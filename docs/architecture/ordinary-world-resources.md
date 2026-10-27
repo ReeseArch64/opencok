@@ -105,3 +105,59 @@ clock does not cause a full terrain scan every worker tick. Native deadlines and
 outbox invalidations remain atomic with node changes. PostgreSQL checks cover
 missing, zero and future openings, occupied nodes, interval suppression, bounded
 catch-up and rollback without retaining an uncommitted scheduling deadline.
+
+Ordinary resource area counts preserve `WorldCreatorV2.getMaxAreaCount` and
+`getPointsByAreaId`. A size divisible by the configured area width uses the
+regular square regions. A remainder uses one additional area containing the
+last row and column together. The canonical 1201-cell source map therefore has
+576 regular resource regions and border area 577, rather than 625 independently
+rounded rectangles. Existing stored area IDs and tiles are never rewritten.
+
+## Shared four-cell supply and expiry
+
+The separate Source `RESOURCE_NEW` producer uses main type 37 and range type 38.
+Its native footprint has one lower-right main and three ranges. All four cells
+retain resource type stone, the configured `on_event2.k2` capacity and the actual
+`k8` lifetime in seconds. The main stores the configured simultaneous-party
+limit in `resLevel`; `monsterCurrHP` is the actual party count. Creation does not
+apply ordinary resource bonuses 305 or 307. Slot selection preserves the Source
+count-as-weight and separate cumulative random draws, including its unused
+`on_event3.k1` presence requirement.
+
+The maintained quota is zero and its configured 2015 interval is reversed. The
+backend preserves that closed recipe. Synthetic acceptance opens only copied
+in-memory rules, without changing maintained catalogs or inventing a current
+campaign. Calendar checks use the existing UTC convention and inclusive bounds.
+Existing nodes can still expire when the production window is closed.
+
+Every page holds the realm fence and shared world placement lock, captures its
+live clock after that lock and locks the four physical rows before updating
+them. Expiry preserves a node with an actual party count, an incoming or unknown
+party, ownership evidence or an ambiguous footprint. A live occupied footprint
+extends its old deadline by one configured lifetime; its matching ranges retain
+the same deadline so the active shared target cannot lose its physical cells.
+An exhausted target remains until ordinary expiry. Unoccupied natural expiry
+clears the four matching cells and creates a `world_res_new_dead` replacement
+ticket when the area remains within its configured quota. Activity and
+player-created nodes do not produce natural replacement tickets. Orphan range
+cleanup preserves foreign ownership and any existing main footprint.
+
+The private `trigger_var` key `opencok.world.shared-resources.v1` under type -1
+and owner `@world:0` stores a strict versioned cursor. Each page bounds expiry and
+replacement reads to 64 and visits at most eight supply regions. New stock,
+expired cells, waiting tickets, cursor and existing `world.resources` outbox
+commit together. Ordinary recovery retains the Source default 30-minute sweep
+cadence; bounded unfinished pages continue immediately. A blocked replacement
+gets a durable next-attempt deadline at the next sweep instead of spinning on the
+same full page. A new process or owner resumes the saved cursor and tickets.
+All four free cells must belong to the selected resource area; the producer
+cannot borrow a neighboring region or wrap the map edge to complete a footprint.
+
+No schema, dependency or environment variable is added. Back up world cells,
+shared parties and their checkpoints, waiting tickets, the private cursor,
+inventory journals, receipts and outbox together. Keep shared commands disabled
+on a binary that cannot recover their target lifecycle. Eight focused rule and
+PostgreSQL cases passed with 72 assertions, covering dormant gates, actual slot
+draws, concurrent creation, expiry, active and unknown parties, fresh-pool owner
+replacement, rollback, live clock locking and protected orphan ownership. Native
+device execution remains unverified.

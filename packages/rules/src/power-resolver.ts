@@ -56,6 +56,7 @@ export function playerGameEffect(
     | 64
     | 72
     | 78
+    | 404
     | 487
     | 895
     | 899
@@ -117,6 +118,7 @@ export function playerGameEffect(
       216,
       217,
       218,
+      404,
       487,
       895,
       899,

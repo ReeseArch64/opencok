@@ -1,3 +1,8 @@
+import { readWorldScoutTargets, writeWorldScoutMails } from "./world-scout-report";
+import { user_army } from "@opencok/drizzle/schema/opencok_kingdom/user_army";
+import { user_pet_dragon } from "@opencok/drizzle/schema/opencok_kingdom/user_pet_dragon";
+import { new_general_skill } from "@opencok/drizzle/schema/opencok_kingdom/new_general_skill";
+import { writeWorldBarbarianActors } from "./world-barbarian-write";
 import { readTreasureMaps, writeTreasureMaps, withTreasureMarchTimes } from "./treasure-map";
 import { treasure_map } from "@opencok/drizzle/schema/opencok_kingdom/treasure_map";
 import { t_worldboss } from "@opencok/drizzle/schema/opencok_kingdom/t_worldboss";
@@ -12,7 +17,7 @@ import { world_march_checkpoint } from "@opencok/drizzle/schema/opencok_kingdom/
 import { world_interest } from "@opencok/drizzle/schema/opencok_kingdom/world_interest";
 import type { WorldMutationWrite } from "@opencok/contracts/world-march-runtime";
 import { num, long, text } from "@opencok/contracts/rows";
-import { decode, int } from "@opencok/messages/sfs";
+import { decode, encode, int } from "@opencok/messages/sfs";
 import { worldCityCandidates } from "@opencok/rules/world-city-geometry";
 import { normalizeWorldCityGeometry } from "./world-city-geometry";
 import { userprofile } from "@opencok/drizzle/schema/opencok_kingdom/userprofile";
@@ -92,6 +97,7 @@ export async function readWorldMutationState(
     castle?.pointId ?? 0,
     ...marches.flatMap((row) => [row.ownerId, row.targetId]),
     int(params, "point", 0),
+    command === "create.boss" ? int(params, "pointIndex", 0) : 0,
     command === "totem" ? 0 : int(params, "pointId", 0),
   ])
     if (point > 0) for (const id of worldCityCandidates(point, size)) ids.add(id);
@@ -101,6 +107,65 @@ export async function readWorldMutationState(
     .where(and(eq(worldpoint.worldId, 0), inArray(worldpoint.id, [...ids])))
     .orderBy(asc(worldpoint.id))
     .for("update");
+  const sharedIds = points.filter((row) => row.pointType === 37).map((row) => row.id);
+  const sharedMarches = sharedIds.length
+    ? await tx
+        .select()
+        .from(world_march)
+        .where(
+          and(
+            eq(world_march.worldId, 0),
+            inArray(world_march.targetId, sharedIds),
+            eq(world_march.state, 1),
+          ),
+        )
+        .orderBy(asc(world_march.marchArrivalTime), asc(world_march.uuid))
+        .limit(4097)
+        .for("update")
+    : [];
+  if (sharedMarches.length > 4096) throw new Error("Shared resource party bound exceeded");
+  const sharedOwners = [
+    ...new Set(
+      sharedMarches.map((row) => row.ownerUid).filter((owner): owner is string => Boolean(owner)),
+    ),
+  ];
+  const sharedCheckpoints = sharedMarches.length
+    ? await tx
+        .select()
+        .from(world_march_checkpoint)
+        .where(
+          and(
+            inArray(
+              world_march_checkpoint.id,
+              sharedMarches.map((row) => row.uuid),
+            ),
+            eq(world_march_checkpoint.status, 0),
+          ),
+        )
+        .for("update")
+    : [];
+  const sharedProfiles = sharedOwners.length
+    ? await tx.select().from(userprofile).where(inArray(userprofile.uid, sharedOwners))
+    : [];
+  const sharedArmies = sharedOwners.length
+    ? await tx.select().from(user_army).where(inArray(user_army.uid, sharedOwners)).limit(65537)
+    : [];
+  const sharedDragons = sharedOwners.length
+    ? await tx
+        .select()
+        .from(user_pet_dragon)
+        .where(inArray(user_pet_dragon.uid, sharedOwners))
+        .limit(65537)
+    : [];
+  const sharedGeneralSkills = sharedOwners.length
+    ? await tx
+        .select()
+        .from(new_general_skill)
+        .where(inArray(new_general_skill.uid, sharedOwners))
+        .limit(65537)
+    : [];
+  if ([sharedArmies, sharedDragons, sharedGeneralSkills].some((rows) => rows.length > 65536))
+    throw new Error("Shared resource companion bound exceeded");
   const cityBosses =
     command === "buy.citydef" || command === "world.user.rcd"
       ? await tx
@@ -134,13 +199,43 @@ export async function readWorldMutationState(
             ),
           )
       : [];
+  const scoutIds =
+    command !== "world.march.check" && command !== "world.march.retreat"
+      ? [
+          ...new Set([
+            ...marches
+              .filter((row) => row.type === 1 && row.state === 0)
+              .map((row) => row.targetId),
+            ...(command === "world.march" && int(params, "type", -1) === 1
+              ? [int(params, "point")]
+              : []),
+          ]),
+        ]
+      : [];
+  const [actorRealm] = scoutIds.length
+    ? await tx
+        .select({ realm: userprofile.serverId })
+        .from(userprofile)
+        .where(eq(userprofile.uid, owner))
+    : [];
+  if (scoutIds.length && !actorRealm?.realm) throw new Error("Missing scout actor realm");
   return {
+    mapSize: size,
+    scoutTargets: scoutIds.length
+      ? await readWorldScoutTargets(tx, scoutIds, actorRealm!.realm!)
+      : undefined,
     world,
     points,
     marches,
     checkpoints,
     ...geometry,
     targetMarchCount: targetMarchCount?.count,
+    sharedMarches,
+    sharedCheckpoints,
+    sharedProfiles,
+    sharedArmies,
+    sharedDragons,
+    sharedGeneralSkills,
     cityBosses,
     treasures: await readTreasureMaps(tx, owner),
   };
@@ -150,7 +245,9 @@ export async function writeWorldMutation(
   owner: string,
   write: WorldMutationWrite,
 ) {
+  await writeWorldBarbarianActors(tx, write);
   await writeTreasureMaps(tx, owner, write);
+  if (write.scoutMails) await writeWorldScoutMails(tx, owner, write.scoutMails);
   if (write.world) {
     if (write.world.uid !== owner) throw new Error("Foreign world write");
     await tx
@@ -204,6 +301,8 @@ export async function writeWorldMutation(
       ownerColor: num(row, "ownerColor"),
       allianceId: text(row, "allianceId"),
       type: num(row, "type"),
+      honourWatchtower: num(row, "honourWatchtower"),
+      slowDown: num(row, "slowDown"),
       targetId: num(row, "targetId"),
       targetType: num(row, "targetType"),
       targetUid: text(row, "targetUid"),
@@ -213,6 +312,7 @@ export async function writeWorldMutation(
       returnStartTime: long(row, "returnStartTime"),
       arrivalTime: long(row, "arrivalTime"),
       collectSpd: Number(row.collectSpd ?? 0),
+      occupyResourceEndTime: long(row, "occupyResourceEndTime"),
       changeCollectSpdTime: long(row, "changeCollectSpdTime"),
       collectedBeforeSpd: long(row, "collectedBeforeSpd"),
       state: num(row, "state"),
@@ -232,6 +332,80 @@ export async function writeWorldMutation(
       .insert(world_march)
       .values(value)
       .onConflictDoUpdate({ target: world_march.uuid, set: value });
+  }
+  for (const timing of write.sharedTimings ?? []) {
+    if (timing.owner === owner || timing.version !== timing.expectedVersion + 1)
+      throw new Error("Invalid shared resource timing");
+    const [march] = await tx
+      .select()
+      .from(world_march)
+      .where(
+        and(
+          eq(world_march.uuid, timing.id),
+          eq(world_march.ownerUid, timing.owner),
+          eq(world_march.worldId, 0),
+          eq(world_march.targetId, timing.target),
+          eq(world_march.targetType, 37),
+          eq(world_march.state, 1),
+        ),
+      )
+      .for("update");
+    const [target] = await tx
+      .select()
+      .from(worldpoint)
+      .where(
+        and(
+          eq(worldpoint.worldId, 0),
+          eq(worldpoint.id, timing.target),
+          eq(worldpoint.pointType, 37),
+        ),
+      );
+    const [prior] = await tx
+      .select()
+      .from(world_march_checkpoint)
+      .where(
+        and(
+          eq(world_march_checkpoint.id, timing.id),
+          eq(world_march_checkpoint.ownerUid, timing.owner),
+          eq(world_march_checkpoint.version, timing.expectedVersion),
+          eq(world_march_checkpoint.status, 0),
+        ),
+      )
+      .for("update");
+    if (!march || !target || !prior) throw new Error("Stale shared resource timing");
+    const before = decode(prior.payload),
+      after = decode(Buffer.from(timing.payload));
+    if (
+      before.id?.value !== timing.id ||
+      before.owner?.value !== timing.owner ||
+      before.target?.value !== timing.target ||
+      before.targetType?.value !== 37 ||
+      before.phase?.value !== "gathering" ||
+      after.version?.value !== timing.version ||
+      after.dueAt?.value !== timing.dueAt
+    )
+      throw new Error("Invalid shared resource checkpoint");
+    const normalize = (body: typeof before) => {
+      const { version: _version, dueAt: _dueAt, ...rest } = body;
+      return Buffer.from(encode(rest));
+    };
+    if (!normalize(before).equals(normalize(after)))
+      throw new Error("Foreign shared resource mutation");
+    await tx
+      .update(world_march_checkpoint)
+      .set({ version: timing.version, dueAt: timing.dueAt, payload: Buffer.from(timing.payload) })
+      .where(
+        and(
+          eq(world_march_checkpoint.id, timing.id),
+          eq(world_march_checkpoint.version, timing.expectedVersion),
+        ),
+      );
+    await tx
+      .update(world_march)
+      .set({
+        occupyResourceEndTime: timing.dueAt,
+      })
+      .where(eq(world_march.uuid, timing.id));
   }
   for (const row of write.checkpoints ?? []) {
     if (row.ownerUid !== owner) throw new Error("Foreign march checkpoint");
@@ -365,13 +539,18 @@ export async function unregisteredWorldMarches(db: Database["kingdom"]["db"], af
     .where(
       and(
         eq(world_march.worldId, 0),
-        eq(world_march.type, 0),
         or(
-          eq(world_march.targetType, 3),
+          and(eq(world_march.type, 1), inArray(world_march.state, [0, 2])),
           and(
-            eq(world_march.targetType, 2),
-            eq(world_march.state, 1),
-            sql`exists (select 1 from ${treasure_map} where ${treasure_map.currentOwner}=${world_march.ownerUid} and ${treasure_map.marchId}=${world_march.uuid} and ${treasure_map.targetId}=${world_march.targetId} and ${treasure_map.state}=1)`,
+            eq(world_march.type, 0),
+            or(
+              inArray(world_march.targetType, [3, 37]),
+              and(
+                eq(world_march.targetType, 2),
+                eq(world_march.state, 1),
+                sql`exists (select 1 from ${treasure_map} where ${treasure_map.currentOwner}=${world_march.ownerUid} and ${treasure_map.marchId}=${world_march.uuid} and ${treasure_map.targetId}=${world_march.targetId} and ${treasure_map.state}=1)`,
+              ),
+            ),
           ),
         ),
         isNull(world_march_checkpoint.id),

@@ -70,3 +70,32 @@ test("world publication targets interested players and retains native march dele
     { owner: "nearby", command: "push.world.march.del" },
   ]);
 });
+
+test("new owned march snapshots pin troop star levels while older snapshots retain compatibility", () => {
+  const army: SavedMarchArmy = {
+    owner: "owner",
+    cachedLoad: 80,
+    soldiers: [
+      {
+        owner: "owner",
+        armsId: "107000",
+        total: 10,
+        dead: 0,
+        loadEffect: 0,
+        basicArm: null,
+        level: 3,
+      },
+    ],
+    dragons: [],
+    general: null,
+  };
+  const encoded = encodeWorldMarchArmy(army);
+  expect(decodeWorldMarchArmy(encoded)!.soldiers![0]!.level).toBe(3);
+  expect(decodeWorldResourceArmy(encoded)!.soldiers![0]).not.toHaveProperty("level");
+  expect(() =>
+    encodeWorldMarchArmy({ ...army, soldiers: [{ ...army.soldiers![0]!, level: -1 }] }),
+  ).toThrow();
+  expect(() =>
+    encodeWorldMarchArmy({ ...army, soldiers: [{ ...army.soldiers![0]!, level: 1.5 }] }),
+  ).toThrow();
+});

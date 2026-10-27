@@ -29,7 +29,9 @@ export function worldMarchDetail(
       soldiers.map((unit) =>
         sfs.object({
           armyId: sfs.string(unit.armsId ?? ""),
-          star: sfs.int(num(armies.find((row) => row.armyId === unit.armsId) ?? {}, "level")),
+          star: sfs.int(
+            unit.level ?? num(armies.find((row) => row.armyId === unit.armsId) ?? {}, "level"),
+          ),
           count: sfs.int(unit.total - unit.dead),
         }),
       ),

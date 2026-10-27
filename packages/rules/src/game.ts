@@ -15,6 +15,7 @@ export interface RankingCatalogs {
   heroEvents?: Map<string, Rule>;
 }
 export interface WorldCatalogs {
+  fieldMonsterGroups?: Map<string, readonly Rule[]>;
   residential?: Map<string, Rule>;
   heritage?: Map<string, Rule>;
   resources?: Map<string, readonly Rule[]>;
@@ -40,6 +41,9 @@ export interface AdvancedCatalogs {
   vipBoxes?: Map<string, Rule>;
   targetTasks?: Map<string, Rule>;
   rechargeFeedback?: Map<string, Rule>;
+  eggs?: Map<string, Rule>;
+  goldenEggs?: Map<string, Rule>;
+  goldenEggSteps?: Map<string, Rule>;
   normalRechargeThresholds?: Map<string, Rule>;
   rechargeThresholds?: Map<string, Rule>;
   ordinaryBoxes?: Map<string, Rule>;
@@ -70,6 +74,7 @@ export interface AdvancedCatalogs {
   dragonTowerMonsters?: Map<string, Rule>;
 }
 export interface AllianceCatalogs {
+  buildingSkills?: Map<string, Rule>;
   gifts?: Map<string, Rule>;
   ranks?: Map<string, Rule>;
 }

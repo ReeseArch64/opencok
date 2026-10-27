@@ -61,7 +61,8 @@ export function decodeWorldResourceArmy(data: Buffer): SavedResourceArmy | null 
     return {
       owner: army.owner,
       cachedLoad: army.cachedLoad,
-      soldiers: army.soldiers?.map(({ basicArm: _basicArm, ...soldier }) => soldier) ?? null,
+      soldiers:
+        army.soldiers?.map(({ basicArm: _basicArm, level: _level, ...soldier }) => soldier) ?? null,
     };
   }
   const decoded = decodeJavaObjectStream(data);
@@ -90,7 +91,7 @@ function resourceArmy(root: JavaObject): SavedResourceArmy {
 }
 
 export interface SavedMarchArmy extends Omit<SavedResourceArmy, "soldiers"> {
-  soldiers: (SavedResourceSoldier & { basicArm: number | null })[] | null;
+  soldiers: (SavedResourceSoldier & { basicArm: number | null; level?: number })[] | null;
   dragons: { owner: string | null; uuid: string | null; itemId: number; level: number }[] | null;
   general: { owner: string | null; id: number; level: number } | null;
 }
@@ -134,7 +135,13 @@ export function decodeWorldMarchArmy(data: Buffer): SavedMarchArmy | null {
           basicArm = ["INFANTRY", "CAVALRY", "BOW", "CAR"].indexOf(type.name);
           if (basicArm < 0) return invalid();
         }
-        return { ...army.soldiers![index]!, basicArm };
+        return {
+          ...army.soldiers![index]!,
+          basicArm,
+          ...(soldier.descriptor.fields.some((field) => field.name === "level")
+            ? { level: field(soldier, "level", "I") as number }
+            : {}),
+        };
       }) ?? null,
     dragons:
       dragons?.map((value) => {
@@ -158,7 +165,7 @@ export function decodeWorldMarchArmy(data: Buffer): SavedMarchArmy | null {
 }
 
 const maintainedMarchPrefix = Buffer.from("OCMA1\0");
-function isMaintainedMarchArmy(data: Buffer) {
+export function isMaintainedMarchArmy(data: Buffer) {
   return (
     Buffer.isBuffer(data) &&
     data.subarray(0, maintainedMarchPrefix.length).equals(maintainedMarchPrefix)
@@ -194,6 +201,7 @@ function readMaintainedMarchArmy(data: Buffer): SavedMarchArmy {
       !integer(soldier.dead, 0) ||
       soldier.dead > soldier.total ||
       !integer(soldier.loadEffect) ||
+      (soldier.level !== undefined && !integer(soldier.level, 0)) ||
       !(soldier.basicArm === null || integer(soldier.basicArm, 0))
     )
       return invalid();
@@ -220,4 +228,23 @@ export function encodeWorldMarchArmy(army: SavedMarchArmy): Buffer {
   const data = Buffer.concat([maintainedMarchPrefix, Buffer.from(JSON.stringify(army), "utf8")]);
   readMaintainedMarchArmy(data);
   return data;
+}
+
+export function decodeWorldMarchSpeedEffects(
+  data: Buffer,
+): ReadonlyMap<string, number> | undefined {
+  if (isMaintainedMarchArmy(data)) return undefined;
+  const decoded = decodeJavaObjectStream(data);
+  if (decoded === null) return undefined;
+  const root = checked(decoded, armyName, 1740992047662150684n, 2);
+  const soldiers = list(field(root, "soldierList", "Ljava/util/List;"));
+  const result = new Map<string, number>();
+  for (const value of soldiers ?? []) {
+    const soldier = checked(value, `${armyName}$Soldier`, -1404739455579587157n, 2);
+    const id = text(field(soldier, "armsId", "Ljava/lang/String;"));
+    if (!id) invalid();
+    const effect = field(soldier, "marchSpdEffectVal", "I") as number;
+    result.set(id, Math.min(result.get(id) ?? effect, effect));
+  }
+  return result;
 }

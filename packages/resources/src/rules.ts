@@ -215,6 +215,7 @@ export async function loadRules(directory?: string, kingdomId = 1) {
   const resources = (await declared(GameplayCatalog.Resources))?.groups;
   const heritage = await optional(GameplayCatalog.Heritage);
   const residential = await optional(GameplayCatalog.Resdential);
+  const fieldMonsterGroups = (await declared(GameplayCatalog.FieldMonster))?.groups;
   const allianceBuildings = (await available(GameplayCatalog.AllianceBuilding))
     ? parseDeclared(await read(GameplayCatalog.AllianceBuilding), GameplayCatalog.AllianceBuilding)
         .records
@@ -298,6 +299,7 @@ export async function loadRules(directory?: string, kingdomId = 1) {
     mail,
     {
       fieldMonsters,
+      fieldMonsterGroups,
       armies,
       neutralResources,
       barbarians,
@@ -335,7 +337,11 @@ export async function loadRules(directory?: string, kingdomId = 1) {
       refinementRepeats: await optionalRecords(GameplayCatalog.GeneralRepeat),
       recruits: await optional(GameplayCatalog.Recruit),
     },
-    { ranks: await optional(GameplayCatalog.Rank), gifts: await optional(GameplayCatalog.Gift) },
+    {
+      ranks: await optional(GameplayCatalog.Rank),
+      gifts: await optional(GameplayCatalog.Gift),
+      buildingSkills: await optional(GameplayCatalog.AllianceBuildingSkill),
+    },
     {
       comebacks: await optional(GameplayCatalog.Comeback),
       activityPages: await optional(GameplayCatalog.ActivityPage),
@@ -354,6 +360,9 @@ export async function loadRules(directory?: string, kingdomId = 1) {
       rechargeFeedback: rechargeFeedbackRecords.length
         ? indexRules(rechargeFeedbackRecords, GameplayCatalog.DailyRecharge)
         : new Map<string, Rule>(),
+      eggs: await optional(GameplayCatalog.Egg),
+      goldenEggs: await optional(GameplayCatalog.GoldenEgg),
+      goldenEggSteps: await optional(GameplayCatalog.GoldenEggStep),
       normalRechargeThresholds: await optional(GameplayCatalog.Heap),
       rechargeThresholds: await optional(GameplayCatalog.NewsHeap),
       ordinaryBoxes: await optional(GameplayCatalog.BoxOrdinary),

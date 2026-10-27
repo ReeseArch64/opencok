@@ -1,4 +1,14 @@
 import { activityRewardDomain } from "@opencok/services/activity-reward";
+import { createWorldMarchInspectionStore } from "@opencok/repositories/world-march-inspection";
+import { createWorldScoutStore } from "@opencok/repositories/world-scout";
+import { createWorldScoutMailReader } from "@opencok/repositories/world-scout-publication";
+import { publishWorldScoutMail } from "@opencok/services/world-scout-publication";
+import { createWorldBulletinStore } from "@opencok/repositories/world-bulletins";
+import { createEggActivityDomain } from "@opencok/services/egg-activity";
+import { createGoldEggsRanks, createGoldEggsRuntimeStore } from "@opencok/repositories/gold-eggs";
+import { createGoldEggsDomain, goldEggsAwardParameters } from "@opencok/services/gold-eggs";
+import { GoldEggsRuntime } from "@opencok/services/gold-eggs-runtime";
+import { goldEggsEnabled } from "@opencok/rules/gold-eggs";
 import { createPaymentObservers } from "@opencok/services/payment-observers";
 import { createNormalRechargeDomain } from "@opencok/services/normal-recharge";
 import { createComebackSessions } from "@opencok/repositories/comeback-session";
@@ -14,6 +24,8 @@ import { createMergeCampaignStore, mergeCampaignActor } from "@opencok/repositor
 import { mergeEffectBoard } from "@opencok/mappings/merge-campaign";
 import { publishMergeEffectBoard } from "@opencok/services/merge-campaign";
 import { serverFeature } from "@opencok/rules/power-context";
+import { createWorldMonsterRefreshExecutor } from "@opencok/repositories/world-monster-refresh";
+import { refreshWorldMonsters } from "@opencok/services/world-monster-refresh";
 import { createWorldRecreationDomain } from "@opencok/services/world-recreation";
 import { assertWorldTerrain } from "@opencok/repositories/world-terrain";
 import { createWorldUseDomain } from "@opencok/services/world-use";
@@ -22,6 +34,9 @@ import { cityDefenseDomain } from "@opencok/services/city-defense";
 import { createWorldUtilityStore } from "@opencok/repositories/world-utility";
 import { createWorldResourceRefreshExecutor } from "@opencok/repositories/world-resource-refresh";
 import { refreshWorldResources } from "@opencok/services/world-resource-refresh";
+import { createWorldResourceNewExecutor } from "@opencok/repositories/world-resource-new";
+import { refreshWorldResourceNew } from "@opencok/services/world-resource-new";
+import { worldResourceAreaCount } from "@opencok/rules/world-resource-refresh";
 import { createRedPacketExpiryStore, redPacketReader } from "@opencok/repositories/red-packets";
 import {
   createRedPacketDomain,
@@ -451,6 +466,7 @@ export const RealmDependenciesLive = Layer.effect(
       );
     }
     const notifications = createRealmNotifications();
+    const scoutMailReader = createWorldScoutMailReader(db.kingdom.db, config.kingdomId);
     const cn1 = createCn1Sessions(db.databases.global.db, rules, config.kingdomId);
     const nickname = config.nicknameChat
       ? createNicknameChangeRuntime({
@@ -648,6 +664,15 @@ export const RealmDependenciesLive = Layer.effect(
       },
       (owner, command, params) => activities.domainCommand(owner, command, params),
     );
+    const goldEggsRanks = createGoldEggsRanks(
+      [...db.databases.kingdoms].map(([kingdomId, realm]) => ({
+        kingdomId,
+        db: realm.db,
+        eligible: () =>
+          goldEggsEnabled(rules, BigInt(Date.now()), false, kingdomId) &&
+          goldEggsEnabled(rules, BigInt(Date.now()), true, kingdomId),
+      })),
+    );
     const city = createCityProgressionHandlers(
       (tx: Parameters<typeof readReconnectProgress>[0], owner, now) =>
         createCityProgressionStore(tx, owner, now, cityBoundary, config.mapSize, authority),
@@ -679,6 +704,8 @@ export const RealmDependenciesLive = Layer.effect(
         createSevenDayCycleDomain(),
         createOrdinaryBoxDomain(),
         createNormalRechargeDomain(config.paidGiftGateway),
+        createGoldEggsDomain(undefined, goldEggsRanks),
+        createEggActivityDomain(),
         createRechargeActivityDomain(paymentObservers.newcomer),
         createRechargeFeedbackDomain(paymentObservers.feedback),
         activityRewardDomain,
@@ -1210,6 +1237,17 @@ export const RealmDependenciesLive = Layer.effect(
         }
       }
     };
+    const goldEggsRuntime = new GoldEggsRuntime(
+      createGoldEggsRuntimeStore(db.kingdom.db, authority),
+      goldEggsRanks,
+      rules,
+      (owner, period, global) =>
+        activities.domainCommand(
+          owner,
+          "goldeggs.award.deliver",
+          goldEggsAwardParameters(owner, period, global),
+        ),
+    );
     const recoverSpecialPurchases = async () => {
       const at = BigInt(Date.now());
       for (const record of await specialEventStock.pending(config.kingdomId, at)) {
@@ -1415,12 +1453,36 @@ export const RealmDependenciesLive = Layer.effect(
         if (!delivered) break;
       }
     };
+    const monsterRefresh = createWorldMonsterRefreshExecutor(
+      db.kingdom.db,
+      authority,
+      config.mapSize,
+    );
     const resourceRefresh = createWorldResourceRefreshExecutor(
       db.kingdom.db,
       authority,
       config.mapSize,
     );
+    const resourceNewRefresh = createWorldResourceNewExecutor(
+      db.kingdom.db,
+      authority,
+      config.mapSize,
+      worldResourceAreaCount(rules, config.mapSize),
+    );
     const recoverWorld = async () => {
+      try {
+        await resourceNewRefresh.execute(undefined, (store) =>
+          refreshWorldResourceNew(store, rules, config.mapSize),
+        );
+      } catch {
+        console.warn(
+          JSON.stringify({
+            event: "world_shared_resource_recovery_failed",
+            kingdom: config.kingdomId,
+          }),
+        );
+      }
+
       try {
         await resourceRefresh.execute(undefined, async (store) =>
           refreshWorldResources(store, rules, config.mapSize, await economyEffects.world()),
@@ -1428,6 +1490,15 @@ export const RealmDependenciesLive = Layer.effect(
       } catch {
         console.warn(
           JSON.stringify({ event: "world_resource_recovery_failed", kingdom: config.kingdomId }),
+        );
+      }
+      try {
+        await monsterRefresh.execute(undefined, (store) =>
+          refreshWorldMonsters(store, rules, config.mapSize),
+        );
+      } catch {
+        console.warn(
+          JSON.stringify({ event: "world_monster_recovery_failed", kingdom: config.kingdomId }),
         );
       }
       for (let index = 0; index < 64; index++) {
@@ -1551,8 +1622,13 @@ export const RealmDependenciesLive = Layer.effect(
       for (const command of [
         "treasuremap.spd",
         "world.use",
+        "create.boss",
+        "world.get.monster",
+        "world.get.barbarion",
         "world.user.rcr",
+        "resource.new.detail",
         "world.resources",
+        "world.monsters",
         "buy.citydef",
         "world.user.rcd",
         "world.march",
@@ -1842,6 +1918,9 @@ export const RealmDependenciesLive = Layer.effect(
         await costRankRewards.refresh().catch(() => undefined);
         for (const type of [
           "hero.rank.mail",
+          "gold.eggs.mail",
+          "egg.activity.mail",
+          "world.scout.mail",
           "hero.target.mail",
           "campaign.mail",
           "redPackets.mail",
@@ -1853,6 +1932,15 @@ export const RealmDependenciesLive = Layer.effect(
               db.kingdom.db,
               authority,
               async (event) => {
+                if (type === "world.scout.mail") {
+                  await publishWorldScoutMail(
+                    event.payload,
+                    event.owner,
+                    scoutMailReader,
+                    (recipient, command, body) => notifications.publish(recipient, command, body),
+                  );
+                  return;
+                }
                 const data = decode(event.payload);
                 if (str(data, "owner") !== event.owner)
                   throw new Error("Foreign progression mail publication");
@@ -1900,6 +1988,15 @@ export const RealmDependenciesLive = Layer.effect(
     yield* Effect.tryPromise({
       try: recoverGroupBuys,
       catch: () => new Error("Group-buy settlement unavailable"),
+    }).pipe(
+      Effect.catch(() => Effect.void),
+      Effect.andThen(Effect.sleep(1000)),
+      Effect.forever,
+      Effect.forkScoped,
+    );
+    yield* Effect.tryPromise({
+      try: () => goldEggsRuntime.refresh(),
+      catch: () => new Error("Gold eggs recovery unavailable"),
     }).pipe(
       Effect.catch(() => Effect.void),
       Effect.andThen(Effect.sleep(1000)),
@@ -2340,6 +2437,12 @@ export const RealmDependenciesLive = Layer.effect(
               }
             : undefined,
           worldPointDetail,
+          worldMarchInspection: createWorldMarchInspectionStore(db.kingdom.db),
+          worldScout: createWorldScoutStore(db.kingdom.db, config.mapSize),
+          worldFightBulletins: {
+            store: createWorldBulletinStore(db.kingdom.db),
+            page: (...args) => cache.worldFightBulletins(...args),
+          },
           playerSearch,
           worldSearch,
           worldUtility: createWorldUtilityStore(db.kingdom.db, authority, config.mapSize),

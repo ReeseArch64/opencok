@@ -1,6 +1,9 @@
 import { activityDirectory } from "@opencok/mappings/activity-directory";
 import { generalRequest } from "@opencok/mappings/generals";
 import { activityDirectoryEntries } from "@opencok/rules/activity-directory";
+import { worldFightBulletins } from "./world-bulletins";
+import { worldScoutQuotation } from "./world-scout";
+import { inspectWorldMarch } from "./world-march-inspection";
 import { worldRecreationCommands } from "./world-recreation";
 import { worldUseCommands } from "./world-use";
 import { treasureMapCommands } from "./treasure-map";
@@ -299,6 +302,7 @@ export class GameService {
   }
   async initialize(uid: string, correlation: Fields = {}): Promise<Result> {
     const businessMan = await this.services.hotItemBusinessMan?.();
+    const eggActivity = await this.services.cityProgression?.(uid, "egg.activity.init", {});
     const normalRecharge = await this.services.cityProgression?.(uid, "normal.recharge.init", {});
     const comeback = await this.services.cityProgression?.(uid, "comeback.init", {});
     const prayer = await this.services.cityProgression?.(uid, "prayer.init", {});
@@ -387,6 +391,7 @@ export class GameService {
       ...expeditionActivity,
     };
     const initialPushes = [
+      eggActivity,
       prayer,
       recallTasks,
       regionalRecall,
@@ -488,9 +493,57 @@ export class GameService {
       if (!this.services.social) throw new GameError(errors.unsupported);
       return { body: await this.services.social(uid, command, params), pushes: [] };
     }
+    if (command === "al.fight.bulletin") {
+      if (!this.services.worldFightBulletins) throw new GameError(errors.unsupported);
+      return this.worldQueryResult(
+        command,
+        params,
+        await worldFightBulletins(
+          this.services.worldFightBulletins,
+          uid,
+          params,
+          this.config.kingdomId,
+          this.now(),
+        ),
+      );
+    }
+    if (command === "world.scout.detail") {
+      if (!this.services.worldScout) throw new GameError(errors.unsupported);
+      return this.worldQueryResult(
+        command,
+        params,
+        await worldScoutQuotation(
+          this.services.worldScout,
+          uid,
+          params,
+          this.rules,
+          this.config.kingdomId,
+          this.config.mapSize ?? 1200,
+          this.now(),
+          this.services,
+        ),
+      );
+    }
+    if (command === "world.get.march") {
+      if (!this.services.worldMarchInspection) throw new GameError(errors.unsupported);
+      return this.worldQueryResult(
+        command,
+        params,
+        await inspectWorldMarch(
+          this.services.worldMarchInspection,
+          uid,
+          params,
+          this.rules,
+          this.config.kingdomId,
+          this.now(),
+          this.services,
+        ),
+      );
+    }
     if (command !== "activity.operators") await this.services.reconcileAlliance?.(uid);
     let body: Fields;
     let pushes: Result["pushes"] = [];
+
     if (
       worldMutationCommands.includes(command) ||
       cityDefenseCommands.includes(command) ||
@@ -576,6 +629,19 @@ export class GameService {
         break;
       }
       case "activity.accept.reward":
+      case "egg.act.info":
+      case "egg.act.open":
+      case "egg.act.reward":
+      case "egg.act.cd":
+      case "egg.exp.reward":
+      case "egg.goods.full":
+      case "goldeggs.info":
+      case "goldeggs.smashing":
+      case "goldeggs.smashingall":
+      case "goldeggs.flush":
+      case "goldeggs.scorereward":
+      case "goldeggs.rank":
+      case "goldeggs.rankAll":
       case "comeback.info":
       case "comeback.reward":
       case "hot.item.v2.get":
@@ -2649,6 +2715,12 @@ export class GameService {
     );
     if (uids.includes("3000002")) out.push(sfs.object(guidePlayerSummary()));
     return { uids: sfs.array(out) };
+  }
+  private worldQueryResult(command: string, params: Fields, body: Fields): Result {
+    for (const key of ["_cok_", "cmdBaseTime"]) if (params[key]) body[key] = params[key]!;
+    if (encode(extension(command, body)).length > MAX_FRAME)
+      throw new GameError(errors.unsupported, "world_state");
+    return { body, pushes: [] };
   }
   private checkProfile(profile: Row | undefined, now = this.now()): Row {
     if (!profile) throw new GameError(errors.missing);

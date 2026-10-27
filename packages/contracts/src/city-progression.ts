@@ -84,6 +84,7 @@ export interface CityProgressionState {
   comeback?: import("./comeback").ComebackState;
   branchCity?: Row | null;
   hotItem?: import("./hot-item").HotItemState;
+  worldMonsters?: import("./world-monsters").WorldMonsterReader;
   campaignProfile?: Row;
   costRankAward?: import("./continued-cost-rewards").CostRankAwardReader;
   expeditionAward?: import("./expedition-stage-rewards").ExpeditionAwardReader;
@@ -109,6 +110,8 @@ export interface CityProgressionState {
   redPackets?: import("./paid-gifts").RedPacketReader;
   militaryAward?: import("./military-rank-awards").MilitaryRankAwardReader;
   rechargeFeedback?: import("./recharge-feedback").RechargeFeedbackReader;
+  goldEggs?: import("./gold-eggs").GoldEggsReader;
+  eggActivity?: import("./egg-activity").EggActivityState;
   normalRecharge?: import("./normal-recharge").NormalRechargeState;
   rechargeActivity?: import("./recharge-activity").RechargeActivityState;
   ordinaryBoxServer?: { openedAt: bigint };
@@ -187,6 +190,8 @@ export interface CityProgressionWrite {
   rechargeActivity?: import("./recharge-activity").RechargeActivityWrite;
   ordinaryBox?: import("./ordinary-box").OrdinaryBoxWrite;
   sevenDayCycle?: import("./seven-day-cycle").SevenDayCycleWrite;
+  goldEggs?: import("./gold-eggs").GoldEggsWrite;
+  eggActivity?: import("./egg-activity").EggActivityWrite;
   normalRecharge?: import("./normal-recharge").NormalRechargeWrite;
   shippingInvestment?: import("./shipping-investment").ShippingInvestmentWrite;
   dailyInvestment?: Row;
@@ -227,7 +232,13 @@ export interface CityProgressionWrite {
   forts?: readonly Row[];
   queues?: readonly Row[];
   profile?: { level: number; exp: number };
-  statistics?: { power: bigint; buildingPower: bigint; armyCure: number; questPower?: number };
+  statistics?: {
+    power: bigint;
+    buildingPower: bigint;
+    armyCure: number;
+    detectNum?: number;
+    questPower?: number;
+  };
   buildingExperience?: { currentMax: bigint; historyMax: bigint };
 }
 

@@ -42,7 +42,7 @@ export function dataConfigItems(overrides: Readonly<Record<string, Rule>> = {}):
     shield_base: { k2: "0" },
     monster: { k3: "0", k4: "0", k6: "0", k8: "0", k10: "0", k11: "boss;0" },
     beginner_move: { k1: "0" },
-    worldmap_city: { k4: "0" },
+    worldmap_city: { k4: "0", k6: "50" },
     function_on8: { k2: "0" },
     on_trumpet: { k2: "0" },
     serviceterms_on: { k1: "0" },

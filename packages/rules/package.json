@@ -178,7 +178,16 @@
     "./normal-recharge": "./src/normal-recharge.ts",
     "./world-use": "./src/world-use.ts",
     "./world-birth": "./src/world-birth.ts",
-    "./world-terrain": "./src/world-terrain.ts"
+    "./world-terrain": "./src/world-terrain.ts",
+    "./world-map-point": "./src/world-map-point.ts",
+    "./world-resource-new": "./src/world-resource-new.ts",
+    "./world-monsters": "./src/world-monsters.ts",
+    "./gold-eggs": "./src/gold-eggs.ts",
+    "./egg-activity": "./src/egg-activity.ts",
+    "./world-scout": "./src/world-scout.ts",
+    "./world-monster-refresh": "./src/world-monster-refresh.ts",
+    "./world-scout-watchtower": "./src/world-scout-watchtower.ts",
+    "./world-scout-report": "./src/world-scout-report.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",

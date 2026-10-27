@@ -293,12 +293,18 @@ export function createSessionHandler(
             (command.startsWith("item.") ||
               command.startsWith("hot.item.") ||
               command.startsWith("comeback.") ||
+              command.startsWith("goldeggs.") ||
+              command.startsWith("egg.") ||
               command === "mail.reward" ||
               command === "mail.reward.batch" ||
               command === "shoppingMall.buy" ||
               command === "activity.accept.reward" ||
               command === "redPackets.sd" ||
               command === "redPackets.rv" ||
+              command === "world.use" ||
+              command === "create.boss" ||
+              command === "world.get.monster" ||
+              command === "world.get.barbarion" ||
               command === "trade.info" ||
               command === "trade.exchange" ||
               command === "trade.cancel") &&

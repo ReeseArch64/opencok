@@ -128,3 +128,60 @@ export function decodeJavaIntMap(data: Buffer): ReadonlyMap<string | null, numbe
   if (offset !== data.length) return invalid();
   return result;
 }
+
+export function encodeJavaIntMap(values: ReadonlyMap<string, number> | null): Buffer {
+  if (values === null) return Buffer.from("aced000570", "hex");
+  if (!(values instanceof Map) || values.size > 4096) throw new ProtocolError();
+  const parts: Buffer[] = [Buffer.from("aced000573", "hex")];
+  const utf = (value: string) => {
+    if (typeof value !== "string") throw new ProtocolError();
+    const bytes: number[] = [];
+    for (let index = 0; index < value.length; index++) {
+      const code = value.charCodeAt(index);
+      if (code > 0 && code < 128) bytes.push(code);
+      else if (code < 2048) bytes.push(0xc0 | (code >> 6), 0x80 | (code & 63));
+      else bytes.push(0xe0 | (code >> 12), 0x80 | ((code >> 6) & 63), 0x80 | (code & 63));
+      if (bytes.length > 65535) throw new ProtocolError();
+    }
+    const prefix = Buffer.alloc(2);
+    prefix.writeUInt16BE(bytes.length);
+    return Buffer.concat([prefix, Buffer.from(bytes)]);
+  };
+  const descriptor = (name: ClassName) => {
+    parts.push(
+      Buffer.from([0x72]),
+      utf(name),
+      Buffer.from(descriptors[name], "hex"),
+      Buffer.from([0x78]),
+    );
+    if (name === "java.lang.Integer") descriptor("java.lang.Number");
+    else parts.push(Buffer.from([0x70]));
+  };
+  descriptor("java.util.HashMap");
+  const fields = Buffer.alloc(18);
+  fields.writeFloatBE(0.75, 0);
+  fields.writeInt32BE(12, 4);
+  fields[8] = 0x77;
+  fields[9] = 8;
+  fields.writeInt32BE(16, 10);
+  fields.writeInt32BE(values.size, 14);
+  parts.push(fields);
+  let first = true,
+    length = parts.reduce((sum, value) => sum + value.length, 0);
+  for (const [key, value] of values) {
+    if (!Number.isInteger(value) || value < -2147483648 || value > 2147483647)
+      throw new ProtocolError();
+    const start = parts.length;
+    parts.push(Buffer.from([0x74]), utf(key), Buffer.from([0x73]));
+    if (first) descriptor("java.lang.Integer");
+    else parts.push(Buffer.from("71007e0003", "hex"));
+    const count = Buffer.alloc(4);
+    count.writeInt32BE(value);
+    parts.push(count);
+    length += parts.slice(start).reduce((sum, part) => sum + part.length, 0);
+    if (length >= 65535) throw new ProtocolError();
+    first = false;
+  }
+  parts.push(Buffer.from([0x78]));
+  return Buffer.concat(parts);
+}
