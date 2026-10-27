@@ -2,6 +2,7 @@ import {
   scoutRoute,
   scoutSoldierLimit,
   scoutExpeditionEffect,
+  scoutWatchtower,
 } from "@opencok/services/world-scout-runtime";
 import type { CityProgressionContext } from "@opencok/services/city-progression";
 import savedMarch from "./fixtures/reconnect-march-army.json";
@@ -186,4 +187,22 @@ test("legacy native scout return keeps the Source type-six destination footprint
   } finally {
     rules.items.set("world_marchtime", configured);
   }
+});
+
+test("scout execution watchtower values use the actual caller version", () => {
+  const context = {
+    state: {
+      profile: { appVersion: "1.0.0" },
+      buildings: [{ itemId: 417000, level: 30, star: 5, progress: 0, effectTime: 0n }],
+    },
+    rules,
+    now: 200000000n,
+  } as unknown as CityProgressionContext;
+  expect(scoutWatchtower(context).speed).toBe(0);
+  expect(scoutWatchtower(context).ready).toBe(false);
+  context.state.profile.appVersion = "12.06.0";
+  expect(scoutWatchtower(context).speed).toBe(100);
+  expect(scoutWatchtower(context).ready).toBe(true);
+  context.state.profile.appVersion = "";
+  expect(scoutWatchtower(context).speed).toBe(100);
 });
