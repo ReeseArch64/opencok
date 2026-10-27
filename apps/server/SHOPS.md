@@ -30,7 +30,11 @@ and grant legs remain in the ledger even if an exchange has no net item change.
 Item grants use the inventory subsystem's stacking and expiration rules.
 
 Daily boundaries and calendar timestamps use UTC, matching maintained realm
-tests. Daily price tiers use the requested batch's final daily quantity, as in
+tests. Weekly offers use the catalog's comma-separated Calendar weekdays (Sunday
+is 1) and the configured sale duration from UTC midnight. An offer is unavailable
+on unlisted days or after that day's sale window. This deliberately closes the
+legacy fallback that treats an unlisted day as having no time restriction.
+Weekly schedules combined with cycle renewal remain unsupported. Daily price tiers use the requested batch's final daily quantity, as in
 the audited Java purchase calculation. Per-player cycle counters renew from the
 configured anchor and interval. Realm stock remains cumulative across player
 cycle/day renewal. Catalog reads calculate current counters without writing.
@@ -91,7 +95,7 @@ cause validation failures. These synthetic tests do not validate APK rendering.
 
 Specialized alliance/kingdom contribution, military honor, SVIP, neutral and
 civilization scores, crystal-gold/CSMOD balances, status/equipment delivery,
-group-purchase discounts, weekly event windows and prestige/SVIP conditions remain
+group-purchase discounts and prestige/SVIP conditions remain
 unsupported. Such offers are hidden or rejected before any debit. Discounts passed
 by the client are rejected. NPC task/progression side effects remain a separate
 authoritative-domain integration; inventory events are durable, but no synthetic
