@@ -1,3 +1,5 @@
+import { readHeroEvents } from "./hero-event";
+import type { HeroEventSelection } from "@opencok/contracts/hero-event";
 import { user_state } from "@opencok/drizzle/schema/opencok_kingdom/user_state";
 import { user_equip } from "@opencok/drizzle/schema/opencok_kingdom/user_equip";
 import { user_hospital } from "@opencok/drizzle/schema/opencok_kingdom/user_hospital";
@@ -155,6 +157,11 @@ export class Database implements GameStore, FriendshipMineStore {
       this.config.kingdomId,
       now,
     );
+  }
+  heroEvents(uid: string, kingdomId: number, selection: HeroEventSelection, now: number) {
+    if (!Number.isInteger(kingdomId) || kingdomId < 1 || !this.databases.kingdoms.has(kingdomId))
+      throw new Error("Unconfigured hero realm");
+    return readHeroEvents(this.databases.getKingdom(kingdomId).db, uid, selection, now);
   }
   heroHistory(uid: string, kingdomId: number, type: number, now: number) {
     if (!Number.isInteger(kingdomId) || kingdomId < 1 || !this.databases.kingdoms.has(kingdomId))
