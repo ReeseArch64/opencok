@@ -40,6 +40,7 @@ export interface AdvancedCatalogs {
   vipBoxes?: Map<string, Rule>;
   targetTasks?: Map<string, Rule>;
   rechargeFeedback?: Map<string, Rule>;
+  eggs?: Map<string, Rule>;
   goldenEggs?: Map<string, Rule>;
   goldenEggSteps?: Map<string, Rule>;
   normalRechargeThresholds?: Map<string, Rule>;

@@ -298,6 +298,7 @@ export class GameService {
   }
   async initialize(uid: string, correlation: Fields = {}): Promise<Result> {
     const businessMan = await this.services.hotItemBusinessMan?.();
+    const eggActivity = await this.services.cityProgression?.(uid, "egg.activity.init", {});
     const normalRecharge = await this.services.cityProgression?.(uid, "normal.recharge.init", {});
     const comeback = await this.services.cityProgression?.(uid, "comeback.init", {});
     const prayer = await this.services.cityProgression?.(uid, "prayer.init", {});
@@ -386,6 +387,7 @@ export class GameService {
       ...expeditionActivity,
     };
     const initialPushes = [
+      eggActivity,
       prayer,
       recallTasks,
       regionalRecall,
@@ -574,6 +576,12 @@ export class GameService {
         break;
       }
       case "activity.accept.reward":
+      case "egg.act.info":
+      case "egg.act.open":
+      case "egg.act.reward":
+      case "egg.act.cd":
+      case "egg.exp.reward":
+      case "egg.goods.full":
       case "goldeggs.info":
       case "goldeggs.smashing":
       case "goldeggs.smashingall":
