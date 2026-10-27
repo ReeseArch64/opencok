@@ -103,7 +103,8 @@ test("shared resource admission reschedules owned foreign checkpoints and conser
   const h = await harness();
   try {
     const original = await h.balances();
-    await Promise.all([h.start(), h.start("other")]);
+    const departed = await Promise.all([h.start(), h.start("other")]);
+    expect(departed[0]!.body.mt).toEqual(sfs.int(56000));
     const outgoing = await h.checkpoints();
     h.clock.now = Math.max(...outgoing.map((row) => Number(row.dueAt)));
     await h.tick();
