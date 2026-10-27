@@ -329,6 +329,7 @@ export async function loadRules(directory?: string, kingdomId = 1) {
     },
     { ranks: await optional(GameplayCatalog.Rank), gifts: await optional(GameplayCatalog.Gift) },
     {
+      vipBoxes: await optional(GameplayCatalog.BoxVip),
       targetTasks: await optional(GameplayCatalog.TargetQuest),
       rechargeFeedback: rechargeFeedbackRecords.length
         ? indexRules(rechargeFeedbackRecords, GameplayCatalog.DailyRecharge)

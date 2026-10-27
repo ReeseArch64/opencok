@@ -290,6 +290,7 @@ export class GameService {
       {},
     );
     const dragonTower = await this.services.cityProgression?.(uid, "dragontower.init", {});
+    const vipBox = await this.services.cityProgression?.(uid, "vip.box.init", {});
     const targets = await this.services.cityProgression?.(uid, "target.init", {});
     const recharge = await this.services.cityProgression?.(uid, "new.sercum.init", {});
     const boxes = await this.services.cityProgression?.(uid, "ordinary.box.init", {});
@@ -315,6 +316,7 @@ export class GameService {
       ...generals?.body,
       ...dragons?.body,
       ...dragonTower?.body,
+      ...vipBox?.body,
       ...luckyDay?.body,
       ...recharge?.body,
       ...totems?.body,
@@ -346,6 +348,7 @@ export class GameService {
       generals,
       dragons,
       dragonTower,
+      vipBox,
       luckyDay,
       castleLevel,
       investment,
@@ -550,6 +553,8 @@ export class GameService {
       case "dragontower":
       case "minstrel":
       case "alchemist":
+      case "vip.box.turntable.ui":
+      case "vip.box.turntable.reward":
       case "target.task.ui":
       case "target.task.receive":
       case "target.task.item":

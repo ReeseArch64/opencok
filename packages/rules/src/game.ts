@@ -22,6 +22,7 @@ export interface WorldCatalogs {
   barbarians?: Map<string, Rule>;
 }
 export interface AdvancedCatalogs {
+  vipBoxes?: Map<string, Rule>;
   targetTasks?: Map<string, Rule>;
   rechargeFeedback?: Map<string, Rule>;
   rechargeThresholds?: Map<string, Rule>;
