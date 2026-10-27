@@ -132,6 +132,10 @@ test("realm configuration derives database and ownership from the shared snapsho
   expect(settings.host).toBe("0.0.0.0");
   expect(settings.port).toBe(9933);
   expect(settings.healthPort).toBe(18090);
+  expect(settings.chatInterval).toBe(1);
+  expect(settings.feedMaxCount).toBe(3);
+  expect(settings.crossSearchEnabled).toBe(true);
+  expect(settings.playerKingdoms).toBeUndefined();
   expect(settings).not.toHaveProperty("resources");
 });
 

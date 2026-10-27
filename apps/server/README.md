@@ -144,8 +144,6 @@ requires the remaining service settings through its process environment.
 | `REDIS_URL`             | Shared API/realm URL; defaults to `redis://127.0.0.1:6379/0` outside Compose. Set the local Compose URL or an external production URL. |
 | `GAME_ZOOKEEPER`        | Defaults to `127.0.0.1:2181`.                                                                                                          |
 | `GAME_MAP_SIZE`         | Defaults to `1200`.                                                                                                                    |
-| `GAME_CROSS_SEARCH`     | Defaults to `true`; `false` restricts general player search to the local realm without global search reads.                            |
-| `GAME_PLAYER_KINGDOMS`  | Optional public-read routes, such as `1:opencok_kingdom_1,2:opencok_kingdom_2`; at most two realms.                                    |
 | `GAME_MAIL_TRANSLATION` | Defaults to `true`; `false` suppresses category-chat translation IDs and stored-translation reads.                                     |
 | `DEPENDENCY_TIMEOUT_MS` | Defaults to `5000`.                                                                                                                    |
 
@@ -252,12 +250,9 @@ numeric fields and overflows produce the existing unsupported error instead of a
 invalid SFS value. Avatar dates retain lenient date-only parsing and serialize parse
 failures as the string `0`. These metadata reads never settle production or
 modify a player. Cross-realm gameplay remains disabled, and the running realm uses
-the normal-world configuration. `GAME_CHAT_INTERVAL` and `GAME_FEED_MAX_COUNT`
-configure the advertised SFS Int values, defaulting to 1 and 3. They accept nonnegative
-integers through 2,147,483,647; invalid settings fail startup. Both direct execution
-and Compose pass these values through the realm configuration. Restart the realm
-after changing them. These values describe client metadata, not chat-service rate
-enforcement. Alternative world-cup projections have unit coverage but are not enabled
+the normal-world configuration. The advertised SFS Int values for chat interval
+and feed count are fixed at 1 and 3 in code for both direct execution and Compose.
+These values describe client metadata, not chat-service rate enforcement. Alternative world-cup projections have unit coverage but are not enabled
 in the runtime composition.
 
 `login.other` with `config` now returns `fbShare`, `pushSetting`, `switches`,
@@ -851,10 +846,10 @@ that restriction. The DTO never serializes raw profile/account rows.
 
 Presence of `allservers`, including `false`, enables lookup of missing numeric IDs
 after stripping `@mod`. Global account records select their authoritative physical
-realm database; unknown accounts are omitted. Configure additional readable realms
-with `GAME_PLAYER_KINGDOMS=1:opencok_kingdom_1,2:opencok_kingdom_2`. Without this
-setting only the selected realm is available. The list may include the selected
-realm only with its existing database name; at most two total realms are allowed.
+realm database; unknown accounts are omitted. The runtime configures no additional
+readable realms, so only the selected realm is available. Additional routes require
+a code change; the database adapter still validates explicitly injected routes and
+allows at most two total realms.
 Missing configured routes, inconsistent remote ownership and database failures
 reject the whole request. Local results precede remote results, as in the legacy.
 Remote reads use separate read-only snapshots; this is not a transaction across
@@ -1901,7 +1896,8 @@ used; PostgreSQL concurrency, collation and live client rendering remain unvalid
 ## Map player search
 
 `world.search.user` searches public player identities in the local realm or a realm
-already configured through `GAME_PLAYER_KINGDOMS`. The runtime supplies
+already configured through explicitly injected realm routes. The default runtime
+only configures the selected realm. The runtime supplies
 `GameServices.worldSearch` and checks the existing local `userprofile`, `playerinfo`
 and `alliance` columns. Remote availability does not gate local startup. No schema,
 configuration variable, external package, global account query or game-state write
@@ -1964,11 +1960,11 @@ concurrent snapshots and native rendering remain unvalidated. The separate gener
 
 `search.player` is connected through `GameServices.playerSearch`, using the existing
 profile, building, statistics, alliance and global-directory tables. It requires
-String `key` and Int `page`; neither parameter has a default. The runtime passes
-`GAME_CROSS_SEARCH`, which defaults to true as in the reference. Explicit false uses
-only local search. Remote reads are restricted to `GAME_PLAYER_KINGDOMS`; unknown
-routes fail visibly rather than returning a fabricated local or empty result.
-Both settings are forwarded by Compose. [Issue #84](https://github.com/ReeseArch64/opencok/issues/84)
+String `key` and Int `page`; neither parameter has a default. Cross search is fixed
+to enabled in the runtime configuration, as in the reference. No additional remote
+realm routes are configured by default. Remote reads require explicitly injected
+routes; unknown routes fail visibly rather than returning a fabricated local or
+empty result. [Issue #84](https://github.com/ReeseArch64/opencok/issues/84)
 tracks local delivery and review. No schema migration or new dependency is required.
 
 The query uses Java-compatible signed decimal parsing for `lookfor.k1` (minimum
@@ -2066,8 +2062,9 @@ collation parity, live concurrency and query plans remain unverified. Query fail
 and malformed dependencies reject explicitly rather than emulate the local Java
 helper's empty-result fallback or drop malformed remote entries. Startup checks local
 search tables and, only when cross search is enabled, global directory columns;
-remote realm availability does not gate startup. Disabling GAME_CROSS_SEARCH removes
-this command's global/remote search reads and global search readiness probes.
+remote realm availability does not gate startup. The runtime always enables cross
+search and its global-directory readiness probes. Explicitly injected local-only
+configurations remain supported by the application components.
 
 ## Additional map queries: completed command integration
 

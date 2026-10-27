@@ -84,8 +84,6 @@ test("complete configuration wire contract survives XML loading, realm compositi
         DATABASE_URL: "postgresql://unused.invalid/global",
         GAME_LOGIN_SECRET: "synthetic",
         KINGDOM_ID: String(kingdomId),
-        GAME_CHAT_INTERVAL: String(kingdomId + 4),
-        GAME_FEED_MAX_COUNT: String(kingdomId + 8),
       });
       let previous: Buffer | undefined;
       for (let reload = 0; reload < 2; reload++) {
@@ -107,8 +105,8 @@ test("complete configuration wire contract survives XML loading, realm compositi
         expect(output.monster_count).toEqual(sfs.int(kingdomId === 1 ? 150 : 100));
         expect(output.dbf_maxScoreView).toEqual(sfs.long(9007199254740993n));
         expect(fields(output.serverConfig)).toEqual({
-          chat_interval: sfs.int(kingdomId + 4),
-          feed_maxCount: sfs.int(kingdomId + 8),
+          chat_interval: sfs.int(1),
+          feed_maxCount: sfs.int(3),
         });
         expect(decoded._cok_).toEqual(sfs.string("contract"));
         expect(decoded.cmdBaseTime).toEqual(sfs.string("42"));

@@ -324,9 +324,9 @@ network controls when the development machine is reachable by other devices.
 
 Both services send OTLP to `http://maple:4318`. For applications run outside Compose,
 set `OTEL_EXPORTER_OTLP_ENDPOINT=http://127.0.0.1:4318` and the same ingest key.
-`OTEL_EXPORT_INTERVAL_MS` defaults to 1000 and accepts 1000–60000 ms;
-`OTEL_SLOW_OPERATION_MS` defaults to 1000 and accepts 100–60000 ms. Configure these
-values on the applications when overriding Compose defaults. Leaving the endpoint
+The telemetry export interval is fixed at 1000 ms in code.
+`OTEL_SLOW_OPERATION_MS` defaults to 1000 and accepts 100–60000 ms; configure it
+on the applications when changing the slow-operation threshold. Leaving the endpoint
 unset keeps JSON logs without network export.
 
 In the dashboard, select `server` or `api`, filter by operation/outcome/level and open

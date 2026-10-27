@@ -123,43 +123,8 @@ export const serverSchema = z
       .enum(["true", "false"])
       .default("true")
       .transform((value) => value === "true"),
-    GAME_CROSS_SEARCH: z
-      .enum(["true", "false"])
-      .default("true")
-      .transform((value) => value === "true"),
-    GAME_CHAT_INTERVAL: z.coerce.number().int().min(0).max(2147483647).default(1),
-    GAME_FEED_MAX_COUNT: z.coerce.number().int().min(0).max(2147483647).default(3),
     ...realmSettings,
     KINGDOM_DATABASE_NAME: z.preprocess(blankToUndefined, databaseName.optional()),
-    GAME_PLAYER_KINGDOMS: z.preprocess(
-      blankToUndefined,
-      z
-        .string()
-        .transform((value) =>
-          value.split(",").map((entry) => {
-            const parts = entry.split(":");
-
-            return { id: Number(parts[0]), database: parts.length === 2 ? parts[1] : undefined };
-          }),
-        )
-        .pipe(
-          z
-            .array(
-              z.object({
-                id: z.number().int().positive().max(2147483647),
-                database: databaseName,
-              }),
-            )
-            .min(1)
-            .max(2)
-            .refine(
-              (realms) =>
-                new Set(realms.map((realm) => realm.id)).size === realms.length &&
-                new Set(realms.map((realm) => realm.database)).size === realms.length,
-            ),
-        )
-        .optional(),
-    ),
     REDIS_URL: redisUrl,
     GAME_ZOOKEEPER: z.string().min(1).default("127.0.0.1:2181"),
     GAME_LOGIN_SECRET: z.string().min(1),

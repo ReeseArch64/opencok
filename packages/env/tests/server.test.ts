@@ -2,29 +2,6 @@ import { expect, test } from "bun:test";
 import { parseServerEnvironment } from "../src/server.schema";
 
 const base = { GAME_LOGIN_SECRET: "synthetic-secret" };
-test("client configuration limits retain defaults and reject invalid SFS integers at startup", () => {
-  expect(parseServerEnvironment(base).GAME_CHAT_INTERVAL).toBe(1);
-  expect(parseServerEnvironment(base).GAME_FEED_MAX_COUNT).toBe(3);
-  for (const key of ["GAME_CHAT_INTERVAL", "GAME_FEED_MAX_COUNT"] as const) {
-    for (const value of ["0", "7", "2147483647"])
-      expect(parseServerEnvironment({ ...base, [key]: value })[key]).toBe(Number(value));
-    for (const value of ["-1", "1.5", "2147483648", "NaN", "Infinity", "invalid"])
-      expect(() => parseServerEnvironment({ ...base, [key]: value })).toThrow(key);
-  }
-});
-test("general player search defaults to cross mode and accepts explicit true or false only", () => {
-  expect(parseServerEnvironment(base).GAME_CROSS_SEARCH).toBe(true);
-  expect(parseServerEnvironment({ ...base, GAME_CROSS_SEARCH: "false" }).GAME_CROSS_SEARCH).toBe(
-    false,
-  );
-  expect(parseServerEnvironment({ ...base, GAME_CROSS_SEARCH: "true" }).GAME_CROSS_SEARCH).toBe(
-    true,
-  );
-  for (const value of ["", "0", "1", "TRUE", "yes"])
-    expect(() => parseServerEnvironment({ ...base, GAME_CROSS_SEARCH: value })).toThrow(
-      "GAME_CROSS_SEARCH",
-    );
-});
 test("server settings validate realm routing and require a login secret", () => {
   expect(parseServerEnvironment(base).KINGDOM_ID).toBe(1);
   expect(parseServerEnvironment({ ...base, KINGDOM_ID: "2" }).KINGDOM_ID).toBe(2);
@@ -37,28 +14,6 @@ test("server settings validate realm routing and require a login secret", () => 
   expect(() => parseServerEnvironment({ ...base, REDIS_URL: "https://localhost" })).toThrow(
     "REDIS_URL",
   );
-});
-
-test("public player realm routes are explicit, bounded and validated", () => {
-  expect(parseServerEnvironment(base).GAME_PLAYER_KINGDOMS).toBeUndefined();
-  expect(
-    parseServerEnvironment({ ...base, GAME_PLAYER_KINGDOMS: "1:kingdom_one,2:kingdom_two" })
-      .GAME_PLAYER_KINGDOMS,
-  ).toEqual([
-    { id: 1, database: "kingdom_one" },
-    { id: 2, database: "kingdom_two" },
-  ]);
-  for (const value of [
-    "0:kingdom",
-    "2:kingdom:extra",
-    "2:db;drop",
-    "2:kingdom,2:other",
-    "1:same,2:same",
-    "1:one,2:two,3:three",
-  ])
-    expect(() => parseServerEnvironment({ ...base, GAME_PLAYER_KINGDOMS: value })).toThrow(
-      "GAME_PLAYER_KINGDOMS",
-    );
 });
 
 test("mail translation defaults enabled and accepts explicit true or false only", () => {
