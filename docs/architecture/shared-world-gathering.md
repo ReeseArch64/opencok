@@ -11,8 +11,9 @@ form a closed interval; this implementation does not replace those settings.
 Synthetic acceptance rules enable tests without changing the shipped catalogue.
 
 An owned ordinary `world.march` can reserve its actual troops and companions for
-an existing main point. Its travel path uses the native four-cell target. Each
-party pins the actual resource capacity and the collection rate calculated from
+an existing main point. Source `WorldPoint.isOccupyFourPoints` excludes type 37,
+so travel targets its main anchor even though supply reserves four physical cells.
+Each party pins the actual resource capacity and the collection rate calculated from
 `on_event2.k4`, castle production and the existing collection effects. The saved
 army retains raw load, so adopting an imported party applies resource weights
 once. Entering a shared point neither attacks another party nor claims exclusive
