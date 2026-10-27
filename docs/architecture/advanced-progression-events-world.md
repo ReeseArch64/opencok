@@ -681,9 +681,8 @@ existing recall tables. They do not reset on reconnect.
 The shared confirmed-action hook advances matching recall tasks alongside weekly
 target tasks. Completed training, construction, research, returned gathering,
 item use, equipment actions, lottery and supported alliance actions supply their
-actual quantities. Clients cannot post counters. Prayer is a separate required
-producer for the maintained assignments and is tracked as an outstanding local
-dependency until its native mutation domain is integrated. Combat and paid
+actual quantities. Clients cannot post counters. Native prayer supplies the prayer
+producer required by the maintained assignments. Combat and paid
 producers require their corresponding validated engines.
 
 Owned task progress stops at its saved deadline; completed entitlements remain
@@ -699,3 +698,29 @@ Back up assignments, notes, rewards, status rows, receipts and inventory togethe
 Retain the added timestamp during rollback. Synthetic PostgreSQL scenarios cover
 maintained assignments, actual completed training, daily reconnect credit,
 concurrent claims, failed receipts and once-only milestone effects.
+
+## Native prayer and confirmed event progress
+
+`user.pray.info` and `user.pray` use the owned altar, its maintained level/star
+parameters and the saved `user_pray` row. The server validates the exact resource
+quote and gold price before selecting a multiplier. First free and paid draws
+use the configured reference first-hit pool; subsequent draws use the altar's
+weighted pool. Growth, per-resource escalating prices, daily limits and free
+item credits persist with the resource grant and receipt. Retry reuses the
+committed result and cannot draw or spend again.
+
+The response preserves INT quotes, flags and multipliers, Boolean first-use
+markers, and LONG uppercase native resource balances. Steel quotes apply the
+reference float arithmetic for effect 205 while the matching silver asset uses
+the authoritative ledger. UTC rollover resets daily counts and amounts while
+retaining unused item credits and first-use history. Altar upgrades rescale the
+saved daily amounts without replaying prayers or costs.
+
+Owned item 200031 enters the internal prayer-credit domain through the inventory
+transaction; clients cannot invoke the credit producer directly. Confirmed prayer
+updates returning-player and weekly targets, daily tasks, expedition scoring and
+supported campaign triggers. The existing prayer history stores each committed
+draw. No migration or dependency is introduced. Back up prayer rows, history,
+resources, inventory, receipts and event progress together and retain committed
+receipts during rollback. Synthetic PostgreSQL and wire tests cover quoted costs,
+pinned draws, free credits, UTC reset, status effects, upgrade scaling and rollback.

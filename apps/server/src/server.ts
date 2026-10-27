@@ -1,3 +1,4 @@
+import { createPrayerDomain } from "@opencok/services/prayer";
 import { recallTaskDomain } from "@opencok/services/recall-task";
 import { regionalRecallDomain } from "@opencok/services/regional-recall";
 import { initializeRealmOpeningClock } from "@opencok/repositories/realm-opening-clock";
@@ -466,6 +467,7 @@ export const RealmDependenciesLive = Layer.effect(
         createRechargeActivityDomain(),
         createRechargeFeedbackDomain(),
         createAllianceHeartDomain((uid) => notifications.owners().includes(uid)),
+        createPrayerDomain(),
         recallTaskDomain,
         regionalRecallDomain,
         playerItemGiftDomain,
@@ -1198,11 +1200,13 @@ export const RealmDependenciesLive = Layer.effect(
                 await city.command(
                   tx,
                   owner,
-                  rules.goods.get(itemId)?.type === "36"
-                    ? "ordinary.box.open"
-                    : ["37", "40"].includes(rules.goods.get(itemId)?.type ?? "")
-                      ? "dragon.item"
-                      : "effect.item",
+                  itemId === "200031"
+                    ? "prayer.item"
+                    : rules.goods.get(itemId)?.type === "36"
+                      ? "ordinary.box.open"
+                      : ["37", "40"].includes(rules.goods.get(itemId)?.type ?? "")
+                        ? "dragon.item"
+                        : "effect.item",
                   encode({ itemId: sfs.string(itemId), count: sfs.int(count) }),
                   now,
                   economy,

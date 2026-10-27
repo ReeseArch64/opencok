@@ -1,3 +1,4 @@
+import { refreshPrayerBuilding } from "./prayer";
 import { recordTargetTask } from "./target-task";
 import { enrollCastleLevel } from "./castle-level-event";
 import { recordExpeditionScore } from "./new-expedition";
@@ -132,6 +133,7 @@ function complete(
   };
   if (experience) context.experience(cityInteger(experience));
   context.write.buildings = [completed];
+  refreshPrayerBuilding(context, row, completed);
   if (!context.completing) recordTargetTask(context, 3, 1);
   enrollCastleLevel(context, completed);
   makeDomainQueue(context, completed);

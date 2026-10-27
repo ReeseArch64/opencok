@@ -276,6 +276,7 @@ export class GameService {
     return (await this.initialize(uid)).body;
   }
   async initialize(uid: string, correlation: Fields = {}): Promise<Result> {
+    const prayer = await this.services.cityProgression?.(uid, "prayer.init", {});
     const recallTasks = await this.services.cityProgression?.(uid, "recall.task.init", {});
     const regionalRecall = await this.services.cityProgression?.(uid, "region.recall.init", {});
     const hearts = await this.services.cityProgression?.(uid, "heart.init", {});
@@ -316,6 +317,7 @@ export class GameService {
           .filter((row) => num(row, "on") !== 2)
           .map((row) => sfs.object(equipmentFields(row))),
       ),
+      ...prayer?.body,
       ...recallTasks?.body,
       ...regionalRecall?.body,
       ...hearts?.body,
@@ -349,6 +351,7 @@ export class GameService {
       serverTime: sfs.long(this.now()),
     };
     const initialPushes = [
+      prayer,
       recallTasks,
       regionalRecall,
       hearts,
@@ -565,6 +568,8 @@ export class GameService {
       case "dragontower":
       case "minstrel":
       case "alchemist":
+      case "user.pray":
+      case "user.pray.info":
       case "recall.task.ui":
       case "recall.task.receive":
       case "region.recall.open.ui":

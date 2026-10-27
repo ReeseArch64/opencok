@@ -298,7 +298,8 @@ export class InventoryPlanner {
     if (rule.type === "13") effectRule = inventoryGoods(this.rules, rule.para4 ?? "");
     const effect: Fields = {};
     if (
-      (["36", "37", "40"].includes(effectRule.type ?? "") ||
+      (effectRule.id === "200031" ||
+        ["36", "37", "40"].includes(effectRule.type ?? "") ||
         effectRule.type === "4" ||
         (effectRule.type === "3" &&
           ["70", "110", "249", "250"].includes(effectRule.para1 ?? ""))) &&
