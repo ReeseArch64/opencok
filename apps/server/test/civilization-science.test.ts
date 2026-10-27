@@ -99,6 +99,22 @@ test("civilization discovery emits float effects and pending deadlines without c
   expect(items.get("210090")).toBe(10);
 });
 
+test("civilization discovery skips saved levels absent from the catalog without changing them", async () => {
+  const { context, state, rules } = await fixture();
+  rules.power.civilizationSciences!.set("800000", { id: "800000", para2: "0" });
+  state.civilizationSciences = [{ baseItemID: 700000, level: 2 }];
+  const result = await civilizationScienceDomain.prepare(
+    context,
+    "civilization.science.data.init",
+    {},
+  );
+  const decoded = decode(Buffer.from(result.response));
+  expect(decoded.civilization_science?.type).toBe(Type.Array);
+  expect(decoded.civilization_science?.value).toHaveLength(1);
+  expect(state.civilizationSciences).toEqual([{ baseItemID: 700000, level: 2 }]);
+  expect(context.write.civilizationSciences).toBeUndefined();
+});
+
 test("civilization cannot jump levels or bypass building requirements", async () => {
   const { context, rules, balances } = await fixture();
   expect(() => civilizationScience(rules, 700001, 0)).toThrow();

@@ -9,6 +9,7 @@ import type { CityState, GameStore } from "@opencok/contracts/game";
 import { user } from "@opencok/mappings/city";
 import { Rules } from "@opencok/rules/game";
 import { decode, encode, fields, sfs } from "@opencok/messages/sfs";
+import { emptyPowerState } from "./fixtures/power-state";
 
 function rules() {
   return new Rules(
@@ -51,7 +52,7 @@ test("login carries the saved civilization and exact score/prestige in init.user
     allianceRanking: unused,
     playerRanking: unused,
     publicProfile: unused,
-    getPowerByPlayerId: unused,
+    getPowerByPlayerId: async () => emptyPowerState(state.profile!),
     getProfileById: unused,
     getAccountsByPlayerId: unused,
     getConfigurationByPlayerId: unused,

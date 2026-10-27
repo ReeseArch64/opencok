@@ -34,7 +34,7 @@ export function shopOffer(rule: Rule, state: ShopState): Fields {
     "prestige_level",
   ])
     if (rule[key]) result[key] = sfs.string(rule[key]);
-  const { begin, end } = shopWindow(rule);
+  const { begin, end } = shopWindow(rule, state.now);
   result.todayBuy = sfs.int(counters.daily);
   result.totalBuy = sfs.int(counters.total);
   result.serverTotalBuy = sfs.int(Number(counters.server));
