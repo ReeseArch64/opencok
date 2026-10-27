@@ -376,13 +376,14 @@ function sharedMemberView(context: CityProgressionContext, row: Row): Fields {
         sfs.object({
           armyId: sfs.string(unit.armsId ?? ""),
           star: sfs.int(
-            num(
-              (owner === context.owner
-                ? context.state.armies
-                : (context.state.worldMutation?.sharedArmies ?? [])
-              ).find((value) => value.uid === owner && value.armyId === unit.armsId) ?? {},
-              "level",
-            ),
+            unit.level ??
+              num(
+                (owner === context.owner
+                  ? context.state.armies
+                  : (context.state.worldMutation?.sharedArmies ?? [])
+                ).find((value) => value.uid === owner && value.armyId === unit.armsId) ?? {},
+                "level",
+              ),
           ),
           count: sfs.int(unit.total - unit.dead),
         }),
@@ -1174,6 +1175,7 @@ export function createWorldMarchDomain(size: number): CityDomain {
             dead: 0,
             loadEffect: 0,
             basicArm: null,
+            level: num(owned, "level"),
           });
         }
         const castle = context.state.buildings.find((row) => num(row, "itemId") === 400000);

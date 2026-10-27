@@ -1,3 +1,4 @@
+import { inspectWorldMarch } from "./world-march-inspection";
 import { worldRecreationCommands } from "./world-recreation";
 import { worldUseCommands } from "./world-use";
 import { treasureMapCommands } from "./treasure-map";
@@ -468,6 +469,21 @@ export class GameService {
     await this.services.reconcileAlliance?.(uid);
     let body: Fields;
     let pushes: Result["pushes"] = [];
+    if (command === "world.get.march" && wireString(params, "uid", uid) !== uid) {
+      if (!this.services.worldMarchInspection) throw new GameError(errors.unsupported);
+      return {
+        body: await inspectWorldMarch(
+          this.services.worldMarchInspection,
+          uid,
+          params,
+          this.rules,
+          this.config.kingdomId,
+          this.now(),
+          this.services,
+        ),
+        pushes: [],
+      };
+    }
     if (
       worldMutationCommands.includes(command) ||
       cityDefenseCommands.includes(command) ||

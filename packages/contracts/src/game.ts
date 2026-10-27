@@ -330,6 +330,7 @@ export interface GameServices {
   nicknameReservedPatterns?(): readonly string[];
   filterBadWords?(text: string): string;
   worldPointDetail?: WorldPointDetailStore;
+  worldMarchInspection?: import("./world-march-inspection").WorldMarchInspectionStore;
   playerSearch?: PlayerSearchStore;
   worldSearch?: WorldSearchStore;
   worldUtility?: import("./world-utility").WorldUtilityStore;
