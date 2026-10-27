@@ -83,7 +83,8 @@
     "./fragment-exchange": "./src/fragment-exchange.ts",
     "./monster-exchange": "./src/monster-exchange.ts",
     "./activity-directory": "./src/activity-directory.ts",
-    "./activity-reward": "./src/activity-reward.ts"
+    "./activity-reward": "./src/activity-reward.ts",
+    "./activity-operators": "./src/activity-operators.ts"
   },
   "dependencies": {
     "@opencok/errors": "workspace:*",

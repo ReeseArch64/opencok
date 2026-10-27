@@ -327,6 +327,7 @@ export async function loadRules(directory?: string, kingdomId = 1) {
     },
     { ranks: await optional(GameplayCatalog.Rank), gifts: await optional(GameplayCatalog.Gift) },
     {
+      activityPages: await optional(GameplayCatalog.ActivityPage),
       hotItems: await optional(GameplayCatalog.Hotstore),
       heroActivities: await optional(GameplayCatalog.Heroactivity),
       heroScores: await optional(GameplayCatalog.Score),

@@ -4,6 +4,8 @@ import { treasureMapCommands } from "./treasure-map";
 import { cityDefenseCommands } from "./city-defense";
 import { worldUtility } from "./world-utility";
 import { legacyIntegerOrder } from "@opencok/messages/legacy-object-order";
+import { activityOperators } from "@opencok/rules/activity-operators";
+import { activityOperatorsView } from "@opencok/mappings/activity-operators";
 import { rewardPreviewArray } from "@opencok/mappings/rewards";
 import { heroEventBand, heroEventRewards, nextHeroPanel } from "@opencok/rules/hero-event";
 import {
@@ -478,7 +480,7 @@ export class GameService {
       if (!this.services.social) throw new GameError(errors.unsupported);
       return { body: await this.services.social(uid, command, params), pushes: [] };
     }
-    await this.services.reconcileAlliance?.(uid);
+    if (command !== "activity.operators") await this.services.reconcileAlliance?.(uid);
     let body: Fields;
     let pushes: Result["pushes"] = [];
     if (
@@ -547,6 +549,22 @@ export class GameService {
         if (!this.services.mailReward) throw new GameError(errors.unsupported);
         ({ body, pushes } = await this.services.mailReward(uid, command, params));
         break;
+      case "activity.operators": {
+        if (!this.db.activityOperators)
+          throw new GameError(errors.unsupported, "activity_operators");
+        const now = this.now(),
+          snapshot = await this.db.activityOperators(uid, now);
+        if (snapshot.profile?.uid !== uid)
+          throw new GameError(errors.unsupported, "activity_operators");
+        body = activityOperatorsView(
+          activityOperators(this.rules, snapshot, {
+            kingdomId: this.config.kingdomId,
+            version: "12.06.0",
+            now,
+          }),
+        );
+        break;
+      }
       case "activity.accept.reward":
       case "hot.item.v2.get":
       case "hot.item.refresh":

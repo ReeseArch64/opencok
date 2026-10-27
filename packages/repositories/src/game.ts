@@ -1,4 +1,5 @@
 import { readActivityDirectory } from "./activity-directory";
+import { readActivityOperators } from "./activity-operators";
 import { readHeroEvents } from "./hero-event";
 import type { HeroEventSelection } from "@opencok/contracts/hero-event";
 import { user_state } from "@opencok/drizzle/schema/opencok_kingdom/user_state";
@@ -439,6 +440,9 @@ export class Database implements GameStore, FriendshipMineStore {
   }
   configurationSwitches(): Promise<Row[] | undefined> {
     return readLoginSwitches(this.kingdom.db);
+  }
+  activityOperators(uid: string, now: number) {
+    return readActivityOperators(this.kingdom.db, uid, now);
   }
   initializeWorldNewsPreference(uid: string, now: number): Promise<void> {
     return initializeWorldNewsPreference(this.kingdom.db, uid, this.config.kingdomId, now);
