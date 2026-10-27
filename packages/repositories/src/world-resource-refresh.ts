@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import { and, asc, eq, lte, sql } from "drizzle-orm";
+import { and, asc, eq, lte, sql, inArray } from "drizzle-orm";
 import { worldpoint } from "@opencok/drizzle/schema/opencok_kingdom/worldpoint";
 import { black_land_res_dead } from "@opencok/drizzle/schema/opencok_kingdom/black_land_res_dead";
 import { world_res_dead } from "@opencok/drizzle/schema/opencok_kingdom/world_res_dead";
@@ -17,35 +17,64 @@ export function createWorldResourceRefreshExecutor(
   authority: RealmAuthority,
   size = 1201,
 ): WorldResourceRefreshExecutor {
+  let nextExpiry = 0n;
   return {
     async execute(now, work) {
       if (now < 0n || now > BigInt(Number.MAX_SAFE_INTEGER))
         throw new Error("Invalid resource clock");
-      await db.transaction(async (tx) => {
+      const next = await db.transaction(async (tx) => {
         await fenceRealmTransaction(tx, authority);
         await tx.execute(sql`select pg_advisory_xact_lock(728214, 0)`);
         const [info] = await tx.select().from(server_info).where(eq(server_info.uid, "server"));
-        if (!info?.activityTime || info.activityTime > now) return;
+        const ready = Boolean(info?.activityTime && info.activityTime <= now);
+        if (!ready && now < nextExpiry) return;
         const [clock] = await tx
           .select()
           .from(world_resource_runtime)
           .where(eq(world_resource_runtime.worldId, 0))
           .for("update");
         const changed: number[] = [];
-        const ordinary = sql`${worldpoint.worldId}=0 AND ${worldpoint.pointType}=3 AND ${worldpoint.pointItem} IN ('0','1','2','3','4','5')`;
+        let expiredCount = 0;
         await work({
           now,
-          opening: info.activityTime,
-          goldBonusUntil: info.resGoldAddEndTime ?? 0n,
+          opening: info?.activityTime ?? 0n,
+          goldBonusUntil: info?.resGoldAddEndTime ?? 0n,
           clock,
-          expired: () =>
-            tx
-              .select()
-              .from(worldpoint)
-              .where(and(ordinary, lte(worldpoint.flushTime, now)))
-              .orderBy(asc(worldpoint.flushTime), asc(worldpoint.id))
-              .limit(64)
-              .for("update"),
+          expired: async () => {
+            const candidates: { id: number; flushTime: bigint | null }[] = [];
+            for (let type = 0; type < 6; type++)
+              candidates.push(
+                ...(await tx
+                  .select({ id: worldpoint.id, flushTime: worldpoint.flushTime })
+                  .from(worldpoint)
+                  .where(
+                    and(
+                      eq(worldpoint.worldId, 0),
+                      eq(worldpoint.pointType, 3),
+                      eq(worldpoint.pointItem, String(type)),
+                      lte(worldpoint.flushTime, now),
+                    ),
+                  )
+                  .orderBy(asc(worldpoint.flushTime))
+                  .limit(64)),
+              );
+            const selected = candidates
+              .sort((a, b) =>
+                a.flushTime! < b.flushTime! ? -1 : a.flushTime! > b.flushTime! ? 1 : a.id - b.id,
+              )
+              .slice(0, 64)
+              .map((row) => row.id);
+            const rows = selected.length
+              ? await tx
+                  .select()
+                  .from(worldpoint)
+                  .where(and(eq(worldpoint.worldId, 0), inArray(worldpoint.id, selected)))
+                  .orderBy(asc(worldpoint.flushTime), asc(worldpoint.id))
+                  .for("update")
+              : [];
+            expiredCount = rows.length;
+            return rows;
+          },
           async pending() {
             const normal = await tx
               .select()
@@ -220,7 +249,9 @@ export function createWorldResourceRefreshExecutor(
             publishedAt: 0n,
           });
         }
+        return ready ? undefined : expiredCount === 64 ? now : now + 1800000n;
       });
+      if (next !== undefined) nextExpiry = next;
     },
   };
 }

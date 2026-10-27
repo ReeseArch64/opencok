@@ -11,8 +11,9 @@ repeating a group until all groups have participated. Selection uses the saved
 group interval, radial area band, realm age and native integer weights. A selected
 type six is a failed node creation and becomes a delayed wait ticket; it never
 creates a pretend silver, crystal or combat target. The existing realm-opening
-clock supplies age. Imported realms without an authoritative opening clock are
-preserved rather than assigned an invented age.
+clock supplies age. Imported realms without an authoritative opening clock pause
+natural generation and rotation rather than receiving an invented age. Existing
+ordinary and player resource nodes can still expire or postpone expiry.
 
 A fenced realm worker shares the world mutation lock with placement, movement
 and marching. It postpones expiry for occupied ordinary resources, clears expired
@@ -80,3 +81,20 @@ capacity is independent of effects 305 and 307. Such nodes stay outside natural
 area quotas, postpone expiry while occupied and clear without replacement tickets
 when free. The bounded expiry scan includes both natural and player nodes; only
 natural nodes can produce ordinary or black-land wait tickets.
+
+Expiry does not require a known or already-started realm opening. Missing, zero
+and future opening dates permit factual node cleanup, but cannot create rotation
+state, replacements or new quota supply. The source `World.startFlushResourceTimer`
+uses a default 30-minute resource interval. Without a natural clock, an ephemeral
+30-minute executor deadline limits cleanup scans; it advances only after commit
+and full 64-node pages drain immediately. Restart resets this scheduling cache
+and retains actual node deadlines in PostgreSQL.
+
+The existing `worldpoint_world_pointType_flushTime_index` begins with point type,
+item and expiry. Cleanup reads six individually bounded index ranges, one per
+ordinary resource item type, before locking at most 64 selected rows under the
+shared world lock. Each range reads at most 64 candidates, so a missing opening
+clock does not cause a full terrain scan every worker tick. Native deadlines and
+outbox invalidations remain atomic with node changes. PostgreSQL checks cover
+missing, zero and future openings, occupied nodes, interval suppression, bounded
+catch-up and rollback without retaining an uncommitted scheduling deadline.

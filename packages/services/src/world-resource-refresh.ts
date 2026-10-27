@@ -20,7 +20,31 @@ export async function refreshWorldResources(
   random = randomInt,
 ) {
   const { now } = store;
-  if (now < store.opening || (store.clock && store.clock.nextRefreshAt > now)) return;
+  const ready = store.opening > 0n && store.opening <= now;
+  if (ready && store.clock && store.clock.nextRefreshAt > now) return;
+  const quota = ready ? worldResourceQuota(rules) : 0,
+    blackMinimum = ready ? cityInteger(rules.items.get("blackland_resource")?.k1) : 0,
+    blackMaximum = ready
+      ? cityInteger(rules.items.get("blackland_resource")?.k2, blackMinimum, 64)
+      : 0;
+  const limit = (area: number) => (area === 0 ? blackMaximum : quota);
+  const expired = await store.expired();
+  for (const point of expired) {
+    if (text(point, "ownerMarchUUid") || text(point, "ownerId")) {
+      await store.postpone(point, now + worldResourceDuration(rules, num(point, "resLevel")));
+      continue;
+    }
+    const area = worldResourceBlackLand(point) ? 0 : num(point, "areaId");
+    if (ready && num(point, "flushFlag") === 0 && (await store.population(area)) <= limit(area))
+      await store.ticket(
+        area,
+        num(point, "resLevel"),
+        text(point, "pointItem"),
+        now + worldResourceDuration(rules, num(point, "resLevel"), true),
+      );
+    await store.clear(point);
+  }
+  if (!ready) return;
   const count = cityInteger(rules.items.get("resources_weight")?.k8, 1, 32),
     interval = BigInt(Math.trunc(Number(rules.items.get("resources_weight")?.k7) * 86400000));
   if (interval <= 0n) worldMutationFailure();
@@ -46,27 +70,7 @@ export async function refreshWorldResources(
   }
   const group = rules.world.resources?.get(used[0] === 0 ? "resources" : `resources${used[0]}`);
   if (!group?.length) worldMutationFailure();
-  const quota = worldResourceQuota(rules),
-    areas = worldResourceAreaCount(rules, size),
-    blackMinimum = cityInteger(rules.items.get("blackland_resource")?.k1),
-    blackMaximum = cityInteger(rules.items.get("blackland_resource")?.k2, blackMinimum, 64);
-  const limit = (area: number) => (area === 0 ? blackMaximum : quota);
-  const expired = await store.expired();
-  for (const point of expired) {
-    if (text(point, "ownerMarchUUid") || text(point, "ownerId")) {
-      await store.postpone(point, now + worldResourceDuration(rules, num(point, "resLevel")));
-      continue;
-    }
-    const area = worldResourceBlackLand(point) ? 0 : num(point, "areaId");
-    if (num(point, "flushFlag") === 0 && (await store.population(area)) <= limit(area))
-      await store.ticket(
-        area,
-        num(point, "resLevel"),
-        text(point, "pointItem"),
-        now + worldResourceDuration(rules, num(point, "resLevel"), true),
-      );
-    await store.clear(point);
-  }
+  const areas = worldResourceAreaCount(rules, size);
   const spawn = async (area: number) => {
     const point = await store.free(area);
     if (!point) return undefined;
