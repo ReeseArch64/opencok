@@ -1,3 +1,9 @@
+import {
+  ExpeditionTreasuryService,
+  expeditionTreasuryCommands,
+  publishExpeditionTreasuryMutation,
+} from "@opencok/services/expedition-treasury";
+import { createExpeditionTreasuryExecutor } from "@opencok/repositories/expedition-treasury";
 import { expeditionDomain } from "@opencok/services/new-expedition";
 import { createArenaDomain, publishArenaMutation } from "@opencok/services/arena";
 import { anniversaryDomain } from "@opencok/services/anniversary";
@@ -612,10 +618,27 @@ export const RealmDependenciesLive = Layer.effect(
       rules,
       economyEffects,
     );
+    const expeditionTreasury = new ExpeditionTreasuryService(
+      createExpeditionTreasuryExecutor(db.kingdom.db, authority),
+      rules,
+    );
     const worldInterest = createWorldInterest(db.kingdom.db, authority, config.mapSize);
     let worldCursor: { dueAt: bigint; id: string } | undefined;
     let worldImportCursor: string | undefined;
     const recoverWorld = async () => {
+      for (let index = 0; index < 64; index++) {
+        const delivered = await relayMutationEvent(
+          db.kingdom.db,
+          authority,
+          (event) =>
+            publishExpeditionTreasuryMutation(event.payload, (owner, name, body) =>
+              notifications.publish(owner, name, body),
+            ),
+          Date.now,
+          "expedition.king.present",
+        );
+        if (!delivered) break;
+      }
       for (const command of ["arena.matched", "arena.enter", "arena.leave", "arena.finished"])
         for (let index = 0; index < 64; index++) {
           const delivered = await relayMutationEvent(
@@ -1071,6 +1094,8 @@ export const RealmDependenciesLive = Layer.effect(
             return alliances.command(owner, command, params);
           },
           cityProgression: async (owner, command, params) => {
+            if ((expeditionTreasuryCommands as readonly string[]).includes(command))
+              return expeditionTreasury.command(owner, command, params);
             await recoverActivities(owner);
             return activities.domainCommand(owner, command, params);
           },

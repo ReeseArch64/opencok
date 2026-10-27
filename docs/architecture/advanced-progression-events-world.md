@@ -269,3 +269,13 @@ gathering supply scores from their validated state transitions with the source
 floating-point bonuses; arbitrary client counters cannot supply scores. Combat
 score producers and cross-kingdom projections still require their validated actor
 integration. Period identities must be issued uniquely by that coordinator.
+
+Expedition treasury reads, daily recipient counters and royal distributions are
+implemented independently of battle scoring. Transfers lock local participants
+in stable order, verify the current kingdom's king, then debit the shared treasury
+and persist a weighted daily counter, distribution record, funded reward mail,
+receipt and notification event in one fenced transaction. The recipient claims
+the attachment through the existing mail reward workflow; retries cannot create
+another mail or debit the treasury twice. Cross-realm recipients are rejected.
+The dedicated executor registers only its own kingdom treasury as an additional
+ledger account; ordinary player mutation executors retain their owner restriction.

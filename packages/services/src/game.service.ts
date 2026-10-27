@@ -511,6 +511,9 @@ export class GameService {
       case "minstrel":
       case "civilizationCastle":
       case "totem":
+      case "exchequer.show":
+      case "expedition.king.present":
+      case "expedition.recieve.count":
       case "newexpidition.activityinfo":
       case "newexpidition.takepersonreward":
       case "newexpidition.takealliancereward":
