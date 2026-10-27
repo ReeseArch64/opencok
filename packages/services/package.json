@@ -147,7 +147,8 @@
     "./hot-item": "./src/hot-item.ts",
     "./world-utility": "./src/world-utility.ts",
     "./city-defense": "./src/city-defense.ts",
-    "./treasure-map": "./src/treasure-map.ts"
+    "./treasure-map": "./src/treasure-map.ts",
+    "./military-rank-awards": "./src/military-rank-awards.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",

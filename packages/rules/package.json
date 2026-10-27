@@ -169,7 +169,8 @@
     "./world-utility": "./src/world-utility.ts",
     "./city-defense": "./src/city-defense.ts",
     "./treasure-map": "./src/treasure-map.ts",
-    "./world-city-geometry": "./src/world-city-geometry.ts"
+    "./world-city-geometry": "./src/world-city-geometry.ts",
+    "./military-rank-awards": "./src/military-rank-awards.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",
