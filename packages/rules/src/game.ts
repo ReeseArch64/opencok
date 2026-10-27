@@ -15,6 +15,7 @@ export interface RankingCatalogs {
   heroEvents?: Map<string, Rule>;
 }
 export interface WorldCatalogs {
+  residential?: Map<string, Rule>;
   allianceBuildings?: readonly Rule[];
   fieldMonsters?: Map<string, Rule>;
   armies?: Map<string, Rule>;
