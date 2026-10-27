@@ -230,6 +230,7 @@ async function createStack() {
         { id: "player_max", k3: 30 },
         { id: "resources_basics", k7: 100, k8: 300 },
         { id: "on_trumpet", k2: 0 },
+        { id: "worldmap_city", k4: 50, k6: 50, k7: 0 },
       ],
       sections: [],
     },
