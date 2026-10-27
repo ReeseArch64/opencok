@@ -317,6 +317,7 @@ export class GameService {
     const recharge = await this.services.cityProgression?.(uid, "new.sercum.init", {});
     const boxes = await this.services.cityProgression?.(uid, "ordinary.box.init", {});
     const cycle = await this.services.cityProgression?.(uid, "sevenday.init", {});
+    const branchCity = await this.services.cityProgression?.(uid, "branchcity.init", {});
     const investment = await this.services.cityProgression?.(uid, "invest.init", {});
     const castleLevel = await this.services.cityProgression?.(uid, "castle.event.init", {});
     const luckyDay = await this.services.cityProgression?.(uid, "luckyday.init", {});
@@ -351,6 +352,7 @@ export class GameService {
       ...luckyDay?.body,
       ...recharge?.body,
       ...totems?.body,
+      ...branchCity?.body,
       ...lottery?.body,
       ...civilization?.body,
       ...alliance?.body,
@@ -652,6 +654,7 @@ export class GameService {
       case "sevenday.lucky.draw":
       case "shipping.trade.invest.ui":
       case "shipping.trade.invest.reward":
+      case "branchcity.open":
       case "invest.add":
       case "invest.open.ui":
       case "invest.receive":
