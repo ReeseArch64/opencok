@@ -107,6 +107,22 @@ export async function readWorldMutationState(
     .where(and(eq(worldpoint.worldId, 0), inArray(worldpoint.id, [...ids])))
     .orderBy(asc(worldpoint.id))
     .for("update");
+  const placementClaims =
+    ["totem", "civilizationCastle"].includes(command ?? "") && points.length
+      ? await tx
+          .select({ id: worldpoint.id })
+          .from(worldpoint)
+          .where(
+            and(
+              eq(worldpoint.worldId, 0),
+              inArray(
+                worldpoint.id,
+                points.map((point) => point.id),
+              ),
+              sql`(EXISTS(SELECT 1 FROM opencok_kingdom.world_march m WHERE m."worldId"=0 AND m."targetId" IN (${worldpoint.id},${worldpoint.id}+1,${worldpoint.id}+${size},${worldpoint.id}+${size + 1})) OR EXISTS(SELECT 1 FROM opencok_kingdom.t_worldboss b WHERE b.point=${worldpoint.id} AND b.status=1) OR EXISTS(SELECT 1 FROM opencok_kingdom.world_barbarion b WHERE b."pointId"=${worldpoint.id}))`,
+            ),
+          )
+      : [];
   const sharedIds = points.filter((row) => row.pointType === 37).map((row) => row.id);
   const sharedMarches = sharedIds.length
     ? await tx
@@ -221,6 +237,7 @@ export async function readWorldMutationState(
   if (scoutIds.length && !actorRealm?.realm) throw new Error("Missing scout actor realm");
   return {
     mapSize: size,
+    placementClaims: placementClaims.map((point) => point.id),
     scoutTargets: scoutIds.length
       ? await readWorldScoutTargets(tx, scoutIds, actorRealm!.realm!)
       : undefined,

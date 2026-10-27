@@ -20,6 +20,7 @@ export interface RuntimeMarch extends MarchLifecycle {
 }
 export interface WorldMutationState {
   mapSize?: number;
+  placementClaims?: readonly number[];
   scoutTargets?: ReadonlyMap<number, import("./world-scout-report").WorldScoutTarget>;
   sharedMarches?: readonly Row[];
   sharedCheckpoints?: readonly Row[];
