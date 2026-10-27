@@ -382,3 +382,56 @@ consumers and individual skill/talent-node catalogs retain their existing implem
 | `nezha-variant-3`                 | Nezha                           | [NezhaVariant3](../hero/src/domain/nezha-variant-3.ts)                                |
 | `nezha-variant-4`                 | Nezha                           | [NezhaVariant4](../hero/src/domain/nezha-variant-4.ts)                                |
 | `nezha-variant-5`                 | Nezha                           | [NezhaVariant5](../hero/src/domain/nezha-variant-5.ts)                                |
+
+## Named dragon definitions
+
+`packages/dragon/src/domain` owns named dragon archetypes extending `Dragon`.
+`dragonRoster` includes Black Dragon, Red Dragon, Blue Dragon, Scartha, Yukine,
+Kraken, Kylin, Thunder Beast, Fire Eagle, Skeletal Frost Dragon, Hestal, Hexa,
+Carres and Vildrin. The resource registry projects the 13 archetypes with existing
+server configuration into `dragon_base`; it does not change their balance.
+This package adds workspace dependencies only, with no external runtime library.
+
+Names and references were verified against the read-only Android 12.06.0
+`assets/local/database.local.xml` and `assets/local/text_en.ini`. The client has
+14 entries while the maintained server base and level catalogs configure 13.
+Vildrin, Sylvan Tutor is represented by a named class using available client
+facts, but lacks server initial power, initial level, battle profile and level
+progression. Its last client skill also lacks a corresponding quality entry.
+These omissions remain explicit. Mapping or importing Vildrin into the playable
+server catalog fails instead of inventing defaults or enabling incomplete gameplay.
+Native device acceptance was not performed.
+
+Each class owns hatching seconds, rename gold cost, ordered skill slots with unlock
+levels and maximum quality ranks, interactions with cooldowns and minimum
+friendship, sustained-feeding bonuses, gifts, initial talent and optional
+civilization reputation requirements. `DragonDefinitionMapper` only projects those
+values through injected `dragonCatalogBindings`. IDs live in `constants`; named
+identities, skills, gifts, civilizations, interactions and battle profiles live in
+`enums`. Domain definitions contain no native resource IDs or delimited strings.
+
+| Catalog field                                | Authored meaning and evidence                                                                                                                                                                                                         |
+| -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `id`                                         | Named dragon identity translated to its native catalog ID.                                                                                                                                                                            |
+| `initFight`, `initlevel`                     | Existing server starting power and level; verified against progression and power consumers.                                                                                                                                           |
+| `skill`, `skillUnlockLv`, `skillSlotQuality` | Ordered skill slots, required dragon level and maximum accepted skill quality rank; replacement rules enforce the quality ceiling.                                                                                                    |
+| `battleSkill`                                | Ordered native combat references selected by a named compatibility profile. The inspected client does not label these server references; profile names identify their dragon family or shared advanced binding, not invented effects. |
+| `hatchTime`, `nicknameCost`                  | Hatching seconds and rename gold cost.                                                                                                                                                                                                |
+| `communicateTime`, `communicateCond`         | Base interaction cooldowns and minimum friendship for Greet, Chat, Praise and Pet. Existing per-level cooldown rules remain authoritative.                                                                                            |
+| `holdCrit`                                   | Bonus multiplier and interval in feeding actions for sustained feeding, not a random percentage.                                                                                                                                      |
+| `gift`                                       | Named gift item references, including Stained Glass, Copper Necklace, Silver Ring, Golden Bracelet and the Silver item.                                                                                                               |
+| `talentskillInit`                            | Initial talent skill reference.                                                                                                                                                                                                       |
+| `reputationCondition`                        | Named civilization and required prestige level; native civilization codes are verified against the civilization catalog.                                                                                                              |
+
+`dragon-roster.test.ts` compares every field and ordered sequence of all 13
+server definitions against the pre-refactor fixture, checks domain edits and
+rejects invalid configuration. Tests also verify that Vildrin stays visible in
+the named roster but cannot enter the server catalog. The importer retains named
+references and rejects unknown or client-only incoming dragon bases.
+
+This change covers base archetypes at the same depth as the hero migration.
+Level schedules in `dragon_new`, individual skill effects, talents, travel,
+Dragon Tower, rankings and existing string-consuming Services/Rules are not
+redesigned or moved by this change. They remain compatible consumers of the same
+server data. There is no player-state migration or client repackaging; revert the
+application change to roll back. Original client inputs are not runtime dependencies.

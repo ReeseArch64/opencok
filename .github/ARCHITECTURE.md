@@ -77,16 +77,17 @@ are local references, never required private artifacts committed as dependencies
 
 ### Implemented API and realm package boundaries
 
-| Packages                                                            | Boundary                                                                                                                                  |
-| ------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
-| `env`, `config`, `core`                                             | Validated root environment, strict compiler settings, scoped runtime/resources, HTTP and filtered logging.                                |
-| `api`, `connection`, `controllers`, `identity`                      | HTTP/SFS entry, authentication and thin command Controllers.                                                                              |
-| `contracts`, `messages`, `dtos`, `enums`, `validations`, `mappings` | Versioned ports, wire types, DTOs, runtime validation and serialization.                                                                  |
-| `services`                                                          | Application workflows and orchestration of rules, contracts and persistence ports.                                                        |
-| `rules`, domain rule modules including `hero/rules` and `combat`    | Pure rule evaluation; no sockets, ORM or broker imports.                                                                                  |
-| `hero`                                                              | Hero and general contracts, rules, workflows, mappings, validations, catalog types and persistence adapters, separated by responsibility. |
-| `resources`                                                         | Versioned typed gameplay catalogs and JSON nickname filtering.                                                                            |
-| `repositories`, `drizzle`, `storage`                                | Owned transactional state, schemas, Redis/ZooKeeper and S3 adapters.                                                                      |
+| Packages                                                            | Boundary                                                                                                                                        |
+| ------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| `env`, `config`, `core`                                             | Validated root environment, strict compiler settings, scoped runtime/resources, HTTP and filtered logging.                                      |
+| `api`, `connection`, `controllers`, `identity`                      | HTTP/SFS entry, authentication and thin command Controllers.                                                                                    |
+| `contracts`, `messages`, `dtos`, `enums`, `validations`, `mappings` | Versioned ports, wire types, DTOs, runtime validation and serialization.                                                                        |
+| `services`                                                          | Application workflows and orchestration of rules, contracts and persistence ports.                                                              |
+| `rules`, domain rule modules including `hero/rules` and `combat`    | Pure rule evaluation; no sockets, ORM or broker imports.                                                                                        |
+| `hero`                                                              | Hero and general contracts, rules, workflows, mappings, validations, catalog types and persistence adapters, separated by responsibility.       |
+| `dragon`                                                            | Named dragon archetypes, configuration contracts, validation and catalog mapping; existing gameplay workflows remain in their current packages. |
+| `resources`                                                         | Versioned typed gameplay catalogs and JSON nickname filtering.                                                                                  |
+| `repositories`, `drizzle`, `storage`                                | Owned transactional state, schemas, Redis/ZooKeeper and S3 adapters.                                                                            |
 
 The nickname/description word list is versioned in
 `packages/resources/data/badwords.json` and included in the server artifact.
@@ -129,6 +130,13 @@ tooling writes hero and general type definitions into the hero domain. Shared
 profile, power and city workflows delegate their hero operations to this package.
 `HeroEventService` owns hero event views and rankings; realm composition injects
 it into `GameService`, whose constructor preserves a default for existing callers.
+
+Dragon base definitions follow the same authoring boundary in `dragon/src/domain`.
+The roster includes 14 client archetypes; the 13 with existing server configuration
+feed `resources` through `DragonDefinitionMapper`. Vildrin remains a client reference
+without server progression. Numeric identities stay in `constants`, semantic enums
+in `enums`, and client-only definitions cannot be published as playable catalogs.
+See the [dragon authoring guide](../packages/resources/README.md#named-dragon-definitions).
 
 Packages never import applications. Declare direct workspace dependencies and
 public exports; do not turn helpers into a cross-domain rules container.
