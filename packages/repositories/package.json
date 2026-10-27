@@ -109,7 +109,8 @@
     "./vip-box": "./src/vip-box.ts",
     "./seasonal-exchange": "./src/seasonal-exchange.ts",
     "./player-item-gifts": "./src/player-item-gifts.ts",
-    "./alliance-heart": "./src/alliance-heart.ts"
+    "./alliance-heart": "./src/alliance-heart.ts",
+    "./realm-opening-clock": "./src/realm-opening-clock.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",

@@ -634,3 +634,15 @@ committed acknowledgments during rollback and retain the additive identity/index
 Synthetic PostgreSQL tests cover exact-stack consumption, concurrent retries,
 rollback, bounded queues, missing recipient cities and interested-player pushes;
 a migration test verifies imported duplicates and later arrivals survive.
+
+## Fresh-realm event clock
+
+After acquiring and fencing realm ownership, a fresh empty kingdom records its
+opening instant once in `server_info.activityTime`. Concurrent starts serialize
+and restarts retain that instant, so age-based castle, recharge, investment and
+VIP periods do not move with the process clock. Existing rows, including zero or
+unknown timestamps, remain unchanged. Populated imported kingdoms without this
+metadata remain unknown; startup does not silently reopen their event periods.
+No migration or dependency is introduced. Back up and retain the opening metadata
+across restores. A disposable PostgreSQL scenario covers concurrent starts,
+owner replacement, stale-owner rejection and preservation of imported metadata.
