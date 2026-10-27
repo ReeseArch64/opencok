@@ -38,13 +38,20 @@ test("world rows use compact keys and seconds; unknown specialized points fail",
   });
   expect(() => compactPoint({ id: 1, pointType: 99 })).toThrow();
 });
-test("v12 points are arrays of JSON strings split below signed-short UTF limit", () => {
+test("v12 point sections contain JSON objects below the signed-short UTF limit", () => {
   const points = Array.from({ length: 200 }, (_, i) => JSON.stringify({ i, o: "城".repeat(100) }));
   const output = pointSections(points);
   expect(output.points?.type).toBe(Type.Array);
   const parts = output.points!.value as { value: string }[];
-  expect(parts.flatMap((p) => JSON.parse(p.value))).toEqual(points);
+  expect(parts.flatMap((p) => JSON.parse(p.value))).toEqual(
+    points.map((point) => JSON.parse(point)),
+  );
   expect(parts.every((p) => Buffer.byteLength(p.value) < 32767)).toBe(true);
+});
+
+test("map sections reject malformed or non-object points", () => {
+  for (const point of ["null", "[]", "1", '"point"', "{"])
+    expect(() => pointSections([point])).toThrow();
 });
 
 test("native fixed reservations and stored monster points remain visible without combat outcomes", () => {

@@ -3,6 +3,10 @@ export interface HeroResourceConfigResponse {
   readonly newHeroMd5Android: string;
 }
 
+export interface DynamicResourceConfigResponse extends HeroResourceConfigResponse {
+  readonly [key: string]: string;
+}
+
 export interface ServerClockResponse {
   readonly db_utc_timestamp: number;
   readonly db_timezone_offset: number;

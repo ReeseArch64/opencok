@@ -1,6 +1,7 @@
 import { validateFields, validateValue } from "./validation.ts";
 import {
   heroResourceConfigSchema,
+  dynamicResourceConfigSchema,
   serverClockSchema,
   featureConfigSchema,
   pushPreferencesSchema,
@@ -25,6 +26,7 @@ import {
 import { long, num, text, type Row } from "@opencok/contracts/rows";
 import type { LoginConfigurationState } from "@opencok/contracts/game";
 import { featureAnnouncementEnabled, type FeatureContext } from "@opencok/rules/features";
+import { ANDROID_DYNAMIC_RESOURCES } from "@opencok/constants/android-resources";
 
 export { dataConfig } from "./configuration.ts";
 
@@ -32,6 +34,18 @@ export function heroResourceConfig(): Fields {
   return validateFields(heroResourceConfigSchema, {
     newHeroVersion: sfs.string(HERO_RESOURCE_VERSION),
     newHeroMd5Android: sfs.string(HERO_RESOURCE_ANDROID_MD5),
+  });
+}
+
+export function dynamicResourceConfig(): Fields {
+  return validateFields(dynamicResourceConfigSchema, {
+    ...heroResourceConfig(),
+    ...Object.fromEntries(
+      ANDROID_DYNAMIC_RESOURCES.flatMap(({ id, version, md5 }) => [
+        [`${id}Version`, sfs.string(version)],
+        [`${id}Md5Android`, sfs.string(md5)],
+      ]),
+    ),
   });
 }
 

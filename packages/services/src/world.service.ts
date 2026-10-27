@@ -69,14 +69,22 @@ export function compactPoint(
 }
 export function pointSections(points: string[]): Fields {
   const sections: string[] = [];
-  let section: string[] = [];
+  let section: Record<string, unknown>[] = [];
   for (const point of points) {
     if (Buffer.byteLength(point) > 15000) throw new GameError(errors.unsupported);
-    if (Buffer.byteLength(JSON.stringify([...section, point])) > 31000) {
+    let value: unknown;
+    try {
+      value = JSON.parse(point);
+    } catch {
+      throw new GameError(errors.unsupported);
+    }
+    if (!value || typeof value !== "object" || Array.isArray(value))
+      throw new GameError(errors.unsupported);
+    if (Buffer.byteLength(JSON.stringify([...section, value])) > 31000) {
       sections.push(JSON.stringify(section));
       section = [];
     }
-    section.push(point);
+    section.push(value as Record<string, unknown>);
   }
 
   if (section.length || !sections.length) sections.push(JSON.stringify(section));

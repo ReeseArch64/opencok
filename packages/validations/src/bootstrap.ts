@@ -1,6 +1,7 @@
 import { z } from "zod";
 import type {
   HeroResourceConfigResponse,
+  DynamicResourceConfigResponse,
   ServerClockResponse,
   FeatureConfigResponse,
   PushPreferenceResponse,
@@ -17,6 +18,10 @@ export const heroResourceConfigSchema = z.strictObject({
   newHeroVersion: field.string,
   newHeroMd5Android: field.string,
 }) satisfies z.ZodType<HeroResourceConfigResponse>;
+
+export const dynamicResourceConfigSchema = heroResourceConfigSchema.catchall(
+  field.string,
+) satisfies z.ZodType<DynamicResourceConfigResponse>;
 
 export const serverClockSchema = z.strictObject({
   db_utc_timestamp: field.int,

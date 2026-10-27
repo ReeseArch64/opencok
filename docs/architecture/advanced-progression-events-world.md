@@ -2,15 +2,23 @@
 
 [Issue 385](https://github.com/ReeseArch64/opencok/issues/385) tracks topics 25, 26 and 27 as separate migration areas. This document tracks implemented
 slices and remaining acceptance; a command registration is not completion evidence.
-The compatibility target is the 12.06.0 server contract. Native APK execution and
-other client tracks remain unverified. Private reference inputs are read-only and
-are not runtime dependencies.
+The compatibility target is the 12.06.0 server contract. Native Android coverage is
+partial, and other client tracks remain unverified. Private reference inputs are
+read-only and are not runtime dependencies.
 
 The [issue acceptance matrix](advanced-progression-acceptance.md) maps all ten
 criteria to maintained implementations and recovery evidence. Independent native
 12.06.0 device acceptance is tracked in
 [issue 521](https://github.com/ReeseArch64/opencok/issues/521); server fixtures do
 not certify APK rendering or interaction behavior.
+
+The [Samsung ADB execution record](../evidence/native-521/README.md) documents
+native authentication, city/world rendering and gathering observations, the
+resource-metadata and world-section fixes, and the original acceptance scenarios
+that remain unverified. `common.res.syn` now synchronizes owned gathering state
+through the fenced world mutation boundary; ordinary gathering march projections
+include the saved collection quantity, speed and timestamps. Its corrected native
+panel still requires a device rerun.
 
 ## Civilization science
 
