@@ -7,7 +7,7 @@ import { errors } from "@opencok/constants/game";
 import { encode, sfs, Type, type Fields } from "@opencok/messages/sfs";
 import type { Rules } from "@opencok/rules/game";
 import { inventoryCount, inventoryInteger } from "@opencok/rules/inventory";
-import { shopInteger } from "@opencok/rules/shops";
+import { shopInteger, shopItemSupported } from "@opencok/rules/shops";
 import { inventoryItem } from "@opencok/mappings/bootstrap";
 import { inventoryResponse, inventoryReplay, inventoryChanges } from "@opencok/mappings/inventory";
 import { planInventoryGrants } from "./inventory.ts";
@@ -74,6 +74,7 @@ export class TradeService {
             );
           };
           const candidates = [...this.rules.trades.values()].filter((rule) => {
+            if (!shopItemSupported(this.rules, rule.recycle_item)) return false;
             if (shopInteger(rule.pool_num) !== trade.num + 1 || !within(rule.castle_level, level))
               return false;
             const count = inventory.items
@@ -99,8 +100,7 @@ export class TradeService {
             ids.map((_, index) => index),
             weights,
           );
-          if (!this.rules.goods.has(rule.recycle_item!) || !this.rules.goods.has(ids[index]!))
-            throw new GameError(errors.unsupported);
+          if (!shopItemSupported(this.rules, ids[index])) throw new GameError(errors.unsupported);
           trade.trade = `${rule.recycle_item};${inventoryInteger(rule.num)}|${ids[index]};${amounts[index]}`;
           trade.superValue = rule.premium === "1" ? 1 : 0;
           body = wire(trade);
@@ -110,6 +110,11 @@ export class TradeService {
           const source = parts[0]!.split(";"),
             destination = parts[1]!.split(";");
           if (source.length !== 2 || destination.length !== 2)
+            throw new GameError(errors.unsupported);
+          if (
+            !shopItemSupported(this.rules, source[0]) ||
+            !shopItemSupported(this.rules, destination[0])
+          )
             throw new GameError(errors.unsupported);
           plan = planInventoryGrants(
             inventory,

@@ -15,6 +15,17 @@ export function shopInteger(value: string | undefined, fallback = 0): number {
 function values(raw: string | undefined): number[] {
   return raw ? raw.split("|").map((value) => shopInteger(value)) : [0];
 }
+export function shopItemSupported(rules: Rules, id: string | undefined): boolean {
+  if (!id || !/^\d+$/.test(id)) return false;
+  const item = rules.goods.get(id);
+  const numeric = Number(id);
+  return Boolean(
+    item &&
+    !(numeric >= 1000000 && numeric <= 1999999) &&
+    !(numeric >= 10000004 && numeric <= 10050555) &&
+    !rules.power.equipment?.has(item.para1 ?? ""),
+  );
+}
 export function shopCounters(rule: Rule, state: ShopState) {
   const row = state.purchases.find((entry) => text(entry, "id") === rule.id);
   const time = row ? long(row, "buyTime") : 0n;
@@ -113,9 +124,13 @@ export function shopWindow(rule: Rule, now = Date.now()) {
 }
 export function shopAvailable(rule: Rule, state: ShopState, rules: Rules): boolean {
   if (rule.onsale !== "1") return false;
-  if (!rule.id || !rule.item_id || rule.id.length > 40 || !rules.goods.has(rule.item_id))
+  if (!rule.id || rule.id.length > 40 || !shopItemSupported(rules, rule.item_id)) return false;
+  if (
+    rule.value_item &&
+    rule.value_item !== "0" &&
+    (!shopItemSupported(rules, rule.value_item) || shopInteger(rule.value_item_num) < 1)
+  )
     return false;
-  if (rules.power.equipment?.has(rules.goods.get(rule.item_id)!.para1 ?? "")) return false;
   if (rule.type2 && rule.type2 !== "0") return false;
   if (["13", "14", "19"].includes(rule.sale_type ?? "")) return false;
   if (
@@ -124,9 +139,13 @@ export function shopAvailable(rule: Rule, state: ShopState, rules: Rules): boole
     )
   )
     return false;
-  if (rule.version && !versionAtLeast(MOBILE_CLIENT_VERSION, rule.version)) return false;
-  if (rule.server && !featureRealmEnabled(rule.server, rules.kingdomId)) return false;
   const profile = state.inventory.profile;
+  if (
+    rule.version &&
+    !versionAtLeast(text(profile, "appVersion") || MOBILE_CLIENT_VERSION, rule.version)
+  )
+    return false;
+  if (rule.server && !featureRealmEnabled(rule.server, rules.kingdomId)) return false;
   const range = (raw: string | undefined, value: number) => {
     if (!raw || raw === "0") return true;
     const limits = raw.split(/[;|]/).map((part) => shopInteger(part));
@@ -163,6 +182,7 @@ export function shopAvailable(rule: Rule, state: ShopState, rules: Rules): boole
   const { begin, end, closed } = shopWindow(rule, state.now);
   if (closed || ((begin || rule.onsale_type === "2") && (state.now < begin || state.now >= end)))
     return false;
-  shopPrice(rule, 0, 1);
+  const { gold } = shopPrice(rule, 0, 1);
+  if (!gold && (!rule.value_item || rule.value_item === "0")) return false;
   return true;
 }
