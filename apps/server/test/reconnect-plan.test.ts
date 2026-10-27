@@ -264,6 +264,10 @@ test("login with an existing march and non-building queue reaches the full recon
   ];
   state.marches.profiles = [{ uid: "1001", serverId: 1, crossFightSrcServerId: -1 }];
   const store = {
+    getPowerByPlayerId: async () => {
+      const { emptyPowerState } = await import("./fixtures/power-state");
+      return emptyPowerState(state.profile);
+    },
     getCityByPlayerId: async () => ({
       ...state,
       hasMarches: true,
@@ -274,7 +278,22 @@ test("login with an existing march and non-building queue reaches the full recon
   const game = new Game(store, rules, { kingdomId: 1 }, () => context.now, {
     ...services,
     cityProgression: async (_owner, command) => ({
-      body: {},
+      body:
+        command === "general.init"
+          ? {
+              data: sfs.object({
+                generallist: sfs.array([
+                  sfs.object({
+                    id: sfs.int(53500),
+                    level: sfs.int(8),
+                    exp: sfs.int(123),
+                    talent: sfs.array([sfs.object({ id: sfs.int(54001), level: sfs.int(2) })]),
+                  }),
+                ]),
+                generalBuyList: sfs.array([sfs.object({ generalId: sfs.int(53500) })]),
+              }),
+            }
+          : ({} as import("@opencok/messages/sfs").Fields),
       pushes:
         command === "campaign.init"
           ? [
@@ -292,6 +311,13 @@ test("login with an existing march and non-building queue reaches the full recon
     reconnect: async (_uid, _now, plan) => (await plan(state)).result,
   });
   const initialized = await game.initialize("1001", { _cok_: sfs.int(7) });
+  const heroes = initialized.body.generallist!.value as import("@opencok/messages/sfs").Value[];
+  expect(fields(heroes[0]).exp).toEqual(sfs.int(123));
+  expect(fields(heroes[0]).level).toEqual(sfs.int(8));
+  expect(fields(heroes[0]).talent?.value).toEqual([
+    sfs.object({ id: sfs.int(54001), level: sfs.int(2) }),
+  ]);
+  expect(initialized.body.generalBuyList!.value).toHaveLength(1);
   expect(initialized.body.activity!.value).toHaveLength(1);
   expect(
     fields((initialized.body.activity!.value as import("@opencok/messages/sfs").Value[])[0]).id,
