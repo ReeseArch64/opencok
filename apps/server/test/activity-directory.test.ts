@@ -1,5 +1,6 @@
 import { expect, test } from "bun:test";
 import { activityDirectoryEntries } from "@opencok/rules/activity-directory";
+import { legacyIntegerOrder } from "@opencok/messages/legacy-object-order";
 import { activityDirectory } from "@opencok/mappings/activity-directory";
 import { sfs, type Fields, type Value } from "@opencok/messages/sfs";
 
@@ -17,6 +18,7 @@ test("native schedule seconds wrap as Java ints and retain optional fields and i
       { id: 4294967295, type: 7, openTime: 1n },
     ],
     0,
+    legacyIntegerOrder,
   );
   expect(rows).toEqual([
     { t: 7, opt: 0 },
@@ -33,8 +35,10 @@ test("native schedule seconds wrap as Java ints and retain optional fields and i
     et: sfs.int(-1511828489),
   });
   expect(Object.keys(mapped[1]!)).toEqual(["t", "opt", "st", "et"]);
-  expect(activityDirectoryEntries([], 0)).toEqual([]);
-  expect(() => activityDirectoryEntries([], -1)).toThrow();
-  expect(() => activityDirectoryEntries([{ id: -1, type: 1, openTime: 1n }], 0)).toThrow();
-  expect(() => activityDirectoryEntries(Array(4097).fill({}), 0)).toThrow();
+  expect(activityDirectoryEntries([], 0, legacyIntegerOrder)).toEqual([]);
+  expect(() => activityDirectoryEntries([], -1, legacyIntegerOrder)).toThrow();
+  expect(() =>
+    activityDirectoryEntries([{ id: -1, type: 1, openTime: 1n }], 0, legacyIntegerOrder),
+  ).toThrow();
+  expect(() => activityDirectoryEntries(Array(4097).fill({}), 0, legacyIntegerOrder)).toThrow();
 });

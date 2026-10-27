@@ -59,19 +59,23 @@ export const civilizationScienceDomain: CityDomain = {
         event: null,
         response: encode({
           civilization_science: sfs.array(
-            bases.map((base) => {
+            bases.flatMap((base) => {
+              const level = num(current(context, base), "level");
+              if (!context.rules.power.civilizationSciences?.has(String(base + level))) return [];
               const pending = context.state.queues.filter(
                 (row) => num(row, "type") === 19 && row.itemId === String(base),
               );
               if (pending.length > 1) throw new GameError(errors.queue, "city_progression");
-              return sfs.object(
-                civilizationScienceView(
-                  context.rules,
-                  base,
-                  num(current(context, base), "level"),
-                  pending.length ? long(pending[0]!, "updateTime") : 0n,
+              return [
+                sfs.object(
+                  civilizationScienceView(
+                    context.rules,
+                    base,
+                    level,
+                    pending.length ? long(pending[0]!, "updateTime") : 0n,
+                  ),
                 ),
-              );
+              ];
             }),
           ),
         }),

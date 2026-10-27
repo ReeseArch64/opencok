@@ -148,6 +148,10 @@ test("initialization replays the current board and an expired board clears only 
   };
   const store = {
     getCityByPlayerId: async () => state,
+    getPowerByPlayerId: async () => {
+      const { emptyPowerState } = await import("./fixtures/power-state");
+      return emptyPowerState(state.profile);
+    },
   } as unknown as import("@opencok/contracts/game").GameStore;
   const rules = new Rules(
     new Map(),
