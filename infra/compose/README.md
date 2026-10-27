@@ -214,15 +214,15 @@ server/API start. This adds nullable outbox trace context without resetting exis
 state. Rebuild server/API when updating this integration. Maple is not a gameplay
 readiness dependency: a telemetry outage does not prevent application startup.
 
-Open `http://127.0.0.1:4318`. The dashboard token defaults to
-`opencok-development-dashboard-only`; this is a public development value. The separate
-ingest key defaults to `opencok-development-ingest-only`. Set independently generated
+Open `http://127.0.0.1:4318`. Set independently generated
 `MAPLE_LOCAL_ACCESS_TOKEN` and `MAPLE_LOCAL_INGEST_KEY` values in the ignored root `.env`
-before sharing access, then recreate Maple, server and API together. Generate each
+before starting the services; Compose supplies no default credentials. Maple, server
+and API must use the same ingest key. After changing credentials, recreate Maple,
+server and API together. Generate each
 value with `openssl rand -hex 32`; keep them out of source and command output captured
 for reports. The dashboard token can read/query telemetry; the ingest key only writes.
-Maple's port is published on loopback only, unlike the existing development tools.
-`MAPLE_PORT` changes the host port without changing the internal ingest address.
+Maple's port 4318 is published on all host interfaces. Restrict access with host
+network controls when the development machine is reachable by other devices.
 
 Both services send OTLP to `http://maple:4318`. For applications run outside Compose,
 set `OTEL_EXPORTER_OTLP_ENDPOINT=http://127.0.0.1:4318` and the same ingest key.

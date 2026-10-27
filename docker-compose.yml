@@ -292,7 +292,7 @@ services:
     environment:
       NODE_ENV: development
       OTEL_EXPORTER_OTLP_ENDPOINT: http://maple:4318
-      MAPLE_LOCAL_INGEST_KEY: ${MAPLE_LOCAL_INGEST_KEY:-opencok-development-ingest-only}
+      MAPLE_LOCAL_INGEST_KEY: ${MAPLE_LOCAL_INGEST_KEY}
       OTEL_EXPORT_INTERVAL_MS: 1000
       DATABASE_URL: postgres://postgres:postgres@postgres:5432/opencok_global
       KINGDOM_ID: 1
@@ -352,7 +352,7 @@ services:
     environment:
       NODE_ENV: development
       OTEL_EXPORTER_OTLP_ENDPOINT: http://maple:4318
-      MAPLE_LOCAL_INGEST_KEY: ${MAPLE_LOCAL_INGEST_KEY:-opencok-development-ingest-only}
+      MAPLE_LOCAL_INGEST_KEY: ${MAPLE_LOCAL_INGEST_KEY}
       OTEL_EXPORT_INTERVAL_MS: 1000
       DATABASE_URL: postgres://postgres:postgres@postgres:5432/opencok_global
       GLOBAL_DATABASE_NAME: opencok_global
