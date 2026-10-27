@@ -1,4 +1,5 @@
 import { and, asc, eq, inArray, lte, sql, or, isNull } from "drizzle-orm";
+import { civilization_castle } from "@opencok/drizzle/schema/opencok_kingdom/civilization_castle";
 import { worldpoint } from "@opencok/drizzle/schema/opencok_kingdom/worldpoint";
 import { user_world } from "@opencok/drizzle/schema/opencok_kingdom/user_world";
 import { world_march } from "@opencok/drizzle/schema/opencok_kingdom/world_march";
@@ -46,9 +47,14 @@ export async function readWorldMutationState(
     );
     randomDestination = result.rows[0]?.id;
   }
+  const [castle] =
+    command === "civilizationCastle"
+      ? await tx.select().from(civilization_castle).where(eq(civilization_castle.uid, owner))
+      : [];
   const ids = new Set<number>();
   for (const point of [
     world.pointId,
+    castle?.pointId ?? 0,
     randomDestination ?? 0,
     ...marches.flatMap((row) => [row.ownerId, row.targetId]),
     int(params, "point", 0),

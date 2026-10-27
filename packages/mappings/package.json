@@ -56,6 +56,7 @@
     "./generals": "./src/generals.ts",
     "./alliance": "./src/alliance.ts",
     "./civilization-science": "./src/civilization-science.ts",
+    "./civilization-castle": "./src/civilization-castle.ts",
     "./minstrel": "./src/minstrel.ts",
     "./dragon-progression": "./src/dragon-progression.ts",
     "./world-march-runtime": "./src/world-march-runtime.ts",

@@ -22,6 +22,8 @@ export interface WorldCatalogs {
   barbarians?: Map<string, Rule>;
 }
 export interface AdvancedCatalogs {
+  civilizationFortress?: Map<string, Rule>;
+  totems?: Map<string, Rule>;
   dragonTravel?: Map<string, Rule>;
   dragonSkillExp?: Map<string, Rule>;
   dragonTalent?: Map<string, Rule>;

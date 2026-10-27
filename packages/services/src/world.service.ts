@@ -21,7 +21,10 @@ export function viewport(x: number, y: number, size: number): number[] {
   return [...ids];
 }
 export function compactPoint(row: Row): string {
-  if (![0, 1, 2, 3, 8].includes(num(row, "pointType")) || text(row, "territoryAlliance"))
+  if (
+    ![0, 1, 2, 3, 8, 64, 65, 68, 69].includes(num(row, "pointType")) ||
+    text(row, "territoryAlliance")
+  )
     throw new GameError(errors.unsupported);
   const out: Record<string, string | number> = {
     i: num(row, "id"),
