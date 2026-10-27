@@ -26,6 +26,7 @@
     "@opencok/services": "workspace:*",
     "@opencok/validations": "workspace:*",
     "drizzle-orm": "0.45.4",
-    "zod": "catalog:"
+    "zod": "catalog:",
+    "@opencok/enums": "workspace:*"
   }
 }

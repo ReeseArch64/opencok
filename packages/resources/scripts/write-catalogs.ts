@@ -5,6 +5,7 @@ import { GameplayCatalog } from "@opencok/enums/gameplay-catalog";
 import { CatalogKind } from "@opencok/enums/catalog-kind";
 import type { CatalogValue, CatalogCodec } from "../src/catalog-model.ts";
 import { convertCatalog, type SourceElement } from "./catalog-conversion.ts";
+import { namedHeroRecord, namedHeroDefinition } from "./named-hero-records.ts";
 
 export interface CatalogSource {
   readonly id: string;
@@ -107,7 +108,11 @@ export async function writeCatalogModules(sources: AsyncIterable<CatalogSource>)
   }[] = [];
   for await (const source of sources) {
     if (source.id === GameplayCatalog.Building) continue;
-    const { definition, codec } = convertCatalog(source.ordered, source.id);
+    const { definition, codec: sourceCodec } = convertCatalog(source.ordered, source.id);
+    const codec =
+      source.id === GameplayCatalog.GeneralBase
+        ? { ...sourceCodec, talent_point_divisor: { field: "talentPointDivisor" } }
+        : sourceCodec;
     const hash = catalogHash({ definition, codec });
     let module = modules.get(hash);
     const member = names.get(source.id as GameplayCatalog);
@@ -134,7 +139,12 @@ export async function writeCatalogModules(sources: AsyncIterable<CatalogSource>)
         const catalogModule = hero ? recordModule : "./catalogs/types/" + module + ".ts";
         typeImports.push("import type { " + typeName + ' } from "' + catalogModule + '";');
         const model =
-          recordType(definition.records, recordName) +
+          recordType(
+            module === GameplayCatalog.GeneralBase
+              ? definition.records.map(namedHeroDefinition)
+              : definition.records,
+            recordName,
+          ) +
           '\nimport type { CatalogTable } from "' +
           (hero ? "@opencok/resources/catalog-model" : "../../catalog-model.ts") +
           '";\nexport type ' +
@@ -150,16 +160,25 @@ export async function writeCatalogModules(sources: AsyncIterable<CatalogSource>)
         const parts: string[] = [];
         for (let offset = 0; offset < definition.records.length; offset += 750) {
           const part = module + ".records" + parts.length + ".ts";
+          const records = definition.records.slice(offset, offset + 750);
+          const named = records.map((record) => namedHeroRecord(module!, record));
+          const declarations = [
+            ...new Set(named.flatMap((entry) => (entry ? [entry.declaration] : []))),
+          ];
           await writeFile(
             join(directory, part),
             "import type { " +
               recordName +
               ' } from "' +
               recordModule +
-              '";\nexport const records: readonly ' +
+              '";\n' +
+              declarations.join("\n") +
+              "\nexport const records: readonly " +
               recordName +
               "[] = " +
-              render(definition.records.slice(offset, offset + 750)) +
+              "[" +
+              records.map((record, index) => named[index]?.expression ?? render(record)).join(",") +
+              "]" +
               ";\n",
           );
           generated.add(part);

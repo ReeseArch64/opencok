@@ -1,0 +1,8866 @@
+[
+  {
+    "identity": "bernard",
+    "name": "Bernard",
+    "nativeId": 53500,
+    "definition": {
+      "id": 53500,
+      "newAccMaxLv": 100,
+      "isUnlock": 1,
+      "name": 169647,
+      "saleId": 53603,
+      "type": 1,
+      "gender": 1,
+      "baseLevel": 1,
+      "baseQuality": 1,
+      "baseSkill": [53900, 53901],
+      "baseStar": 2,
+      "baseSkill3": 54140,
+      "baseSkill4": 54141,
+      "baseSkill5": 54142,
+      "breachGoods": [
+        [211128, 0],
+        [211128, 0],
+        [211128, 0],
+        [211128, 0],
+        [211128, 0]
+      ],
+      "starMaxLevel": 4,
+      "starGoods": [
+        [211128, 6000],
+        [211128, 15000],
+        [211128, 30000],
+        [211128, 60000]
+      ],
+      "needPieces": [211128, 6000],
+      "piecesId": 211128,
+      "levelMax": 100,
+      "talent": 1,
+      "generalAb": [88203, 88204, 88205],
+      "loot": 1,
+      "lootLevel": 5,
+      "garrison": 1,
+      "battle": 1,
+      "lordExp": 1,
+      "refineCard": 20,
+      "refineEffect": [
+        [1, 1000],
+        [2, 1000],
+        [3, 1000],
+        [4, 1000],
+        [5, 1000]
+      ],
+      "refineEffectLock": [
+        [1, 1000],
+        [2, 3000],
+        [3, 7000],
+        [4, 15000]
+      ],
+      "refineNum": [
+        [1, 1],
+        [2, 1],
+        [3, 1],
+        [4, 1],
+        [5, 0]
+      ],
+      "unlockLevel": [
+        [1, 1],
+        [2, 1],
+        [3, 30],
+        [4, 1]
+      ],
+      "unlockStar": [
+        [1, 1],
+        [2, 1],
+        [3, 1],
+        [4, 3]
+      ],
+      "unlockGoodsNum": [
+        [1, 0],
+        [2, 0],
+        [3, 1],
+        [4, 10]
+      ],
+      "goodsId": 211453
+    }
+  },
+  {
+    "identity": "jered",
+    "name": "Jered",
+    "nativeId": 53501,
+    "definition": {
+      "id": 53501,
+      "newAccMaxLv": 100,
+      "isUnlock": 1,
+      "name": 169654,
+      "saleId": 53600,
+      "type": 1,
+      "gender": 1,
+      "baseLevel": 1,
+      "baseQuality": 1,
+      "baseSkill": [53902, 53903],
+      "baseStar": 2,
+      "baseSkill3": 53917,
+      "baseSkill4": "",
+      "baseSkill5": "",
+      "breachGoods": [
+        [211127, 0],
+        [211127, 0],
+        [211127, 0],
+        [211127, 0],
+        [211127, 0]
+      ],
+      "starMaxLevel": 3,
+      "starGoods": [
+        [211127, 2000],
+        [211127, 5000],
+        [211127, 10000],
+        [211127, 20000]
+      ],
+      "needPieces": [211127, 6000],
+      "piecesId": 211127,
+      "levelMax": 100,
+      "talent": 2,
+      "generalAb": [88206, 88207, 88208],
+      "loot": 1,
+      "lootLevel": 5,
+      "garrison": 1,
+      "battle": 1,
+      "lordExp": 1,
+      "refineCard": 20,
+      "refineEffect": [
+        [1, 1000],
+        [2, 1000],
+        [3, 1000],
+        [4, 1000],
+        [5, 1000]
+      ],
+      "refineEffectLock": [
+        [1, 1000],
+        [2, 3000],
+        [3, 7000],
+        [4, 15000]
+      ],
+      "refineNum": [
+        [1, 1],
+        [2, 1],
+        [3, 1],
+        [4, 0],
+        [5, 0]
+      ],
+      "unlockLevel": [
+        [1, 1],
+        [2, 1],
+        [3, 30]
+      ],
+      "unlockStar": [
+        [1, 1],
+        [2, 1],
+        [3, 1]
+      ],
+      "unlockGoodsNum": [
+        [1, 0],
+        [2, 0],
+        [3, 1],
+        [4, 1]
+      ],
+      "goodsId": 211453
+    }
+  },
+  {
+    "identity": "thorn-flower",
+    "name": "Thorn Flower",
+    "nativeId": 53502,
+    "definition": {
+      "id": 53502,
+      "newAccMaxLv": 100,
+      "isUnlock": 1,
+      "name": 169710,
+      "saleId": 53601,
+      "type": 1,
+      "gender": 2,
+      "baseLevel": 1,
+      "baseQuality": 1,
+      "baseSkill": [53904, 53905],
+      "baseStar": 2,
+      "baseSkill3": 53918,
+      "baseSkill4": 53948,
+      "baseSkill5": "",
+      "breachGoods": [
+        [211219, 0],
+        [211219, 0],
+        [211219, 0],
+        [211219, 0],
+        [211219, 0]
+      ],
+      "starMaxLevel": 4,
+      "starGoods": [
+        [211219, 2000],
+        [211219, 5000],
+        [211219, 10000],
+        [211219, 20000]
+      ],
+      "needPieces": [211219, 6000],
+      "piecesId": 211219,
+      "levelMax": 100,
+      "talent": 3,
+      "generalAb": [88209, 88210, 88211],
+      "loot": 1,
+      "lootLevel": 5,
+      "garrison": 1,
+      "battle": 1,
+      "lordExp": 1,
+      "refineCard": 20,
+      "refineEffect": [
+        [1, 1000],
+        [2, 1000],
+        [3, 1000],
+        [4, 1000],
+        [5, 1000]
+      ],
+      "refineEffectLock": [
+        [1, 1000],
+        [2, 3000],
+        [3, 7000],
+        [4, 15000]
+      ],
+      "refineNum": [
+        [1, 1],
+        [2, 1],
+        [3, 1],
+        [4, 1],
+        [5, 0]
+      ],
+      "unlockLevel": [
+        [1, 1],
+        [2, 1],
+        [3, 30],
+        [4, 1]
+      ],
+      "unlockStar": [
+        [1, 1],
+        [2, 1],
+        [3, 1],
+        [4, 3]
+      ],
+      "unlockGoodsNum": [
+        [1, 0],
+        [2, 0],
+        [3, 1],
+        [4, 100]
+      ],
+      "goodsId": 211453
+    }
+  },
+  {
+    "identity": "rufus",
+    "name": "Rufus",
+    "nativeId": 53503,
+    "definition": {
+      "id": 53503,
+      "newAccMaxLv": 100,
+      "isUnlock": 1,
+      "name": 169785,
+      "saleId": 53602,
+      "type": 1,
+      "gender": 1,
+      "baseLevel": 1,
+      "baseQuality": 1,
+      "baseSkill": [53906, 53907],
+      "baseStar": 2,
+      "baseSkill3": 53919,
+      "baseSkill4": "",
+      "baseSkill5": "",
+      "breachGoods": [
+        [211452, 0],
+        [211452, 0],
+        [211452, 0],
+        [211452, 0],
+        [211452, 0]
+      ],
+      "starMaxLevel": 2,
+      "starGoods": [
+        [211452, 6000],
+        [211452, 15000],
+        [211452, 30000],
+        [211452, 60000]
+      ],
+      "needPieces": [211452, 6000],
+      "piecesId": 211452,
+      "levelMax": 100,
+      "talent": 4,
+      "generalAb": [88212, 88213, 88214],
+      "loot": 1,
+      "lootLevel": 5,
+      "garrison": 1,
+      "battle": 1,
+      "lordExp": 1,
+      "refineCard": 20,
+      "refineEffect": [
+        [1, 1000],
+        [2, 1000],
+        [3, 1000],
+        [4, 1000],
+        [5, 1000]
+      ],
+      "refineEffectLock": [
+        [1, 1000],
+        [2, 3000],
+        [3, 7000],
+        [4, 15000]
+      ],
+      "refineNum": [
+        [1, 1],
+        [2, 1],
+        [3, 1],
+        [4, 0],
+        [5, 0]
+      ],
+      "unlockLevel": [
+        [1, 1],
+        [2, 1],
+        [3, 30]
+      ],
+      "unlockStar": [
+        [1, 1],
+        [2, 1],
+        [3, 1]
+      ],
+      "unlockGoodsNum": [
+        [1, 0],
+        [2, 0],
+        [3, 1],
+        [4, 1]
+      ],
+      "goodsId": 211453
+    }
+  },
+  {
+    "identity": "joseph",
+    "name": "Joseph",
+    "nativeId": 53507,
+    "definition": {
+      "id": 53507,
+      "newAccMaxLv": 100,
+      "isUnlock": 1,
+      "name": 169454,
+      "saleId": 53607,
+      "type": 0,
+      "gender": 1,
+      "baseLevel": 1,
+      "baseQuality": 1,
+      "baseSkill": [53914, 53915],
+      "baseStar": 2,
+      "baseSkill3": 53920,
+      "baseSkill4": "",
+      "baseSkill5": "",
+      "breachGoods": [
+        [211618, 0],
+        [211618, 0],
+        [211618, 0],
+        [211618, 0],
+        [211618, 0]
+      ],
+      "starMaxLevel": 2,
+      "starGoods": [
+        [211618, 6000],
+        [211618, 15000],
+        [211618, 30000],
+        [211618, 60000]
+      ],
+      "needPieces": [211618, 3000],
+      "piecesId": 211618,
+      "levelMax": 100,
+      "talent": 8,
+      "generalAb": [88224, 88225, 88226],
+      "loot": 1,
+      "lootLevel": 5,
+      "garrison": 1,
+      "battle": 1,
+      "lordExp": 1,
+      "refineCard": 20,
+      "refineEffect": [
+        [1, 1000],
+        [2, 1000],
+        [3, 1000],
+        [4, 1000],
+        [5, 1000]
+      ],
+      "refineEffectLock": [
+        [1, 1000],
+        [2, 3000],
+        [3, 7000],
+        [4, 15000]
+      ],
+      "refineNum": [
+        [1, 1],
+        [2, 1],
+        [3, 0],
+        [4, 0],
+        [5, 0]
+      ],
+      "unlockLevel": [
+        [1, 1],
+        [2, 1]
+      ],
+      "unlockStar": [
+        [1, 1],
+        [2, 1],
+        [3, 1]
+      ],
+      "unlockGoodsNum": [
+        [1, 0],
+        [2, 0]
+      ],
+      "goodsId": 211453
+    }
+  },
+  {
+    "identity": "mo-ye",
+    "name": "Mo Ye",
+    "nativeId": 53508,
+    "definition": {
+      "id": 53508,
+      "newAccMaxLv": 100,
+      "isUnlock": 1,
+      "name": 169455,
+      "saleId": 53608,
+      "type": 0,
+      "gender": 2,
+      "baseLevel": 1,
+      "baseQuality": 1,
+      "baseSkill": 53921,
+      "baseStar": 1,
+      "baseSkill3": "",
+      "baseSkill4": "",
+      "baseSkill5": "",
+      "breachGoods": [
+        [211619, 0],
+        [211619, 0],
+        [211619, 0],
+        [211619, 0],
+        [211619, 0]
+      ],
+      "starMaxLevel": 2,
+      "starGoods": [
+        [211619, 6000],
+        [211619, 15000],
+        [211619, 30000],
+        [211619, 60000]
+      ],
+      "needPieces": [211619, 3000],
+      "piecesId": 211619,
+      "levelMax": 100,
+      "talent": 9,
+      "generalAb": [88227, 88228, 88229],
+      "loot": 1,
+      "lootLevel": 5,
+      "garrison": 1,
+      "battle": 1,
+      "lordExp": 1,
+      "refineCard": 20,
+      "refineEffect": [
+        [1, 1000],
+        [2, 1000],
+        [3, 1000],
+        [4, 1000],
+        [5, 1000]
+      ],
+      "refineEffectLock": [
+        [1, 1000],
+        [2, 3000],
+        [3, 7000],
+        [4, 15000]
+      ],
+      "refineNum": [
+        [1, 1],
+        [2, 1],
+        [3, 0],
+        [4, 0],
+        [5, 0]
+      ],
+      "unlockLevel": [
+        [1, 1],
+        [2, 1]
+      ],
+      "unlockStar": [
+        [1, 1],
+        [2, 1],
+        [3, 1]
+      ],
+      "unlockGoodsNum": [
+        [1, 0],
+        [2, 0]
+      ],
+      "goodsId": 211453
+    }
+  },
+  {
+    "identity": "komatsuhime",
+    "name": "Komatsuhime",
+    "nativeId": 53509,
+    "definition": {
+      "id": 53509,
+      "newAccMaxLv": 100,
+      "isUnlock": 1,
+      "name": 169456,
+      "saleId": 53609,
+      "type": 0,
+      "gender": 2,
+      "baseLevel": 1,
+      "baseQuality": 1,
+      "baseSkill": 53923,
+      "baseStar": 1,
+      "baseSkill3": 53925,
+      "baseSkill4": "",
+      "baseSkill5": "",
+      "breachGoods": [
+        [211620, 0],
+        [211620, 0],
+        [211620, 0],
+        [211620, 0],
+        [211620, 0]
+      ],
+      "starMaxLevel": 1,
+      "starGoods": [
+        [211620, 6000],
+        [211620, 15000],
+        [211620, 30000],
+        [211620, 60000]
+      ],
+      "needPieces": [211620, 3000],
+      "piecesId": 211620,
+      "levelMax": 100,
+      "talent": 10,
+      "generalAb": [88230, 88231, 88232],
+      "loot": 1,
+      "lootLevel": 5,
+      "garrison": 1,
+      "battle": 1,
+      "lordExp": 1,
+      "refineCard": 20,
+      "refineEffect": [
+        [1, 1000],
+        [2, 1000],
+        [3, 1000],
+        [4, 1000],
+        [5, 1000]
+      ],
+      "refineEffectLock": [
+        [1, 1000],
+        [2, 3000],
+        [3, 7000],
+        [4, 15000]
+      ],
+      "refineNum": [
+        [1, 1],
+        [2, 1],
+        [3, 0],
+        [4, 0],
+        [5, 0]
+      ],
+      "unlockLevel": [
+        [1, 1],
+        [2, 1]
+      ],
+      "unlockStar": [
+        [1, 1],
+        [2, 1],
+        [3, 1]
+      ],
+      "unlockGoodsNum": [
+        [1, 0],
+        [2, 0]
+      ],
+      "goodsId": 211453
+    }
+  },
+  {
+    "identity": "valkyr",
+    "name": "Valkyr",
+    "nativeId": 53510,
+    "definition": {
+      "id": 53510,
+      "newAccMaxLv": 100,
+      "isUnlock": 1,
+      "name": 169457,
+      "saleId": 53610,
+      "type": 0,
+      "gender": 2,
+      "baseLevel": 1,
+      "baseQuality": 1,
+      "baseSkill": 53926,
+      "baseStar": 1,
+      "baseSkill3": 53928,
+      "baseSkill4": "",
+      "baseSkill5": "",
+      "breachGoods": [
+        [211621, 0],
+        [211621, 0],
+        [211621, 0],
+        [211621, 0],
+        [211621, 0]
+      ],
+      "starMaxLevel": 1,
+      "starGoods": [
+        [211621, 6000],
+        [211621, 15000],
+        [211621, 30000],
+        [211621, 60000]
+      ],
+      "needPieces": [211621, 3000],
+      "piecesId": 211621,
+      "levelMax": 100,
+      "talent": 11,
+      "generalAb": [88233, 88234, 88235],
+      "loot": 1,
+      "lootLevel": 5,
+      "garrison": 1,
+      "battle": 1,
+      "lordExp": 1,
+      "refineCard": 20,
+      "refineEffect": [
+        [1, 1000],
+        [2, 1000],
+        [3, 1000],
+        [4, 1000],
+        [5, 1000]
+      ],
+      "refineEffectLock": [
+        [1, 1000],
+        [2, 3000],
+        [3, 7000],
+        [4, 15000]
+      ],
+      "refineNum": [
+        [1, 1],
+        [2, 1],
+        [3, 0],
+        [4, 0],
+        [5, 0]
+      ],
+      "unlockLevel": [
+        [1, 1],
+        [2, 1]
+      ],
+      "unlockStar": [
+        [1, 1],
+        [2, 1],
+        [3, 1]
+      ],
+      "unlockGoodsNum": [
+        [1, 0],
+        [2, 0]
+      ],
+      "goodsId": 211453
+    }
+  },
+  {
+    "identity": "caroline",
+    "name": "Caroline",
+    "nativeId": 53511,
+    "definition": {
+      "id": 53511,
+      "newAccMaxLv": 100,
+      "isUnlock": 1,
+      "name": 169458,
+      "saleId": 53611,
+      "type": 0,
+      "gender": 2,
+      "baseLevel": 1,
+      "baseQuality": 1,
+      "baseSkill": 53929,
+      "baseStar": 1,
+      "baseSkill3": 53931,
+      "baseSkill4": "",
+      "baseSkill5": "",
+      "breachGoods": [
+        [211622, 0],
+        [211622, 0],
+        [211622, 0],
+        [211622, 0],
+        [211622, 0]
+      ],
+      "starMaxLevel": 1,
+      "starGoods": [
+        [211622, 6000],
+        [211622, 15000],
+        [211622, 30000],
+        [211622, 60000]
+      ],
+      "needPieces": [211622, 3000],
+      "piecesId": 211622,
+      "levelMax": 100,
+      "talent": 12,
+      "generalAb": [88236, 88237, 88238],
+      "loot": 1,
+      "lootLevel": 5,
+      "garrison": 1,
+      "battle": 1,
+      "lordExp": 1,
+      "refineCard": 20,
+      "refineEffect": [
+        [1, 1000],
+        [2, 1000],
+        [3, 1000],
+        [4, 1000],
+        [5, 1000]
+      ],
+      "refineEffectLock": [
+        [1, 1000],
+        [2, 3000],
+        [3, 7000],
+        [4, 15000]
+      ],
+      "refineNum": [
+        [1, 1],
+        [2, 1],
+        [3, 0],
+        [4, 0],
+        [5, 0]
+      ],
+      "unlockLevel": [
+        [1, 1],
+        [2, 1]
+      ],
+      "unlockStar": [
+        [1, 1],
+        [2, 1],
+        [3, 1]
+      ],
+      "unlockGoodsNum": [
+        [1, 0],
+        [2, 0]
+      ],
+      "goodsId": 211453
+    }
+  },
+  {
+    "identity": "sanada-yukimura",
+    "name": "Sanada Yukimura",
+    "nativeId": 53512,
+    "definition": {
+      "id": 53512,
+      "newAccMaxLv": 100,
+      "isUnlock": 1,
+      "name": 169479,
+      "saleId": 53612,
+      "type": 1,
+      "gender": 1,
+      "baseLevel": 1,
+      "baseQuality": 1,
+      "baseSkill": 53932,
+      "baseStar": 1,
+      "baseSkill3": 53934,
+      "baseSkill4": 53935,
+      "baseSkill5": "",
+      "breachGoods": [
+        [211601, 0],
+        [211601, 0],
+        [211601, 0],
+        [211601, 0],
+        [211601, 0]
+      ],
+      "starMaxLevel": 1,
+      "starGoods": [
+        [211601, 6000],
+        [211601, 12000],
+        [211601, 24000],
+        [211601, 48000]
+      ],
+      "needPieces": [211601, 6000],
+      "piecesId": 211601,
+      "levelMax": 100,
+      "talent": 13,
+      "generalAb": [88239, 88240, 88241],
+      "loot": 1,
+      "lootLevel": 5,
+      "garrison": 1,
+      "battle": 1,
+      "lordExp": 1,
+      "refineCard": 20,
+      "refineEffect": [
+        [1, 1000],
+        [2, 1000],
+        [3, 1000],
+        [4, 1000],
+        [5, 1000]
+      ],
+      "refineEffectLock": [
+        [1, 1000],
+        [2, 3000],
+        [3, 7000],
+        [4, 15000]
+      ],
+      "refineNum": [
+        [1, 1],
+        [2, 1],
+        [3, 1],
+        [4, 0],
+        [5, 0]
+      ],
+      "unlockLevel": [
+        [1, 1],
+        [2, 1],
+        [3, 30]
+      ],
+      "unlockStar": [
+        [1, 1],
+        [2, 1],
+        [3, 1]
+      ],
+      "unlockGoodsNum": [
+        [1, 0],
+        [2, 0],
+        [3, 1],
+        [4, 1]
+      ],
+      "goodsId": 211453
+    }
+  },
+  {
+    "identity": "olaf",
+    "name": "Olaf",
+    "nativeId": 53513,
+    "definition": {
+      "id": 53513,
+      "newAccMaxLv": 100,
+      "isUnlock": 1,
+      "name": 169480,
+      "saleId": 53613,
+      "type": 1,
+      "gender": 1,
+      "baseLevel": 1,
+      "baseQuality": 1,
+      "baseSkill": 53936,
+      "baseStar": 1,
+      "baseSkill3": 53938,
+      "baseSkill4": 53939,
+      "baseSkill5": "",
+      "breachGoods": [
+        [211602, 0],
+        [211602, 0],
+        [211602, 0],
+        [211602, 0],
+        [211602, 0]
+      ],
+      "starMaxLevel": 1,
+      "starGoods": [
+        [211602, 6000],
+        [211602, 12000],
+        [211602, 24000],
+        [211602, 48000]
+      ],
+      "needPieces": [211602, 6000],
+      "piecesId": 211602,
+      "levelMax": 100,
+      "talent": 14,
+      "generalAb": [88242, 88243, 88244],
+      "loot": 1,
+      "lootLevel": 5,
+      "garrison": 1,
+      "battle": 1,
+      "lordExp": 1,
+      "refineCard": 20,
+      "refineEffect": [
+        [1, 1000],
+        [2, 1000],
+        [3, 1000],
+        [4, 1000],
+        [5, 1000]
+      ],
+      "refineEffectLock": [
+        [1, 1000],
+        [2, 3000],
+        [3, 7000],
+        [4, 15000]
+      ],
+      "refineNum": [
+        [1, 1],
+        [2, 1],
+        [3, 1],
+        [4, 0],
+        [5, 0]
+      ],
+      "unlockLevel": [
+        [1, 1],
+        [2, 1],
+        [3, 30]
+      ],
+      "unlockStar": [
+        [1, 1],
+        [2, 1],
+        [3, 1]
+      ],
+      "unlockGoodsNum": [
+        [1, 0],
+        [2, 0],
+        [3, 1],
+        [4, 1]
+      ],
+      "goodsId": 211453
+    }
+  },
+  {
+    "identity": "galenus",
+    "name": "Galenus",
+    "nativeId": 53514,
+    "definition": {
+      "id": 53514,
+      "newAccMaxLv": 100,
+      "isUnlock": 1,
+      "name": 169481,
+      "saleId": 53614,
+      "type": 1,
+      "gender": 1,
+      "baseLevel": 1,
+      "baseQuality": 1,
+      "baseSkill": 53940,
+      "baseStar": 1,
+      "baseSkill3": 53942,
+      "baseSkill4": 53943,
+      "baseSkill5": "",
+      "breachGoods": [
+        [211603, 0],
+        [211603, 0],
+        [211603, 0],
+        [211603, 0],
+        [211603, 0]
+      ],
+      "starMaxLevel": 1,
+      "starGoods": [
+        [211603, 6000],
+        [211603, 12000],
+        [211603, 24000],
+        [211603, 48000]
+      ],
+      "needPieces": [211603, 6000],
+      "piecesId": 211603,
+      "levelMax": 100,
+      "talent": 15,
+      "generalAb": [88245, 88246, 88247],
+      "loot": 1,
+      "lootLevel": 5,
+      "garrison": 1,
+      "battle": 1,
+      "lordExp": 1,
+      "refineCard": 20,
+      "refineEffect": [
+        [1, 1000],
+        [2, 1000],
+        [3, 1000],
+        [4, 1000],
+        [5, 1000]
+      ],
+      "refineEffectLock": [
+        [1, 1000],
+        [2, 3000],
+        [3, 7000],
+        [4, 15000]
+      ],
+      "refineNum": [
+        [1, 1],
+        [2, 1],
+        [3, 1],
+        [4, 0],
+        [5, 0]
+      ],
+      "unlockLevel": [
+        [1, 1],
+        [2, 1],
+        [3, 30]
+      ],
+      "unlockStar": [
+        [1, 1],
+        [2, 1],
+        [3, 1]
+      ],
+      "unlockGoodsNum": [
+        [1, 0],
+        [2, 0],
+        [3, 1],
+        [4, 1]
+      ],
+      "goodsId": 211453
+    }
+  },
+  {
+    "identity": "the-queen-of-war",
+    "name": "The Queen of War",
+    "nativeId": 53515,
+    "definition": {
+      "id": 53515,
+      "newAccMaxLv": 100,
+      "isUnlock": 1,
+      "name": 169482,
+      "saleId": 53615,
+      "type": 1,
+      "gender": 2,
+      "baseLevel": 1,
+      "baseQuality": 1,
+      "baseSkill": [53944, 53945],
+      "baseStar": 2,
+      "baseSkill3": 53946,
+      "baseSkill4": 53947,
+      "baseSkill5": "",
+      "breachGoods": [
+        [211604, 0],
+        [211604, 0],
+        [211604, 0],
+        [211604, 0],
+        [211604, 0]
+      ],
+      "starMaxLevel": 4,
+      "starGoods": [
+        [211604, 6000],
+        [211604, 15000],
+        [211604, 30000],
+        [211604, 60000]
+      ],
+      "needPieces": [211604, 6000],
+      "piecesId": 211604,
+      "levelMax": 100,
+      "talent": 16,
+      "generalAb": [88248, 88249, 88250],
+      "loot": 1,
+      "lootLevel": 5,
+      "garrison": 1,
+      "battle": 1,
+      "lordExp": 1,
+      "refineCard": 20,
+      "refineEffect": [
+        [1, 1000],
+        [2, 1000],
+        [3, 1000],
+        [4, 1000],
+        [5, 1000]
+      ],
+      "refineEffectLock": [
+        [1, 1000],
+        [2, 3000],
+        [3, 7000],
+        [4, 15000]
+      ],
+      "refineNum": [
+        [1, 1],
+        [2, 1],
+        [3, 1],
+        [4, 1],
+        [5, 1]
+      ],
+      "unlockLevel": [
+        [1, 1],
+        [2, 1],
+        [3, 30],
+        [4, 1],
+        [5, 1]
+      ],
+      "unlockStar": [
+        [1, 1],
+        [2, 1],
+        [3, 1],
+        [4, 3],
+        [5, 1]
+      ],
+      "unlockGoodsNum": [
+        [1, 0],
+        [2, 0],
+        [3, 1],
+        [4, 100],
+        [5, 100]
+      ],
+      "goodsId": 211453
+    }
+  },
+  {
+    "identity": "yulia",
+    "name": "Yulia",
+    "nativeId": 53516,
+    "definition": {
+      "id": 53516,
+      "newAccMaxLv": 100,
+      "isUnlock": 1,
+      "name": 169459,
+      "saleId": 53616,
+      "type": 0,
+      "gender": 2,
+      "baseLevel": 1,
+      "baseQuality": 1,
+      "baseSkill": 53949,
+      "baseStar": 1,
+      "baseSkill3": 53951,
+      "baseSkill4": 54090,
+      "baseSkill5": "",
+      "breachGoods": [
+        [211623, 0],
+        [211623, 0],
+        [211623, 0],
+        [211623, 0],
+        [211623, 0]
+      ],
+      "starMaxLevel": 4,
+      "starGoods": [
+        [211623, 3000],
+        [211623, 6000],
+        [211623, 18000],
+        [211623, 36000]
+      ],
+      "needPieces": [211623, 3000],
+      "piecesId": 211623,
+      "levelMax": 100,
+      "talent": 17,
+      "generalAb": 88251,
+      "loot": 1,
+      "lootLevel": 5,
+      "garrison": 1,
+      "battle": 1,
+      "lordExp": 1,
+      "refineCard": 20,
+      "refineEffect": [
+        [1, 1000],
+        [2, 1000],
+        [3, 1000],
+        [4, 1000],
+        [5, 1000]
+      ],
+      "refineEffectLock": [
+        [1, 1000],
+        [2, 3000],
+        [3, 7000],
+        [4, 15000]
+      ],
+      "refineNum": [
+        [1, 0],
+        [2, 0],
+        [3, 0],
+        [4, 0],
+        [5, 0]
+      ],
+      "unlockLevel": 0,
+      "unlockStar": 0,
+      "unlockGoodsNum": 0,
+      "goodsId": 211453
+    }
+  },
+  {
+    "identity": "han-xin",
+    "name": "Han Xin",
+    "nativeId": 53517,
+    "definition": {
+      "id": 53517,
+      "newAccMaxLv": 100,
+      "isUnlock": 1,
+      "name": 169401,
+      "saleId": 53617,
+      "type": 1,
+      "gender": 1,
+      "baseLevel": 1,
+      "baseQuality": 1,
+      "baseSkill": 53955,
+      "baseStar": 1,
+      "baseSkill3": 53957,
+      "baseSkill4": 53958,
+      "baseSkill5": 53959,
+      "breachGoods": [
+        [211605, 0],
+        [211605, 0],
+        [211605, 0],
+        [211605, 0],
+        [211605, 0]
+      ],
+      "starMaxLevel": 5,
+      "starGoods": [
+        [211605, 6000],
+        [211605, 15000],
+        [211605, 30000],
+        [211605, 60000]
+      ],
+      "needPieces": [211605, 3000],
+      "piecesId": 211605,
+      "levelMax": 100,
+      "talent": 18,
+      "generalAb": 88252,
+      "loot": 1,
+      "lootLevel": 5,
+      "garrison": 1,
+      "battle": 1,
+      "lordExp": 1,
+      "refineCard": 20,
+      "refineEffect": [
+        [1, 1000],
+        [2, 1000],
+        [3, 1000],
+        [4, 1000],
+        [5, 1000]
+      ],
+      "refineEffectLock": [
+        [1, 1000],
+        [2, 3000],
+        [3, 7000],
+        [4, 15000]
+      ],
+      "refineNum": [
+        [1, 0],
+        [2, 0],
+        [3, 0],
+        [4, 0],
+        [5, 0]
+      ],
+      "unlockLevel": [
+        [1, 1],
+        [2, 1],
+        [3, 30]
+      ],
+      "unlockStar": [
+        [1, 1],
+        [2, 1],
+        [3, 1],
+        [4, 3]
+      ],
+      "unlockGoodsNum": [
+        [1, 0],
+        [2, 0],
+        [3, 1],
+        [4, 1]
+      ],
+      "goodsId": 211453
+    }
+  },
+  {
+    "identity": "charlemagne",
+    "name": "Charlemagne",
+    "nativeId": 53518,
+    "definition": {
+      "id": 53518,
+      "newAccMaxLv": 100,
+      "isUnlock": 1,
+      "name": 169402,
+      "saleId": 53618,
+      "type": 1,
+      "gender": 1,
+      "baseLevel": 1,
+      "baseQuality": 1,
+      "baseSkill": 53960,
+      "baseStar": 1,
+      "baseSkill3": 53962,
+      "baseSkill4": 53963,
+      "baseSkill5": 53964,
+      "breachGoods": [
+        [211606, 0],
+        [211606, 0],
+        [211606, 0],
+        [211606, 0],
+        [211606, 0]
+      ],
+      "starMaxLevel": 5,
+      "starGoods": [
+        [211606, 6000],
+        [211606, 15000],
+        [211606, 30000],
+        [211606, 60000]
+      ],
+      "needPieces": [211606, 3000],
+      "piecesId": 211606,
+      "levelMax": 100,
+      "talent": 19,
+      "generalAb": 88253,
+      "loot": 1,
+      "lootLevel": 5,
+      "garrison": 1,
+      "battle": 1,
+      "lordExp": 1,
+      "refineCard": 20,
+      "refineEffect": [
+        [1, 1000],
+        [2, 1000],
+        [3, 1000],
+        [4, 1000],
+        [5, 1000]
+      ],
+      "refineEffectLock": [
+        [1, 1000],
+        [2, 3000],
+        [3, 7000],
+        [4, 15000]
+      ],
+      "refineNum": [
+        [1, 0],
+        [2, 0],
+        [3, 0],
+        [4, 0],
+        [5, 0]
+      ],
+      "unlockLevel": [
+        [1, 1],
+        [2, 1],
+        [3, 30]
+      ],
+      "unlockStar": [
+        [1, 1],
+        [2, 1],
+        [3, 1],
+        [4, 3]
+      ],
+      "unlockGoodsNum": [
+        [1, 0],
+        [2, 0],
+        [3, 1],
+        [4, 1]
+      ],
+      "goodsId": 211453
+    }
+  },
+  {
+    "identity": "beowulf",
+    "name": "Beowulf",
+    "nativeId": 53519,
+    "definition": {
+      "id": 53519,
+      "newAccMaxLv": 100,
+      "isUnlock": 1,
+      "name": 169403,
+      "saleId": 53619,
+      "type": 0,
+      "gender": 1,
+      "baseLevel": 1,
+      "baseQuality": 1,
+      "baseSkill": 53965,
+      "baseStar": 1,
+      "baseSkill3": 53967,
+      "baseSkill4": 53968,
+      "baseSkill5": 53969,
+      "breachGoods": [
+        [211607, 0],
+        [211607, 0],
+        [211607, 0],
+        [211607, 0],
+        [211607, 0]
+      ],
+      "starMaxLevel": 5,
+      "starGoods": [
+        [211607, 6000],
+        [211607, 15000],
+        [211607, 30000],
+        [211607, 60000]
+      ],
+      "needPieces": [211607, 3000],
+      "piecesId": 211607,
+      "levelMax": 100,
+      "talent": 20,
+      "generalAb": 88254,
+      "loot": 1,
+      "lootLevel": 5,
+      "garrison": 1,
+      "battle": 1,
+      "lordExp": 1,
+      "refineCard": 20,
+      "refineEffect": [
+        [1, 1000],
+        [2, 1000],
+        [3, 1000],
+        [4, 1000],
+        [5, 1000]
+      ],
+      "refineEffectLock": [
+        [1, 1000],
+        [2, 3000],
+        [3, 7000],
+        [4, 15000]
+      ],
+      "refineNum": [
+        [1, 0],
+        [2, 0],
+        [3, 0],
+        [4, 0],
+        [5, 0]
+      ],
+      "unlockLevel": [
+        [1, 1],
+        [2, 1],
+        [3, 30]
+      ],
+      "unlockStar": [
+        [1, 1],
+        [2, 1],
+        [3, 1],
+        [4, 3]
+      ],
+      "unlockGoodsNum": [
+        [1, 0],
+        [2, 0],
+        [3, 1],
+        [4, 1]
+      ],
+      "goodsId": 211453
+    }
+  },
+  {
+    "identity": "siegfried",
+    "name": "Siegfried",
+    "nativeId": 53520,
+    "definition": {
+      "id": 53520,
+      "newAccMaxLv": 100,
+      "isUnlock": 1,
+      "name": 169410,
+      "saleId": 53620,
+      "type": 1,
+      "gender": 1,
+      "baseLevel": 1,
+      "baseQuality": 1,
+      "baseSkill": 53970,
+      "baseStar": 1,
+      "baseSkill3": 53972,
+      "baseSkill4": 53973,
+      "baseSkill5": 53974,
+      "breachGoods": [
+        [211608, 0],
+        [211608, 0],
+        [211608, 0],
+        [211608, 0],
+        [211608, 0]
+      ],
+      "starMaxLevel": 5,
+      "starGoods": [
+        [211608, 6000],
+        [211608, 15000],
+        [211608, 30000],
+        [211608, 60000]
+      ],
+      "needPieces": [211608, 3000],
+      "piecesId": 211608,
+      "levelMax": 100,
+      "talent": 21,
+      "generalAb": 88255,
+      "loot": 1,
+      "lootLevel": 5,
+      "garrison": 1,
+      "battle": 1,
+      "lordExp": 1,
+      "refineCard": 20,
+      "refineEffect": [
+        [1, 1000],
+        [2, 1000],
+        [3, 1000],
+        [4, 1000],
+        [5, 1000]
+      ],
+      "refineEffectLock": [
+        [1, 1000],
+        [2, 3000],
+        [3, 7000],
+        [4, 15000]
+      ],
+      "refineNum": [
+        [1, 0],
+        [2, 0],
+        [3, 0],
+        [4, 0],
+        [5, 0]
+      ],
+      "unlockLevel": [
+        [1, 1],
+        [2, 1],
+        [3, 30]
+      ],
+      "unlockStar": [
+        [1, 1],
+        [2, 1],
+        [3, 1],
+        [4, 3]
+      ],
+      "unlockGoodsNum": [
+        [1, 0],
+        [2, 0],
+        [3, 1],
+        [4, 1]
+      ],
+      "goodsId": 211453
+    }
+  },
+  {
+    "identity": "prinz-eugen",
+    "name": "Prinz Eugen",
+    "nativeId": 53521,
+    "definition": {
+      "id": 53521,
+      "newAccMaxLv": 100,
+      "isUnlock": 1,
+      "name": 169411,
+      "saleId": 53621,
+      "type": 0,
+      "gender": 1,
+      "baseLevel": 1,
+      "baseQuality": 1,
+      "baseSkill": 53975,
+      "baseStar": 1,
+      "baseSkill3": 53977,
+      "baseSkill4": 53978,
+      "baseSkill5": 53979,
+      "breachGoods": [
+        [211609, 0],
+        [211609, 0],
+        [211609, 0],
+        [211609, 0],
+        [211609, 0]
+      ],
+      "starMaxLevel": 5,
+      "starGoods": [
+        [211609, 6000],
+        [211609, 15000],
+        [211609, 30000],
+        [211609, 60000]
+      ],
+      "needPieces": [211609, 3000],
+      "piecesId": 211609,
+      "levelMax": 100,
+      "talent": 22,
+      "generalAb": 88256,
+      "loot": 1,
+      "lootLevel": 5,
+      "garrison": 1,
+      "battle": 1,
+      "lordExp": 1,
+      "refineCard": 20,
+      "refineEffect": [
+        [1, 1000],
+        [2, 1000],
+        [3, 1000],
+        [4, 1000],
+        [5, 1000]
+      ],
+      "refineEffectLock": [
+        [1, 1000],
+        [2, 3000],
+        [3, 7000],
+        [4, 15000]
+      ],
+      "refineNum": [
+        [1, 0],
+        [2, 0],
+        [3, 0],
+        [4, 0],
+        [5, 0]
+      ],
+      "unlockLevel": [
+        [1, 1],
+        [2, 1],
+        [3, 30]
+      ],
+      "unlockStar": [
+        [1, 1],
+        [2, 1],
+        [3, 1],
+        [4, 3]
+      ],
+      "unlockGoodsNum": [
+        [1, 0],
+        [2, 0],
+        [3, 1],
+        [4, 1]
+      ],
+      "goodsId": 211453
+    }
+  },
+  {
+    "identity": "harald",
+    "name": "Harald",
+    "nativeId": 53522,
+    "definition": {
+      "id": 53522,
+      "newAccMaxLv": 100,
+      "isUnlock": 1,
+      "name": 169412,
+      "type": 0,
+      "gender": 1,
+      "baseLevel": 1,
+      "baseQuality": 1,
+      "baseSkill": 53980,
+      "baseStar": 1,
+      "baseSkill3": 53982,
+      "baseSkill4": 53983,
+      "baseSkill5": 53984,
+      "breachGoods": [
+        [211610, 0],
+        [211610, 0],
+        [211610, 0],
+        [211610, 0],
+        [211610, 0]
+      ],
+      "starMaxLevel": 5,
+      "starGoods": [
+        [211610, 6000],
+        [211610, 15000],
+        [211610, 30000],
+        [211610, 60000]
+      ],
+      "needPieces": [211610, 3000],
+      "piecesId": 211610,
+      "levelMax": 100,
+      "talent": 23,
+      "generalAb": 88257,
+      "loot": 1,
+      "lootLevel": 5,
+      "garrison": 1,
+      "battle": 1,
+      "lordExp": 1,
+      "refineCard": 20,
+      "refineEffect": [
+        [1, 1000],
+        [2, 1000],
+        [3, 1000],
+        [4, 1000],
+        [5, 1000]
+      ],
+      "refineEffectLock": [
+        [1, 1000],
+        [2, 3000],
+        [3, 7000],
+        [4, 15000]
+      ],
+      "refineNum": [
+        [1, 0],
+        [2, 0],
+        [3, 0],
+        [4, 0],
+        [5, 0]
+      ],
+      "unlockLevel": [
+        [1, 1],
+        [2, 1],
+        [3, 30]
+      ],
+      "unlockStar": [
+        [1, 1],
+        [2, 1],
+        [3, 1],
+        [4, 3]
+      ],
+      "unlockGoodsNum": [
+        [1, 0],
+        [2, 0],
+        [3, 1],
+        [4, 1]
+      ],
+      "goodsId": 211453
+    }
+  },
+  {
+    "identity": "lancelot",
+    "name": "Lancelot",
+    "nativeId": 53523,
+    "definition": {
+      "id": 53523,
+      "newAccMaxLv": 100,
+      "isUnlock": 1,
+      "name": 169413,
+      "type": 0,
+      "gender": 1,
+      "baseLevel": 1,
+      "baseQuality": 1,
+      "baseSkill": 53985,
+      "baseStar": 1,
+      "baseSkill3": 53987,
+      "baseSkill4": 53988,
+      "baseSkill5": 53989,
+      "breachGoods": [
+        [211611, 0],
+        [211611, 0],
+        [211611, 0],
+        [211611, 0],
+        [211611, 0]
+      ],
+      "starMaxLevel": 5,
+      "starGoods": [
+        [211611, 6000],
+        [211611, 15000],
+        [211611, 30000],
+        [211611, 60000]
+      ],
+      "needPieces": [211611, 3000],
+      "piecesId": 211611,
+      "levelMax": 100,
+      "talent": 24,
+      "generalAb": 88258,
+      "loot": 1,
+      "lootLevel": 5,
+      "garrison": 1,
+      "battle": 1,
+      "lordExp": 1,
+      "refineCard": 20,
+      "refineEffect": [
+        [1, 1000],
+        [2, 1000],
+        [3, 1000],
+        [4, 1000],
+        [5, 1000]
+      ],
+      "refineEffectLock": [
+        [1, 1000],
+        [2, 3000],
+        [3, 7000],
+        [4, 15000]
+      ],
+      "refineNum": [
+        [1, 0],
+        [2, 0],
+        [3, 0],
+        [4, 0],
+        [5, 0]
+      ],
+      "unlockLevel": [
+        [1, 1],
+        [2, 1],
+        [3, 30]
+      ],
+      "unlockStar": [
+        [1, 1],
+        [2, 1],
+        [3, 1],
+        [4, 3]
+      ],
+      "unlockGoodsNum": [
+        [1, 0],
+        [2, 0],
+        [3, 1],
+        [4, 1]
+      ],
+      "goodsId": 211453
+    }
+  },
+  {
+    "identity": "joan-of-arc",
+    "name": "Joan of Arc",
+    "nativeId": 53524,
+    "definition": {
+      "id": 53524,
+      "newAccMaxLv": 100,
+      "isUnlock": 1,
+      "name": 169414,
+      "type": 1,
+      "gender": 2,
+      "baseLevel": 1,
+      "baseQuality": 1,
+      "baseSkill": 53990,
+      "baseStar": 1,
+      "baseSkill3": 53992,
+      "baseSkill4": 53993,
+      "baseSkill5": 53994,
+      "breachGoods": [
+        [211612, 0],
+        [211612, 0],
+        [211612, 0],
+        [211612, 0],
+        [211612, 0]
+      ],
+      "starMaxLevel": 5,
+      "starGoods": [
+        [211612, 6000],
+        [211612, 15000],
+        [211612, 30000],
+        [211612, 60000]
+      ],
+      "needPieces": [211612, 3000],
+      "piecesId": 211612,
+      "levelMax": 100,
+      "talent": 25,
+      "generalAb": 88259,
+      "loot": 1,
+      "lootLevel": 5,
+      "garrison": 1,
+      "battle": 1,
+      "lordExp": 1,
+      "refineCard": 20,
+      "refineEffect": [
+        [1, 1000],
+        [2, 1000],
+        [3, 1000],
+        [4, 1000],
+        [5, 1000]
+      ],
+      "refineEffectLock": [
+        [1, 1000],
+        [2, 3000],
+        [3, 7000],
+        [4, 15000]
+      ],
+      "refineNum": [
+        [1, 0],
+        [2, 0],
+        [3, 0],
+        [4, 0],
+        [5, 0]
+      ],
+      "unlockLevel": [
+        [1, 1],
+        [2, 1],
+        [3, 30]
+      ],
+      "unlockStar": [
+        [1, 1],
+        [2, 1],
+        [3, 1],
+        [4, 3]
+      ],
+      "unlockGoodsNum": [
+        [1, 0],
+        [2, 0],
+        [3, 1],
+        [4, 1]
+      ],
+      "goodsId": 211453
+    }
+  },
+  {
+    "identity": "toyotomi-hideyoshi",
+    "name": "Toyotomi Hideyoshi",
+    "nativeId": 53525,
+    "definition": {
+      "id": 53525,
+      "newAccMaxLv": 100,
+      "isUnlock": 1,
+      "name": 169423,
+      "type": 1,
+      "gender": 1,
+      "baseLevel": 1,
+      "baseQuality": 1,
+      "baseSkill": 53995,
+      "baseStar": 1,
+      "baseSkill3": 53997,
+      "baseSkill4": 53998,
+      "baseSkill5": 53999,
+      "breachGoods": [
+        [211627, 0],
+        [211627, 0],
+        [211627, 0],
+        [211627, 0],
+        [211627, 0]
+      ],
+      "starMaxLevel": 5,
+      "starGoods": [
+        [211627, 6000],
+        [211627, 15000],
+        [211627, 30000],
+        [211627, 60000]
+      ],
+      "needPieces": [211627, 3000],
+      "piecesId": 211627,
+      "levelMax": 100,
+      "talent": 26,
+      "generalAb": 88260,
+      "loot": 1,
+      "lootLevel": 5,
+      "garrison": 1,
+      "battle": 1,
+      "lordExp": 1,
+      "refineCard": 20,
+      "refineEffect": [
+        [1, 1000],
+        [2, 1000],
+        [3, 1000],
+        [4, 1000],
+        [5, 1000]
+      ],
+      "refineEffectLock": [
+        [1, 1000],
+        [2, 3000],
+        [3, 7000],
+        [4, 15000]
+      ],
+      "refineNum": [
+        [1, 0],
+        [2, 0],
+        [3, 0],
+        [4, 0],
+        [5, 0]
+      ],
+      "unlockLevel": [
+        [1, 1],
+        [2, 1],
+        [3, 30]
+      ],
+      "unlockStar": [
+        [1, 1],
+        [2, 1],
+        [3, 1],
+        [4, 3]
+      ],
+      "unlockGoodsNum": [
+        [1, 0],
+        [2, 0],
+        [3, 1],
+        [4, 1]
+      ],
+      "goodsId": 211453
+    }
+  },
+  {
+    "identity": "date-masamune",
+    "name": "Date Masamune",
+    "nativeId": 53526,
+    "definition": {
+      "id": 53526,
+      "newAccMaxLv": 100,
+      "isUnlock": 1,
+      "name": 169416,
+      "type": 0,
+      "gender": 1,
+      "baseLevel": 1,
+      "baseQuality": 1,
+      "baseSkill": 54000,
+      "baseStar": 1,
+      "baseSkill3": 54002,
+      "baseSkill4": 54003,
+      "baseSkill5": 54004,
+      "breachGoods": [
+        [211614, 0],
+        [211614, 0],
+        [211614, 0],
+        [211614, 0],
+        [211614, 0]
+      ],
+      "starMaxLevel": 5,
+      "starGoods": [
+        [211614, 6000],
+        [211614, 15000],
+        [211614, 30000],
+        [211614, 60000]
+      ],
+      "needPieces": [211614, 3000],
+      "piecesId": 211614,
+      "levelMax": 100,
+      "talent": 27,
+      "generalAb": 88261,
+      "loot": 1,
+      "lootLevel": 5,
+      "garrison": 1,
+      "battle": 1,
+      "lordExp": 1,
+      "refineCard": 20,
+      "refineEffect": [
+        [1, 1000],
+        [2, 1000],
+        [3, 1000],
+        [4, 1000],
+        [5, 1000]
+      ],
+      "refineEffectLock": [
+        [1, 1000],
+        [2, 3000],
+        [3, 7000],
+        [4, 15000]
+      ],
+      "refineNum": [
+        [1, 0],
+        [2, 0],
+        [3, 0],
+        [4, 0],
+        [5, 0]
+      ],
+      "unlockLevel": [
+        [1, 1],
+        [2, 1],
+        [3, 30]
+      ],
+      "unlockStar": [
+        [1, 1],
+        [2, 1],
+        [3, 1],
+        [4, 3]
+      ],
+      "unlockGoodsNum": [
+        [1, 0],
+        [2, 0],
+        [3, 1],
+        [4, 1]
+      ],
+      "goodsId": 211453
+    }
+  },
+  {
+    "identity": "di-renjie",
+    "name": "Di Renjie",
+    "nativeId": 53527,
+    "definition": {
+      "id": 53527,
+      "newAccMaxLv": 100,
+      "isUnlock": 1,
+      "name": 169417,
+      "type": 0,
+      "gender": 1,
+      "baseLevel": 1,
+      "baseQuality": 1,
+      "baseSkill": 54005,
+      "baseStar": 1,
+      "baseSkill3": 54007,
+      "baseSkill4": 54008,
+      "baseSkill5": 54009,
+      "breachGoods": [
+        [211615, 0],
+        [211615, 0],
+        [211615, 0],
+        [211615, 0],
+        [211615, 0]
+      ],
+      "starMaxLevel": 5,
+      "starGoods": [
+        [211615, 6000],
+        [211615, 15000],
+        [211615, 30000],
+        [211615, 60000]
+      ],
+      "needPieces": [211615, 3000],
+      "piecesId": 211615,
+      "levelMax": 100,
+      "talent": 28,
+      "generalAb": 88262,
+      "loot": 1,
+      "lootLevel": 5,
+      "garrison": 1,
+      "battle": 1,
+      "lordExp": 1,
+      "refineCard": 20,
+      "refineEffect": [
+        [1, 1000],
+        [2, 1000],
+        [3, 1000],
+        [4, 1000],
+        [5, 1000]
+      ],
+      "refineEffectLock": [
+        [1, 1000],
+        [2, 3000],
+        [3, 7000],
+        [4, 15000]
+      ],
+      "refineNum": [
+        [1, 0],
+        [2, 0],
+        [3, 0],
+        [4, 0],
+        [5, 0]
+      ],
+      "unlockLevel": [
+        [1, 1],
+        [2, 1],
+        [3, 30]
+      ],
+      "unlockStar": [
+        [1, 1],
+        [2, 1],
+        [3, 1],
+        [4, 3]
+      ],
+      "unlockGoodsNum": [
+        [1, 0],
+        [2, 0],
+        [3, 1],
+        [4, 1]
+      ],
+      "goodsId": 211453
+    }
+  },
+  {
+    "identity": "xiao-qiao",
+    "name": "Xiao Qiao",
+    "nativeId": 53528,
+    "definition": {
+      "id": 53528,
+      "newAccMaxLv": 100,
+      "isUnlock": 1,
+      "name": 169418,
+      "type": 1,
+      "gender": 2,
+      "baseLevel": 1,
+      "baseQuality": 1,
+      "baseSkill": 54010,
+      "baseStar": 1,
+      "baseSkill3": 54012,
+      "baseSkill4": 54013,
+      "baseSkill5": 54014,
+      "breachGoods": [
+        [211616, 0],
+        [211616, 0],
+        [211616, 0],
+        [211616, 0],
+        [211616, 0]
+      ],
+      "starMaxLevel": 5,
+      "starGoods": [
+        [211616, 6000],
+        [211616, 15000],
+        [211616, 30000],
+        [211616, 60000]
+      ],
+      "needPieces": [211616, 3000],
+      "piecesId": 211616,
+      "levelMax": 100,
+      "talent": 29,
+      "generalAb": 88263,
+      "loot": 1,
+      "lootLevel": 5,
+      "garrison": 1,
+      "battle": 1,
+      "lordExp": 1,
+      "refineCard": 20,
+      "refineEffect": [
+        [1, 1000],
+        [2, 1000],
+        [3, 1000],
+        [4, 1000],
+        [5, 1000]
+      ],
+      "refineEffectLock": [
+        [1, 1000],
+        [2, 3000],
+        [3, 7000],
+        [4, 15000]
+      ],
+      "refineNum": [
+        [1, 0],
+        [2, 0],
+        [3, 0],
+        [4, 0],
+        [5, 0]
+      ],
+      "unlockLevel": [
+        [1, 1],
+        [2, 1],
+        [3, 30]
+      ],
+      "unlockStar": [
+        [1, 1],
+        [2, 1],
+        [3, 1],
+        [4, 3]
+      ],
+      "unlockGoodsNum": [
+        [1, 0],
+        [2, 0],
+        [3, 1],
+        [4, 1]
+      ],
+      "goodsId": 211453
+    }
+  },
+  {
+    "identity": "takenaka-shigeharu",
+    "name": "Takenaka Shigeharu",
+    "nativeId": 53529,
+    "definition": {
+      "id": 53529,
+      "newAccMaxLv": 100,
+      "isUnlock": 1,
+      "name": 169419,
+      "type": 1,
+      "gender": 1,
+      "baseLevel": 1,
+      "baseQuality": 1,
+      "baseSkill": 54015,
+      "baseStar": 1,
+      "baseSkill3": 54017,
+      "baseSkill4": 54018,
+      "baseSkill5": 54019,
+      "breachGoods": [
+        [211617, 0],
+        [211617, 0],
+        [211617, 0],
+        [211617, 0],
+        [211617, 0]
+      ],
+      "starMaxLevel": 5,
+      "starGoods": [
+        [211617, 6000],
+        [211617, 15000],
+        [211617, 30000],
+        [211617, 60000]
+      ],
+      "needPieces": [211617, 3000],
+      "piecesId": 211617,
+      "levelMax": 100,
+      "talent": 30,
+      "generalAb": 88264,
+      "loot": 1,
+      "lootLevel": 5,
+      "garrison": 1,
+      "battle": 1,
+      "lordExp": 1,
+      "refineCard": 20,
+      "refineEffect": [
+        [1, 1000],
+        [2, 1000],
+        [3, 1000],
+        [4, 1000],
+        [5, 1000]
+      ],
+      "refineEffectLock": [
+        [1, 1000],
+        [2, 3000],
+        [3, 7000],
+        [4, 15000]
+      ],
+      "refineNum": [
+        [1, 0],
+        [2, 0],
+        [3, 0],
+        [4, 0],
+        [5, 0]
+      ],
+      "unlockLevel": [
+        [1, 1],
+        [2, 1],
+        [3, 30]
+      ],
+      "unlockStar": [
+        [1, 1],
+        [2, 1],
+        [3, 1],
+        [4, 3]
+      ],
+      "unlockGoodsNum": [
+        [1, 0],
+        [2, 0],
+        [3, 1],
+        [4, 1]
+      ],
+      "goodsId": 211453
+    }
+  },
+  {
+    "identity": "saito-kichyo",
+    "name": "Saitō Kichyō",
+    "nativeId": 53530,
+    "definition": {
+      "id": 53530,
+      "newAccMaxLv": 100,
+      "isUnlock": 1,
+      "name": 169420,
+      "type": 0,
+      "gender": 2,
+      "baseLevel": 1,
+      "baseQuality": 1,
+      "baseSkill": 54020,
+      "baseStar": 1,
+      "baseSkill3": 54022,
+      "baseSkill4": 54023,
+      "baseSkill5": 54024,
+      "breachGoods": [
+        [211624, 0],
+        [211624, 0],
+        [211624, 0],
+        [211624, 0],
+        [211624, 0]
+      ],
+      "starMaxLevel": 5,
+      "starGoods": [
+        [211624, 6000],
+        [211624, 15000],
+        [211624, 30000],
+        [211624, 60000]
+      ],
+      "needPieces": [211624, 3000],
+      "piecesId": 211624,
+      "levelMax": 100,
+      "talent": 31,
+      "generalAb": 88265,
+      "loot": 1,
+      "lootLevel": 5,
+      "garrison": 1,
+      "battle": 1,
+      "lordExp": 1,
+      "refineCard": 20,
+      "refineEffect": [
+        [1, 1000],
+        [2, 1000],
+        [3, 1000],
+        [4, 1000],
+        [5, 1000]
+      ],
+      "refineEffectLock": [
+        [1, 1000],
+        [2, 3000],
+        [3, 7000],
+        [4, 15000]
+      ],
+      "refineNum": [
+        [1, 0],
+        [2, 0],
+        [3, 0],
+        [4, 0],
+        [5, 0]
+      ],
+      "unlockLevel": [
+        [1, 1],
+        [2, 1],
+        [3, 30]
+      ],
+      "unlockStar": [
+        [1, 1],
+        [2, 1],
+        [3, 1],
+        [4, 3]
+      ],
+      "unlockGoodsNum": [
+        [1, 0],
+        [2, 0],
+        [3, 1],
+        [4, 1]
+      ],
+      "goodsId": 211453
+    }
+  },
+  {
+    "identity": "lin-xiangru",
+    "name": "Lin Xiangru",
+    "nativeId": 53531,
+    "definition": {
+      "id": 53531,
+      "newAccMaxLv": 100,
+      "isUnlock": 1,
+      "name": 169421,
+      "type": 0,
+      "gender": 1,
+      "baseLevel": 1,
+      "baseQuality": 1,
+      "baseSkill": 54025,
+      "baseStar": 1,
+      "baseSkill3": 54027,
+      "baseSkill4": 54028,
+      "baseSkill5": 54029,
+      "breachGoods": [
+        [211625, 0],
+        [211625, 0],
+        [211625, 0],
+        [211625, 0],
+        [211625, 0]
+      ],
+      "starMaxLevel": 5,
+      "starGoods": [
+        [211625, 6000],
+        [211625, 15000],
+        [211625, 30000],
+        [211625, 60000]
+      ],
+      "needPieces": [211625, 3000],
+      "piecesId": 211625,
+      "levelMax": 100,
+      "talent": 32,
+      "generalAb": 88266,
+      "loot": 1,
+      "lootLevel": 5,
+      "garrison": 1,
+      "battle": 1,
+      "lordExp": 1,
+      "refineCard": 20,
+      "refineEffect": [
+        [1, 1000],
+        [2, 1000],
+        [3, 1000],
+        [4, 1000],
+        [5, 1000]
+      ],
+      "refineEffectLock": [
+        [1, 1000],
+        [2, 3000],
+        [3, 7000],
+        [4, 15000]
+      ],
+      "refineNum": [
+        [1, 0],
+        [2, 0],
+        [3, 0],
+        [4, 0],
+        [5, 0]
+      ],
+      "unlockLevel": [
+        [1, 1],
+        [2, 1],
+        [3, 30]
+      ],
+      "unlockStar": [
+        [1, 1],
+        [2, 1],
+        [3, 1],
+        [4, 3]
+      ],
+      "unlockGoodsNum": [
+        [1, 0],
+        [2, 0],
+        [3, 1],
+        [4, 1]
+      ],
+      "goodsId": 211453
+    }
+  },
+  {
+    "identity": "oda-ichi",
+    "name": "Oda Ichi",
+    "nativeId": 53532,
+    "definition": {
+      "id": 53532,
+      "newAccMaxLv": 100,
+      "isUnlock": 1,
+      "name": 169422,
+      "type": 0,
+      "gender": 2,
+      "baseLevel": 1,
+      "baseQuality": 1,
+      "baseSkill": 54030,
+      "baseStar": 1,
+      "baseSkill3": 54032,
+      "baseSkill4": 54033,
+      "baseSkill5": 54034,
+      "breachGoods": [
+        [211626, 0],
+        [211626, 0],
+        [211626, 0],
+        [211626, 0],
+        [211626, 0]
+      ],
+      "starMaxLevel": 5,
+      "starGoods": [
+        [211626, 6000],
+        [211626, 15000],
+        [211626, 30000],
+        [211626, 60000]
+      ],
+      "needPieces": [211626, 3000],
+      "piecesId": 211626,
+      "levelMax": 100,
+      "talent": 33,
+      "generalAb": 88267,
+      "loot": 1,
+      "lootLevel": 5,
+      "garrison": 1,
+      "battle": 1,
+      "lordExp": 1,
+      "refineCard": 20,
+      "refineEffect": [
+        [1, 1000],
+        [2, 1000],
+        [3, 1000],
+        [4, 1000],
+        [5, 1000]
+      ],
+      "refineEffectLock": [
+        [1, 1000],
+        [2, 3000],
+        [3, 7000],
+        [4, 15000]
+      ],
+      "refineNum": [
+        [1, 0],
+        [2, 0],
+        [3, 0],
+        [4, 0],
+        [5, 0]
+      ],
+      "unlockLevel": [
+        [1, 1],
+        [2, 1],
+        [3, 30]
+      ],
+      "unlockStar": [
+        [1, 1],
+        [2, 1],
+        [3, 1],
+        [4, 3]
+      ],
+      "unlockGoodsNum": [
+        [1, 0],
+        [2, 0],
+        [3, 1],
+        [4, 1]
+      ],
+      "goodsId": 211453
+    }
+  },
+  {
+    "identity": "bale",
+    "name": "Bale",
+    "nativeId": 53533,
+    "definition": {
+      "id": 53533,
+      "newAccMaxLv": 100,
+      "isUnlock": 1,
+      "name": 169462,
+      "type": 1,
+      "gender": 2,
+      "baseLevel": 1,
+      "baseQuality": 1,
+      "baseSkill": 54035,
+      "baseStar": 1,
+      "baseSkill3": 54037,
+      "baseSkill4": 54038,
+      "baseSkill5": 54039,
+      "breachGoods": [
+        [211613, 0],
+        [211613, 0],
+        [211613, 0],
+        [211613, 0],
+        [211613, 0]
+      ],
+      "starMaxLevel": 5,
+      "starGoods": [
+        [211613, 6000],
+        [211613, 15000],
+        [211613, 30000],
+        [211613, 60000]
+      ],
+      "needPieces": [211613, 3000],
+      "piecesId": 211613,
+      "levelMax": 100,
+      "talent": 34,
+      "generalAb": 88268,
+      "loot": 1,
+      "lootLevel": 5,
+      "garrison": 1,
+      "battle": 1,
+      "lordExp": 1,
+      "refineCard": 20,
+      "refineEffect": [
+        [1, 1000],
+        [2, 1000],
+        [3, 1000],
+        [4, 1000],
+        [5, 1000]
+      ],
+      "refineEffectLock": [
+        [1, 1000],
+        [2, 3000],
+        [3, 7000],
+        [4, 15000]
+      ],
+      "refineNum": [
+        [1, 0],
+        [2, 0],
+        [3, 0],
+        [4, 0],
+        [5, 0]
+      ],
+      "unlockLevel": [
+        [1, 1],
+        [2, 1],
+        [3, 30]
+      ],
+      "unlockStar": [
+        [1, 1],
+        [2, 1],
+        [3, 1],
+        [4, 3]
+      ],
+      "unlockGoodsNum": [
+        [1, 0],
+        [2, 0],
+        [3, 1],
+        [4, 1]
+      ],
+      "goodsId": 211453
+    }
+  },
+  {
+    "identity": "zhuge-liang",
+    "name": "Zhuge Liang",
+    "nativeId": 53534,
+    "definition": {
+      "id": 53534,
+      "newAccMaxLv": 100,
+      "isUnlock": 1,
+      "name": 169424,
+      "type": 1,
+      "gender": 1,
+      "baseLevel": 1,
+      "baseQuality": 1,
+      "baseSkill": 54040,
+      "baseStar": 1,
+      "baseSkill3": 54042,
+      "baseSkill4": 54043,
+      "baseSkill5": 54044,
+      "breachGoods": [
+        [211628, 0],
+        [211628, 0],
+        [211628, 0],
+        [211628, 0],
+        [211628, 0]
+      ],
+      "starMaxLevel": 5,
+      "starGoods": [
+        [211628, 6000],
+        [211628, 15000],
+        [211628, 30000],
+        [211628, 60000]
+      ],
+      "needPieces": [211628, 3000],
+      "piecesId": 211628,
+      "levelMax": 100,
+      "talent": 35,
+      "generalAb": 88269,
+      "loot": 1,
+      "lootLevel": 5,
+      "garrison": 1,
+      "battle": 1,
+      "lordExp": 1,
+      "refineCard": 20,
+      "refineEffect": [
+        [1, 1000],
+        [2, 1000],
+        [3, 1000],
+        [4, 1000],
+        [5, 1000]
+      ],
+      "refineEffectLock": [
+        [1, 1000],
+        [2, 3000],
+        [3, 7000],
+        [4, 15000]
+      ],
+      "refineNum": [
+        [1, 0],
+        [2, 0],
+        [3, 0],
+        [4, 0],
+        [5, 0]
+      ],
+      "unlockLevel": [
+        [1, 1],
+        [2, 1],
+        [3, 30]
+      ],
+      "unlockStar": [
+        [1, 1],
+        [2, 1],
+        [3, 1],
+        [4, 3]
+      ],
+      "unlockGoodsNum": [
+        [1, 0],
+        [2, 0],
+        [3, 1],
+        [4, 1]
+      ],
+      "goodsId": 211453
+    }
+  },
+  {
+    "identity": "xun-yu",
+    "name": "Xun Yu",
+    "nativeId": 53535,
+    "definition": {
+      "id": 53535,
+      "newAccMaxLv": 100,
+      "isUnlock": 1,
+      "name": 169425,
+      "type": 0,
+      "gender": 1,
+      "baseLevel": 1,
+      "baseQuality": 1,
+      "baseSkill": 54045,
+      "baseStar": 1,
+      "baseSkill3": 54047,
+      "baseSkill4": 54048,
+      "baseSkill5": 54049,
+      "breachGoods": [
+        [211629, 0],
+        [211629, 0],
+        [211629, 0],
+        [211629, 0],
+        [211629, 0]
+      ],
+      "starMaxLevel": 5,
+      "starGoods": [
+        [211629, 6000],
+        [211629, 15000],
+        [211629, 30000],
+        [211629, 60000]
+      ],
+      "needPieces": [211629, 3000],
+      "piecesId": 211629,
+      "levelMax": 100,
+      "talent": 36,
+      "generalAb": 88270,
+      "loot": 1,
+      "lootLevel": 5,
+      "garrison": 1,
+      "battle": 1,
+      "lordExp": 1,
+      "refineCard": 20,
+      "refineEffect": [
+        [1, 1000],
+        [2, 1000],
+        [3, 1000],
+        [4, 1000],
+        [5, 1000]
+      ],
+      "refineEffectLock": [
+        [1, 1000],
+        [2, 3000],
+        [3, 7000],
+        [4, 15000]
+      ],
+      "refineNum": [
+        [1, 0],
+        [2, 0],
+        [3, 0],
+        [4, 0],
+        [5, 0]
+      ],
+      "unlockLevel": [
+        [1, 1],
+        [2, 1],
+        [3, 30]
+      ],
+      "unlockStar": [
+        [1, 1],
+        [2, 1],
+        [3, 1],
+        [4, 3]
+      ],
+      "unlockGoodsNum": [
+        [1, 0],
+        [2, 0],
+        [3, 1],
+        [4, 1]
+      ],
+      "goodsId": 211453
+    }
+  },
+  {
+    "identity": "sun-wu",
+    "name": "Sun Wu",
+    "nativeId": 53536,
+    "definition": {
+      "id": 53536,
+      "newAccMaxLv": 100,
+      "isUnlock": 1,
+      "name": 169426,
+      "type": 0,
+      "gender": 1,
+      "baseLevel": 1,
+      "baseQuality": 1,
+      "baseSkill": 54050,
+      "baseStar": 1,
+      "baseSkill3": 54052,
+      "baseSkill4": 54053,
+      "baseSkill5": 54054,
+      "breachGoods": [
+        [211614, 0],
+        [211614, 0],
+        [211614, 0],
+        [211614, 0],
+        [211614, 0]
+      ],
+      "starMaxLevel": 5,
+      "starGoods": [
+        [211630, 6000],
+        [211630, 15000],
+        [211630, 30000],
+        [211630, 60000]
+      ],
+      "needPieces": [211630, 3000],
+      "piecesId": 211630,
+      "levelMax": 100,
+      "talent": 37,
+      "generalAb": 88271,
+      "loot": 1,
+      "lootLevel": 5,
+      "garrison": 1,
+      "battle": 1,
+      "lordExp": 1,
+      "refineCard": 20,
+      "refineEffect": [
+        [1, 1000],
+        [2, 1000],
+        [3, 1000],
+        [4, 1000],
+        [5, 1000]
+      ],
+      "refineEffectLock": [
+        [1, 1000],
+        [2, 3000],
+        [3, 7000],
+        [4, 15000]
+      ],
+      "refineNum": [
+        [1, 0],
+        [2, 0],
+        [3, 0],
+        [4, 0],
+        [5, 0]
+      ],
+      "unlockLevel": [
+        [1, 1],
+        [2, 1],
+        [3, 30]
+      ],
+      "unlockStar": [
+        [1, 1],
+        [2, 1],
+        [3, 1],
+        [4, 3]
+      ],
+      "unlockGoodsNum": [
+        [1, 0],
+        [2, 0],
+        [3, 1],
+        [4, 1]
+      ],
+      "goodsId": 211453
+    }
+  },
+  {
+    "identity": "vitruvius",
+    "name": "Vitruvius",
+    "nativeId": 53537,
+    "definition": {
+      "id": 53537,
+      "newAccMaxLv": 100,
+      "isUnlock": 1,
+      "name": 169427,
+      "type": 1,
+      "gender": 1,
+      "baseLevel": 1,
+      "baseQuality": 1,
+      "baseSkill": 54055,
+      "baseStar": 1,
+      "baseSkill3": 54057,
+      "baseSkill4": 54058,
+      "baseSkill5": 54059,
+      "breachGoods": [
+        [211630, 0],
+        [211630, 0],
+        [211630, 0],
+        [211630, 0],
+        [211630, 0]
+      ],
+      "starMaxLevel": 5,
+      "starGoods": [
+        [211631, 6000],
+        [211631, 15000],
+        [211631, 30000],
+        [211631, 60000]
+      ],
+      "needPieces": [211631, 3000],
+      "piecesId": 211631,
+      "levelMax": 100,
+      "talent": 38,
+      "generalAb": 88272,
+      "loot": 1,
+      "lootLevel": 5,
+      "garrison": 1,
+      "battle": 1,
+      "lordExp": 1,
+      "refineCard": 20,
+      "refineEffect": [
+        [1, 1000],
+        [2, 1000],
+        [3, 1000],
+        [4, 1000],
+        [5, 1000]
+      ],
+      "refineEffectLock": [
+        [1, 1000],
+        [2, 3000],
+        [3, 7000],
+        [4, 15000]
+      ],
+      "refineNum": [
+        [1, 0],
+        [2, 0],
+        [3, 0],
+        [4, 0],
+        [5, 0]
+      ],
+      "unlockLevel": [
+        [1, 1],
+        [2, 1],
+        [3, 30]
+      ],
+      "unlockStar": [
+        [1, 1],
+        [2, 1],
+        [3, 1],
+        [4, 3]
+      ],
+      "unlockGoodsNum": [
+        [1, 0],
+        [2, 0],
+        [3, 1],
+        [4, 1]
+      ],
+      "goodsId": 211453
+    }
+  },
+  {
+    "identity": "hippocrates",
+    "name": "Hippocrates",
+    "nativeId": 53538,
+    "definition": {
+      "id": 53538,
+      "newAccMaxLv": 100,
+      "isUnlock": 1,
+      "name": 169428,
+      "type": 1,
+      "gender": 1,
+      "baseLevel": 1,
+      "baseQuality": 1,
+      "baseSkill": 54060,
+      "baseStar": 1,
+      "baseSkill3": 54062,
+      "baseSkill4": 54063,
+      "baseSkill5": 54064,
+      "breachGoods": [
+        [211632, 0],
+        [211632, 0],
+        [211632, 0],
+        [211632, 0],
+        [211632, 0]
+      ],
+      "starMaxLevel": 5,
+      "starGoods": [
+        [211632, 6000],
+        [211632, 15000],
+        [211632, 30000],
+        [211632, 60000]
+      ],
+      "needPieces": [211632, 3000],
+      "piecesId": 211632,
+      "levelMax": 100,
+      "talent": 39,
+      "generalAb": 88273,
+      "loot": 1,
+      "lootLevel": 5,
+      "garrison": 1,
+      "battle": 1,
+      "lordExp": 1,
+      "refineCard": 20,
+      "refineEffect": [
+        [1, 1000],
+        [2, 1000],
+        [3, 1000],
+        [4, 1000],
+        [5, 1000]
+      ],
+      "refineEffectLock": [
+        [1, 1000],
+        [2, 3000],
+        [3, 7000],
+        [4, 15000]
+      ],
+      "refineNum": [
+        [1, 0],
+        [2, 0],
+        [3, 0],
+        [4, 0],
+        [5, 0]
+      ],
+      "unlockLevel": [
+        [1, 1],
+        [2, 1],
+        [3, 30]
+      ],
+      "unlockStar": [
+        [1, 1],
+        [2, 1],
+        [3, 1],
+        [4, 3]
+      ],
+      "unlockGoodsNum": [
+        [1, 0],
+        [2, 0],
+        [3, 1],
+        [4, 1]
+      ],
+      "goodsId": 211453
+    }
+  },
+  {
+    "identity": "lu-su",
+    "name": "Lu Su",
+    "nativeId": 53539,
+    "definition": {
+      "id": 53539,
+      "newAccMaxLv": 100,
+      "isUnlock": 1,
+      "name": 169433,
+      "type": 0,
+      "gender": 1,
+      "baseLevel": 1,
+      "baseQuality": 1,
+      "baseSkill": 54065,
+      "baseStar": 1,
+      "baseSkill3": 54067,
+      "baseSkill4": 54068,
+      "baseSkill5": 54069,
+      "breachGoods": [
+        [211633, 0],
+        [211633, 0],
+        [211633, 0],
+        [211633, 0],
+        [211633, 0]
+      ],
+      "starMaxLevel": 5,
+      "starGoods": [
+        [211633, 6000],
+        [211633, 15000],
+        [211633, 30000],
+        [211633, 60000]
+      ],
+      "needPieces": [211633, 3000],
+      "piecesId": 211633,
+      "levelMax": 100,
+      "talent": 40,
+      "generalAb": 88274,
+      "loot": 1,
+      "lootLevel": 5,
+      "garrison": 1,
+      "battle": 1,
+      "lordExp": 1,
+      "refineCard": 20,
+      "refineEffect": [
+        [1, 1000],
+        [2, 1000],
+        [3, 1000],
+        [4, 1000],
+        [5, 1000]
+      ],
+      "refineEffectLock": [
+        [1, 1000],
+        [2, 3000],
+        [3, 7000],
+        [4, 15000]
+      ],
+      "refineNum": [
+        [1, 0],
+        [2, 0],
+        [3, 0],
+        [4, 0],
+        [5, 0]
+      ],
+      "unlockLevel": [
+        [1, 1],
+        [2, 1],
+        [3, 30]
+      ],
+      "unlockStar": [
+        [1, 1],
+        [2, 1],
+        [3, 1],
+        [4, 3]
+      ],
+      "unlockGoodsNum": [
+        [1, 0],
+        [2, 0],
+        [3, 1],
+        [4, 1]
+      ],
+      "goodsId": 211453
+    }
+  },
+  {
+    "identity": "saito-dosan",
+    "name": "Saitō Dōsan",
+    "nativeId": 53540,
+    "definition": {
+      "id": 53540,
+      "newAccMaxLv": 100,
+      "isUnlock": 1,
+      "name": 169434,
+      "type": 0,
+      "gender": 1,
+      "baseLevel": 1,
+      "baseQuality": 1,
+      "baseSkill": 54070,
+      "baseStar": 1,
+      "baseSkill3": 54072,
+      "baseSkill4": 54073,
+      "baseSkill5": 54074,
+      "breachGoods": [
+        [211634, 0],
+        [211634, 0],
+        [211634, 0],
+        [211634, 0],
+        [211634, 0]
+      ],
+      "starMaxLevel": 5,
+      "starGoods": [
+        [211634, 6000],
+        [211634, 15000],
+        [211634, 30000],
+        [211634, 60000]
+      ],
+      "needPieces": [211634, 3000],
+      "piecesId": 211634,
+      "levelMax": 100,
+      "talent": 41,
+      "generalAb": 88275,
+      "loot": 1,
+      "lootLevel": 5,
+      "garrison": 1,
+      "battle": 1,
+      "lordExp": 1,
+      "refineCard": 20,
+      "refineEffect": [
+        [1, 1000],
+        [2, 1000],
+        [3, 1000],
+        [4, 1000],
+        [5, 1000]
+      ],
+      "refineEffectLock": [
+        [1, 1000],
+        [2, 3000],
+        [3, 7000],
+        [4, 15000]
+      ],
+      "refineNum": [
+        [1, 0],
+        [2, 0],
+        [3, 0],
+        [4, 0],
+        [5, 0]
+      ],
+      "unlockLevel": [
+        [1, 1],
+        [2, 1],
+        [3, 30]
+      ],
+      "unlockStar": [
+        [1, 1],
+        [2, 1],
+        [3, 1],
+        [4, 3]
+      ],
+      "unlockGoodsNum": [
+        [1, 0],
+        [2, 0],
+        [3, 1],
+        [4, 1]
+      ],
+      "goodsId": 211453
+    }
+  },
+  {
+    "identity": "sen-no-rikyu",
+    "name": "Sen no Rikyū",
+    "nativeId": 53541,
+    "definition": {
+      "id": 53541,
+      "newAccMaxLv": 100,
+      "isUnlock": 1,
+      "name": 169435,
+      "type": 0,
+      "gender": 1,
+      "baseLevel": 1,
+      "baseQuality": 1,
+      "baseSkill": 54075,
+      "baseStar": 1,
+      "baseSkill3": 54077,
+      "baseSkill4": 54078,
+      "baseSkill5": 54079,
+      "breachGoods": [
+        [211635, 0],
+        [211635, 0],
+        [211635, 0],
+        [211635, 0],
+        [211635, 0]
+      ],
+      "starMaxLevel": 5,
+      "starGoods": [
+        [211635, 6000],
+        [211635, 15000],
+        [211635, 30000],
+        [211635, 60000]
+      ],
+      "needPieces": [211635, 3000],
+      "piecesId": 211635,
+      "levelMax": 100,
+      "talent": 42,
+      "generalAb": 88276,
+      "loot": 1,
+      "lootLevel": 5,
+      "garrison": 1,
+      "battle": 1,
+      "lordExp": 1,
+      "refineCard": 20,
+      "refineEffect": [
+        [1, 1000],
+        [2, 1000],
+        [3, 1000],
+        [4, 1000],
+        [5, 1000]
+      ],
+      "refineEffectLock": [
+        [1, 1000],
+        [2, 3000],
+        [3, 7000],
+        [4, 15000]
+      ],
+      "refineNum": [
+        [1, 0],
+        [2, 0],
+        [3, 0],
+        [4, 0],
+        [5, 0]
+      ],
+      "unlockLevel": [
+        [1, 1],
+        [2, 1],
+        [3, 30]
+      ],
+      "unlockStar": [
+        [1, 1],
+        [2, 1],
+        [3, 1],
+        [4, 3]
+      ],
+      "unlockGoodsNum": [
+        [1, 0],
+        [2, 0],
+        [3, 1],
+        [4, 1]
+      ],
+      "goodsId": 211453
+    }
+  },
+  {
+    "identity": "creator",
+    "name": "Creator",
+    "nativeId": 53542,
+    "definition": {
+      "id": 53542,
+      "newAccMaxLv": 100,
+      "isUnlock": 1,
+      "name": 169460,
+      "type": 0,
+      "gender": 1,
+      "baseLevel": 1,
+      "baseQuality": 1,
+      "baseSkill": 53952,
+      "baseStar": 1,
+      "baseSkill3": 53954,
+      "baseSkill4": 54092,
+      "baseSkill5": "",
+      "breachGoods": [
+        [211636, 0],
+        [211636, 0],
+        [211636, 0],
+        [211636, 0],
+        [211636, 0]
+      ],
+      "starMaxLevel": 4,
+      "starGoods": [
+        [211636, 6000],
+        [211636, 12000],
+        [211636, 24000],
+        [211636, 48000]
+      ],
+      "needPieces": [211636, 3000],
+      "piecesId": 211636,
+      "levelMax": 100,
+      "talent": 43,
+      "generalAb": 88277,
+      "loot": 1,
+      "lootLevel": 5,
+      "garrison": 1,
+      "battle": 1,
+      "lordExp": 1,
+      "refineCard": 20,
+      "refineEffect": [
+        [1, 1000],
+        [2, 1000],
+        [3, 1000],
+        [4, 1000],
+        [5, 1000]
+      ],
+      "refineEffectLock": [
+        [1, 1000],
+        [2, 3000],
+        [3, 7000],
+        [4, 15000]
+      ],
+      "refineNum": [
+        [1, 0],
+        [2, 0],
+        [3, 0],
+        [4, 0],
+        [5, 0]
+      ],
+      "unlockLevel": [
+        [1, 1],
+        [2, 1],
+        [3, 30]
+      ],
+      "unlockStar": [
+        [1, 1],
+        [2, 1],
+        [3, 1],
+        [4, 3]
+      ],
+      "unlockGoodsNum": [
+        [1, 0],
+        [2, 0],
+        [3, 1],
+        [4, 1]
+      ],
+      "goodsId": 211453
+    }
+  },
+  {
+    "identity": "sonya",
+    "name": "Sonya",
+    "nativeId": 53543,
+    "definition": {
+      "id": 53543,
+      "newAccMaxLv": 100,
+      "isUnlock": 1,
+      "name": 169461,
+      "type": 0,
+      "gender": 2,
+      "baseLevel": 1,
+      "baseQuality": 1,
+      "baseSkill": 54080,
+      "baseStar": 1,
+      "baseSkill3": 54082,
+      "baseSkill4": 54083,
+      "baseSkill5": "",
+      "breachGoods": [
+        [211637, 0],
+        [211637, 0],
+        [211637, 0],
+        [211637, 0],
+        [211637, 0]
+      ],
+      "starMaxLevel": 4,
+      "starGoods": [
+        [211637, 6000],
+        [211637, 12000],
+        [211637, 24000],
+        [211637, 48000]
+      ],
+      "needPieces": [211637, 3000],
+      "piecesId": 211637,
+      "levelMax": 100,
+      "talent": 44,
+      "generalAb": 88278,
+      "loot": 1,
+      "lootLevel": 5,
+      "garrison": 1,
+      "battle": 1,
+      "lordExp": 1,
+      "refineCard": 20,
+      "refineEffect": [
+        [1, 1000],
+        [2, 1000],
+        [3, 1000],
+        [4, 1000],
+        [5, 1000]
+      ],
+      "refineEffectLock": [
+        [1, 1000],
+        [2, 3000],
+        [3, 7000],
+        [4, 15000]
+      ],
+      "refineNum": [
+        [1, 0],
+        [2, 0],
+        [3, 0],
+        [4, 0],
+        [5, 0]
+      ],
+      "unlockLevel": [
+        [1, 1],
+        [2, 1],
+        [3, 30]
+      ],
+      "unlockStar": [
+        [1, 1],
+        [2, 1],
+        [3, 1],
+        [4, 3]
+      ],
+      "unlockGoodsNum": [
+        [1, 0],
+        [2, 0],
+        [3, 1],
+        [4, 1]
+      ],
+      "goodsId": 211453
+    }
+  },
+  {
+    "identity": "goddess-of-harvest",
+    "name": "Goddess of Harvest",
+    "nativeId": 53544,
+    "definition": {
+      "id": 53544,
+      "newAccMaxLv": 100,
+      "isUnlock": 1,
+      "name": 169468,
+      "type": 0,
+      "gender": 2,
+      "baseLevel": 1,
+      "baseQuality": 1,
+      "baseSkill": 54085,
+      "baseStar": 1,
+      "baseSkill3": 54087,
+      "baseSkill4": "",
+      "baseSkill5": "",
+      "breachGoods": [
+        [211638, 0],
+        [211638, 0],
+        [211638, 0],
+        [211638, 0],
+        [211638, 0]
+      ],
+      "starMaxLevel": 3,
+      "starGoods": [
+        [211638, 6000],
+        [211638, 15000],
+        [211638, 30000],
+        [211638, 60000]
+      ],
+      "needPieces": [211638, 3000],
+      "piecesId": 211638,
+      "levelMax": 100,
+      "talent": 45,
+      "generalAb": 88279,
+      "loot": 1,
+      "lootLevel": 5,
+      "garrison": 1,
+      "battle": 1,
+      "lordExp": 1,
+      "refineCard": 20,
+      "refineEffect": [
+        [1, 1000],
+        [2, 1000],
+        [3, 1000],
+        [4, 1000],
+        [5, 1000]
+      ],
+      "refineEffectLock": [
+        [1, 1000],
+        [2, 3000],
+        [3, 7000],
+        [4, 15000]
+      ],
+      "refineNum": [
+        [1, 0],
+        [2, 0],
+        [3, 0],
+        [4, 0],
+        [5, 0]
+      ],
+      "unlockLevel": [
+        [1, 1],
+        [2, 1],
+        [3, 30]
+      ],
+      "unlockStar": [
+        [1, 1],
+        [2, 1],
+        [3, 1],
+        [4, 3]
+      ],
+      "unlockGoodsNum": [
+        [1, 0],
+        [2, 0],
+        [3, 1],
+        [4, 1]
+      ],
+      "goodsId": 211453
+    }
+  },
+  {
+    "identity": "demogorgon",
+    "name": "Demogorgon",
+    "nativeId": 53545,
+    "definition": {
+      "id": 53545,
+      "newAccMaxLv": 100,
+      "isUnlock": 1,
+      "name": 169439,
+      "type": 0,
+      "gender": 1,
+      "baseLevel": 1,
+      "baseQuality": 1,
+      "baseSkill": 54095,
+      "baseStar": 1,
+      "baseSkill3": 54097,
+      "baseSkill4": "",
+      "baseSkill5": "",
+      "breachGoods": [
+        [213267, 0],
+        [213267, 0],
+        [213267, 0],
+        [213267, 0],
+        [213267, 0]
+      ],
+      "starMaxLevel": 3,
+      "starGoods": [
+        [213267, 6000],
+        [213267, 15000],
+        [213267, 30000],
+        [213267, 60000]
+      ],
+      "needPieces": [213267, 3000],
+      "piecesId": 213267,
+      "levelMax": 100,
+      "talent": 46,
+      "generalAb": 88280,
+      "loot": 1,
+      "lootLevel": 5,
+      "garrison": 1,
+      "battle": 1,
+      "lordExp": 1,
+      "refineCard": 20,
+      "refineEffect": [
+        [1, 1000],
+        [2, 1000],
+        [3, 1000],
+        [4, 1000],
+        [5, 1000]
+      ],
+      "refineEffectLock": [
+        [1, 1000],
+        [2, 3000],
+        [3, 7000],
+        [4, 15000]
+      ],
+      "refineNum": [
+        [1, 0],
+        [2, 0],
+        [3, 0],
+        [4, 0],
+        [5, 0]
+      ],
+      "unlockLevel": [
+        [1, 1],
+        [2, 1],
+        [3, 30]
+      ],
+      "unlockStar": [
+        [1, 1],
+        [2, 1],
+        [3, 1],
+        [4, 3]
+      ],
+      "unlockGoodsNum": [
+        [1, 0],
+        [2, 0],
+        [3, 1],
+        [4, 1]
+      ],
+      "goodsId": 211453
+    }
+  },
+  {
+    "identity": "priest",
+    "name": "Priest",
+    "nativeId": 53546,
+    "definition": {
+      "id": 53546,
+      "newAccMaxLv": 100,
+      "isUnlock": 1,
+      "name": 169467,
+      "type": 1,
+      "gender": 1,
+      "baseLevel": 1,
+      "baseQuality": 1,
+      "baseSkill": 54100,
+      "baseStar": 1,
+      "baseSkill3": 54102,
+      "baseSkill4": "",
+      "baseSkill5": "",
+      "breachGoods": [
+        [213268, 0],
+        [213268, 0],
+        [213268, 0],
+        [213268, 0],
+        [213268, 0]
+      ],
+      "starMaxLevel": 3,
+      "starGoods": [
+        [213268, 6000],
+        [213268, 30000],
+        [213268, 30000],
+        [213268, 60000]
+      ],
+      "needPieces": [213268, 3000],
+      "piecesId": 213268,
+      "levelMax": 100,
+      "talent": 47,
+      "generalAb": 88281,
+      "loot": 1,
+      "lootLevel": 5,
+      "garrison": 1,
+      "battle": 1,
+      "lordExp": 1,
+      "refineCard": 20,
+      "refineEffect": [
+        [1, 1000],
+        [2, 1000],
+        [3, 1000],
+        [4, 1000],
+        [5, 1000]
+      ],
+      "refineEffectLock": [
+        [1, 1000],
+        [2, 3000],
+        [3, 7000],
+        [4, 15000]
+      ],
+      "refineNum": [
+        [1, 0],
+        [2, 0],
+        [3, 0],
+        [4, 0],
+        [5, 0]
+      ],
+      "unlockLevel": [
+        [1, 1],
+        [2, 1],
+        [3, 30]
+      ],
+      "unlockStar": [
+        [1, 1],
+        [2, 1],
+        [3, 1],
+        [4, 3]
+      ],
+      "unlockGoodsNum": [
+        [1, 0],
+        [2, 0],
+        [3, 1],
+        [4, 1]
+      ],
+      "goodsId": 211453
+    }
+  },
+  {
+    "identity": "wasteland-warrior",
+    "name": "Wasteland Warrior",
+    "nativeId": 53547,
+    "definition": {
+      "id": 53547,
+      "newAccMaxLv": 100,
+      "isUnlock": 1,
+      "name": 169441,
+      "type": 1,
+      "gender": 1,
+      "baseLevel": 1,
+      "baseQuality": 1,
+      "baseSkill": 54105,
+      "baseStar": 1,
+      "baseSkill3": 54107,
+      "baseSkill4": "",
+      "baseSkill5": "",
+      "breachGoods": [
+        [213269, 0],
+        [213269, 0],
+        [213269, 0],
+        [213269, 0],
+        [213269, 0]
+      ],
+      "starMaxLevel": 3,
+      "starGoods": [
+        [213269, 6000],
+        [213269, 15000],
+        [213269, 30000],
+        [213269, 60000]
+      ],
+      "needPieces": [213269, 3000],
+      "piecesId": 213269,
+      "levelMax": 100,
+      "talent": 48,
+      "generalAb": 88282,
+      "loot": 1,
+      "lootLevel": 5,
+      "garrison": 1,
+      "battle": 1,
+      "lordExp": 1,
+      "refineCard": 20,
+      "refineEffect": [
+        [1, 1000],
+        [2, 1000],
+        [3, 1000],
+        [4, 1000],
+        [5, 1000]
+      ],
+      "refineEffectLock": [
+        [1, 1000],
+        [2, 3000],
+        [3, 7000],
+        [4, 15000]
+      ],
+      "refineNum": [
+        [1, 1],
+        [2, 1],
+        [3, 1],
+        [4, 0],
+        [5, 0]
+      ],
+      "unlockLevel": [
+        [1, 1],
+        [2, 1],
+        [3, 30]
+      ],
+      "unlockStar": "",
+      "unlockGoodsNum": [
+        [1, 0],
+        [2, 0],
+        [3, 1],
+        [4, 1]
+      ],
+      "goodsId": 211453
+    }
+  },
+  {
+    "identity": "death-knight",
+    "name": "Death Knight",
+    "nativeId": 53548,
+    "definition": {
+      "id": 53548,
+      "newAccMaxLv": 100,
+      "isUnlock": 1,
+      "name": 169431,
+      "type": 1,
+      "gender": 2,
+      "baseLevel": 1,
+      "baseQuality": 1,
+      "baseSkill": 54110,
+      "baseStar": 1,
+      "baseSkill3": 54112,
+      "baseSkill4": "",
+      "baseSkill5": "",
+      "breachGoods": [
+        [213270, 0],
+        [213270, 0],
+        [213270, 0],
+        [213270, 0],
+        [213270, 0]
+      ],
+      "starMaxLevel": 3,
+      "starGoods": [
+        [213270, 6000],
+        [213270, 15000],
+        [213270, 30000],
+        [213270, 60000]
+      ],
+      "needPieces": [213270, 3000],
+      "piecesId": 213270,
+      "levelMax": 100,
+      "talent": 49,
+      "generalAb": 88283,
+      "loot": 1,
+      "lootLevel": 5,
+      "garrison": 1,
+      "battle": 1,
+      "lordExp": 1,
+      "refineCard": 20,
+      "refineEffect": [
+        [1, 1000],
+        [2, 1000],
+        [3, 1000],
+        [4, 1000],
+        [5, 1000]
+      ],
+      "refineEffectLock": [
+        [1, 1000],
+        [2, 3000],
+        [3, 7000],
+        [4, 15000]
+      ],
+      "refineNum": [
+        [1, 1],
+        [2, 1],
+        [3, 1],
+        [4, 0],
+        [5, 0]
+      ],
+      "unlockLevel": [
+        [1, 1],
+        [2, 1],
+        [3, 30]
+      ],
+      "unlockStar": "",
+      "unlockGoodsNum": [
+        [1, 0],
+        [2, 0],
+        [3, 1],
+        [4, 1]
+      ],
+      "goodsId": 211453
+    }
+  },
+  {
+    "identity": "wind-ranger",
+    "name": "Wind Ranger",
+    "nativeId": 53549,
+    "definition": {
+      "id": 53549,
+      "newAccMaxLv": 100,
+      "isUnlock": 1,
+      "name": 169443,
+      "type": 1,
+      "gender": 1,
+      "baseLevel": 1,
+      "baseQuality": 1,
+      "baseSkill": 54115,
+      "baseStar": 1,
+      "baseSkill3": 54117,
+      "baseSkill4": "",
+      "baseSkill5": "",
+      "breachGoods": [
+        [213271, 0],
+        [213271, 0],
+        [213271, 0],
+        [213271, 0],
+        [213271, 0]
+      ],
+      "starMaxLevel": 3,
+      "starGoods": [
+        [213271, 6000],
+        [213271, 15000],
+        [213271, 30000],
+        [213271, 60000]
+      ],
+      "needPieces": [213271, 3000],
+      "piecesId": 213271,
+      "levelMax": 100,
+      "talent": 50,
+      "generalAb": 88284,
+      "loot": 1,
+      "lootLevel": 5,
+      "garrison": 1,
+      "battle": 1,
+      "lordExp": 1,
+      "refineCard": 20,
+      "refineEffect": [
+        [1, 1000],
+        [2, 1000],
+        [3, 1000],
+        [4, 1000],
+        [5, 1000]
+      ],
+      "refineEffectLock": [
+        [1, 1000],
+        [2, 3000],
+        [3, 7000],
+        [4, 15000]
+      ],
+      "refineNum": [
+        [1, 1],
+        [2, 1],
+        [3, 1],
+        [4, 0],
+        [5, 0]
+      ],
+      "unlockLevel": [
+        [1, 1],
+        [2, 1],
+        [3, 30]
+      ],
+      "unlockStar": "",
+      "unlockGoodsNum": [
+        [1, 0],
+        [2, 0],
+        [3, 1],
+        [4, 1]
+      ],
+      "goodsId": 211453
+    }
+  },
+  {
+    "identity": "warsong-master",
+    "name": "Warsong Master",
+    "nativeId": 53550,
+    "definition": {
+      "id": 53550,
+      "newAccMaxLv": 100,
+      "isUnlock": 1,
+      "name": 169463,
+      "type": 1,
+      "gender": 1,
+      "baseLevel": 1,
+      "baseQuality": 1,
+      "baseSkill": 54120,
+      "baseStar": 1,
+      "baseSkill3": 54122,
+      "baseSkill4": "",
+      "baseSkill5": "",
+      "breachGoods": [
+        [213272, 0],
+        [213272, 0],
+        [213272, 0],
+        [213272, 0],
+        [213272, 0]
+      ],
+      "starMaxLevel": 3,
+      "starGoods": [
+        [213272, 6000],
+        [213272, 15000],
+        [213272, 30000],
+        [213272, 60000]
+      ],
+      "needPieces": [213272, 3000],
+      "piecesId": 213272,
+      "levelMax": 100,
+      "talent": 51,
+      "generalAb": 88285,
+      "loot": 1,
+      "lootLevel": 5,
+      "garrison": 1,
+      "battle": 1,
+      "lordExp": 1,
+      "refineCard": 20,
+      "refineEffect": [
+        [1, 1000],
+        [2, 1000],
+        [3, 1000],
+        [4, 1000],
+        [5, 1000]
+      ],
+      "refineEffectLock": [
+        [1, 1000],
+        [2, 3000],
+        [3, 7000],
+        [4, 15000]
+      ],
+      "refineNum": [
+        [1, 1],
+        [2, 1],
+        [3, 1],
+        [4, 0],
+        [5, 0]
+      ],
+      "unlockLevel": [
+        [1, 1],
+        [2, 1],
+        [3, 30]
+      ],
+      "unlockStar": "",
+      "unlockGoodsNum": [
+        [1, 0],
+        [2, 0],
+        [3, 1],
+        [4, 1]
+      ],
+      "goodsId": 211453
+    }
+  },
+  {
+    "identity": "warhammer",
+    "name": "Warhammer",
+    "nativeId": 53551,
+    "definition": {
+      "id": 53551,
+      "newAccMaxLv": 100,
+      "isUnlock": 1,
+      "name": 169464,
+      "type": 1,
+      "gender": 1,
+      "baseLevel": 1,
+      "baseQuality": 1,
+      "baseSkill": 54125,
+      "baseStar": 1,
+      "baseSkill3": 54127,
+      "baseSkill4": "",
+      "baseSkill5": "",
+      "breachGoods": [
+        [213273, 0],
+        [213273, 0],
+        [213273, 0],
+        [213273, 0],
+        [213273, 0]
+      ],
+      "starMaxLevel": 3,
+      "starGoods": [
+        [213273, 6000],
+        [213273, 15000],
+        [213273, 30000],
+        [213273, 60000]
+      ],
+      "needPieces": [213273, 3000],
+      "piecesId": 213273,
+      "levelMax": 100,
+      "talent": 52,
+      "generalAb": 88286,
+      "loot": 1,
+      "lootLevel": 5,
+      "garrison": 1,
+      "battle": 1,
+      "lordExp": 1,
+      "refineCard": 20,
+      "refineEffect": [
+        [1, 1000],
+        [2, 1000],
+        [3, 1000],
+        [4, 1000],
+        [5, 1000]
+      ],
+      "refineEffectLock": [
+        [1, 1000],
+        [2, 3000],
+        [3, 7000],
+        [4, 15000]
+      ],
+      "refineNum": [
+        [1, 1],
+        [2, 1],
+        [3, 1],
+        [4, 0],
+        [5, 0]
+      ],
+      "unlockLevel": [
+        [1, 1],
+        [2, 1],
+        [3, 30]
+      ],
+      "unlockStar": "",
+      "unlockGoodsNum": [
+        [1, 0],
+        [2, 0],
+        [3, 1],
+        [4, 1]
+      ],
+      "goodsId": 211453
+    }
+  },
+  {
+    "identity": "phantom",
+    "name": "Phantom",
+    "nativeId": 53552,
+    "definition": {
+      "id": 53552,
+      "newAccMaxLv": 100,
+      "isUnlock": 1,
+      "name": 169465,
+      "type": 1,
+      "gender": 1,
+      "baseLevel": 1,
+      "baseQuality": 1,
+      "baseSkill": 54130,
+      "baseStar": 1,
+      "baseSkill3": 54132,
+      "baseSkill4": "",
+      "baseSkill5": "",
+      "breachGoods": [
+        [213274, 0],
+        [213274, 0],
+        [213274, 0],
+        [213274, 0],
+        [213274, 0]
+      ],
+      "starMaxLevel": 3,
+      "starGoods": [
+        [213274, 6000],
+        [213274, 15000],
+        [213274, 30000],
+        [213274, 60000]
+      ],
+      "needPieces": [213274, 3000],
+      "piecesId": 213274,
+      "levelMax": 100,
+      "talent": 53,
+      "generalAb": 88287,
+      "loot": 1,
+      "lootLevel": 5,
+      "garrison": 1,
+      "battle": 1,
+      "lordExp": 1,
+      "refineCard": 20,
+      "refineEffect": [
+        [1, 1000],
+        [2, 1000],
+        [3, 1000],
+        [4, 1000],
+        [5, 1000]
+      ],
+      "refineEffectLock": [
+        [1, 1000],
+        [2, 3000],
+        [3, 7000],
+        [4, 15000]
+      ],
+      "refineNum": [
+        [1, 1],
+        [2, 1],
+        [3, 1],
+        [4, 0],
+        [5, 0]
+      ],
+      "unlockLevel": [
+        [1, 1],
+        [2, 1],
+        [3, 30]
+      ],
+      "unlockStar": "",
+      "unlockGoodsNum": [
+        [1, 0],
+        [2, 0],
+        [3, 1],
+        [4, 1]
+      ],
+      "goodsId": 211453
+    }
+  },
+  {
+    "identity": "soul-eater",
+    "name": "Soul Eater",
+    "nativeId": 53553,
+    "definition": {
+      "id": 53553,
+      "newAccMaxLv": 100,
+      "isUnlock": 1,
+      "name": 169466,
+      "type": 1,
+      "gender": 1,
+      "baseLevel": 1,
+      "baseQuality": 1,
+      "baseSkill": 54135,
+      "baseStar": 1,
+      "baseSkill3": 54137,
+      "baseSkill4": "",
+      "baseSkill5": "",
+      "breachGoods": [
+        [213275, 0],
+        [213275, 0],
+        [213275, 0],
+        [213275, 0],
+        [213275, 0]
+      ],
+      "starMaxLevel": 3,
+      "starGoods": [
+        [213275, 6000],
+        [213275, 15000],
+        [213275, 30000],
+        [213275, 60000]
+      ],
+      "needPieces": [213275, 3000],
+      "piecesId": 213275,
+      "levelMax": 100,
+      "talent": 54,
+      "generalAb": 88288,
+      "loot": 1,
+      "lootLevel": 5,
+      "garrison": 1,
+      "battle": 1,
+      "lordExp": 1,
+      "refineCard": 20,
+      "refineEffect": [
+        [1, 1000],
+        [2, 1000],
+        [3, 1000],
+        [4, 1000],
+        [5, 1000]
+      ],
+      "refineEffectLock": [
+        [1, 1000],
+        [2, 3000],
+        [3, 7000],
+        [4, 15000]
+      ],
+      "refineNum": [
+        [1, 1],
+        [2, 1],
+        [3, 1],
+        [4, 0],
+        [5, 0]
+      ],
+      "unlockLevel": [
+        [1, 1],
+        [2, 1],
+        [3, 30]
+      ],
+      "unlockStar": "",
+      "unlockGoodsNum": [
+        [1, 0],
+        [2, 0],
+        [3, 1],
+        [4, 1]
+      ],
+      "goodsId": 211453
+    }
+  },
+  {
+    "identity": "christmas-elf",
+    "name": "Christmas Elf",
+    "nativeId": 53554,
+    "definition": {
+      "id": 53554,
+      "newAccMaxLv": 100,
+      "isUnlock": 1,
+      "name": 169469,
+      "type": 0,
+      "gender": 2,
+      "baseLevel": 1,
+      "baseQuality": 1,
+      "baseSkill": 54143,
+      "baseStar": 1,
+      "baseSkill3": 54145,
+      "baseSkill4": "",
+      "baseSkill5": "",
+      "breachGoods": [
+        [213276, 0],
+        [213276, 0],
+        [213276, 0],
+        [213276, 0],
+        [213276, 0]
+      ],
+      "starMaxLevel": 3,
+      "starGoods": [
+        [213276, 6000],
+        [213276, 15000],
+        [213276, 30000],
+        [213276, 60000]
+      ],
+      "needPieces": [213276, 3000],
+      "piecesId": 213276,
+      "levelMax": 100,
+      "talent": 55,
+      "generalAb": 88289,
+      "loot": 1,
+      "lootLevel": 5,
+      "garrison": 1,
+      "battle": 1,
+      "lordExp": 1,
+      "refineCard": 20,
+      "refineEffect": [
+        [1, 1000],
+        [2, 1000],
+        [3, 1000],
+        [4, 1000],
+        [5, 1000]
+      ],
+      "refineEffectLock": [
+        [1, 1000],
+        [2, 3000],
+        [3, 7000],
+        [4, 15000]
+      ],
+      "refineNum": [
+        [1, 1],
+        [2, 1],
+        [3, 1],
+        [4, 0],
+        [5, 0]
+      ],
+      "unlockLevel": [
+        [1, 1],
+        [2, 1],
+        [3, 30]
+      ],
+      "unlockStar": [
+        [1, 1],
+        [2, 1],
+        [3, 1],
+        [4, 3]
+      ],
+      "unlockGoodsNum": [
+        [1, 0],
+        [2, 0],
+        [3, 1],
+        [4, 1]
+      ],
+      "goodsId": 211453
+    }
+  },
+  {
+    "identity": "arrow-of-god-of-love",
+    "name": "Arrow of God of Love",
+    "nativeId": 53555,
+    "definition": {
+      "id": 53555,
+      "newAccMaxLv": 100,
+      "isUnlock": 1,
+      "name": 169470,
+      "type": 1,
+      "gender": 2,
+      "baseLevel": 1,
+      "baseQuality": 1,
+      "baseSkill": 54148,
+      "baseStar": 1,
+      "baseSkill3": 54150,
+      "baseSkill4": "",
+      "baseSkill5": "",
+      "breachGoods": [
+        [213277, 0],
+        [213277, 0],
+        [213277, 0],
+        [213277, 0],
+        [213277, 0]
+      ],
+      "starMaxLevel": 3,
+      "starGoods": [
+        [213277, 6000],
+        [213277, 15000],
+        [213277, 30000],
+        [213277, 60000]
+      ],
+      "needPieces": [213277, 3000],
+      "piecesId": 213277,
+      "levelMax": 100,
+      "talent": 56,
+      "generalAb": 88290,
+      "loot": 1,
+      "lootLevel": 5,
+      "garrison": 1,
+      "battle": 1,
+      "lordExp": 1,
+      "refineCard": 20,
+      "refineEffect": [
+        [1, 1000],
+        [2, 1000],
+        [3, 1000],
+        [4, 1000],
+        [5, 1000]
+      ],
+      "refineEffectLock": [
+        [1, 1000],
+        [2, 3000],
+        [3, 7000],
+        [4, 15000]
+      ],
+      "refineNum": [
+        [1, 1],
+        [2, 1],
+        [3, 1],
+        [4, 0],
+        [5, 0]
+      ],
+      "unlockLevel": [
+        [1, 1],
+        [2, 1],
+        [3, 30]
+      ],
+      "unlockStar": "",
+      "unlockGoodsNum": [
+        [1, 0],
+        [2, 0],
+        [3, 1],
+        [4, 1]
+      ],
+      "goodsId": 211453
+    }
+  },
+  {
+    "identity": "wild-swordsman",
+    "name": "Wild Swordsman",
+    "nativeId": 53556,
+    "definition": {
+      "id": 53556,
+      "newAccMaxLv": 100,
+      "isUnlock": 1,
+      "name": 169471,
+      "type": 1,
+      "gender": 1,
+      "baseLevel": 1,
+      "baseQuality": 1,
+      "baseSkill": 54153,
+      "baseStar": 1,
+      "baseSkill3": 54155,
+      "baseSkill4": "",
+      "baseSkill5": "",
+      "breachGoods": [
+        [213278, 0],
+        [213278, 0],
+        [213278, 0],
+        [213278, 0],
+        [213278, 0]
+      ],
+      "starMaxLevel": 3,
+      "starGoods": [
+        [213278, 6000],
+        [213278, 15000],
+        [213278, 30000],
+        [213278, 60000]
+      ],
+      "needPieces": [213278, 3000],
+      "piecesId": 213278,
+      "levelMax": 100,
+      "talent": 57,
+      "generalAb": 88291,
+      "loot": 1,
+      "lootLevel": 5,
+      "garrison": 1,
+      "battle": 1,
+      "lordExp": 1,
+      "refineCard": 20,
+      "refineEffect": [
+        [1, 1000],
+        [2, 1000],
+        [3, 1000],
+        [4, 1000],
+        [5, 1000]
+      ],
+      "refineEffectLock": [
+        [1, 1000],
+        [2, 3000],
+        [3, 7000],
+        [4, 15000]
+      ],
+      "refineNum": [
+        [1, 1],
+        [2, 1],
+        [3, 1],
+        [4, 0],
+        [5, 0]
+      ],
+      "unlockLevel": [
+        [1, 1],
+        [2, 1],
+        [3, 30]
+      ],
+      "unlockStar": "",
+      "unlockGoodsNum": [
+        [1, 0],
+        [2, 0],
+        [3, 1],
+        [4, 1]
+      ],
+      "goodsId": 211453
+    }
+  },
+  {
+    "identity": "eagle-witch",
+    "name": "Eagle Witch",
+    "nativeId": 53557,
+    "definition": {
+      "id": 53557,
+      "newAccMaxLv": 100,
+      "isUnlock": 1,
+      "name": 169472,
+      "type": 0,
+      "gender": 2,
+      "baseLevel": 1,
+      "baseQuality": 1,
+      "baseSkill": 54158,
+      "baseStar": 1,
+      "baseSkill3": 54160,
+      "baseSkill4": "",
+      "baseSkill5": "",
+      "breachGoods": [
+        [213279, 0],
+        [213279, 0],
+        [213279, 0],
+        [213279, 0],
+        [213279, 0]
+      ],
+      "starMaxLevel": 3,
+      "starGoods": [
+        [213279, 6000],
+        [213279, 15000],
+        [213279, 30000],
+        [213279, 60000]
+      ],
+      "needPieces": [213279, 3000],
+      "piecesId": 213279,
+      "levelMax": 100,
+      "talent": 58,
+      "generalAb": 88292,
+      "loot": 1,
+      "lootLevel": 5,
+      "garrison": 1,
+      "battle": 1,
+      "lordExp": 1,
+      "refineCard": 20,
+      "refineEffect": [
+        [1, 1000],
+        [2, 1000],
+        [3, 1000],
+        [4, 1000],
+        [5, 1000]
+      ],
+      "refineEffectLock": [
+        [1, 1000],
+        [2, 3000],
+        [3, 7000],
+        [4, 15000]
+      ],
+      "refineNum": [
+        [1, 1],
+        [2, 1],
+        [3, 1],
+        [4, 0],
+        [5, 0]
+      ],
+      "unlockLevel": [
+        [1, 1],
+        [2, 1],
+        [3, 30]
+      ],
+      "unlockStar": [
+        [1, 1],
+        [2, 1],
+        [3, 1],
+        [4, 3]
+      ],
+      "unlockGoodsNum": [
+        [1, 0],
+        [2, 0],
+        [3, 1],
+        [4, 1]
+      ],
+      "goodsId": 211453
+    }
+  },
+  {
+    "identity": "holy-shield",
+    "name": "Holy Shield",
+    "nativeId": 53558,
+    "definition": {
+      "id": 53558,
+      "newAccMaxLv": 100,
+      "isUnlock": 1,
+      "name": 169473,
+      "type": 1,
+      "gender": 1,
+      "baseLevel": 1,
+      "baseQuality": 1,
+      "baseSkill": 54163,
+      "baseStar": 1,
+      "baseSkill3": 54165,
+      "baseSkill4": "",
+      "baseSkill5": "",
+      "breachGoods": [
+        [213280, 0],
+        [213280, 0],
+        [213280, 0],
+        [213280, 0],
+        [213280, 0]
+      ],
+      "starMaxLevel": 3,
+      "starGoods": [
+        [213280, 6000],
+        [213280, 15000],
+        [213280, 30000],
+        [213280, 60000]
+      ],
+      "needPieces": [213280, 3000],
+      "piecesId": 213280,
+      "levelMax": 100,
+      "talent": 59,
+      "generalAb": 88293,
+      "loot": 1,
+      "lootLevel": 5,
+      "garrison": 1,
+      "battle": 1,
+      "lordExp": 1,
+      "refineCard": 20,
+      "refineEffect": [
+        [1, 1000],
+        [2, 1000],
+        [3, 1000],
+        [4, 1000],
+        [5, 1000]
+      ],
+      "refineEffectLock": [
+        [1, 1000],
+        [2, 3000],
+        [3, 7000],
+        [4, 15000]
+      ],
+      "refineNum": [
+        [1, 1],
+        [2, 1],
+        [3, 1],
+        [4, 0],
+        [5, 0]
+      ],
+      "unlockLevel": [
+        [1, 1],
+        [2, 1],
+        [3, 30]
+      ],
+      "unlockStar": "",
+      "unlockGoodsNum": [
+        [1, 0],
+        [2, 0],
+        [3, 1],
+        [4, 1]
+      ],
+      "goodsId": 211453
+    }
+  },
+  {
+    "identity": "time-elder",
+    "name": "Time Elder",
+    "nativeId": 53559,
+    "definition": {
+      "id": 53559,
+      "newAccMaxLv": 100,
+      "isUnlock": 1,
+      "name": 169474,
+      "type": 0,
+      "gender": 1,
+      "baseLevel": 1,
+      "baseQuality": 1,
+      "baseSkill": 54168,
+      "baseStar": 1,
+      "baseSkill3": 54170,
+      "baseSkill4": "",
+      "baseSkill5": "",
+      "breachGoods": [
+        [213281, 0],
+        [213281, 0],
+        [213281, 0],
+        [213281, 0],
+        [213281, 0]
+      ],
+      "starMaxLevel": 3,
+      "starGoods": [
+        [213281, 6000],
+        [213281, 15000],
+        [213281, 30000],
+        [213281, 60000]
+      ],
+      "needPieces": [213281, 3000],
+      "piecesId": 213281,
+      "levelMax": 100,
+      "talent": 60,
+      "generalAb": 88294,
+      "loot": 1,
+      "lootLevel": 5,
+      "garrison": 1,
+      "battle": 1,
+      "lordExp": 1,
+      "refineCard": 20,
+      "refineEffect": [
+        [1, 1000],
+        [2, 1000],
+        [3, 1000],
+        [4, 1000],
+        [5, 1000]
+      ],
+      "refineEffectLock": [
+        [1, 1000],
+        [2, 3000],
+        [3, 7000],
+        [4, 15000]
+      ],
+      "refineNum": [
+        [1, 1],
+        [2, 1],
+        [3, 1],
+        [4, 0],
+        [5, 0]
+      ],
+      "unlockLevel": [
+        [1, 1],
+        [2, 1],
+        [3, 30]
+      ],
+      "unlockStar": [
+        [1, 1],
+        [2, 1],
+        [3, 1],
+        [4, 3]
+      ],
+      "unlockGoodsNum": [
+        [1, 0],
+        [2, 0],
+        [3, 1],
+        [4, 1]
+      ],
+      "goodsId": 211453
+    }
+  },
+  {
+    "identity": "zhao-yun",
+    "name": "Zhao Yun",
+    "nativeId": 53560,
+    "definition": {
+      "id": 53560,
+      "newAccMaxLv": 100,
+      "isUnlock": 1,
+      "name": 169475,
+      "type": 1,
+      "gender": 1,
+      "baseLevel": 1,
+      "baseQuality": 1,
+      "baseSkill": 54173,
+      "baseStar": 1,
+      "baseSkill3": 54175,
+      "baseSkill4": "",
+      "baseSkill5": "",
+      "breachGoods": [
+        [213282, 0],
+        [213282, 0],
+        [213282, 0],
+        [213282, 0],
+        [213282, 0]
+      ],
+      "starMaxLevel": 3,
+      "starGoods": [
+        [213282, 6000],
+        [213282, 15000],
+        [213282, 30000],
+        [213282, 60000]
+      ],
+      "needPieces": [213282, 3000],
+      "piecesId": 213282,
+      "levelMax": 100,
+      "talent": 61,
+      "generalAb": 88295,
+      "loot": 1,
+      "lootLevel": 5,
+      "garrison": 1,
+      "battle": 1,
+      "lordExp": 1,
+      "refineCard": 20,
+      "refineEffect": [
+        [1, 1000],
+        [2, 1000],
+        [3, 1000],
+        [4, 1000],
+        [5, 1000]
+      ],
+      "refineEffectLock": [
+        [1, 1000],
+        [2, 3000],
+        [3, 7000],
+        [4, 15000]
+      ],
+      "refineNum": [
+        [1, 1],
+        [2, 1],
+        [3, 1],
+        [4, 1],
+        [5, 0]
+      ],
+      "unlockLevel": [
+        [1, 1],
+        [2, 1],
+        [3, 30],
+        [4, 1]
+      ],
+      "unlockStar": [
+        [1, 1],
+        [2, 1],
+        [3, 1],
+        [4, 1]
+      ],
+      "unlockGoodsNum": [
+        [1, 0],
+        [2, 0],
+        [3, 1],
+        [4, 100]
+      ],
+      "goodsId": 211453
+    }
+  },
+  {
+    "identity": "god-of-abundance",
+    "name": "God of Abundance",
+    "nativeId": 53561,
+    "definition": {
+      "id": 53561,
+      "newAccMaxLv": 100,
+      "isUnlock": 1,
+      "name": 169476,
+      "type": 0,
+      "gender": 1,
+      "baseLevel": 1,
+      "baseQuality": 1,
+      "baseSkill": 54178,
+      "baseStar": 1,
+      "baseSkill3": 54180,
+      "baseSkill4": "",
+      "baseSkill5": "",
+      "breachGoods": [
+        [213283, 0],
+        [213283, 0],
+        [213283, 0],
+        [213283, 0],
+        [213283, 0]
+      ],
+      "starMaxLevel": 3,
+      "starGoods": [
+        [213283, 6000],
+        [213283, 15000],
+        [213283, 30000],
+        [213283, 60000]
+      ],
+      "needPieces": [213283, 3000],
+      "piecesId": 213283,
+      "levelMax": 100,
+      "talent": 62,
+      "generalAb": 88296,
+      "loot": 1,
+      "lootLevel": 5,
+      "garrison": 1,
+      "battle": 1,
+      "lordExp": 1,
+      "refineCard": 20,
+      "refineEffect": [
+        [1, 1000],
+        [2, 1000],
+        [3, 1000],
+        [4, 1000],
+        [5, 1000]
+      ],
+      "refineEffectLock": [
+        [1, 1000],
+        [2, 3000],
+        [3, 7000],
+        [4, 15000]
+      ],
+      "refineNum": [
+        [1, 1],
+        [2, 1],
+        [3, 1],
+        [4, 0],
+        [5, 0]
+      ],
+      "unlockLevel": [
+        [1, 1],
+        [2, 1],
+        [3, 30]
+      ],
+      "unlockStar": [
+        [1, 1],
+        [2, 1],
+        [3, 1],
+        [4, 3]
+      ],
+      "unlockGoodsNum": [
+        [1, 0],
+        [2, 0],
+        [3, 1],
+        [4, 1]
+      ],
+      "goodsId": 211453
+    }
+  },
+  {
+    "identity": "civilization-crystal-envoy-hill",
+    "name": "Civilization Crystal Envoy Hill",
+    "nativeId": 53562,
+    "definition": {
+      "id": 53562,
+      "newAccMaxLv": 100,
+      "isUnlock": 1,
+      "name": 169483,
+      "type": 0,
+      "gender": 2,
+      "baseLevel": 1,
+      "baseQuality": 1,
+      "baseSkill": 54183,
+      "baseStar": 1,
+      "baseSkill3": 54185,
+      "baseSkill4": 54186,
+      "baseSkill5": "",
+      "breachGoods": [
+        [213284, 0],
+        [213284, 0],
+        [213284, 0],
+        [213284, 0],
+        [213284, 0]
+      ],
+      "starMaxLevel": 4,
+      "starGoods": [
+        [213284, 6000],
+        [213284, 15000],
+        [213284, 30000],
+        [213284, 60000]
+      ],
+      "needPieces": [213284, 3000],
+      "piecesId": 213284,
+      "levelMax": 100,
+      "talent": 63,
+      "generalAb": 88297,
+      "loot": 1,
+      "lootLevel": 5,
+      "garrison": 1,
+      "battle": 1,
+      "lordExp": 1,
+      "refineCard": 20,
+      "refineEffect": [
+        [1, 1000],
+        [2, 1000],
+        [3, 1000],
+        [4, 1000],
+        [5, 1000]
+      ],
+      "refineEffectLock": [
+        [1, 1000],
+        [2, 3000],
+        [3, 7000],
+        [4, 15000]
+      ],
+      "refineNum": [
+        [1, 1],
+        [2, 1],
+        [3, 1],
+        [4, 0],
+        [5, 0]
+      ],
+      "unlockLevel": [
+        [1, 1],
+        [2, 1],
+        [3, 30]
+      ],
+      "unlockStar": [
+        [1, 1],
+        [2, 1],
+        [3, 1],
+        [4, 3]
+      ],
+      "unlockGoodsNum": [
+        [1, 0],
+        [2, 0],
+        [3, 1],
+        [4, 1]
+      ],
+      "goodsId": 211453
+    }
+  },
+  {
+    "identity": "mansur",
+    "name": "Mansur",
+    "nativeId": 53563,
+    "definition": {
+      "id": 53563,
+      "newAccMaxLv": 100,
+      "isUnlock": 1,
+      "name": 169484,
+      "type": 0,
+      "gender": 1,
+      "baseLevel": 1,
+      "baseQuality": 1,
+      "baseSkill": 54188,
+      "baseStar": 1,
+      "baseSkill3": "",
+      "baseSkill4": "",
+      "baseSkill5": "",
+      "breachGoods": [
+        [213285, 0],
+        [213285, 0],
+        [213285, 0],
+        [213285, 0],
+        [213285, 0]
+      ],
+      "starMaxLevel": 1,
+      "starGoods": [
+        [213285, 6000],
+        [213285, 15000],
+        [213285, 30000],
+        [213285, 60000]
+      ],
+      "needPieces": [213285, 3000],
+      "piecesId": 213285,
+      "levelMax": 100,
+      "talent": 64,
+      "generalAb": [41020001, 41020002, 41020003],
+      "loot": 1,
+      "lootLevel": 5,
+      "garrison": 1,
+      "battle": 1,
+      "lordExp": 1,
+      "refineCard": 20,
+      "refineEffect": [
+        [1, 1000],
+        [2, 1000],
+        [3, 1000],
+        [4, 1000],
+        [5, 1000]
+      ],
+      "refineEffectLock": [
+        [1, 1000],
+        [2, 3000],
+        [3, 7000],
+        [4, 15000]
+      ],
+      "refineNum": [
+        [1, 1],
+        [2, 1],
+        [3, 1],
+        [4, 0],
+        [5, 0]
+      ],
+      "unlockLevel": [
+        [1, 1],
+        [2, 1],
+        [3, 30]
+      ],
+      "unlockStar": [
+        [1, 1],
+        [2, 1],
+        [3, 1],
+        [4, 3]
+      ],
+      "unlockGoodsNum": [
+        [1, 0],
+        [2, 0],
+        [3, 1],
+        [4, 1]
+      ],
+      "goodsId": 211453
+    }
+  },
+  {
+    "identity": "harvest-elf",
+    "name": "Harvest Elf",
+    "nativeId": 53564,
+    "definition": {
+      "id": 53564,
+      "newAccMaxLv": 100,
+      "isUnlock": 1,
+      "name": 169486,
+      "type": 0,
+      "gender": 1,
+      "baseLevel": 1,
+      "baseQuality": 1,
+      "baseSkill": 54193,
+      "baseStar": 1,
+      "baseSkill3": 54195,
+      "baseSkill4": "",
+      "baseSkill5": "",
+      "breachGoods": [
+        [213286, 0],
+        [213286, 0],
+        [213286, 0],
+        [213286, 0],
+        [213286, 0]
+      ],
+      "starMaxLevel": 3,
+      "starGoods": [
+        [213286, 6000],
+        [213286, 15000],
+        [213286, 30000],
+        [213286, 60000]
+      ],
+      "needPieces": [213286, 3000],
+      "piecesId": 213286,
+      "levelMax": 100,
+      "talent": 65,
+      "generalAb": 41020004,
+      "loot": 1,
+      "lootLevel": 5,
+      "garrison": 1,
+      "battle": 1,
+      "lordExp": 1,
+      "refineCard": 20,
+      "refineEffect": [
+        [1, 1000],
+        [2, 1000],
+        [3, 1000],
+        [4, 1000],
+        [5, 1000]
+      ],
+      "refineEffectLock": [
+        [1, 1000],
+        [2, 3000],
+        [3, 7000],
+        [4, 15000]
+      ],
+      "refineNum": [
+        [1, 1],
+        [2, 1],
+        [3, 1],
+        [4, 0],
+        [5, 0]
+      ],
+      "unlockLevel": [
+        [1, 1],
+        [2, 1],
+        [3, 30]
+      ],
+      "unlockStar": [
+        [1, 1],
+        [2, 1],
+        [3, 1],
+        [4, 3]
+      ],
+      "unlockGoodsNum": [
+        [1, 0],
+        [2, 0],
+        [3, 1],
+        [4, 1]
+      ],
+      "goodsId": 211453
+    }
+  },
+  {
+    "identity": "iron-mason",
+    "name": "Iron Mason",
+    "nativeId": 53565,
+    "definition": {
+      "id": 53565,
+      "newAccMaxLv": 100,
+      "isUnlock": 1,
+      "name": 169487,
+      "type": 0,
+      "gender": 1,
+      "baseLevel": 1,
+      "baseQuality": 1,
+      "baseSkill": 54198,
+      "baseStar": 1,
+      "baseSkill3": 54200,
+      "baseSkill4": 54201,
+      "baseSkill5": "",
+      "breachGoods": [
+        [213287, 0],
+        [213287, 0],
+        [213287, 0],
+        [213287, 0],
+        [213287, 0]
+      ],
+      "starMaxLevel": 4,
+      "starGoods": [
+        [213287, 6000],
+        [213287, 15000],
+        [213287, 30000],
+        [213287, 60000]
+      ],
+      "needPieces": [213287, 3000],
+      "piecesId": 213287,
+      "levelMax": 100,
+      "talent": 66,
+      "generalAb": 41020005,
+      "loot": 1,
+      "lootLevel": 5,
+      "garrison": 1,
+      "battle": 1,
+      "lordExp": 1,
+      "refineCard": 20,
+      "refineEffect": [
+        [1, 1000],
+        [2, 1000],
+        [3, 1000],
+        [4, 1000],
+        [5, 1000]
+      ],
+      "refineEffectLock": [
+        [1, 1000],
+        [2, 3000],
+        [3, 7000],
+        [4, 15000]
+      ],
+      "refineNum": [
+        [1, 1],
+        [2, 1],
+        [3, 1],
+        [4, 0],
+        [5, 0]
+      ],
+      "unlockLevel": [
+        [1, 1],
+        [2, 1],
+        [3, 30]
+      ],
+      "unlockStar": [
+        [1, 1],
+        [2, 1],
+        [3, 1],
+        [4, 3]
+      ],
+      "unlockGoodsNum": [
+        [1, 0],
+        [2, 0],
+        [3, 1],
+        [4, 1]
+      ],
+      "goodsId": 211453
+    }
+  },
+  {
+    "identity": "yulin-iron-guard",
+    "name": "Yulin Iron Guard",
+    "nativeId": 53566,
+    "definition": {
+      "id": 53566,
+      "newAccMaxLv": 100,
+      "isUnlock": 1,
+      "name": 169488,
+      "type": 0,
+      "gender": 1,
+      "baseLevel": 1,
+      "baseQuality": 1,
+      "baseSkill": 54203,
+      "baseStar": 1,
+      "baseSkill3": "",
+      "baseSkill4": "",
+      "baseSkill5": "",
+      "breachGoods": [
+        [213288, 0],
+        [213288, 0],
+        [213288, 0],
+        [213288, 0],
+        [213288, 0]
+      ],
+      "starMaxLevel": 2,
+      "starGoods": [
+        [213288, 6000],
+        [213288, 15000],
+        [213288, 30000],
+        [213288, 60000]
+      ],
+      "needPieces": [213288, 3000],
+      "piecesId": 213288,
+      "levelMax": 100,
+      "talent": 67,
+      "generalAb": 41020006,
+      "loot": 1,
+      "lootLevel": 5,
+      "garrison": 1,
+      "battle": 1,
+      "lordExp": 1,
+      "refineCard": 20,
+      "refineEffect": [
+        [1, 1000],
+        [2, 1000],
+        [3, 1000],
+        [4, 1000],
+        [5, 1000]
+      ],
+      "refineEffectLock": [
+        [1, 1000],
+        [2, 3000],
+        [3, 7000],
+        [4, 15000]
+      ],
+      "refineNum": [
+        [1, 1],
+        [2, 1],
+        [3, 1],
+        [4, 0],
+        [5, 0]
+      ],
+      "unlockLevel": [
+        [1, 1],
+        [2, 1],
+        [3, 30]
+      ],
+      "unlockStar": "",
+      "unlockGoodsNum": [
+        [1, 0],
+        [2, 0],
+        [3, 1],
+        [4, 1]
+      ],
+      "goodsId": 211453
+    }
+  },
+  {
+    "identity": "guard-knight",
+    "name": "Guard Knight",
+    "nativeId": 53567,
+    "definition": {
+      "id": 53567,
+      "newAccMaxLv": 100,
+      "isUnlock": 1,
+      "name": 169489,
+      "type": 0,
+      "gender": 1,
+      "baseLevel": 1,
+      "baseQuality": 1,
+      "baseSkill": 54208,
+      "baseStar": 1,
+      "baseSkill3": "",
+      "baseSkill4": "",
+      "baseSkill5": "",
+      "breachGoods": [
+        [213289, 0],
+        [213289, 0],
+        [213289, 0],
+        [213289, 0],
+        [213289, 0]
+      ],
+      "starMaxLevel": 2,
+      "starGoods": [
+        [213289, 6000],
+        [213289, 15000],
+        [213289, 30000],
+        [213289, 60000]
+      ],
+      "needPieces": [213289, 3000],
+      "piecesId": 213289,
+      "levelMax": 100,
+      "talent": 68,
+      "generalAb": 41020007,
+      "loot": 1,
+      "lootLevel": 5,
+      "garrison": 1,
+      "battle": 1,
+      "lordExp": 1,
+      "refineCard": 20,
+      "refineEffect": [
+        [1, 1000],
+        [2, 1000],
+        [3, 1000],
+        [4, 1000],
+        [5, 1000]
+      ],
+      "refineEffectLock": [
+        [1, 1000],
+        [2, 3000],
+        [3, 7000],
+        [4, 15000]
+      ],
+      "refineNum": [
+        [1, 1],
+        [2, 1],
+        [3, 1],
+        [4, 0],
+        [5, 0]
+      ],
+      "unlockLevel": [
+        [1, 1],
+        [2, 1],
+        [3, 30]
+      ],
+      "unlockStar": "",
+      "unlockGoodsNum": [
+        [1, 0],
+        [2, 0],
+        [3, 1],
+        [4, 1]
+      ],
+      "goodsId": 211453
+    }
+  },
+  {
+    "identity": "visionary-ranger",
+    "name": "Visionary Ranger",
+    "nativeId": 53568,
+    "definition": {
+      "id": 53568,
+      "newAccMaxLv": 100,
+      "isUnlock": 1,
+      "name": 169490,
+      "type": 0,
+      "gender": 1,
+      "baseLevel": 1,
+      "baseQuality": 1,
+      "baseSkill": 54213,
+      "baseStar": 1,
+      "baseSkill3": "",
+      "baseSkill4": "",
+      "baseSkill5": "",
+      "breachGoods": [
+        [213290, 0],
+        [213290, 0],
+        [213290, 0],
+        [213290, 0],
+        [213290, 0]
+      ],
+      "starMaxLevel": 2,
+      "starGoods": [
+        [213290, 6000],
+        [213290, 15000],
+        [213290, 30000],
+        [213290, 60000]
+      ],
+      "needPieces": [213290, 3000],
+      "piecesId": 213290,
+      "levelMax": 100,
+      "talent": 69,
+      "generalAb": 41020008,
+      "loot": 1,
+      "lootLevel": 5,
+      "garrison": 1,
+      "battle": 1,
+      "lordExp": 1,
+      "refineCard": 20,
+      "refineEffect": [
+        [1, 1000],
+        [2, 1000],
+        [3, 1000],
+        [4, 1000],
+        [5, 1000]
+      ],
+      "refineEffectLock": [
+        [1, 1000],
+        [2, 3000],
+        [3, 7000],
+        [4, 15000]
+      ],
+      "refineNum": [
+        [1, 1],
+        [2, 1],
+        [3, 1],
+        [4, 0],
+        [5, 0]
+      ],
+      "unlockLevel": [
+        [1, 1],
+        [2, 1],
+        [3, 30]
+      ],
+      "unlockStar": "",
+      "unlockGoodsNum": [
+        [1, 0],
+        [2, 0],
+        [3, 1],
+        [4, 1]
+      ],
+      "goodsId": 211453
+    }
+  },
+  {
+    "identity": "chariot-master",
+    "name": "Chariot Master",
+    "nativeId": 53569,
+    "definition": {
+      "id": 53569,
+      "newAccMaxLv": 100,
+      "isUnlock": 1,
+      "name": 169491,
+      "type": 0,
+      "gender": 1,
+      "baseLevel": 1,
+      "baseQuality": 1,
+      "baseSkill": 54218,
+      "baseStar": 1,
+      "baseSkill3": "",
+      "baseSkill4": "",
+      "baseSkill5": "",
+      "breachGoods": [
+        [213291, 0],
+        [213291, 0],
+        [213291, 0],
+        [213291, 0],
+        [213291, 0]
+      ],
+      "starMaxLevel": 2,
+      "starGoods": [
+        [213291, 6000],
+        [213291, 15000],
+        [213291, 30000],
+        [213291, 60000]
+      ],
+      "needPieces": [213291, 3000],
+      "piecesId": 213291,
+      "levelMax": 100,
+      "talent": 70,
+      "generalAb": 41020009,
+      "loot": 1,
+      "lootLevel": 5,
+      "garrison": 1,
+      "battle": 1,
+      "lordExp": 1,
+      "refineCard": 20,
+      "refineEffect": [
+        [1, 1000],
+        [2, 1000],
+        [3, 1000],
+        [4, 1000],
+        [5, 1000]
+      ],
+      "refineEffectLock": [
+        [1, 1000],
+        [2, 3000],
+        [3, 7000],
+        [4, 15000]
+      ],
+      "refineNum": [
+        [1, 1],
+        [2, 1],
+        [3, 1],
+        [4, 0],
+        [5, 0]
+      ],
+      "unlockLevel": [
+        [1, 1],
+        [2, 1],
+        [3, 30]
+      ],
+      "unlockStar": "",
+      "unlockGoodsNum": [
+        [1, 0],
+        [2, 0],
+        [3, 1],
+        [4, 1]
+      ],
+      "goodsId": 211453
+    }
+  },
+  {
+    "identity": "king-arthur",
+    "name": "King Arthur",
+    "nativeId": 53570,
+    "definition": {
+      "id": 53570,
+      "newAccMaxLv": 100,
+      "isUnlock": 1,
+      "name": 169492,
+      "type": 1,
+      "gender": 1,
+      "baseLevel": 1,
+      "baseQuality": 1,
+      "baseSkill": 54223,
+      "baseStar": 1,
+      "baseSkill3": 54225,
+      "baseSkill4": "",
+      "baseSkill5": "",
+      "breachGoods": [
+        [213292, 0],
+        [213292, 0],
+        [213292, 0],
+        [213292, 0],
+        [213292, 0]
+      ],
+      "starMaxLevel": 3,
+      "starGoods": [
+        [213292, 6000],
+        [213292, 15000],
+        [213292, 30000],
+        [213292, 60000]
+      ],
+      "needPieces": [213292, 3000],
+      "piecesId": 213292,
+      "levelMax": 100,
+      "talent": 71,
+      "generalAb": 41020010,
+      "loot": 1,
+      "lootLevel": 5,
+      "garrison": 1,
+      "battle": 1,
+      "lordExp": 1,
+      "refineCard": 20,
+      "refineEffect": [
+        [1, 1000],
+        [2, 1000],
+        [3, 1000],
+        [4, 1000],
+        [5, 1000]
+      ],
+      "refineEffectLock": [
+        [1, 1000],
+        [2, 3000],
+        [3, 7000],
+        [4, 15000]
+      ],
+      "refineNum": [
+        [1, 1],
+        [2, 1],
+        [3, 1],
+        [4, 1],
+        [5, 0]
+      ],
+      "unlockLevel": [
+        [1, 1],
+        [2, 1],
+        [3, 30],
+        [4, 1]
+      ],
+      "unlockStar": [
+        [1, 1],
+        [2, 1],
+        [3, 1],
+        [4, 1]
+      ],
+      "unlockGoodsNum": [
+        [1, 0],
+        [2, 0],
+        [3, 1],
+        [4, 100]
+      ],
+      "goodsId": 211453
+    }
+  },
+  {
+    "identity": "hua-mulan",
+    "name": "Hua Mulan",
+    "nativeId": 53571,
+    "definition": {
+      "id": 53571,
+      "newAccMaxLv": 100,
+      "isUnlock": 1,
+      "name": 169493,
+      "type": 0,
+      "gender": 2,
+      "baseLevel": 1,
+      "baseQuality": 1,
+      "baseSkill": 54228,
+      "baseStar": 1,
+      "baseSkill2": 54229,
+      "baseSkill3": 54230,
+      "baseSkill4": 54231,
+      "baseSkill5": 54232,
+      "breachGoods": [
+        [213293, 0],
+        [213293, 0],
+        [213293, 0],
+        [213293, 0],
+        [213293, 0]
+      ],
+      "starMaxLevel": 5,
+      "starGoods": [
+        [213293, 6000],
+        [213293, 15000],
+        [213293, 30000],
+        [213293, 60000]
+      ],
+      "needPieces": [213293, 3000],
+      "piecesId": 213293,
+      "levelMax": 99,
+      "talent": 72,
+      "talentPointDivisor": 10,
+      "generalAb": [41020011, 53571201, 53571202],
+      "loot": 1,
+      "lootLevel": 5,
+      "garrison": 1,
+      "battle": 1,
+      "lordExp": 1,
+      "refineCard": 20,
+      "refineEffect": [
+        [1, 1000],
+        [2, 1000],
+        [3, 1000],
+        [4, 1000],
+        [5, 1000]
+      ],
+      "refineEffectLock": [
+        [1, 1000],
+        [2, 3000],
+        [3, 7000],
+        [4, 15000]
+      ],
+      "refineNum": [
+        [1, 1],
+        [2, 1],
+        [3, 1],
+        [4, 0],
+        [5, 0]
+      ],
+      "unlockLevel": [
+        [1, 1],
+        [2, 1],
+        [3, 30],
+        [4, 1],
+        [5, 1]
+      ],
+      "unlockStar": [
+        [1, 1],
+        [2, 2],
+        [3, 3],
+        [4, 4],
+        [5, 5]
+      ],
+      "unlockGoodsNum": [
+        [1, 0],
+        [2, 0],
+        [3, 1],
+        [4, 1],
+        [5, 1]
+      ],
+      "goodsId": 211453
+    }
+  },
+  {
+    "identity": "unknown-1",
+    "name": "unknown-1",
+    "nativeId": 53572,
+    "definition": {
+      "id": 53572,
+      "newAccMaxLv": 100,
+      "isUnlock": 1,
+      "name": 169494,
+      "type": 0,
+      "gender": 1,
+      "baseLevel": 1,
+      "baseQuality": 1,
+      "baseSkill": 54233,
+      "baseStar": 1,
+      "baseSkill3": 0,
+      "baseSkill4": 0,
+      "baseSkill5": "",
+      "breachGoods": [
+        [213294, 0],
+        [213294, 0],
+        [213294, 0],
+        [213294, 0],
+        [213294, 0]
+      ],
+      "starMaxLevel": 4,
+      "starGoods": [
+        [213294, 6000],
+        [213294, 15000],
+        [213294, 30000],
+        [213294, 60000]
+      ],
+      "needPieces": [213294, 3000],
+      "piecesId": 213294,
+      "levelMax": 100,
+      "talent": 73,
+      "generalAb": 41020012,
+      "loot": 1,
+      "lootLevel": 5,
+      "garrison": 1,
+      "battle": 1,
+      "lordExp": 1,
+      "refineCard": 20,
+      "refineEffect": [
+        [1, 1000],
+        [2, 1000],
+        [3, 1000],
+        [4, 1000],
+        [5, 1000]
+      ],
+      "refineEffectLock": [
+        [1, 1000],
+        [2, 3000],
+        [3, 7000],
+        [4, 15000]
+      ],
+      "refineNum": [
+        [1, 1],
+        [2, 1],
+        [3, 1],
+        [4, 0],
+        [5, 0]
+      ],
+      "unlockLevel": [
+        [1, 1],
+        [2, 1],
+        [3, 30]
+      ],
+      "unlockStar": "",
+      "unlockGoodsNum": [
+        [1, 0],
+        [2, 0],
+        [3, 1],
+        [4, 1]
+      ],
+      "goodsId": 211453
+    }
+  },
+  {
+    "identity": "unknown-2",
+    "name": "unknown-2",
+    "nativeId": 53573,
+    "definition": {
+      "id": 53573,
+      "newAccMaxLv": 100,
+      "isUnlock": 1,
+      "name": 169495,
+      "type": 0,
+      "gender": 1,
+      "baseLevel": 1,
+      "baseQuality": 1,
+      "baseSkill": 54238,
+      "baseStar": 1,
+      "baseSkill3": 0,
+      "baseSkill4": 0,
+      "baseSkill5": "",
+      "breachGoods": [
+        [213295, 0],
+        [213295, 0],
+        [213295, 0],
+        [213295, 0],
+        [213295, 0]
+      ],
+      "starMaxLevel": 4,
+      "starGoods": [
+        [213295, 6000],
+        [213295, 15000],
+        [213295, 30000],
+        [213295, 60000]
+      ],
+      "needPieces": [213295, 3000],
+      "piecesId": 213295,
+      "levelMax": 100,
+      "talent": 74,
+      "generalAb": 41020013,
+      "loot": 1,
+      "lootLevel": 5,
+      "garrison": 1,
+      "battle": 1,
+      "lordExp": 1,
+      "refineCard": 20,
+      "refineEffect": [
+        [1, 1000],
+        [2, 1000],
+        [3, 1000],
+        [4, 1000],
+        [5, 1000]
+      ],
+      "refineEffectLock": [
+        [1, 1000],
+        [2, 3000],
+        [3, 7000],
+        [4, 15000]
+      ],
+      "refineNum": [
+        [1, 1],
+        [2, 1],
+        [3, 1],
+        [4, 0],
+        [5, 0]
+      ],
+      "unlockLevel": [
+        [1, 1],
+        [2, 1],
+        [3, 30]
+      ],
+      "unlockStar": "",
+      "unlockGoodsNum": [
+        [1, 0],
+        [2, 0],
+        [3, 1],
+        [4, 1]
+      ],
+      "goodsId": 211453
+    }
+  },
+  {
+    "identity": "luminous-shield",
+    "name": "Luminous Shield",
+    "nativeId": 53574,
+    "definition": {
+      "id": 53574,
+      "newAccMaxLv": 100,
+      "isUnlock": 1,
+      "name": 169496,
+      "type": 1,
+      "gender": 1,
+      "baseLevel": 1,
+      "baseQuality": 1,
+      "baseSkill": 54243,
+      "baseStar": 1,
+      "baseSkill3": 54245,
+      "baseSkill4": 54246,
+      "baseSkill5": "",
+      "breachGoods": [
+        [213296, 0],
+        [213296, 0],
+        [213296, 0],
+        [213296, 0],
+        [213296, 0]
+      ],
+      "starMaxLevel": 4,
+      "starGoods": [
+        [213296, 6000],
+        [213296, 15000],
+        [213296, 30000],
+        [213296, 60000]
+      ],
+      "needPieces": [213296, 3000],
+      "piecesId": 213296,
+      "levelMax": 100,
+      "talent": 75,
+      "generalAb": 41020014,
+      "loot": 1,
+      "lootLevel": 5,
+      "garrison": 1,
+      "battle": 1,
+      "lordExp": 1,
+      "refineCard": 20,
+      "refineEffect": [
+        [1, 1000],
+        [2, 1000],
+        [3, 1000],
+        [4, 1000],
+        [5, 1000]
+      ],
+      "refineEffectLock": [
+        [1, 1000],
+        [2, 3000],
+        [3, 7000],
+        [4, 15000]
+      ],
+      "refineNum": [
+        [1, 1],
+        [2, 1],
+        [3, 1],
+        [4, 0],
+        [5, 0]
+      ],
+      "unlockLevel": [
+        [1, 1],
+        [2, 1],
+        [3, 30]
+      ],
+      "unlockStar": "",
+      "unlockGoodsNum": [
+        [1, 0],
+        [2, 0],
+        [3, 1],
+        [4, 1]
+      ],
+      "goodsId": 211453
+    }
+  },
+  {
+    "identity": "ambitious-cavalry",
+    "name": "Ambitious Cavalry",
+    "nativeId": 53575,
+    "definition": {
+      "id": 53575,
+      "newAccMaxLv": 100,
+      "isUnlock": 1,
+      "name": 169497,
+      "type": 1,
+      "gender": 1,
+      "baseLevel": 1,
+      "baseQuality": 1,
+      "baseSkill": 54248,
+      "baseStar": 1,
+      "baseSkill3": 54250,
+      "baseSkill4": 54251,
+      "baseSkill5": "",
+      "breachGoods": [
+        [213297, 0],
+        [213297, 0],
+        [213297, 0],
+        [213297, 0],
+        [213297, 0]
+      ],
+      "starMaxLevel": 4,
+      "starGoods": [
+        [213297, 6000],
+        [213297, 15000],
+        [213297, 30000],
+        [213297, 60000]
+      ],
+      "needPieces": [213297, 3000],
+      "piecesId": 213297,
+      "levelMax": 100,
+      "talent": 76,
+      "generalAb": 41020015,
+      "loot": 1,
+      "lootLevel": 5,
+      "garrison": 1,
+      "battle": 1,
+      "lordExp": 1,
+      "refineCard": 20,
+      "refineEffect": [
+        [1, 1000],
+        [2, 1000],
+        [3, 1000],
+        [4, 1000],
+        [5, 1000]
+      ],
+      "refineEffectLock": [
+        [1, 1000],
+        [2, 3000],
+        [3, 7000],
+        [4, 15000]
+      ],
+      "refineNum": [
+        [1, 1],
+        [2, 1],
+        [3, 1],
+        [4, 0],
+        [5, 0]
+      ],
+      "unlockLevel": [
+        [1, 1],
+        [2, 1],
+        [3, 30]
+      ],
+      "unlockStar": "",
+      "unlockGoodsNum": [
+        [1, 0],
+        [2, 0],
+        [3, 1],
+        [4, 1]
+      ],
+      "goodsId": 211453
+    }
+  },
+  {
+    "identity": "imperial-archer",
+    "name": "Imperial Archer",
+    "nativeId": 53576,
+    "definition": {
+      "id": 53576,
+      "newAccMaxLv": 100,
+      "isUnlock": 1,
+      "name": 169498,
+      "type": 1,
+      "gender": 1,
+      "baseLevel": 1,
+      "baseQuality": 1,
+      "baseSkill": 54253,
+      "baseStar": 1,
+      "baseSkill3": 54255,
+      "baseSkill4": 54256,
+      "baseSkill5": "",
+      "breachGoods": [
+        [213298, 0],
+        [213298, 0],
+        [213298, 0],
+        [213298, 0],
+        [213298, 0]
+      ],
+      "starMaxLevel": 4,
+      "starGoods": [
+        [213298, 6000],
+        [213298, 15000],
+        [213298, 30000],
+        [213298, 60000]
+      ],
+      "needPieces": [213298, 3000],
+      "piecesId": 213298,
+      "levelMax": 100,
+      "talent": 77,
+      "generalAb": 41020016,
+      "loot": 1,
+      "lootLevel": 5,
+      "garrison": 1,
+      "battle": 1,
+      "lordExp": 1,
+      "refineCard": 20,
+      "refineEffect": [
+        [1, 1000],
+        [2, 1000],
+        [3, 1000],
+        [4, 1000],
+        [5, 1000]
+      ],
+      "refineEffectLock": [
+        [1, 1000],
+        [2, 3000],
+        [3, 7000],
+        [4, 15000]
+      ],
+      "refineNum": [
+        [1, 1],
+        [2, 1],
+        [3, 1],
+        [4, 0],
+        [5, 0]
+      ],
+      "unlockLevel": [
+        [1, 1],
+        [2, 1],
+        [3, 30]
+      ],
+      "unlockStar": "",
+      "unlockGoodsNum": [
+        [1, 0],
+        [2, 0],
+        [3, 1],
+        [4, 1]
+      ],
+      "goodsId": 211453
+    }
+  },
+  {
+    "identity": "iron-hand",
+    "name": "Iron Hand",
+    "nativeId": 53577,
+    "definition": {
+      "id": 53577,
+      "newAccMaxLv": 100,
+      "isUnlock": 1,
+      "name": 169499,
+      "type": 1,
+      "gender": 1,
+      "baseLevel": 1,
+      "baseQuality": 1,
+      "baseSkill": 54258,
+      "baseStar": 1,
+      "baseSkill3": 54260,
+      "baseSkill4": 54261,
+      "baseSkill5": "",
+      "breachGoods": [
+        [213299, 0],
+        [213299, 0],
+        [213299, 0],
+        [213299, 0],
+        [213299, 0]
+      ],
+      "starMaxLevel": 4,
+      "starGoods": [
+        [213299, 6000],
+        [213299, 15000],
+        [213299, 30000],
+        [213299, 60000]
+      ],
+      "needPieces": [213299, 3000],
+      "piecesId": 213299,
+      "levelMax": 100,
+      "talent": 78,
+      "generalAb": 41020017,
+      "loot": 1,
+      "lootLevel": 5,
+      "garrison": 1,
+      "battle": 1,
+      "lordExp": 1,
+      "refineCard": 20,
+      "refineEffect": [
+        [1, 1000],
+        [2, 1000],
+        [3, 1000],
+        [4, 1000],
+        [5, 1000]
+      ],
+      "refineEffectLock": [
+        [1, 1000],
+        [2, 3000],
+        [3, 7000],
+        [4, 15000]
+      ],
+      "refineNum": [
+        [1, 1],
+        [2, 1],
+        [3, 1],
+        [4, 0],
+        [5, 0]
+      ],
+      "unlockLevel": [
+        [1, 1],
+        [2, 1],
+        [3, 30]
+      ],
+      "unlockStar": "",
+      "unlockGoodsNum": [
+        [1, 0],
+        [2, 0],
+        [3, 1],
+        [4, 1]
+      ],
+      "goodsId": 211453
+    }
+  },
+  {
+    "identity": "shield-of-empire",
+    "name": "Shield of Empire",
+    "nativeId": 53580,
+    "definition": {
+      "id": 53580,
+      "newAccMaxLv": 100,
+      "isUnlock": 1,
+      "name": 5504081,
+      "type": 1,
+      "gender": 1,
+      "baseLevel": 1,
+      "baseQuality": 1,
+      "baseSkill": 54263,
+      "baseStar": 1,
+      "baseSkill3": 54265,
+      "baseSkill4": "",
+      "baseSkill5": "",
+      "breachGoods": [
+        [213300, 0],
+        [213300, 0],
+        [213300, 0],
+        [213300, 0],
+        [213300, 0]
+      ],
+      "starMaxLevel": 3,
+      "starGoods": [
+        [213300, 6000],
+        [213300, 15000],
+        [213300, 30000],
+        [213300, 60000]
+      ],
+      "needPieces": [213300, 3000],
+      "piecesId": 213300,
+      "levelMax": 100,
+      "talent": 80,
+      "generalAb": 41020018,
+      "loot": 1,
+      "lootLevel": 5,
+      "garrison": 1,
+      "battle": 1,
+      "lordExp": 1,
+      "refineCard": 20,
+      "refineEffect": [
+        [1, 1000],
+        [2, 1000],
+        [3, 1000],
+        [4, 1000],
+        [5, 1000]
+      ],
+      "refineEffectLock": [
+        [1, 1000],
+        [2, 3000],
+        [3, 7000],
+        [4, 15000]
+      ],
+      "refineNum": [
+        [1, 1],
+        [2, 1],
+        [3, 1],
+        [4, 0],
+        [5, 0]
+      ],
+      "unlockLevel": [
+        [1, 1],
+        [2, 1],
+        [3, 30]
+      ],
+      "unlockStar": "",
+      "unlockGoodsNum": [
+        [1, 0],
+        [2, 0],
+        [3, 1],
+        [4, 1]
+      ],
+      "goodsId": 211453
+    }
+  },
+  {
+    "identity": "spear-of-empire",
+    "name": "Spear of Empire",
+    "nativeId": 53581,
+    "definition": {
+      "id": 53581,
+      "newAccMaxLv": 100,
+      "isUnlock": 1,
+      "name": 5504082,
+      "type": 1,
+      "gender": 1,
+      "baseLevel": 1,
+      "baseQuality": 1,
+      "baseSkill": 54268,
+      "baseStar": 1,
+      "baseSkill3": 54270,
+      "baseSkill4": "",
+      "baseSkill5": "",
+      "breachGoods": [
+        [213301, 0],
+        [213301, 0],
+        [213301, 0],
+        [213301, 0],
+        [213301, 0]
+      ],
+      "starMaxLevel": 3,
+      "starGoods": [
+        [213301, 6000],
+        [213301, 15000],
+        [213301, 30000],
+        [213301, 60000]
+      ],
+      "needPieces": [213301, 3000],
+      "piecesId": 213301,
+      "levelMax": 100,
+      "talent": 81,
+      "generalAb": 41020019,
+      "loot": 1,
+      "lootLevel": 5,
+      "garrison": 1,
+      "battle": 1,
+      "lordExp": 1,
+      "refineCard": 20,
+      "refineEffect": [
+        [1, 1000],
+        [2, 1000],
+        [3, 1000],
+        [4, 1000],
+        [5, 1000]
+      ],
+      "refineEffectLock": [
+        [1, 1000],
+        [2, 3000],
+        [3, 7000],
+        [4, 15000]
+      ],
+      "refineNum": [
+        [1, 1],
+        [2, 1],
+        [3, 1],
+        [4, 0],
+        [5, 0]
+      ],
+      "unlockLevel": [
+        [1, 1],
+        [2, 1],
+        [3, 30]
+      ],
+      "unlockStar": "",
+      "unlockGoodsNum": [
+        [1, 0],
+        [2, 0],
+        [3, 1],
+        [4, 1]
+      ],
+      "goodsId": 211453
+    }
+  },
+  {
+    "identity": "tiger-warrior",
+    "name": "Tiger Warrior",
+    "nativeId": 53582,
+    "definition": {
+      "id": 53582,
+      "newAccMaxLv": 100,
+      "isUnlock": 1,
+      "name": 5504083,
+      "type": 1,
+      "gender": 1,
+      "baseLevel": 1,
+      "baseQuality": 1,
+      "baseSkill": 54273,
+      "baseStar": 1,
+      "baseSkill3": 54275,
+      "baseSkill4": "",
+      "baseSkill5": "",
+      "breachGoods": [
+        [213302, 0],
+        [213302, 0],
+        [213302, 0],
+        [213302, 0],
+        [213302, 0]
+      ],
+      "starMaxLevel": 3,
+      "starGoods": [
+        [213302, 6000],
+        [213302, 15000],
+        [213302, 30000],
+        [213302, 60000]
+      ],
+      "needPieces": [213302, 3000],
+      "piecesId": 213302,
+      "levelMax": 100,
+      "talent": 82,
+      "generalAb": 41020020,
+      "loot": 1,
+      "lootLevel": 5,
+      "garrison": 1,
+      "battle": 1,
+      "lordExp": 1,
+      "refineCard": 20,
+      "refineEffect": [
+        [1, 1000],
+        [2, 1000],
+        [3, 1000],
+        [4, 1000],
+        [5, 1000]
+      ],
+      "refineEffectLock": [
+        [1, 1000],
+        [2, 3000],
+        [3, 7000],
+        [4, 15000]
+      ],
+      "refineNum": [
+        [1, 1],
+        [2, 1],
+        [3, 1],
+        [4, 0],
+        [5, 0]
+      ],
+      "unlockLevel": [
+        [1, 1],
+        [2, 1],
+        [3, 30]
+      ],
+      "unlockStar": "",
+      "unlockGoodsNum": [
+        [1, 0],
+        [2, 0],
+        [3, 1],
+        [4, 1]
+      ],
+      "goodsId": 211453
+    }
+  },
+  {
+    "identity": "lion-heart-knight",
+    "name": "Lion Heart Knight",
+    "nativeId": 53583,
+    "definition": {
+      "id": 53583,
+      "newAccMaxLv": 100,
+      "isUnlock": 1,
+      "name": 5504084,
+      "type": 1,
+      "gender": 1,
+      "baseLevel": 1,
+      "baseQuality": 1,
+      "baseSkill": 54278,
+      "baseStar": 1,
+      "baseSkill3": 54280,
+      "baseSkill4": "",
+      "baseSkill5": "",
+      "breachGoods": [
+        [213303, 0],
+        [213303, 0],
+        [213303, 0],
+        [213303, 0],
+        [213303, 0]
+      ],
+      "starMaxLevel": 3,
+      "starGoods": [
+        [213303, 6000],
+        [213303, 15000],
+        [213303, 30000],
+        [213303, 60000]
+      ],
+      "needPieces": [213303, 3000],
+      "piecesId": 213303,
+      "levelMax": 100,
+      "talent": 83,
+      "generalAb": 41020021,
+      "loot": 1,
+      "lootLevel": 5,
+      "garrison": 1,
+      "battle": 1,
+      "lordExp": 1,
+      "refineCard": 20,
+      "refineEffect": [
+        [1, 1000],
+        [2, 1000],
+        [3, 1000],
+        [4, 1000],
+        [5, 1000]
+      ],
+      "refineEffectLock": [
+        [1, 1000],
+        [2, 3000],
+        [3, 7000],
+        [4, 15000]
+      ],
+      "refineNum": [
+        [1, 1],
+        [2, 1],
+        [3, 1],
+        [4, 0],
+        [5, 0]
+      ],
+      "unlockLevel": [
+        [1, 1],
+        [2, 1],
+        [3, 30]
+      ],
+      "unlockStar": "",
+      "unlockGoodsNum": [
+        [1, 0],
+        [2, 0],
+        [3, 1],
+        [4, 1]
+      ],
+      "goodsId": 211453
+    }
+  },
+  {
+    "identity": "pandarus",
+    "name": "Pandarus",
+    "nativeId": 53584,
+    "definition": {
+      "id": 53584,
+      "newAccMaxLv": 100,
+      "isUnlock": 1,
+      "name": 5504085,
+      "type": 1,
+      "gender": 1,
+      "baseLevel": 1,
+      "baseQuality": 1,
+      "baseSkill": 54283,
+      "baseStar": 1,
+      "baseSkill3": 54285,
+      "baseSkill4": "",
+      "baseSkill5": "",
+      "breachGoods": [
+        [213304, 0],
+        [213304, 0],
+        [213304, 0],
+        [213304, 0],
+        [213304, 0]
+      ],
+      "starMaxLevel": 3,
+      "starGoods": [
+        [213304, 6000],
+        [213304, 15000],
+        [213304, 30000],
+        [213304, 60000]
+      ],
+      "needPieces": [213304, 3000],
+      "piecesId": 213304,
+      "levelMax": 100,
+      "talent": 84,
+      "generalAb": 41020022,
+      "loot": 1,
+      "lootLevel": 5,
+      "garrison": 1,
+      "battle": 1,
+      "lordExp": 1,
+      "refineCard": 20,
+      "refineEffect": [
+        [1, 1000],
+        [2, 1000],
+        [3, 1000],
+        [4, 1000],
+        [5, 1000]
+      ],
+      "refineEffectLock": [
+        [1, 1000],
+        [2, 3000],
+        [3, 7000],
+        [4, 15000]
+      ],
+      "refineNum": [
+        [1, 1],
+        [2, 1],
+        [3, 1],
+        [4, 0],
+        [5, 0]
+      ],
+      "unlockLevel": [
+        [1, 1],
+        [2, 1],
+        [3, 30]
+      ],
+      "unlockStar": "",
+      "unlockGoodsNum": [
+        [1, 0],
+        [2, 0],
+        [3, 1],
+        [4, 1]
+      ],
+      "goodsId": 211453
+    }
+  },
+  {
+    "identity": "shadow-dancer",
+    "name": "Shadow Dancer",
+    "nativeId": 53585,
+    "definition": {
+      "id": 53585,
+      "newAccMaxLv": 100,
+      "isUnlock": 1,
+      "name": 5504086,
+      "type": 1,
+      "gender": 1,
+      "baseLevel": 1,
+      "baseQuality": 1,
+      "baseSkill": 54288,
+      "baseStar": 1,
+      "baseSkill3": 54290,
+      "baseSkill4": "",
+      "baseSkill5": "",
+      "breachGoods": [
+        [213305, 0],
+        [213305, 0],
+        [213305, 0],
+        [213305, 0],
+        [213305, 0]
+      ],
+      "starMaxLevel": 3,
+      "starGoods": [
+        [213305, 6000],
+        [213305, 15000],
+        [213305, 30000],
+        [213305, 60000]
+      ],
+      "needPieces": [213305, 3000],
+      "piecesId": 213305,
+      "levelMax": 100,
+      "talent": 85,
+      "generalAb": 41020023,
+      "loot": 1,
+      "lootLevel": 5,
+      "garrison": 1,
+      "battle": 1,
+      "lordExp": 1,
+      "refineCard": 20,
+      "refineEffect": [
+        [1, 1000],
+        [2, 1000],
+        [3, 1000],
+        [4, 1000],
+        [5, 1000]
+      ],
+      "refineEffectLock": [
+        [1, 1000],
+        [2, 3000],
+        [3, 7000],
+        [4, 15000]
+      ],
+      "refineNum": [
+        [1, 1],
+        [2, 1],
+        [3, 1],
+        [4, 0],
+        [5, 0]
+      ],
+      "unlockLevel": [
+        [1, 1],
+        [2, 1],
+        [3, 30]
+      ],
+      "unlockStar": "",
+      "unlockGoodsNum": [
+        [1, 0],
+        [2, 0],
+        [3, 1],
+        [4, 1]
+      ],
+      "goodsId": 211453
+    }
+  },
+  {
+    "identity": "pyrus",
+    "name": "Pyrus",
+    "nativeId": 53586,
+    "definition": {
+      "id": 53586,
+      "newAccMaxLv": 100,
+      "isUnlock": 1,
+      "name": 5504087,
+      "type": 1,
+      "gender": 1,
+      "baseLevel": 1,
+      "baseQuality": 1,
+      "baseSkill": 54293,
+      "baseStar": 1,
+      "baseSkill3": 54295,
+      "baseSkill4": "",
+      "baseSkill5": "",
+      "breachGoods": [
+        [213306, 0],
+        [213306, 0],
+        [213306, 0],
+        [213306, 0],
+        [213306, 0]
+      ],
+      "starMaxLevel": 3,
+      "starGoods": [
+        [213306, 6000],
+        [213306, 15000],
+        [213306, 30000],
+        [213306, 60000]
+      ],
+      "needPieces": [213306, 3000],
+      "piecesId": 213306,
+      "levelMax": 100,
+      "talent": 86,
+      "generalAb": 41020024,
+      "loot": 1,
+      "lootLevel": 5,
+      "garrison": 1,
+      "battle": 1,
+      "lordExp": 1,
+      "refineCard": 20,
+      "refineEffect": [
+        [1, 1000],
+        [2, 1000],
+        [3, 1000],
+        [4, 1000],
+        [5, 1000]
+      ],
+      "refineEffectLock": [
+        [1, 1000],
+        [2, 3000],
+        [3, 7000],
+        [4, 15000]
+      ],
+      "refineNum": [
+        [1, 1],
+        [2, 1],
+        [3, 1],
+        [4, 0],
+        [5, 0]
+      ],
+      "unlockLevel": [
+        [1, 1],
+        [2, 1],
+        [3, 30]
+      ],
+      "unlockStar": "",
+      "unlockGoodsNum": [
+        [1, 0],
+        [2, 0],
+        [3, 1],
+        [4, 1]
+      ],
+      "goodsId": 211453
+    }
+  },
+  {
+    "identity": "leonidas",
+    "name": "Leonidas",
+    "nativeId": 53587,
+    "definition": {
+      "id": 53587,
+      "newAccMaxLv": 100,
+      "isUnlock": 1,
+      "name": 5504088,
+      "type": 1,
+      "gender": 1,
+      "baseLevel": 1,
+      "baseQuality": 1,
+      "baseSkill": 54298,
+      "baseStar": 1,
+      "baseSkill3": 54300,
+      "baseSkill4": "",
+      "baseSkill5": "",
+      "breachGoods": [
+        [213307, 0],
+        [213307, 0],
+        [213307, 0],
+        [213307, 0],
+        [213307, 0]
+      ],
+      "starMaxLevel": 3,
+      "starGoods": [
+        [213307, 6000],
+        [213307, 15000],
+        [213307, 30000],
+        [213307, 60000]
+      ],
+      "needPieces": [213307, 3000],
+      "piecesId": 213307,
+      "levelMax": 100,
+      "talent": 87,
+      "generalAb": 41020025,
+      "loot": 1,
+      "lootLevel": 5,
+      "garrison": 1,
+      "battle": 1,
+      "lordExp": 1,
+      "refineCard": 20,
+      "refineEffect": [
+        [1, 1000],
+        [2, 1000],
+        [3, 1000],
+        [4, 1000],
+        [5, 1000]
+      ],
+      "refineEffectLock": [
+        [1, 1000],
+        [2, 3000],
+        [3, 7000],
+        [4, 15000]
+      ],
+      "refineNum": [
+        [1, 1],
+        [2, 1],
+        [3, 1],
+        [4, 0],
+        [5, 0]
+      ],
+      "unlockLevel": [
+        [1, 1],
+        [2, 1],
+        [3, 30]
+      ],
+      "unlockStar": "",
+      "unlockGoodsNum": [
+        [1, 0],
+        [2, 0],
+        [3, 1],
+        [4, 1]
+      ],
+      "goodsId": 211453
+    }
+  },
+  {
+    "identity": "iron-blooded-guard",
+    "name": "Iron-Blooded Guard",
+    "nativeId": 53588,
+    "definition": {
+      "id": 53588,
+      "newAccMaxLv": 100,
+      "isUnlock": 1,
+      "name": 5504089,
+      "type": 0,
+      "gender": 1,
+      "baseLevel": 1,
+      "baseQuality": 1,
+      "baseSkill": 54303,
+      "baseStar": 1,
+      "baseSkill3": 54305,
+      "baseSkill4": 54306,
+      "baseSkill5": 54307,
+      "breachGoods": [
+        [213308, 0],
+        [213308, 0],
+        [213308, 0],
+        [213308, 0],
+        [213308, 0]
+      ],
+      "starMaxLevel": 5,
+      "starGoods": [
+        [213308, 6000],
+        [213308, 15000],
+        [213308, 30000],
+        [213308, 60000]
+      ],
+      "needPieces": [213308, 3000],
+      "piecesId": 211624,
+      "levelMax": 100,
+      "talent": 88,
+      "generalAb": 41020026,
+      "loot": 1,
+      "lootLevel": 5,
+      "garrison": 1,
+      "battle": 1,
+      "lordExp": 1,
+      "refineCard": 20,
+      "refineEffect": [
+        [1, 1000],
+        [2, 1000],
+        [3, 1000],
+        [4, 1000],
+        [5, 1000]
+      ],
+      "refineEffectLock": [
+        [1, 1000],
+        [2, 3000],
+        [3, 7000],
+        [4, 15000]
+      ],
+      "refineNum": [
+        [1, 1],
+        [2, 1],
+        [3, 1],
+        [4, 0],
+        [5, 0]
+      ],
+      "unlockLevel": [
+        [1, 1],
+        [2, 1],
+        [3, 30]
+      ],
+      "unlockStar": "",
+      "unlockGoodsNum": [
+        [1, 0],
+        [2, 0],
+        [3, 1],
+        [4, 1]
+      ],
+      "goodsId": 211453
+    }
+  },
+  {
+    "identity": "expansion-master-gaudi",
+    "name": "Expansion Master Gaudi",
+    "nativeId": 53589,
+    "definition": {
+      "id": 53589,
+      "newAccMaxLv": 100,
+      "isUnlock": 1,
+      "name": 5504090,
+      "type": 0,
+      "gender": 1,
+      "baseLevel": 1,
+      "baseQuality": 1,
+      "baseSkill": 54308,
+      "baseStar": 1,
+      "baseSkill3": 54310,
+      "baseSkill4": 54311,
+      "baseSkill5": 54312,
+      "breachGoods": [
+        [213309, 0],
+        [213309, 0],
+        [213309, 0],
+        [213309, 0],
+        [213309, 0]
+      ],
+      "starMaxLevel": 5,
+      "starGoods": [
+        [213309, 6000],
+        [213309, 15000],
+        [213309, 30000],
+        [213309, 60000]
+      ],
+      "needPieces": [213309, 3000],
+      "piecesId": 211624,
+      "levelMax": 100,
+      "talent": 89,
+      "generalAb": 41020027,
+      "loot": 1,
+      "lootLevel": 5,
+      "garrison": 1,
+      "battle": 1,
+      "lordExp": 1,
+      "refineCard": 20,
+      "refineEffect": [
+        [1, 1000],
+        [2, 1000],
+        [3, 1000],
+        [4, 1000],
+        [5, 1000]
+      ],
+      "refineEffectLock": [
+        [1, 1000],
+        [2, 3000],
+        [3, 7000],
+        [4, 15000]
+      ],
+      "refineNum": [
+        [1, 1],
+        [2, 1],
+        [3, 1],
+        [4, 0],
+        [5, 0]
+      ],
+      "unlockLevel": [
+        [1, 1],
+        [2, 1],
+        [3, 30]
+      ],
+      "unlockStar": "",
+      "unlockGoodsNum": [
+        [1, 0],
+        [2, 0],
+        [3, 1],
+        [4, 1]
+      ],
+      "goodsId": 211453
+    }
+  },
+  {
+    "identity": "gem-witch",
+    "name": "Gem Witch",
+    "nativeId": 53590,
+    "definition": {
+      "id": 53590,
+      "newAccMaxLv": 100,
+      "isUnlock": 1,
+      "name": 5504091,
+      "type": 0,
+      "gender": 2,
+      "baseLevel": 1,
+      "baseQuality": 1,
+      "baseSkill": 54316,
+      "baseStar": 1,
+      "baseSkill3": 54318,
+      "baseSkill4": "",
+      "baseSkill5": "",
+      "breachGoods": [
+        [213310, 0],
+        [213310, 0],
+        [213310, 0],
+        [213310, 0],
+        [213310, 0]
+      ],
+      "starMaxLevel": 3,
+      "starGoods": [
+        [213310, 6000],
+        [213310, 15000],
+        [213310, 30000],
+        [213310, 60000]
+      ],
+      "needPieces": [213310, 3000],
+      "piecesId": 213310,
+      "levelMax": 100,
+      "talent": 90,
+      "generalAb": 41020028,
+      "loot": 1,
+      "lootLevel": 5,
+      "garrison": 1,
+      "battle": 1,
+      "lordExp": 1,
+      "refineCard": 20,
+      "refineEffect": [
+        [1, 1000],
+        [2, 1000],
+        [3, 1000],
+        [4, 1000],
+        [5, 1000]
+      ],
+      "refineEffectLock": [
+        [1, 1000],
+        [2, 3000],
+        [3, 7000],
+        [4, 15000]
+      ],
+      "refineNum": [
+        [1, 1],
+        [2, 1],
+        [3, 1],
+        [4, 0],
+        [5, 0]
+      ],
+      "unlockLevel": [
+        [1, 1],
+        [2, 1],
+        [3, 30]
+      ],
+      "unlockStar": [
+        [1, 1],
+        [2, 1],
+        [3, 1],
+        [4, 3]
+      ],
+      "unlockGoodsNum": [
+        [1, 0],
+        [2, 0],
+        [3, 1],
+        [4, 1]
+      ],
+      "goodsId": 211453
+    }
+  },
+  {
+    "identity": "cleopatra",
+    "name": "Cleopatra",
+    "nativeId": 53591,
+    "definition": {
+      "id": 53591,
+      "newAccMaxLv": 100,
+      "isUnlock": 1,
+      "name": 5504092,
+      "type": 1,
+      "gender": 2,
+      "baseLevel": 1,
+      "baseQuality": 1,
+      "baseSkill": 54321,
+      "baseStar": 1,
+      "baseSkill3": 54323,
+      "baseSkill4": "",
+      "baseSkill5": "",
+      "breachGoods": [
+        [213311, 0],
+        [213311, 0],
+        [213311, 0],
+        [213311, 0],
+        [213311, 0]
+      ],
+      "starMaxLevel": 3,
+      "starGoods": [
+        [213311, 6000],
+        [213311, 15000],
+        [213311, 30000],
+        [213311, 60000]
+      ],
+      "needPieces": [213311, 3000],
+      "piecesId": 213311,
+      "levelMax": 100,
+      "talent": 91,
+      "generalAb": 41020029,
+      "loot": 1,
+      "lootLevel": 5,
+      "garrison": 1,
+      "battle": 1,
+      "lordExp": 1,
+      "refineCard": 20,
+      "refineEffect": [
+        [1, 1000],
+        [2, 1000],
+        [3, 1000],
+        [4, 1000],
+        [5, 1000]
+      ],
+      "refineEffectLock": [
+        [1, 1000],
+        [2, 3000],
+        [3, 7000],
+        [4, 15000]
+      ],
+      "refineNum": [
+        [1, 1],
+        [2, 1],
+        [3, 1],
+        [4, 1],
+        [5, 0]
+      ],
+      "unlockLevel": [
+        [1, 1],
+        [2, 1],
+        [3, 30],
+        [4, 1]
+      ],
+      "unlockStar": [
+        [1, 1],
+        [2, 1],
+        [3, 1],
+        [4, 1]
+      ],
+      "unlockGoodsNum": [
+        [1, 0],
+        [2, 0],
+        [3, 1],
+        [4, 100]
+      ],
+      "goodsId": 211453
+    }
+  },
+  {
+    "identity": "judith",
+    "name": "Judith",
+    "nativeId": 53592,
+    "definition": {
+      "id": 53592,
+      "newAccMaxLv": 100,
+      "isUnlock": 1,
+      "name": 5504093,
+      "type": 1,
+      "gender": 2,
+      "baseLevel": 1,
+      "baseQuality": 1,
+      "baseSkill": 54326,
+      "baseStar": 1,
+      "baseSkill3": 54328,
+      "baseSkill4": "",
+      "baseSkill5": "",
+      "breachGoods": [
+        [213312, 0],
+        [213312, 0],
+        [213312, 0],
+        [213312, 0],
+        [213312, 0]
+      ],
+      "starMaxLevel": 3,
+      "starGoods": [
+        [213312, 6000],
+        [213312, 15000],
+        [213312, 30000],
+        [213312, 60000]
+      ],
+      "needPieces": [213312, 3000],
+      "piecesId": 213312,
+      "levelMax": 100,
+      "talent": 92,
+      "generalAb": 41020030,
+      "loot": 1,
+      "lootLevel": 5,
+      "garrison": 1,
+      "battle": 1,
+      "lordExp": 1,
+      "refineCard": 20,
+      "refineEffect": [
+        [1, 1000],
+        [2, 1000],
+        [3, 1000],
+        [4, 1000],
+        [5, 1000]
+      ],
+      "refineEffectLock": [
+        [1, 1000],
+        [2, 3000],
+        [3, 7000],
+        [4, 15000]
+      ],
+      "refineNum": [
+        [1, 1],
+        [2, 1],
+        [3, 1],
+        [4, 1],
+        [5, 0]
+      ],
+      "unlockLevel": [
+        [1, 1],
+        [2, 1],
+        [3, 30],
+        [4, 1]
+      ],
+      "unlockStar": [
+        [1, 1],
+        [2, 1],
+        [3, 1],
+        [4, 1]
+      ],
+      "unlockGoodsNum": [
+        [1, 0],
+        [2, 0],
+        [3, 1],
+        [4, 100]
+      ],
+      "goodsId": 211453
+    }
+  },
+  {
+    "identity": "dio",
+    "name": "Dio",
+    "nativeId": 53593,
+    "definition": {
+      "id": 53593,
+      "newAccMaxLv": 100,
+      "isUnlock": 1,
+      "name": 5504094,
+      "type": 1,
+      "gender": 1,
+      "baseLevel": 1,
+      "baseQuality": 1,
+      "baseSkill": 54331,
+      "baseStar": 1,
+      "baseSkill3": 54333,
+      "baseSkill4": "",
+      "baseSkill5": "",
+      "breachGoods": [
+        [213313, 0],
+        [213313, 0],
+        [213313, 0],
+        [213313, 0],
+        [213313, 0]
+      ],
+      "starMaxLevel": 3,
+      "starGoods": [
+        [213313, 6000],
+        [213313, 15000],
+        [213313, 30000],
+        [213313, 60000]
+      ],
+      "needPieces": [213313, 3000],
+      "piecesId": 213313,
+      "levelMax": 100,
+      "talent": 93,
+      "generalAb": 41020031,
+      "loot": 1,
+      "lootLevel": 5,
+      "garrison": 1,
+      "battle": 1,
+      "lordExp": 1,
+      "refineCard": 20,
+      "refineEffect": [
+        [1, 1000],
+        [2, 1000],
+        [3, 1000],
+        [4, 1000],
+        [5, 1000]
+      ],
+      "refineEffectLock": [
+        [1, 1000],
+        [2, 3000],
+        [3, 7000],
+        [4, 15000]
+      ],
+      "refineNum": [
+        [1, 1],
+        [2, 1],
+        [3, 1],
+        [4, 1],
+        [5, 0]
+      ],
+      "unlockLevel": [
+        [1, 1],
+        [2, 1],
+        [3, 30],
+        [4, 1]
+      ],
+      "unlockStar": [
+        [1, 1],
+        [2, 1],
+        [3, 1],
+        [4, 1]
+      ],
+      "unlockGoodsNum": [
+        [1, 0],
+        [2, 0],
+        [3, 1],
+        [4, 100]
+      ],
+      "goodsId": 211453
+    }
+  },
+  {
+    "identity": "athena",
+    "name": "Athena",
+    "nativeId": 53594,
+    "definition": {
+      "id": 53594,
+      "newAccMaxLv": 100,
+      "isUnlock": 1,
+      "name": 683700,
+      "type": 1,
+      "gender": 2,
+      "baseLevel": 1,
+      "baseQuality": 1,
+      "baseSkill": 54336,
+      "baseStar": 1,
+      "baseSkill3": 54338,
+      "baseSkill4": "",
+      "baseSkill5": "",
+      "breachGoods": [
+        [213314, 0],
+        [213314, 0],
+        [213314, 0],
+        [213314, 0],
+        [213314, 0]
+      ],
+      "starMaxLevel": 3,
+      "starGoods": [
+        [213314, 6000],
+        [213314, 15000],
+        [213314, 30000],
+        [213314, 60000]
+      ],
+      "needPieces": [213314, 3000],
+      "piecesId": 213314,
+      "levelMax": 100,
+      "talent": 94,
+      "generalAb": 41020032,
+      "loot": 1,
+      "lootLevel": 5,
+      "garrison": 1,
+      "battle": 1,
+      "lordExp": 1,
+      "refineCard": 20,
+      "refineEffect": [
+        [1, 1000],
+        [2, 1000],
+        [3, 1000],
+        [4, 1000],
+        [5, 1000]
+      ],
+      "refineEffectLock": [
+        [1, 1000],
+        [2, 3000],
+        [3, 7000],
+        [4, 15000]
+      ],
+      "refineNum": [
+        [1, 1],
+        [2, 1],
+        [3, 1],
+        [4, 0],
+        [5, 0]
+      ],
+      "unlockLevel": [
+        [1, 1],
+        [2, 1],
+        [3, 30]
+      ],
+      "unlockStar": "",
+      "unlockGoodsNum": [
+        [1, 0],
+        [2, 0],
+        [3, 1],
+        [4, 1]
+      ],
+      "goodsId": 211453
+    }
+  },
+  {
+    "identity": "black-star",
+    "name": "Black Star",
+    "nativeId": 53595,
+    "definition": {
+      "id": 53595,
+      "newAccMaxLv": 100,
+      "isUnlock": 1,
+      "name": 683720,
+      "type": 1,
+      "gender": 1,
+      "baseLevel": 1,
+      "baseQuality": 1,
+      "baseSkill": 54341,
+      "baseStar": 1,
+      "baseSkill3": 54343,
+      "baseSkill4": "",
+      "baseSkill5": "",
+      "breachGoods": [
+        [213315, 0],
+        [213315, 0],
+        [213315, 0],
+        [213315, 0],
+        [213315, 0]
+      ],
+      "starMaxLevel": 3,
+      "starGoods": [
+        [213315, 6000],
+        [213315, 15000],
+        [213315, 30000],
+        [213315, 60000]
+      ],
+      "needPieces": [213315, 3000],
+      "piecesId": 213315,
+      "levelMax": 100,
+      "talent": 95,
+      "generalAb": 41020033,
+      "loot": 1,
+      "lootLevel": 5,
+      "garrison": 1,
+      "battle": 1,
+      "lordExp": 1,
+      "refineCard": 20,
+      "refineEffect": [
+        [1, 1000],
+        [2, 1000],
+        [3, 1000],
+        [4, 1000],
+        [5, 1000]
+      ],
+      "refineEffectLock": [
+        [1, 1000],
+        [2, 3000],
+        [3, 7000],
+        [4, 15000]
+      ],
+      "refineNum": [
+        [1, 1],
+        [2, 1],
+        [3, 1],
+        [4, 0],
+        [5, 0]
+      ],
+      "unlockLevel": [
+        [1, 1],
+        [2, 1],
+        [3, 30]
+      ],
+      "unlockStar": "",
+      "unlockGoodsNum": [
+        [1, 0],
+        [2, 0],
+        [3, 1],
+        [4, 1]
+      ],
+      "goodsId": 211453
+    }
+  },
+  {
+    "identity": "saladin",
+    "name": "Saladin",
+    "nativeId": 53596,
+    "definition": {
+      "id": 53596,
+      "newAccMaxLv": 100,
+      "isUnlock": 1,
+      "name": 5504097,
+      "type": 1,
+      "gender": 1,
+      "baseLevel": 1,
+      "baseQuality": 1,
+      "baseSkill": 54346,
+      "baseStar": 1,
+      "baseSkill3": 54348,
+      "baseSkill4": 54349,
+      "baseSkill5": "",
+      "breachGoods": [
+        [213316, 0],
+        [213316, 0],
+        [213316, 0],
+        [213316, 0],
+        [213316, 0]
+      ],
+      "starMaxLevel": 4,
+      "starGoods": [
+        [213316, 6000],
+        [213316, 15000],
+        [213316, 30000],
+        [213316, 60000]
+      ],
+      "needPieces": [213316, 3000],
+      "piecesId": 213316,
+      "levelMax": 100,
+      "talent": 96,
+      "generalAb": 41020034,
+      "loot": 1,
+      "lootLevel": 5,
+      "garrison": 1,
+      "battle": 1,
+      "lordExp": 1,
+      "refineCard": 20,
+      "refineEffect": [
+        [1, 1000],
+        [2, 1000],
+        [3, 1000],
+        [4, 1000],
+        [5, 1000]
+      ],
+      "refineEffectLock": [
+        [1, 1000],
+        [2, 3000],
+        [3, 7000],
+        [4, 15000]
+      ],
+      "refineNum": [
+        [1, 1],
+        [2, 1],
+        [3, 1],
+        [4, 0],
+        [5, 0]
+      ],
+      "unlockLevel": [
+        [1, 1],
+        [2, 1],
+        [3, 30]
+      ],
+      "unlockStar": "",
+      "unlockGoodsNum": [
+        [1, 0],
+        [2, 0],
+        [3, 1],
+        [4, 1]
+      ],
+      "goodsId": 211453
+    }
+  },
+  {
+    "identity": "baldwin-the-fourth",
+    "name": "Baldwin the Fourth",
+    "nativeId": 53597,
+    "definition": {
+      "id": 53597,
+      "newAccMaxLv": 100,
+      "isUnlock": 1,
+      "name": 5504098,
+      "type": 1,
+      "gender": 1,
+      "baseLevel": 1,
+      "baseQuality": 1,
+      "baseSkill": 54351,
+      "baseStar": 1,
+      "baseSkill3": 54353,
+      "baseSkill4": 54354,
+      "baseSkill5": "",
+      "breachGoods": [
+        [213317, 0],
+        [213317, 0],
+        [213317, 0],
+        [213317, 0],
+        [213317, 0]
+      ],
+      "starMaxLevel": 4,
+      "starGoods": [
+        [213317, 6000],
+        [213317, 15000],
+        [213317, 30000],
+        [213317, 60000]
+      ],
+      "needPieces": [213317, 3000],
+      "piecesId": 213317,
+      "levelMax": 100,
+      "talent": 97,
+      "generalAb": 41020035,
+      "loot": 1,
+      "lootLevel": 5,
+      "garrison": 1,
+      "battle": 1,
+      "lordExp": 1,
+      "refineCard": 20,
+      "refineEffect": [
+        [1, 1000],
+        [2, 1000],
+        [3, 1000],
+        [4, 1000],
+        [5, 1000]
+      ],
+      "refineEffectLock": [
+        [1, 1000],
+        [2, 3000],
+        [3, 7000],
+        [4, 15000]
+      ],
+      "refineNum": [
+        [1, 1],
+        [2, 1],
+        [3, 1],
+        [4, 0],
+        [5, 0]
+      ],
+      "unlockLevel": [
+        [1, 1],
+        [2, 1],
+        [3, 30]
+      ],
+      "unlockStar": "",
+      "unlockGoodsNum": [
+        [1, 0],
+        [2, 0],
+        [3, 1],
+        [4, 1]
+      ],
+      "goodsId": 211453
+    }
+  },
+  {
+    "identity": "richard-i",
+    "name": "Richard I",
+    "nativeId": 53598,
+    "definition": {
+      "id": 53598,
+      "newAccMaxLv": 100,
+      "isUnlock": 1,
+      "name": 5504099,
+      "type": 1,
+      "gender": 1,
+      "baseLevel": 1,
+      "baseQuality": 1,
+      "baseSkill": 54356,
+      "baseStar": 1,
+      "baseSkill3": 54358,
+      "baseSkill4": 54359,
+      "baseSkill5": "",
+      "breachGoods": [
+        [213318, 0],
+        [213318, 0],
+        [213318, 0],
+        [213318, 0],
+        [213318, 0]
+      ],
+      "starMaxLevel": 4,
+      "starGoods": [
+        [213318, 6000],
+        [213318, 15000],
+        [213318, 30000],
+        [213318, 60000]
+      ],
+      "needPieces": [213318, 3000],
+      "piecesId": 213318,
+      "levelMax": 100,
+      "talent": 98,
+      "generalAb": 41020036,
+      "loot": 1,
+      "lootLevel": 5,
+      "garrison": 1,
+      "battle": 1,
+      "lordExp": 1,
+      "refineCard": 20,
+      "refineEffect": [
+        [1, 1000],
+        [2, 1000],
+        [3, 1000],
+        [4, 1000],
+        [5, 1000]
+      ],
+      "refineEffectLock": [
+        [1, 1000],
+        [2, 3000],
+        [3, 7000],
+        [4, 15000]
+      ],
+      "refineNum": [
+        [1, 1],
+        [2, 1],
+        [3, 1],
+        [4, 0],
+        [5, 0]
+      ],
+      "unlockLevel": [
+        [1, 1],
+        [2, 1],
+        [3, 30]
+      ],
+      "unlockStar": "",
+      "unlockGoodsNum": [
+        [1, 0],
+        [2, 0],
+        [3, 1],
+        [4, 1]
+      ],
+      "goodsId": 211453
+    }
+  },
+  {
+    "identity": "frederick-the-first",
+    "name": "Frederick the First",
+    "nativeId": 53599,
+    "definition": {
+      "id": 53599,
+      "newAccMaxLv": 100,
+      "isUnlock": 1,
+      "name": 5504100,
+      "type": 1,
+      "gender": 1,
+      "baseLevel": 1,
+      "baseQuality": 1,
+      "baseSkill": 54361,
+      "baseStar": 1,
+      "baseSkill3": 54363,
+      "baseSkill4": 54364,
+      "baseSkill5": "",
+      "breachGoods": [
+        [213319, 0],
+        [213319, 0],
+        [213319, 0],
+        [213319, 0],
+        [213319, 0]
+      ],
+      "starMaxLevel": 4,
+      "starGoods": [
+        [213319, 6000],
+        [213319, 15000],
+        [213319, 30000],
+        [213319, 60000]
+      ],
+      "needPieces": [213319, 3000],
+      "piecesId": 213319,
+      "levelMax": 100,
+      "talent": 99,
+      "generalAb": 41020037,
+      "loot": 1,
+      "lootLevel": 5,
+      "garrison": 1,
+      "battle": 1,
+      "lordExp": 1,
+      "refineCard": 20,
+      "refineEffect": [
+        [1, 1000],
+        [2, 1000],
+        [3, 1000],
+        [4, 1000],
+        [5, 1000]
+      ],
+      "refineEffectLock": [
+        [1, 1000],
+        [2, 3000],
+        [3, 7000],
+        [4, 15000]
+      ],
+      "refineNum": [
+        [1, 1],
+        [2, 1],
+        [3, 1],
+        [4, 0],
+        [5, 0]
+      ],
+      "unlockLevel": [
+        [1, 1],
+        [2, 1],
+        [3, 30]
+      ],
+      "unlockStar": "",
+      "unlockGoodsNum": [
+        [1, 0],
+        [2, 0],
+        [3, 1],
+        [4, 1]
+      ],
+      "goodsId": 211453
+    }
+  },
+  {
+    "identity": "rogers",
+    "name": "Rogers",
+    "nativeId": 53160001,
+    "definition": {
+      "id": 53160001,
+      "newAccMaxLv": 100,
+      "isUnlock": 1,
+      "name": 5504136,
+      "type": 1,
+      "gender": 1,
+      "baseLevel": 1,
+      "baseQuality": 1,
+      "baseSkill": 54366,
+      "baseStar": 1,
+      "baseSkill3": 54368,
+      "baseSkill4": 54369,
+      "baseSkill5": 54370,
+      "breachGoods": [
+        [213320, 0],
+        [213320, 0],
+        [213320, 0],
+        [213320, 0],
+        [213320, 0]
+      ],
+      "starMaxLevel": 5,
+      "starGoods": [
+        [213320, 6000],
+        [213320, 15000],
+        [213320, 30000],
+        [213320, 60000]
+      ],
+      "needPieces": [213320, 3000],
+      "piecesId": 213320,
+      "levelMax": 100,
+      "talent": 100,
+      "generalAb": 41020039,
+      "loot": 1,
+      "lootLevel": 5,
+      "garrison": 1,
+      "battle": 1,
+      "lordExp": 1,
+      "refineCard": 20,
+      "refineEffect": [
+        [1, 1000],
+        [2, 1000],
+        [3, 1000],
+        [4, 1000],
+        [5, 1000]
+      ],
+      "refineEffectLock": [
+        [1, 1000],
+        [2, 3000],
+        [3, 7000],
+        [4, 15000]
+      ],
+      "refineNum": [
+        [1, 1],
+        [2, 1],
+        [3, 1],
+        [4, 1],
+        [5, 0]
+      ],
+      "unlockLevel": [
+        [1, 1],
+        [2, 1],
+        [3, 30],
+        [4, 1]
+      ],
+      "unlockStar": [
+        [1, 1],
+        [2, 1],
+        [3, 1],
+        [4, 3]
+      ],
+      "unlockGoodsNum": [
+        [1, 0],
+        [2, 0],
+        [3, 1],
+        [4, 100]
+      ],
+      "goodsId": 211453
+    }
+  },
+  {
+    "identity": "ying-yaoguang",
+    "name": "Ying Yaoguang",
+    "nativeId": 53160002,
+    "definition": {
+      "id": 53160002,
+      "newAccMaxLv": 100,
+      "isUnlock": 1,
+      "name": 5504119,
+      "type": 1,
+      "gender": 2,
+      "baseLevel": 1,
+      "baseQuality": 1,
+      "baseSkill": 54371,
+      "baseStar": 1,
+      "baseSkill3": 54373,
+      "baseSkill4": 54374,
+      "baseSkill5": 54375,
+      "breachGoods": [
+        [213321, 0],
+        [213321, 0],
+        [213321, 0],
+        [213321, 0],
+        [213321, 0]
+      ],
+      "starMaxLevel": 5,
+      "starGoods": [
+        [213321, 6000],
+        [213321, 15000],
+        [213321, 30000],
+        [213321, 60000]
+      ],
+      "needPieces": [213321, 3000],
+      "piecesId": 213321,
+      "levelMax": 100,
+      "talent": 101,
+      "generalAb": 41020040,
+      "loot": 1,
+      "lootLevel": 5,
+      "garrison": 1,
+      "battle": 1,
+      "lordExp": 1,
+      "refineCard": 20,
+      "refineEffect": [
+        [1, 1000],
+        [2, 1000],
+        [3, 1000],
+        [4, 1000],
+        [5, 1000]
+      ],
+      "refineEffectLock": [
+        [1, 1000],
+        [2, 3000],
+        [3, 7000],
+        [4, 15000]
+      ],
+      "refineNum": [
+        [1, 1],
+        [2, 1],
+        [3, 1],
+        [4, 1],
+        [5, 0]
+      ],
+      "unlockLevel": [
+        [1, 1],
+        [2, 1],
+        [3, 30],
+        [4, 1]
+      ],
+      "unlockStar": [
+        [1, 1],
+        [2, 1],
+        [3, 1],
+        [4, 3]
+      ],
+      "unlockGoodsNum": [
+        [1, 0],
+        [2, 0],
+        [3, 1],
+        [4, 100]
+      ],
+      "goodsId": 211453
+    }
+  },
+  {
+    "identity": "edgar",
+    "name": "Edgar",
+    "nativeId": 53160003,
+    "definition": {
+      "id": 53160003,
+      "newAccMaxLv": 100,
+      "isUnlock": 1,
+      "name": 5504101,
+      "type": 1,
+      "gender": 1,
+      "baseLevel": 1,
+      "baseQuality": 1,
+      "baseSkill": 54376,
+      "baseStar": 1,
+      "baseSkill3": 54378,
+      "baseSkill4": 54379,
+      "baseSkill5": 54380,
+      "breachGoods": [
+        [213322, 0],
+        [213322, 0],
+        [213322, 0],
+        [213322, 0],
+        [213322, 0]
+      ],
+      "starMaxLevel": 5,
+      "starGoods": [
+        [213322, 6000],
+        [213322, 15000],
+        [213322, 30000],
+        [213322, 60000]
+      ],
+      "needPieces": [213322, 3000],
+      "piecesId": 213322,
+      "levelMax": 100,
+      "talent": 102,
+      "generalAb": 41020038,
+      "loot": 1,
+      "lootLevel": 5,
+      "garrison": 1,
+      "battle": 1,
+      "lordExp": 1,
+      "refineCard": 20,
+      "refineEffect": [
+        [1, 1000],
+        [2, 1000],
+        [3, 1000],
+        [4, 1000],
+        [5, 1000]
+      ],
+      "refineEffectLock": [
+        [1, 1000],
+        [2, 3000],
+        [3, 7000],
+        [4, 15000]
+      ],
+      "refineNum": [
+        [1, 1],
+        [2, 1],
+        [3, 1],
+        [4, 1],
+        [5, 0]
+      ],
+      "unlockLevel": [
+        [1, 1],
+        [2, 1],
+        [3, 30],
+        [4, 1]
+      ],
+      "unlockStar": [
+        [1, 1],
+        [2, 1],
+        [3, 1],
+        [4, 3]
+      ],
+      "unlockGoodsNum": [
+        [1, 0],
+        [2, 0],
+        [3, 1],
+        [4, 100]
+      ],
+      "goodsId": 211453
+    }
+  },
+  {
+    "identity": "cassidier",
+    "name": "Cassidier",
+    "nativeId": 53160004,
+    "definition": {
+      "id": 53160004,
+      "newAccMaxLv": 100,
+      "isUnlock": 1,
+      "name": 5504153,
+      "type": 1,
+      "gender": 1,
+      "baseLevel": 1,
+      "baseQuality": 1,
+      "baseSkill": 54381,
+      "baseStar": 1,
+      "baseSkill3": 54383,
+      "baseSkill4": 54384,
+      "baseSkill5": 54385,
+      "breachGoods": [
+        [213323, 0],
+        [213323, 0],
+        [213323, 0],
+        [213323, 0],
+        [213323, 0]
+      ],
+      "starMaxLevel": 5,
+      "starGoods": [
+        [213323, 6000],
+        [213323, 15000],
+        [213323, 30000],
+        [213323, 60000]
+      ],
+      "needPieces": [213323, 3000],
+      "piecesId": 213323,
+      "levelMax": 100,
+      "talent": 103,
+      "generalAb": 41020041,
+      "loot": 1,
+      "lootLevel": 5,
+      "garrison": 1,
+      "battle": 1,
+      "lordExp": 1,
+      "refineCard": 20,
+      "refineEffect": [
+        [1, 1000],
+        [2, 1000],
+        [3, 1000],
+        [4, 1000],
+        [5, 1000]
+      ],
+      "refineEffectLock": [
+        [1, 1000],
+        [2, 3000],
+        [3, 7000],
+        [4, 15000]
+      ],
+      "refineNum": [
+        [1, 1],
+        [2, 1],
+        [3, 1],
+        [4, 1],
+        [5, 0]
+      ],
+      "unlockLevel": [
+        [1, 1],
+        [2, 1],
+        [3, 30],
+        [4, 1]
+      ],
+      "unlockStar": [
+        [1, 1],
+        [2, 1],
+        [3, 1],
+        [4, 3]
+      ],
+      "unlockGoodsNum": [
+        [1, 0],
+        [2, 0],
+        [3, 1],
+        [4, 100]
+      ],
+      "goodsId": 211453
+    }
+  },
+  {
+    "identity": "mo-tianxuan",
+    "name": "Mo Tianxuan",
+    "nativeId": 53160005,
+    "definition": {
+      "id": 53160005,
+      "newAccMaxLv": 100,
+      "isUnlock": 1,
+      "name": 5504170,
+      "type": 1,
+      "gender": 1,
+      "baseLevel": 1,
+      "baseQuality": 1,
+      "baseSkill": 54386,
+      "baseStar": 1,
+      "baseSkill3": 54388,
+      "baseSkill4": 54389,
+      "baseSkill5": 54390,
+      "breachGoods": [
+        [213324, 0],
+        [213324, 0],
+        [213324, 0],
+        [213324, 0],
+        [213324, 0]
+      ],
+      "starMaxLevel": 5,
+      "starGoods": [
+        [213324, 300],
+        [213324, 600],
+        [213324, 1500],
+        [213324, 3000]
+      ],
+      "needPieces": [213324, 3000],
+      "piecesId": 213324,
+      "levelMax": 100,
+      "talent": 104,
+      "generalAb": 41020042,
+      "loot": 1,
+      "lootLevel": 5,
+      "garrison": 1,
+      "battle": 1,
+      "lordExp": 1,
+      "refineCard": 20,
+      "refineEffect": [
+        [1, 1000],
+        [2, 1000],
+        [3, 1000],
+        [4, 1000],
+        [5, 1000]
+      ],
+      "refineEffectLock": [
+        [1, 1000],
+        [2, 3000],
+        [3, 7000],
+        [4, 15000]
+      ],
+      "refineNum": [
+        [1, 1],
+        [2, 1],
+        [3, 1],
+        [4, 0],
+        [5, 0]
+      ],
+      "unlockLevel": [
+        [1, 1],
+        [2, 1],
+        [3, 30]
+      ],
+      "unlockStar": [
+        [1, 1],
+        [2, 1],
+        [3, 1]
+      ],
+      "unlockGoodsNum": [
+        [1, 0],
+        [2, 0],
+        [3, 1],
+        [4, 100]
+      ],
+      "goodsId": 211453
+    }
+  },
+  {
+    "identity": "tivash",
+    "name": "Tivash",
+    "nativeId": 53160006,
+    "definition": {
+      "id": 53160006,
+      "newAccMaxLv": 100,
+      "isUnlock": 1,
+      "name": 5504171,
+      "type": 1,
+      "gender": 1,
+      "baseLevel": 1,
+      "baseQuality": 1,
+      "baseSkill": 54391,
+      "baseStar": 1,
+      "baseSkill3": 54393,
+      "baseSkill4": 54394,
+      "baseSkill5": 54395,
+      "breachGoods": [
+        [213325, 0],
+        [213325, 0],
+        [213325, 0],
+        [213325, 0],
+        [213325, 0]
+      ],
+      "starMaxLevel": 5,
+      "starGoods": [
+        [213325, 300],
+        [213325, 600],
+        [213325, 1500],
+        [213325, 3000]
+      ],
+      "needPieces": [213325, 3000],
+      "piecesId": 213325,
+      "levelMax": 100,
+      "talent": 105,
+      "generalAb": 41020043,
+      "loot": 1,
+      "lootLevel": 5,
+      "garrison": 1,
+      "battle": 1,
+      "lordExp": 1,
+      "refineCard": 20,
+      "refineEffect": [
+        [1, 1000],
+        [2, 1000],
+        [3, 1000],
+        [4, 1000],
+        [5, 1000]
+      ],
+      "refineEffectLock": [
+        [1, 1000],
+        [2, 3000],
+        [3, 7000],
+        [4, 15000]
+      ],
+      "refineNum": [
+        [1, 1],
+        [2, 1],
+        [3, 1],
+        [4, 0],
+        [5, 0]
+      ],
+      "unlockLevel": [
+        [1, 1],
+        [2, 1],
+        [3, 30]
+      ],
+      "unlockStar": [
+        [1, 1],
+        [2, 1],
+        [3, 1]
+      ],
+      "unlockGoodsNum": [
+        [1, 0],
+        [2, 0],
+        [3, 1],
+        [4, 100]
+      ],
+      "goodsId": 211453
+    }
+  },
+  {
+    "identity": "douby",
+    "name": "Douby",
+    "nativeId": 53160007,
+    "definition": {
+      "id": 53160007,
+      "newAccMaxLv": 100,
+      "isUnlock": 1,
+      "name": 5504172,
+      "type": 1,
+      "gender": 1,
+      "baseLevel": 1,
+      "baseQuality": 1,
+      "baseSkill": 54396,
+      "baseStar": 1,
+      "baseSkill3": 54398,
+      "baseSkill4": 54399,
+      "baseSkill5": 54400,
+      "breachGoods": [
+        [213326, 0],
+        [213326, 0],
+        [213326, 0],
+        [213326, 0],
+        [213326, 0]
+      ],
+      "starMaxLevel": 5,
+      "starGoods": [
+        [213326, 300],
+        [213326, 450],
+        [213326, 1500],
+        [213326, 3000]
+      ],
+      "needPieces": [213326, 3000],
+      "piecesId": 213326,
+      "levelMax": 100,
+      "talent": 106,
+      "generalAb": 41020044,
+      "loot": 1,
+      "lootLevel": 5,
+      "garrison": 1,
+      "battle": 1,
+      "lordExp": 1,
+      "refineCard": 20,
+      "refineEffect": [
+        [1, 1000],
+        [2, 1000],
+        [3, 1000],
+        [4, 1000],
+        [5, 1000]
+      ],
+      "refineEffectLock": [
+        [1, 1000],
+        [2, 3000],
+        [3, 7000],
+        [4, 15000]
+      ],
+      "refineNum": [
+        [1, 1],
+        [2, 1],
+        [3, 1],
+        [4, 0],
+        [5, 0]
+      ],
+      "unlockLevel": [
+        [1, 1],
+        [2, 1],
+        [3, 30]
+      ],
+      "unlockStar": [
+        [1, 1],
+        [2, 1],
+        [3, 1]
+      ],
+      "unlockGoodsNum": [
+        [1, 0],
+        [2, 0],
+        [3, 1],
+        [4, 100]
+      ],
+      "goodsId": 211453
+    }
+  },
+  {
+    "identity": "shea",
+    "name": "Shea",
+    "nativeId": 53160008,
+    "definition": {
+      "id": 53160008,
+      "newAccMaxLv": 100,
+      "isUnlock": 1,
+      "name": 5504173,
+      "type": 1,
+      "gender": 2,
+      "baseLevel": 1,
+      "baseQuality": 1,
+      "baseSkill": 54401,
+      "baseStar": 1,
+      "baseSkill3": 54403,
+      "baseSkill4": 54404,
+      "baseSkill5": 54405,
+      "breachGoods": [
+        [213327, 0],
+        [213327, 0],
+        [213327, 0],
+        [213327, 0],
+        [213327, 0]
+      ],
+      "starMaxLevel": 5,
+      "starGoods": [
+        [213327, 300],
+        [213327, 450],
+        [213327, 1500],
+        [213327, 3000]
+      ],
+      "needPieces": [213327, 3000],
+      "piecesId": 213327,
+      "levelMax": 100,
+      "talent": 107,
+      "generalAb": 41020045,
+      "loot": 1,
+      "lootLevel": 5,
+      "garrison": 1,
+      "battle": 1,
+      "lordExp": 1,
+      "refineCard": 20,
+      "refineEffect": [
+        [1, 1000],
+        [2, 1000],
+        [3, 1000],
+        [4, 1000],
+        [5, 1000]
+      ],
+      "refineEffectLock": [
+        [1, 1000],
+        [2, 3000],
+        [3, 7000],
+        [4, 15000]
+      ],
+      "refineNum": [
+        [1, 1],
+        [2, 1],
+        [3, 1],
+        [4, 0],
+        [5, 0]
+      ],
+      "unlockLevel": [
+        [1, 1],
+        [2, 1],
+        [3, 30]
+      ],
+      "unlockStar": [
+        [1, 1],
+        [2, 1],
+        [3, 1]
+      ],
+      "unlockGoodsNum": [
+        [1, 0],
+        [2, 0],
+        [3, 1],
+        [4, 100]
+      ],
+      "goodsId": 211453
+    }
+  },
+  {
+    "identity": "mizar",
+    "name": "Mizar",
+    "nativeId": 53160009,
+    "definition": {
+      "id": 53160009,
+      "newAccMaxLv": 100,
+      "isUnlock": 1,
+      "name": 5504174,
+      "type": 1,
+      "gender": 2,
+      "baseLevel": 1,
+      "baseQuality": 1,
+      "baseSkill": 54406,
+      "baseStar": 1,
+      "baseSkill3": 54408,
+      "baseSkill4": 54409,
+      "baseSkill5": 54410,
+      "breachGoods": [
+        [213328, 0],
+        [213328, 0],
+        [213328, 0],
+        [213328, 0],
+        [213328, 0]
+      ],
+      "starMaxLevel": 5,
+      "starGoods": [
+        [213328, 300],
+        [213328, 450],
+        [213328, 1500],
+        [213328, 3000]
+      ],
+      "needPieces": [213328, 3000],
+      "piecesId": 213328,
+      "levelMax": 100,
+      "talent": 108,
+      "generalAb": 41020046,
+      "loot": 1,
+      "lootLevel": 5,
+      "garrison": 1,
+      "battle": 1,
+      "lordExp": 1,
+      "refineCard": 20,
+      "refineEffect": [
+        [1, 1000],
+        [2, 1000],
+        [3, 1000],
+        [4, 1000],
+        [5, 1000]
+      ],
+      "refineEffectLock": [
+        [1, 1000],
+        [2, 3000],
+        [3, 7000],
+        [4, 15000]
+      ],
+      "refineNum": [
+        [1, 1],
+        [2, 1],
+        [3, 1],
+        [4, 0],
+        [5, 0]
+      ],
+      "unlockLevel": [
+        [1, 1],
+        [2, 1],
+        [3, 30]
+      ],
+      "unlockStar": [
+        [1, 1],
+        [2, 1],
+        [3, 1]
+      ],
+      "unlockGoodsNum": [
+        [1, 0],
+        [2, 0],
+        [3, 1],
+        [4, 100]
+      ],
+      "goodsId": 211453
+    }
+  },
+  {
+    "identity": "nezha-variant-1",
+    "name": "Nezha",
+    "nativeId": 53160010,
+    "definition": {
+      "id": 53160010,
+      "newAccMaxLv": 100,
+      "isUnlock": 1,
+      "name": 5504175,
+      "type": 1,
+      "gender": 1,
+      "baseLevel": 1,
+      "baseQuality": 1,
+      "baseSkill": 54411,
+      "baseStar": 1,
+      "baseSkill3": 54413,
+      "baseSkill4": 54414,
+      "baseSkill5": 54415,
+      "breachGoods": [
+        [213329, 0],
+        [213329, 0],
+        [213329, 0],
+        [213329, 0],
+        [213329, 0]
+      ],
+      "starMaxLevel": 5,
+      "starGoods": [
+        [213329, 300],
+        [213329, 450],
+        [213329, 1500],
+        [213329, 3000]
+      ],
+      "needPieces": [213329, 3000],
+      "piecesId": 213329,
+      "levelMax": 100,
+      "talent": 109,
+      "generalAb": 41020047,
+      "loot": 1,
+      "lootLevel": 5,
+      "garrison": 1,
+      "battle": 1,
+      "lordExp": 1,
+      "refineCard": 20,
+      "refineEffect": [
+        [1, 1000],
+        [2, 1000],
+        [3, 1000],
+        [4, 1000],
+        [5, 1000]
+      ],
+      "refineEffectLock": [
+        [1, 1000],
+        [2, 3000],
+        [3, 7000],
+        [4, 15000]
+      ],
+      "refineNum": [
+        [1, 1],
+        [2, 1],
+        [3, 1],
+        [4, 0],
+        [5, 0]
+      ],
+      "unlockLevel": [
+        [1, 1],
+        [2, 1],
+        [3, 30]
+      ],
+      "unlockStar": [
+        [1, 1],
+        [2, 1],
+        [3, 1]
+      ],
+      "unlockGoodsNum": [
+        [1, 0],
+        [2, 0],
+        [3, 1],
+        [4, 100]
+      ],
+      "goodsId": 211453
+    }
+  },
+  {
+    "identity": "nezha-variant-2",
+    "name": "Nezha",
+    "nativeId": 53160011,
+    "definition": {
+      "id": 53160011,
+      "newAccMaxLv": 1,
+      "isUnlock": 0,
+      "name": 5504175,
+      "type": 1,
+      "gender": 2,
+      "baseLevel": 1,
+      "baseQuality": 1,
+      "baseSkill": 54416,
+      "baseStar": 1,
+      "baseSkill2": 54417,
+      "baseSkill3": 54418,
+      "baseSkill4": 54419,
+      "baseSkill5": 54420,
+      "breachGoods": [
+        [213330, 0],
+        [213330, 0],
+        [213330, 0],
+        [213330, 0],
+        [213330, 0]
+      ],
+      "starMaxLevel": 5,
+      "starGoods": [
+        [213330, 300],
+        [213330, 450],
+        [213330, 1500],
+        [213330, 3000]
+      ],
+      "needPieces": [213330, 3000],
+      "piecesId": 213330,
+      "levelMax": 100,
+      "talent": 110,
+      "generalAb": 41020048,
+      "loot": 1,
+      "lootLevel": 5,
+      "garrison": 1,
+      "battle": 1,
+      "lordExp": 1,
+      "refineCard": 20,
+      "refineEffect": [
+        [1, 1000],
+        [2, 1000],
+        [3, 1000],
+        [4, 1000],
+        [5, 1000]
+      ],
+      "refineEffectLock": [
+        [1, 1000],
+        [2, 3000],
+        [3, 7000],
+        [4, 15000]
+      ],
+      "refineNum": [
+        [1, 1],
+        [2, 1],
+        [3, 1],
+        [4, 0],
+        [5, 0]
+      ],
+      "unlockLevel": [
+        [1, 1],
+        [2, 1],
+        [3, 30]
+      ],
+      "unlockStar": [
+        [1, 1],
+        [2, 1],
+        [3, 1]
+      ],
+      "unlockGoodsNum": [
+        [1, 0],
+        [2, 0],
+        [3, 1],
+        [4, 100]
+      ],
+      "goodsId": 211453
+    }
+  },
+  {
+    "identity": "nezha-variant-3",
+    "name": "Nezha",
+    "nativeId": 53160012,
+    "definition": {
+      "id": 53160012,
+      "newAccMaxLv": 1,
+      "isUnlock": 0,
+      "name": 5504175,
+      "type": 1,
+      "gender": 1,
+      "baseLevel": 1,
+      "baseQuality": 1,
+      "baseSkill": 54421,
+      "baseStar": 1,
+      "baseSkill2": 54422,
+      "baseSkill3": 54423,
+      "baseSkill4": 54424,
+      "baseSkill5": 54425,
+      "breachGoods": [
+        [213331, 0],
+        [213331, 0],
+        [213331, 0],
+        [213331, 0],
+        [213331, 0]
+      ],
+      "starMaxLevel": 3,
+      "starGoods": [
+        [213331, 3000],
+        [213331, 6000],
+        [213331, 10000],
+        [213331, 20000]
+      ],
+      "needPieces": [213331, 3000],
+      "piecesId": 213331,
+      "levelMax": 100,
+      "talent": 17,
+      "generalAb": "",
+      "loot": 1,
+      "lootLevel": 5,
+      "garrison": 1,
+      "battle": 1,
+      "lordExp": 1,
+      "refineCard": 20,
+      "refineEffect": [
+        [1, 1000],
+        [2, 1000],
+        [3, 1000],
+        [4, 1000],
+        [5, 1000]
+      ],
+      "refineEffectLock": [
+        [1, 1000],
+        [2, 3000],
+        [3, 7000],
+        [4, 15000]
+      ],
+      "refineNum": [
+        [1, 0],
+        [2, 0],
+        [3, 0],
+        [4, 0],
+        [5, 0]
+      ],
+      "unlockLevel": [
+        [1, 50],
+        [2, 50],
+        [3, 50]
+      ],
+      "unlockStar": [
+        [1, 6],
+        [2, 6],
+        [3, 6],
+        [4, 6]
+      ],
+      "unlockGoodsNum": [
+        [1, 100],
+        [2, 100],
+        [3, 100],
+        [4, 100]
+      ],
+      "goodsId": 211453
+    }
+  },
+  {
+    "identity": "nezha-variant-4",
+    "name": "Nezha",
+    "nativeId": 53160013,
+    "definition": {
+      "id": 53160013,
+      "newAccMaxLv": 1,
+      "isUnlock": 0,
+      "name": 5504175,
+      "type": 1,
+      "gender": 1,
+      "baseLevel": 1,
+      "baseQuality": 1,
+      "baseSkill": 54426,
+      "baseStar": 1,
+      "baseSkill2": 54427,
+      "baseSkill3": 54428,
+      "baseSkill4": 54429,
+      "baseSkill5": 54430,
+      "breachGoods": [
+        [213332, 0],
+        [213331, 0],
+        [213331, 0],
+        [213331, 0],
+        [213331, 0]
+      ],
+      "starMaxLevel": 3,
+      "starGoods": [
+        [213332, 3000],
+        [213332, 6000],
+        [213332, 10000],
+        [213332, 20000]
+      ],
+      "needPieces": [213332, 3000],
+      "piecesId": 213332,
+      "levelMax": 100,
+      "talent": 17,
+      "generalAb": "",
+      "loot": 1,
+      "lootLevel": 5,
+      "garrison": 1,
+      "battle": 1,
+      "lordExp": 1,
+      "refineCard": 20,
+      "refineEffect": [
+        [1, 1000],
+        [2, 1000],
+        [3, 1000],
+        [4, 1000],
+        [5, 1000]
+      ],
+      "refineEffectLock": [
+        [1, 1000],
+        [2, 3000],
+        [3, 7000],
+        [4, 15000]
+      ],
+      "refineNum": [
+        [1, 0],
+        [2, 0],
+        [3, 0],
+        [4, 0],
+        [5, 0]
+      ],
+      "unlockLevel": [
+        [1, 50],
+        [2, 50],
+        [3, 50]
+      ],
+      "unlockStar": [
+        [1, 6],
+        [2, 6],
+        [3, 6],
+        [4, 6]
+      ],
+      "unlockGoodsNum": [
+        [1, 100],
+        [2, 100],
+        [3, 100],
+        [4, 100]
+      ],
+      "goodsId": 211453
+    }
+  },
+  {
+    "identity": "nezha-variant-5",
+    "name": "Nezha",
+    "nativeId": 53160014,
+    "definition": {
+      "id": 53160014,
+      "newAccMaxLv": 1,
+      "isUnlock": 0,
+      "name": 5504175,
+      "type": 1,
+      "gender": 1,
+      "baseLevel": 1,
+      "baseQuality": 1,
+      "baseSkill": 54431,
+      "baseStar": 1,
+      "baseSkill2": 54432,
+      "baseSkill3": 54433,
+      "baseSkill4": 54434,
+      "baseSkill5": 54435,
+      "breachGoods": [
+        [213333, 0],
+        [213333, 0],
+        [213333, 0],
+        [213333, 0],
+        [213333, 0]
+      ],
+      "starMaxLevel": 5,
+      "starGoods": [
+        [213333, 300],
+        [213333, 450],
+        [213333, 1500],
+        [213333, 3000]
+      ],
+      "needPieces": [213333, 3000],
+      "piecesId": 213333,
+      "levelMax": 100,
+      "talent": 113,
+      "generalAb": 41020051,
+      "loot": 1,
+      "lootLevel": 5,
+      "garrison": 1,
+      "battle": 1,
+      "lordExp": 1,
+      "refineCard": 20,
+      "refineEffect": [
+        [1, 1000],
+        [2, 1000],
+        [3, 1000],
+        [4, 1000],
+        [5, 1000]
+      ],
+      "refineEffectLock": [
+        [1, 1000],
+        [2, 3000],
+        [3, 7000],
+        [4, 15000]
+      ],
+      "refineNum": [
+        [1, 1],
+        [2, 1],
+        [3, 1],
+        [4, 0],
+        [5, 0]
+      ],
+      "unlockLevel": [
+        [1, 1],
+        [2, 1],
+        [3, 30]
+      ],
+      "unlockStar": [
+        [1, 1],
+        [2, 1],
+        [3, 1]
+      ],
+      "unlockGoodsNum": [
+        [1, 0],
+        [2, 0],
+        [3, 1],
+        [4, 100]
+      ],
+      "goodsId": 211453
+    }
+  }
+]

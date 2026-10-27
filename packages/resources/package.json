@@ -29,6 +29,7 @@
     "@opencok/rules": "workspace:*",
     "@opencok/enums": "workspace:*",
     "@opencok/contracts": "workspace:*",
-    "@opencok/hero": "workspace:*"
+    "@opencok/hero": "workspace:*",
+    "@opencok/constants": "workspace:*"
   }
 }
