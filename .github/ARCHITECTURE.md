@@ -183,6 +183,13 @@ legacy and numeric rosters. Assignment and effect changes settle production;
 combat consumes immutable general snapshots. See [general progression](../docs/architecture/general-progression.md)
 for native commands, recovery, draw catalog compatibility and acceptance limits.
 
+[Advanced progression, local events and resident world](../docs/architecture/advanced-progression-events-world.md#implemented-scope-and-acceptance-boundaries)
+records the implemented topics25–27 families, integration checkpoints and combat
+and native-device boundaries. Resident placement requires a known birth phase or
+explicit operator adoption; shared noncombat gathering preserves owned party
+checkpoints and pinned return rewards. Focused terrain, birth, supply and party
+contracts remain linked from that inventory.
+
 Basic alliances use ordered participant locks before alliance locks, with current
 membership checked again inside the realm transaction. Shared research schedules
 production effects at their saved deadlines, and gifts pin recipient outcomes
