@@ -1,13 +1,8 @@
 import type { Rules } from "./game";
 import { num, text, type Row } from "@opencok/contracts/rows";
 import { cityInteger } from "./city-progression";
-import {
-  generalBase,
-  generalPairs,
-  generalContent,
-  generalLevel,
-  generalFailure,
-} from "./general-progression";
+import { mailBlank } from "./mail";
+import { generalBase, generalPairs, generalContent, generalFailure } from "./general-progression";
 
 export function validateGeneralTalents(
   rules: Rules,
@@ -15,7 +10,6 @@ export function validateGeneralTalents(
   points: ReadonlyMap<number, number>,
 ) {
   const base = generalBase(rules, num(row, "id"));
-  let used = 0;
   for (const [id, value] of points) {
     const skill = rules.power.newGeneralSkills?.get(String(id));
     if (
@@ -25,15 +19,11 @@ export function validateGeneralTalents(
       value > cityInteger(skill.max_lv, 1)
     )
       generalFailure();
-    if (skill.learn_lv && num(row, "level") < cityInteger(skill.learn_lv, 1)) generalFailure();
-    const conditions = generalPairs(skill.condition_skill);
+    const conditions = generalPairs(mailBlank(skill.condition_skill) ? "" : skill.condition_skill);
     if (conditions.size && ![...conditions].some(([id, value]) => (points.get(id) ?? 0) >= value))
       generalFailure();
-    used = cityInteger(used + value);
   }
-  const remaining = generalLevel(rules, base, num(row, "level")).points - used;
-  if (remaining < 0) generalFailure();
-  return remaining;
+  return cityInteger(num(row, "talentpoint"));
 }
 export function activateGeneralTalent(rules: Rules, row: Row, id: number, full: number) {
   cityInteger(full, 0, 1);
@@ -42,12 +32,11 @@ export function activateGeneralTalent(rules: Rules, row: Row, id: number, full: 
   if (!rule) generalFailure();
   const remaining = validateGeneralTalents(rules, row, points),
     previous = points.get(id) ?? 0;
+  if (rule.learn_lv && num(row, "level") < cityInteger(rule.learn_lv, 1)) generalFailure();
   const addition = full ? Math.min(remaining, cityInteger(rule.max_lv, 1) - previous) : 1;
   if (addition <= 0 || addition > remaining) generalFailure();
   points.set(id, previous + addition);
-  return {
-    ...row,
-    talent: generalContent(points),
-    talentpoint: validateGeneralTalents(rules, row, points),
-  };
+  const next = { ...row, talent: generalContent(points), talentpoint: remaining - addition };
+  validateGeneralTalents(rules, next, points);
+  return next;
 }

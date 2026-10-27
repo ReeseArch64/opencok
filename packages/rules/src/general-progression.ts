@@ -41,8 +41,16 @@ export function generalLevel(rules: Rules, base: Rule, level: number) {
   if (!rule || !["0", "1"].includes(base.type ?? "")) generalFailure();
   return {
     exp: cityInteger(rule[base.type === "0" ? "exp1" : "exp"], 1),
-    points: cityInteger(rule[base.type === "0" ? "point1" : "point"]),
+    points: generalTalentPoints(rules, base, level),
   };
+}
+export function generalTalentPoints(rules: Rules, base: Rule, level: number) {
+  const rule = rules.general.levels?.get(String(53700 + cityInteger(level, 1)));
+  if (!rule || !["0", "1"].includes(base.type ?? "")) generalFailure();
+  return Math.floor(
+    cityInteger(rule[base.type === "0" ? "point1" : "point"]) /
+      cityInteger(base.talent_point_divisor ?? "1", 1),
+  );
 }
 export function generalRecruit(rules: Rules, id: number, owner: string, now: bigint): Row {
   const base = generalBase(rules, id),

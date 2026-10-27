@@ -20,6 +20,7 @@ export interface GeneralBaseDefinition {
   readonly "piecesId": number;
   readonly "levelMax": number;
   readonly "talent": number;
+  readonly "talentPointDivisor"?: number;
   readonly "generalAb": number | readonly number[] | string;
   readonly "loot": number;
   readonly "lootLevel": number;

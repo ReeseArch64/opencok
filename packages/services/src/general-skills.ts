@@ -7,7 +7,7 @@ import {
   generalBaseSkills,
   generalPairs,
   generalList,
-  generalLevel,
+  generalTalentPoints,
   generalFailure,
 } from "@opencok/rules/general-progression";
 import { activateGeneralTalent } from "@opencok/rules/general-talents";
@@ -54,11 +54,11 @@ export function generalAbility(
       row: {
         ...row,
         talent: "",
-        talentpoint: generalLevel(
+        talentpoint: generalTalentPoints(
           context.rules,
           generalBase(context.rules, num(row, "id")),
           num(row, "level"),
-        ).points,
+        ),
       },
       body: { gold: sfs.long(context.balance("gold")) },
     };

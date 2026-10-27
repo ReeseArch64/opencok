@@ -11,6 +11,19 @@ import {
 } from "../src/catalog-mechanics.ts";
 import provenance from "../src/catalogs/provenance.json";
 
+const maintainedAdditions: Readonly<Record<string, readonly number[]>> = {
+  [GameplayCatalog.GeneralAb]: [41020011, 53571201, 53571202],
+  [GameplayCatalog.GeneralSkill]: [
+    53571100, 53571101, 53571102, 53571103, 53571104, 53571105, 53571106, 53571107, 53571108,
+    53571109, 53571110, 53571111, 53571112, 53571113, 53571114, 53571115, 53571116, 53571117,
+    53571118, 53571119, 53571120, 53571121, 53571122, 53571123, 53571124, 53571125, 53571126,
+    53571127, 53571128, 53571129, 53571130, 53571131, 53571132, 53571133, 53571134, 53571135,
+    53571136, 53571137, 53571138, 53571139, 53571140, 53571141, 53571142, 53571143, 53571144,
+    53571145, 53571146, 53571147, 53571148, 53571149, 53571150, 53571151, 53571152, 53571153,
+    53571154, 53571155, 53571156, 53571157, 53571158, 53571159,
+  ],
+};
+
 test("all remaining catalogs expose domain definitions without XML documents", async () => {
   expect(
     Object.values(GameplayCatalog)
@@ -28,7 +41,12 @@ test("all remaining catalogs expose domain definitions without XML documents", a
     expect(Object.keys(catalog)).not.toContain("ordered");
     expect(Object.keys(catalog)).not.toContain("unordered");
     if (catalog.kind === CatalogKind.Table) {
-      expect(catalog.records.length).toBe(source.records!);
+      const additions = maintainedAdditions[source.id] ?? [];
+      expect(catalog.records.length).toBe(source.records! + additions.length);
+      for (const id of additions)
+        expect(catalog.records.filter((record) => "id" in record && record.id === id)).toHaveLength(
+          1,
+        );
       for (const record of catalog.records) {
         const keys = Object.keys(record);
         expect(keys).not.toContain(":@");
