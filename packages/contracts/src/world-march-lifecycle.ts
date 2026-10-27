@@ -13,7 +13,7 @@ export interface MarchCargo {
   amount: bigint;
 }
 export interface MarchLifecycle {
-  purpose?: "trouble" | "treasure";
+  purpose?: "trouble" | "treasure" | "scout";
   id: string;
   owner: string;
   worldId: number;

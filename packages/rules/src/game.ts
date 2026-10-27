@@ -74,6 +74,7 @@ export interface AdvancedCatalogs {
   dragonTowerMonsters?: Map<string, Rule>;
 }
 export interface AllianceCatalogs {
+  buildingSkills?: Map<string, Rule>;
   gifts?: Map<string, Rule>;
   ranks?: Map<string, Rule>;
 }

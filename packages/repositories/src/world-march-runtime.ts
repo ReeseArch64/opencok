@@ -1,3 +1,4 @@
+import { readWorldScoutTargets, writeWorldScoutMails } from "./world-scout-report";
 import { user_army } from "@opencok/drizzle/schema/opencok_kingdom/user_army";
 import { user_pet_dragon } from "@opencok/drizzle/schema/opencok_kingdom/user_pet_dragon";
 import { new_general_skill } from "@opencok/drizzle/schema/opencok_kingdom/new_general_skill";
@@ -198,7 +199,31 @@ export async function readWorldMutationState(
             ),
           )
       : [];
+  const scoutIds =
+    command !== "world.march.check" && command !== "world.march.retreat"
+      ? [
+          ...new Set([
+            ...marches
+              .filter((row) => row.type === 1 && row.state === 0)
+              .map((row) => row.targetId),
+            ...(command === "world.march" && int(params, "type", -1) === 1
+              ? [int(params, "point")]
+              : []),
+          ]),
+        ]
+      : [];
+  const [actorRealm] = scoutIds.length
+    ? await tx
+        .select({ realm: userprofile.serverId })
+        .from(userprofile)
+        .where(eq(userprofile.uid, owner))
+    : [];
+  if (scoutIds.length && !actorRealm?.realm) throw new Error("Missing scout actor realm");
   return {
+    mapSize: size,
+    scoutTargets: scoutIds.length
+      ? await readWorldScoutTargets(tx, scoutIds, actorRealm!.realm!)
+      : undefined,
     world,
     points,
     marches,
@@ -222,6 +247,7 @@ export async function writeWorldMutation(
 ) {
   await writeWorldBarbarianActors(tx, write);
   await writeTreasureMaps(tx, owner, write);
+  if (write.scoutMails) await writeWorldScoutMails(tx, owner, write.scoutMails);
   if (write.world) {
     if (write.world.uid !== owner) throw new Error("Foreign world write");
     await tx
@@ -275,6 +301,8 @@ export async function writeWorldMutation(
       ownerColor: num(row, "ownerColor"),
       allianceId: text(row, "allianceId"),
       type: num(row, "type"),
+      honourWatchtower: num(row, "honourWatchtower"),
+      slowDown: num(row, "slowDown"),
       targetId: num(row, "targetId"),
       targetType: num(row, "targetType"),
       targetUid: text(row, "targetUid"),
@@ -511,13 +539,18 @@ export async function unregisteredWorldMarches(db: Database["kingdom"]["db"], af
     .where(
       and(
         eq(world_march.worldId, 0),
-        eq(world_march.type, 0),
         or(
-          inArray(world_march.targetType, [3, 37]),
+          and(eq(world_march.type, 1), inArray(world_march.state, [0, 2])),
           and(
-            eq(world_march.targetType, 2),
-            eq(world_march.state, 1),
-            sql`exists (select 1 from ${treasure_map} where ${treasure_map.currentOwner}=${world_march.ownerUid} and ${treasure_map.marchId}=${world_march.uuid} and ${treasure_map.targetId}=${world_march.targetId} and ${treasure_map.state}=1)`,
+            eq(world_march.type, 0),
+            or(
+              inArray(world_march.targetType, [3, 37]),
+              and(
+                eq(world_march.targetType, 2),
+                eq(world_march.state, 1),
+                sql`exists (select 1 from ${treasure_map} where ${treasure_map.currentOwner}=${world_march.ownerUid} and ${treasure_map.marchId}=${world_march.uuid} and ${treasure_map.targetId}=${world_march.targetId} and ${treasure_map.state}=1)`,
+              ),
+            ),
           ),
         ),
         isNull(world_march_checkpoint.id),

@@ -32,6 +32,7 @@ export function ordinaryMarchRoute(
   scout = false,
   sourceFootprint?: readonly number[],
   targetFootprint?: readonly number[],
+  javaCoordinates = false,
 ) {
   const rule = rules.items.get("world_marchtime");
   if (
@@ -42,6 +43,8 @@ export function ordinaryMarchRoute(
     !Number.isFinite(blackEffect)
   )
     worldMutationFailure();
+  const coordinateY = (id: number) =>
+    javaCoordinates ? Math.trunc((id - 1) / size) : Math.floor((id - 1) / size);
   let distance = Infinity,
     fromPoint = source,
     toPoint = target;
@@ -49,7 +52,7 @@ export function ordinaryMarchRoute(
     for (const to of targetFootprint ?? worldFootprint(target, size, targetFour)) {
       const current = Math.hypot(
         ((from - 1) % size) - ((to - 1) % size),
-        Math.floor((from - 1) / size) - Math.floor((to - 1) / size),
+        coordinateY(from) - coordinateY(to),
       );
       if (current > 0 && current < distance) {
         distance = current;
@@ -57,8 +60,8 @@ export function ordinaryMarchRoute(
         toPoint = to;
       }
     }
-  const from = [(fromPoint - 1) % size, Math.floor((fromPoint - 1) / size)] as const,
-    to = [(toPoint - 1) % size, Math.floor((toPoint - 1) / size)] as const,
+  const from = [(fromPoint - 1) % size, coordinateY(fromPoint)] as const,
+    to = [(toPoint - 1) % size, coordinateY(toPoint)] as const,
     center = Math.floor(size / 2);
   const axis = Math.abs(to[0] - from[0]) >= Math.abs(to[1] - from[1]) ? 0 : 1,
     other = axis === 0 ? 1 : 0,

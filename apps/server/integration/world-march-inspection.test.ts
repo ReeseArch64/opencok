@@ -170,6 +170,13 @@ test("occupied and returning native inspections use saved timestamps and actual 
     const collecting = (await h.query()).body;
     expect(collecting.startStamp).toEqual(sfs.long(1100000n));
     expect(collecting.endStamp).toEqual(sfs.long(1164000n));
+    await h.db.db.update(worldpoint).set({ resInitValue: 1 }).where(eq(worldpoint.id, 10));
+    await h.db.db.update(world_march).set({ collectSpd: 10 });
+    const fractional = (await h.query()).body;
+    expect(fractional.actionMax).toEqual(sfs.int(1));
+    expect(fractional.endStamp).toEqual(sfs.long(1100100n));
+    await h.db.db.update(worldpoint).set({ resInitValue: 1000 }).where(eq(worldpoint.id, 10));
+    await h.db.db.update(world_march).set({ collectSpd: 1.25 });
     await h.db.db.update(world_march).set({
       state: 2,
       returnStartTime: 1200000n,

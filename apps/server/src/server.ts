@@ -1,6 +1,8 @@
 import { activityRewardDomain } from "@opencok/services/activity-reward";
 import { createWorldMarchInspectionStore } from "@opencok/repositories/world-march-inspection";
 import { createWorldScoutStore } from "@opencok/repositories/world-scout";
+import { createWorldScoutMailReader } from "@opencok/repositories/world-scout-publication";
+import { publishWorldScoutMail } from "@opencok/services/world-scout-publication";
 import { createWorldBulletinStore } from "@opencok/repositories/world-bulletins";
 import { createEggActivityDomain } from "@opencok/services/egg-activity";
 import { createGoldEggsRanks, createGoldEggsRuntimeStore } from "@opencok/repositories/gold-eggs";
@@ -464,6 +466,7 @@ export const RealmDependenciesLive = Layer.effect(
       );
     }
     const notifications = createRealmNotifications();
+    const scoutMailReader = createWorldScoutMailReader(db.kingdom.db, config.kingdomId);
     const cn1 = createCn1Sessions(db.databases.global.db, rules, config.kingdomId);
     const nickname = config.nicknameChat
       ? createNicknameChangeRuntime({
@@ -1917,6 +1920,7 @@ export const RealmDependenciesLive = Layer.effect(
           "hero.rank.mail",
           "gold.eggs.mail",
           "egg.activity.mail",
+          "world.scout.mail",
           "hero.target.mail",
           "campaign.mail",
           "redPackets.mail",
@@ -1928,6 +1932,15 @@ export const RealmDependenciesLive = Layer.effect(
               db.kingdom.db,
               authority,
               async (event) => {
+                if (type === "world.scout.mail") {
+                  await publishWorldScoutMail(
+                    event.payload,
+                    event.owner,
+                    scoutMailReader,
+                    (recipient, command, body) => notifications.publish(recipient, command, body),
+                  );
+                  return;
+                }
                 const data = decode(event.payload);
                 if (str(data, "owner") !== event.owner)
                   throw new Error("Foreign progression mail publication");
