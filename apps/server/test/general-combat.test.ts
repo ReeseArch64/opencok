@@ -1,7 +1,7 @@
 import { test, expect } from "bun:test";
 import { loadRules } from "@opencok/resources/rules";
-import { generalRecruit } from "@opencok/rules/general-progression";
-import { generalCombatSnapshot, captureGeneral } from "@opencok/services/general-combat";
+import { generalRecruit } from "@opencok/hero/rules/general-progression";
+import { generalCombatSnapshot, captureGeneral } from "@opencok/hero/services/general-combat";
 import { cityFixture } from "./fixtures/city-progression";
 const rules = await loadRules();
 test("combat snapshots compose each source once, gate factions, and reject absent assignments", () => {

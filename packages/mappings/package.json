@@ -19,6 +19,7 @@
     "@opencok/errors": "workspace:*",
     "@opencok/messages": "workspace:*",
     "@opencok/rules": "workspace:*",
-    "@opencok/validations": "workspace:*"
+    "@opencok/validations": "workspace:*",
+    "@opencok/hero": "workspace:*"
   }
 }

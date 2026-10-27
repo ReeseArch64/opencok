@@ -1,3 +1,4 @@
+import type { ReconnectMarchGeneralResponse } from "@opencok/hero/contracts/responses/reconnect-march-general";
 import type { ResponseValue } from "./value.ts";
 
 export interface ReconnectMarchArmyResponse {
@@ -14,13 +15,6 @@ export interface ReconnectMarchDragonResponse {
   readonly friendShip: number;
   readonly userId?: string;
   readonly nickName?: string;
-}
-
-export interface ReconnectMarchGeneralResponse {
-  readonly userId: string;
-  readonly generalId: string;
-  readonly level: number;
-  readonly skillList?: string[];
 }
 
 export interface ReconnectMarchResponse {

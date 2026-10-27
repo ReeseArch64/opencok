@@ -2,7 +2,7 @@ import { expect, test } from "bun:test";
 import { GameService } from "@opencok/services/game";
 import type { GameStore } from "@opencok/contracts/game";
 import { Rules } from "@opencok/rules/game";
-import { generalRequest } from "@opencok/mappings/generals";
+import { generalRequest } from "@opencok/hero/mappings/generals";
 import { sfs, type Fields } from "@opencok/messages/sfs";
 
 const routes = [

@@ -1,5 +1,5 @@
 import { test, expect } from "bun:test";
-import { heroMatchGroups, heroMatchIdentity } from "@opencok/rules/hero-matching";
+import { heroMatchGroups, heroMatchIdentity } from "@opencok/hero/rules/hero-matching";
 test("hero matching groups by exact power before shuffling each bounded power cohort", () => {
   const realms = [
     { kingdomId: 1, power: 9007199254740993n, shuffle: 9 },

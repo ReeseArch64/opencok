@@ -1,7 +1,7 @@
 import { expect, test } from "bun:test";
 import { loadRules } from "@opencok/resources/rules";
-import { generalRecruit, generalPairs } from "@opencok/rules/general-progression";
-import { activateGeneralTalent, validateGeneralTalents } from "@opencok/rules/general-talents";
+import { generalRecruit, generalPairs } from "@opencok/hero/rules/general-progression";
+import { activateGeneralTalent, validateGeneralTalents } from "@opencok/hero/rules/general-talents";
 const rules = await loadRules();
 
 test("legacy blank prerequisites allow learning and validating restored talent trees", () => {

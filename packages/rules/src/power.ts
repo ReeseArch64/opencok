@@ -1,26 +1,15 @@
+import { calculateGeneralPower, calculateHeroPower } from "@opencok/hero/rules/hero-power";
+import { sumInt } from "@opencok/rules/player-power-values";
+import { record } from "@opencok/rules/player-power-values";
+import { integer } from "@opencok/rules/player-power-values";
+import { i64 } from "@opencok/rules/player-power-values";
+import { i32 } from "@opencok/rules/player-power-values";
 import type { PlayerPower, PowerContext, PowerSnapshot } from "@opencok/contracts/power";
-import { selectHeroes } from "./power-companions.ts";
+
 import { long, num, text, type Row } from "@opencok/contracts/rows";
 import { errors } from "@opencok/constants/game";
 import { GameError } from "@opencok/errors/game";
 import type { Rule, Rules } from "./game.ts";
-
-const i32 = (value: bigint) => Number(BigInt.asIntN(32, value));
-
-const i64 = (value: bigint) => BigInt.asIntN(64, value);
-
-function integer(value: unknown, fallback = 0n): bigint {
-  if (value === undefined || value === null) return fallback;
-
-  if (!/^[+-]?\d+$/.test(String(value))) throw new GameError(errors.unsupported, "power_rule");
-
-  const result = BigInt(String(value));
-
-  if (result < -2147483648n || result > 2147483647n)
-    throw new GameError(errors.unsupported, "power_rule");
-
-  return result;
-}
 
 function decimal(value: unknown): number {
   const source = String(value ?? "0").trim();
@@ -35,14 +24,6 @@ function decimal(value: unknown): number {
   return result;
 }
 
-function record(catalog: Map<string, Rule> | undefined, id: string): Rule {
-  const rule = catalog?.get(id);
-
-  if (!rule) throw new GameError(errors.unsupported, "power_rule");
-
-  return rule;
-}
-
 function numberToLong(value: number): bigint {
   if (Number.isNaN(value)) return 0n;
 
@@ -51,10 +32,6 @@ function numberToLong(value: number): bigint {
   if (value <= -9223372036854775808) return -9223372036854775808n;
 
   return BigInt(Math.trunc(value));
-}
-
-function sumInt(rows: readonly Row[], power: (row: Row) => bigint): number {
-  return i32(rows.reduce((sum, row) => sum + power(row), 0n));
 }
 
 function unitPower(rows: readonly Row[], rules: Rules, army: boolean): bigint {
@@ -186,11 +163,7 @@ export function calculatePlayerPower(
   const playerPower = Number(
     integer(record(rules.roles, String(i32(100100n + integer(state.profile.level)))).power),
   );
-  const heroPower = sumInt(
-    state.generals,
-    (row) =>
-      integer(record(rules.power.generals, text(row, "generalId")).power) * integer(row.level),
-  );
+  const heroPower = calculateGeneralPower(state.generals, rules);
   const armyPower = unitPower(state.armies, rules, true);
   const fortPower = unitPower(state.walls, rules, false);
   const buildingPower = sumInt(state.buildings, (row) =>
@@ -225,18 +198,7 @@ export function calculatePlayerPower(
   );
   const knight_title = titlePower(state, rules, context);
   const petDragonPower = dragonPower(state, rules, context);
-  const prinessPower = selectHeroes(state.heroes).reduce((sum, row) => {
-    const raw = record(rules.power.heroes, text(row, "heroid")).power ?? "0";
-
-    if (!/^[+-]?\d+$/.test(raw)) throw new GameError(errors.unsupported, "power_rule");
-
-    const power = BigInt(raw);
-
-    if (power < -9223372036854775808n || power > 9223372036854775807n)
-      throw new GameError(errors.unsupported, "power_rule");
-
-    return i64(sum + power);
-  }, 0n);
+  const prinessPower = calculateHeroPower(state.heroes, rules);
   const questpower = Number(integer(state.statistics?.questPower));
   const total = i64(
     BigInt(i32(BigInt(questpower) + BigInt(playerPower) + BigInt(heroPower))) +

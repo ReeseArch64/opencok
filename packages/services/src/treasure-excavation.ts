@@ -4,7 +4,7 @@ import type { RuntimeMarch } from "@opencok/contracts/world-march-runtime";
 import type { AvatarSystemMail } from "@opencok/contracts/files";
 import { encode, sfs } from "@opencok/messages/sfs";
 import { decodeWorldMarchArmy } from "@opencok/messages/world-resource-army";
-import { reconnectMarchGeneral } from "@opencok/mappings/reconnect-marches";
+import { reconnectMarchGeneral } from "@opencok/hero/mappings/reconnect-march-general";
 import { treasureMapOccupation } from "@opencok/mappings/treasure-map";
 import { cityInteger } from "@opencok/rules/city-progression";
 import { javaMailBytes } from "@opencok/rules/avatar-mail";

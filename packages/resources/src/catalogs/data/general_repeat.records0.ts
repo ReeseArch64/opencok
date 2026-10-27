@@ -1,4 +1,4 @@
-import type { GeneralRepeatDefinition } from "../types/general_repeat.ts";
+import type { GeneralRepeatDefinition } from "@opencok/hero/resources/catalogs/types/general_repeat";
 
 export const records: readonly GeneralRepeatDefinition[] = [
   { "id": 221000, "generalId": 53500, "consume": [0, 400000], "quantity": 0 },

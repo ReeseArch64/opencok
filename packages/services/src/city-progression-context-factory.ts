@@ -1,16 +1,14 @@
-import { generalDrawPeriod } from "@opencok/rules/general-draws";
+import { generalDrawPeriod } from "@opencok/hero/rules/general-draws";
 import { GameError } from "@opencok/errors/game";
 import { errors } from "@opencok/constants/game";
-import {
-  resourceOwnerRuleContext,
-  resourceGeneralBuildingEffect,
-} from "./world-resource-owner-context";
+import { resourceOwnerRuleContext } from "./world-resource-owner-context";
+import { resourceGeneralBuildingEffect } from "@opencok/hero/services/general-building-effects";
 import type { ActivityEconomy } from "@opencok/contracts/timed-activity";
 import type { CityProgressionStore } from "@opencok/contracts/city-progression";
 import type { Rules } from "@opencok/rules/game";
 import { cityInteger } from "@opencok/rules/city-progression";
 import { playerGameEffect } from "@opencok/rules/power-resolver";
-import { generalSkillPoints } from "./power";
+import { generalSkillPoints } from "@opencok/hero/services/general-power";
 import type { InventoryEffects } from "./inventory";
 import { CityProgressionContext } from "./city-progression-context.ts";
 

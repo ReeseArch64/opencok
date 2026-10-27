@@ -1,4 +1,4 @@
-import type { GeneralAwakeDefinition } from "../types/general_awake.ts";
+import type { GeneralAwakeDefinition } from "@opencok/hero/resources/catalogs/types/general_awake";
 
 export const records: readonly GeneralAwakeDefinition[] = [
   {

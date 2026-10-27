@@ -1,4 +1,4 @@
-import type { HeroChallengeMonsterDefinition } from "../types/hero_challenge_monster.ts";
+import type { HeroChallengeMonsterDefinition } from "@opencok/hero/resources/catalogs/types/hero_challenge_monster";
 
 export const records: readonly HeroChallengeMonsterDefinition[] = [
   {

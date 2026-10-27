@@ -1,5 +1,5 @@
 import { CatalogKind } from "@opencok/enums/catalog-kind";
-import type { GeneralAwakenChallengeRewardDefinition } from "../types/general_awaken_challenge_reward.ts";
+import type { GeneralAwakenChallengeRewardDefinition } from "@opencok/hero/resources/catalogs/types/general_awaken_challenge_reward";
 import type { CatalogTable } from "../../catalog-model.ts";
 import { records as records0 } from "./general_awaken_challenge_reward.records0.ts";
 import { records as records1 } from "./general_awaken_challenge_reward.records1.ts";

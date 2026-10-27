@@ -25,7 +25,7 @@ import { GameError } from "@opencok/errors/game";
 import { errors } from "@opencok/constants/game";
 import type { Database } from "./game.ts";
 import { readPlayerEffects } from "./power.ts";
-import { readResourceNewGenerals } from "./world-resource-owner.ts";
+import { readResourceNewGenerals } from "@opencok/hero/repositories/general-resource-owner";
 import { readReconnectMarches } from "./reconnect-marches.ts";
 
 type Transaction = Parameters<Parameters<Database["kingdom"]["db"]["transaction"]>[0]>[0];

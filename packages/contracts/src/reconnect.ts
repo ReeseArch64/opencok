@@ -1,5 +1,5 @@
 import type { Row } from "./rows.ts";
-import type { GeneralPreview } from "./profile.ts";
+
 import type { PlayerEffectSnapshot } from "./power.ts";
 import type { WorldResourceOwnerSnapshot } from "./world-point-detail.ts";
 import type { AvatarSystemMail } from "./files.ts";
@@ -9,10 +9,6 @@ export interface ReconnectBaseState {
   armies: readonly Row[];
   generals: readonly Row[];
   skills: readonly Row[];
-}
-
-export interface OwnGeneralSnapshot extends Omit<GeneralPreview, "plusSkillPoint"> {
-  abilityIndex: number;
 }
 
 export interface FriendshipMine {

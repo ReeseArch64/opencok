@@ -1,4 +1,4 @@
-import type { HeroDefinition } from "../types/hero.ts";
+import type { HeroDefinition } from "@opencok/hero/resources/catalogs/types/hero";
 
 export const records: readonly HeroDefinition[] = [
   {

@@ -16,8 +16,11 @@ import { readFragmentExchanges, writeFragmentExchanges } from "./fragment-exchan
 import { readCampaignProfile } from "./campaign-notice";
 import { costRankAwardReader, writeCostRankAward } from "./continued-cost-rewards";
 import { expeditionAwardReader, writeExpeditionAward } from "./expedition-stage-rewards";
-import { heroRankAwardReader, writeHeroRankAward } from "./hero-ranking-rewards";
-import { heroScoreReader, writeHeroScore } from "./hero-score";
+import {
+  heroRankAwardReader,
+  writeHeroRankAward,
+} from "@opencok/hero/repositories/hero-ranking-rewards";
+import { heroScoreReader, writeHeroScore } from "@opencok/hero/repositories/hero-score";
 import { readOlympic, writeOlympic } from "./olympic";
 import { readCupBetting, writeCupBetting } from "./cup-betting";
 import { readGroupBuy, writeGroupBuy } from "./groupbuy";
@@ -54,12 +57,12 @@ import { readDragonProgression, writeDragonProgression } from "./dragon-progress
 import { activity_minstrel } from "@opencok/drizzle/schema/opencok_kingdom/activity_minstrel";
 import { user_civilization_science } from "@opencok/drizzle/schema/opencok_kingdom/user_civilization_science";
 import { user_general } from "@opencok/drizzle/schema/opencok_kingdom/user_general";
-import { readGeneralRoster, writeGeneralRoster } from "./generals";
+import { readGeneralRoster, writeGeneralRoster } from "@opencok/hero/repositories/generals";
 import { readSuitDecompositions, writeEquipment } from "./equipment";
 import { readAbilityPages, readProgressionEffects, writePlayerEffects } from "./player-effects";
 import { readQuests, writeQuests } from "./quests";
 import { user_skill } from "@opencok/drizzle/schema/opencok_kingdom/user_skill";
-import { readResourceNewGenerals } from "./world-resource-owner";
+import { readResourceNewGenerals } from "@opencok/hero/repositories/general-resource-owner";
 import { new_general } from "@opencok/drizzle/schema/opencok_kingdom/new_general";
 import { and, asc, eq, inArray } from "drizzle-orm";
 import { userprofile } from "@opencok/drizzle/schema/opencok_kingdom/userprofile";

@@ -1,5 +1,5 @@
 import { CatalogKind } from "@opencok/enums/catalog-kind";
-import type { GeneralMaxNumDefinition } from "../types/general_max_num.ts";
+import type { GeneralMaxNumDefinition } from "@opencok/hero/resources/catalogs/types/general_max_num";
 import type { CatalogTable } from "../../catalog-model.ts";
 import { records as records0 } from "./general_max_num.records0.ts";
 

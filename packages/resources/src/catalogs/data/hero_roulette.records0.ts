@@ -1,4 +1,4 @@
-import type { HeroRouletteDefinition } from "../types/hero_roulette.ts";
+import type { HeroRouletteDefinition } from "@opencok/hero/resources/catalogs/types/hero_roulette";
 
 export const records: readonly HeroRouletteDefinition[] = [
   {

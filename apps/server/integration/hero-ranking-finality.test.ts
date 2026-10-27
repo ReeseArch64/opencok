@@ -3,18 +3,18 @@ import { eq, sql } from "drizzle-orm";
 import { migrate } from "drizzle-orm/node-postgres/migrator";
 import { createDatabase } from "@opencok/drizzle";
 import { loadRules } from "@opencok/resources/rules";
-import { HeroRankingFinalityService } from "@opencok/services/hero-ranking-finality";
+import { HeroRankingFinalityService } from "@opencok/hero/services/hero-ranking-finality";
 import {
   createHeroRankFinalityRealm,
   createHeroRankFinalityRegistry,
-} from "@opencok/repositories/hero-ranking-finality";
-import { createHeroRankProjection } from "@opencok/repositories/hero-rank-publication";
+} from "@opencok/hero/repositories/hero-ranking-finality";
+import { createHeroRankProjection } from "@opencok/hero/repositories/hero-rank-publication";
 import {
   fenceRealmDatabase,
   fenceRealmTransaction,
   acquireRealmAuthority,
 } from "@opencok/repositories/realm-authority";
-import { heroFinalityPeriod } from "@opencok/rules/hero-ranking-finality";
+import { heroFinalityPeriod } from "@opencok/hero/rules/hero-ranking-finality";
 import { trainingDomain } from "@opencok/services/training";
 import { sfs } from "@opencok/messages/sfs";
 import { hero_event } from "@opencok/drizzle/schema/opencok_kingdom/hero_event";

@@ -3,21 +3,21 @@ import { randomUUID } from "node:crypto";
 import { eq, sql } from "drizzle-orm";
 import { migrate } from "drizzle-orm/node-postgres/migrator";
 import { createDatabase } from "@opencok/drizzle";
-import { HeroRankingFinalityService } from "@opencok/services/hero-ranking-finality";
+import { HeroRankingFinalityService } from "@opencok/hero/services/hero-ranking-finality";
 import {
   HeroRankingRewardService,
   heroRankingRewardDomain,
-} from "@opencok/services/hero-ranking-rewards";
+} from "@opencok/hero/services/hero-ranking-rewards";
 import {
   createHeroRankFinalityRealm,
   createHeroRankFinalityRegistry,
-} from "@opencok/repositories/hero-ranking-finality";
-import { createHeroRankProjection } from "@opencok/repositories/hero-rank-publication";
+} from "@opencok/hero/repositories/hero-ranking-finality";
+import { createHeroRankProjection } from "@opencok/hero/repositories/hero-rank-publication";
 import {
   createHeroRankRewardStore,
   createHeroRankRewardStandings,
-} from "@opencok/repositories/hero-ranking-rewards";
-import { heroRankAwardOperation } from "@opencok/rules/hero-ranking-rewards";
+} from "@opencok/hero/repositories/hero-ranking-rewards";
+import { heroRankAwardOperation } from "@opencok/hero/rules/hero-ranking-rewards";
 import { MailRewardService } from "@opencok/services/mail-rewards";
 import { createMailRewardExecutor } from "@opencok/repositories/mail-rewards";
 import { sfs, str, decode, fields } from "@opencok/messages/sfs";

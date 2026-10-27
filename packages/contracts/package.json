@@ -15,6 +15,7 @@
   },
   "dependencies": {
     "@opencok/enums": "workspace:*",
-    "@opencok/messages": "workspace:*"
+    "@opencok/messages": "workspace:*",
+    "@opencok/hero": "workspace:*"
   }
 }

@@ -1,10 +1,10 @@
+import { reconnectMarchGeneralSchema } from "@opencok/hero/validations/reconnect-march-general";
 import { z } from "zod";
 import { field, responseValueSchema } from "./response.ts";
 
 import type {
   ReconnectMarchArmyResponse,
   ReconnectMarchDragonResponse,
-  ReconnectMarchGeneralResponse,
   ReconnectMarchResponse,
   ReconnectMarchesResponse,
 } from "@opencok/contracts/responses/reconnect-marches";
@@ -24,13 +24,6 @@ export const reconnectMarchDragonSchema = z.strictObject({
   userId: field.string.optional(),
   nickName: field.string.optional(),
 }) satisfies z.ZodType<ReconnectMarchDragonResponse>;
-
-export const reconnectMarchGeneralSchema = z.strictObject({
-  userId: field.string,
-  generalId: field.string,
-  level: field.int,
-  skillList: z.array(field.string).max(32767).optional(),
-}) satisfies z.ZodType<ReconnectMarchGeneralResponse>;
 
 export const reconnectMarchSchema = z.strictObject({
   uuid: field.string,

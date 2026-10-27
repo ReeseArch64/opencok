@@ -1,7 +1,7 @@
 import { CityCommandDomain } from "./city-command-domain.ts";
 import { applyMilitaryRankAward } from "./military-rank-awards";
 import type { ActivityRewardWrite } from "@opencok/contracts/activity-reward";
-import { rewardLegacyGenerals } from "./legacy-generals";
+import { rewardLegacyGenerals } from "@opencok/hero/services/legacy-generals";
 import { cityInteger } from "@opencok/rules/city-progression";
 import type { ActivityRewardAmounts } from "@opencok/contracts/responses/activity-reward";
 import { activityRewardView } from "@opencok/mappings/activity-reward";

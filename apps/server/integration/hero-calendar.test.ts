@@ -1,7 +1,7 @@
 import { test, expect } from "bun:test";
 import { eq, sql } from "drizzle-orm";
-import { HeroCalendarService } from "@opencok/services/hero-calendar";
-import { createHeroCalendarStore } from "@opencok/repositories/hero-calendar";
+import { HeroCalendarService } from "@opencok/hero/services/hero-calendar";
+import { createHeroCalendarStore } from "@opencok/hero/repositories/hero-calendar";
 import { acquireRealmAuthority } from "@opencok/repositories/realm-authority";
 import { hero_activity } from "@opencok/drizzle/schema/opencok_kingdom/hero_activity";
 import { hero_event } from "@opencok/drizzle/schema/opencok_kingdom/hero_event";

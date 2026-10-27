@@ -1,5 +1,5 @@
 import { CatalogKind } from "@opencok/enums/catalog-kind";
-import type { GeneralSkillDefinition } from "../types/general_skill.ts";
+import type { GeneralSkillDefinition } from "@opencok/hero/resources/catalogs/types/general_skill";
 import type { CatalogTable } from "../../catalog-model.ts";
 import { records as records0 } from "./general_skill.records0.ts";
 import { records as records1 } from "./general_skill.records1.ts";

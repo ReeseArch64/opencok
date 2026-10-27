@@ -1,10 +1,13 @@
 import { progressionEffectIds, type ProgressionEffectId } from "./city-progression";
-import type { GeneralSkill, PlayerEffectSnapshot } from "@opencok/contracts/power";
+import type { GeneralSkill } from "@opencok/hero/contracts/generals";
+import type { PlayerEffectSnapshot } from "@opencok/contracts/power";
 import type { RuleContext } from "./availability.ts";
 import type { Rules } from "./game.ts";
-import type { NewGeneralEquipmentModifier } from "./new-general-equipment.ts";
-import { equipmentEffects, equipmentSetEffects, generalSkillEffects } from "./power-attributes.ts";
-import { heroEffects, dragonSkillEffects } from "./power-companions.ts";
+import type { NewGeneralEquipmentModifier } from "@opencok/hero/rules/new-general-equipment";
+import { equipmentEffects, equipmentSetEffects } from "./power-attributes.ts";
+import { generalSkillEffects } from "@opencok/hero/rules/general-skill-effects";
+import { heroEffects } from "@opencok/hero/rules/hero-effects";
+import { dragonSkillEffects } from "./power-companions.ts";
 import { storedPowerEffects } from "./power-effects.ts";
 import { luckyDayEffects } from "./power-lucky-day.ts";
 import { allianceScienceEffects, vipEffects } from "./power-memberships.ts";

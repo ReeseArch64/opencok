@@ -1,8 +1,8 @@
 import { test, expect } from "bun:test";
 import { loadRules } from "@opencok/resources/rules";
-import { HeroRankPublicationService } from "@opencok/services/hero-rank-publication";
-import { publishHeroRanking } from "@opencok/storage/hero-ranking";
-import type { HeroRankVersionedScore } from "@opencok/contracts/hero-rank-publication";
+import { HeroRankPublicationService } from "@opencok/hero/services/hero-rank-publication";
+import { publishHeroRanking } from "@opencok/hero/storage/hero-ranking";
+import type { HeroRankVersionedScore } from "@opencok/hero/contracts/hero-rank-publication";
 test("overlapping hero publication refreshes share one snapshot and a failed run remains retryable", async () => {
   const rules = await loadRules();
   let release: () => void = () => {},

@@ -1,7 +1,7 @@
 import { test, expect } from "bun:test";
 import { loadRules } from "@opencok/resources/rules";
-import { heroScoreDelta, heroScoreInteger } from "@opencok/rules/hero-score";
-import { heroScoreFlags } from "@opencok/rules/hero-event";
+import { heroScoreDelta, heroScoreInteger } from "@opencok/hero/rules/hero-score";
+import { heroScoreFlags } from "@opencok/hero/rules/hero-event";
 test("hero scoring uses the configured action and parameter pairs and signed power changes", async () => {
   const rules = await loadRules();
   rules.ranking.heroEvents!.set("synthetic", { id: "synthetic", score: "47075|47077|47078|47009" });

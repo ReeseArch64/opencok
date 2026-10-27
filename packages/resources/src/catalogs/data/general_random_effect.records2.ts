@@ -1,4 +1,4 @@
-import type { GeneralRandomEffectDefinition } from "../types/general_random_effect.ts";
+import type { GeneralRandomEffectDefinition } from "@opencok/hero/resources/catalogs/types/general_random_effect";
 
 export const records: readonly GeneralRandomEffectDefinition[] = [
   {

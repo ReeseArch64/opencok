@@ -4,7 +4,7 @@ import { createDatabase } from "@opencok/drizzle";
 import { requireEnv } from "@opencok/env/database";
 import { loadRules } from "@opencok/resources/rules";
 import { characterSeed } from "@opencok/rules/character-seed";
-import { generalRecruit } from "@opencok/rules/general-progression";
+import { generalRecruit } from "@opencok/hero/rules/general-progression";
 import { calculatePlayerPower } from "@opencok/rules/power";
 import { powerContext } from "@opencok/services/power";
 import { starterVersion } from "@opencok/contracts/provisioning";

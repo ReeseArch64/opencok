@@ -1,4 +1,4 @@
-import type { GeneralRankDefinition } from "../types/general_rank.ts";
+import type { GeneralRankDefinition } from "@opencok/hero/resources/catalogs/types/general_rank";
 
 export const records: readonly GeneralRankDefinition[] = [
   {

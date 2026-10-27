@@ -1,6 +1,7 @@
 import { test, expect } from "bun:test";
 import { loadRules } from "@opencok/resources/rules";
-import { temporaryEffect, vipMutation, validateTalentTrees } from "@opencok/rules/player-effects";
+import { temporaryEffect, vipMutation } from "@opencok/rules/player-effects";
+import { validateTalentTrees } from "@opencok/hero/rules/legacy-general-talents";
 import { storedPowerEffects } from "@opencok/rules/power-effects";
 import { playerEffectsDomain } from "@opencok/services/player-effects";
 import { cityFixture } from "./fixtures/city-progression";

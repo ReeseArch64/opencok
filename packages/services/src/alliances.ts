@@ -29,7 +29,7 @@ import { previewRewards } from "@opencok/rules/rewards";
 import { javaMailBytes } from "@opencok/rules/avatar-mail";
 import type { CreateAllianceDto } from "@opencok/dtos/create-alliance.dto";
 import { playerGameEffect } from "@opencok/rules/power-resolver";
-import { generalSkillPoints } from "./power";
+import { generalSkillPoints } from "@opencok/hero/services/general-power";
 import { InventoryPlanner, type InventoryEffects } from "./inventory";
 import { activityEconomy } from "./timed-activity";
 import { AllianceScienceContext } from "./alliance-science";

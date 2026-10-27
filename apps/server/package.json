@@ -29,7 +29,8 @@
     "@opencok/core": "workspace:*",
     "@opencok/rules": "workspace:*",
     "@opencok/mappings": "workspace:*",
-    "@opencok/services": "workspace:*"
+    "@opencok/services": "workspace:*",
+    "@opencok/hero": "workspace:*"
   },
   "devDependencies": {
     "@opencok/api": "workspace:*",

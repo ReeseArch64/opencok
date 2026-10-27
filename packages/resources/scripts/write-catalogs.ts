@@ -83,10 +83,14 @@ export async function writeCatalogModules(sources: AsyncIterable<CatalogSource>)
   const base = new URL("../src/", import.meta.url).pathname;
   const directory = join(base, "catalogs", "data");
   const typesDirectory = join(base, "catalogs", "types");
+  const heroTypesDirectory = new URL("../../hero/src/resources/catalogs/types/", import.meta.url)
+    .pathname;
   await mkdir(directory, { recursive: true });
   await mkdir(typesDirectory, { recursive: true });
+  await mkdir(heroTypesDirectory, { recursive: true });
   const generated = new Set<string>();
   const generatedTypes = new Set<string>();
+  const generatedHeroTypes = new Set<string>();
   const modules = new Map<string, string>();
   const names = new Map(Object.entries(GameplayCatalog).map(([member, id]) => [id, member]));
   const registry: string[] = [];
@@ -123,19 +127,24 @@ export async function writeCatalogModules(sources: AsyncIterable<CatalogSource>)
       if (definition.kind === CatalogKind.Table) {
         const recordName = member + "Definition";
         const typeName = recordName + "Catalog";
-        typeImports.push(
-          "import type { " + typeName + ' } from "./catalogs/types/' + module + '.ts";',
-        );
+        const hero = /hero|general/.test(module);
+        const recordModule = hero
+          ? "@opencok/hero/resources/catalogs/types/" + module
+          : "../types/" + module + ".ts";
+        const catalogModule = hero ? recordModule : "./catalogs/types/" + module + ".ts";
+        typeImports.push("import type { " + typeName + ' } from "' + catalogModule + '";');
         const model =
           recordType(definition.records, recordName) +
-          '\nimport type { CatalogTable } from "../../catalog-model.ts";\nexport type ' +
+          '\nimport type { CatalogTable } from "' +
+          (hero ? "@opencok/resources/catalog-model" : "../../catalog-model.ts") +
+          '";\nexport type ' +
           typeName +
           " = CatalogTable<" +
           recordName +
           ">;\n";
-        await writeFile(join(typesDirectory, module + ".ts"), model);
-        generatedTypes.add(module + ".ts");
-        imports.push("import type { " + recordName + ' } from "../types/' + module + '.ts";');
+        await writeFile(join(hero ? heroTypesDirectory : typesDirectory, module + ".ts"), model);
+        (hero ? generatedHeroTypes : generatedTypes).add(module + ".ts");
+        imports.push("import type { " + recordName + ' } from "' + recordModule + '";');
         imports.push('import type { CatalogTable } from "../../catalog-model.ts";');
         type = "CatalogTable<" + recordName + ">";
         const parts: string[] = [];
@@ -145,9 +154,9 @@ export async function writeCatalogModules(sources: AsyncIterable<CatalogSource>)
             join(directory, part),
             "import type { " +
               recordName +
-              ' } from "../types/' +
-              module +
-              '.ts";\nexport const records: readonly ' +
+              ' } from "' +
+              recordModule +
+              '";\nexport const records: readonly ' +
               recordName +
               "[] = " +
               render(definition.records.slice(offset, offset + 750)) +
@@ -255,6 +264,8 @@ export async function writeCatalogModules(sources: AsyncIterable<CatalogSource>)
     if (!generated.has(file)) await rm(join(directory, file));
   for (const file of await readdir(typesDirectory))
     if (!generatedTypes.has(file)) await rm(join(typesDirectory, file));
+  for (const file of await readdir(heroTypesDirectory))
+    if (!generatedHeroTypes.has(file)) await rm(join(heroTypesDirectory, file));
   const header = 'import { GameplayCatalog } from "@opencok/enums/gameplay-catalog";\n';
   const modelImports =
     'import type { TileMapDefinition, AutomationCatalog, VariableCatalog, WebRoutingCatalog } from "./catalog-model.ts";\n';

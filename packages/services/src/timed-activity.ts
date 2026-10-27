@@ -3,7 +3,7 @@ import { GameError } from "@opencok/errors/game";
 import { errors } from "@opencok/constants/game";
 import { cityQueueCommands } from "@opencok/rules/city-command";
 import { playerGameEffect } from "@opencok/rules/power-resolver";
-import { generalSkillPoints } from "./power";
+import { generalSkillPoints } from "@opencok/hero/services/general-power";
 import { inventoryReplay } from "@opencok/mappings/inventory";
 import { randomUUID } from "node:crypto";
 import type {

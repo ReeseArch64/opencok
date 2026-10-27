@@ -1,4 +1,4 @@
-import type { GeneralBaseSkillTreeDefinition } from "../types/general_base_skill_tree.ts";
+import type { GeneralBaseSkillTreeDefinition } from "@opencok/hero/resources/catalogs/types/general_base_skill_tree";
 
 export const records: readonly GeneralBaseSkillTreeDefinition[] = [
   {

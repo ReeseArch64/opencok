@@ -1,6 +1,6 @@
 import { planPlayerExperience } from "@opencok/rules/player-experience";
 import type { ExpeditionScoreAction } from "@opencok/contracts/new-expedition";
-import type { HeroScoreAction } from "@opencok/contracts/hero-score";
+import type { HeroScoreAction } from "@opencok/hero/contracts/hero-score";
 import { GameError } from "@opencok/errors/game";
 import { errors } from "@opencok/constants/game";
 import { unitPower } from "@opencok/rules/military";

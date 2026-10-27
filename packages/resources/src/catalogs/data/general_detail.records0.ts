@@ -1,4 +1,4 @@
-import type { GeneralDetailDefinition } from "../types/general_detail.ts";
+import type { GeneralDetailDefinition } from "@opencok/hero/resources/catalogs/types/general_detail";
 
 export const records: readonly GeneralDetailDefinition[] = [
   { "id": 219000, "name": 113804, "effect": 56, "show": 1, "buff": 0, "order": 1 },

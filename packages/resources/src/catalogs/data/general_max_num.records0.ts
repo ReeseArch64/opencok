@@ -1,4 +1,4 @@
-import type { GeneralMaxNumDefinition } from "../types/general_max_num.ts";
+import type { GeneralMaxNumDefinition } from "@opencok/hero/resources/catalogs/types/general_max_num";
 
 export const records: readonly GeneralMaxNumDefinition[] = [
   { "id": 221100, "generalId": 53500, "consume": [0, 30000], "maxNum": 0 },

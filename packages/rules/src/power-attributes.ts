@@ -1,4 +1,3 @@
-import type { GeneralSkill } from "@opencok/contracts/power";
 import type { Row } from "@opencok/contracts/rows";
 import { text } from "@opencok/contracts/rows";
 import { GameError } from "@opencok/errors/game";
@@ -22,46 +21,6 @@ function add(effects: Map<number, number>, id: number, value: number) {
 
 function addEquipment(effects: Map<number, number>, id: number, value: number) {
   effects.set(id, Math.max(0, float((effects.get(id) ?? 0) + value)));
-}
-
-export function generalSkillEffects(
-  generals: readonly (readonly GeneralSkill[])[],
-  rules: Rules,
-): ReadonlyMap<number, number> {
-  const effects = new Map<number, number>();
-
-  for (const skills of generals) {
-    const general = new Map<number, number>();
-
-    for (const skill of skills) {
-      const rule = rules.power.generalSkills?.get(skill.id);
-
-      if (!rule) return invalid();
-
-      if (rule.type !== "0") continue;
-
-      const ids = split(rule.para1);
-      const bases = split(rule.base);
-      const increments = split(rule.add);
-
-      if (!ids.length || bases.length < ids.length || increments.length < ids.length)
-        return invalid();
-
-      const points = Number(BigInt.asIntN(32, BigInt(integer(skill.points)) - 1n));
-      const skillEffects = new Map<number, number>();
-
-      for (const [index, id] of ids.entries()) {
-        const increase = float(float(points) * float(increments[index]));
-        skillEffects.set(integer(id), float(float(bases[index]) + increase));
-      }
-
-      for (const [id, value] of skillEffects) add(general, id, value);
-    }
-
-    for (const [id, value] of general) add(effects, id, value);
-  }
-
-  return effects;
 }
 
 function equipmentMultiplier(rule: Rule, effectValue: (id: number) => number): number {

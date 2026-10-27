@@ -1,5 +1,5 @@
 import { CatalogKind } from "@opencok/enums/catalog-kind";
-import type { GeneralSaleDefinition } from "../types/general_sale.ts";
+import type { GeneralSaleDefinition } from "@opencok/hero/resources/catalogs/types/general_sale";
 import type { CatalogTable } from "../../catalog-model.ts";
 import { records as records0 } from "./general_sale.records0.ts";
 

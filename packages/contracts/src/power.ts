@@ -1,10 +1,5 @@
 import type { Row } from "./rows.ts";
 
-export interface GeneralSkill {
-  id: string;
-  points: number;
-}
-
 export interface WorldPowerEffect {
   id: number;
   value: string;

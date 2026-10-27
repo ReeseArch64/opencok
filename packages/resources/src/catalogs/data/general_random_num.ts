@@ -1,5 +1,5 @@
 import { CatalogKind } from "@opencok/enums/catalog-kind";
-import type { GeneralRandomNumDefinition } from "../types/general_random_num.ts";
+import type { GeneralRandomNumDefinition } from "@opencok/hero/resources/catalogs/types/general_random_num";
 import type { CatalogTable } from "../../catalog-model.ts";
 import { records as records0 } from "./general_random_num.records0.ts";
 import { records as records1 } from "./general_random_num.records1.ts";

@@ -12,9 +12,10 @@ import { playerGameEffect } from "@opencok/rules/power-resolver";
 import { worldPowerEffects } from "@opencok/rules/power-world";
 import { serverFeature } from "@opencok/rules/power-context";
 import { productionScale } from "@opencok/rules/timed-activity";
-import { decodeWorldPowerEffects, generalSkillPoints } from "./power";
+import { decodeWorldPowerEffects } from "./power";
+import { generalSkillPoints } from "@opencok/hero/services/general-power";
 import { allianceScienceRule } from "@opencok/rules/alliance-science";
-import { resourceGeneralBuildingEffect } from "./world-resource-owner-context";
+import { resourceGeneralBuildingEffect } from "@opencok/hero/services/general-building-effects";
 
 export async function productionContext(
   state: ReconnectProgressState,

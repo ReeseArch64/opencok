@@ -1,7 +1,7 @@
 import { trainingDomain } from "@opencok/services/training";
 import { sfs } from "@opencok/messages/sfs";
 import { expedition_progress } from "@opencok/drizzle/schema/opencok_kingdom/expedition_progress";
-import { createHeroCalendarStore } from "@opencok/repositories/hero-calendar";
+import { createHeroCalendarStore } from "@opencok/hero/repositories/hero-calendar";
 import { test, expect } from "bun:test";
 import { eq, sql } from "drizzle-orm";
 import { migrate } from "drizzle-orm/node-postgres/migrator";

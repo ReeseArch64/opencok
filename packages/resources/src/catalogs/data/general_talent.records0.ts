@@ -1,4 +1,4 @@
-import type { GeneralTalentDefinition } from "../types/general_talent.ts";
+import type { GeneralTalentDefinition } from "@opencok/hero/resources/catalogs/types/general_talent";
 
 export const records: readonly GeneralTalentDefinition[] = [
   {

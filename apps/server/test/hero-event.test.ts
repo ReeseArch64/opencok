@@ -5,8 +5,8 @@ import {
   nextHeroPanel,
   heroEventRewards,
   heroEventBand,
-} from "@opencok/rules/hero-event";
-import { heroEventInfo } from "@opencok/mappings/hero-event";
+} from "@opencok/hero/rules/hero-event";
+import { heroEventInfo } from "@opencok/hero/mappings/hero-event";
 import { sfs } from "@opencok/messages/sfs";
 test("hero reward bands retain configured thresholds and personal levels while integer claim sets preserve native bucket order", async () => {
   const rules = await loadRules(),

@@ -1,4 +1,4 @@
-import type { GeneralStationDefinition } from "../types/general_station.ts";
+import type { GeneralStationDefinition } from "@opencok/hero/resources/catalogs/types/general_station";
 
 export const records: readonly GeneralStationDefinition[] = [
   {

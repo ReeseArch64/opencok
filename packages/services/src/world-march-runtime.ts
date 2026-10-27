@@ -19,7 +19,8 @@ import {
 import { treasureMapRoster, writeTreasureMap } from "./treasure-map-state";
 import { sharedResourceRewards, pinStoredSharedResourceRewards } from "./world-shared-rewards";
 import { javaMailBytes } from "@opencok/rules/avatar-mail";
-import { reconnectMarchDragon, reconnectMarchGeneral } from "@opencok/mappings/reconnect-marches";
+import { reconnectMarchDragon } from "@opencok/mappings/reconnect-marches";
+import { reconnectMarchGeneral } from "@opencok/hero/mappings/reconnect-march-general";
 import { pinProgressionReward, grantPinnedProgressionReward } from "./progression-rewards";
 import { treasureMapFree } from "@opencok/rules/treasure-map";
 import { GameError } from "@opencok/errors/game";

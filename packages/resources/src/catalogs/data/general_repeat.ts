@@ -1,5 +1,5 @@
 import { CatalogKind } from "@opencok/enums/catalog-kind";
-import type { GeneralRepeatDefinition } from "../types/general_repeat.ts";
+import type { GeneralRepeatDefinition } from "@opencok/hero/resources/catalogs/types/general_repeat";
 import type { CatalogTable } from "../../catalog-model.ts";
 import { records as records0 } from "./general_repeat.records0.ts";
 

@@ -2,7 +2,7 @@ import { test, expect } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { eq } from "drizzle-orm";
 import { sfs, fields } from "@opencok/messages/sfs";
-import { createGeneralDrawDomain } from "@opencok/services/general-draws";
+import { createGeneralDrawDomain } from "@opencok/hero/services/general-draws";
 import { user_gold_wheel } from "@opencok/drizzle/schema/opencok_kingdom/user_gold_wheel";
 import { userprofile } from "@opencok/drizzle/schema/opencok_kingdom/userprofile";
 import { user_item } from "@opencok/drizzle/schema/opencok_kingdom/user_item";

@@ -1,4 +1,4 @@
-import type { HeroChallengeLayerDefinition } from "../types/hero_challenge_layer.ts";
+import type { HeroChallengeLayerDefinition } from "@opencok/hero/resources/catalogs/types/hero_challenge_layer";
 
 export const records: readonly HeroChallengeLayerDefinition[] = [
   {

@@ -1,6 +1,6 @@
 import { GameError } from "@opencok/errors/game";
 import { errors } from "@opencok/constants/game";
-import { newGeneralPrestigeLevel } from "./new-general-prestige";
+import { newGeneralPrestigeLevel } from "@opencok/hero/rules/new-general-prestige";
 import type {
   CityProgressionState,
   ProgressionActivityData,

@@ -2,14 +2,14 @@ import type { Rule } from "@opencok/rules/game";
 import { text } from "@opencok/contracts/rows";
 import { test, expect } from "bun:test";
 import { loadRules } from "@opencok/resources/rules";
-import { generalRecruit } from "@opencok/rules/general-progression";
-import { activateGeneralTalent } from "@opencok/rules/general-talents";
+import { generalRecruit } from "@opencok/hero/rules/general-progression";
+import { activateGeneralTalent } from "@opencok/hero/rules/general-talents";
 import {
   generalProperties,
   activateGeneralRefinement,
   refineGeneralValues,
-} from "@opencok/rules/general-refinement";
-import { generalRefinement } from "@opencok/mappings/generals";
+} from "@opencok/hero/rules/general-refinement";
+import { generalRefinement } from "@opencok/hero/mappings/generals";
 const rules = await loadRules();
 test("talent ownership, prerequisite alternatives, maxima, and point budgets", () => {
   const base = rules.power.newGeneralBases!.get("53500")!;

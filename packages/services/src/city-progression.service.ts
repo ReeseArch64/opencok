@@ -1,8 +1,8 @@
 import { TimedActivityAction } from "@opencok/enums/timed-activity-action";
-import { flushHeroScore } from "./hero-score";
+import { flushHeroScore } from "@opencok/hero/services/hero-score";
 import { flushExpeditionScores } from "./new-expedition";
 import { refreshCampaignGrants } from "./local-campaign";
-import { refreshGeneralUnlocks } from "./general-assignments";
+import { refreshGeneralUnlocks } from "@opencok/hero/services/general-assignments";
 import { refreshQuests } from "./quests";
 import { GameError } from "@opencok/errors/game";
 import { errors } from "@opencok/constants/game";

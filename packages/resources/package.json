@@ -28,6 +28,7 @@
   "dependencies": {
     "@opencok/rules": "workspace:*",
     "@opencok/enums": "workspace:*",
-    "@opencok/contracts": "workspace:*"
+    "@opencok/contracts": "workspace:*",
+    "@opencok/hero": "workspace:*"
   }
 }

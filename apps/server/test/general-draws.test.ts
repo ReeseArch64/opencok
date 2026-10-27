@@ -4,8 +4,8 @@ import {
   generalDrawState,
   generalDrawPurchase,
   generalDrawScore,
-} from "@opencok/rules/general-draws";
-import { loadGeneralDrawRanking } from "@opencok/storage/general-draws";
+} from "@opencok/hero/rules/general-draws";
+import { loadGeneralDrawRanking } from "@opencok/hero/storage/general-draws";
 const rules = await loadRules();
 rules.power.activityPanels!.set("57153", { start: "1970-01-01-00-00", end: "2100-01-01-00-00" });
 test("draw thresholds, free cooldowns, discounted batches, and score conservation", () => {

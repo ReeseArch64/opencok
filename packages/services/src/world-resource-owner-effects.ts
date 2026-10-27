@@ -9,11 +9,10 @@ import { playerGameEffect } from "@opencok/rules/power-resolver";
 import { worldPowerEffects } from "@opencok/rules/power-world";
 import { resourceOrdinaryLoadEffects } from "@opencok/rules/world-resource-effects";
 import { readResourceExpeditionLoadEffect } from "./world-resource-expedition.ts";
-import { decodeWorldPowerEffects, generalSkillPoints } from "./power.ts";
-import {
-  resourceGeneralBuildingEffect,
-  resourceOwnerRuleContext,
-} from "./world-resource-owner-context.ts";
+import { decodeWorldPowerEffects } from "./power.ts";
+import { generalSkillPoints } from "@opencok/hero/services/general-power";
+import { resourceGeneralBuildingEffect } from "@opencok/hero/services/general-building-effects";
+import { resourceOwnerRuleContext } from "./world-resource-owner-context.ts";
 
 export async function readResourceOwnerLoadEffects(
   snapshot: WorldResourceOwnerSnapshot,
