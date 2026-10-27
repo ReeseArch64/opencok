@@ -143,7 +143,8 @@
     "./red-packets": "./src/red-packets.ts",
     "./world-city-geometry": "./src/world-city-geometry.ts",
     "./military-rank-awards": "./src/military-rank-awards.ts",
-    "./world-birth": "./src/world-birth.ts"
+    "./world-birth": "./src/world-birth.ts",
+    "./world-terrain": "./src/world-terrain.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",

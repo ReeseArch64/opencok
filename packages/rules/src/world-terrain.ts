@@ -33,7 +33,7 @@ export function worldTerrainPoint(terrain: WorldTerrain, rules: WorldTerrainRule
       Math.floor(y / rules.bornSide) +
       1;
   let pointType = 0,
-    pointItem = "",
+    pointItem: string | null = null,
     resLevel = 0;
   if (Math.abs(x - 600) <= 1 && Math.abs(y - 600) <= 1) {
     pointType = x === 600 && y === 600 ? 10 : 11;
@@ -47,7 +47,7 @@ export function worldTerrainPoint(terrain: WorldTerrain, rules: WorldTerrainRule
   ])
     if (x >= tx! - 1 && x <= tx! && y >= ty! - 1 && y <= ty!) {
       pointType = x === tx && y === ty ? 12 : 13;
-      pointItem = pointType === 13 ? String(1 + tx! + ty! * size) : "";
+      pointItem = pointType === 13 ? String(1 + tx! + ty! * size) : null;
     }
   if (x === 604 && y === 600) {
     pointType = 48;
@@ -67,5 +67,7 @@ export function worldTerrainPoint(terrain: WorldTerrain, rules: WorldTerrainRule
     pointItem,
     resLevel,
     resInitValue: 0,
+    startTime: 0n,
+    flushTime: 0n,
   };
 }

@@ -13,7 +13,8 @@
     "test:timed-mutations": "bun --no-env-file scripts/mutate-timed-economy.ts",
     "test:city-mutations": "bun --no-env-file scripts/mutate-city-progression.ts",
     "test:progression-mutations": "bun --no-env-file scripts/mutate-progression-domains.ts",
-    "test:player-progression-mutations": "bun --no-env-file scripts/mutate-player-progression.ts"
+    "test:player-progression-mutations": "bun --no-env-file scripts/mutate-player-progression.ts",
+    "world:import": "bun --no-env-file scripts/import-world-terrain.ts"
   },
   "dependencies": {
     "@opencok/connection": "workspace:*",
