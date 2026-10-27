@@ -15,18 +15,15 @@
   },
   "type": "module",
   "exports": {
-    "./rules": "./src/rules.ts",
-    "./nickname-words": "./src/nickname-words.ts",
-    "./catalogs": "./src/catalogs.ts",
-    "./nickname-reserved": "./src/nickname-reserved.ts",
-    "./buildings/import": "./src/buildings/import.ts",
     "./buildings": "./src/buildings/index.ts",
     "./definitions": "./src/catalog-definitions.ts",
-    "./catalog-model": "./src/catalog-model.ts",
-    "./catalog-mechanics": "./src/catalog-mechanics.ts",
     "./fixtures": "./src/xml-fixtures.ts",
     "./catalogs/*": "./src/catalogs/types/*.ts",
-    "./world-terrain": "./src/world-terrain.ts"
+    "./*": "./src/*.ts",
+    "./*.json": "./src/*.json",
+    "./catalogs/types/*": "./src/catalogs/types/*.ts",
+    "./catalogs/data/*": "./src/catalogs/data/*.ts",
+    "./catalogs/*.json": "./src/catalogs/*.json"
   },
   "dependencies": {
     "@opencok/rules": "workspace:*",

@@ -12,20 +12,7 @@
   },
   "type": "module",
   "exports": {
-    "./server": "./src/server.ts",
-    "./dependencies": "./src/dependencies.ts",
-    "./avatar-files": "./src/avatar-files.ts",
-    "./chat-discovery": "./src/chat-discovery.ts",
-    "./realm-chat-session": "./src/realm-chat-session.ts",
-    "./chat-server": "./src/chat-server.ts",
-    "./chat-websocket": "./src/chat-websocket.ts",
-    "./chat-avatar-profile": "./src/chat-avatar-profile.ts",
-    "./notifications": "./src/notifications.ts",
-    "./session": "./src/session.ts",
-    "./chat-nickname": "./src/chat-nickname.ts",
-    "./chat-mailbox": "./src/chat-mailbox.ts",
-    "./provisioning": "./src/provisioning.ts",
-    "./realm-social": "./src/realm-social.ts"
+    "./*": "./src/*.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",

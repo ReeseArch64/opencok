@@ -11,7 +11,7 @@
   },
   "type": "module",
   "exports": {
-    "./chat-archive": "./src/chat-archive.ts"
+    "./*": "./src/*.ts"
   },
   "dependencies": {
     "mongodb": "6.21.0",

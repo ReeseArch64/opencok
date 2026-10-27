@@ -11,7 +11,7 @@
   },
   "type": "module",
   "exports": {
-    "./posting": "./src/posting.ts"
+    "./*": "./src/*.ts"
   },
   "dependencies": {
     "@opencok/contracts": "workspace:*"

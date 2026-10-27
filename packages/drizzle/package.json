@@ -5,17 +5,8 @@
   "exports": {
     ".": "./src/index.ts",
     "./schema": "./src/schema/index.ts",
-    "./schema/global": "./src/schema/global.ts",
-    "./schema/kingdom": "./src/schema/kingdom.ts",
-    "./schema/opencok_kingdom": "./src/schema/opencok_kingdom.ts",
-    "./schema/opencok_kingdom/*": "./src/schema/opencok_kingdom/*.ts",
-    "./schema/opencok_global": "./src/schema/opencok_global.ts",
-    "./schema/opencok_global/*": "./src/schema/opencok_global/*.ts",
-    "./schema/opencok_pay": "./src/schema/opencok_pay.ts",
-    "./schema/opencok_pay/*": "./src/schema/opencok_pay/*.ts",
-    "./schema/opencok_chat": "./src/schema/opencok_chat.ts",
     "./schema/opencok_chat/chat_social": "./src/schema/chat-social.ts",
-    "./schema/opencok_chat/*": "./src/schema/opencok_chat/*.ts"
+    "./*": "./src/*.ts"
   },
   "scripts": {
     "check-types": "tsc --noEmit",
