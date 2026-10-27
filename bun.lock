@@ -334,6 +334,17 @@
         "typescript": "catalog:",
       },
     },
+    "packages/dragon": {
+      "name": "@opencok/dragon",
+      "dependencies": {
+        "@opencok/enums": "workspace:*",
+      },
+      "devDependencies": {
+        "@opencok/config": "workspace:*",
+        "@types/bun": "catalog:",
+        "typescript": "catalog:",
+      },
+    },
     "packages/drizzle": {
       "name": "@opencok/drizzle",
       "dependencies": {
@@ -631,6 +642,7 @@
       "dependencies": {
         "@opencok/constants": "workspace:*",
         "@opencok/contracts": "workspace:*",
+        "@opencok/dragon": "workspace:*",
         "@opencok/enums": "workspace:*",
         "@opencok/hero": "workspace:*",
         "@opencok/rules": "workspace:*",
@@ -1086,6 +1098,8 @@
     "@opencok/custom": ["@opencok/custom@workspace:packages/custom"],
 
     "@opencok/decorators": ["@opencok/decorators@workspace:packages/decorators"],
+
+    "@opencok/dragon": ["@opencok/dragon@workspace:packages/dragon"],
 
     "@opencok/drizzle": ["@opencok/drizzle@workspace:packages/drizzle"],
 

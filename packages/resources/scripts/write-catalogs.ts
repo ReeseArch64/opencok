@@ -6,6 +6,7 @@ import { CatalogKind } from "@opencok/enums/catalog-kind";
 import type { CatalogValue, CatalogCodec } from "../src/catalog-model.ts";
 import { convertCatalog, type SourceElement } from "./catalog-conversion.ts";
 import { namedHeroRecord, namedHeroDefinition } from "./named-hero-records.ts";
+import { namedDragonRecord, namedDragonDefinition } from "./named-dragon-records.ts";
 
 export interface CatalogSource {
   readonly id: string;
@@ -142,7 +143,9 @@ export async function writeCatalogModules(sources: AsyncIterable<CatalogSource>)
           recordType(
             module === GameplayCatalog.GeneralBase
               ? definition.records.map(namedHeroDefinition)
-              : definition.records,
+              : module === GameplayCatalog.DragonBase
+                ? definition.records.map(namedDragonDefinition)
+                : definition.records,
             recordName,
           ) +
           '\nimport type { CatalogTable } from "' +
@@ -161,7 +164,9 @@ export async function writeCatalogModules(sources: AsyncIterable<CatalogSource>)
         for (let offset = 0; offset < definition.records.length; offset += 750) {
           const part = module + ".records" + parts.length + ".ts";
           const records = definition.records.slice(offset, offset + 750);
-          const named = records.map((record) => namedHeroRecord(module!, record));
+          const named = records.map(
+            (record) => namedHeroRecord(module!, record) ?? namedDragonRecord(module!, record),
+          );
           const declarations = [
             ...new Set(named.flatMap((entry) => (entry ? [entry.declaration] : []))),
           ];

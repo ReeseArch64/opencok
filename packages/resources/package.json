@@ -30,6 +30,7 @@
     "@opencok/enums": "workspace:*",
     "@opencok/contracts": "workspace:*",
     "@opencok/hero": "workspace:*",
-    "@opencok/constants": "workspace:*"
+    "@opencok/constants": "workspace:*",
+    "@opencok/dragon": "workspace:*"
   }
 }
