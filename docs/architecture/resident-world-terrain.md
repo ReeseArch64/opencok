@@ -101,3 +101,5 @@ unchanged. Temporary databases, containers and synthetic fixtures were removed;
 no authored content was exported or committed. These figures describe this local
 validation run rather than a production throughput guarantee. Device execution
 remains unverified.
+
+Realm startup checks this manifest immediately after binding its PostgreSQL owner fence, before the opening clock, workers or player availability. A partial import, incompatible dimension or malformed manifest prevents startup. A realm without an import manifest keeps its existing maintained terrain behavior.

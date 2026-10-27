@@ -14,6 +14,7 @@ import { mergeEffectBoard } from "@opencok/mappings/merge-campaign";
 import { publishMergeEffectBoard } from "@opencok/services/merge-campaign";
 import { serverFeature } from "@opencok/rules/power-context";
 import { createWorldRecreationDomain } from "@opencok/services/world-recreation";
+import { assertWorldTerrain } from "@opencok/repositories/world-terrain";
 import { createWorldUseDomain } from "@opencok/services/world-use";
 import { createTreasureMapDomain } from "@opencok/services/treasure-map";
 import { cityDefenseDomain } from "@opencok/services/city-defense";
@@ -402,6 +403,9 @@ export const RealmDependenciesLive = Layer.effect(
     cache.bindRealmOwner(authority.epoch);
     yield* fromPromise("realm.mutations", () => checkMutationStore(db.kingdom.db));
     fenceRealmDatabase(db.kingdom.db, authority);
+    yield* fromPromise("realm.terrain", () =>
+      assertWorldTerrain(db.kingdom.db, authority, config.mapSize),
+    );
     const realmTransactions = new AsyncLocalStorage<MutationTransaction>();
     const transactRealm = db.kingdom.db.transaction.bind(db.kingdom.db);
     db.kingdom.db.transaction = (apply, settings) =>
