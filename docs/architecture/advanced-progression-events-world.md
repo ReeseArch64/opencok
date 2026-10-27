@@ -2343,3 +2343,26 @@ not admit a new resident city. Existing imported cities retain their actual
 terrain and identity. PostgreSQL provisioning acceptance first supplies only
 neutral tiles and verifies that no character is created, then enables space
 tiles and exercises normal receipt, rollback and ownership recovery.
+
+## Native map projection for reserved and monster points
+
+`WorldPoint.toJsonFromWorldPointObj` defines the stored-row map projection for
+fixed throne/range types 10/11, trebuchet/range types 12/13 and victory tower 48.
+These factual reservations now remain visible in `world.get` without requiring
+an attack engine. Stored exploration/range types 6/7, field monster/range types
+9/17, monster boss 15 and barbarian/range types 44/45 also retain their native
+base fields. This projection does not construct an actor, start a campaign or
+persist combat health. Type 6 adds its actual saved `mc_state`. The static
+projection does not add barbarian combat state from an absent actor.
+
+For types 9 and 15 with a nonblank catalogue identity, native `mchp` derives from
+positive stored health or the maintained monster maximum, clamped at zero;
+`mmhp` preserves the catalogue's Java integer result. NPC `mrn` uses the actual
+UTF-8 stored count, Java trimming/parsing and signed integer subtraction. Invalid
+UTF-8 has the Source empty-count fallback; invalid numeric data is unavailable.
+`WorldPoint.getOwnerInfo` uses the same current-health fallback for the type-15
+point-detail reply. Neither projection writes a derived value back into storage.
+Native map clock fields retain signed Java integer seconds. Unit acceptance
+covers every added point type, stored and derived health, malformed counters,
+NPC overflow and signed clock conversion. Unsupported specialized actors and
+territory overlays keep their separate state requirements.
