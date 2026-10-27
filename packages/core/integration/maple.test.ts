@@ -47,7 +47,16 @@ test("the pinned Maple container stores both services' logs, traces, errors and 
     );
     await compose(["up", "--build", "-d", "--wait", "--wait-timeout", "120"]);
     const endpoint = `http://${(await compose(["port", "maple", "4318"])).trim()}`;
-    expect((await fetch(`${endpoint}/health`)).ok).toBe(true);
+    const readyDeadline = Date.now() + 120000;
+    let ready = false;
+    while (Date.now() < readyDeadline) {
+      ready = await fetch(`${endpoint}/health`, { signal: AbortSignal.timeout(2000) })
+        .then((response) => response.ok)
+        .catch(() => false);
+      if (ready) break;
+      await Bun.sleep(100);
+    }
+    expect(ready).toBe(true);
     const loginPage = await fetch(`${endpoint}/login`);
     expect(loginPage.headers.get("content-security-policy")).not.toContain("wasm-unsafe-eval");
     const login = await fetch(`${endpoint}/local/auth/login`, {

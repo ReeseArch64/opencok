@@ -2,7 +2,7 @@
 
 The bundled dashboard compiles WebAssembly, but upstream v0.3.0 serves its UI with
 `script-src 'self'`. Browsers enforce this policy and can leave the authenticated
-dashboard blank. The CLI healthcheck and the separate login page do not exercise
+dashboard blank. CLI service queries and the separate login page do not exercise
 this path. See the upstream
 [policy source](https://github.com/MapleTechLabs/maple/blob/v0.3.0/apps/cli/src/server/serve.ts).
 
@@ -52,10 +52,14 @@ bun run --cwd packages/core test:maple
 To activate the image later, from the repository root:
 
 ```sh
-docker compose --profile dev up --build -d --no-deps maple
+docker compose --profile observability up --build -d
 ```
+
+The `observability` profile selects only Maple. There is no periodic Compose
+healthcheck; validate readiness explicitly before relying on the endpoint. The
+45-second shutdown grace period and bounded Docker logs remain intentional.
 
 Building files alone does not update an already running Maple container. Recreating
 Maple with the same named volume preserves telemetry; do not delete the volume or
 reset the store. Verify the actual authenticated dashboard, not only `/login` or the
-CLI healthcheck, after activation.
+CLI service queries, after activation.

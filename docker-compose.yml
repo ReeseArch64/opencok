@@ -32,7 +32,7 @@ services:
       context: ./infra/observability/maple
       dockerfile: Dockerfile
     restart: unless-stopped
-    profiles: [all, dev]
+    profiles: [all, dev, observability]
     networks: [opencok-internal-network, opencok-external-network]
     environment:
       MAPLE_LOCAL_INGEST_KEY: ${MAPLE_LOCAL_INGEST_KEY}
@@ -49,12 +49,6 @@ services:
       options:
         max-size: 20m
         max-file: "5"
-    healthcheck:
-      test: [CMD, maple, services, --local, --limit, "1"]
-      interval: 15s
-      timeout: 10s
-      start_period: 60s
-      retries: 8
 
   portainer:
     image: portainer/portainer-ce:lts
@@ -125,19 +119,6 @@ services:
     volumes:
       - pgadmin-data:/var/lib/pgadmin
       - pgadmin-servers:/configuration:ro
-
-    healthcheck:
-      test:
-        [
-          CMD,
-          /venv/bin/python3,
-          -c,
-          "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8080/misc/ping', timeout=3)",
-        ]
-      interval: 10s
-      timeout: 5s
-      retries: 12
-      start_period: 30s
 
   redis:
     image: redis:6.2.24-bookworm

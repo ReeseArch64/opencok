@@ -9,7 +9,8 @@ and optional endpoint overrides are substituted from the root `.env`.
 Use both files for local development. Every service uses both profiles `all` and
 `dev`; either profile starts the same complete set of containers, including
 pgAdmin, Redis Insight and Portainer. Only Redis also has the `redis` profile;
-it selects Redis alone, without applications or inspection tools.
+it selects Redis alone, without applications or inspection tools. The `observability`
+profile selects only Maple, without application startup dependencies.
 Chat runs as its own service. Media runs inside the API using the five S3 settings
 and shared Redis authorization; there is no Files container or media overlay. See the
 [API guide](../../apps/api/README.md#avatar-media). MinIO and `minio-setup` provide the
@@ -259,7 +260,21 @@ It applies the guarded [WebAssembly CSP workaround](../observability/maple/READM
 to the versioned official image with an executable checksum guard; currently only the
 verified Linux amd64 build is supported.
 It uses `maple-data:/data`; no second database or hosted Maple account is required.
-Its own outgoing telemetry/update checks are disabled.
+Its own outgoing telemetry/update checks are disabled. Start only observability with:
+
+```sh
+docker compose --profile observability up --build -d
+```
+
+Maple has no periodic Compose healthcheck: no service waits for its health, and the
+former CLI probe queried the embedded store without validating the dashboard. Check
+its HTTP endpoint and authenticated dashboard explicitly when diagnosing it. Keep
+`stop_grace_period: 45s` for request draining/store shutdown and bounded `json-file`
+logs (20 MiB per file, five files) to avoid unbounded Docker disk usage. pgAdmin's
+redundant periodic probe is also removed. Database checks used by `service_healthy`
+and application/ingress readiness checks remain, including Chat and MongoDB, so
+operators retain runtime diagnostics and meaningful `up --wait` behavior. A running
+Maple or pgAdmin container alone does not establish readiness.
 
 Start the services after rebuilding the applications:
 

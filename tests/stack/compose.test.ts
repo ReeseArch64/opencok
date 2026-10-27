@@ -81,7 +81,13 @@ async function createStack() {
   for (const [name, service] of Object.entries(isolated.services) as [string, any][]) {
     service.container_name = project + "-" + name;
     expect(new Set(service.profiles)).toEqual(
-      new Set(name === "redis" ? ["all", "dev", "redis"] : ["all", "dev"]),
+      new Set(
+        name === "redis"
+          ? ["all", "dev", "redis"]
+          : name === "maple"
+            ? ["all", "dev", "observability"]
+            : ["all", "dev"],
+      ),
     );
   }
   for (const [name, volume] of Object.entries(isolated.volumes) as [string, any][])
