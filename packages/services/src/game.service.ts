@@ -296,6 +296,7 @@ export class GameService {
   }
   async initialize(uid: string, correlation: Fields = {}): Promise<Result> {
     const businessMan = await this.services.hotItemBusinessMan?.();
+    const normalRecharge = await this.services.cityProgression?.(uid, "normal.recharge.init", {});
     const comeback = await this.services.cityProgression?.(uid, "comeback.init", {});
     const prayer = await this.services.cityProgression?.(uid, "prayer.init", {});
     const recallTasks = await this.services.cityProgression?.(uid, "recall.task.init", {});
@@ -343,6 +344,7 @@ export class GameService {
           .map((row) => sfs.object(equipmentFields(row))),
       ),
       ...(businessMan ? { businessMan: sfs.object(businessMan) } : {}),
+      ...normalRecharge?.body,
       ...comeback?.body,
       ...prayer?.body,
       ...recallTasks?.body,

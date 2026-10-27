@@ -193,7 +193,8 @@
     "./responses/activity-reward": "./src/responses/activity-reward.ts",
     "./activity-operators": "./src/activity-operators.ts",
     "./responses/activity-operators": "./src/responses/activity-operators.ts",
-    "./comeback": "./src/comeback.ts"
+    "./comeback": "./src/comeback.ts",
+    "./normal-recharge": "./src/normal-recharge.ts"
   },
   "dependencies": {
     "@opencok/enums": "workspace:*",

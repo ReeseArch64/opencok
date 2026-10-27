@@ -2673,8 +2673,8 @@ fields remain intact, and saved long clocks do not pass through JavaScript numbe
 conversion before the Source division by 1000.
 
 This projection does not substitute regional recall for the separate legacy
-`comeback` engine. Normal accumulated recharge (type 20) remains outside this first projection until
-its Source backend and accepted-payment/reward path are implemented. Combat
+`comeback` engine. Normal accumulated recharge (type 20), legacy comeback (21), today-sale (24) and
+overseas trade (26) are covered by the focused backend/projection sections below. Combat
 resource battles (38) remain gated. Those remaining engines and native-device
 rendering are separate completion work; this section does not declare topics
 25–27 complete. No migration, dependency or environment variable is added.
@@ -2776,3 +2776,125 @@ stake, pinned weighted return and atomic receipt. Completing a tier does not
 remove the Source navigation entry early. Historical dates and closed production
 controls remain intact. Neither projection adds a payment claim route, mutation,
 schema, dependency or environment setting.
+
+## Verified gift campaigns and funded red packets
+
+The internal delivered-gift consumer requires `ServerConfig.paidGiftGateway` and
+its owned, completed `paylog` record. `server.paidGifts.consume` binds the player,
+kingdom, provider, order, exchange catalog identity, product tier, exact price in
+cents and original delivery instant. The gateway attests that the original gift
+body has already been delivered; this consumer neither accepts money nor repeats
+that gift body. The default composition has no gateway and rejects consumption.
+Native commands cannot invoke the trusted producer or submit campaign counters.
+
+A permanent canonical command receipt pins the verified evidence and prevents
+repeated provider/order delivery from issuing a second bonus. Event 56 observes
+that evidence at its original instant. The six maintained system packet tiers
+retain `gold_8` at 0.99 and `gold_1` through `gold_5` at 4.99, 9.99, 19.99, 49.99
+and 99.99. Condition 104 compares the actual saved product tier. The declared
+window, rule state, open type and personal purchase quota continue through the
+campaign planner. Action 47 saves the declared funded pool, audience, distribution
+mode, claimant count and original expiry together with campaign progress and its
+announcement outbox event. Delayed consumption cannot extend that lifetime.
+
+Native `redPackets.sd` validates the owned type-15 envelope, actual castle level,
+item limits, message and current kingdom or alliance membership before reserving
+one item and the complete gold amount. Native correlation supplies a stable
+receipt for transport retries. Preview, status and received-history commands keep
+the source field names and SFS integer and long types. Alliance access rechecks
+matching current membership; visiting profiles and foreign kingdoms cannot claim.
+Group audiences and foreign-server transfers require their corresponding shared
+protocol and remain unavailable.
+
+Claims lock the shared packet row inside the recipient's fenced economic
+transaction. Saved funding history must match the remaining pool and claimant
+count. A recipient receives at most one grant, the configured claimant quota
+cannot be exceeded, and the final claimant receives the remainder. The random
+selector retains the configured single-precision distribution and its five
+parameters while reserving positive shares for later claimants. Average packets
+retain ceiling division and the final remainder. System claims require the
+configured castle threshold. Only a newly credited claim emits event 52;
+condition 81 reads its actual grant and system sender. Previews and receipt or
+claim-history retries cannot repeat score or gold.
+
+The packet lifecycle sweep closes at most 128 due pools per transaction, using
+row locks and the realm fence. Claims reject the exact expiry boundary even
+before that sweep runs. Player-funded remainders become deterministic funded
+mail for the original local sender, with the packet closure, mail notification
+and receipt committed together. Repeated or concurrent sweep attempts cannot
+repeat the refund, and an ordinary owned mail claim delivers the reserved gold.
+System remainders close without creating mail for the synthetic system sender.
+Imported pools with inconsistent funding history require reconciliation; missing
+or relocated original senders retain their reserved pool until local ownership
+can be established. The native post-12 announcement retains the packet identity,
+server, sender and dialog identity and rechecks its current online audience.
+Without a maintained localization table, its optional system message is empty.
+
+No schema migration, dependency or environment variable is added. Inventory stays
+at 848 tables and 6,917 fields. Back up packet pools and claim records, payment
+records, inventories, wallets, campaign variables, permanent receipts, refund mail
+and outbox together. Preserve outstanding pools and evidence during rollback;
+resume their claim and refund lifecycle with a supporting binary. Provider
+integration and native-device execution remain unverified.
+
+Fourteen PostgreSQL acceptance cases passed with 121 assertions, covering all six
+paid tiers, rejected evidence, native previews and claims, concurrent conservation,
+quotas, sender and audience isolation, funded refund-mail collection, transaction
+rollback, fencing and delayed delivery. Four rule and native-routing tests passed
+with 27,021 assertions. The complete server unit suite passed 1,504 tests with
+272,974 assertions. Native TCP regression passed one test with 222 assertions
+across two realms. Required lint, formatting and 19 implemented workspace type
+checks passed.
+
+## Normal accumulated recharge
+
+The Source PaymentService engine now owns `pay_total(uid,type)` progress for
+month-end type one, midmonth type three and post-merge type four. Maintained
+`heap` nodes drive ordered thresholds and claimable12000/12014 system mails.
+Normal threshold advancement emits trusted campaign event70 with the actual
+reached level; merge advancement preserves Source's separate event behavior.
+Native login `repayinfo` retains millisecond LONG start/end/points, UTF gift type
+and face, INT thresholds and reward previews. The internal delivery result
+retains LONG `repay_add`. Operator NORMAL_ADD_UP_RECHARGE20 uses the same actual
+window and converts its end to LONG seconds.
+
+69022 version/realm admission requires the persisted positive, nonfuture
+`server_info.payTotalTime`. Normal calendars retain their maintained dates and
+inclusive boundaries. The separate merge feature additionally requires an actual
+positive, nonfuture `lastMergeMillis`. The first initializer or verified delivery
+pins `mergeTiredRushBeginTime` under the realm transaction; an overlapping normal
+window postpones that anchor to its configured end before applying the declared
+offset. Existing anchors survive retries. Active merge windows take precedence,
+retain the configured full duration and do not start from absent/future facts.
+The initial anchor lock is avoided after that fact is established.
+
+The observer reuses `ServerConfig.paidGiftGateway` and
+`server.paidGifts.consume(owner,orderId,platform)`. Its adapter must attest that
+the original gift body is already delivered. Before progressing, the observer
+checks the owned status-two paylog, provider/order, exact SKU, single-pack catalog
+price and original instant. Points use the exact Source `gold_doller` catalog
+field. They are never inferred from a dollar-to-gold ratio, and the original gift
+body is not granted again. The shared proof can explicitly report
+`rechargeGold` between zero and the declared single-pack amount for confirmed
+zero/reduced-gold delivery outcomes. Quantity-priced deliveries require an
+explicitly supported provider contract; this observer does not guess quantity.
+Mycard's separate type-two path requires trusted method metadata and preserves
+Source float arithmetic for cents; no current heap nodes declare that type.
+
+The owner-fenced transaction commits total, monotonic observed payment time,
+reached level, pinned mails, campaign changes, outbox and canonical command
+receipt together. A private version-one order marker additionally prevents
+reapplication after generic receipt cleanup. Each marker contains a bounded
+fingerprint and its key hashes the canonical provider/order identity. Valid
+orders outside an admitted window are recorded without awarding a later
+retroactively configured period. Same-period out-of-order deliveries can still
+increase the total; an older period cannot replace newer progress. Login and
+startup never scan historical orders or repair missing threshold awards.
+
+PostgreSQL tests cover competing retries, owned status/SKU/price checks, Source
+point values, mail-to-inventory grants, rollback, stale realm fencing, clock
+admission and concurrent merge-anchor creation. The default provider adapter
+remains unconfigured and rejects trusted delivery calls. No native paid command,
+provider endpoint, schema migration, dependency or environment setting is added.
+Provider integration and native paid-response/device acceptance remain explicit
+external boundaries; this section does not claim topics25–27 complete.
