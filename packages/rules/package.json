@@ -162,7 +162,8 @@
     "./fragment-exchange": "./src/fragment-exchange.ts",
     "./monster-exchange": "./src/monster-exchange.ts",
     "./red-packets": "./src/red-packets.ts",
-    "./world-city-geometry": "./src/world-city-geometry.ts"
+    "./world-city-geometry": "./src/world-city-geometry.ts",
+    "./military-rank-awards": "./src/military-rank-awards.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",
