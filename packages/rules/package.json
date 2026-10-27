@@ -163,7 +163,8 @@
     "./monster-exchange": "./src/monster-exchange.ts",
     "./red-packets": "./src/red-packets.ts",
     "./world-city-geometry": "./src/world-city-geometry.ts",
-    "./military-rank-awards": "./src/military-rank-awards.ts"
+    "./military-rank-awards": "./src/military-rank-awards.ts",
+    "./player-experience": "./src/player-experience.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",
