@@ -1,5 +1,6 @@
 import { militaryRankAwardReader, writeMilitaryRankAward } from "./military-rank-awards";
 import { activityRewardReader, writeActivityReward } from "./activity-reward";
+import { user_branch_city_info } from "@opencok/drizzle/schema/opencok_kingdom/user_branch_city_info";
 import { redPacketReader, writeRedPackets } from "./red-packets";
 import { readNormalRecharge, writeNormalRecharge } from "./normal-recharge";
 import { readComeback, writeComeback } from "./comeback";
@@ -305,6 +306,14 @@ export function createCityProgressionStore(
         sevenDayCycle: command?.startsWith("sevenday.")
           ? await readSevenDayCycle(tx, owner)
           : undefined,
+        branchCity: command?.startsWith("branchcity.")
+          ? ((
+              await tx
+                .select()
+                .from(user_branch_city_info)
+                .where(eq(user_branch_city_info.uid, owner))
+            )[0] ?? null)
+          : undefined,
         dailyInvestment: command?.startsWith("invest.")
           ? await readDailyInvestment(tx, owner)
           : undefined,
@@ -454,6 +463,18 @@ export function createCityProgressionStore(
         if (write.sevenDayCycle) await writeSevenDayCycle(tx, owner, write.sevenDayCycle);
         if (write.shippingInvestment)
           await writeShippingInvestment(tx, owner, write.shippingInvestment);
+        if (write.branchCityOpenState !== undefined)
+          await tx
+            .insert(user_branch_city_info)
+            .values({
+              uid: owner,
+              openstate: write.branchCityOpenState,
+              takerewardcount: 0,
+            })
+            .onConflictDoUpdate({
+              target: user_branch_city_info.uid,
+              set: { openstate: write.branchCityOpenState },
+            });
         if (write.dailyInvestment) await writeDailyInvestment(tx, owner, write.dailyInvestment);
         if (write.castleLevelEvent || write.castleLevelEnrollments)
           await writeCastleLevelEvent(
