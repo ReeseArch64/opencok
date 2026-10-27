@@ -287,6 +287,8 @@ export function createSessionHandler(
               command === "mail.reward" ||
               command === "mail.reward.batch" ||
               command === "shoppingMall.buy" ||
+              command === "world.use" ||
+              command === "world.get.monster" ||
               command === "trade.info" ||
               command === "trade.exchange" ||
               command === "trade.cancel") &&

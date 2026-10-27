@@ -1,3 +1,4 @@
+import { worldMonsterReader } from "./world-monsters";
 import { worldpoint } from "@opencok/drizzle/schema/opencok_kingdom/worldpoint";
 import { readMonsterExchanges, writeMonsterExchanges } from "./monster-exchange";
 import { readFragmentExchanges, writeFragmentExchanges } from "./fragment-exchange";
@@ -174,6 +175,7 @@ export function createCityProgressionStore(
       alliance = profile.allianceId ?? "";
       const worldMutation =
         command?.startsWith("world.") ||
+        command === "get.act.boss.point" ||
         command?.startsWith("treasuremap.") ||
         command === "buy.citydef" ||
         command === "totem" ||
@@ -181,6 +183,9 @@ export function createCityProgressionStore(
           ? await readWorldMutationState(tx, owner, request, mapSize, command)
           : undefined;
       return {
+        worldMonsters: ["world.get.monster", "get.act.boss.point"].includes(command ?? "")
+          ? worldMonsterReader(tx, mapSize)
+          : undefined,
         campaignProfile:
           command?.startsWith("campaign.") || command === "trigger.activity"
             ? await readCampaignProfile(tx, owner)
