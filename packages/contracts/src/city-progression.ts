@@ -82,6 +82,7 @@ export interface DragonProgressionWrite {
 export interface CityProgressionState {
   activityReward?: import("./activity-reward").ActivityRewardReader;
   comeback?: import("./comeback").ComebackState;
+  branchCity?: Row | null;
   hotItem?: import("./hot-item").HotItemState;
   worldMonsters?: import("./world-monsters").WorldMonsterReader;
   campaignProfile?: Row;
@@ -158,6 +159,7 @@ export interface CityProgressionWrite {
   legacyGeneralLevel?: number;
   activityRewardClaim?: import("./activity-reward").ActivityRewardWrite;
   comeback?: import("./comeback").ComebackWrite;
+  branchCityOpenState?: number;
   hotItem?: import("./hot-item").HotItemWrite;
   costRankAward?: string;
   expeditionAward?: string;

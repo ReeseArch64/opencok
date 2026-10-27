@@ -11,6 +11,7 @@
   },
   "type": "module",
   "exports": {
+    "./branch-city": "./src/branch-city.ts",
     "./continued-cost-rewards": "./src/continued-cost-rewards.ts",
     "./continued-cost-finality": "./src/continued-cost-finality.ts",
     "./continued-cost-ranking": "./src/continued-cost-ranking.ts",
