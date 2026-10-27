@@ -21,6 +21,7 @@ export function rechargeFeedbackReader(
         .where(
           and(
             eq(paylog.uid, owner),
+            eq(paylog.status, 2),
             gte(paylog.time, cityAmount(start)),
             lte(paylog.time, cityAmount(end)),
             inArray(

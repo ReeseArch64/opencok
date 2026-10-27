@@ -74,15 +74,15 @@ export function createRechargeFeedbackDomain(gateway?: RechargeFeedbackGateway):
         payment.time < 0n ||
         payment.time > context.now ||
         !Number.isSafeInteger(Number(payment.time)) ||
-        price === undefined ||
-        Math.round(payment.spend * 100) !== price
+        (price !== undefined && Math.round(payment.spend * 100) !== price)
       )
         feedbackFailure();
+      if (price === undefined) return empty();
       const paidWindow = feedbackWindow(context.rules, {
         ...ruleContext,
         now: Number(payment.time),
       });
-      if (!paidWindow?.active) feedbackFailure();
+      if (!paidWindow?.active) return empty();
       const counts = await reader.counts(paidWindow.start, paidWindow.end, [price]),
         claimed = new Set(
           (await reader.claims(paidWindow.start, paidWindow.end)).map((row) => row.id),

@@ -1,8 +1,6 @@
 import { activityRewardDomain } from "@opencok/services/activity-reward";
-import {
-  createNormalRechargeDomain,
-  normalRechargeParameters,
-} from "@opencok/services/normal-recharge";
+import { createPaymentObservers } from "@opencok/services/payment-observers";
+import { createNormalRechargeDomain } from "@opencok/services/normal-recharge";
 import { createComebackSessions } from "@opencok/repositories/comeback-session";
 import { comebackDomain, planComebackLogin } from "@opencok/services/comeback";
 import {
@@ -20,10 +18,9 @@ import { cityDefenseDomain } from "@opencok/services/city-defense";
 import { createWorldUtilityStore } from "@opencok/repositories/world-utility";
 import { createWorldResourceRefreshExecutor } from "@opencok/repositories/world-resource-refresh";
 import { refreshWorldResources } from "@opencok/services/world-resource-refresh";
-import { createRedPacketExpiryStore } from "@opencok/repositories/red-packets";
+import { createRedPacketExpiryStore, redPacketReader } from "@opencok/repositories/red-packets";
 import {
   createRedPacketDomain,
-  paidGiftParameters,
   publishRedPacketAnnouncement,
   settleRedPacketExpiry,
 } from "@opencok/services/red-packets";
@@ -634,6 +631,16 @@ export const RealmDependenciesLive = Layer.effect(
       },
     };
     const specialEventStock = createSpecialEventStock(db.databases.global.db);
+    const paymentObservers = createPaymentObservers(
+      config.paidGiftGateway,
+      rules,
+      async (owner, orderId, platform) => {
+        const tx = realmTransactions.getStore();
+        if (!tx) throw new Error("Missing trusted payment transaction");
+        return redPacketReader(tx, owner).payment(orderId, platform);
+      },
+      (owner, command, params) => activities.domainCommand(owner, command, params),
+    );
     const city = createCityProgressionHandlers(
       (tx: Parameters<typeof readReconnectProgress>[0], owner, now) =>
         createCityProgressionStore(tx, owner, now, cityBoundary, config.mapSize),
@@ -662,8 +669,8 @@ export const RealmDependenciesLive = Layer.effect(
         createSevenDayCycleDomain(),
         createOrdinaryBoxDomain(),
         createNormalRechargeDomain(config.paidGiftGateway),
-        createRechargeActivityDomain(),
-        createRechargeFeedbackDomain(),
+        createRechargeActivityDomain(paymentObservers.newcomer),
+        createRechargeFeedbackDomain(paymentObservers.feedback),
         activityRewardDomain,
         createRedPacketDomain(config.paidGiftGateway),
         createAllianceHeartDomain((uid) => notifications.owners().includes(uid)),
@@ -2207,20 +2214,7 @@ export const RealmDependenciesLive = Layer.effect(
       ),
     );
     return {
-      paidGifts: {
-        async consume(owner: string, orderId: string, platform: string) {
-          await activities.domainCommand(
-            owner,
-            "campaign.paid.gift",
-            paidGiftParameters(owner, orderId, platform),
-          );
-          await activities.domainCommand(
-            owner,
-            "normal.recharge.paid",
-            normalRechargeParameters(owner, orderId, platform),
-          );
-        },
-      },
+      paidGifts: { consume: paymentObservers.consume },
       provisioning: config.provisioningSecret
         ? characterProvisioningHandler(
             new CharacterProvisioningController(

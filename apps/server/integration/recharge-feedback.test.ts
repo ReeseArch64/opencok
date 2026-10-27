@@ -50,6 +50,7 @@ async function fixture() {
       time,
       spend: 0.99,
       payLevel: 1,
+      status: 2,
     });
   const paid = (orderId: string) => {
     const eventId = `approved:${orderId}`;
