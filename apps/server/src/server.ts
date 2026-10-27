@@ -1,3 +1,14 @@
+import {
+  ExpeditionStageRewardService,
+  expeditionStageRewardDomain,
+  ExpeditionHistoryService,
+} from "@opencok/services/expedition-stage-rewards";
+import {
+  createExpeditionAwardStore,
+  createExpeditionAwardStandings,
+  createExpeditionHistorySource,
+} from "@opencok/repositories/expedition-stage-rewards";
+import { expeditionAwardOperation } from "@opencok/rules/expedition-stage-rewards";
 import { ExpeditionStageFinalityService } from "@opencok/services/expedition-stage-finality";
 import {
   createExpeditionStageRealm,
@@ -574,6 +585,7 @@ export const RealmDependenciesLive = Layer.effect(
         continuedCostDomain,
         heroTargetDomain,
         heroRankingRewardDomain,
+        expeditionStageRewardDomain,
         createSpecialEventDomain(specialEventStock),
         recallTaskDomain,
         regionalRecallDomain,
@@ -869,6 +881,20 @@ export const RealmDependenciesLive = Layer.effect(
         if (!delivered) break;
       }
     };
+    const expeditionStageRewards = new ExpeditionStageRewardService(
+      createExpeditionAwardStore(db.kingdom.db, authority),
+      createExpeditionAwardStandings(db.databases.global.db, config.kingdomId),
+      rules,
+      (owner, id) =>
+        activities.domainCommand(owner, "expedition.award.deliver", {
+          awardId: sfs.string(id),
+          operationId: sfs.string(expeditionAwardOperation(id)),
+        }),
+    );
+    const expeditionHistory = new ExpeditionHistoryService(
+      createExpeditionHistorySource(db.kingdom.db, db.databases.global.db, authority),
+      rules,
+    );
     const expeditionStageFinality = new ExpeditionStageFinalityService(
       createExpeditionStageRealm(db.kingdom.db, authority),
       createExpeditionStageRegistry(db.databases.global.db, authority),
@@ -1538,7 +1564,8 @@ export const RealmDependenciesLive = Layer.effect(
     yield* Effect.tryPromise({
       try: async () => {
         await heroRankingRewards.refresh().catch(() => undefined);
-        for (const type of ["hero.rank.mail", "hero.target.mail"]) {
+        await expeditionStageRewards.refresh().catch(() => undefined);
+        for (const type of ["hero.rank.mail", "hero.target.mail", "expedition.award.mail"]) {
           for (let index = 0; index < 64; index++) {
             const delivered = await relayMutationEvent(
               db.kingdom.db,
@@ -1546,7 +1573,7 @@ export const RealmDependenciesLive = Layer.effect(
               async (event) => {
                 const data = decode(event.payload);
                 if (str(data, "owner") !== event.owner)
-                  throw new Error("Foreign hero mail publication");
+                  throw new Error("Foreign progression mail publication");
                 await notifications.publish(event.owner, "push.mail", fields(data.mail));
                 if (data.achievement)
                   await notifications.publish(
@@ -1888,6 +1915,8 @@ export const RealmDependenciesLive = Layer.effect(
             return alliances.command(owner, command, params);
           },
           cityProgression: async (owner, command, params) => {
+            if (command === "newexpidition.rankinfo")
+              return { body: await expeditionHistory.read(owner), pushes: [] };
             if ((expeditionTreasuryCommands as readonly string[]).includes(command))
               return expeditionTreasury.command(owner, command, params);
             await recoverActivities(owner);

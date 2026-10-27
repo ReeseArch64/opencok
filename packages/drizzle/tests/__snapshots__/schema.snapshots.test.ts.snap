@@ -15259,12 +15259,14 @@ column ["total","double precision",true,null,null,null]
 column ["createdAt","bigint",true,null,null,null]
 column ["winner","integer",true,null,null,null]
 column ["finalizedAt","bigint",true,null,null,null]
+column ["awardCursor","varchar(40)",true,"''",null,null]
+column ["history","text",false,null,null,null]
 primary ["expedition_stage_closure_PRIMARY",["periodId","stage"]]
 index ["expedition_stage_closure_pending",false,["phase","endTime"]]
 check ["expedition_stage_closure_bounds","\\"stage\\" BETWEEN 2 AND 8 AND \\"opponent\\">0 AND \\"startTime\\">=0 AND \\"endTime\\">\\"startTime\\" AND \\"createdAt\\">=\\"endTime\\" AND \\"phase\\" BETWEEN 0 AND 3 AND \\"processed\\">=0 AND \\"processed\\"<=\\"scoreCount\\" AND \\"scoreCount\\"<=1000000 AND \\"total\\">=0 AND \\"total\\"<'Infinity'::double precision AND \\"winner\\">=0 AND \\"finalizedAt\\">=0"]
-insert into "opencok_kingdom"."expedition_stage_closure" ("periodId", "stage", "opponent", "startTime", "endTime", "phase", "cursor", "processed", "scoreCount", "digest", "total", "createdAt", "winner", "finalizedAt") values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
-select "periodId", "stage", "opponent", "startTime", "endTime", "phase", "cursor", "processed", "scoreCount", "digest", "total", "createdAt", "winner", "finalizedAt" from "opencok_kingdom"."expedition_stage_closure" where "opencok_kingdom"."expedition_stage_closure"."periodId" = $1
-update "opencok_kingdom"."expedition_stage_closure" set "periodId" = $1, "stage" = $2, "opponent" = $3, "startTime" = $4, "endTime" = $5, "phase" = $6, "cursor" = $7, "processed" = $8, "scoreCount" = $9, "digest" = $10, "total" = $11, "createdAt" = $12, "winner" = $13, "finalizedAt" = $14 where "opencok_kingdom"."expedition_stage_closure"."periodId" = $15
+insert into "opencok_kingdom"."expedition_stage_closure" ("periodId", "stage", "opponent", "startTime", "endTime", "phase", "cursor", "processed", "scoreCount", "digest", "total", "createdAt", "winner", "finalizedAt", "awardCursor", "history") values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)
+select "periodId", "stage", "opponent", "startTime", "endTime", "phase", "cursor", "processed", "scoreCount", "digest", "total", "createdAt", "winner", "finalizedAt", "awardCursor", "history" from "opencok_kingdom"."expedition_stage_closure" where "opencok_kingdom"."expedition_stage_closure"."periodId" = $1
+update "opencok_kingdom"."expedition_stage_closure" set "periodId" = $1, "stage" = $2, "opponent" = $3, "startTime" = $4, "endTime" = $5, "phase" = $6, "cursor" = $7, "processed" = $8, "scoreCount" = $9, "digest" = $10, "total" = $11, "createdAt" = $12, "winner" = $13, "finalizedAt" = $14, "awardCursor" = $15, "history" = $16 where "opencok_kingdom"."expedition_stage_closure"."periodId" = $17
 delete from "opencok_kingdom"."expedition_stage_closure" where "opencok_kingdom"."expedition_stage_closure"."periodId" = $1"
 `;
 
@@ -15284,4 +15286,23 @@ insert into "opencok_kingdom"."expedition_stage_member" ("periodId", "stage", "u
 select "periodId", "stage", "uid", "score", "allianceId", "takeReward", "eligibility", "metadata" from "opencok_kingdom"."expedition_stage_member" where "opencok_kingdom"."expedition_stage_member"."periodId" = $1
 update "opencok_kingdom"."expedition_stage_member" set "periodId" = $1, "stage" = $2, "uid" = $3, "score" = $4, "allianceId" = $5, "takeReward" = $6, "eligibility" = $7, "metadata" = $8 where "opencok_kingdom"."expedition_stage_member"."periodId" = $9
 delete from "opencok_kingdom"."expedition_stage_member" where "opencok_kingdom"."expedition_stage_member"."periodId" = $1"
+`;
+
+exports[`opencok_kingdom.expedition_stage_award: schema and CRUD SQL 1`] = `
+"schema opencok_kingdom
+column ["id","varchar(32)",true,null,null,null]
+column ["periodId","varchar(40)",true,null,null,null]
+column ["stage","integer",true,null,null,null]
+column ["ownerUid","varchar(40)",true,null,null,null]
+column ["payload","text",true,null,null,null]
+column ["createdAt","bigint",true,null,null,null]
+column ["deliveredAt","bigint",true,"0",null,null]
+column ["nextAttemptAt","bigint",true,"0",null,null]
+primary ["expedition_stage_award_PRIMARY",["id"]]
+index ["expedition_stage_award_pending",false,["deliveredAt","nextAttemptAt","createdAt"]]
+check ["expedition_stage_award_bounds","\\"stage\\" BETWEEN 2 AND 8 AND \\"createdAt\\">=0 AND \\"deliveredAt\\">=0 AND \\"nextAttemptAt\\">=0 AND octet_length(\\"payload\\") BETWEEN 1 AND 1048576"]
+insert into "opencok_kingdom"."expedition_stage_award" ("id", "periodId", "stage", "ownerUid", "payload", "createdAt", "deliveredAt", "nextAttemptAt") values ($1, $2, $3, $4, $5, $6, $7, $8)
+select "id", "periodId", "stage", "ownerUid", "payload", "createdAt", "deliveredAt", "nextAttemptAt" from "opencok_kingdom"."expedition_stage_award" where "opencok_kingdom"."expedition_stage_award"."id" = $1
+update "opencok_kingdom"."expedition_stage_award" set "id" = $1, "periodId" = $2, "stage" = $3, "ownerUid" = $4, "payload" = $5, "createdAt" = $6, "deliveredAt" = $7, "nextAttemptAt" = $8 where "opencok_kingdom"."expedition_stage_award"."id" = $9
+delete from "opencok_kingdom"."expedition_stage_award" where "opencok_kingdom"."expedition_stage_award"."id" = $1"
 `;

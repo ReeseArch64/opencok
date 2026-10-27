@@ -149,6 +149,10 @@ export function sampleRow(spec: TableContract, variant = 1): Row {
     row.remainder = BigInt(variant);
   if (spec.indexes.some((key) => key.name === "economy_posting_PRIMARY"))
     row.after = (row.before as bigint) + (row.delta as bigint);
+  if (spec.checks.some(([name]) => name === "expedition_stage_award_bounds")) {
+    row.deliveredAt = 0n;
+    row.nextAttemptAt = 0n;
+  }
   if (spec.checks.some(([name]) => name.startsWith("expedition_stage_"))) {
     row.stage = 3;
     if ("startTime" in row) {
