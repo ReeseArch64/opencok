@@ -207,7 +207,8 @@
     "./world-scout": "./src/world-scout.ts",
     "./world-monster-refresh": "./src/world-monster-refresh.ts",
     "./world-bulletins": "./src/world-bulletins.ts",
-    "./world-scout-report": "./src/world-scout-report.ts"
+    "./world-scout-report": "./src/world-scout-report.ts",
+    "./world-scout-publication": "./src/world-scout-publication.ts"
   },
   "dependencies": {
     "@opencok/enums": "workspace:*",
