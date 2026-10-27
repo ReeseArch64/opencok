@@ -18,16 +18,28 @@ export function createWorldMarchInspectionStore(
   db: Database["kingdom"]["db"],
 ): WorldMarchInspectionStore {
   return {
-    async read(observer, owner, id) {
+    async read(observer, owner, id, kingdomId, now) {
       for (const value of [observer, owner, id]) identity(value);
+      if (!Number.isInteger(kingdomId) || kingdomId < 1 || !Number.isSafeInteger(now) || now < 0)
+        throw new Error("Invalid world march inspection realm");
       return db.transaction(
         async (tx) => {
           const [self] = await tx
-              .select({ uid: userprofile.uid, alliance: userprofile.allianceId })
+              .select({
+                uid: userprofile.uid,
+                alliance: userprofile.allianceId,
+                serverId: userprofile.serverId,
+                banTime: userprofile.banTime,
+                banFlag: userprofile.banFlag,
+              })
               .from(userprofile)
               .where(eq(userprofile.uid, observer)),
             [target] = await tx
-              .select({ uid: userprofile.uid, alliance: userprofile.allianceId })
+              .select({
+                uid: userprofile.uid,
+                alliance: userprofile.allianceId,
+                serverId: userprofile.serverId,
+              })
               .from(userprofile)
               .where(eq(userprofile.uid, owner)),
             [observerRole] = await tx
@@ -37,6 +49,10 @@ export function createWorldMarchInspectionStore(
           if (
             !self ||
             !target ||
+            self.serverId !== kingdomId ||
+            target.serverId !== kingdomId ||
+            (self.banFlag ?? 0) !== 0 ||
+            (self.banTime ?? 0n) > BigInt(now) ||
             (self.uid !== target.uid &&
               !observerRole &&
               (!self.alliance || self.alliance !== target.alliance))
