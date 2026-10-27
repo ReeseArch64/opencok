@@ -41,7 +41,12 @@ export function encodeScoutReport(fields: Fields) {
   if (bytes.length > 65535) throw new Error("Scout report byte bound exceeded");
   return bytes;
 }
-export function scoutMailPush(mail: WorldScoutMail): Fields {
+export function scoutMailPush(
+  mail: Pick<
+    WorldScoutMail,
+    "id" | "type" | "itemIdFlag" | "title" | "sender" | "senderName" | "createdAt"
+  >,
+): Fields {
   return {
     title: sfs.string(mail.title),
     rewardId: sfs.string(""),
