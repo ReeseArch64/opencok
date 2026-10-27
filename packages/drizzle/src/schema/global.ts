@@ -1,3 +1,5 @@
+export { expedition_match_realm as opencok_global_expedition_match_realm } from "./opencok_global/expedition_match_realm";
+export { expedition_match_batch as opencok_global_expedition_match_batch } from "./opencok_global/expedition_match_batch";
 export { expedition_calendar as opencok_global_expedition_calendar } from "./opencok_global/expedition_calendar";
 export { hero_rank_watermark as opencok_global_hero_rank_watermark } from "./opencok_global/hero_rank_watermark";
 export { hero_rank_period as opencok_global_hero_rank_period } from "./opencok_global/hero_rank_period";

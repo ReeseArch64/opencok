@@ -15074,3 +15074,56 @@ select "id", "startTime", "endTime", "schedule", "expectedRealms", "createdAt", 
 update "opencok_global"."expedition_calendar" set "id" = $1, "startTime" = $2, "endTime" = $3, "schedule" = $4, "expectedRealms" = $5, "createdAt" = $6, "cycle" = $7, "state" = $8, "sourceId" = $9 where "opencok_global"."expedition_calendar"."id" = $10
 delete from "opencok_global"."expedition_calendar" where "opencok_global"."expedition_calendar"."id" = $1"
 `;
+
+exports[`opencok_global.expedition_match_batch: schema and CRUD SQL 1`] = `
+"schema opencok_global
+column ["periodId","varchar(32)",true,null,null,null]
+column ["admissionStart","bigint",true,null,null,null]
+column ["admissionEnd","bigint",true,null,null,null]
+column ["configuration","text",true,null,null,null]
+column ["seed","varchar(32)",true,null,null,null]
+column ["createdAt","bigint",true,null,null,null]
+column ["matchedAt","bigint",true,"0",null,null]
+primary ["expedition_match_batch_PRIMARY",["periodId"]]
+check ["expedition_match_batch_bounds","\\"admissionStart\\" >= 0 AND \\"admissionEnd\\" > \\"admissionStart\\" AND \\"createdAt\\" >= \\"admissionStart\\" AND (\\"matchedAt\\" = 0 OR \\"matchedAt\\" >= \\"admissionEnd\\") AND octet_length(\\"configuration\\") BETWEEN 1 AND 8192"]
+insert into "opencok_global"."expedition_match_batch" ("periodId", "admissionStart", "admissionEnd", "configuration", "seed", "createdAt", "matchedAt") values ($1, $2, $3, $4, $5, $6, $7)
+select "periodId", "admissionStart", "admissionEnd", "configuration", "seed", "createdAt", "matchedAt" from "opencok_global"."expedition_match_batch" where "opencok_global"."expedition_match_batch"."periodId" = $1
+update "opencok_global"."expedition_match_batch" set "periodId" = $1, "admissionStart" = $2, "admissionEnd" = $3, "configuration" = $4, "seed" = $5, "createdAt" = $6, "matchedAt" = $7 where "opencok_global"."expedition_match_batch"."periodId" = $8
+delete from "opencok_global"."expedition_match_batch" where "opencok_global"."expedition_match_batch"."periodId" = $1"
+`;
+
+exports[`opencok_global.expedition_match_realm: schema and CRUD SQL 1`] = `
+"schema opencok_global
+column ["periodId","varchar(32)",true,null,null,null]
+column ["kingdomId","integer",true,null,null,null]
+column ["statistics","text",true,null,null,null]
+column ["previousMatch","integer",true,null,null,null]
+column ["registeredAt","bigint",true,null,null,null]
+column ["opponent","integer",true,"0",null,null]
+column ["matchedAt","bigint",true,"0",null,null]
+primary ["expedition_match_realm_PRIMARY",["periodId","kingdomId"]]
+check ["expedition_match_realm_bounds","\\"kingdomId\\" > 0 AND \\"previousMatch\\" >= 0 AND \\"previousMatch\\" <> \\"kingdomId\\" AND \\"registeredAt\\" >= 0 AND \\"opponent\\" >= 0 AND \\"opponent\\" <> \\"kingdomId\\" AND (\\"matchedAt\\" = 0 OR \\"matchedAt\\" >= \\"registeredAt\\") AND octet_length(\\"statistics\\") BETWEEN 1 AND 8192"]
+insert into "opencok_global"."expedition_match_realm" ("periodId", "kingdomId", "statistics", "previousMatch", "registeredAt", "opponent", "matchedAt") values ($1, $2, $3, $4, $5, $6, $7)
+select "periodId", "kingdomId", "statistics", "previousMatch", "registeredAt", "opponent", "matchedAt" from "opencok_global"."expedition_match_realm" where "opencok_global"."expedition_match_realm"."periodId" = $1
+update "opencok_global"."expedition_match_realm" set "periodId" = $1, "kingdomId" = $2, "statistics" = $3, "previousMatch" = $4, "registeredAt" = $5, "opponent" = $6, "matchedAt" = $7 where "opencok_global"."expedition_match_realm"."periodId" = $8
+delete from "opencok_global"."expedition_match_realm" where "opencok_global"."expedition_match_realm"."periodId" = $1"
+`;
+
+exports[`opencok_kingdom.expedition_admission: schema and CRUD SQL 1`] = `
+"schema opencok_kingdom
+column ["periodId","varchar(32)",true,null,null,null]
+column ["startTime","bigint",true,null,null,null]
+column ["endTime","bigint",true,null,null,null]
+column ["activityEnd","bigint",true,null,null,null]
+column ["statistics","text",true,null,null,null]
+column ["previousMatch","integer",true,null,null,null]
+column ["createdAt","bigint",true,null,null,null]
+column ["appliedAt","bigint",true,"0",null,null]
+primary ["expedition_admission_PRIMARY",["periodId"]]
+index ["expedition_admission_pending",false,["appliedAt","activityEnd"]]
+check ["expedition_admission_bounds","\\"startTime\\" >= 0 AND \\"endTime\\" > \\"startTime\\" AND \\"activityEnd\\" > \\"endTime\\" AND \\"previousMatch\\" >= 0 AND \\"createdAt\\" >= \\"startTime\\" AND \\"createdAt\\" < \\"endTime\\" AND (\\"appliedAt\\" = 0 OR \\"appliedAt\\" >= \\"endTime\\") AND octet_length(\\"statistics\\") BETWEEN 1 AND 8192"]
+insert into "opencok_kingdom"."expedition_admission" ("periodId", "startTime", "endTime", "activityEnd", "statistics", "previousMatch", "createdAt", "appliedAt") values ($1, $2, $3, $4, $5, $6, $7, $8)
+select "periodId", "startTime", "endTime", "activityEnd", "statistics", "previousMatch", "createdAt", "appliedAt" from "opencok_kingdom"."expedition_admission" where "opencok_kingdom"."expedition_admission"."periodId" = $1
+update "opencok_kingdom"."expedition_admission" set "periodId" = $1, "startTime" = $2, "endTime" = $3, "activityEnd" = $4, "statistics" = $5, "previousMatch" = $6, "createdAt" = $7, "appliedAt" = $8 where "opencok_kingdom"."expedition_admission"."periodId" = $9
+delete from "opencok_kingdom"."expedition_admission" where "opencok_kingdom"."expedition_admission"."periodId" = $1"
+`;
