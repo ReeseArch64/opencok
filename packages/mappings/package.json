@@ -100,7 +100,8 @@
     "./campaign-observation": "./src/campaign-observation.ts",
     "./fragment-exchange": "./src/fragment-exchange.ts",
     "./monster-exchange": "./src/monster-exchange.ts",
-    "./world-utility": "./src/world-utility.ts"
+    "./world-utility": "./src/world-utility.ts",
+    "./city-defense": "./src/city-defense.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",

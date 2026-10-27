@@ -142,7 +142,8 @@
     "./monster-exchange": "./src/monster-exchange.ts",
     "./exchange-activity": "./src/exchange-activity.ts",
     "./world-resource-refresh": "./src/world-resource-refresh.ts",
-    "./world-utility": "./src/world-utility.ts"
+    "./world-utility": "./src/world-utility.ts",
+    "./city-defense": "./src/city-defense.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",

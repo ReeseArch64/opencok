@@ -1,3 +1,4 @@
+import { cityDefenseDomain } from "@opencok/services/city-defense";
 import { createWorldUtilityStore } from "@opencok/repositories/world-utility";
 import { createWorldResourceRefreshExecutor } from "@opencok/repositories/world-resource-refresh";
 import { refreshWorldResources } from "@opencok/services/world-resource-refresh";
@@ -599,6 +600,7 @@ export const RealmDependenciesLive = Layer.effect(
         dragonTowerDomain,
         dragonTalentsDomain,
         createWorldMarchDomain(config.mapSize),
+        cityDefenseDomain,
         createCivilizationCastleDomain(config.mapSize),
         createTotemDomain(config.mapSize),
         minstrelDomain,
@@ -1417,6 +1419,8 @@ export const RealmDependenciesLive = Layer.effect(
       }
       for (const command of [
         "world.resources",
+        "buy.citydef",
+        "world.user.rcd",
         "world.march",
         "world.march.retreat",
         "world.march.check",

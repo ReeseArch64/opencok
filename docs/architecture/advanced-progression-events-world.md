@@ -2115,3 +2115,29 @@ preserved. The next `world.get` obtains a fresh snapshot and resubscribes throug
 the existing world service. These commands add no schema, asset grant or
 configuration setting. Synthetic PostgreSQL and native field tests establish
 these routes; device execution remains unverified.
+
+## Resident city fire and repairs
+
+`buy.citydef` and `world.user.rcd` replace the ordinary `BuyCityDef` and
+`RecoverCityDef` handlers through the owned city mutation transaction. Extinguish
+settles whole-second fire damage, charges the configured game gold once and clears
+the fire checkpoints. Repair enforces the saved minute-based cooldown, adds the
+configured defense and clamps to the current wall maximum plus effect 125.
+The native `repairType=1` black-land probe retains its string response without
+changing defense or the cooldown.
+
+Fire rates preserve the source float arithmetic, effects 122 and 2189 and the
+61-cell outer/53-cell inner black-land reduction ring. Saved active boss fire
+ranges supply their configured rate when applicable; reading an existing boss
+record does not synthesize a boss battle. Native cross-battle realm restrictions
+remain outside this resident world path. Both commands require the current owned
+city point and the shared world mutation lock. Failed costs preserve health,
+checkpoints and gold. Operation receipts prevent concurrent retries from charging
+or applying a repair again; world point invalidations use the existing outbox.
+
+The existing player effect calculation now admits these three source effect IDs.
+No effect provider or scoring producer is bypassed. No schema, dependency or
+configuration key is added. PostgreSQL acceptance covers fire settlement,
+concurrent extinguish and repair, cooldown, wall cap, black-land probe, persisted
+boss rates and insufficient-gold rollback. Device execution and the separate
+combat producers that start fires remain unverified.
