@@ -6,6 +6,12 @@ The compatibility target is the 12.06.0 server contract. Native APK execution an
 other client tracks remain unverified. Private reference inputs are read-only and
 are not runtime dependencies.
 
+The [issue acceptance matrix](advanced-progression-acceptance.md) maps all ten
+criteria to maintained implementations and recovery evidence. Independent native
+12.06.0 device acceptance is tracked in
+[issue 521](https://github.com/ReeseArch64/opencok/issues/521); server fixtures do
+not certify APK rendering or interaction behavior.
+
 ## Civilization science
 
 `civilization.science.data.init`, `race.science.research`, `race.science.directly`
