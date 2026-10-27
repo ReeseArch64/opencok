@@ -40,6 +40,7 @@ export interface ProvisioningStore {
   ): Promise<CharacterResponse>;
 }
 export interface CharacterSeed {
+  birth: import("./world-birth").WorldBirthRules;
   profile: Row;
   resource: Row;
   buildings: readonly Row[];

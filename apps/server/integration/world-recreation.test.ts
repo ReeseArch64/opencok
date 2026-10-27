@@ -1,3 +1,4 @@
+import { seedSyntheticWorldBirth } from "./support/world-birth";
 import { expect, test } from "bun:test";
 import { eq, inArray } from "drizzle-orm";
 import { user_world } from "@opencok/drizzle/schema/opencok_kingdom/user_world";
@@ -48,6 +49,7 @@ async function recreationHarness(lost = true) {
         };
       }),
     );
+    await seedSyntheticWorldBirth(h.db.db, h.authority, h.rules);
     return h;
   } catch (error) {
     await h.close();
@@ -204,6 +206,23 @@ test("recreation preserves a lost city when no complete native birth footprint i
         (row) => row.eventType === "world.user.rcr",
       ),
     ).toHaveLength(0);
+  } finally {
+    await h.close();
+  }
+}, 120000);
+
+test("a zero-point profile cannot duplicate an existing owned city", async () => {
+  const h = await recreationHarness();
+  try {
+    await h.db.db
+      .update(worldpoint)
+      .set({ pointType: 1, ownerId: "owner" })
+      .where(eq(worldpoint.id, 1202));
+    await expect(h.command("world.user.rcr", {})).rejects.toThrow();
+    expect((await h.db.db.select().from(user_world))[0]!.pointId).toBe(0);
+    expect(
+      await h.db.db.select().from(worldpoint).where(eq(worldpoint.ownerId, "owner")),
+    ).toHaveLength(1);
   } finally {
     await h.close();
   }

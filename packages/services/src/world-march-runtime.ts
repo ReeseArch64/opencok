@@ -1,3 +1,4 @@
+import { worldBirthRules } from "@opencok/rules/world-birth";
 import {
   startTreasureExcavation,
   finishTreasureExcavation,
@@ -964,11 +965,14 @@ export function createWorldMarchDomain(size: number): CityDomain {
       if (command === "world.mv" || command === "world.mv.gold") {
         const random = int(params, "point") === 0;
         if (random && marchRows(context).length) worldMutationFailure();
-        const target = cityInteger(
-            random ? context.state.worldMutation.randomDestination : int(params, "point"),
-            1,
-            size * size,
-          ),
+        let randomPoint: number | undefined;
+        if (random) {
+          if (!context.birthPoint) worldMutationFailure();
+          const placement = await context.birthPoint(worldBirthRules(context.rules), "random");
+          randomPoint = placement.point;
+          for (const row of placement.points) savePoint(context, row);
+        }
+        const target = cityInteger(random ? randomPoint : int(params, "point"), 1, size * size),
           world = context.state.worldMutation.world,
           source = num(world, "pointId"),
           destination = worldFootprint(target, size),

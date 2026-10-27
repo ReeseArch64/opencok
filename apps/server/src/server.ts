@@ -588,7 +588,7 @@ export const RealmDependenciesLive = Layer.effect(
     const specialEventStock = createSpecialEventStock(db.databases.global.db);
     const city = createCityProgressionHandlers(
       (tx: Parameters<typeof readReconnectProgress>[0], owner, now) =>
-        createCityProgressionStore(tx, owner, now, cityBoundary, config.mapSize),
+        createCityProgressionStore(tx, owner, now, cityBoundary, config.mapSize, authority),
       [
         generalsDomain,
         createGeneralDrawDomain(() => cache.generalDrawRanking()),

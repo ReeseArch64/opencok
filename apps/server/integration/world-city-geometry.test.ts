@@ -1,3 +1,4 @@
+import { seedSyntheticWorldBirth } from "./support/world-birth";
 import { mutation_outbox } from "@opencok/drizzle/schema/opencok_kingdom/mutation_outbox";
 import { expect, test } from "bun:test";
 import { eq, inArray } from "drizzle-orm";
@@ -69,6 +70,7 @@ async function fixture(native = false) {
       .select()
       .from(worldpoint)
       .where(inArray(worldpoint.id, [1, 2, 1201, 1202]));
+  await seedSyntheticWorldBirth(h.db.db, h.authority, h.rules);
   return { ...h, tick, start, state };
 }
 test("concurrent recovery normalizes a proven maintained city without moving tiles or losing main metadata", async () => {

@@ -1,3 +1,4 @@
+import { worldBirthRules } from "@opencok/rules/world-birth";
 import { num, long, text } from "@opencok/contracts/rows";
 import { encode } from "@opencok/messages/sfs";
 import { cityInteger } from "@opencok/rules/city-progression";
@@ -19,11 +20,13 @@ export function createWorldRecreationDomain(size: number): CityDomain {
     async prepare(context, _command, params) {
       const state = context.state.worldMutation;
       if (!state || num(state.world, "pointId") !== 0) worldMutationFailure();
-      const target = cityInteger(state.randomDestination, 1, size * size),
+      if (!context.birthPoint) worldMutationFailure();
+      const placement = await context.birthPoint(worldBirthRules(context.rules)),
+        target = cityInteger(placement.point, 1, size * size),
         footprint = worldFootprint(target, size),
         castle = context.state.buildings.find((row) => num(row, "itemId") === 400000);
       if (!castle) worldMutationFailure();
-      const rows = footprint.map((id) => state.points.find((row) => num(row, "id") === id));
+      const rows = footprint.map((id) => placement.points.find((row) => num(row, "id") === id));
       if (
         rows.some(
           (row) =>

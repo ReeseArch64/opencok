@@ -47,23 +47,6 @@ export async function readWorldMutationState(
   if (marches.length > 256 || checkpoints.length > 256)
     throw new Error("World march aggregate exceeds bound");
   const params = request ? decode(Buffer.from(request)) : {};
-  let randomDestination: number | undefined;
-  if (
-    (command === "world.user.rcr" && world.pointId === 0) ||
-    (["world.mv", "world.mv.gold"].includes(command ?? "") &&
-      params.point &&
-      int(params, "point") === 0)
-  ) {
-    const grid = 2;
-    const birth =
-      command === "world.user.rcr"
-        ? sql`and coalesce(p."territoryAlliance",'')='' and coalesce(e."territoryAlliance",'')='' and coalesce(s."territoryAlliance",'')='' and coalesce(c."territoryAlliance",'')='' and coalesce(p.reserve,0)=0 and coalesce(e.reserve,0)=0 and coalesce(s.reserve,0)=0 and coalesce(c.reserve,0)=0`
-        : sql``;
-    const result = await tx.execute<{ id: number }>(
-      sql`select p.id from opencok_kingdom.worldpoint p join opencok_kingdom.worldpoint e on e.id=p.id-1 and e."worldId"=0 join opencok_kingdom.worldpoint s on s.id=p.id-${size} and s."worldId"=0 join opencok_kingdom.worldpoint c on c.id=p.id-${size + 1} and c."worldId"=0 where p."worldId"=0 and p.x>0 and p.y>0 and p.x<${size} and p.y<${size} and e.x=p.x-1 and e.y=p.y and s.x=p.x and s.y=p.y-1 and c.x=p.x-1 and c.y=p.y-1 and p."pointType"=0 and e."pointType"=0 and s."pointType"=0 and c."pointType"=0 and p."gridType"=${grid} and e."gridType"=${grid} and s."gridType"=${grid} and c."gridType"=${grid} and p."grid2Type"=0 and e."grid2Type"=0 and s."grid2Type"=0 and c."grid2Type"=0 and coalesce(p."ownerId",'')='' and coalesce(e."ownerId",'')='' and coalesce(s."ownerId",'')='' and coalesce(c."ownerId",'')='' and coalesce(p."ownerMarchUUid",'')='' and coalesce(e."ownerMarchUUid",'')='' and coalesce(s."ownerMarchUUid",'')='' and coalesce(c."ownerMarchUUid",'')='' ${birth} order by random() limit 1`,
-    );
-    randomDestination = result.rows[0]?.id;
-  }
   const [castle] =
     command === "civilizationCastle"
       ? await tx
@@ -107,7 +90,6 @@ export async function readWorldMutationState(
   for (const point of [
     world.pointId,
     castle?.pointId ?? 0,
-    randomDestination ?? 0,
     ...marches.flatMap((row) => [row.ownerId, row.targetId]),
     int(params, "point", 0),
     command === "totem" ? 0 : int(params, "pointId", 0),
@@ -157,7 +139,6 @@ export async function readWorldMutationState(
     points,
     marches,
     checkpoints,
-    randomDestination,
     ...geometry,
     targetMarchCount: targetMarchCount?.count,
     cityBosses,

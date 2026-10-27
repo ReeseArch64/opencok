@@ -1,3 +1,4 @@
+import { allocateWorldBirth } from "./world-birth";
 import { and, eq, inArray, sql } from "drizzle-orm";
 import { userprofile } from "@opencok/drizzle/schema/opencok_kingdom/userprofile";
 import { user_resource } from "@opencok/drizzle/schema/opencok_kingdom/user_resource";
@@ -64,27 +65,27 @@ export function createCharacterCreator(
         ).length
       )
         throw new Error("Existing character cannot be initialized");
+      await tx.execute(sql`select pg_advisory_xact_lock(728214, 0)`);
+      const [ownedCity] = await tx
+        .select({ id: worldpoint.id })
+        .from(worldpoint)
+        .where(
+          and(eq(worldpoint.worldId, 0), eq(worldpoint.ownerId, uid), eq(worldpoint.pointType, 1)),
+        )
+        .limit(1)
+        .for("update");
+      if (ownedCity) throw new Error("Existing city cannot be initialized");
       const captured = now();
       if (!Number.isSafeInteger(captured) || captured < reservation.createdAt)
         throw new Error("Invalid provisioning clock");
       const seed = plan(captured);
-      const result = await tx.execute<{ id: number }>(sql`
-      SELECT p.id FROM opencok_kingdom.worldpoint p
-      JOIN opencok_kingdom.worldpoint e ON e.id = p.id - 1 AND e."worldId" = 0 AND e.x = p.x - 1 AND e.y = p.y
-      JOIN opencok_kingdom.worldpoint s ON s.id = p.id - ${mapSize} AND s."worldId" = 0 AND s.x = p.x AND s.y = p.y - 1
-      JOIN opencok_kingdom.worldpoint c ON c.id = p.id - ${mapSize + 1} AND c."worldId" = 0 AND c.x = p.x - 1 AND c.y = p.y - 1
-      WHERE p."worldId" = 0 AND p.x > 0 AND p.y > 0 AND p.x < ${mapSize} AND p.y < ${mapSize}
-      AND p.id = 1 + p.x + p.y * ${mapSize}
-      AND p."pointType" = 0 AND e."pointType" = 0 AND s."pointType" = 0 AND c."pointType" = 0
-      AND p."gridType" = 2 AND e."gridType" = 2 AND s."gridType" = 2 AND c."gridType" = 2
-      AND p."grid2Type" = 0 AND e."grid2Type" = 0 AND s."grid2Type" = 0 AND c."grid2Type" = 0
-      AND coalesce(p."ownerId", '') = '' AND coalesce(e."ownerId", '') = '' AND coalesce(s."ownerId", '') = '' AND coalesce(c."ownerId", '') = ''
-      AND coalesce(p."territoryAlliance", '') = '' AND coalesce(e."territoryAlliance", '') = '' AND coalesce(s."territoryAlliance", '') = '' AND coalesce(c."territoryAlliance", '') = ''
-      AND coalesce(p.reserve, 0) = 0 AND coalesce(e.reserve, 0) = 0 AND coalesce(s.reserve, 0) = 0 AND coalesce(c.reserve, 0) = 0
-      ORDER BY p.id LIMIT 1 FOR UPDATE OF p,e,s,c SKIP LOCKED
-    `);
-      const point = result.rows[0]?.id;
-      if (!point) throw new Error("No available initial city location");
+      const { point } = await allocateWorldBirth(
+        tx,
+        authority,
+        mapSize,
+        seed.birth,
+        BigInt(captured),
+      );
       await tx
         .insert(userprofile)
         .values({ ...seed.profile, worldPoint: point } as typeof userprofile.$inferInsert);

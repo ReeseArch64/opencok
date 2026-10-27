@@ -6,6 +6,8 @@ import {
   parseWorldBirth,
   advanceWorldBirth,
   countWorldBirth,
+  worldBirthArea,
+  worldBirthCandidates,
 } from "@opencok/rules/world-birth";
 const settings = worldBirthRules(await loadRules());
 
@@ -62,4 +64,18 @@ test("birth state rejects malformed private snapshots without mutating the suppl
   const decoded = parseWorldBirth(raw);
   decoded.counts[67] = 1;
   expect(state.counts).toEqual({});
+});
+
+test("birth candidate regions retain x-major Source numbering and exclude four-cell crossings into an unadmitted area", () => {
+  const first = 1 + 181 + 181 * 1201,
+    second = 1 + 181 + 421 * 1201;
+  expect(worldBirthArea(first, 1201, 60)).toBe(67);
+  expect(worldBirthArea(second, 1201, 60)).toBe(71);
+  const single = worldBirthCandidates([67], 1201, 60),
+    group = worldBirthCandidates([67, 68], 1201, 60);
+  expect(single).toHaveLength(3481);
+  expect(single).toContain(first);
+  expect(single).not.toContain(1 + 181 + 240 * 1201);
+  expect(group).toContain(1 + 181 + 240 * 1201);
+  expect(worldBirthCandidates([67], 100, 60)).toHaveLength(0);
 });

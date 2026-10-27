@@ -1,3 +1,4 @@
+import { seedSyntheticWorldBirth } from "./support/world-birth";
 import { test, expect } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { eq, inArray } from "drizzle-orm";
@@ -53,6 +54,7 @@ async function worldHarness() {
       operationId,
     });
   const tick = () => h.command("world.tick", { operationId: sfs.string(randomUUID()) });
+  await seedSyntheticWorldBirth(h.db.db, h.authority, h.rules);
   return { ...h, start, tick };
 }
 
@@ -273,7 +275,12 @@ test("native march preflight is a shield and target-occupancy read without troop
     await h.db.db
       .update(worldpoint)
       .set({ shieldTime: BigInt(h.clock.now + 60000) })
-      .where(eq(worldpoint.id, 1));
+      .where(
+        eq(
+          worldpoint.id,
+          (await h.db.db.select().from(user_world).where(eq(user_world.uid, "owner")))[0]!.pointId!,
+        ),
+      );
     const camp = await h.command("world.march.check", { point: sfs.int(20) });
     expect(camp.body.needBreakShield!.value).toBe(true);
     expect(
