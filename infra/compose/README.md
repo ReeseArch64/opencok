@@ -253,8 +253,11 @@ values change; do not delete the volume to rotate credentials.
 [ADR-0013](../../docs/decisions/0013-adopt-maple-for-local-operational-observability.md)
 selects Maple Local for server/API logs, traces, controlled errors and duration/process
 metrics. Grafana, Loki, Prometheus, Axiom and Sentry adoption is suspended for these
-signals while Maple passes the required checks. The official `v0.3.0` image contains
+signals while Maple passes the required checks. A derived `v0.3.0` image contains
 OTLP HTTP ingest, the query API, embedded ClickHouse and the bundled offline dashboard.
+It applies the guarded [WebAssembly CSP workaround](../observability/maple/README.md)
+to the versioned official image with an executable checksum guard; currently only the
+verified Linux amd64 build is supported.
 It uses `maple-data:/data`; no second database or hosted Maple account is required.
 Its own outgoing telemetry/update checks are disabled.
 

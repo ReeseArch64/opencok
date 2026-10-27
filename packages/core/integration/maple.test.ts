@@ -45,9 +45,26 @@ test("the pinned Maple container stores both services' logs, traces, errors and 
       }),
       { mode: 0o600 },
     );
-    await compose(["up", "-d", "--wait", "--wait-timeout", "120"]);
+    await compose(["up", "--build", "-d", "--wait", "--wait-timeout", "120"]);
     const endpoint = `http://${(await compose(["port", "maple", "4318"])).trim()}`;
     expect((await fetch(`${endpoint}/health`)).ok).toBe(true);
+    const loginPage = await fetch(`${endpoint}/login`);
+    expect(loginPage.headers.get("content-security-policy")).not.toContain("wasm-unsafe-eval");
+    const login = await fetch(`${endpoint}/local/auth/login`, {
+      method: "POST",
+      headers: { origin: endpoint },
+      body: new URLSearchParams({ token: accessToken }),
+      redirect: "manual",
+    });
+    expect(login.status).toBe(303);
+    const cookie = login.headers.get("set-cookie")!.split(";")[0]!;
+    for (const path of ["/", "/services", "/assets/missing.js"]) {
+      const dashboard = await fetch(`${endpoint}${path}`, { headers: { cookie } });
+      expect(dashboard.headers.get("content-security-policy")).toContain(
+        "script-src 'self' 'wasm-unsafe-eval'",
+      );
+      expect(dashboard.headers.get("content-security-policy")).not.toContain("'unsafe-eval'");
+    }
     expect((await fetch(`${endpoint}/local/query`, { method: "POST", body: "{}" })).status).toBe(
       401,
     );

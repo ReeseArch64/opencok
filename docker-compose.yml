@@ -27,7 +27,10 @@ volumes:
 
 services:
   maple:
-    image: ghcr.io/mapletechlabs/maple:v0.3.0
+    image: opencok-maple:v0.3.0-csp1
+    build:
+      context: ./infra/observability/maple
+      dockerfile: Dockerfile
     restart: on-failure:5
     profiles: [all, dev]
     networks: [opencok-internal-network]
