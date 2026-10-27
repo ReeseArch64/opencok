@@ -1,5 +1,6 @@
 import { activityDirectory } from "@opencok/mappings/activity-directory";
 import { activityDirectoryEntries } from "@opencok/rules/activity-directory";
+import { worldScoutQuotation } from "./world-scout";
 import { inspectWorldMarch } from "./world-march-inspection";
 import { worldRecreationCommands } from "./world-recreation";
 import { worldUseCommands } from "./world-use";
@@ -488,6 +489,22 @@ export class GameService {
     if ([...chatSocialCommands, ...nativeChatCommands].includes(command)) {
       if (!this.services.social) throw new GameError(errors.unsupported);
       return { body: await this.services.social(uid, command, params), pushes: [] };
+    }
+    if (command === "world.scout.detail") {
+      if (!this.services.worldScout) throw new GameError(errors.unsupported);
+      return {
+        body: await worldScoutQuotation(
+          this.services.worldScout,
+          uid,
+          params,
+          this.rules,
+          this.config.kingdomId,
+          this.config.mapSize ?? 1200,
+          this.now(),
+          this.services,
+        ),
+        pushes: [],
+      };
     }
     if (command === "world.get.march" && wireString(params, "uid", uid) !== uid) {
       if (!this.services.worldMarchInspection) throw new GameError(errors.unsupported);
