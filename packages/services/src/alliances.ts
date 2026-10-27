@@ -785,14 +785,18 @@ export class AllianceContext {
               (a, b) =>
                 num(b, "rank") - num(a, "rank") || text(a, "uid").localeCompare(text(b, "uid")),
             )
-            .map((row) =>
-              sfs.object({
+            .map((row) => {
+              const profile = this.profile(text(row, "uid"));
+              return sfs.object({
                 uid: sfs.string(text(row, "uid")),
-                name: sfs.string(text(this.profile(text(row, "uid")), "name")),
+                name: sfs.string(text(profile, "name")),
+                pic: sfs.string(text(profile, "pic")),
+                picVer: sfs.int(num(profile, "picVer")),
+                picfraId: sfs.int(num(profile, "picfraId")),
                 rank: sfs.int(num(row, "rank")),
                 power: sfs.long(this.power(text(row, "uid"))),
-              }),
-            ),
+              });
+            }),
         ),
       };
     }

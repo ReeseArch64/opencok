@@ -115,6 +115,25 @@ test("shops serialize stock and account limits with debit, delivery, receipt, ro
     await expect(buy("buyer", randomUUID(), "cycle")).rejects.toThrow();
     now += 86400000;
     await buy("buyer", randomUUID(), "cycle");
+    rules.shops.set("weekly", {
+      ...rule,
+      id: "weekly",
+      total_times: "0",
+      onsale_type: "2",
+      begin_time: "2",
+      sale_life: "2",
+    });
+    now = Date.UTC(2026, 0, 5);
+    await buy("buyer", randomUUID(), "weekly");
+    const afterWeekly = await balance();
+    now += 2 * 3600000;
+    await expect(buy("buyer", randomUUID(), "weekly")).rejects.toThrow();
+    now += 86400000;
+    await expect(buy("buyer", randomUUID(), "weekly")).rejects.toThrow();
+    expect(await balance()).toBe(afterWeekly);
+    expect(
+      (await first.db.select().from(shop_stock).where(eq(shop_stock.id, "weekly")))[0]!.purchased,
+    ).toBe(1n);
     rules.shops.set("failure", { ...rule, id: "failure", total_times: "0" });
     await first.db.execute(
       sql`CREATE FUNCTION opencok_kingdom.reject_shop_receipt() RETURNS trigger LANGUAGE plpgsql AS 'BEGIN RAISE EXCEPTION ''synthetic rollback''; END'`,
