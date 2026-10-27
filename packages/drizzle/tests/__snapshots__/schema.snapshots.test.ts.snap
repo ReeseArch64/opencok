@@ -14885,3 +14885,39 @@ select "id", "uid", "name", "itemId", "count", "createdAt" from "opencok_kingdom
 update "opencok_kingdom"."vip_box_history" set "id" = $1, "uid" = $2, "name" = $3, "itemId" = $4, "count" = $5, "createdAt" = $6 where "opencok_kingdom"."vip_box_history"."id" = $7
 delete from "opencok_kingdom"."vip_box_history" where "opencok_kingdom"."vip_box_history"."id" = $1"
 `;
+
+exports[`opencok_global.hero_match_period: schema and CRUD SQL 1`] = `
+"schema opencok_global
+column ["id","varchar(32)",true,null,null,null]
+column ["definition","varchar(100)",true,null,null,null]
+column ["startTime","bigint",true,null,null,null]
+column ["endTime","bigint",true,null,null,null]
+column ["admissionEnd","bigint",true,null,null,null]
+column ["groupSize","integer",true,null,null,null]
+column ["matchSize","integer",true,null,null,null]
+column ["matchedAt","bigint",true,"0",null,null]
+column ["createdAt","bigint",true,null,null,null]
+primary ["hero_match_period_PRIMARY",["id"]]
+check ["hero_match_period_bounds","\\"startTime\\" >= 0 AND \\"createdAt\\" >= \\"startTime\\" AND \\"admissionEnd\\" > \\"createdAt\\" AND \\"endTime\\" > \\"admissionEnd\\" AND \\"groupSize\\" BETWEEN 1 AND 128 AND \\"matchSize\\" BETWEEN 1 AND 16 AND \\"matchSize\\" <= \\"groupSize\\" AND (\\"matchedAt\\" = 0 OR (\\"matchedAt\\" >= \\"admissionEnd\\" AND \\"matchedAt\\" < \\"endTime\\"))"]
+insert into "opencok_global"."hero_match_period" ("id", "definition", "startTime", "endTime", "admissionEnd", "groupSize", "matchSize", "matchedAt", "createdAt") values ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+select "id", "definition", "startTime", "endTime", "admissionEnd", "groupSize", "matchSize", "matchedAt", "createdAt" from "opencok_global"."hero_match_period" where "opencok_global"."hero_match_period"."id" = $1
+update "opencok_global"."hero_match_period" set "id" = $1, "definition" = $2, "startTime" = $3, "endTime" = $4, "admissionEnd" = $5, "groupSize" = $6, "matchSize" = $7, "matchedAt" = $8, "createdAt" = $9 where "opencok_global"."hero_match_period"."id" = $10
+delete from "opencok_global"."hero_match_period" where "opencok_global"."hero_match_period"."id" = $1"
+`;
+
+exports[`opencok_global.hero_match_realm: schema and CRUD SQL 1`] = `
+"schema opencok_global
+column ["periodId","varchar(32)",true,null,null,null]
+column ["kingdomId","integer",true,null,null,null]
+column ["power","bigint",true,null,null,null]
+column ["shuffle","integer",true,null,null,null]
+column ["registeredAt","bigint",true,null,null,null]
+column ["serverGroup","varchar(255)",false,null,null,null]
+column ["matchedAt","bigint",true,"0",null,null]
+primary ["hero_match_realm_PRIMARY",["periodId","kingdomId"]]
+check ["hero_match_realm_bounds","\\"kingdomId\\" > 0 AND \\"power\\" >= 0 AND \\"shuffle\\" >= 0 AND \\"registeredAt\\" >= 0 AND ((\\"serverGroup\\" IS NULL AND \\"matchedAt\\" = 0) OR (\\"serverGroup\\" IS NOT NULL AND length(\\"serverGroup\\") > 0 AND \\"matchedAt\\" >= \\"registeredAt\\"))"]
+insert into "opencok_global"."hero_match_realm" ("periodId", "kingdomId", "power", "shuffle", "registeredAt", "serverGroup", "matchedAt") values ($1, $2, $3, $4, $5, $6, $7)
+select "periodId", "kingdomId", "power", "shuffle", "registeredAt", "serverGroup", "matchedAt" from "opencok_global"."hero_match_realm" where "opencok_global"."hero_match_realm"."periodId" = $1
+update "opencok_global"."hero_match_realm" set "periodId" = $1, "kingdomId" = $2, "power" = $3, "shuffle" = $4, "registeredAt" = $5, "serverGroup" = $6, "matchedAt" = $7 where "opencok_global"."hero_match_realm"."periodId" = $8
+delete from "opencok_global"."hero_match_realm" where "opencok_global"."hero_match_realm"."periodId" = $1"
+`;

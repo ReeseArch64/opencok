@@ -1,3 +1,5 @@
+export { hero_match_realm } from "./opencok_global/hero_match_realm";
+export { hero_match_period } from "./opencok_global/hero_match_period";
 export { special_event_purchase } from "./opencok_global/special_event_purchase";
 export { account_device_mapping } from "./opencok_global/account_device_mapping";
 export { account_new } from "./opencok_global/account_new";
