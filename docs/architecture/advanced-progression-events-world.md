@@ -2087,8 +2087,13 @@ one item and the complete gold amount. Native correlation supplies a stable
 receipt for transport retries. Preview, status and received-history commands keep
 the source field names and SFS integer and long types. Alliance access rechecks
 matching current membership; visiting profiles and foreign kingdoms cannot claim.
-Group audiences and foreign-server transfers require their corresponding shared
-protocol and remain unavailable.
+Group ordinal 2 has no declared producer in the authorized reference: the native
+send request has no room identity, the range selector only binds kingdom and
+alliance scopes, and announcement delivery only selects those two channels. The
+private-chat membership backend supplies no missing packet-to-room binding.
+Group packet delivery therefore remains undeclared by that source contract.
+Foreign-server transfers require an authoritative shared transfer protocol and
+remain gated.
 
 Claims lock the shared packet row inside the recipient's fenced economic
 transaction. Saved funding history must match the remaining pool and claimant
