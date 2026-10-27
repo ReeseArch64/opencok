@@ -1,6 +1,15 @@
 import type { InventoryItem } from "@opencok/contracts/inventory";
 import type { EconomyPosting } from "@opencok/contracts/mutation";
-import { sfs, encode, decode, fields, str, type Fields } from "@opencok/messages/sfs";
+import {
+  sfs,
+  encode,
+  decode,
+  fields,
+  str,
+  Type,
+  type Value,
+  type Fields,
+} from "@opencok/messages/sfs";
 import type { Rules } from "@opencok/rules/game";
 import { inventoryItem } from "./bootstrap.ts";
 
@@ -80,4 +89,25 @@ export function inventoryReplay(response: Buffer, requestId: string) {
     body: fields(entry.value.body),
   }));
   return { body, pushes };
+}
+
+export function mergeInventoryResponses(primary: Uint8Array, secondary: Uint8Array): Buffer {
+  const left = decode(Buffer.from(primary)),
+    right = decode(Buffer.from(secondary));
+  if (
+    left.body?.type !== Type.Object ||
+    right.body?.type !== Type.Object ||
+    left.pushes?.type !== Type.Array ||
+    right.pushes?.type !== Type.Array ||
+    !Array.isArray(left.pushes.value) ||
+    !Array.isArray(right.pushes.value)
+  )
+    throw new Error("Invalid chained inventory response");
+  return inventoryResponse(
+    fields(left.body),
+    [...(left.pushes.value as Value[]), ...(right.pushes.value as Value[])].map((entry) => {
+      const value = fields(entry);
+      return { command: str(value, "command"), body: fields(value.body) };
+    }),
+  );
 }

@@ -1855,3 +1855,46 @@ server unit suite passed 1,493 tests with 245,573 assertions. Native TCP accepta
 passed one test with 212 assertions, including real maintained flower login
 notices in both realms. Required lint, formatting and server/nine package type
 checks passed. Device execution remains unverified.
+
+## Confirmed shop and mail campaign producers
+
+Ordinary purchases and funded mail claims now observe actual delivered item
+quantities before their semantic shop or saved-title event. The original item,
+wallet, stock and claim writes precede observation within the same owned
+transaction. Campaign counters, grants, receipts, ledger and outbox therefore
+commit or roll back with the original delivery. A repeated shop receipt or saved
+mail claim cannot observe the delivery a second time. Previews and foreign mail
+claims cannot create progress. Rule state, selectors, time windows and personal
+caps remain enforced; numeric maintained offers supply their saved sale category.
+
+The observer reloads the inventory after the original validated writes and uses
+the existing campaign planner with a private command. Client dispatch rejects
+that command. Its extra native pushes append to the original response without
+replacing the purchase or claim body. Positive item changes supply event 40,
+confirmed purchases event 68 and newly funded mail claims event 61. A cheap rule
+and leading-time-window check avoids loading an inactive campaign aggregate.
+
+Chained debits retain continuous postings and combine consumption evidence only
+when owner, timestamp, period, type and pinned tiers agree. One owned consumption
+fact then proves the complete debit, including a campaign's additional item cost.
+Unexpected duplicate event identities fail the transaction. Newly granted rewards
+still use the campaign planner's bounded recursive item observation.
+
+No schema migration, dependency, configuration or environment variable is added.
+Inventory remains 848 tables and 6,917 fields. Back up item balances, campaign
+variables, shop stock, mail claim markers, consumption facts, operation receipts
+and outbox together. Preserve these records during rollback; an older binary
+retains committed rewards and counters but does not observe new shop or mail
+campaign events. This module does not bind appearance, exchange, paid gifts or
+combat outcomes.
+
+Eight PostgreSQL acceptance tests passed with 51 assertions. They exercise the
+maintained fire purchase and saved-title mail rules, exact delivered quantities,
+caps, replay, appended grant pushes, expired windows, foreign claims, failures
+before receipts and combined speed-item spending. Native TCP regression passed
+one test with 212 assertions in two realms. Device execution remains unverified.
+
+The server unit suite passed 1,493 tests with 245,574 assertions. Final mail and
+private-command units passed five tests with 47 assertions; existing consumption,
+anniversary and recipe acceptance passed eighteen tests with 128 assertions.
+Required lint, formatting and server/nine package type checks passed.

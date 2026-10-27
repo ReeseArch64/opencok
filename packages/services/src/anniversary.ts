@@ -1,3 +1,4 @@
+import { readCampaignObservations } from "@opencok/mappings/campaign-observation";
 import { cosmeticInteractionEvent } from "./city-cosmetics";
 import { campaignTriggerView } from "@opencok/mappings/anniversary";
 import { encode, sfs, str, int } from "@opencok/messages/sfs";
@@ -62,6 +63,7 @@ export const anniversaryDomain: CityDomain = {
     "campaign.init",
     "trigger.activity",
     "campaign.action",
+    "campaign.record",
   ],
   types: [],
   async prepare(context, command, params) {
@@ -97,6 +99,13 @@ export const anniversaryDomain: CityDomain = {
         response: encode(campaignTriggerView(type)),
         event: cosmeticInteractionEvent(context),
       };
+    }
+    if (command === "campaign.record") {
+      for (const event of readCampaignObservations(params)) {
+        new CampaignPlanner(context, event.attributes).event(event.code, event.selector);
+        refreshCampaignGrants(context);
+      }
+      return { response: encode({}), event: null };
     }
     if (command === "campaign.init") {
       new CampaignPlanner(context).event(8);

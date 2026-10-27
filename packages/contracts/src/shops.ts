@@ -9,6 +9,7 @@ export interface ShopState {
   now: number;
 }
 export interface ShopPurchase {
+  saleType?: string;
   id: string;
   count: number;
   daily: number;
