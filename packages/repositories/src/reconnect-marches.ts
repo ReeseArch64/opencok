@@ -1,3 +1,4 @@
+import { withTreasureMarchTimes } from "./treasure-map";
 import { and, asc, eq, inArray } from "drizzle-orm";
 import { world_march } from "@opencok/drizzle/schema/opencok_kingdom/world_march";
 import { alliance_territory } from "@opencok/drizzle/schema/opencok_kingdom/alliance_territory";
@@ -68,13 +69,16 @@ const identities = (rows: readonly Row[], key: string) => [
 export async function readReconnectMarches(db: Reader, uid: string): Promise<ReconnectMarchState> {
   if (!uid || uid.length > 40 || uid.includes("\0") || !uid.isWellFormed())
     throw new Error("Invalid reconnect march owner");
-  const rows = bounded(
-    await db
-      .select(marchColumns)
-      .from(world_march)
-      .where(eq(world_march.ownerUid, uid))
-      .orderBy(asc(world_march.uuid))
-      .limit(32768),
+  const rows = await withTreasureMarchTimes(
+    db,
+    bounded(
+      await db
+        .select(marchColumns)
+        .from(world_march)
+        .where(eq(world_march.ownerUid, uid))
+        .orderBy(asc(world_march.uuid))
+        .limit(32768),
+    ),
   );
   const result: ReconnectMarchState = {
     rows,

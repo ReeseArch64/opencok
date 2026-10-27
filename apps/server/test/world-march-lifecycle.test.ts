@@ -92,3 +92,32 @@ test("failed reservation cannot mutate input or overflow troop counters", () => 
     ]),
   ).toThrow();
 });
+
+test("treasure parties require real reservations and cannot manufacture gathered cargo", () => {
+  const seed = { ...departure().march, purpose: "treasure" as const },
+    balances = [{ armyId: "107000", free: 100, march: 0 }];
+  expect(() => reserveMarch({ ...seed, troops: [] }, balances)).toThrow();
+  const reserved = reserveMarch(seed, balances),
+    arrived = arriveForGathering(reserved.march, "owner", 1, seed.dueAt, 10000n);
+  expect(reserved.troops).toEqual([{ armyId: "107000", free: 90, march: 10 }]);
+  expect(arrived.march.phase).toBe("gathering");
+  expect(() =>
+    returnFromGathering(arrived.march, "owner", 2, arrived.march.dueAt, {
+      resource: "gold",
+      amount: 1n,
+    }),
+  ).toThrow();
+  expect(() =>
+    completeMarchReturn(
+      {
+        ...arrived.march,
+        phase: "returning",
+        cargo: { resource: "gold", amount: 1n },
+      },
+      "owner",
+      2,
+      arrived.march.dueAt,
+      reserved.troops,
+    ),
+  ).toThrow();
+});

@@ -2406,10 +2406,9 @@ order and types. No schema, dependency or external service is added; the existin
 `treasure_map` table owns these records. Back up map rows with inventory and
 receipts. An older binary can retain the rows with treasure handlers disabled.
 
-This checkpoint establishes generation, login and destruction. Excavation,
-acceleration, completion mail and march recovery require their corresponding
-owned noncombat march lifecycle; takeover of an occupied enemy camp additionally
-requires its validated battle engine. These dependencies are distinct.
+The owned noncombat lifecycle described below adds excavation, acceleration,
+completion mail and march recovery. Taking over an occupied enemy camp still
+requires its validated battle engine.
 
 ## Native march preflight
 
@@ -2470,7 +2469,7 @@ and range geometry have been verified; those imported rows are not repaired as a
 side effect of reading or starting a march.
 
 No migration, dependency, environment variable or catalog change is added.
-Inventory remains 848 tables and 6,917 fields. Back up city cells, player and world
+Inventory remains 849 tables and 6,922 fields. Back up city cells, player and world
 anchors, march rows and checkpoints, troop balances, receipts and outbox together.
 A binary predating this geometry convention needs the compatibility adapter or
 world-mutation gating during rollback; it must not reinterpret a native anchor
@@ -2485,3 +2484,39 @@ civilization cases passed. Native provisioning passed with 65 assertions, the
 two-realm TCP regression with 222, and killed-process recovery with 47. Five
 geometry rule cases, required lint and formatting, and 19 implemented workspace
 type checks passed. Device execution remains unverified.
+
+## Owned treasure excavation and recovery
+
+The noncombat branches of `TreasureMapService.occupy`, `retreat`, `speedUp` and
+`toMarchObj`, together with the empty-camp `WorldSpaceFightHandler` occupation
+path and treasure completion callback, now use the persistent ordinary march
+lifecycle. An owned unstarted hint on a genuinely free point admits a type-0
+march with real reserved troops and companions. Arrival checks the point and
+map again, resolves and pins the maintained heritage reward, consumes one map
+item and starts the selected heritage row's actual excavation duration. A target
+that changes before arrival returns the party without spending the map item or
+overwriting its new owner.
+
+The occupied camp and treasure row retain their march identity and deadline.
+Native timer fields restore through owned march queries, viewport marches and
+login. The source empty-camp occupation notification uses
+`push.world.march.win` without a fight result or casualty fields. Its type-9
+encampment mail contains the deployed party and point; this mail cannot carry a
+reward. Completion deletes the owned map, clears only the matching owned camp,
+creates funded template-11616 reward mail and starts the return journey. Mail
+claim uses the existing ledger and receipt protections. A pinned reward remains
+claimable after its catalog definition changes.
+
+`treasuremap.spd` uses the configured gold formula and atomically advances the
+excavation to completion. Failed costs preserve the deadline. Recall abandons
+an active excavation without refund or completion reward. Recovery catches up
+arrival, excavation and return in deadline order after a late worker or restart;
+saved claimed camps without a checkpoint can be imported from their owned map,
+point, army and reserved troops without charging the item again. PostgreSQL
+acceptance covers those transitions, concurrent retries, restored native timers,
+reward claim and changed targets. No schema or dependency is added.
+
+Taking over another player's occupied camp remains unavailable until its battle
+engine validates the defender, casualties and outcome. Cross-battle treasure
+transfer is a separate realm-transfer dependency. Neither is needed for owned
+free-point excavation; device execution remains unverified.
