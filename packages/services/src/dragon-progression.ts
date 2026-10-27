@@ -707,29 +707,33 @@ function dragonSkillCommand(
     ids.includes(text(row, "uuid"))
   )
     dragonFailure();
-  const consumed: string[] = [];
-  for (const id of ids) {
+  const materials = ids.map((id) => {
     const source = skills.find((prior) => prior.uuid === id),
       sourceRule = source
         ? context.rules.power.dragonSkills?.get(text(source, "skillId"))
         : undefined;
     if (!source || !sourceRule || num(source, "ownerId") !== 0 || sourceRule.born_dragon)
       dragonFailure();
-    if (rule.boost_condition === source.skillId)
-      row.strengthenLevel = Math.min(
-        cityInteger(rule.boost_level ?? 0),
-        num(row, "strengthenLevel") + 1,
-      );
-    const maximum = cityInteger(rule.maxLv) + num(row, "strengthenLevel");
-    if (num(row, "level") >= maximum) break;
+    return source;
+  });
+  const boosters = materials.filter((source) => rule.boost_condition === source.skillId),
+    ordinary = materials.filter((source) => rule.boost_condition !== source.skillId),
+    boostLimit = cityInteger(rule.boost_level ?? 0),
+    baseMaximum = cityInteger(rule.maxLv, 1),
+    maximumStrength = Math.min(boostLimit, num(row, "strengthenLevel") + boosters.length);
+  if (num(row, "level") >= baseMaximum + maximumStrength) dragonFailure();
+  const consumed: string[] = [];
+  const addExperience = (source: Row, maximum: number) => {
     const gained = cityInteger(
       Math.trunc(
-        num(source, "totalExp") * Math.fround(Number(context.rules.items.get("dragon_new")?.k13)),
+        Math.fround(
+          Math.fround(num(source, "totalExp")) *
+            Math.fround(Number(context.rules.items.get("dragon_new")?.k13)),
+        ),
       ),
     );
     row.exp = cityInteger(num(row, "exp") + gained);
-    row.totalExp = cityInteger(num(row, "totalExp") + gained);
-    consumed.push(id);
+    let discarded = 0;
     for (let guard = 0; guard < 1000; guard++) {
       const thresholds = [...(context.rules.advanced.dragonSkillExp?.values() ?? [])].filter(
         (entry) => entry.quality === rule.quality && Number(entry.level) === num(row, "level"),
@@ -738,13 +742,25 @@ function dragonSkillCommand(
       const threshold = cityInteger(thresholds[0]!.exp, 1);
       if (num(row, "exp") < threshold) break;
       if (num(row, "level") >= maximum) {
+        discarded = num(row, "exp") - threshold + 1;
         row.exp = threshold - 1;
         break;
       }
       row.exp = num(row, "exp") - threshold;
       row.level = num(row, "level") + 1;
     }
+    row.totalExp = cityInteger(num(row, "totalExp") + gained - discarded);
+    consumed.push(text(source, "uuid"));
+    return num(row, "level") >= maximum;
+  };
+  for (const source of boosters) {
+    const full = addExperience(source, baseMaximum + maximumStrength);
+    row.strengthenLevel = Math.min(boostLimit, num(row, "strengthenLevel") + 1);
+    if (full && num(row, "strengthenLevel") === boostLimit) break;
   }
+  if (num(row, "level") < baseMaximum + num(row, "strengthenLevel"))
+    for (const source of ordinary)
+      if (addExperience(source, baseMaximum + num(row, "strengthenLevel"))) break;
   if (!consumed.length) dragonFailure();
   writeSkill(context, row);
   const write = context.write.dragons!;

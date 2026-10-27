@@ -158,3 +158,77 @@ test("dragon incubation, feeding, levels, skills and travel persist atomically a
     await h.close();
   }
 }, 120000);
+
+test("dragon skill strengthening precedes ordinary materials and discards capped experience", async () => {
+  const h = await cityHarness([dragonProgressionDomain]);
+  try {
+    for (const id of ["dragon_new", "dragon_skill", "dragon_skill_levelup"])
+      h.rules.features.set(id, { id, version: "1.0.0", online: "all", test: "all" });
+    const skill = {
+      id: "synthetic-target",
+      type: "1",
+      quality: "999",
+      maxLv: "2",
+      boost_level: "2",
+      boost_condition: "synthetic-booster",
+    };
+    h.rules.power.dragonSkills!.set(skill.id, skill);
+    h.rules.power.dragonSkills!.set("synthetic-booster", {
+      ...skill,
+      id: "synthetic-booster",
+    });
+    for (let level = 1; level <= 4; level++)
+      h.rules.advanced.dragonSkillExp!.set(`synthetic-${level}`, {
+        id: `synthetic-${level}`,
+        quality: "999",
+        level: String(level),
+        exp: "100",
+      });
+    for (const owner of ["owner", "other"])
+      for (const id of ["target", "ordinary", "boost1", "boost2"])
+        await h.db.db.insert(user_pet_dragon_skill).values({
+          uuid: `${owner}-${id}`,
+          uid: owner,
+          skillId: id.startsWith("boost") ? "synthetic-booster" : skill.id,
+          level: id === "target" ? 2 : 1,
+          exp: 0,
+          totalExp: id === "target" ? 100 : 1000,
+          ownerId: 0,
+          index1: -1,
+          strengthenLevel: 0,
+        });
+    const upgrade = (owner: string, order: string[]) => ({
+      uuid: sfs.string(`${owner}-target`),
+      materialArr: sfs.array(order.map((id) => sfs.string(`${owner}-${id}`))),
+      operationId: sfs.string(randomUUID()),
+    });
+    await expect(
+      h.command("petdragon.upgrade.skill", upgrade("owner", ["ordinary"])),
+    ).rejects.toThrow();
+    const request = upgrade("owner", ["ordinary", "boost1", "boost2"]);
+    await Promise.all(
+      Array.from({ length: 4 }, () => h.command("petdragon.upgrade.skill", request)),
+    );
+    await h.command(
+      "petdragon.upgrade.skill",
+      upgrade("other", ["boost1", "boost2", "ordinary"]),
+      "other",
+    );
+    const all = await h.db.db.select().from(user_pet_dragon_skill);
+    for (const owner of ["owner", "other"]) {
+      const target = all.find((row) => row.uuid === `${owner}-target`)!;
+      expect(target.level).toBe(4);
+      expect(target.strengthenLevel).toBe(2);
+      expect(target.exp).toBe(99);
+      expect(target.totalExp).toBe(399);
+      expect(all.find((row) => row.uuid === `${owner}-ordinary`)!.totalExp).toBe(1000);
+      expect(all.some((row) => row.uuid === `${owner}-boost1`)).toBe(false);
+      expect(all.some((row) => row.uuid === `${owner}-boost2`)).toBe(false);
+    }
+    await expect(
+      h.command("petdragon.upgrade.skill", upgrade("owner", ["ordinary"])),
+    ).rejects.toThrow();
+  } finally {
+    await h.close();
+  }
+}, 120000);
