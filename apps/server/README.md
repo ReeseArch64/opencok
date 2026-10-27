@@ -131,31 +131,33 @@ runtime uses no external XML directory or resource volume. See the
 [catalog editing guide](../../packages/resources/README.md). Direct Bun execution
 requires the remaining service settings through its process environment.
 
-| Setting                          | Purpose/default                                                                                                                        |
-| -------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
-| `DATABASE_URL`                   | Required PostgreSQL cluster URL; the adapter selects physical databases from the names below, retaining URL credentials/TLS options.   |
-| `KINGDOM_ID`                     | Realm ID, default `1`; selects SFS zone `COK1` or `COK2`.                                                                              |
-| `KINGDOM_DATABASE_NAME`          | Defaults to `opencok_kingdom_<KINGDOM_ID>`.                                                                                            |
-| `GLOBAL_DATABASE_NAME`           | Defaults to `opencok_global`.                                                                                                          |
-| `GAME_CHAT_SESSION_URL`          | Optional internal HTTP(S) endpoint ending in `/external/session`; unset disables chat session issuance.                                |
-| `CHAT_SIGNING_SECRET`            | Required when the session URL is configured; must match the maintained chat service.                                                   |
-| `GAME_FILES_URL`                 | Optional internal files-service HTTP(S) origin; unset disables avatar grants.                                                          |
-| `GAME_LOGIN_SECRET`              | Required private secret matching the legacy mobile login issuer.                                                                       |
-| `REDIS_URL`                      | Shared API/realm URL; defaults to `redis://127.0.0.1:6379/0` outside Compose. Set the local Compose URL or an external production URL. |
-| `GAME_ZOOKEEPER`                 | Defaults to `127.0.0.1:2181`.                                                                                                          |
-| `GAME_HOST`                      | Bind address, default `127.0.0.1`.                                                                                                     |
-| `GAME_PORT` / `GAME_HEALTH_PORT` | Defaults to `19933` / `18090`.                                                                                                         |
-| `GAME_MAP_SIZE`                  | Defaults to `1200`.                                                                                                                    |
-| `GAME_CROSS_SEARCH`              | Defaults to `true`; `false` restricts general player search to the local realm without global search reads.                            |
-| `GAME_PLAYER_KINGDOMS`           | Optional public-read routes, such as `1:opencok_kingdom_1,2:opencok_kingdom_2`; at most two realms.                                    |
-| `GAME_MAIL_TRANSLATION`          | Defaults to `true`; `false` suppresses category-chat translation IDs and stored-translation reads.                                     |
-| `DEPENDENCY_TIMEOUT_MS`          | Defaults to `5000`.                                                                                                                    |
+| Setting                 | Purpose/default                                                                                                                        |
+| ----------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| `DATABASE_URL`          | Required PostgreSQL cluster URL; the adapter selects physical databases from the names below, retaining URL credentials/TLS options.   |
+| `KINGDOM_ID`            | Realm ID, default `1`; selects SFS zone `COK1` or `COK2`.                                                                              |
+| `KINGDOM_DATABASE_NAME` | Defaults to `opencok_kingdom_<KINGDOM_ID>`.                                                                                            |
+| `GLOBAL_DATABASE_NAME`  | Defaults to `opencok_global`.                                                                                                          |
+| `GAME_CHAT_SESSION_URL` | Optional internal HTTP(S) endpoint ending in `/external/session`; unset disables chat session issuance.                                |
+| `CHAT_SIGNING_SECRET`   | Required when the session URL is configured; must match the maintained chat service.                                                   |
+| `GAME_FILES_URL`        | Optional internal files-service HTTP(S) origin; unset disables avatar grants.                                                          |
+| `GAME_LOGIN_SECRET`     | Required private secret matching the legacy mobile login issuer.                                                                       |
+| `REDIS_URL`             | Shared API/realm URL; defaults to `redis://127.0.0.1:6379/0` outside Compose. Set the local Compose URL or an external production URL. |
+| `GAME_ZOOKEEPER`        | Defaults to `127.0.0.1:2181`.                                                                                                          |
+| `GAME_MAP_SIZE`         | Defaults to `1200`.                                                                                                                    |
+| `GAME_CROSS_SEARCH`     | Defaults to `true`; `false` restricts general player search to the local realm without global search reads.                            |
+| `GAME_PLAYER_KINGDOMS`  | Optional public-read routes, such as `1:opencok_kingdom_1,2:opencok_kingdom_2`; at most two realms.                                    |
+| `GAME_MAIL_TRANSLATION` | Defaults to `true`; `false` suppresses category-chat translation IDs and stored-translation reads.                                     |
+| `DEPENDENCY_TIMEOUT_MS` | Defaults to `5000`.                                                                                                                    |
+
+The server binds TCP to `0.0.0.0:9933` and health HTTP to `0.0.0.0:18090`.
+These listener values are fixed in code and are not environment settings.
 
 The root [Compose stack](../../infra/compose/README.md) starts this server, the
 shared discovery API, gateway, PostgreSQL, Redis, ZooKeeper and MinIO CDN. It mounts the XML
 directory read-only and uses a container-specific database URL. For direct Bun
-execution, provide reachable PostgreSQL/Redis/ZooKeeper endpoints separately. Each running realm needs its own TCP/health ports and
-`KINGDOM_ID`. The PostgreSQL topology setup initializes realms 1 and 2 with the
+execution, provide reachable PostgreSQL/Redis/ZooKeeper endpoints separately. Run
+additional realms in separate network namespaces, such as separate containers,
+with distinct `KINGDOM_ID` values and host port mappings for the fixed internal ports. The PostgreSQL topology setup initializes realms 1 and 2 with the
 same schema. Advertise the corresponding `COK<id>` zone and TCP endpoint through
 the existing discovery issuer; the shared API implements discovery; registration remains unavailable.
 

@@ -50,11 +50,12 @@ described in [Avatar media](#avatar-media):
 | `API_SERVERS_FILE`          | Optional JSON directory, relative to the workspace root; defaults to an in-memory directory derived from `KINGDOM_ID`.               |
 | `API_GAME_HOST`             | Optional advertised client-reachable TCP host. A bind wildcard is rejected.                                                          |
 | `API_CHAT_URL`              | Optional HTTP(S) origin of the maintained chat service; no path, embedded credentials, query or fragment.                            |
-| `API_GAME_PORT`             | Optional advertised port override for a single-realm directory. Compose uses `GATEWAY_GAME_PORT`.                                    |
+| `API_GAME_PORT`             | Optional advertised port override for a single-realm directory. Compose advertises gateway port `9933`.                              |
 
 Direct Bun execution requires separately reachable dependencies; the default
 Compose network does not publish Redis. If the server runs directly in Bun, set
-`API_GAME_PORT` to its `GAME_PORT`; Compose instead advertises the gateway port.
+`API_GAME_PORT` to the server's fixed TCP port `9933`; Compose advertises the
+published gateway port.
 
 Runtime credentials need SELECT access to `account_new`, `usermapping` and
 `userbindmapping`. Global queries retain parameterization and exact bigint sorting;

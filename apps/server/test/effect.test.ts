@@ -2,7 +2,7 @@ import { expect, test } from "bun:test";
 import { createConnection, createServer } from "node:net";
 import { Effect, Layer, ManagedRuntime, Exit } from "effect";
 import { EnvironmentSource } from "@opencok/env/effect";
-import { RealmConfig, RealmConfigLive, config } from "../src/config.ts";
+import { RealmConfig, config } from "../src/config.ts";
 import { RealmDependencies, RealmServer, RealmServerLive, startServer } from "../src/server.ts";
 import { Rules } from "@opencok/rules/game";
 import type { ServerDependencies } from "@opencok/connection/dependencies";
@@ -10,8 +10,6 @@ import type { ServerDependencies } from "@opencok/connection/dependencies";
 const source = Layer.succeed(EnvironmentSource, {
   DATABASE_URL: "postgresql://synthetic:secret@localhost/postgres",
   GAME_LOGIN_SECRET: "synthetic",
-  GAME_PORT: "0",
-  GAME_HEALTH_PORT: "0",
   KINGDOM_ID: "2",
 });
 
@@ -84,7 +82,12 @@ const dependencies: ServerDependencies = {
   world: { get: async () => ({}) },
 };
 
-const configured = RealmConfigLive.pipe(Layer.provide(source));
+const configured = Layer.effect(
+  RealmConfig,
+  config.pipe(
+    Effect.map((settings) => ({ ...settings, host: "127.0.0.1", port: 0, healthPort: 0 })),
+  ),
+).pipe(Layer.provide(source));
 
 test.each([
   undefined,
@@ -126,6 +129,9 @@ test("realm configuration derives database and ownership from the shared snapsho
   expect(settings.kingdomId).toBe(2);
   expect(settings.kingdomDatabase).toBe("opencok_kingdom_2");
   expect(settings.zkPath).toBe("/opencok-experiment/COK2");
+  expect(settings.host).toBe("0.0.0.0");
+  expect(settings.port).toBe(9933);
+  expect(settings.healthPort).toBe(18090);
   expect(settings).not.toHaveProperty("resources");
 });
 

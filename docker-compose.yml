@@ -276,9 +276,6 @@ services:
       KINGDOM_ID: 1
       KINGDOM_DATABASE_NAME: opencok_kingdom_1
       GLOBAL_DATABASE_NAME: opencok_global
-      GAME_HOST: 0.0.0.0
-      GAME_PORT: 9933
-      GAME_HEALTH_PORT: 18090
       GAME_FILES_URL: http://api:8080
       REDIS_URL: ${REDIS_URL:?Set REDIS_URL for API and server}
       GAME_ZOOKEEPER: zookeeper:2181

@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { blankToUndefined, validateEnvironment } from "./validation";
 
-import { port, timeout, databaseName, redisUrl, realmSettings } from "./service.schema";
+import { timeout, databaseName, redisUrl, realmSettings } from "./service.schema";
 
 export const serverSchema = z
   .object({
@@ -127,11 +127,8 @@ export const serverSchema = z
       .enum(["true", "false"])
       .default("true")
       .transform((value) => value === "true"),
-    GAME_HOST: z.string().min(1).default("127.0.0.1"),
     GAME_CHAT_INTERVAL: z.coerce.number().int().min(0).max(2147483647).default(1),
     GAME_FEED_MAX_COUNT: z.coerce.number().int().min(0).max(2147483647).default(3),
-    GAME_PORT: port(19933),
-    GAME_HEALTH_PORT: port(18090),
     ...realmSettings,
     KINGDOM_DATABASE_NAME: z.preprocess(blankToUndefined, databaseName.optional()),
     GAME_PLAYER_KINGDOMS: z.preprocess(

@@ -27,7 +27,7 @@ test("general player search defaults to cross mode and accepts explicit true or 
 });
 test("server settings validate realm routing and require a login secret", () => {
   expect(parseServerEnvironment(base).KINGDOM_ID).toBe(1);
-  expect(parseServerEnvironment({ ...base, KINGDOM_ID: "2", GAME_PORT: "0" }).KINGDOM_ID).toBe(2);
+  expect(parseServerEnvironment({ ...base, KINGDOM_ID: "2" }).KINGDOM_ID).toBe(2);
   expect(() => parseServerEnvironment({})).toThrow("GAME_LOGIN_SECRET");
   for (const value of ["0", "-1", "1.5", "invalid"])
     expect(() => parseServerEnvironment({ ...base, KINGDOM_ID: value })).toThrow("KINGDOM_ID");
@@ -37,7 +37,6 @@ test("server settings validate realm routing and require a login secret", () => 
   expect(() => parseServerEnvironment({ ...base, REDIS_URL: "https://localhost" })).toThrow(
     "REDIS_URL",
   );
-  expect(() => parseServerEnvironment({ ...base, GAME_PORT: "65536" })).toThrow("GAME_PORT");
 });
 
 test("public player realm routes are explicit, bounded and validated", () => {
