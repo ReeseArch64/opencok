@@ -598,6 +598,7 @@ export class GameService {
       case "get.trouble.list":
       case "trouble.speed":
       case "trigger.activity":
+      case "item.askFor":
       case "user.pray":
       case "user.pray.info":
       case "recall.task.ui":

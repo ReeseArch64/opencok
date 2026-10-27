@@ -1,3 +1,5 @@
+import { avatarMailPush } from "@opencok/mappings/avatar-mail";
+import type { AvatarSystemMail } from "@opencok/contracts/files";
 import { campaignNoticeFrame } from "@opencok/mappings/campaign-notice";
 import { eventRealmEnabled } from "@opencok/rules/availability";
 import { cosmeticOwnership, cosmeticTargetStates } from "./city-cosmetics";
@@ -289,23 +291,32 @@ export class CampaignPlanner {
             ? template.reward
             : pinProgressionReward(this.context, template.reward)
           : null;
+        const entry: AvatarSystemMail = {
+          uid: randomUUID().replaceAll("-", "") + "00",
+          owner: this.context.owner,
+          fromName: template.sender ?? "",
+          title: template.title ?? "",
+          type: 2,
+          contents,
+          extra: null,
+          rewardId: reward,
+          rewardStatus: reward ? 0 : 1,
+          reply: 0,
+          createTime: this.context.now,
+        };
         const quests = (this.context.write.quests ??= {});
-        quests.mail = [
-          ...(quests.mail ?? []),
-          {
-            uid: randomUUID().replaceAll("-", "") + "00",
-            owner: this.context.owner,
-            fromName: template.sender ?? "",
-            title: template.title ?? "",
-            type: 2,
-            contents,
-            extra: null,
-            rewardId: reward,
-            rewardStatus: reward ? 0 : 1,
-            reply: 0,
-            createTime: this.context.now,
-          },
-        ];
+        quests.mail = [...(quests.mail ?? []), entry];
+        if (!this.context.economy.event) campaignFailure();
+        const full =
+          this.context.rules.items.get("chat_switch")?.k3?.split("|").includes("1") ?? false;
+        this.context.economy.event({
+          id: entry.uid,
+          type: "campaign.mail",
+          payload: encode({
+            owner: sfs.string(this.context.owner),
+            mail: sfs.object(avatarMailPush(entry, full)),
+          }),
+        });
         return;
       }
       case 46: {
