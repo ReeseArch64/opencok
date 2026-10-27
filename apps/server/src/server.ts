@@ -1,3 +1,4 @@
+import { lotteryDomain } from "@opencok/services/lottery";
 import { createTotemEffectStore, pendingTotemOwners } from "@opencok/repositories/totem";
 import { createTotemDomain, expireTotems, settleTotemEffects } from "@opencok/services/totem";
 import { publishWorldMutation } from "@opencok/services/world-publication";
@@ -417,6 +418,7 @@ export const RealmDependenciesLive = Layer.effect(
         createCivilizationCastleDomain(config.mapSize),
         createTotemDomain(config.mapSize),
         minstrelDomain,
+        lotteryDomain,
         trainingDomain,
         hospitalDomain,
         fortificationDomain,

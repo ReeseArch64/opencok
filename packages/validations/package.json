@@ -12,6 +12,7 @@
   },
   "type": "module",
   "exports": {
+    "./lottery": "./src/lottery.ts",
     "./image": "./src/image.ts",
     "./bootstrap": "./src/bootstrap.ts",
     "./reconnect": "./src/reconnect.ts",

@@ -306,6 +306,7 @@ export async function loadRules(directory?: string, kingdomId = 1) {
     },
     { ranks: await optional(GameplayCatalog.Rank), gifts: await optional(GameplayCatalog.Gift) },
     {
+      lotteries: await optional(GameplayCatalog.Lottery),
       civilizationFortress: await optional(GameplayCatalog.CivilizationFortress),
       totems: await optional(GameplayCatalog.Totem),
       dragonTravel: await optional(GameplayCatalog.DragonTravel),

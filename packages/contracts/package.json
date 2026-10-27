@@ -11,6 +11,7 @@
   },
   "type": "module",
   "exports": {
+    "./responses/lottery": "./src/responses/lottery.ts",
     "./totem": "./src/totem.ts",
     "./avatar-version": "./src/avatar-version.ts",
     "./account": "./src/account.ts",
