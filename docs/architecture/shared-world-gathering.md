@@ -43,6 +43,16 @@ cannot reserve troops or fund cargo again. Owned imported parties can adopt a
 checkpoint from their actual saved army, collection clock and reserved troops.
 An unknown foreign checkpoint requires its owner's recovery before another
 party can safely reschedule it; a read does not assume its economic history.
+Startup discovery includes shared parties lacking a checkpoint. Empty native
+load caches and outbound collection rates derive from the actual owned troops,
+rules and effect context without reserving those troops again. Java army load
+is raw load, so resource weights apply once; older maintained snapshots retain
+their recorded resource-capacity convention. Multiple saved cohorts of the same
+army type share one internal reservation while their original army bytes remain
+unchanged. A foreign troop owner cannot authorize an owned refund. Returning
+shared parties retain their actual resource cargo and native queued `r/v`
+rewards even after the old point expires. Those saved rewards are pinned once
+and funded on return; recovery never redraws the elapsed gathering period.
 
 Extra rewards preserve `on_event2.k5/k6/k7` periods, stochastic partial periods
 and weighted identities. The native return path selects the first Java hash-map

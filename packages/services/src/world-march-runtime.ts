@@ -5,7 +5,7 @@ import {
   abandonTreasureExcavation,
 } from "./treasure-excavation";
 import { treasureMapRoster, writeTreasureMap } from "./treasure-map-state";
-import { sharedResourceRewards } from "./world-shared-rewards";
+import { sharedResourceRewards, pinStoredSharedResourceRewards } from "./world-shared-rewards";
 import { javaMailBytes } from "@opencok/rules/avatar-mail";
 import { reconnectMarchDragon, reconnectMarchGeneral } from "@opencok/mappings/reconnect-marches";
 import { pinProgressionReward, grantPinnedProgressionReward } from "./progression-rewards";
@@ -32,6 +32,7 @@ import { num, long, text, type Row } from "@opencok/contracts/rows";
 import {
   encodeWorldMarchArmy,
   decodeWorldMarchArmy,
+  isMaintainedMarchArmy,
   type SavedMarchArmy,
 } from "@opencok/messages/world-resource-army";
 import type { RuntimeMarch } from "@opencok/contracts/world-march-runtime";
@@ -266,12 +267,13 @@ function saveMarch(context: CityProgressionContext, state: RuntimeMarch, origina
     arrivalTime: state.phase === "gathering" ? long(original, "arrivalTime") : state.dueAt,
     collectSpd: state.collectRate,
     blackLandMarchTime: state.segments?.length ? JSON.stringify(state.segments) : "",
-    plunderRes: state.cargo
-      ? JSON.stringify([
-          { t: state.targetResource, v: Number(state.cargo.amount) },
-          ...(state.sharedRewardCounts ?? []).map((row) => ({ r: row.id, v: row.count })),
-        ])
-      : "",
+    plunderRes:
+      state.cargo || state.sharedRewardCounts?.length
+        ? JSON.stringify([
+            ...(state.cargo ? [{ t: state.targetResource, v: Number(state.cargo.amount) }] : []),
+            ...(state.sharedRewardCounts ?? []).map((row) => ({ r: row.id, v: row.count })),
+          ])
+        : "",
     ...(state.targetType === 37 && state.phase === "gathering"
       ? { occupyResourceEndTime: state.dueAt, maxCollectTime: state.dueAt - state.startedAt }
       : {}),
@@ -660,13 +662,22 @@ export function recoverWorldMarches(context: CityProgressionContext) {
     if (num(row, "type") !== 0 || (![3, 37].includes(num(row, "targetType")) && !treasure))
       continue;
     const army = row.armyInfo ? decodeWorldMarchArmy(row.armyInfo as Buffer) : null;
-    if (!army || army.owner !== context.owner || !army.soldiers?.length) worldMutationFailure();
-    const troops = army.soldiers
-      .filter((unit) => unit.total > unit.dead)
-      .map((unit) => ({
-        armyId: unit.armsId ?? "",
-        quantity: cityInteger(unit.total - unit.dead, 1),
-      }));
+    if (
+      !army ||
+      army.owner !== context.owner ||
+      !army.soldiers?.length ||
+      army.soldiers.some((unit) => unit.owner !== context.owner)
+    )
+      worldMutationFailure();
+    const groupedTroops = new Map<string, number>();
+    for (const unit of army.soldiers.filter((unit) => unit.total > unit.dead)) {
+      const id = unit.armsId ?? "";
+      groupedTroops.set(
+        id,
+        cityInteger((groupedTroops.get(id) ?? 0) + cityInteger(unit.total - unit.dead, 1), 1),
+      );
+    }
+    const troops = [...groupedTroops].map(([armyId, quantity]) => ({ armyId, quantity }));
     for (const unit of troops)
       if (
         !balances(context).some(
@@ -714,20 +725,62 @@ export function recoverWorldMarches(context: CityProgressionContext) {
       continue;
     }
     const target = point(context, num(row, "targetId")),
-      resource = cityInteger(target.pointItem, 0, 5),
+      shared = num(row, "targetType") === 37,
+      saved = text(row, "plunderRes")
+        ? (JSON.parse(text(row, "plunderRes")) as { t?: number; r?: string; v: number }[])
+        : [];
+    if (
+      !Array.isArray(saved) ||
+      saved.length > 4096 ||
+      saved.some((value) => value === null || typeof value !== "object" || Array.isArray(value))
+    )
+      worldMutationFailure();
+    const resourceRows = saved.filter((value) => value.t !== undefined),
+      rewardRows = saved.filter((value) => value.r !== undefined);
+    if (
+      resourceRows.length + rewardRows.length !== saved.length ||
+      resourceRows.length > 1 ||
+      (!shared && (saved.length > 1 || rewardRows.length)) ||
+      (rewardRows.length && num(row, "state") !== 2)
+    )
+      worldMutationFailure();
+    const resource = cityInteger(
+        shared && num(row, "state") === 2 && resourceRows.length
+          ? resourceRows[0]!.t
+          : (target.pointItem ?? (shared && num(row, "state") === 2 ? 0 : undefined)),
+        0,
+        5,
+      ),
+      derivedLoad = !isMaintainedMarchArmy(row.armyInfo as Buffer) || army.cachedLoad <= 0,
+      rawLoad = derivedLoad
+        ? resourceRawArmyLoad(
+            {
+              cachedLoad: 0,
+              residentOwner: true,
+              soldiers: army.soldiers!.map((unit) => ({ ...unit, armsId: unit.armsId! })),
+              effects: {
+                worldLoad: context.effect(78),
+                worldLoadAdd: context.effect(2196),
+                general: 0,
+                newGeneral: Math.fround(context.generalEffect(78)),
+                expedition: 0,
+              },
+            },
+            context.rules,
+          )
+        : cityInteger(army.cachedLoad, 1),
       capacity =
-        num(row, "targetType") === 37
+        shared || derivedLoad
           ? resourceArmyLoad(
               {
-                rawArmyLoad: cityInteger(army.cachedLoad, 1),
-                pointType: 37,
+                rawArmyLoad: rawLoad,
+                pointType: num(row, "targetType"),
                 pointItem: String(resource),
                 plunder: [],
               },
               context.rules,
             )
-          : cityInteger(army.cachedLoad, 1),
-      rate = Number(row.collectSpd ?? 0),
+          : rawLoad,
       phase =
         num(row, "state") === 0
           ? "outbound"
@@ -736,35 +789,57 @@ export function recoverWorldMarches(context: CityProgressionContext) {
             : num(row, "state") === 2
               ? "returning"
               : undefined;
-    if (!phase || !Number.isFinite(rate) || rate <= 0) worldMutationFailure();
+    let rate = Number(row.collectSpd ?? 0);
+    if (phase === "outbound" && rate === 0) {
+      const castle = context.state.buildings.find((row) => num(row, "itemId") === 400000);
+      if (!castle) worldMutationFailure();
+      const effect =
+        resource === 5
+          ? context.effect(79)
+          : context.effect(65) +
+            context.effect(1165) +
+            context.effect(300) +
+            context.effect(308) +
+            context.effect(2195) +
+            context.effect([153, 156, 155, 154][resource] ?? 65);
+      rate = resourceGatherRate(context.rules, resource, num(castle, "level"), effect, shared);
+    }
+    if (!phase || !Number.isFinite(rate) || rate < 0 || (rate === 0 && phase !== "returning"))
+      worldMutationFailure();
     const start =
-      phase === "outbound"
-        ? long(row, "marchStartTime")
-        : phase === "gathering"
-          ? long(row, "changeCollectSpdTime") || long(row, "marchArrivalTime")
-          : long(row, "returnStartTime");
-    const returnDuration = BigInt(Math.max(1, num(row, "marchTime")));
-    const gatheredBefore = phase === "gathering" ? cityInteger(long(row, "collectedBeforeSpd")) : 0;
-    const limit = Math.max(
-      0,
-      Math.min(capacity, num(target, "resInitValue") - num(target, "resCostValue")) -
-        gatheredBefore,
-    );
-    const dueAt =
-      phase === "gathering"
-        ? start + BigInt(Math.max(1, Math.ceil((limit / rate) * 1000)))
-        : long(row, "arrivalTime") || long(row, "marchArrivalTime");
+        phase === "outbound"
+          ? long(row, "marchStartTime")
+          : phase === "gathering"
+            ? long(row, "changeCollectSpdTime") || long(row, "marchArrivalTime")
+            : long(row, "returnStartTime"),
+      returnDuration = BigInt(Math.max(1, num(row, "marchTime"))),
+      gatheredBefore = phase === "gathering" ? cityInteger(long(row, "collectedBeforeSpd")) : 0,
+      limit = Math.max(
+        0,
+        Math.min(capacity, num(target, "resInitValue") - num(target, "resCostValue")) -
+          gatheredBefore,
+      ),
+      dueAt =
+        phase === "gathering"
+          ? start + BigInt(Math.max(1, Math.ceil((limit / rate) * 1000)))
+          : long(row, "arrivalTime") || long(row, "marchArrivalTime");
     let cargo: RuntimeMarch["cargo"] = null;
-    if (text(row, "plunderRes")) {
-      const saved = JSON.parse(text(row, "plunderRes")) as { t: number; v: number }[];
-      if (!Array.isArray(saved) || saved.length !== 1 || saved[0]!.t !== resource)
-        worldMutationFailure();
+    if (resourceRows.length) {
+      if (resourceRows[0]!.t !== resource) worldMutationFailure();
       cargo = {
         resource: (["wood", "stone", "iron", "food", "silver", "gold"] as const)[resource]!,
-        amount: cityAmount(saved[0]!.v),
+        amount: cityAmount(resourceRows[0]!.v),
       };
     }
+    const sharedRewardCounts = rewardRows.map((value) => ({
+        id: value.r!,
+        count: cityInteger(value.v, 1),
+      })),
+      sharedReward = sharedRewardCounts.length
+        ? pinStoredSharedResourceRewards(context, sharedRewardCounts)
+        : undefined;
     const state: RuntimeMarch = {
+      ...(sharedReward !== undefined ? { sharedReward, sharedRewardCounts } : {}),
       id: text(row, "uuid"),
       owner: context.owner,
       worldId: 0,
