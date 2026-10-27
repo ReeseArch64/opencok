@@ -25,12 +25,6 @@ volumes:
   portainer-data: ~
   maple-data: ~
 
-x-operational-logging: &operational-logging
-  driver: json-file
-  options:
-    max-size: 20m
-    max-file: "5"
-
 services:
   maple:
     image: ghcr.io/mapletechlabs/maple:v0.3.0
@@ -47,7 +41,11 @@ services:
     volumes:
       - maple-data:/data
     stop_grace_period: 45s
-    logging: *operational-logging
+    logging:
+      driver: json-file
+      options:
+        max-size: 20m
+        max-file: "5"
     healthcheck:
       test: [CMD, maple, services, --local, --limit, "1"]
       interval: 15s
@@ -279,7 +277,11 @@ services:
         condition: service_healthy
 
   server:
-    logging: *operational-logging
+    logging:
+      driver: json-file
+      options:
+        max-size: 20m
+        max-file: "5"
     build:
       context: .
       dockerfile: apps/server/Dockerfile
@@ -335,7 +337,11 @@ services:
       retries: 12
 
   api:
-    logging: *operational-logging
+    logging:
+      driver: json-file
+      options:
+        max-size: 20m
+        max-file: "5"
     build:
       context: .
       dockerfile: apps/api/Dockerfile
