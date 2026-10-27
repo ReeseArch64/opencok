@@ -86,6 +86,28 @@ state in `opencok_global`. The second kingdom database keeps the same schema.
 Changing the active realm requires matching server database/ID and API directory
 configuration; the disposable test exercises COK2 through explicit overrides.
 
+The resident map uses `GAME_MAP_SIZE=1201`, matching the saved native terrain and
+the one-based identity `id = 1 + x + y * 1201`. A worker configured with 1200 can
+answer `world.get` successfully while selecting cells outside the requested view.
+Keep this setting aligned with the actual realm database; changing the setting
+does not convert terrain or move existing cities.
+
+When correcting a realm previously started with 1200, stop its worker and back up
+its database first. Inspect private `opencok.world.monsters.*.v1` records under
+`trigger_var(-1, @world:0)` before restarting. An idle `expiry` cursor with empty
+quota, remaining and pool values can retain its point-ID cursor while its size
+metadata is corrected to the verified terrain width. Other producer snapshots
+need separate reconciliation because their area numbering depends on map size.
+Do not delete producer snapshots or regenerate occupied terrain automatically.
+Recreate the server with `docker compose --profile dev up -d --no-deps server`
+and confirm its health and absence of world recovery failures.
+
+Future `server_info.activityTime`, `shuaguaiActStart` or `daoliangStart` values
+are a separate replenishment gate. Correcting viewport geometry does not establish
+the historical opening date. Reconcile those values from verified operator
+evidence before enabling ordinary production; do not replace them automatically
+with the deployment time.
+
 Application settings are still validated by `@opencok/env`. Compose provides the
 container values directly; host-side tools use the root database URL. Database and
 MinIO credentials in Compose are local development values. The prepared client's
