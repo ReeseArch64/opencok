@@ -202,3 +202,31 @@ test("scout quotations reject banned and foreign principals and foreign resident
     await h.close();
   }
 }, 120000);
+
+test("native watchtower quotation uses the actual glory feature and exact underscore progress speed for stars four and five", async () => {
+  const h = await harness();
+  try {
+    await h.db.db.insert(user_building).values({
+      uuid: "watchtower",
+      uid: "owner",
+      itemId: 417000,
+      pos: 13,
+      level: 30,
+      star: 4,
+      progress: 0,
+    });
+    expect((await h.quote()).body.scoutTime).toEqual(sfs.int(9000));
+    await h.db.db
+      .update(user_building)
+      .set({ star: 5, progress: 0 })
+      .where(eq(user_building.uuid, "watchtower"));
+    expect((await h.quote()).body.scoutTime).toEqual(sfs.int(9000));
+    await h.db.db
+      .update(user_building)
+      .set({ progress: 1 })
+      .where(eq(user_building.uuid, "watchtower"));
+    expect((await h.quote()).body.scoutTime).toEqual(sfs.int(18000));
+  } finally {
+    await h.close();
+  }
+}, 120000);
