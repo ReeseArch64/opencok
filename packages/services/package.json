@@ -159,7 +159,8 @@
     "./world-resource-new": "./src/world-resource-new.ts",
     "./gold-eggs": "./src/gold-eggs.ts",
     "./gold-eggs-runtime": "./src/gold-eggs-runtime.ts",
-    "./egg-activity": "./src/egg-activity.ts"
+    "./egg-activity": "./src/egg-activity.ts",
+    "./world-march-inspection": "./src/world-march-inspection.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",

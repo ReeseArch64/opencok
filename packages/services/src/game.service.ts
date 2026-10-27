@@ -1,5 +1,6 @@
 import { activityDirectory } from "@opencok/mappings/activity-directory";
 import { activityDirectoryEntries } from "@opencok/rules/activity-directory";
+import { inspectWorldMarch } from "./world-march-inspection";
 import { worldRecreationCommands } from "./world-recreation";
 import { worldUseCommands } from "./world-use";
 import { treasureMapCommands } from "./treasure-map";
@@ -486,9 +487,25 @@ export class GameService {
       if (!this.services.social) throw new GameError(errors.unsupported);
       return { body: await this.services.social(uid, command, params), pushes: [] };
     }
+    if (command === "world.get.march" && wireString(params, "uid", uid) !== uid) {
+      if (!this.services.worldMarchInspection) throw new GameError(errors.unsupported);
+      return {
+        body: await inspectWorldMarch(
+          this.services.worldMarchInspection,
+          uid,
+          params,
+          this.rules,
+          this.config.kingdomId,
+          this.now(),
+          this.services,
+        ),
+        pushes: [],
+      };
+    }
     if (command !== "activity.operators") await this.services.reconcileAlliance?.(uid);
     let body: Fields;
     let pushes: Result["pushes"] = [];
+
     if (
       worldMutationCommands.includes(command) ||
       cityDefenseCommands.includes(command) ||
