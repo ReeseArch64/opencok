@@ -4,6 +4,8 @@ export interface RuntimeMarch extends MarchLifecycle {
   treasureUUID?: string;
   treasureReward?: string;
   troubleItem?: string;
+  sharedReward?: string;
+  sharedRewardCounts?: readonly { id: string; count: number }[];
   capacity: number;
   gatheredBefore?: number;
   segments?: readonly { sp: number; dp: number; mt: number }[];
@@ -14,6 +16,12 @@ export interface RuntimeMarch extends MarchLifecycle {
   troopIds: Readonly<Record<string, string>>;
 }
 export interface WorldMutationState {
+  sharedMarches?: readonly Row[];
+  sharedCheckpoints?: readonly Row[];
+  sharedProfiles?: readonly Row[];
+  sharedArmies?: readonly Row[];
+  sharedDragons?: readonly Row[];
+  sharedGeneralSkills?: readonly Row[];
   targetMarchCount?: number;
   treasures?: readonly Row[];
   cityBosses?: readonly Row[];
@@ -25,6 +33,15 @@ export interface WorldMutationState {
   checkpoints: readonly Row[];
 }
 export interface WorldMutationWrite {
+  sharedTimings?: readonly {
+    id: string;
+    owner: string;
+    target: number;
+    expectedVersion: number;
+    version: number;
+    dueAt: bigint;
+    payload: Uint8Array;
+  }[];
   treasures?: readonly Row[];
   deletedTreasures?: readonly string[];
   troubleDeliveries?: readonly import("./trouble").TroubleDelivery[];
