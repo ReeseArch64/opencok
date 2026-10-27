@@ -82,7 +82,8 @@
     "./hero-event": "./src/hero-event.ts",
     "./fragment-exchange": "./src/fragment-exchange.ts",
     "./monster-exchange": "./src/monster-exchange.ts",
-    "./activity-directory": "./src/activity-directory.ts"
+    "./activity-directory": "./src/activity-directory.ts",
+    "./activity-reward": "./src/activity-reward.ts"
   },
   "dependencies": {
     "@opencok/errors": "workspace:*",

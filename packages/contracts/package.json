@@ -188,7 +188,9 @@
     "./responses/city-defense": "./src/responses/city-defense.ts",
     "./responses/treasure-map": "./src/responses/treasure-map.ts",
     "./responses/world-march-runtime": "./src/responses/world-march-runtime.ts",
-    "./military-rank-awards": "./src/military-rank-awards.ts"
+    "./military-rank-awards": "./src/military-rank-awards.ts",
+    "./activity-reward": "./src/activity-reward.ts",
+    "./responses/activity-reward": "./src/responses/activity-reward.ts"
   },
   "dependencies": {
     "@opencok/enums": "workspace:*",

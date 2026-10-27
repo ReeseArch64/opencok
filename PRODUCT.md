@@ -158,6 +158,15 @@ day prevents a budget from resetting repeatedly while its offer checkpoint still
 belongs to yesterday. Expired quotes must be refreshed before a new claim can
 charge the player.
 
+Activity reward entitlements belong to one local character and are consumed once.
+The saved entitlement and configured reward establish authority; a client cannot
+supply its own reward or payment evidence. Costs, actual grants, progression,
+shared alliance balances and claim receipts commit together. Missing metadata or
+an unavailable authoritative period preserves the entitlement for a later retry.
+Reward blocks retain their configured order, including ownership checks between
+general grants and experience changes. Experience uses the shared earned bonus
+and factual level cap; retries cannot manufacture additional progression.
+
 ### Consumption competitions
 
 Consumption rankings use confirmed debits and exact signed 64-bit amounts.

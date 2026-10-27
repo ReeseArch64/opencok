@@ -148,7 +148,8 @@
     "./world-utility": "./src/world-utility.ts",
     "./city-defense": "./src/city-defense.ts",
     "./treasure-map": "./src/treasure-map.ts",
-    "./military-rank-awards": "./src/military-rank-awards.ts"
+    "./military-rank-awards": "./src/military-rank-awards.ts",
+    "./activity-reward": "./src/activity-reward.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",
