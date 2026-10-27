@@ -1,4 +1,5 @@
 import type { DragonTowerMonsterDefinition } from "../types/dragon_tower_monster.ts";
+
 export const records: readonly DragonTowerMonsterDefinition[] = [
   {
     "id": 83500,

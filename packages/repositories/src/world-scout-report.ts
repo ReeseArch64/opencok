@@ -37,6 +37,7 @@ import type {
 } from "@opencok/contracts/world-scout-report";
 import { readWorldResourceOwner } from "./world-resource-owner";
 import type { MutationTransaction } from "./mutation";
+
 const profileFields = {
   uid: userprofile.uid,
   serverId: userprofile.serverId,
@@ -50,12 +51,14 @@ const profileFields = {
   allianceId: userprofile.allianceId,
   appVersion: userprofile.appVersion,
 };
+
 const validUid = (uid: unknown): uid is string =>
   typeof uid === "string" &&
   uid.length > 0 &&
   uid.length <= 40 &&
   uid.isWellFormed() &&
   !uid.includes("\0");
+
 async function companionDragons(tx: MutationTransaction, uid: string) {
   const rows = await tx
     .select()
@@ -63,13 +66,18 @@ async function companionDragons(tx: MutationTransaction, uid: string) {
     .where(eq(user_pet_dragon.uid, uid))
     .orderBy(asc(user_pet_dragon.uuid))
     .limit(65);
+
   if (rows.length > 64 || rows.some((row) => row.uid !== uid))
     throw new Error("Scout dragon bound exceeded");
+
   return rows;
 }
+
 async function reinforcement(tx: MutationTransaction, march: Row, kingdom: number) {
   const uid = march.ownerUid;
+
   if (!validUid(uid) || num(march, "worldId") !== 0) throw new Error("Invalid scout reinforcement");
+
   const [profile] = await tx
       .select(profileFields)
       .from(userprofile)
@@ -80,6 +88,7 @@ async function reinforcement(tx: MutationTransaction, march: Row, kingdom: numbe
       .from(playerinfo)
       .where(eq(playerinfo.uid, uid))
       .limit(1);
+
   if (
     !profile ||
     profile.serverId !== kingdom ||
@@ -87,6 +96,7 @@ async function reinforcement(tx: MutationTransaction, march: Row, kingdom: numbe
     !statistics
   )
     throw new Error("Unknown scout reinforcement owner");
+
   const [guild] = profile.allianceId
     ? await tx
         .select({ uid: alliance.uid, abbr: alliance.abbr })
@@ -94,24 +104,31 @@ async function reinforcement(tx: MutationTransaction, march: Row, kingdom: numbe
         .where(eq(alliance.uid, profile.allianceId))
         .limit(1)
     : [];
+
   return { march, profile, statistics, dragons: await companionDragons(tx, uid), alliance: guild };
 }
+
 async function participant(
   tx: MutationTransaction,
   uid: string,
   kingdom: number,
 ): Promise<ScoutParticipant | undefined> {
   if (!validUid(uid)) throw new Error("Invalid scout participant");
+
   const [profile] = await tx
     .select(profileFields)
     .from(userprofile)
     .where(eq(userprofile.uid, uid))
     .limit(1);
+
   if (!profile || profile.serverId !== kingdom || num(profile, "crossFightSrcServerId") > 0) return;
+
   const [world] = await tx.select().from(user_world).where(eq(user_world.uid, uid));
   const [resources] = await tx.select().from(user_resource).where(eq(user_resource.uid, uid));
   const effects = await readWorldResourceOwner(tx, uid);
+
   if (!world || world.worldId !== 0 || !resources || !effects || effects.newGenerals.moved) return;
+
   const buildings = await tx
     .select()
     .from(user_building)
@@ -176,6 +193,7 @@ async function participant(
     .where(eq(building_production.ownerId, uid))
     .orderBy(asc(building_production.buildingId))
     .limit(257);
+
   if (
     buildings.length > 256 ||
     armies.length > 1024 ||
@@ -189,6 +207,7 @@ async function participant(
     offices.length > 256
   )
     throw new Error("Scout participant exceeds bound");
+
   const [guild] = profile.allianceId
     ? await tx.select().from(alliance).where(eq(alliance.uid, profile.allianceId))
     : [];
@@ -207,7 +226,9 @@ async function participant(
         .orderBy(asc(alliance_territory.uid))
         .limit(257)
     : [];
+
   if (turrets.length > 256) throw new Error("Scout territory bound exceeded");
+
   const territorySkills = turrets.length
     ? await tx
         .select()
@@ -221,7 +242,9 @@ async function participant(
         .orderBy(asc(alliance_skill.uuid))
         .limit(1025)
     : [];
+
   if (territorySkills.length > 1024) throw new Error("Scout territory skill bound exceeded");
+
   const kingSkills = await tx
       .select({
         uid: user_king_skill.uid,
@@ -241,8 +264,10 @@ async function participant(
       .where(eq(kingdom_skill_log.uid, uid))
       .orderBy(asc(kingdom_skill_log.skillId))
       .limit(1025);
+
   if (kingSkills.length > 1024 || kingSkillLogs.length > 1024)
     throw new Error("Scout kingdom repair bound exceeded");
+
   return {
     profile,
     world,
@@ -266,6 +291,7 @@ async function participant(
     alliance: guild,
   };
 }
+
 export async function readWorldScoutTargets(
   tx: MutationTransaction,
   ids: readonly number[],
@@ -279,16 +305,22 @@ export async function readWorldScoutTargets(
     new Set(ids).size !== ids.length
   )
     throw new Error("Scout target bound exceeded");
+
   const result = new Map<number, WorldScoutTarget>(),
     people = new Map<string, ScoutParticipant | undefined>();
+
   for (const id of ids) {
     const [point] = await tx
       .select()
       .from(worldpoint)
       .where(and(eq(worldpoint.worldId, 0), eq(worldpoint.id, id)));
+
     if (!point) continue;
+
     const uid = text(point, "ownerId");
+
     if (uid && !people.has(uid)) people.set(uid, await participant(tx, uid, kingdom));
+
     const [occupyingMarch] = text(point, "ownerMarchUUid")
       ? await tx
           .select()
@@ -315,9 +347,12 @@ export async function readWorldScoutTargets(
           .limit(129)
       : [];
     const reinforcements = [];
+
     if (reinforcementRows.length > 128) throw new Error("Scout reinforcements exceed bound");
+
     for (const march of reinforcementRows)
       reinforcements.push(await reinforcement(tx, march, kingdom));
+
     const rallies = defender
       ? await tx
           .select()
@@ -332,8 +367,11 @@ export async function readWorldScoutTargets(
           )
           .limit(129)
       : [];
+
     if (rallies.length > 128) throw new Error("Scout rally bound exceeded");
+
     const rallyDetails = [];
+
     for (const march of rallies) {
       const family = [15, 16].includes(num(march, "type"))
           ? 15
@@ -351,13 +389,17 @@ export async function readWorldScoutTargets(
         .from(table)
         .where(eq(table.id, text(march, "teamId")))
         .limit(2);
+
       if (teams.length > 1) throw new Error("Ambiguous scout team");
+
       const team = teams[0],
         members: ScoutReinforcement[] = [];
+
       if (team && (num(team, "worldId") !== 0 || team.leaderUid !== uid)) {
         rallyDetails.push({ march, members });
         continue;
       }
+
       if (team) {
         const rows = await tx
           .select()
@@ -372,11 +414,15 @@ export async function readWorldScoutTargets(
           )
           .orderBy(asc(world_march.uuid))
           .limit(129);
+
         if (rows.length > 128) throw new Error("Scout rally members exceed bound");
+
         for (const member of rows) members.push(await reinforcement(tx, member, kingdom));
       }
+
       rallyDetails.push({ march, team, members });
     }
+
     const [barbarian] =
       point.pointType === 44
         ? await tx.select().from(world_barbarion).where(eq(world_barbarion.pointId, id))
@@ -398,7 +444,9 @@ export async function readWorldScoutTargets(
           .where(eq(t_worldboss.status, 1))
           .limit(129)
       : [];
+
     if (cityBosses.length > 128) throw new Error("Scout city-boss bound exceeded");
+
     result.set(id, {
       point,
       participant: defender,
@@ -410,14 +458,17 @@ export async function readWorldScoutTargets(
       cityBosses,
     });
   }
+
   return result;
 }
+
 export async function writeWorldScoutMails(
   tx: MutationTransaction,
   owner: string,
   values: readonly WorldScoutMail[],
 ) {
   if (values.length > 512) throw new Error("Scout mail bound exceeded");
+
   for (const value of values) {
     if (
       !validUid(owner) ||
@@ -452,6 +503,7 @@ export async function writeWorldScoutMails(
       (value.sender !== "" && value.sender !== owner)
     )
       throw new Error("Invalid owned scout mail");
+
     const [scout] = await tx
       .select()
       .from(world_march)
@@ -470,6 +522,7 @@ export async function writeWorldScoutMails(
       .from(userprofile)
       .where(eq(userprofile.uid, owner))
       .limit(1);
+
     if (
       !scout ||
       num(scout, "state") !== 0 ||
@@ -479,18 +532,23 @@ export async function writeWorldScoutMails(
       (scout.marchArrivalTime !== null && scout.marchArrivalTime > value.createdAt)
     )
       throw new Error("Missing owned scout mail march");
+
     const [target] = await tx
       .select()
       .from(worldpoint)
       .where(and(eq(worldpoint.worldId, 0), eq(worldpoint.id, value.target)));
+
     if (!target || text(target, "ownerId") !== value.targetOwner)
       throw new Error("Changed scout mail target");
+
     const [recipient] = await tx
       .select({ realm: userprofile.serverId })
       .from(userprofile)
       .where(eq(userprofile.uid, value.recipient));
+
     if (!recipient || recipient.realm !== actor.realm)
       throw new Error("Missing resident scout mail recipient");
+
     await tx.insert(mail).values({
       uid: value.id,
       toUser: value.recipient,

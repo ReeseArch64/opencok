@@ -93,6 +93,7 @@ export interface WorldSpecialDetailSnapshot {
   boss?: Row;
   ranks: readonly Row[];
 }
+
 export type WorldTurretReader = (
   kingdomId: number,
   territory: string,

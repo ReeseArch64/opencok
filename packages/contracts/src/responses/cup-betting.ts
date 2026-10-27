@@ -7,6 +7,7 @@ export interface CupMatchResponse {
   timeFormat: string;
   betCount: number;
 }
+
 export interface CupBetResponse {
   uuid: string;
   uid: string;

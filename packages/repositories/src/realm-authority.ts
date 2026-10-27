@@ -5,6 +5,7 @@ import { DependencyError } from "@opencok/errors/dependency";
 import type { Database } from "./game.ts";
 
 type RealmDatabase = Database["kingdom"]["db"];
+
 type RealmTransaction = Parameters<Parameters<RealmDatabase["transaction"]>[0]>[0];
 
 export interface RealmAuthority {
@@ -27,6 +28,7 @@ export async function acquireRealmAuthority(
     !Number.isSafeInteger(now)
   )
     throw new DependencyError("realm authority");
+
   const assertReady = () => {
     if (!ready()) throw new DependencyError("realm authority");
   };
@@ -51,11 +53,15 @@ export async function acquireRealmAuthority(
         },
       })
       .returning({ epoch: realm_authority.ownerEpoch });
+
     if (rows.length !== 1 || rows[0]!.epoch <= 0n) throw new DependencyError("realm authority");
+
     assertReady();
+
     return rows[0]!.epoch;
   });
   assertReady();
+
   return Object.freeze({ kingdomId, epoch, instance, assertReady });
 }
 
@@ -77,28 +83,36 @@ export async function fenceRealmTransaction(
     )
     .limit(1)
     .for(mode);
+
   if (rows.length !== 1) throw new DependencyError("realm authority");
+
   authority.assertReady();
 }
 
 const guarded = new WeakSet<object>();
+
 export function fenceRealmDatabase(db: RealmDatabase, authority: RealmAuthority): void {
   if (guarded.has(db)) throw new DependencyError("realm authority already installed");
+
   const transaction = db.transaction.bind(db);
   db.transaction = (apply, config) => {
     if (config?.accessMode === "read only") return transaction(apply, config);
+
     return transaction(async (tx) => {
       await fenceRealmTransaction(tx, authority);
       const result = await apply(tx);
       authority.assertReady();
+
       return result;
     }, config);
   };
+
   for (const method of ["insert", "update", "delete"] as const)
     Object.defineProperty(db, method, {
       value: () => {
         throw new DependencyError("realm write requires transaction");
       },
     });
+
   guarded.add(db);
 }

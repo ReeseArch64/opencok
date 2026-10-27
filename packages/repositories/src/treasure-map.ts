@@ -12,9 +12,12 @@ export async function readTreasureMaps(tx: MutationTransaction, owner: string) {
     .orderBy(asc(treasure_map.uuid))
     .limit(4097)
     .for("update");
+
   if (rows.length > 4096) throw new Error("Treasure map aggregate exceeds bound");
+
   return rows;
 }
+
 export async function writeTreasureMaps(
   tx: MutationTransaction,
   owner: string,
@@ -22,11 +25,14 @@ export async function writeTreasureMaps(
 ) {
   for (const row of write.treasures ?? []) {
     if (row.currentOwner !== owner) throw new Error("Foreign treasure map write");
+
     const [prior] = await tx
       .select({ owner: treasure_map.currentOwner })
       .from(treasure_map)
       .where(eq(treasure_map.uuid, text(row, "uuid")));
+
     if (prior && prior.owner !== owner) throw new Error("Foreign treasure map identity");
+
     const value = {
       uuid: text(row, "uuid"),
       treasureId: text(row, "treasureId"),
@@ -45,6 +51,7 @@ export async function writeTreasureMaps(
       .values(value)
       .onConflictDoUpdate({ target: treasure_map.uuid, set: value });
   }
+
   if (write.deletedTreasures?.length)
     await tx
       .delete(treasure_map)
@@ -63,7 +70,9 @@ export async function withTreasureMarchTimes<T extends Row>(
   const selected = rows.filter(
     (row) => num(row, "type") === 0 && num(row, "state") === 1 && num(row, "targetType") === 2,
   );
+
   if (!selected.length) return [...rows];
+
   const maps = await db
     .select()
     .from(treasure_map)
@@ -82,13 +91,18 @@ export async function withTreasureMarchTimes<T extends Row>(
     .orderBy(asc(treasure_map.uuid))
     .limit(32768);
   const indexed = new Map<string, (typeof maps)[number]>();
+
   for (const row of maps) {
     const key = `${row.currentOwner}:${row.marchId}`;
+
     if (indexed.has(key)) throw new Error("Ambiguous treasure march identity");
+
     indexed.set(key, row);
   }
+
   return rows.map((row) => {
     const map = indexed.get(`${row.ownerUid}:${row.uuid}`);
+
     return map ? { ...row, treasureMapTime: map.time, treasureMapFinishTime: map.finishTime } : row;
   });
 }

@@ -22,7 +22,9 @@ export function resourceExpeditionConfigured(
 
 export function resourceMergeServer(rules: Rules, kingdomId: number): boolean {
   const rule = rules.items.get("merge_server");
+
   if (!rule) throw new Error("Missing resource merge-server rule");
+
   return generalContent(rule.k5, ";").map(generalInteger).includes(kingdomId);
 }
 
@@ -49,10 +51,15 @@ export function resourceExpeditionLoadEffect(
 ): number {
   try {
     let state: ReturnType<typeof read> | undefined;
+
     if (!resourceExpeditionConfigured(rules, context, () => (state = read()).mergeServer)) return 0;
+
     if (!state) return 0;
+
     if (state.stage !== 3 || state.homeKingdomId !== context.kingdomId) return 0;
+
     const value = resolve(895);
+
     return typeof value === "number" ? Math.fround(value) : 0;
   } catch {
     return 0;

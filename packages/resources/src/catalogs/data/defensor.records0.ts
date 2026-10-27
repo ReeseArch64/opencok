@@ -1,4 +1,5 @@
 import type { DefensorDefinition } from "../types/defensor.ts";
+
 export const records: readonly DefensorDefinition[] = [
   {
     "id": 6900401,

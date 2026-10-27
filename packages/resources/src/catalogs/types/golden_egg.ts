@@ -9,4 +9,5 @@ export interface GoldenEggDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type GoldenEggDefinitionCatalog = CatalogTable<GoldenEggDefinition>;

@@ -6,4 +6,5 @@ export interface DragonTowerCoordDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type DragonTowerCoordDefinitionCatalog = CatalogTable<DragonTowerCoordDefinition>;

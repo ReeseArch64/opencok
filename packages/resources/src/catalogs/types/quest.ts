@@ -24,4 +24,5 @@ export interface QuestDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type QuestDefinitionCatalog = CatalogTable<QuestDefinition>;

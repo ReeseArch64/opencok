@@ -11,6 +11,7 @@ import type { Database } from "./game.ts";
 import { readPlayerEffects } from "./power.ts";
 
 type Reader = Pick<Database["kingdom"]["db"], "select">;
+
 const profileColumns = {
   uid: userprofile.uid,
   level: userprofile.level,
@@ -23,6 +24,7 @@ const profileColumns = {
   civilizationType: userprofile.civilizationType,
   decomposeSuitEffect: userprofile.decomposesuiteffect,
 };
+
 const buildingColumns = {
   uid: user_building.uid,
   uuid: user_building.uuid,
@@ -30,6 +32,7 @@ const buildingColumns = {
   level: user_building.level,
   star: user_building.star,
 };
+
 const generalColumns = {
   uid: new_general.uid,
   id: new_general.id,
@@ -41,6 +44,7 @@ const generalColumns = {
   opTime: new_general.optime,
   refinement: new_general.refineproperty,
 };
+
 const statusColumns = {
   uid: new_general_status.uid,
   newGeneralId: new_general_status.newGeneralId,
@@ -48,6 +52,7 @@ const statusColumns = {
   startTime: new_general_status.startTime,
   endTime: new_general_status.endTime,
 };
+
 const equipmentColumns = {
   uid: user_equip.uid,
   uuid: user_equip.uuid,
@@ -55,6 +60,7 @@ const equipmentColumns = {
   itemId: user_equip.itemId,
   extraProperty: user_equip.extraProperty,
 };
+
 const officeColumns = {
   uid: hero_office.uid,
   id: hero_office.id,
@@ -71,6 +77,7 @@ function text(value: unknown, limit: number): value is string {
     !value.includes("\0")
   );
 }
+
 function integer(value: unknown): value is number {
   return (
     typeof value === "number" &&
@@ -79,9 +86,11 @@ function integer(value: unknown): value is number {
     value <= 2147483647
   );
 }
+
 function long(value: unknown): boolean {
   return typeof value === "bigint" && BigInt.asIntN(64, value) === value;
 }
+
 function rows(
   values: readonly Row[],
   uid: string,
@@ -95,9 +104,11 @@ function rows(
   )
     throw new Error("Invalid resource owner records");
 }
+
 function nullableText(value: unknown, limit: number): boolean {
   return value === null || text(value, limit);
 }
+
 function nullableInteger(value: unknown): boolean {
   return value === null || integer(value);
 }
@@ -107,14 +118,19 @@ export async function readWorldResourceOwner(
   uid: string,
 ): Promise<WorldResourceOwnerSnapshot | undefined> {
   if (!text(uid, 255) || !uid) throw new Error("Invalid resource owner");
+
   const profiles = await db
     .select(profileColumns)
     .from(userprofile)
     .where(eq(userprofile.uid, uid))
     .limit(2);
+
   if (profiles.length > 1) throw new Error("Duplicate resource owner");
+
   const profile = profiles[0];
+
   if (!profile) return undefined;
+
   if (
     profile.uid !== uid ||
     !integer(profile.level) ||
@@ -128,6 +144,7 @@ export async function readWorldResourceOwner(
     !nullableText(profile.decomposeSuitEffect, 100)
   )
     throw new Error("Invalid resource owner profile");
+
   const effects = await readPlayerEffects(db, profile, true);
   const buildings = await db
     .select(buildingColumns)
@@ -151,6 +168,7 @@ export async function readWorldResourceOwner(
     uid,
     profile.banTime === 9223372036854775807n,
   );
+
   return { effects, buildings, newGenerals };
 }
 
@@ -160,6 +178,7 @@ export async function readResourceNewGenerals(
   moved: boolean,
 ): Promise<WorldResourceOwnerSnapshot["newGenerals"]> {
   if (!text(uid, 255) || !uid) throw new Error("Invalid general owner");
+
   const generals = await db
     .select(generalColumns)
     .from(new_general)
@@ -235,6 +254,7 @@ export async function readResourceNewGenerals(
       nullableInteger(row.position) &&
       (row.startTime === null || long(row.startTime)),
   );
+
   return { moved, generals, statuses, equipment, offices };
 }
 

@@ -1,4 +1,5 @@
 import type { StorySettingDefinition } from "../types/story_setting.ts";
+
 export const records: readonly StorySettingDefinition[] = [
   {
     "id": 2906500,

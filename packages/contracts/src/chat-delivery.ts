@@ -1,10 +1,12 @@
 import type { ChatMessage, Frame } from "./chat.ts";
+
 export interface ChatArchiveMessage extends ChatMessage {
   version: number;
   hash: string;
   archiveAt: number;
   expiresAt: number;
 }
+
 export interface ChatArchiveStore {
   put(message: ChatArchiveMessage): Promise<void>;
   getMany?(ids: number[]): Promise<ChatArchiveMessage[]>;
@@ -13,16 +15,19 @@ export interface ChatArchiveStore {
   purge(now: number): Promise<void>;
   close(): Promise<void>;
 }
+
 export interface ChatHistoryQuery {
   roomId: string;
   before: number;
   limit: number;
   archive: boolean;
 }
+
 export interface ChatHistoryPage {
   messages: ChatMessage[];
   cursor: number | null;
 }
+
 export interface ChatDeliveryEvent {
   sequence: string;
   id: string;
@@ -32,6 +37,7 @@ export interface ChatDeliveryEvent {
   message: ChatMessage | null;
   frame: Frame | null;
 }
+
 export interface ChatDeliveryStore {
   acquire(instance: string, token: string): Promise<void>;
   poll(
@@ -42,6 +48,7 @@ export interface ChatDeliveryStore {
   acknowledge(instance: string, token: string, sequence: string): Promise<void>;
   release(instance: string, token: string): Promise<void>;
 }
+
 export interface ChatAccessStore {
   roomInfo?(uid: string, roomId: string): Promise<ChatPrivateRoomInfo | null>;
   filter?(uid: string, messages: ChatMessage[]): Promise<ChatMessage[]>;
@@ -50,10 +57,12 @@ export interface ChatAccessStore {
   canRead(uid: string, message: ChatMessage): Promise<boolean>;
   privateRoom(uid: string, roomId: string): Promise<boolean>;
 }
+
 export interface ChatNoticeCost {
   createdAt: number;
   postings: { asset: string; before: bigint; after: bigint }[];
 }
+
 export type ChatNoticeCostReader = (owner: string, requestId: string) => Promise<ChatNoticeCost>;
 
 export interface ChatPrivateRoomInfo {

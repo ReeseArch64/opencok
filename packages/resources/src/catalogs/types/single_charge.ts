@@ -8,4 +8,5 @@ export interface SingleChargeDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type SingleChargeDefinitionCatalog = CatalogTable<SingleChargeDefinition>;

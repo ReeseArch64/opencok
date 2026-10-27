@@ -1,6 +1,7 @@
 import type { ResourceType } from "@opencok/enums/resource";
 
 export type BuildingResource = `${ResourceType}`;
+
 export type BuildingCosts = Partial<Readonly<Record<BuildingResource, bigint>>>;
 
 export interface BuildingRequirement {

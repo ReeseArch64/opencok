@@ -1,4 +1,5 @@
 import type { VipDefinition } from "../types/vip.ts";
+
 export const records: readonly VipDefinition[] = [
   {
     "id": 7000,

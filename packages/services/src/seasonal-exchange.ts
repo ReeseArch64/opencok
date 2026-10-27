@@ -1,3 +1,4 @@
+import { CityCommandDomain } from "./city-command-domain.ts";
 import { randomInt } from "node:crypto";
 import { num, long, text, type Row } from "@opencok/contracts/rows";
 import { sfs, encode, int, type Fields } from "@opencok/messages/sfs";
@@ -11,18 +12,28 @@ import { previewRewards } from "@opencok/rules/rewards";
 import { rewardPreviewArray } from "@opencok/mappings/rewards";
 import { seasonalExchangeView } from "@opencok/mappings/seasonal-exchange";
 import { pinProgressionReward, grantNativeProgressionReward } from "./progression-rewards";
-import type { CityDomain } from "./city-progression";
-export function createSeasonalExchangeDomain(
-  random: (maximum: number) => number = randomInt,
-): CityDomain {
-  return {
-    commands: ["activity.exchange.info", "activity.exchange.reward"],
-    types: [],
-    async prepare(context, command, params) {
+import type { CityDomain } from "./city-domain.ts";
+
+export class SeasonalExchangeDomain extends CityCommandDomain {
+  public readonly commands: CityDomain["commands"];
+  public readonly types: CityDomain["types"];
+  public readonly prepare: CityDomain["prepare"];
+  public readonly apply: CityDomain["apply"];
+
+  public constructor(random: (maximum: number) => number = randomInt) {
+    super();
+
+    this.commands = ["activity.exchange.info", "activity.exchange.reward"];
+
+    this.types = [];
+
+    this.prepare = async (context, command, params) => {
       if (int(params, "type") !== 5) seasonalExchangeFailure();
+
       const config = context.rules.items.get("chrisms"),
         state = context.state.seasonalExchange,
         period = state?.period;
+
       if (
         !config ||
         config.k12 === "0" ||
@@ -35,6 +46,7 @@ export function createSeasonalExchangeDomain(
         context.now >= long(period, "endTime")
       )
         seasonalExchangeFailure();
+
       cityInteger(config.k12, 1);
       const interval = cityAmount(config.k1) * 1000n;
       let row: Row | undefined = state.record ? { ...state.record } : undefined;
@@ -55,12 +67,15 @@ export function createSeasonalExchangeDomain(
         };
         context.write.seasonalExchange = row;
       };
+
       if (
         command === "activity.exchange.info" &&
         (!row || (config.k12 === "1" && context.now - long(row, "updateTime") >= interval))
       )
         refresh();
+
       if (!row) seasonalExchangeFailure();
+
       const view = () =>
         seasonalExchangeView(
           cityInteger(row!.level, 0, 4),
@@ -88,13 +103,18 @@ export function createSeasonalExchangeDomain(
           })),
           text(row!, "receiveLevels"),
         );
+
       if (command === "activity.exchange.info")
         return { response: encode({ activity: sfs.object(view()) }), event: null };
+
       const level = cityInteger(int(params, "level"), 1, 5);
+
       if (level !== num(row, "level") + 1 || !context.economy.quantity) seasonalExchangeFailure();
+
       const reward = seasonalExchangeRewards(text(row, "rewards"))[level - 1]!;
       context.economy.item("209174", -reward.count);
       const body: Fields = {};
+
       if (level === 5) {
         refresh();
         body.activity = sfs.object(view());
@@ -103,14 +123,23 @@ export function createSeasonalExchangeDomain(
         context.write.seasonalExchange = row;
         body.level = sfs.int(level);
       }
+
       body.num = sfs.int(context.economy.quantity("209174"));
       body.reward = sfs.array(
         grantNativeProgressionReward(context, pinProgressionReward(context, reward.id)),
       );
+
       return { response: encode(body), event: null };
-    },
-    async apply() {
+    };
+
+    this.apply = async () => {
       seasonalExchangeFailure();
-    },
-  };
+    };
+  }
+}
+
+export function createSeasonalExchangeDomain(
+  random: (maximum: number) => number = randomInt,
+): CityDomain {
+  return new SeasonalExchangeDomain(random);
 }

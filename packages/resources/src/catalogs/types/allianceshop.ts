@@ -8,4 +8,5 @@ export interface AllianceshopDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type AllianceshopDefinitionCatalog = CatalogTable<AllianceshopDefinition>;

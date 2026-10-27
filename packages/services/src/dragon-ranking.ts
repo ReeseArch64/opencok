@@ -9,7 +9,9 @@ function invalid(): never {
 
 export function decodeDragonRanking(entries: readonly DragonRankingEntry[]): DragonRankingTeam[] {
   if (!Array.isArray(entries) || entries.length > 32767) return invalid();
+
   let bytes = 0;
+
   return entries.map((entry) => {
     if (
       !entry ||
@@ -18,33 +20,49 @@ export function decodeDragonRanking(entries: readonly DragonRankingEntry[]): Dra
       (entry.rank | 0) !== entry.rank
     )
       return invalid();
+
     const data = Buffer.from(entry.json);
     bytes += data.length;
+
     if (bytes > 4 * 1024 * 1024) return invalid();
+
     const parsed = decodeStoredJson(data);
+
     if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) return invalid();
+
     const object = parsed as Record<string, unknown>;
     const string = (key: string, required = false) => {
       const value = object[key];
+
       if (value === undefined || value === null) return required ? invalid() : "";
+
       if (typeof value === "string") return value;
+
       if (typeof value === "boolean" || typeof value === "bigint" || typeof value === "number")
         return String(value);
+
       return invalid();
     };
     const integer = (key: string, bits: 32 | 64): bigint => {
       const value = object[key];
+
       if (value === undefined || value === null) return 0n;
+
       if (typeof value === "bigint")
         return BigInt.asIntN(bits, value) === value ? value : invalid();
+
       if (typeof value === "number" && Number.isSafeInteger(value))
         return BigInt.asIntN(bits, BigInt(value)) === BigInt(value) ? BigInt(value) : invalid();
+
       if (typeof value === "string" && /^[+-]?\d+$/.test(value)) {
         const number = BigInt(value);
+
         if (BigInt.asIntN(bits, number) === number) return number;
       }
+
       return invalid();
     };
+
     return {
       teamId: string("teamId", true),
       name: string("teamName"),

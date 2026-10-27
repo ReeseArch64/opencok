@@ -6,4 +6,5 @@ export interface NewsHeapDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type NewsHeapDefinitionCatalog = CatalogTable<NewsHeapDefinition>;

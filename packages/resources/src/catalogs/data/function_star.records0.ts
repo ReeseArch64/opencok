@@ -1,4 +1,5 @@
 import type { FunctionStarDefinition } from "../types/function_star.ts";
+
 export const records: readonly FunctionStarDefinition[] = [
   {
     "id": 108400,

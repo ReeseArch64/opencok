@@ -1,4 +1,5 @@
 import type { AffairsDefinition } from "../types/affairs.ts";
+
 export const records: readonly AffairsDefinition[] = [
   {
     "id": 8300,

@@ -1,4 +1,5 @@
 import type { GeoTreasureTaskDefinition } from "../types/geo_treasure_task.ts";
+
 export const records: readonly GeoTreasureTaskDefinition[] = [
   {
     "id": 52027101,

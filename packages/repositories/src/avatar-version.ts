@@ -39,7 +39,9 @@ export async function commitAvatarVersion(
   recoverOnly = false,
 ): Promise<AvatarVersionResult> {
   validKey(owner, operationId, kingdomId);
+
   if (!Number.isSafeInteger(now) || now < 0) throw new Error("Invalid avatar version time");
+
   return db.transaction(
     async (tx) => {
       const [profile] = await tx
@@ -56,6 +58,7 @@ export async function commitAvatarVersion(
         .where(eq(userprofile.uid, owner))
         .limit(1)
         .for("update");
+
       if (
         !profile ||
         profile.uid !== owner ||
@@ -64,38 +67,49 @@ export async function commitAvatarVersion(
         (profile.banTime ?? 0n) > BigInt(now)
       )
         return { profile };
+
       const [prior] = await tx
         .select()
         .from(avatar_version_update)
         .where(eq(avatar_version_update.operationId, operationId))
         .limit(1);
+
       if (prior) {
         if (prior.ownerUid !== owner) throw new Error("Avatar version operation owner mismatch");
+
         avatarVersionProfile(prior, kingdomId);
+
         return { profile, intent: prior };
       }
+
       if (recoverOnly) throw new Error("Avatar version operation not committed");
+
       let record: typeof pic_upload_record.$inferSelect | undefined;
       let recordRead = false,
         castleRead = false,
         active = true;
       let plan;
+
       try {
         plan = await inspect(profile, {
           async castleLevel() {
             if (!active || castleRead) throw new Error("Invalid avatar version castle read");
+
             castleRead = true;
             const rows = await tx
               .select({ uid: user_building.uid, level: user_building.level })
               .from(user_building)
               .where(and(eq(user_building.uid, owner), eq(user_building.itemId, 400000)))
               .limit(2);
+
             if (rows.length > 1 || rows.some((row) => row.uid !== owner))
               throw new Error("Invalid avatar version castle");
+
             return rows[0]?.level ?? 0;
           },
           async uploadRecord() {
             if (!active || recordRead) throw new Error("Invalid avatar version record read");
+
             recordRead = true;
             [record] = await tx
               .select()
@@ -103,21 +117,26 @@ export async function commitAvatarVersion(
               .where(eq(pic_upload_record.uid, owner))
               .limit(1)
               .for("update");
+
             if (record && record.uid !== owner)
               throw new Error("Invalid avatar version record owner");
+
             return record;
           },
         });
       } finally {
         active = false;
       }
+
       const sequence = legacyAvatarVersion(profile.picVer);
+
       if (
         plan.picVer !== sequence + (plan.moderated ? 0 : 2000000) ||
         (plan.moderated ? !recordRead || !castleRead : recordRead || castleRead) ||
         (plan.moderated ? plan.nextUpdateTime === null : plan.nextUpdateTime !== null)
       )
         throw new Error("Invalid avatar version plan");
+
       const intent: AvatarVersionIntent = {
         operationId,
         ownerUid: owner,
@@ -129,9 +148,12 @@ export async function commitAvatarVersion(
         revision: await nextAvatarRevision(tx, owner),
       };
       avatarVersionProfile(intent, kingdomId);
+
       if (intent.pendingEffects !== 6 && intent.pendingEffects !== 7)
         throw new Error("Invalid avatar version effects");
+
       if (intent.pendingEffects & 1) avatarVersionMail(intent);
+
       const pending = await tx
         .select({ id: avatar_version_update.operationId })
         .from(avatar_version_update)
@@ -142,9 +164,12 @@ export async function commitAvatarVersion(
           ),
         )
         .limit(1000);
+
       if (pending.length >= 1000) throw new Error("Avatar version backlog full");
+
       if (plan.moderated) {
         const values = { picVer: plan.picVer, report: 0, updateTime: BigInt(now), stat: 0 };
+
         if (record)
           await tx.update(pic_upload_record).set(values).where(eq(pic_upload_record.uid, owner));
         else
@@ -152,14 +177,18 @@ export async function commitAvatarVersion(
             .insert(pic_upload_record)
             .values({ uid: owner, ...values, banCount: 0, banTime: 0n });
       }
+
       const changed = await tx
         .update(userprofile)
         .set({ picVer: plan.picVer })
         .where(and(eq(userprofile.uid, owner), eq(userprofile.picVer, profile.picVer!)))
         .returning({ uid: userprofile.uid });
+
       if (changed.length !== 1 || changed[0]!.uid !== owner)
         throw new Error("Avatar version update failed");
+
       await tx.insert(avatar_version_update).values(intent);
+
       return { profile: { ...profile, picVer: plan.picVer }, intent };
     },
     { isolationLevel: "read committed", accessMode: "read write" },
@@ -173,6 +202,7 @@ export async function deliverAvatarVersionMail(
   operationId: string,
 ): Promise<AvatarMailDelivery> {
   validKey(owner, operationId, kingdomId);
+
   return db.transaction(
     async (tx) => {
       const [profile] = await tx
@@ -181,7 +211,9 @@ export async function deliverAvatarVersionMail(
         .where(eq(userprofile.uid, owner))
         .limit(1)
         .for("update");
+
       if (!profile || profile.uid !== owner || profile.serverId !== kingdomId) return { profile };
+
       const key = and(
         eq(avatar_version_update.operationId, operationId),
         eq(avatar_version_update.ownerUid, owner),
@@ -192,7 +224,9 @@ export async function deliverAvatarVersionMail(
         .where(key)
         .limit(1)
         .for("update");
+
       if (!entry || !(entry.pendingEffects & 1)) return { profile };
+
       const message = avatarVersionMail(entry);
       await insertAvatarSystemMail(tx, message, owner, operationId, entry.committedAt);
       const changed = await tx
@@ -200,8 +234,10 @@ export async function deliverAvatarVersionMail(
         .set({ pendingEffects: entry.pendingEffects & ~1 })
         .where(and(key, eq(avatar_version_update.pendingEffects, entry.pendingEffects)))
         .returning({ id: avatar_version_update.operationId });
+
       if (changed.length !== 1 || changed[0]!.id !== operationId)
         throw new Error("Avatar version mail acknowledgment failed");
+
       return { profile, mail: message };
     },
     { isolationLevel: "read committed", accessMode: "read write" },
@@ -218,6 +254,7 @@ export async function publishAvatarVersionEffect(
   timeoutMs: number,
 ): Promise<void> {
   validKey(owner, operationId, kingdomId);
+
   if (
     (bit !== 2 && bit !== 4 && bit !== 8) ||
     !Number.isInteger(timeoutMs) ||
@@ -225,6 +262,7 @@ export async function publishAvatarVersionEffect(
     timeoutMs > 30000
   )
     throw new Error("Invalid avatar version publication");
+
   await db.transaction(
     async (tx) => {
       const [profile] = await tx
@@ -237,7 +275,9 @@ export async function publishAvatarVersionEffect(
         .where(eq(userprofile.uid, owner))
         .limit(1)
         .for("update");
+
       if (!profile || profile.uid !== owner || profile.serverId !== kingdomId) return;
+
       const key = and(
         eq(avatar_version_update.operationId, operationId),
         eq(avatar_version_update.ownerUid, owner),
@@ -248,11 +288,15 @@ export async function publishAvatarVersionEffect(
         .where(key)
         .limit(1)
         .for("update");
+
       if (!entry || !(entry.pendingEffects & bit)) return;
+
       const update = avatarVersionProfile(entry, kingdomId);
+
       if (profile.picVer === entry.picVer) {
         const controller = new AbortController();
         let timer: ReturnType<typeof setTimeout> | undefined;
+
         try {
           await Promise.race([
             Promise.resolve().then(() => publish(update, controller.signal)),
@@ -268,11 +312,13 @@ export async function publishAvatarVersionEffect(
           controller.abort();
         }
       }
+
       const changed = await tx
         .update(avatar_version_update)
         .set({ pendingEffects: entry.pendingEffects & ~bit })
         .where(and(key, eq(avatar_version_update.pendingEffects, entry.pendingEffects)))
         .returning({ id: avatar_version_update.operationId });
+
       if (changed.length !== 1 || changed[0]!.id !== operationId)
         throw new Error("Avatar version publication acknowledgment failed");
     },
@@ -287,7 +333,9 @@ export async function nextAvatarVersionDelivery(
 ): Promise<AvatarVersionKey | undefined> {
   if (!Number.isInteger(kingdomId) || kingdomId < 1 || kingdomId > 2147483647)
     throw new Error("Invalid avatar version realm");
+
   if (cursor) validKey(cursor.owner, cursor.operationId, kingdomId);
+
   const [row] = await db
     .select({
       owner: avatar_version_update.ownerUid,
@@ -312,7 +360,9 @@ export async function nextAvatarVersionDelivery(
     )
     .orderBy(asc(avatar_version_update.ownerUid), asc(avatar_version_update.operationId))
     .limit(1);
+
   if (row) validKey(row.owner, row.operationId, kingdomId);
+
   return row;
 }
 

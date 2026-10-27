@@ -10,4 +10,5 @@ export interface AuctionDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type AuctionDefinitionCatalog = CatalogTable<AuctionDefinition>;

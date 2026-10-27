@@ -23,6 +23,7 @@ import { errors } from "@opencok/constants/game";
 import { fenceRealmTransaction, type RealmAuthority } from "./realm-authority";
 import type { MutationTransaction } from "./mutation";
 import type { Database } from "./game";
+
 export function expeditionAwardReader(
   tx: MutationTransaction,
   owner: string,
@@ -34,10 +35,12 @@ export function expeditionAwardReader(
         .from(awards)
         .where(and(eq(awards.id, id), eq(awards.ownerUid, owner)))
         .for("update");
+
       return row;
     },
   };
 }
+
 export async function writeExpeditionAward(
   tx: MutationTransaction,
   owner: string,
@@ -49,8 +52,10 @@ export async function writeExpeditionAward(
     .from(awards)
     .where(and(eq(awards.id, id), eq(awards.ownerUid, owner), eq(awards.deliveredAt, 0n)))
     .for("update");
+
   if (!award || award.createdAt > now)
     throw new Error("Invalid owned expedition award acknowledgement");
+
   const payload = JSON.parse(award.payload) as ExpeditionAwardPayload;
   const [progress] = await tx
     .select()
@@ -63,12 +68,18 @@ export async function writeExpeditionAward(
       ),
     )
     .for("update");
+
   if (payload.claims.length) {
     if (!progress) throw new Error("Missing expedition reward progress");
+
     const taken = new Set(progress.takeReward.split("|").filter(Boolean).map(Number));
+
     for (const claim of payload.claims) taken.add(claim);
+
     const takeReward = [...taken].join("|");
+
     if (takeReward.length > 500) throw new Error("Expedition claim flag bound exceeded");
+
     await tx
       .update(expedition_progress)
       .set({ takeReward })
@@ -80,8 +91,10 @@ export async function writeExpeditionAward(
         ),
       );
   }
+
   await tx.update(awards).set({ deliveredAt: now, nextAttemptAt: 0n }).where(eq(awards.id, id));
 }
+
 export function createExpeditionAwardStore(
   db: Database["kingdom"]["db"],
   authority: RealmAuthority,
@@ -96,6 +109,7 @@ export function createExpeditionAwardStore(
       lte(userprofile.regTime, long(closure, "createdAt")),
       sql`${userprofile.uid} collate "C">${text(closure, "awardCursor")} collate "C"`,
     );
+
   return {
     candidates() {
       return db.transaction(async (tx) => {
@@ -118,6 +132,7 @@ export function createExpeditionAwardStore(
           rows.length === 8 && last
             ? { end: last.endTime, id: last.periodId, stage: last.stage }
             : undefined;
+
         return rows;
       });
     },
@@ -138,6 +153,7 @@ export function createExpeditionAwardStore(
           .where(owners(closure))
           .orderBy(sql`${userprofile.uid} collate "C"`)
           .limit(64);
+
         return rows.map((row) => ({ ...row.member, uid: row.uid }));
       });
     },
@@ -146,6 +162,7 @@ export function createExpeditionAwardStore(
         await fenceRealmTransaction(tx, authority);
         const [current] = await tx.select().from(closures).where(key(closure)).for("update");
         const uid = text(member, "uid");
+
         if (
           !current ||
           current.phase !== 2 ||
@@ -154,21 +171,25 @@ export function createExpeditionAwardStore(
           Buffer.compare(Buffer.from(uid), Buffer.from(current.awardCursor)) <= 0
         )
           throw new Error("Stale expedition reward cursor");
+
         const [profile] = await tx
           .select({ uid: userprofile.uid })
           .from(userprofile)
           .where(and(owners(current), eq(userprofile.uid, uid)))
           .for("share");
+
         if (profile) {
           const payload = create(),
             encoded = JSON.stringify(payload),
             id = expeditionAwardId(current.periodId, current.stage, uid);
+
           if (
             payload.mails.length > 129 ||
             payload.claims.length > 128 ||
             Buffer.byteLength(encoded) > 1048576
           )
             throw new Error("Expedition award payload bound exceeded");
+
           await tx
             .insert(awards)
             .values({
@@ -181,6 +202,7 @@ export function createExpeditionAwardStore(
             })
             .onConflictDoNothing();
           const [saved] = await tx.select().from(awards).where(eq(awards.id, id)).limit(1);
+
           if (
             !saved ||
             saved.periodId !== current.periodId ||
@@ -189,6 +211,7 @@ export function createExpeditionAwardStore(
           )
             throw new Error("Foreign expedition award identity");
         }
+
         await tx
           .update(closures)
           .set({ awardCursor: uid, history: current.history ?? history })
@@ -200,14 +223,18 @@ export function createExpeditionAwardStore(
       await db.transaction(async (tx) => {
         await fenceRealmTransaction(tx, authority);
         const [current] = await tx.select().from(closures).where(key(closure)).for("update");
+
         if (!current || current.phase !== 2 || current.awardCursor !== text(closure, "awardCursor"))
           throw new Error("Stale expedition reward completion");
+
         const [remaining] = await tx
           .select({ uid: userprofile.uid })
           .from(userprofile)
           .where(owners(current))
           .limit(1);
+
         if (remaining) throw new Error("Incomplete expedition reward population");
+
         await tx
           .update(closures)
           .set({ phase: 3, history: current.history ?? history })
@@ -218,6 +245,7 @@ export function createExpeditionAwardStore(
     pending(now) {
       return db.transaction(async (tx) => {
         await fenceRealmTransaction(tx, authority);
+
         return tx
           .select()
           .from(awards)
@@ -237,6 +265,7 @@ export function createExpeditionAwardStore(
     },
   };
 }
+
 export function createExpeditionAwardStandings(
   db: Database["databases"]["global"]["db"],
   kingdomId: number,
@@ -246,6 +275,7 @@ export function createExpeditionAwardStandings(
       return db.transaction(
         async (tx) => {
           if (owners.length > 64) throw new Error("Expedition standings member bound exceeded");
+
           await tx.execute(sql`set local statement_timeout='3s'`);
           const opponent = num(closure, "opponent"),
             [result] = await tx
@@ -261,12 +291,15 @@ export function createExpeditionAwardStandings(
                 ),
               )
               .limit(1);
+
           if (!result) return;
+
           if (
             result.winner !== num(closure, "winner") ||
             result.endTime !== long(closure, "endTime")
           )
             throw new Error("Conflicting expedition prize result");
+
           const proofs = await tx
             .select()
             .from(marks)
@@ -277,6 +310,7 @@ export function createExpeditionAwardStandings(
                 inArray(marks.kingdomId, [kingdomId, opponent]),
               ),
             );
+
           if (
             proofs.length !== 2 ||
             proofs.some((row) => row.state !== 1) ||
@@ -285,6 +319,7 @@ export function createExpeditionAwardStandings(
             )
           )
             return;
+
           const rows = owners.length
             ? await tx.execute<Row>(
                 sql`with cohort as(select *,row_number() over(order by score desc,member collate "C" desc)::integer as rank,sum(score) over(partition by "kingdomId","allianceId" order by member collate "C" rows between unbounded preceding and unbounded following)::float8 as "allianceScore" from ${scores} where "periodId"=${result.periodId} and stage=${result.stage} and (("kingdomId"=${kingdomId} and opponent=${opponent}) or ("kingdomId"=${opponent} and opponent=${kingdomId}))) select member,score,case when (select min(rank) from cohort where metadata is null)<=cohort.rank then 0 else cohort.rank end as rank,"allianceScore" from cohort where "kingdomId"=${kingdomId} and member in (${sql.join(
@@ -306,6 +341,7 @@ export function createExpeditionAwardStandings(
             )
             .orderBy(sql`${scores.score} desc`, sql`${scores.member} collate "C" desc`)
             .limit(1);
+
           return { result, members: rows.rows, top };
         },
         { isolationLevel: "repeatable read" },
@@ -313,6 +349,7 @@ export function createExpeditionAwardStandings(
     },
   };
 }
+
 export function createExpeditionHistorySource(
   owned: Database["kingdom"]["db"],
   global: Database["databases"]["global"]["db"],
@@ -328,6 +365,7 @@ export function createExpeditionHistorySource(
             .from(userprofile)
             .where(eq(userprofile.uid, owner))
             .limit(1);
+
           if (
             !profile ||
             profile.serverId !== authority.kingdomId ||
@@ -335,6 +373,7 @@ export function createExpeditionHistorySource(
             (profile.banTime ?? 0n) > now
           )
             throw new GameError(errors.invalid);
+
           const current = await tx
             .select()
             .from(closures)
@@ -355,6 +394,7 @@ export function createExpeditionHistorySource(
               new_exped_history.loseServerId,
             )
             .limit(12);
+
           return [
             ...current.map((row) => ({
               ...row,
@@ -378,7 +418,9 @@ export function createExpeditionHistorySource(
     },
     async servers(ids) {
       if (!ids.length) return [];
+
       if (ids.length > 24) throw new Error("Expedition history realm bound exceeded");
+
       return global
         .select()
         .from(server_king_info)

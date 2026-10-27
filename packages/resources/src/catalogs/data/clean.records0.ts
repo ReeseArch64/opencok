@@ -1,4 +1,5 @@
 import type { CleanDefinition } from "../types/clean.ts";
+
 export const records: readonly CleanDefinition[] = [
   { "id": 108300, "castle": 1, "second": 172800 },
   { "id": 108301, "castle": 2, "second": 172800 },

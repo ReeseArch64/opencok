@@ -1,4 +1,5 @@
 import type { GeneralDetailDefinition } from "../types/general_detail.ts";
+
 export const records: readonly GeneralDetailDefinition[] = [
   { "id": 219000, "name": 113804, "effect": 56, "show": 1, "buff": 0, "order": 1 },
   { "id": 219001, "name": 113805, "effect": 131, "show": 1, "buff": 0, "order": 2 },

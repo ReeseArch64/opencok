@@ -6,4 +6,5 @@ export interface WaMonsterDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type WaMonsterDefinitionCatalog = CatalogTable<WaMonsterDefinition>;

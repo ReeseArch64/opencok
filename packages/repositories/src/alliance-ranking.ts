@@ -26,6 +26,7 @@ export function readAllianceRanking(
     !Number.isSafeInteger(query.now)
   )
     throw new Error("Invalid alliance ranking query");
+
   return db.transaction(
     async (tx) => {
       const profile = (
@@ -42,8 +43,10 @@ export function readAllianceRanking(
           .limit(1)
       )[0];
       const empty = { profile, candidates: [], sciences: [], videos: [], fallbackRank: 1n };
+
       if (!profile || (profile.banFlag ?? 0) !== 0 || (profile.banTime ?? 0n) > BigInt(query.now))
         return empty;
+
       const metric = query.kind === "power" ? playerinfo.power : playerinfo.armyKill;
       const members = tx
         .select({
@@ -95,6 +98,7 @@ export function readAllianceRanking(
         )
         .limit(query.limit * 2 - (query.kind === "power" ? 1 : 0));
       let fallbackRank = 1n;
+
       if (profile.allianceId?.trim()) {
         const own = tx
           .select({ score: members.score })
@@ -106,9 +110,12 @@ export function readAllianceRanking(
           .from(members)
           .innerJoin(alliance, eq(alliance.uid, members.allianceId))
           .where(gt(members.score, own));
+
         if (counts.length !== 1) throw new Error("Missing alliance ranking count");
+
         fallbackRank = counts[0]!.rank;
       }
+
       const kept = query.kind === "kills" ? candidates.slice(0, -1) : candidates;
       const ids = [...new Set(kept.slice(0, query.limit).map((row) => row.uid))];
       const sciences = ids.length
@@ -126,8 +133,10 @@ export function readAllianceRanking(
             )
             .limit(32768)
         : [];
+
       if (sciences.length > 32767)
         throw new Error("Alliance ranking science collection exceeds limit");
+
       const videos = ids.length
         ? await tx
             .select({
@@ -145,6 +154,7 @@ export function readAllianceRanking(
             .orderBy(sql`${alliance_vedio.allianceId} collate "C" asc`)
             .limit(ids.length)
         : [];
+
       return {
         profile,
         candidates: candidates.map(({ score, ...row }) => ({

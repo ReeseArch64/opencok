@@ -66,4 +66,5 @@ export interface GiftDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type GiftDefinitionCatalog = CatalogTable<GiftDefinition>;

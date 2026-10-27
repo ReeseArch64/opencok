@@ -1,5 +1,6 @@
 import type { Row } from "./rows";
 import type { AvatarSystemMail } from "./files";
+
 export interface PinnedTotemConfiguration {
   width: number;
   range: number;
@@ -7,18 +8,22 @@ export interface PinnedTotemConfiguration {
   enemyStateId: number;
   takeEffectMail: { sender: string; title: string; message: string };
 }
+
 export interface TotemProgressionState {
   history: readonly Row[];
   active: readonly Row[];
 }
+
 export interface TotemProgressionWrite {
   history?: readonly Row[];
   activations?: readonly Row[];
 }
+
 export interface TotemDelivery {
   activation: Row;
   stateId: number;
 }
+
 export interface TotemEffectStore {
   due(): Promise<readonly { activation: Row; cities: readonly Row[] }[]>;
   expire(

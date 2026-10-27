@@ -1,4 +1,5 @@
 import type { NewsCastleLVDefinition } from "../types/news_castleLV.ts";
+
 export const records: readonly NewsCastleLVDefinition[] = [
   {
     "id": 9011501,

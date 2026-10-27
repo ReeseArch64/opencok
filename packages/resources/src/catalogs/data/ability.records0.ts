@@ -1,4 +1,5 @@
 import type { AbilityDefinition } from "../types/ability.ts";
+
 export const records: readonly AbilityDefinition[] = [
   {
     "id": 50024,

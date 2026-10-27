@@ -26,4 +26,5 @@ export interface ItemDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type ItemDefinitionCatalog = CatalogTable<ItemDefinition>;

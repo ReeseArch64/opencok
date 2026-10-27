@@ -1,6 +1,7 @@
 import type { ExpeditionScoreVersion } from "@opencok/contracts/expedition-score-publication";
 import { cityInteger, cityAmount } from "./city-progression";
 import { long, text, type Row } from "@opencok/contracts/rows";
+
 const states = [
   "WAITING_STATE",
   "MATCHING_STATE",
@@ -12,6 +13,7 @@ const states = [
   "TRAIN_ARMY_STATE",
   "FIGHTING_STATE",
 ];
+
 export function expeditionDiscovery(
   clock: Row,
   version: ExpeditionScoreVersion,
@@ -20,11 +22,13 @@ export function expeditionDiscovery(
 ) {
   if (!enabled)
     clock = { ...clock, stage: 0, opponent: 0, startTime: 0n, endTime: 9223372036854775807n };
+
   const stage = cityInteger(clock.stage, 0, 8),
     kingdomId = cityInteger(clock.serverId, 1),
     opponent = cityInteger(clock.opponent),
     revision = cityAmount(clock.revision);
   cityAmount(now);
+
   if (
     kingdomId !== version.kingdomId ||
     opponent === kingdomId ||
@@ -33,6 +37,7 @@ export function expeditionDiscovery(
     revision < 1n
   )
     throw new Error("Foreign expedition discovery state");
+
   return {
     key: `opencok:global:expedition-match:${kingdomId}`,
     value: JSON.stringify({

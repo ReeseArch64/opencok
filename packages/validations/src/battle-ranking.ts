@@ -6,6 +6,7 @@ import type {
   PlayoffRankingTeamResponse,
   PlayoffRankingResponse,
 } from "@opencok/contracts/responses/battle-ranking";
+
 export const fightMemberSchema = z.strictObject({
   rankNum: field.int,
   id: field.string,
@@ -19,6 +20,7 @@ export const fightMemberSchema = z.strictObject({
   holdNum: field.int,
   campType: field.int,
 }) satisfies z.ZodType<FightRankingMemberResponse>;
+
 export const playoffTeamSchema = z.strictObject({
   kingId: field.int,
   kingName: field.string,
@@ -35,6 +37,7 @@ export const playoffTeamSchema = z.strictObject({
   groupId: field.int,
   ticketPayed: field.bool,
 }) satisfies z.ZodType<PlayoffRankingTeamResponse>;
+
 export const playoffRankingSchema = z.strictObject({
   battleState: field.int.optional(),
   endTime: field.long.optional(),
@@ -45,6 +48,7 @@ export const playoffRankingSchema = z.strictObject({
   turns: field.int,
   groups: z.array(playoffTeamSchema).length(8),
 }) satisfies z.ZodType<PlayoffRankingResponse>;
+
 export const fightRankingSchema = z.strictObject({
   rank: z.array(fightMemberSchema).max(32767).optional(),
 }) satisfies z.ZodType<FightRankingResponse>;

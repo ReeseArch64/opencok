@@ -5,6 +5,7 @@ import { blankToUndefined, validateEnvironment } from "./validation";
 import { port, timeout, redisUrl, realmSettings } from "./service.schema";
 
 const optionalPath = z.preprocess(blankToUndefined, z.string().optional());
+
 export const apiSchema = z
   .object({
     ...realmSettings,
@@ -25,6 +26,7 @@ export const apiSchema = z
             return JSON.parse(value) as unknown;
           } catch {
             ctx.addIssue({ code: "custom", message: "Invalid realm configuration" });
+
             return z.NEVER;
           }
         })
@@ -35,6 +37,7 @@ export const apiSchema = z
                 id: z.number().int().positive().max(2147483647),
                 url: z.url({ protocol: /^https?$/ }).refine((value) => {
                   const url = new URL(value);
+
                   return (
                     url.pathname === "/_internal/characters" &&
                     !url.username &&
@@ -58,6 +61,7 @@ export const apiSchema = z
         .refine((value) => {
           try {
             const url = new URL(value);
+
             return (
               url.pathname === "/" &&
               !url.username &&
@@ -112,6 +116,7 @@ export const apiSchema = z
         settings.S3_ACCESS_KEY_ID,
         settings.S3_SECRET_ACCESS_KEY,
       ];
+
       return values.every((value) => value === undefined) || values.every((value) => !!value);
     },
     { path: ["S3_BUCKET"], message: "Configure all five S3 settings" },
@@ -130,5 +135,6 @@ export const apiSchema = z
   .readonly();
 
 export type ApiEnvironment = z.infer<typeof apiSchema>;
+
 export const parseApiEnvironment = (source: Readonly<Record<string, string | undefined>>) =>
   validateEnvironment(apiSchema, source);

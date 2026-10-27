@@ -1,6 +1,7 @@
 import { z } from "zod";
 import type { CastleLevelStateResponse } from "@opencok/contracts/responses/castle-level-event";
 import { field } from "./response";
+
 export const castleLevelStateSchema = z.strictObject({
   uid: field.string,
   level: field.int,

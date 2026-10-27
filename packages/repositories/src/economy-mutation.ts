@@ -15,6 +15,7 @@ const profileAssets = [
   "dmmPaidGold",
   "dmmPaidSpecialGold",
 ] as const;
+
 const resourceAssets = [
   "wood",
   "stone",
@@ -25,9 +26,11 @@ const resourceAssets = [
   "ironbind",
   "foodbind",
 ] as const;
+
 export type EconomyAsset =
   | `profile.${(typeof profileAssets)[number]}`
   | `resource.${(typeof resourceAssets)[number]}`;
+
 export interface EconomyPlan {
   changes: readonly { asset: EconomyAsset; delta: bigint; reason: string }[];
   response: Uint8Array;
@@ -40,11 +43,13 @@ export function createEconomyMutationExecutor(
   now = Date.now,
 ) {
   const execute = createMutationExecutor(db, authority, now);
+
   return (
     input: MutationCommand,
     plan: (balances: Readonly<Record<EconomyAsset, bigint>>) => Promise<EconomyPlan>,
   ) => {
     const command = { ...input, request: Buffer.from(input.request) };
+
     return execute(command, async (tx) => {
       const [profile] = await tx
         .select()
@@ -56,16 +61,24 @@ export function createEconomyMutationExecutor(
         .from(user_resource)
         .where(eq(user_resource.uid, command.owner))
         .for("update");
+
       if (!profile || !resource) throw new Error("Missing economic account");
+
       const balances = {} as Record<EconomyAsset, bigint>;
+
       for (const asset of profileAssets) balances[`profile.${asset}`] = profile[asset] ?? 0n;
+
       for (const asset of resourceAssets) balances[`resource.${asset}`] = resource[asset] ?? 0n;
+
       const result = await plan(Object.freeze(balances));
+
       if (result.changes.length > 256) throw new Error("Economic posting limit exceeded");
+
       const postings: EconomyPosting[] = [];
       const profileUpdate: Partial<typeof userprofile.$inferInsert> = {};
       const resourceUpdate: Partial<typeof user_resource.$inferInsert> = {};
       const seen = new Set<string>();
+
       for (const change of result.changes) {
         if (
           !Object.hasOwn(balances, change.asset) ||
@@ -73,6 +86,7 @@ export function createEconomyMutationExecutor(
           typeof change.delta !== "bigint"
         )
           throw new Error("Invalid economic asset");
+
         seen.add(change.asset);
         const before = balances[change.asset];
         const posting = {
@@ -85,17 +99,21 @@ export function createEconomyMutationExecutor(
         validatePosting(posting);
         postings.push(posting);
         const field = change.asset.split(".")[1]!;
+
         if (change.asset.startsWith("profile."))
           Object.assign(profileUpdate, { [field]: posting.after });
         else Object.assign(resourceUpdate, { [field]: posting.after });
       }
+
       if (Object.keys(profileUpdate).length)
         await tx.update(userprofile).set(profileUpdate).where(eq(userprofile.uid, command.owner));
+
       if (Object.keys(resourceUpdate).length)
         await tx
           .update(user_resource)
           .set(resourceUpdate)
           .where(eq(user_resource.uid, command.owner));
+
       return { response: result.response, postings, events: result.events };
     });
   };

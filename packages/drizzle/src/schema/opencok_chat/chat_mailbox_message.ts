@@ -10,6 +10,7 @@ import {
 } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
 import { opencok_chat } from "../namespaces";
+
 export const chat_mailbox_message = opencok_chat.table(
   "chat_mailbox_message",
   {

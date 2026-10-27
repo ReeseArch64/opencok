@@ -1,4 +1,5 @@
 import type { StatusCopyDefinition } from "../types/status - Copy.ts";
+
 export const records: readonly StatusCopyDefinition[] = [
   {
     "id": 502225,

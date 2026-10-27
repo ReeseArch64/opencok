@@ -13,4 +13,5 @@ export interface AchievementDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type AchievementDefinitionCatalog = CatalogTable<AchievementDefinition>;

@@ -1,4 +1,5 @@
 import type { LordImageDefinition } from "../types/lord_image.ts";
+
 export const records: readonly LordImageDefinition[] = [
   { "id": 53300, "name": "g044", "value": 400, "show": 1, "rank": 1 },
   { "id": 53301, "name": "g041", "value": 400, "show": 1, "rank": 2 },

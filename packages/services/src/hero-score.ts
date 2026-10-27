@@ -1,3 +1,4 @@
+import { CityCommandDomain } from "./city-command-domain.ts";
 import { createHash, randomUUID } from "node:crypto";
 import { sfs, encode, decode, str, int, Type, fields, type Fields } from "@opencok/messages/sfs";
 import { long, num, text, type Row } from "@opencok/contracts/rows";
@@ -14,18 +15,25 @@ import { rewardPreviewArray } from "@opencok/mappings/rewards";
 import { previewRewards } from "@opencok/rules/rewards";
 import { randomInt } from "node:crypto";
 import { pinProgressionReward } from "./progression-rewards";
-import type { CityDomain, CityProgressionContext } from "./city-progression";
+import type { CityDomain } from "./city-domain.ts";
+import type { CityProgressionContext } from "./city-progression-context.ts";
+
 function identity(...values: unknown[]) {
   return createHash("sha256").update(JSON.stringify(values)).digest("hex").slice(0, 32);
 }
+
 export function heroTargetOperation(act: string, alliance: string, stage: number, owner: string) {
   return `hero:${identity(act, alliance, stage, owner)}`;
 }
+
 export function heroTargetParameters(params: Fields, owner: string): Fields {
   const rewards = fields(params.rewards),
     reward = rewards[owner];
+
   if (reward?.type !== Type.String) throw new Error("Missing owned hero reward");
+
   const { recipients: _recipients, rewards: _rewards, ...message } = params;
+
   return {
     ...message,
     reward,
@@ -39,12 +47,14 @@ export function heroTargetParameters(params: Fields, owner: string): Fields {
     ),
   };
 }
+
 export async function deliverHeroTargetBatch(
   payload: Uint8Array,
   deliver: (owner: string, params: Fields) => Promise<unknown>,
 ) {
   const params = decode(Buffer.from(payload)),
     recipients = params.recipients;
+
   if (
     recipients?.type !== Type.StringArray ||
     !Array.isArray(recipients.value) ||
@@ -54,6 +64,7 @@ export async function deliverHeroTargetBatch(
     recipients.value.some((owner) => typeof owner !== "string" || !owner || owner.length > 40)
   )
     throw new Error("Invalid hero reward recipients");
+
   const results = await Promise.allSettled(
     (recipients.value as string[]).map((owner) =>
       deliver(owner, heroTargetParameters(params, owner)),
@@ -62,12 +73,14 @@ export async function deliverHeroTargetBatch(
   const failures = results.filter(
     (result): result is PromiseRejectedResult => result.status === "rejected",
   );
+
   if (failures.length)
     throw new AggregateError(
       failures.map((result) => result.reason),
       "Hero reward delivery pending",
     );
 }
+
 function enqueueTarget(
   context: CityProgressionContext,
   event: Row,
@@ -77,6 +90,7 @@ function enqueueTarget(
   members: readonly string[],
 ) {
   if (!members.length) return;
+
   const template = context.rules.mail.get(
     num(event, "type") === 4
       ? "11669"
@@ -86,8 +100,10 @@ function enqueueTarget(
           ? "11649"
           : "11635",
   );
+
   if (!template || !template.message || !context.economy.event)
     throw new Error("Hero target delivery unavailable");
+
   for (let offset = 0; offset < members.length; offset += 64) {
     const recipients = members.slice(offset, offset + 64);
     context.economy.event({
@@ -111,8 +127,10 @@ function enqueueTarget(
     });
   }
 }
+
 export async function flushHeroScore(context: CityProgressionContext) {
   const actions = context.heroActions.splice(0);
+
   if (
     !actions.length ||
     !context.state.heroScore ||
@@ -120,36 +138,44 @@ export async function flushHeroScore(context: CityProgressionContext) {
     num(context.state.profile, "serverId") !== context.rules.kingdomId
   )
     return;
+
   const alliance = text(context.state.profile, "allianceId"),
     scores = new Map<string, Row>(),
     contributions = new Map<string, Row>();
+
   for (const at of [...new Set(actions.map((action) => action.at))].toSorted((a, b) =>
     a < b ? -1 : a > b ? 1 : 0,
   )) {
     const snapshot = await context.state.heroScore.load(at);
+
     for (const event of snapshot.events) {
       const type = num(event, "type"),
         isAlliance = type === 2 || type === 4,
         member = isAlliance ? alliance : context.owner,
         gate = context.rules.items.get("heroactivity_on"),
         keys = type === 1 ? ["k1", "k2"] : type === 2 ? ["k5", "k6"] : ["k9", "k10"];
+
       if (
         !member ||
         !featureRealmEnabled(gate?.[keys[0]!], context.rules.kingdomId) ||
         !versionAtLeast("12.06.0", gate?.[keys[1]!] ?? "")
       )
         continue;
+
       if (
         type >= 3 &&
         !text(event, "serverGroup").split("|").includes(String(context.rules.kingdomId))
       )
         continue;
+
       const delta = heroScoreDelta(
         context.rules,
         event,
         actions.filter((action) => action.at === at),
       );
+
       if (!delta) continue;
+
       const key = `${event.uuid}:${member}`,
         prior =
           scores.get(key) ??
@@ -168,7 +194,9 @@ export async function flushHeroScore(context: CityProgressionContext) {
             : castle
               ? Math.min(29, num(castle, "level") - 1)
               : -1;
+
       if (level < 0) continue;
+
       const row: Row = {
           uid: member,
           actId: text(event, "uuid"),
@@ -182,6 +210,7 @@ export async function flushHeroScore(context: CityProgressionContext) {
         rewards = heroEventRewards(event, level, context.rules),
         flags = new Set(heroScoreFlags(row).split(",").filter(Boolean).map(Number));
       let recipients = [context.owner];
+
       if (isAlliance) {
         const previous =
             contributions.get(key) ??
@@ -203,6 +232,7 @@ export async function flushHeroScore(context: CityProgressionContext) {
         participants.add(context.owner);
         recipients = snapshot.members.filter((uid) => participants.has(uid)).toSorted();
       }
+
       rewards.targets.forEach((target, index) => {
         if (score >= target && !flags.has(index)) {
           enqueueTarget(
@@ -228,8 +258,10 @@ export async function flushHeroScore(context: CityProgressionContext) {
         ...(isAlliance ? { aid: sfs.string(alliance) } : {}),
       });
       context.economy.push?.("push.act.score.obtain", body);
+
       if (isAlliance && context.economy.event) {
         const members = snapshot.members.filter((uid) => uid !== context.owner);
+
         for (let offset = 0; offset < members.length; offset += 64)
           context.economy.event({
             id: identity("notify", event.uuid, at.toString(), offset),
@@ -242,21 +274,26 @@ export async function flushHeroScore(context: CityProgressionContext) {
       }
     }
   }
+
   if (scores.size)
     context.write.heroScore = {
       scores: [...scores.values()],
       contributions: [...contributions.values()],
     };
 }
-export const heroTargetDomain: CityDomain = {
-  commands: ["hero.target.deliver"],
-  types: [],
-  async prepare(context, _command, params: Fields) {
+
+export class HeroTargetDomain extends CityCommandDomain {
+  public readonly commands: CityDomain["commands"] = ["hero.target.deliver"];
+
+  public readonly types: CityDomain["types"] = [];
+
+  public readonly prepare: CityDomain["prepare"] = async (context, _command, params: Fields) => {
     const act = str(params, "actId"),
       alliance = str(params, "aid", ""),
       stage = int(params, "stage"),
       reward = str(params, "reward"),
       message = str(params, "message");
+
     if (
       !act ||
       act.length > 40 ||
@@ -267,9 +304,12 @@ export const heroTargetDomain: CityDomain = {
       str(params, "operationId") !== heroTargetOperation(act, alliance, stage, context.owner)
     )
       throw new Error("Invalid hero target delivery");
+
     mailRewardEntries(reward);
     const contents = javaMailBytes(`${message}|${stage}`);
+
     if (!contents) throw new Error("Missing hero target mail");
+
     const quests = (context.write.quests ??= {});
     const mail: AvatarSystemMail = {
       uid: randomUUID().replaceAll("-", "") + "00",
@@ -288,6 +328,7 @@ export const heroTargetDomain: CityDomain = {
     let achievement: Fields | undefined;
     const snapshot = await context.state.heroScore?.load(context.now),
       event = snapshot?.events.find((row) => row.uuid === act);
+
     if (snapshot && event) {
       const eventType = num(event, "type"),
         family = eventType >= 3 ? 3 : eventType,
@@ -305,8 +346,11 @@ export const heroTargetDomain: CityDomain = {
                 : allianceEvent
                   ? heroHistoryBand(num(row, "type"), 0, snapshot.alliancePower, context.rules)
                   : Math.min(29, num(castle ?? {}, "level") - 1);
+
             if (level < 0) return undefined;
+
             const rewards = heroEventRewards(row, level, context.rules);
+
             return heroEventEntry(
               row,
               { score: rewards.rule.score ?? "", value: rewards.value, targets: rewards.targets },
@@ -335,7 +379,9 @@ export const heroTargetDomain: CityDomain = {
         eventType: sfs.int(eventType === 2 || eventType === 4 ? 2 : 1),
       };
     }
+
     if (!context.economy.event) throw new Error("Hero target mail publication unavailable");
+
     const full = context.rules.items.get("chat_switch")?.k3?.split("|").includes("1") ?? false;
     context.economy.event({
       id: "hero-target-mail",
@@ -346,9 +392,13 @@ export const heroTargetDomain: CityDomain = {
         ...(achievement ? { achievement: sfs.object(achievement) } : {}),
       }),
     });
+
     return { response: encode({}), event: null };
-  },
-  async apply() {
+  };
+
+  public readonly apply: CityDomain["apply"] = async () => {
     throw new Error("Unsupported hero target activity");
-  },
-};
+  };
+}
+
+export const heroTargetDomain: CityDomain = new HeroTargetDomain();

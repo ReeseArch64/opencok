@@ -17,6 +17,7 @@ export async function loadMilitaryRanking(
 ): Promise<string[]> {
   if (![0, 1].includes(type) || !Number.isInteger(group) || (group | 0) !== group)
     throw new DependencyError("military ranking selector");
+
   const prefix = type === 0 ? "score" : "exp";
   const result = await command(
     "EVAL",
@@ -26,14 +27,20 @@ export async function loadMilitaryRanking(
     `${prefix}RankingKey_${group}`,
     `${prefix}RankingUserKey_${group}`,
   );
+
   if (!Array.isArray(result) || result.length > 151)
     throw new DependencyError("military ranking list");
+
   let bytes = 0;
+
   return result.map((row) => {
     if (typeof row !== "string" || !row.isWellFormed())
       throw new DependencyError("military ranking row");
+
     bytes += Buffer.byteLength(row);
+
     if (bytes > 4 * 1024 * 1024) throw new DependencyError("military ranking size");
+
     return row;
   });
 }

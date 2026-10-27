@@ -13,4 +13,5 @@ export interface EquipStrengthDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type EquipStrengthDefinitionCatalog = CatalogTable<EquipStrengthDefinition>;

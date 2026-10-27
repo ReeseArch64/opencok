@@ -1,4 +1,5 @@
 import type { Resource3Definition } from "../types/resource3.ts";
+
 export const records: readonly Resource3Definition[] = [
   {
     "id": 830001,

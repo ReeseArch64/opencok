@@ -4,4 +4,5 @@ export interface ArmyDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type ArmyDefinitionCatalog = CatalogTable<ArmyDefinition>;

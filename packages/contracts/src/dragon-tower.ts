@@ -1,4 +1,5 @@
 import type { Row } from "./rows";
+
 export interface DragonTowerState {
   user?: Row;
   layers: readonly Row[];
@@ -11,6 +12,7 @@ export interface DragonTowerState {
   historyRanking?: readonly Row[];
   reports?: readonly Row[];
 }
+
 export interface DragonTowerWrite {
   user?: Row;
   layers?: readonly Row[];

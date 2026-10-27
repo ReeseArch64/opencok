@@ -5,4 +5,5 @@ export interface WkPersonRewardDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type WkPersonRewardDefinitionCatalog = CatalogTable<WkPersonRewardDefinition>;

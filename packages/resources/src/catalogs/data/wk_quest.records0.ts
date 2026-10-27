@@ -1,4 +1,5 @@
 import type { WkQuestDefinition } from "../types/wk_quest.ts";
+
 export const records: readonly WkQuestDefinition[] = [
   {
     "id": 218300,

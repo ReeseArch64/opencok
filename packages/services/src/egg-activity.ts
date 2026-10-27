@@ -1,3 +1,4 @@
+import { CityCommandDomain } from "./city-command-domain.ts";
 import type { AvatarSystemMail } from "@opencok/contracts/files";
 import { createHash, randomInt } from "node:crypto";
 import { sfs, encode, str, Type, type Fields } from "@opencok/messages/sfs";
@@ -25,16 +26,25 @@ import { errors } from "@opencok/constants/game";
 import { pinGoldEggRewards } from "./gold-eggs-rewards";
 import { grantNativeProgressionReward } from "./progression-rewards";
 import { javaHashMapOrder } from "@opencok/rules/java-hash-map-order";
-import type { CityDomain, CityProgressionContext } from "./city-progression";
+import type { CityDomain } from "./city-domain.ts";
+import type { CityProgressionContext } from "./city-progression-context.ts";
+
 function charge(context: CityProgressionContext, value: number) {
   if (context.balance("gold") < BigInt(value)) throw new GameError(errors.gold, "city_progression");
+
   if (value) context.economy.gold(-BigInt(value));
 }
-export function createEggActivityDomain(
-  random: (maximum: number) => number = randomInt,
-): CityDomain {
-  return {
-    commands: [
+
+export class EggActivityDomain extends CityCommandDomain {
+  public readonly commands: CityDomain["commands"];
+  public readonly types: CityDomain["types"];
+  public readonly prepare: CityDomain["prepare"];
+  public readonly apply: CityDomain["apply"];
+
+  public constructor(random: (maximum: number) => number = randomInt) {
+    super();
+
+    this.commands = [
       "egg.act.info",
       "egg.act.open",
       "egg.act.reward",
@@ -42,20 +52,27 @@ export function createEggActivityDomain(
       "egg.exp.reward",
       "egg.goods.full",
       "egg.activity.init",
-    ],
-    types: [],
-    async prepare(context, command, params) {
+    ];
+
+    this.types = [];
+
+    this.prepare = async (context, command, params) => {
       const state = context.state.eggActivity,
         opened = eggActivityOpen(context.rules, context.now),
         empty = () => ({ response: encode({}), event: null });
+
       if (!state) eggActivityFailure();
+
       if (num(context.state.profile, "crossFightSrcServerId") > 0) {
         if (command === "egg.activity.init") return empty();
+
         eggActivityFailure();
       }
+
       const saved = state.record;
       const pinned = (id: string) => pinGoldEggRewards(context, [id], 1, random);
       const grant = (id: string) => grantNativeProgressionReward(context, pinned(id));
+
       if (command === "egg.activity.init") {
         if (
           !eggActivityWindow(context.rules) ||
@@ -66,11 +83,14 @@ export function createEggActivityDomain(
           long(saved, "eggCd") > context.now
         )
           return empty();
+
         const row = { ...eggActivityRecord(saved, context.owner) },
           rule = eggActivityRule(context.rules, text(row, "curEgg")),
           template = context.rules.mail.get("11724"),
           contents = javaMailBytes(template?.message);
+
         if (!template || !contents) eggActivityFailure();
+
         const mail: AvatarSystemMail = {
           uid:
             createHash("sha256")
@@ -92,7 +112,9 @@ export function createEggActivityDomain(
         quests.mail = [...(quests.mail ?? []), mail];
         row.eggCd = eggActivityIdle;
         context.write.eggActivity = { record: row };
+
         if (!context.economy.event) eggActivityFailure();
+
         context.economy.event({
           id: "egg-closure-mail",
           type: "egg.activity.mail",
@@ -106,13 +128,17 @@ export function createEggActivityDomain(
             ),
           }),
         });
+
         return empty();
       }
+
       if (!opened) {
         if (command === "egg.act.info")
           return { response: encode({ opened: sfs.bool(false) }), event: null };
+
         eggActivityFailure();
       }
+
       const row: Row = saved
         ? { ...eggActivityRecord(saved, context.owner) }
         : {
@@ -126,6 +152,7 @@ export function createEggActivityDomain(
         ...eggActivityCollection(value, context.owner),
       }));
       let body: Fields;
+
       if (command === "egg.act.info")
         body = {
           opened: sfs.bool(true),
@@ -135,9 +162,12 @@ export function createEggActivityDomain(
       else if (command === "egg.act.open") {
         if (params.eggId?.type !== Type.String || long(row, "eggCd") !== eggActivityIdle)
           eggActivityFailure();
+
         const id = str(params, "eggId"),
           rule = eggActivityRule(context.rules, id);
+
         if (id !== text(row, "curEgg")) charge(context, cityInteger(rule.cost, 1));
+
         row.curEgg = id;
         row.eggCd = cityAmount(context.now + BigInt(cityInteger(rule.time, 1)) * 1000n);
         body = {
@@ -154,6 +184,7 @@ export function createEggActivityDomain(
       } else if (command === "egg.act.reward") {
         if (long(row, "eggCd") === eggActivityIdle || long(row, "eggCd") > context.now)
           eggActivityFailure();
+
         const id = text(row, "curEgg"),
           rule = eggActivityRule(context.rules, id),
           raw = pinned(rule.reward ?? ""),
@@ -167,6 +198,7 @@ export function createEggActivityDomain(
             ),
           ]);
         let eggGoods: Fields = {};
+
         if (goods.length) {
           const existing = collections.find((value) => value.eggId === id) ?? {
               uid: context.owner,
@@ -180,6 +212,7 @@ export function createEggActivityDomain(
           context.write.eggActivity = { collection: existing };
           eggGoods = eggCollectionView(existing);
         }
+
         row.exp = cityInteger(num(row, "exp") + cityInteger(rule.exp_finish));
         row.curEgg = eggActivityDraw(context.rules, random);
         row.eggCd = eggActivityIdle;
@@ -192,18 +225,23 @@ export function createEggActivityDomain(
         const thresholds = eggActivityThresholds(context.rules),
           index = Math.min(num(row, "curExpStage"), thresholds.length - 1),
           threshold = thresholds[index]!;
+
         if (num(row, "exp") < threshold.exp) eggActivityFailure();
+
         const reward = grant(threshold.reward);
         row.exp = num(row, "exp") - threshold.exp;
         row.curExpStage = Math.min(index + 1, thresholds.length - 1);
         body = { eggAct: sfs.object(eggActivityView(row)), reward: sfs.array(reward) };
       } else {
         if (params.eggId?.type !== Type.String) eggActivityFailure();
+
         const id = str(params, "eggId"),
           rule = eggActivityRule(context.rules, id),
           collection = collections.find((value) => value.eggId === id);
+
         if (!collection || num(collection, "reward") === 1 || eggActivityMissing(collection, rule))
           eggActivityFailure();
+
         const reward = grant(rule.full ?? "");
         row.exp = cityInteger(num(row, "exp") + cityInteger(rule.exp));
         collection.reward = 1;
@@ -214,11 +252,20 @@ export function createEggActivityDomain(
           eggGoods: sfs.object(eggCollectionView(collection)),
         };
       }
+
       (context.write.eggActivity ??= {}).record = row;
+
       return { response: encode(body), event: null };
-    },
-    async apply() {
+    };
+
+    this.apply = async () => {
       eggActivityFailure();
-    },
-  };
+    };
+  }
+}
+
+export function createEggActivityDomain(
+  random: (maximum: number) => number = randomInt,
+): CityDomain {
+  return new EggActivityDomain(random);
 }

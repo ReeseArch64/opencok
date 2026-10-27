@@ -123,7 +123,9 @@ export function getPowerByPlayerId(
         powerServer: undefined,
         throneRewards: [],
       };
+
       if (!profile) return empty;
+
       const effects = await readPlayerEffects(tx, profile);
       const statistics = (
         await tx.select().from(playerinfo).where(eq(playerinfo.uid, uid)).limit(1)
@@ -191,6 +193,7 @@ export function getPowerByPlayerId(
           .where(eq(pic_upload_record.uid, uid))
           .limit(1)
       )[0];
+
       return {
         ...effects,
         profile,
@@ -209,15 +212,19 @@ export function getPowerByPlayerId(
 
 function bound<T extends { limit(value: number): unknown }>(query: T, bounded: boolean): T {
   if (bounded) query.limit(4097);
+
   return query;
 }
+
 export async function readPlayerEffects(
   tx: Pick<Database["kingdom"]["db"], "select">,
   profile: Row,
   bounded = false,
 ): Promise<PlayerEffectSnapshot> {
   const uid = profile.uid;
+
   if (typeof uid !== "string" || !uid) throw new Error("Invalid effect owner");
+
   const generals = await bound(
     tx
       .select({
@@ -456,6 +463,7 @@ export async function readPlayerEffects(
     )
     .orderBy(asc(cross_throne_reward_record.id))
     .limit(4097);
+
   if (
     bounded &&
     [
@@ -476,6 +484,7 @@ export async function readPlayerEffects(
     ].some((rows) => rows.length > 4096)
   )
     throw new Error("Too many player effect records");
+
   return {
     profile,
     generals,

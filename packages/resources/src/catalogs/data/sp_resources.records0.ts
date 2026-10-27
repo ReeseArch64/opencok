@@ -1,4 +1,5 @@
 import type { SpResourcesDefinition } from "../types/sp_resources.ts";
+
 export const records: readonly SpResourcesDefinition[] = [
   {
     "id": 518000,

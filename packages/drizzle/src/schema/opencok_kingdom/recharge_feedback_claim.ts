@@ -1,6 +1,7 @@
 import { sql } from "drizzle-orm";
 import { bigint, check, primaryKey, varchar } from "drizzle-orm/pg-core";
 import { opencok_kingdom } from "../namespaces";
+
 export const recharge_feedback_claim = opencok_kingdom.table(
   "recharge_feedback_claim",
   {

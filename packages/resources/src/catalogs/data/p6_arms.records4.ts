@@ -1,4 +1,5 @@
 import type { P6ArmsDefinition } from "../types/p6_arms.ts";
+
 export const records: readonly P6ArmsDefinition[] = [
   {
     "id": 2955842,

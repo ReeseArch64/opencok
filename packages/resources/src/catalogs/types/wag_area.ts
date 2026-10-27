@@ -8,4 +8,5 @@ export interface WagAreaDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type WagAreaDefinitionCatalog = CatalogTable<WagAreaDefinition>;

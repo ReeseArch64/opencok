@@ -1,4 +1,5 @@
 import type { DragonBaseDefinition } from "../types/dragon_base.ts";
+
 export const records: readonly DragonBaseDefinition[] = [
   {
     "id": 109000,

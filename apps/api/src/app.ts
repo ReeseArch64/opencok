@@ -6,27 +6,20 @@ import { provisioningHandler, realmProvisioner } from "@opencok/connection/provi
 import { BODY_LIMIT } from "@opencok/contracts/files";
 import { createFiles } from "./files.ts";
 import { createChatDiscovery } from "@opencok/connection/chat-discovery";
-import { Context, Effect, Layer } from "effect";
+import { Effect, Layer } from "effect";
 import { logEvent } from "@opencok/core/logging";
 import { ApiConfig } from "./config.ts";
 import { acquireResource, fromPromise } from "@opencok/core/resource";
 import { serveHttp } from "@opencok/core/http";
-import { createHandler } from "@opencok/api/handler";
+import { ApiRequestHandler } from "@opencok/api/api-request-handler";
+import { ApiRouter } from "@opencok/api/api-router";
 import { ServerDirectory } from "@opencok/storage/server-directory";
 import { AccountStore } from "@opencok/repositories/account";
 import { DiscoveryRedis } from "@opencok/storage/discovery-redis";
 
-export class ApiDependencies extends Context.Service<
-  ApiDependencies,
-  {
-    accounts: Parameters<typeof createHandler>[0];
-    directory: Parameters<typeof createHandler>[1];
-    redis: Parameters<typeof createHandler>[2];
-    chatDiscovery?: Parameters<typeof createHandler>[3];
-    files?: Parameters<typeof createHandler>[4];
-    provisioning?: Parameters<typeof createHandler>[5];
-  }
->()("@opencok/api/Dependencies") {}
+import { ApiDependencies } from "./api-dependencies.ts";
+
+export { ApiDependencies } from "./api-dependencies.ts";
 
 export const ApiDependenciesLive = Layer.effect(
   ApiDependencies,
@@ -49,6 +42,7 @@ export const ApiDependenciesLive = Layer.effect(
           (value) => value.close(),
         )
       : undefined;
+
     return {
       provisioning:
         identity && config.provisioning
@@ -85,7 +79,10 @@ export const ApiDependenciesLive = Layer.effect(
 
 export const createApp = Effect.gen(function* () {
   const { accounts, directory, redis, chatDiscovery, files, provisioning } = yield* ApiDependencies;
-  return createHandler(accounts, directory, redis, chatDiscovery, files, provisioning);
+
+  return new ApiRequestHandler(
+    new ApiRouter({ accounts, directory, redis, chatDiscovery, files, provisioning }),
+  );
 });
 
 export const serveApi = Effect.gen(function* () {
@@ -96,5 +93,6 @@ export const serveApi = Effect.gen(function* () {
     app.fetch,
   );
   logEvent("listening", { host: config.host, port: server.port, outcome: "success" });
+
   return server;
 });

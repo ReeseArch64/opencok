@@ -1,4 +1,5 @@
 import type { DragonWordsDefinition } from "../types/dragon_words.ts";
+
 export const records: readonly DragonWordsDefinition[] = [
   {
     "id": 4300001,

@@ -7,4 +7,5 @@ export interface WkQuestDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type WkQuestDefinitionCatalog = CatalogTable<WkQuestDefinition>;

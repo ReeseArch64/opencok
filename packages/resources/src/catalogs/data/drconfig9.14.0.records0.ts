@@ -1,4 +1,5 @@
 import type { Drconfig9140Definition } from "../types/drconfig9.14.0.ts";
+
 export const records: readonly Drconfig9140Definition[] = [
   {
     "id": 43,

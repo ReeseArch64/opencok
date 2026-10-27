@@ -1,4 +1,5 @@
 import type { ReputationActionDefinition } from "../types/reputation_action.ts";
+
 export const records: readonly ReputationActionDefinition[] = [
   {
     "id": 5603001,

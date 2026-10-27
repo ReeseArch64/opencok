@@ -23,6 +23,7 @@ export interface ProductionPreparation {
     now: bigint,
   ): Promise<(building: Row, from: bigint) => Promise<readonly ProductionRate[]>>;
 }
+
 export function createProductionExecutor(
   db: Database["kingdom"]["db"],
   authority: RealmAuthority,
@@ -30,10 +31,12 @@ export function createProductionExecutor(
   now = Date.now,
 ): ProductionExecutor {
   const execute = createMutationExecutor(db, authority, now);
+
   return (command, plan) =>
     execute(command, async (tx) => {
       const captured = BigInt(now());
       const rates = await preparation.prepare(tx, command.owner, captured);
+
       return executeInventoryTransaction(
         tx,
         command.owner,
@@ -45,7 +48,9 @@ export function createProductionExecutor(
             .orderBy(asc(building_production.buildingId))
             .limit(257)
             .for("update");
+
           if (rows.length > 256) throw new Error("Production aggregate exceeds bound");
+
           const accounts = rows.map((row) => ({ ...row, rates: decodeProductionRates(row.rates) }));
           const result = await plan({
             ...inventory,
@@ -65,23 +70,28 @@ export function createProductionExecutor(
                   )
               : undefined,
           });
+
           if (
             result.accounts.length > 256 ||
             new Set(result.accounts.map((row) => row.buildingId)).size !== result.accounts.length
           )
             throw new Error("Invalid production write set");
+
           for (const account of result.accounts) {
             if (
               account.ownerId !== command.owner ||
               !inventory.buildings.some((row) => row.uuid === account.buildingId)
             )
               throw new Error("Invalid production owner");
+
             const previous = accounts.find((row) => row.buildingId === account.buildingId);
+
             if (
               previous &&
               (previous.asset !== account.asset || account.settledAt < previous.settledAt)
             )
               throw new Error("Production checkpoint conflict");
+
             settleProduction(account, account.settledAt);
             const value = { ...account, rates: encodeProductionRates(account.rates) };
             await tx
@@ -89,9 +99,11 @@ export function createProductionExecutor(
               .values(value)
               .onConflictDoUpdate({ target: building_production.buildingId, set: value });
           }
+
           for (const building of result.buildings) {
             if (!inventory.buildings.some((row) => row.uuid === building.uuid))
               throw new Error("Unknown production building");
+
             await tx
               .update(user_building)
               .set({
@@ -105,6 +117,7 @@ export function createProductionExecutor(
                 ),
               );
           }
+
           return result;
         },
         command.command,
@@ -124,6 +137,7 @@ export async function changeProductionInTransaction<T>(
 ): Promise<T> {
   if (initial.length > 256 || new Set(initial.map((row) => row.buildingId)).size !== initial.length)
     throw new Error("Invalid production rate change set");
+
   const saved = await tx
     .select()
     .from(building_production)
@@ -131,7 +145,9 @@ export async function changeProductionInTransaction<T>(
     .orderBy(asc(building_production.buildingId))
     .limit(257)
     .for("update");
+
   if (saved.length > 256) throw new Error("Production aggregate exceeds bound");
+
   const buildings = await tx
     .select({ id: user_building.uuid })
     .from(user_building)
@@ -139,14 +155,18 @@ export async function changeProductionInTransaction<T>(
   const accounts = initial.map((account) => {
     if (account.ownerId !== owner || !buildings.some((row) => row.id === account.buildingId))
       throw new Error("Invalid production rate change owner");
+
     const previous = saved.find((row) => row.buildingId === account.buildingId);
+
     if (previous && previous.asset !== account.asset) throw new Error("Production asset changed");
+
     return settleProduction(
       previous ? { ...previous, rates: decodeProductionRates(previous.rates) } : account,
       now,
     );
   });
   const changed = await change();
+
   for (const account of accounts) {
     const next = changeProductionRate(account, now, await changed.rates(account.buildingId));
     const value = { ...next, rates: encodeProductionRates(next.rates) };
@@ -155,5 +175,6 @@ export async function changeProductionInTransaction<T>(
       .values(value)
       .onConflictDoUpdate({ target: building_production.buildingId, set: value });
   }
+
   return changed.result;
 }

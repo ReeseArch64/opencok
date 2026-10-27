@@ -1,4 +1,5 @@
 import type { ActivityEventDefinition } from "../types/activity_event.ts";
+
 export const records: readonly ActivityEventDefinition[] = [
   {
     "id": 9005001,

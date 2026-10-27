@@ -3,6 +3,7 @@ import { command_receipt } from "@opencok/drizzle/schema/opencok_kingdom/command
 import { economy_posting } from "@opencok/drizzle/schema/opencok_kingdom/economy_posting";
 import type { ChatNoticeCostReader } from "@opencok/contracts/chat-delivery";
 import type { Database } from "./game.ts";
+
 export function createChatNoticeCostReader(
   db: Database["kingdom"]["db"],
   realm: number,
@@ -14,8 +15,10 @@ export function createChatNoticeCostReader(
       eq(command_receipt.requestId, requestId),
     );
     const [receipt] = await db.select().from(command_receipt).where(key).limit(1);
+
     if (!receipt || !["chat.notice", "chat.original.notice"].includes(receipt.command))
       throw new Error("Notice cost receipt unavailable");
+
     const postings = await db
       .select({
         asset: economy_posting.asset,
@@ -31,6 +34,7 @@ export function createChatNoticeCostReader(
         ),
       )
       .limit(16);
+
     return { createdAt: Number(receipt.createdAt), postings };
   };
 }

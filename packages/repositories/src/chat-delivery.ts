@@ -7,21 +7,26 @@ import type { ChatDeliveryStore } from "@opencok/contracts/chat-delivery";
 import type { Frame } from "@opencok/contracts/chat";
 import { chatMessage } from "./chat-messages.ts";
 import type { Database } from "./game.ts";
+
 export function createChatDeliveryStore(
   db: Database["databases"]["global"]["db"],
   clock: () => Date,
 ): ChatDeliveryStore {
   const now = () => BigInt(clock().getTime());
+
   return {
     async acquire(instance, token) {
       if (!/^[a-zA-Z0-9_-]{1,100}$/.test(instance)) throw new TypeError("Invalid chat instance");
+
       await db.transaction(async (tx) => {
         await tx.execute(
           sql`select pg_advisory_xact_lock(hashtextextended(${`chat:consumer:${instance}`},0))`,
         );
         const [old] = await tx.select().from(chat_consumer).where(eq(chat_consumer.id, instance));
+
         if (old && old.token !== token && old.leaseUntil > now())
           throw new Error("Chat instance already active");
+
         await tx
           .insert(chat_consumer)
           .values({
@@ -40,6 +45,7 @@ export function createChatDeliveryStore(
     async poll(instance, token, limit = 100) {
       if (!Number.isInteger(limit) || limit < 1 || limit > 100)
         throw new TypeError("Invalid delivery limit");
+
       const [previous] = await db
         .select()
         .from(chat_consumer)
@@ -55,7 +61,9 @@ export function createChatDeliveryStore(
           ),
         )
         .returning();
+
       if (!consumer) throw new Error("Chat distribution lease lost");
+
       const [oldest] = await db
         .select({ sequence: chat_event.sequence })
         .from(chat_event)
@@ -68,6 +76,7 @@ export function createChatDeliveryStore(
         .orderBy(asc(chat_event.sequence))
         .limit(limit);
       const events = [];
+
       for (const row of rows) {
         const [message] =
           row.message && row.kind === "message"
@@ -128,6 +137,7 @@ export function createChatDeliveryStore(
                   : null,
         });
       }
+
       return {
         events,
         resync:
@@ -138,6 +148,7 @@ export function createChatDeliveryStore(
     },
     async acknowledge(instance, token, sequence) {
       if (!/^\d+$/.test(sequence)) throw new TypeError("Invalid delivery cursor");
+
       const rows = await db
         .update(chat_consumer)
         .set({ cursor: BigInt(sequence), updatedAt: now() })
@@ -150,6 +161,7 @@ export function createChatDeliveryStore(
           ),
         )
         .returning({ id: chat_consumer.id });
+
       if (!rows.length) throw new Error("Chat distribution lease lost");
     },
     async release(instance, token) {

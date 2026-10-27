@@ -1,4 +1,5 @@
 import type { CivilizationInjuryDefinition } from "../types/Civilization_injury.ts";
+
 export const records: readonly CivilizationInjuryDefinition[] = [
   { "id": 5857001, "DValueS": -500, "DValueE": -1000, "DValue1per": 100, "Cumulants": -10 },
   { "id": 5857002, "DValueS": 0, "DValueE": -500, "DValue1per": 50, "Cumulants": 0 },

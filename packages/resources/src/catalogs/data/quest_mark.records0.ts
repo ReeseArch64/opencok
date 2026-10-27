@@ -1,4 +1,5 @@
 import type { QuestMarkDefinition } from "../types/quest_mark.ts";
+
 export const records: readonly QuestMarkDefinition[] = [
   { "quest": "【新手引导】农田升1级", "id": 2100101, "order": 100010 },
   { "quest": "【大本1】校场升1级", "id": 2200801, "order": 100090 },

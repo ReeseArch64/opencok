@@ -1,4 +1,5 @@
 import type { WagRoleDefinition } from "../types/wag_role.ts";
+
 export const records: readonly WagRoleDefinition[] = [
   { "id": 20010000, "type": 1, "buildId": 400000, "pos": 0, "buildLevel": 30, "buildStar": 6 },
   { "id": 20010001, "type": 1, "buildId": 401000, "pos": 13, "buildLevel": 30, "buildStar": 6 },

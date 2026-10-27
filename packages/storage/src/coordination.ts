@@ -8,10 +8,12 @@ export interface CoordinationConfig {
   zkPath: string;
   kingdomId: number;
 }
+
 export class Coordination {
   private readonly client: Client;
   private registered = false;
   private expired = false;
+
   constructor(readonly config: CoordinationConfig) {
     this.client = zk.createClient(config.zookeeper, {
       sessionTimeout: 15000,
@@ -29,9 +31,11 @@ export class Coordination {
 
     this.client.on("error", () => {});
   }
+
   get ready() {
     return this.registered && !this.expired && this.client.getState() === zk.State.SYNC_CONNECTED;
   }
+
   async start() {
     try {
       await bounded(
@@ -66,9 +70,11 @@ export class Coordination {
       this.registered = true;
     } catch {
       this.client.close();
+
       throw new DependencyError("zookeeper");
     }
   }
+
   close() {
     this.registered = false;
     this.client.close();

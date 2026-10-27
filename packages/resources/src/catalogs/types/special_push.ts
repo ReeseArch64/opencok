@@ -10,4 +10,5 @@ export interface SpecialPushDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type SpecialPushDefinitionCatalog = CatalogTable<SpecialPushDefinition>;

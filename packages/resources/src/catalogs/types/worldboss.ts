@@ -14,4 +14,5 @@ export interface WorldbossDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type WorldbossDefinitionCatalog = CatalogTable<WorldbossDefinition>;

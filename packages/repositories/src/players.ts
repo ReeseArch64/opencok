@@ -14,6 +14,7 @@ import type { Row } from "@opencok/contracts/rows";
 import { DependencyError } from "@opencok/errors/dependency";
 
 type Databases = ReturnType<typeof createDatabases>;
+
 type KingdomDb = ReturnType<Databases["getKingdom"]>["db"];
 
 export async function checkPlayerSummaryStore(db: KingdomDb) {
@@ -31,7 +32,9 @@ export async function checkPlayerSummaryStore(db: KingdomDb) {
 
 export async function getLocalPlayerSummariesByIds(db: KingdomDb, uids: string[]): Promise<Row[]> {
   if (!uids.length) return [];
+
   if (uids.length > 50) throw new DependencyError("player batch");
+
   return db.transaction(
     async (tx) => {
       const rows = await tx
@@ -69,7 +72,9 @@ export async function getLocalPlayerSummariesByIds(db: KingdomDb, uids: string[]
         )
         .leftJoin(user_mixed_info, eq(user_mixed_info.uid, userprofile.uid))
         .where(inArray(userprofile.uid, uids));
+
       if (!rows.length) return [];
+
       const found = rows.map((row) => row.uid);
       const titles = await tx
         .select({ uid: alliance_title.uid, title: alliance_title.title })
@@ -94,8 +99,10 @@ export async function getLocalPlayerSummariesByIds(db: KingdomDb, uids: string[]
         .from(stat_reg)
         .where(inArray(stat_reg.uid, found))
         .orderBy(asc(stat_reg.type));
+
       return rows.map((row) => {
         const state = states.find((entry) => entry.uid === row.uid);
+
         return {
           ...row,
           officer: titles.find((entry) => entry.uid === row.uid)?.title ?? null,
@@ -116,45 +123,62 @@ export async function getPlayerSummariesByIds(
   allServers: boolean,
 ): Promise<PlayerSummary[]> {
   if (!uids.length) return [];
+
   if (uids.length > 50) throw new DependencyError("player batch");
+
   const local = await getLocalPlayerSummariesByIds(databases.getKingdom(kingdomId).db, [
     ...new Set(uids),
   ]);
   const byUid = new Map(local.map((data) => [String(data.uid), data]));
   const result: PlayerSummary[] = uids.flatMap((uid) => {
     const data = byUid.get(uid);
+
     return data ? [{ data, kingdomId, remote: false }] : [];
   });
+
   if (!allServers) return result;
+
   const missing = uids
     .filter((uid) => !byUid.has(uid))
     .map((uid) => uid.replaceAll("@mod", ""))
     .filter((uid) => /^\d+$/.test(uid));
+
   if (!missing.length) return result;
+
   const accounts = await databases.global.db
     .select({ uid: account_new.gameUid, server: account_new.server })
     .from(account_new)
     .where(inArray(account_new.gameUid, [...new Set(missing)]));
   const groups = new Map<number, string[]>();
+
   for (const account of accounts) {
     const id = Number(account.server);
+
     if (!Number.isSafeInteger(id) || !databases.kingdoms.has(id))
       throw new DependencyError("player realm");
+
     const group = groups.get(id) ?? [];
     group.push(account.uid);
     groups.set(id, group);
   }
+
   const remote = new Map<string, PlayerSummary>();
+
   for (const [id, ids] of groups) {
     const rows = await getLocalPlayerSummariesByIds(databases.getKingdom(id).db, ids);
+
     for (const data of rows) {
       if (Number(data.profileServerId) !== id) throw new DependencyError("player realm");
+
       remote.set(String(data.uid), { data, kingdomId: id, remote: true });
     }
   }
+
   for (const uid of missing) {
     const summary = remote.get(uid);
+
     if (summary) result.push(summary);
   }
+
   return result;
 }

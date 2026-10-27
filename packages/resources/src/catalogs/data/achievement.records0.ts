@@ -1,4 +1,5 @@
 import type { AchievementDefinition } from "../types/achievement.ts";
+
 export const records: readonly AchievementDefinition[] = [
   {
     "id": 9200,

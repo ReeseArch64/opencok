@@ -25,6 +25,7 @@ export interface HeroInsideMemberResponse {
   readonly rank: number;
   readonly score: number;
 }
+
 export interface HeroInsideRankingResponse {
   readonly rankList: HeroInsideMemberResponse[];
 }
@@ -42,18 +43,21 @@ export interface HeroHistoryMemberResponse {
   readonly abbr?: string;
   readonly icon?: string;
 }
+
 export interface HeroHistoryRealmResponse {
   readonly id: number;
   readonly rank: number;
   readonly name?: string;
   readonly banner?: string;
 }
+
 export interface HeroHistoryEntryResponse {
   readonly eventId: string;
   readonly endTime: bigint;
   readonly userList: HeroHistoryMemberResponse[];
   readonly kingdomList: HeroHistoryRealmResponse[];
 }
+
 export interface HeroHistoryResponse {
   readonly history: HeroHistoryEntryResponse[];
 }

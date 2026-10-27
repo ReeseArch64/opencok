@@ -4,4 +4,5 @@ export interface CharactersDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type CharactersDefinitionCatalog = CatalogTable<CharactersDefinition>;

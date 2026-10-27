@@ -1,4 +1,5 @@
 import type { LuckDrawDefinition } from "../types/luck_draw.ts";
+
 export const records: readonly LuckDrawDefinition[] = [
   { "id": 85050, "type": 0, "reward": 248543, "rate": 100, "color": 5 },
   { "id": 85051, "type": 0, "reward": 248544, "rate": 100, "color": 1 },

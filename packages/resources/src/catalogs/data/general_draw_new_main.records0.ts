@@ -1,4 +1,5 @@
 import type { GeneralDrawNewMainDefinition } from "../types/general_draw_new_main.ts";
+
 export const records: readonly GeneralDrawNewMainDefinition[] = [
   {
     "id": 89699,

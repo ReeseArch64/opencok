@@ -1,4 +1,5 @@
 import type { MagicRushDefinition } from "../types/magic_rush.ts";
+
 export const records: readonly MagicRushDefinition[] = [
   {
     "id": 57064,

@@ -16,31 +16,40 @@ import { mailBlank } from "@opencok/rules/mail";
 import { javaHashMapOrder, javaIntHashMapOrder } from "@opencok/rules/java-hash-map-order";
 
 const integer = (value: unknown) => Number(javaDecimal(String(value ?? 0), 32));
+
 const long = (value: unknown) => {
   if (typeof value === "number" && !Number.isSafeInteger(value))
     throw new Error("Invalid march time");
+
   return javaDecimal(String(value ?? 0), 64);
 };
+
 const string = (value: unknown) => {
   if (typeof value !== "string") throw new Error("Invalid march identity");
+
   return value;
 };
 
 function serializereconnectMarchDragon(row: Row | undefined, rules: Rules): Fields {
   if (!row) return { uuid: sfs.string(""), itemId: sfs.string(""), friendShip: sfs.int(0) };
+
   const rule = [...(rules.power.dragonLevels?.values() ?? [])].find(
     (rule) =>
       integer(rule.base_id) === integer(row.itemId) && integer(rule.level) === integer(row.lv),
   );
+
   if (!rule) throw new Error("Missing march dragon rule");
+
   const result: Fields = {
     userId: sfs.string(string(row.uid)),
     uuid: sfs.string(string(row.uuid)),
     itemId: sfs.string(String(integer(rule.id))),
     friendShip: sfs.int(integer(row.friendly)),
   };
+
   if (row.nickName !== null && row.nickName !== undefined)
     result.nickName = sfs.string(string(row.nickName));
+
   return result;
 }
 
@@ -61,37 +70,50 @@ function serializereconnectMarchGeneral(
   );
   const active = javaHashMapOrder(index.keys()).filter((id) => {
     const row = index.get(id)!;
+
     return integer(row.stat) === 3 && now <= long(row.actTime);
   });
+
   if (active.length) result.skillList = { type: Type.StringArray, value: active };
+
   return result;
 }
 
 function serializeReconnectMarchArmy(army: SavedMarchArmy | null, rules: Rules): Value[] {
   if (army === null) return [];
+
   if (army.soldiers === null) throw new Error("Missing saved march soldiers");
+
   const groups = new Map<
     number,
     { total: number; dead: number; knights: number; deadKnights: number }
   >();
+
   for (const soldier of army.soldiers) {
     const rule = rules.arms.get(soldier.armsId ?? "");
     let type = soldier.basicArm;
+
     if (type === null) {
       const arm = integer(rule?.arm);
+
       if (arm < 1 || arm > 8) throw new Error("Invalid march troop family");
+
       type = Math.floor((arm - 1) / 2);
     }
+
     const knight = integer(rule?.new_arms) !== 0;
     const group = groups.get(type) ?? { total: 0, dead: 0, knights: 0, deadKnights: 0 };
     group.total = (group.total + integer(soldier.total)) | 0;
     group.dead = (group.dead + integer(soldier.dead)) | 0;
+
     if (knight) {
       group.knights = (group.knights + integer(soldier.total)) | 0;
       group.deadKnights = (group.deadKnights + integer(soldier.dead)) | 0;
     }
+
     groups.set(type, group);
   }
+
   return [...groups].map(([type, group]) =>
     sfs.object({
       armId: sfs.int(type),
@@ -117,7 +139,9 @@ function serializereconnectMarchBase(
 ): Fields {
   const type = integer(row.type);
   const state = integer(row.state);
+
   if (state < 0 || state > 2) throw new Error("Invalid march state");
+
   const fields: Fields = {
     uuid: sfs.string(string(row.uuid)),
     o: sfs.string(string(row.ownerName ?? "")),
@@ -133,6 +157,7 @@ function serializereconnectMarchBase(
     slowDown: sfs.bool(integer(row.slowDown) === 1),
     isDuel: sfs.int(integer(row.isDuelSkill)),
   };
+
   if (!context.miracle || context.miracleState) {
     fields.territoryStartTime = sfs.long(
       long(context.miracle ? context.miracleState!.starttime : row.territoryStartTime),
@@ -144,10 +169,13 @@ function serializereconnectMarchBase(
       integer(context.miracle ? context.miracleState!.state : row.territoryStat),
     );
   }
+
   if (!mailBlank(row.plunderRes as string | null) || !mailBlank(row.retrieveRes as string | null))
     fields.plunderRes = sfs.string(string(row.plunderRes));
+
   let start = 0n;
   let end = long(row.arrivalTime);
+
   if (state === 0) start = long(row.marchStartTime);
   else if (state === 1) end = 0n;
   else {
@@ -159,6 +187,7 @@ function serializereconnectMarchBase(
     const remaining =
       army?.soldiers?.reduce((total, soldier) => (total + soldier.total - soldier.dead) | 0, 0) ??
       0;
+
     if (
       army === null ||
       context.siege ||
@@ -166,17 +195,23 @@ function serializereconnectMarchBase(
     )
       end = 0n;
   }
+
   fields.st = sfs.long(start);
   fields.et = sfs.long(end);
   fields.mt = sfs.int(integer(row.marchTime));
+
   if (!context.siege && !mailBlank(row.blackLandMarchTime as string | null))
     fields.mt2 = sfs.array(decodeLegacyJsonArray(string(row.blackLandMarchTime)));
+
   fields.army = sfs.array(reconnectMarchArmy(army, rules));
+
   if (context.siege) {
     fields.monsterCount = sfs.int(integer(row.monsterArmyCount));
     fields.monsterLevel = sfs.int(integer(row.monsterLevel));
   }
+
   if (context.resourceBattle) fields.occupyEndTime = sfs.long(long(row.occupyResourceEndTime));
+
   if (
     type === 0 &&
     state === 1 &&
@@ -187,6 +222,7 @@ function serializereconnectMarchBase(
     fields.treasureMapTime = sfs.int(integer(row.treasureMapTime));
     fields.treasureMapFinishTime = sfs.long(long(row.treasureMapFinishTime));
   }
+
   return fields;
 }
 
@@ -208,46 +244,65 @@ function serializereconnectMarches(
   now: bigint,
 ): Fields {
   const index = new Map<string, ReconnectMarchView>();
+
   for (const view of views) {
     const id = string(view.row.uuid);
+
     if (index.has(id)) throw new Error("Duplicate reconnect march");
+
     index.set(id, view);
   }
+
   const project = (view: ReconnectMarchView, visiting: Set<string>): Fields => {
     const id = string(view.row.uuid);
+
     if (visiting.has(id) || visiting.size > 1) throw new Error("Cyclic reconnect team");
+
     visiting.add(id);
     let result = { ...view.base };
     const dragons: Fields[] = view.hasDragon && view.petDragon ? [view.petDragon] : [];
     const generals: Fields[] = view.general ? [view.general] : [];
+
     if (view.petDragon) result.petDragon = sfs.object(view.petDragon);
+
     const team = view.team;
+
     if (team) {
       if (new Set(team.members).size !== team.members.length || team.members.includes(team.leader))
         throw new Error("Duplicate reconnect team members");
+
       const leader = index.get(team.leader);
+
       if (!leader) throw new Error("Missing reconnect team leader");
+
       const members = team.members.map((id) => {
         const member = index.get(id);
+
         if (
           !member ||
           member.row.teamId !== view.row.teamId ||
           member.row.worldId !== view.row.worldId
         )
           throw new Error("Inconsistent reconnect team member");
+
         return member;
       });
+
       if (leader.row.teamId !== view.row.teamId || leader.row.worldId !== view.row.worldId)
         throw new Error("Inconsistent reconnect team leader");
+
       result.team = sfs.string(team.leader);
       const type = integer(view.row.type);
       const state = integer(view.row.state);
+
       if ([5, 16, 19].includes(type) && state !== 2 && now >= long(view.row.marchArrivalTime)) {
         if (id !== team.leader) result = { ...project(leader, visiting), uuid: sfs.string(id) };
       } else if ([4, 15, 18].includes(type)) {
         const totals = new Map<number, { total: number; dead: number }>();
+
         for (const march of [leader, ...members]) {
           if (march.base.army?.type !== Type.Array) throw new Error("Invalid reconnect team army");
+
           for (const entry of march.base.army.value as Value[]) {
             const army = objectFields(entry);
             const arm = integer(army.armId?.value);
@@ -257,6 +312,7 @@ function serializereconnectMarches(
             totals.set(arm, total);
           }
         }
+
         result.army = sfs.array(
           javaIntHashMapOrder(totals.keys()).map((arm) =>
             sfs.object({
@@ -266,10 +322,14 @@ function serializereconnectMarches(
             }),
           ),
         );
+
         if (state === 2) result.leaderArmy = view.base.army!;
+
         if (now < long(view.row.marchStartTime)) result.sType = sfs.int(1);
       }
+
       result.tct = sfs.long(long(team.createdAt));
+
       if ([4, 15, 18].includes(type)) {
         for (const member of [
           leader,
@@ -277,20 +337,27 @@ function serializereconnectMarches(
         ]) {
           if (member.hasDragon && member.dragon) {
             const uuid = member.dragon.uuid?.value;
+
             if (typeof uuid !== "string") throw new Error("Invalid march dragon identity");
+
             if (!dragons.some((dragon) => dragon.uuid?.value === uuid)) dragons.push(member.dragon);
           }
+
           if (member.general) generals.push(member.general);
         }
       }
     }
+
     result.dragonList = sfs.array(dragons.map((dragon) => sfs.object(dragon)));
     result.generalList = sfs.array(generals.map((general) => sfs.object(general)));
     visiting.delete(id);
+
     return { ...result, ...view.late };
   };
   const own = views.filter((view) => view.row.ownerUid === owner);
+
   if (own.length > 32767) throw new Error("Oversized reconnect marches");
+
   return {
     worldMarch: sfs.array(
       own.map((view) =>

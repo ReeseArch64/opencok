@@ -6,6 +6,7 @@ export interface Account {
   active: string | null;
   lastTime: string;
 }
+
 export interface AccountReader {
   getAll(type: string, value: string, bound: boolean): Promise<Account[]>;
 }

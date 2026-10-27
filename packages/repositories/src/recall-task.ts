@@ -6,6 +6,7 @@ import { text, long } from "@opencok/contracts/rows";
 import { cityInteger, cityAmount } from "@opencok/rules/city-progression";
 import type { RecallTaskWrite } from "@opencok/contracts/recall-task";
 import type { MutationTransaction } from "./mutation";
+
 export async function readRecallTasks(
   tx: MutationTransaction,
   owner: string,
@@ -23,7 +24,9 @@ export async function readRecallTasks(
     .orderBy(asc(user_recall_task.id))
     .limit(65)
     .for("update");
+
   if (tasks.length > 64) throw new Error("Recall task aggregate exceeds bound");
+
   const [registration] = countryNeeded
     ? await tx
         .select({ country: stat_reg.country })
@@ -32,8 +35,10 @@ export async function readRecallTasks(
         .orderBy(sql`case when ${stat_reg.type} = 2 then 0 else 1 end`, asc(stat_reg.type))
         .limit(1)
     : [];
+
   return { notes, tasks, country: registration?.country ?? "" };
 }
+
 export async function writeRecallTasks(
   tx: MutationTransaction,
   owner: string,
@@ -41,6 +46,7 @@ export async function writeRecallTasks(
 ) {
   if (write.notes) {
     const row = write.notes;
+
     if (
       row.uid !== owner ||
       text(row, "version").length > 255 ||
@@ -48,6 +54,7 @@ export async function writeRecallTasks(
       long(row, "endTime") < long(row, "beginTime")
     )
       throw new Error("Invalid recall task notes");
+
     const value = {
       uid: owner,
       version: text(row, "version"),
@@ -64,15 +71,19 @@ export async function writeRecallTasks(
       .values(value)
       .onConflictDoUpdate({ target: user_recall_task_notes.uid, set: value });
   }
+
   if (
     (write.tasks?.length ?? 0) > 64 ||
     new Set(write.tasks?.map((row) => row.id)).size !== (write.tasks?.length ?? 0)
   )
     throw new Error("Recall task writes exceed bound");
+
   if (write.reset) await tx.delete(user_recall_task).where(eq(user_recall_task.uid, owner));
+
   for (const row of write.tasks ?? []) {
     if (row.uid !== owner || !text(row, "id") || text(row, "id").length > 255)
       throw new Error("Foreign recall task");
+
     const value = {
       uid: owner,
       id: text(row, "id"),
@@ -82,6 +93,7 @@ export async function writeRecallTasks(
       type_level: cityInteger(row.type_level),
       receive: cityInteger(row.receive, 0, 1),
     };
+
     if (write.reset) await tx.insert(user_recall_task).values(value);
     else {
       const updated = await tx
@@ -89,6 +101,7 @@ export async function writeRecallTasks(
         .set(value)
         .where(and(eq(user_recall_task.uid, owner), eq(user_recall_task.id, value.id)))
         .returning({ id: user_recall_task.id });
+
       if (updated.length !== 1) throw new Error("Stale recall task");
     }
   }

@@ -3,6 +3,7 @@ export interface MonsterExchangeOffer {
   count: number;
   color: number;
 }
+
 export interface MonsterExchangeConfig {
   id: string;
   token: string;
@@ -11,6 +12,7 @@ export interface MonsterExchangeConfig {
   costs: readonly number[];
   gears: readonly (readonly (MonsterExchangeOffer & { weight: number })[])[];
 }
+
 export interface MonsterExchangeHeader {
   token: string;
   interval: bigint;

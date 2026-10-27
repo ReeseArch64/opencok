@@ -40,7 +40,9 @@ export function createExpeditionPhaseStore(
             .where(eq(expedition_admission.periodId, text(period, "id")))
             .limit(1);
         const at = BigInt(now());
+
         if (prior && at < prior.updatedAt) return prior;
+
         const plan = resolve({ manifest, admission }, at);
         const value = {
           serverId: authority.kingdomId,
@@ -50,6 +52,7 @@ export function createExpeditionPhaseStore(
           endTime: cityAmount(plan.endTime),
           opponent: cityInteger(plan.opponent),
         };
+
         if (
           prior &&
           prior.periodId === value.periodId &&
@@ -59,9 +62,12 @@ export function createExpeditionPhaseStore(
           prior.opponent === value.opponent
         )
           return prior;
+
         const revision = (prior?.revision ?? 0n) + 1n;
+
         if (revision > 9223372036854775807n || !value.periodId || value.periodId.length > 40)
           throw new Error("Invalid expedition clock revision");
+
         const [saved] = await tx
           .insert(expedition_clock)
           .values({ ...value, revision, updatedAt: at })
@@ -70,11 +76,13 @@ export function createExpeditionPhaseStore(
             set: { ...value, revision, updatedAt: at },
           })
           .returning();
+
         return saved!;
       });
     },
   };
 }
+
 export async function currentExpeditionClock(
   db: Database["kingdom"]["db"],
   authority: RealmAuthority,
@@ -87,8 +95,10 @@ export async function currentExpeditionClock(
       and(eq(expedition_clock.serverId, authority.kingdomId), sql`${expedition_clock.revision}>0`),
     )
     .limit(1);
+
   return row;
 }
+
 export function createExpeditionActivityReader(
   db: Database["kingdom"]["db"],
   authority: RealmAuthority,
@@ -98,6 +108,7 @@ export function createExpeditionActivityReader(
     async read(owner) {
       if (!owner || owner.length > 40 || !owner.isWellFormed() || owner.includes("\0"))
         throw new GameError(errors.invalid);
+
       return db.transaction(async (tx) => {
         await tx.execute(sql`set local lock_timeout='1s'`);
         await tx.execute(sql`set local statement_timeout='3s'`);
@@ -108,6 +119,7 @@ export function createExpeditionActivityReader(
             .from(userprofile)
             .where(eq(userprofile.uid, owner))
             .for("share");
+
         if (
           !profile ||
           profile.serverId !== authority.kingdomId ||
@@ -115,6 +127,7 @@ export function createExpeditionActivityReader(
           (profile.banTime ?? 0n) > at
         )
           throw new GameError(errors.invalid);
+
         return {
           profile,
           state: await readExpedition(tx, profile, at, "newexpidition.activityinfo"),

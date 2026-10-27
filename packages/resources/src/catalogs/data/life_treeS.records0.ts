@@ -1,4 +1,5 @@
 import type { LifeTreeSDefinition } from "../types/life_treeS.ts";
+
 export const records: readonly LifeTreeSDefinition[] = [
   {
     "id": 980001,

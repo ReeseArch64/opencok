@@ -5,4 +5,5 @@ export interface TerritoryEffectDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type TerritoryEffectDefinitionCatalog = CatalogTable<TerritoryEffectDefinition>;

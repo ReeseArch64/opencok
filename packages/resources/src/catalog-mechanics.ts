@@ -8,7 +8,9 @@ export function roleLevelRewards(
 ): readonly { itemId: number; quantity: number }[] {
   const items = role.levelItem ?? [];
   const quantities = role.levelNum ?? [];
+
   if (items.length !== quantities.length) throw new Error("Mismatched role level rewards");
+
   return items.map((itemId, index) => ({ itemId, quantity: quantities[index]! }));
 }
 
@@ -35,10 +37,13 @@ export function withMapTile(
   value: number,
 ): TileMapDefinition {
   mapTile(map, layer, x, y);
+
   if (!Number.isSafeInteger(value) || value < 0) throw new Error("Invalid tile ID");
+
   const selected = map.layers[layer]!;
   const tiles = [...selected.tiles];
   tiles[y * selected.width + x] = value;
+
   return {
     ...map,
     layers: map.layers.map((current, index) => (index === layer ? { ...current, tiles } : current)),

@@ -9,4 +9,5 @@ export interface AbilityDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type AbilityDefinitionCatalog = CatalogTable<AbilityDefinition>;

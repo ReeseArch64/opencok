@@ -5,4 +5,5 @@ export interface EquipmentRandomPowerDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type EquipmentRandomPowerDefinitionCatalog = CatalogTable<EquipmentRandomPowerDefinition>;

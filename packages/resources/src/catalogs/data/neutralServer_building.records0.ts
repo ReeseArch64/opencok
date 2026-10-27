@@ -1,4 +1,5 @@
 import type { NeutralServerBuildingDefinition } from "../types/neutralServer_building.ts";
+
 export const records: readonly NeutralServerBuildingDefinition[] = [
   { "id": 523100, "type": 1, "pointType": 54, "x": 77, "y": 77 },
   {

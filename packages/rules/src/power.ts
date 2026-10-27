@@ -6,36 +6,50 @@ import { GameError } from "@opencok/errors/game";
 import type { Rule, Rules } from "./game.ts";
 
 const i32 = (value: bigint) => Number(BigInt.asIntN(32, value));
+
 const i64 = (value: bigint) => BigInt.asIntN(64, value);
 
 function integer(value: unknown, fallback = 0n): bigint {
   if (value === undefined || value === null) return fallback;
+
   if (!/^[+-]?\d+$/.test(String(value))) throw new GameError(errors.unsupported, "power_rule");
+
   const result = BigInt(String(value));
+
   if (result < -2147483648n || result > 2147483647n)
     throw new GameError(errors.unsupported, "power_rule");
+
   return result;
 }
 
 function decimal(value: unknown): number {
   const source = String(value ?? "0").trim();
+
   if (!/^[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?$/.test(source))
     throw new GameError(errors.unsupported, "power_rule");
+
   const result = Number(source);
+
   if (!Number.isFinite(result)) throw new GameError(errors.unsupported, "power_rule");
+
   return result;
 }
 
 function record(catalog: Map<string, Rule> | undefined, id: string): Rule {
   const rule = catalog?.get(id);
+
   if (!rule) throw new GameError(errors.unsupported, "power_rule");
+
   return rule;
 }
 
 function numberToLong(value: number): bigint {
   if (Number.isNaN(value)) return 0n;
+
   if (value >= 9223372036854775808) return 9223372036854775807n;
+
   if (value <= -9223372036854775808) return -9223372036854775808n;
+
   return BigInt(Math.trunc(value));
 }
 
@@ -45,6 +59,7 @@ function sumInt(rows: readonly Row[], power: (row: Row) => bigint): number {
 
 function unitPower(rows: readonly Row[], rules: Rules, army: boolean): bigint {
   let total = 0;
+
   for (const row of rows) {
     const count = army
       ? i32(["free", "pve", "defence", "march"].reduce((sum, key) => sum + integer(row[key]), 0n))
@@ -52,6 +67,7 @@ function unitPower(rows: readonly Row[], rules: Rules, army: boolean): bigint {
     const power = decimal(record(rules.arms, text(row, "armyId")).power);
     total += power * count;
   }
+
   return numberToLong(total);
 }
 
@@ -63,26 +79,35 @@ function researchPower(
 ): number {
   return sumInt(rows, (row) => {
     const id = String(i32(integer(row[key]) + integer(row.level) + offset));
+
     return integer(record(catalog, id).power);
   });
 }
 
 function titlePower(state: PowerSnapshot, rules: Rules, context: PowerContext): number {
   const title = state.knight;
+
   if (!title) return 0;
+
   const contract = Number(integer(title.contract_activity_title, -1n));
   let active = -1;
+
   if (
     contract !== -1 &&
     (context.contractTitleExpiries.get(String(contract)) ?? 0n) > BigInt(context.now)
   )
     active = contract;
+
   if (active === -1) {
     active = Number(integer(title.activity_title, -1n));
+
     if (active === -1) return 0;
+
     const rule = record(rules.power.titles, String(active));
+
     if (rule.type !== "2") {
       if (rule.activate_array === undefined) throw new GameError(errors.unsupported, "power_rule");
+
       const requirements = rule.activate_array.split(";");
       const available = requirements.every((id) =>
         state.items.some(
@@ -92,46 +117,64 @@ function titlePower(state: PowerSnapshot, rules: Rules, context: PowerContext): 
             (long(item, "vanishTime") === 0n || long(item, "vanishTime") > BigInt(context.now)),
         ),
       );
+
       if (!available) return 0;
     }
   }
+
   const power = record(rules.power.titles, String(active)).power;
+
   return power?.trim() ? Math.max(0, Number(integer(power))) : 0;
 }
 
 function dragonPower(state: PowerSnapshot, rules: Rules, context: PowerContext): bigint {
   if (!context.dragonLevelUp) return 0n;
+
   const dragons = state.dragons.filter((row) => integer(row.dragonState) === 3n);
+
   if (!dragons.length) return 0n;
+
   if (context.dragonScience && !Number.isFinite(context.dragonAttackPercent))
     throw new GameError(errors.unsupported, "power_effect");
+
   const global = record(rules.items, "dragon_new");
+
   for (const key of ["k10", "k11", "k12"])
     if (global[key] === undefined) throw new GameError(errors.unsupported, "power_rule");
+
   const divisor = Math.fround(decimal(global.k10));
   const exponent = Math.fround(decimal(global.k11));
   const multiplier = Math.fround(decimal(global.k12));
   let total = 0n;
+
   for (const row of dragons) {
     const base = record(rules.power.dragonBases, text(row, "itemId"));
+
     if (base.initFight === undefined) throw new GameError(errors.unsupported, "power_rule");
+
     const levels = [...(rules.power.dragonLevels?.values() ?? [])].filter(
       (rule) =>
         integer(rule.base_id) === integer(row.itemId) && integer(rule.level) === integer(row.lv),
     );
+
     if (levels.length !== 1) throw new GameError(errors.unsupported, "power_rule");
+
     if (levels[0]!.attack === undefined) throw new GameError(errors.unsupported, "power_rule");
+
     let attack = Math.fround(decimal(levels[0]!.attack));
+
     if (context.dragonScience) {
       const percent = Math.fround(context.dragonAttackPercent!);
       const bonus = Math.max(Math.fround(percent / 100), 0);
       attack = Math.fround(attack * Math.fround(1 + bonus));
     }
+
     const power =
       Math.pow(Math.fround(attack / divisor), exponent) * multiplier +
       Number(integer(base.initFight));
     total = i64(total + numberToLong(power));
   }
+
   return total > 0n ? total : 0n;
 }
 
@@ -160,6 +203,7 @@ export function calculatePlayerPower(
   const civilizationSciencePower = sumInt(state.civilizationSciences, (row) => {
     const id = String(i32(integer(row.baseItemID) + integer(row.level)));
     const rule = rules.power.civilizationSciences?.get(id);
+
     return rule ? integer(rule.power) : 0n;
   });
   const sagatower_science = researchPower(
@@ -174,6 +218,7 @@ export function calculatePlayerPower(
       state.equipment.filter((row) => integer(row.on) === 1n),
       (row) => {
         const raw = record(rules.power.equipment, text(row, "itemId")).power;
+
         return raw?.trim() ? integer(raw) : 0n;
       },
     ),
@@ -182,10 +227,14 @@ export function calculatePlayerPower(
   const petDragonPower = dragonPower(state, rules, context);
   const prinessPower = selectHeroes(state.heroes).reduce((sum, row) => {
     const raw = record(rules.power.heroes, text(row, "heroid")).power ?? "0";
+
     if (!/^[+-]?\d+$/.test(raw)) throw new GameError(errors.unsupported, "power_rule");
+
     const power = BigInt(raw);
+
     if (power < -9223372036854775808n || power > 9223372036854775807n)
       throw new GameError(errors.unsupported, "power_rule");
+
     return i64(sum + power);
   }, 0n);
   const questpower = Number(integer(state.statistics?.questPower));
@@ -202,6 +251,7 @@ export function calculatePlayerPower(
       BigInt(sagatower_science) +
       prinessPower,
   );
+
   return {
     playerPower,
     heroPower,

@@ -16,15 +16,19 @@ export function createCn1Sessions(
   const remember = (owner: string, row: typeof session.$inferSelect | null) => {
     current.delete(owner);
     current.set(owner, row);
+
     if (current.size > 8192)
       for (const key of current.keys()) {
         if (!active.has(key) && key !== owner) current.delete(key);
+
         if (current.size <= 8192) break;
       }
+
     if (current.size > 8192) throw new Error("CN1 session capacity exceeded");
   };
   const timestamp = (now: number) => {
     if (!Number.isSafeInteger(now) || now < 0) throw new Error("Invalid CN1 session time");
+
     return BigInt(now);
   };
   async function sample(owner: string, now: number, id?: string, closing = false) {
@@ -36,9 +40,13 @@ export function createCn1Sessions(
         .where(eq(session.ownerUid, owner))
         .limit(1)
         .for("update");
+
       if (!row) return null;
+
       if (id && row.sessionId !== id) return row;
+
       if (!id || !row.sessionId) return row;
+
       const elapsed = time > row.sampledAt ? (time - row.sampledAt) / 60000n : 0n;
       const onlineMinutes =
         row.isAddict === 0 ? 0 : Number(BigInt.asIntN(32, BigInt(row.onlineMinutes) + elapsed));
@@ -52,11 +60,14 @@ export function createCn1Sessions(
         .set(values)
         .where(and(eq(session.ownerUid, owner), eq(session.sessionId, id)))
         .returning();
+
       if (!updated) throw new Error("CN1 session changed");
+
       return updated;
     });
     remember(owner, value);
   }
+
   return {
     async open(owner: string, id: string, now: number) {
       const time = timestamp(now);
@@ -67,10 +78,15 @@ export function createCn1Sessions(
           .where(eq(session.ownerUid, owner))
           .limit(1)
           .for("update");
+
         if (!saved) return null;
+
         let isAddict = saved.isAddict;
+
         if (isAddict === 2 && saved.authAt < time) isAddict = 0;
+
         let onlineMinutes = saved.onlineMinutes;
+
         if (
           saved.sessionId !== null &&
           active.get(owner) === saved.sessionId &&
@@ -79,7 +95,9 @@ export function createCn1Sessions(
           onlineMinutes = Number(
             BigInt.asIntN(32, BigInt(onlineMinutes) + (time - saved.sampledAt) / 60000n),
           );
+
         const control = rules.configuration.payControl?.get("69036");
+
         if (
           isAddict === 0 ||
           (saved.offlineAt !== null &&
@@ -87,11 +105,13 @@ export function createCn1Sessions(
             (time - saved.offlineAt) / 60000n >= javaDecimal(control.k4, 32))
         )
           onlineMinutes = 0;
+
         const [updated] = await tx
           .update(session)
           .set({ isAddict, onlineMinutes, sessionId: id, sampledAt: time, offlineAt: null })
           .where(eq(session.ownerUid, owner))
           .returning();
+
         return updated!;
       });
       active.set(owner, id);
@@ -99,6 +119,7 @@ export function createCn1Sessions(
     },
     async close(owner: string, id: string, now: number) {
       await sample(owner, now, id, true);
+
       if (active.get(owner) === id) {
         active.delete(owner);
         current.delete(owner);
@@ -109,9 +130,12 @@ export function createCn1Sessions(
     },
     ratio(profile: Row): number {
       const owner = profile.uid;
+
       if (typeof owner !== "string" || !current.has(owner))
         throw new Error("CN1 session not restored");
+
       const row = current.get(owner)!;
+
       return cn1RewardRatio(
         row === null ? null : { isAddict: row.isAddict, onlineLastTime: row.onlineMinutes },
         rules,

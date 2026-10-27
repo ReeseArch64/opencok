@@ -2,6 +2,7 @@ import { sql } from "drizzle-orm";
 import { bigint, check, index, integer, primaryKey, text, varchar } from "drizzle-orm/pg-core";
 import { bytea } from "../../types";
 import { opencok_kingdom } from "../namespaces";
+
 export const hero_rank_award = opencok_kingdom.table(
   "hero_rank_award",
   {

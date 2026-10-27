@@ -1,4 +1,5 @@
 import type { DragonTalentDefinition } from "../types/dragon_talent.ts";
+
 export const records: readonly DragonTalentDefinition[] = [
   {
     "id": 30200480,

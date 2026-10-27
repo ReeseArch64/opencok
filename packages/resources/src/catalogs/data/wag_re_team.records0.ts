@@ -1,4 +1,5 @@
 import type { WagReTeamDefinition } from "../types/wag_re_team.ts";
+
 export const records: readonly WagReTeamDefinition[] = [
   {
     "id": 20011000,

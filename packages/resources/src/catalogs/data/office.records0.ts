@@ -1,4 +1,5 @@
 import type { OfficeDefinition } from "../types/office.ts";
+
 export const records: readonly OfficeDefinition[] = [
   { "id": 216000, "para1": [1010, 1030, 8], "para2": [25, 25, 15], "atk": 5, "beingAtk": 5 },
   {

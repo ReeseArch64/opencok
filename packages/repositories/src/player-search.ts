@@ -13,7 +13,9 @@ import { DependencyError } from "@opencok/errors/dependency";
 import { and, asc, eq, gte, ilike, inArray, ne } from "drizzle-orm";
 
 type Databases = Pick<ReturnType<typeof createDatabases>, "getKingdom" | "kingdoms" | "global">;
+
 const options = { isolationLevel: "repeatable read", accessMode: "read only" } as const;
+
 function integer(value: unknown): value is number {
   return (
     typeof value === "number" &&
@@ -22,6 +24,7 @@ function integer(value: unknown): value is number {
     value <= 2147483647
   );
 }
+
 function validText(value: unknown, limit: number): value is string {
   return (
     typeof value === "string" &&
@@ -30,6 +33,7 @@ function validText(value: unknown, limit: number): value is string {
     !value.includes("\0")
   );
 }
+
 function authorized(profile: Row | undefined, owner: string, kingdomId: number, now: number) {
   return (
     profile?.uid === owner &&
@@ -38,15 +42,18 @@ function authorized(profile: Row | undefined, owner: string, kingdomId: number, 
     ((profile.banTime ?? 0n) as bigint) <= BigInt(now)
   );
 }
+
 export function createPlayerSearchStore(
   databases: Databases,
   kingdomId: number,
 ): PlayerSearchStore {
   if (!integer(kingdomId) || kingdomId < 1 || !databases.kingdoms.has(kingdomId))
     throw new Error("Invalid player search realm");
+
   return {
     async search(owner, input, now, inspect) {
       const query = Object.freeze({ ...input });
+
       if (
         !validText(owner, 255) ||
         !owner ||
@@ -64,6 +71,7 @@ export function createPlayerSearchStore(
         now < 0
       )
         throw new Error("Invalid player search query");
+
       try {
         const local = await databases.getKingdom(kingdomId).db.transaction(async (tx) => {
           const [profile] = await tx
@@ -76,7 +84,9 @@ export function createPlayerSearchStore(
             .from(userprofile)
             .where(eq(userprofile.uid, owner))
             .limit(1);
+
           if (!authorized(profile, owner, kingdomId, now)) return { profile, rows: [] };
+
           const rows = await tx
             .select({
               uid: userprofile.uid,
@@ -102,6 +112,7 @@ export function createPlayerSearchStore(
             )
             .orderBy(asc(userprofile.uid), asc(user_building.uuid))
             .limit(query.limit);
+
           if (
             rows.length > query.limit ||
             rows.some(
@@ -113,6 +124,7 @@ export function createPlayerSearchStore(
             )
           )
             throw new Error("Invalid local search rows");
+
           return { profile, rows };
         }, options);
         const result = {
@@ -120,8 +132,11 @@ export function createPlayerSearchStore(
           local: local.rows,
           remote: [] as PlayerSearchRemote[],
         };
+
         if (!authorized(local.profile, owner, kingdomId, now) || !query.cross) return result;
+
         const budget = { ...inspect(local.rows) };
+
         if (
           !integer(budget.limit) ||
           budget.limit < 0 ||
@@ -130,7 +145,9 @@ export function createPlayerSearchStore(
           budget.minimumLevel !== ((query.minimumLevel - 2) | 0)
         )
           throw new Error("Invalid player search budget");
+
         if (!budget.limit) return result;
+
         const accounts = await databases.global.db.transaction(async (tx) => {
           const matches = await tx
             .select({ uid: usermapping.gameUid })
@@ -144,13 +161,16 @@ export function createPlayerSearchStore(
             .orderBy(asc(usermapping.gameUid))
             .limit(budget.limit);
           const ids = matches.map((row) => row.uid);
+
           if (
             ids.length > budget.limit ||
             ids.some((id) => !validText(id, 100) || !id) ||
             new Set(ids).size !== ids.length
           )
             throw new Error("Invalid player search mapping");
+
           if (!ids.length) return [];
+
           const rows = await tx
             .select({ uid: account_new.gameUid, server: account_new.server })
             .from(account_new)
@@ -163,25 +183,33 @@ export function createPlayerSearchStore(
             )
             .orderBy(asc(account_new.gameUid));
           const allowed = new Set(ids);
+
           if (
             rows.length > ids.length ||
             rows.some((row) => !allowed.has(row.uid)) ||
             new Set(rows.map((row) => row.uid)).size !== rows.length
           )
             throw new Error("Invalid player search directory");
+
           return rows;
         }, options);
         const groups = new Map<number, string[]>();
+
         for (const account of accounts) {
           if (!/^[1-9][0-9]*$/.test(account.server)) throw new Error("Invalid player search route");
+
           const realm = Number(account.server);
+
           if (!integer(realm) || realm === kingdomId || !databases.kingdoms.has(realm))
             throw new Error("Unconfigured player search route");
+
           const ids = groups.get(realm) ?? [];
           ids.push(account.uid);
           groups.set(realm, ids);
         }
+
         const found = new Map<string, PlayerSearchRemote>();
+
         for (const [realm, ids] of groups) {
           await databases.getKingdom(realm).db.transaction(async (tx) => {
             for (let offset = 0; offset < ids.length; offset += 500) {
@@ -220,22 +248,29 @@ export function createPlayerSearchStore(
                 .orderBy(asc(userprofile.uid))
                 .limit(batch.length + 1);
               const allowed = new Set(batch);
+
               if (rows.length > batch.length) throw new Error("Ambiguous player search profile");
+
               for (const data of rows) {
                 if (!allowed.has(data.uid) || data.profileServerId !== realm || found.has(data.uid))
                   throw new Error("Invalid player search profile");
+
                 found.set(data.uid, { key: data.uid, kingdomId: realm, data });
               }
             }
           }, options);
         }
+
         for (const account of accounts) {
           const entry = found.get(account.uid);
+
           if (entry) result.remote.push(entry);
         }
+
         for (const account of accounts)
           if (!found.has(account.uid))
             result.remote.push({ key: account.uid, kingdomId: Number(account.server), data: {} });
+
         return result;
       } catch {
         throw new DependencyError("player search");
@@ -250,8 +285,10 @@ export async function checkPlayerSearchStore(
   cross: boolean,
 ): Promise<void> {
   const db = databases.getKingdom(kingdomId).db;
+
   for (const table of [userprofile, playerinfo, alliance, user_building])
     await db.select().from(table).limit(0);
+
   if (cross) {
     await databases.global.db
       .select({

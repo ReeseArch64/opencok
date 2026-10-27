@@ -12,4 +12,5 @@ export interface ReputationLevelDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type ReputationLevelDefinitionCatalog = CatalogTable<ReputationLevelDefinition>;

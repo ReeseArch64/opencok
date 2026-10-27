@@ -9,4 +9,5 @@ export interface EndowmentDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type EndowmentDefinitionCatalog = CatalogTable<EndowmentDefinition>;

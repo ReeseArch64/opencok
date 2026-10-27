@@ -13,4 +13,5 @@ export interface GoldDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type GoldDefinitionCatalog = CatalogTable<GoldDefinition>;

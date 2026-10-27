@@ -1,4 +1,5 @@
 import type { DragonSkillExpDefinition } from "../types/dragon_skill_exp.ts";
+
 export const records: readonly DragonSkillExpDefinition[] = [
   { "id": 514000, "level": 1, "quality": 0, "experience": 300 },
   { "id": 514001, "level": 2, "quality": 0, "experience": 500 },

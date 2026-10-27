@@ -4,10 +4,14 @@ import { javaDecimal } from "./java-integer.ts";
 import { javaHashMapOrder } from "./java-hash-map-order.ts";
 
 const int = (value: unknown) => Number(javaDecimal(String(value ?? 0), 32));
+
 const long = (value: unknown) => javaDecimal(String(value ?? 0), 64);
+
 const float = Math.fround;
+
 const cast = (value: number) =>
   Number.isNaN(value) ? 0 : Math.max(-2147483648, Math.min(2147483647, Math.trunc(value)));
+
 const castLong = (value: number) =>
   Number.isNaN(value)
     ? 0n
@@ -27,11 +31,15 @@ export function reconnectBuildingRefresh(
   const ordered = javaHashMapOrder(index.keys()).map((id) => index.get(id)!);
   const writes: { uuid: string; refreshTime: bigint }[] = [];
   const views: { itemId: string; pos: number; refreshTime: bigint }[] = [];
+
   for (const item of [415000, 413000])
     for (const row of ordered) {
       const position = int(row.pos);
+
       if (int(row.itemId) !== item || position < 17 || position > 26) continue;
+
       if (int(row.level) < 1) throw new Error("Invalid tutorial resource building");
+
       const rule = rules.building(String(item), int(row.level), int(row.star), int(row.progress));
       const rate = float(float(float(int(rule.effects?.productionPerHour)) / 3600) / 1000);
       const modified = float(
@@ -44,11 +52,14 @@ export function reconnectBuildingRefresh(
       const threshold = cast(
         float(float(int(rule.effects?.productionCapacity ?? 4000)) * float(0.3)),
       );
+
       if (output < threshold) {
         refreshTime = castLong(Number(now) - threshold / modified);
         writes.push({ uuid: String(row.uuid), refreshTime });
       }
+
       views.push({ itemId: String(item), pos: position, refreshTime });
     }
+
   return { writes, views };
 }

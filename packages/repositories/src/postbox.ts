@@ -11,6 +11,7 @@ import { createMutationExecutor } from "./mutation.ts";
 import { executeInventoryTransaction } from "./inventory.ts";
 import type { RealmAuthority } from "./realm-authority.ts";
 import type { Database } from "./game.ts";
+
 export function createPostboxExecutor(
   db: Database["kingdom"]["db"],
   authority: RealmAuthority,
@@ -18,6 +19,7 @@ export function createPostboxExecutor(
   preparation?: InventoryPreparation,
 ): PostboxExecutor {
   const execute = createMutationExecutor(db, authority, now);
+
   return (input, plan) =>
     execute(input, async (tx) => {
       const owner = input.owner;
@@ -27,6 +29,7 @@ export function createPostboxExecutor(
       await tx.execute(
         sql`select pg_advisory_xact_lock(hashtextextended('postbox:distribution',0))`,
       );
+
       return executeInventoryTransaction(
         tx,
         owner,
@@ -41,8 +44,11 @@ export function createPostboxExecutor(
                 .orderBy(asc(post_box.time), asc(post_box.uid))
                 .limit(1)
                 .for("update", { skipLocked: true });
+
               if (!row) return null;
+
               await tx.delete(post_box).where(eq(post_box.uid, row.uid));
+
               return row;
             },
             async putBox(row) {
@@ -67,10 +73,12 @@ export function createPostboxExecutor(
                     sql`${owner}=ANY(string_to_array(${post_relation.players},'|'))`,
                   ),
                 );
+
               return row ?? null;
             },
             async relations(ids) {
               if (!ids.length) return [];
+
               return tx
                 .select()
                 .from(post_relation)

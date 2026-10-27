@@ -1,5 +1,6 @@
 import { CatalogKind } from "@opencok/enums/catalog-kind";
 import type { WebRoutingCatalog } from "../../catalog-model.ts";
+
 export const catalog: WebRoutingCatalog = {
   "kind": CatalogKind.WebRouting,
   "enabled": false,

@@ -9,6 +9,7 @@ function serializeDragonRanking(teams: readonly DragonRankingTeam[]): Fields {
     rank: sfs.array(
       teams.map((team) => {
         const wins = team.fightNum === 0 ? 0 : team.winNum / team.fightNum;
+
         return sfs.object({
           teamId: sfs.string(team.teamId),
           allianceId: sfs.string(team.teamId),

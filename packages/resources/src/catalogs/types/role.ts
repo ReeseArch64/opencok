@@ -15,4 +15,5 @@ export interface RoleDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type RoleDefinitionCatalog = CatalogTable<RoleDefinition>;

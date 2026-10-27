@@ -7,6 +7,7 @@ import { and, DrizzleQueryError, ne, sql } from "drizzle-orm";
 import type { Database } from "./game.ts";
 
 const nameTypeKey = mysqlUtf8UnicodeKey("name");
+
 const nameTypeCandidates = mysqlUtf8UnicodeCandidates(["name"]);
 
 export async function nicknameOccupied(
@@ -17,6 +18,7 @@ export async function nicknameOccupied(
     return await readNicknameOccupation(db, name);
   } catch (error) {
     const cause = error instanceof DrizzleQueryError ? error.cause : error;
+
     if (
       cause &&
       typeof cause === "object" &&
@@ -25,6 +27,7 @@ export async function nicknameOccupied(
       /^[0-9A-Z]{5}$/.test(cause.code)
     )
       return false;
+
     throw new DependencyError("nickname availability");
   }
 }
@@ -55,7 +58,9 @@ export async function readNicknameOccupation(
         mysqlUtf8UnicodeKey(row.value) === nameKey,
     )
     .map((row) => nicknameTrim(row.uid));
+
   if (!ids.length) return false;
+
   const keys = new Set(ids.map(mysqlUtf8UnicodeKey));
   const accounts = await db
     .select({ uid: account_new.gameUid })
@@ -66,5 +71,6 @@ export async function readNicknameOccupation(
         ne(account_new.active, -1),
       ),
     );
+
   return accounts.some((row) => keys.has(mysqlUtf8UnicodeKey(row.uid)));
 }

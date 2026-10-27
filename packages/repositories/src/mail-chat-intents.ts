@@ -3,13 +3,17 @@ import { and, asc, eq, sql } from "drizzle-orm";
 import { mail_chat_read_intent } from "@opencok/drizzle/schema/opencok_kingdom/mail_chat_read_intent";
 import type { ChatMailboxPublisher, ChatMailboxUpdate } from "@opencok/contracts/chat-mailbox";
 import type { Database } from "./game.ts";
+
 type Db = Database["kingdom"]["db"];
+
 type Tx = Parameters<Parameters<Db["transaction"]>[0]>[0];
+
 export interface MailChatEffect {
   action: "read" | "delete";
   others: string;
   types: readonly number[];
 }
+
 export async function enqueueMailChat(
   tx: Tx,
   owner: string,
@@ -17,6 +21,7 @@ export async function enqueueMailChat(
   effects: readonly MailChatEffect[],
 ) {
   if (!effects.length) return;
+
   if (
     effects.length > 1000 ||
     effects.some(
@@ -30,12 +35,15 @@ export async function enqueueMailChat(
     )
   )
     throw new Error("Invalid mail chat effect");
+
   const [count] = await tx
     .select({ count: sql<string>`count(*)::text` })
     .from(mail_chat_read_intent)
     .where(eq(mail_chat_read_intent.ownerUid, owner));
+
   if (!count || !/^\d+$/.test(count.count) || BigInt(count.count) + BigInt(effects.length) > 1000n)
     throw new Error("Mail chat backlog exceeded");
+
   const commandId = randomUUID();
   await tx.insert(mail_chat_read_intent).values(
     effects.map((effect, effectIndex) => ({
@@ -49,6 +57,7 @@ export async function enqueueMailChat(
     })),
   );
 }
+
 export async function relayMailChat(
   db: Db,
   kingdomId: number,
@@ -63,6 +72,7 @@ export async function relayMailChat(
     timeoutMs > 30000
   )
     throw new Error("Invalid mailbox relay");
+
   return db.transaction(
     async (tx) => {
       const pending = await tx
@@ -76,7 +86,9 @@ export async function relayMailChat(
         .limit(1)
         .for("update", { skipLocked: true });
       const entry = pending[0];
+
       if (!entry) return 0;
+
       const update: ChatMailboxUpdate = {
         owner: entry.ownerUid,
         kingdomId,
@@ -89,6 +101,7 @@ export async function relayMailChat(
       };
       const abort = new AbortController();
       let timer: ReturnType<typeof setTimeout> | undefined;
+
       try {
         await Promise.race([
           publish(update, abort.signal),
@@ -108,6 +121,7 @@ export async function relayMailChat(
               eq(mail_chat_read_intent.effectIndex, entry.effectIndex),
             ),
           );
+
         return 1;
       } finally {
         clearTimeout(timer);

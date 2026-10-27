@@ -1,3 +1,4 @@
+import { CityCommandDomain } from "./city-command-domain.ts";
 import { applyMilitaryRankAward } from "./military-rank-awards";
 import type { ActivityRewardWrite } from "@opencok/contracts/activity-reward";
 import { rewardLegacyGenerals } from "./legacy-generals";
@@ -12,7 +13,8 @@ import { GameError } from "@opencok/errors/game";
 import { errors } from "@opencok/constants/game";
 import { equipmentItem, equipment } from "@opencok/mappings/equipment";
 import { grantPinnedProgressionReward } from "./progression-rewards";
-import type { CityDomain } from "./city-progression";
+import type { CityDomain } from "./city-domain.ts";
+
 const resourceAssets = {
   wood: "wood",
   stone: "stone",
@@ -27,10 +29,13 @@ const resourceAssets = {
   granite: "granite",
   limestone: "limestone",
 } as const;
-export const activityRewardDomain: CityDomain = {
-  commands: ["activity.accept.reward"],
-  types: [],
-  async prepare(context, _command, params) {
+
+export class ActivityRewardDomain extends CityCommandDomain {
+  public readonly commands: CityDomain["commands"] = ["activity.accept.reward"];
+
+  public readonly types: CityDomain["types"] = [];
+
+  public readonly prepare: CityDomain["prepare"] = async (context, _command, params) => {
     if (
       num(context.state.profile, "serverId") !== context.rules.kingdomId ||
       num(context.state.profile, "banFlag") !== 0 ||
@@ -40,22 +45,28 @@ export const activityRewardDomain: CityDomain = {
 
     const actId = str(params, "actId"),
       saved = await context.state.activityReward?.owned(actId);
+
     if (!saved?.announcement || num(saved.entitlement, "status") !== 0)
       throw new GameError(errors.invalid, "city_progression");
+
     const version = text(saved.announcement, "updateVersion");
+
     if (
       !mailBlank(version) &&
       activityRewardVersion(text(context.state.profile, "appVersion")) <
         activityRewardVersion(version)
     )
       throw new GameError(errors.unsupported, "city_progression");
+
     const rewards = activityRewardEntries(saved.announcement.reward);
+
     if (
       rewards
         .filter((reward) => reward.category === "equip")
         .reduce((total, reward) => total + reward.count, 0) > 256
     )
       throw new GameError(errors.unsupported, "city_progression");
+
     const write: ActivityRewardWrite = { actId, kingdomId: context.rules.kingdomId },
       group = rewards.some(
         (reward) => reward.category === "honor" || reward.category === "alliance_point",
@@ -66,13 +77,16 @@ export const activityRewardDomain: CityDomain = {
       goods: Fields[] = [],
       equips: Fields[] = [],
       generals: Fields[] = [];
+
     for (const reward of rewards) {
       const category = reward.category;
+
       if (category === "gold") {
         context.economy.gold(BigInt(reward.count));
         body.gold = context.balance("gold");
       } else if (category === "crystal") {
         if (!context.economy.crystal) throw new GameError(errors.unsupported, "city_progression");
+
         context.economy.crystal(BigInt(reward.count));
         body.crystal = context.balance("crystal");
       } else if (category === "exp") {
@@ -91,6 +105,7 @@ export const activityRewardDomain: CityDomain = {
         );
       } else if (category === "honor") {
         body.honor = 0;
+
         if (group.member) {
           const previous = write.member ?? {
             allianceId: text(group.member, "allianceId"),
@@ -109,8 +124,10 @@ export const activityRewardDomain: CityDomain = {
         if (group.alliance && group.member) {
           const previous = write.alliance?.points ?? long(group.alliance, "alliancepoint"),
             next = previous + BigInt(reward.count);
+
           if (previous < 0n || next > 9223372036854775807n)
             throw new GameError(errors.unsupported, "city_progression");
+
           const id = text(group.alliance, "uid");
           write.alliance = { id, points: next };
           body.alliancepoint = next;
@@ -121,6 +138,7 @@ export const activityRewardDomain: CityDomain = {
           amount: reward.count,
           entitlementId: actId,
         });
+
         if (granted) body[category] = granted.requested;
       } else if (category === "general") {
         generals.push(...rewardLegacyGenerals(context, reward.itemId, reward.count));
@@ -151,14 +169,18 @@ export const activityRewardDomain: CityDomain = {
             "exp" | "expDelta" | "power" | "honor" | "military" | "milhonor"
           >
         ] = context.balance(asset);
+
         if (["wood", "stone", "iron", "food"].includes(asset))
           body[`${wire}_bind` as "wood_bind" | "stone_bind" | "iron_bind" | "food_bind"] =
             context.balance(`${asset}bind`);
       } else throw new GameError(errors.unsupported, "city_progression");
     }
+
     context.write.activityRewardClaim = write;
+
     if (write.alliance) {
       if (!context.economy.event) throw new GameError(errors.unsupported, "city_progression");
+
       context.economy.event({
         id: "activity-alliance",
         type: "alliance.changed",
@@ -169,9 +191,13 @@ export const activityRewardDomain: CityDomain = {
         }),
       });
     }
+
     return { response: encode(activityRewardView(body, goods, equips, generals)), event: null };
-  },
-  async apply() {
+  };
+
+  public readonly apply: CityDomain["apply"] = async () => {
     return {};
-  },
-};
+  };
+}
+
+export const activityRewardDomain: CityDomain = new ActivityRewardDomain();

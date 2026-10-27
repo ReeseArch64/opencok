@@ -1,6 +1,7 @@
 import { sql } from "drizzle-orm";
 import { bigint, check, index, integer, primaryKey, varchar } from "drizzle-orm/pg-core";
 import { opencok_kingdom } from "../namespaces";
+
 export const totem_delivery = opencok_kingdom.table(
   "totem_delivery",
   {

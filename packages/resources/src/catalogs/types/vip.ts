@@ -11,4 +11,5 @@ export interface VipDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type VipDefinitionCatalog = CatalogTable<VipDefinition>;

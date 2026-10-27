@@ -6,4 +6,5 @@ export interface PackageDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type PackageDefinitionCatalog = CatalogTable<PackageDefinition>;

@@ -1,4 +1,5 @@
 import type { ContinuedCostDefinition } from "../types/continued_cost.ts";
+
 export const records: readonly ContinuedCostDefinition[] = [
   { "id": 89700, "type": 1, "level": 1, "point": 1000, "item": 239301 },
   { "id": 89701, "type": 1, "level": 2, "point": 2000, "item": 239302 },

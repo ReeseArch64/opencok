@@ -1,4 +1,5 @@
 import type { Row } from "./rows";
+
 export interface HotItemState {
   v2: readonly Row[];
   v3: readonly Row[];
@@ -9,6 +10,7 @@ export interface HotItemState {
   server: Row;
   scores: readonly Row[];
 }
+
 export interface HotItemWrite {
   version: 2 | 3;
   offers: readonly Row[];
@@ -16,6 +18,7 @@ export interface HotItemWrite {
   refresh: { count: number; todayTime: bigint };
   purchases: readonly Row[];
 }
+
 export interface HotItemOffer {
   goodsId: string;
   itemId: string;

@@ -5,12 +5,14 @@ export interface WorldTerrain {
   readonly grid: Uint8Array;
   readonly overlay: Uint8Array;
 }
+
 export interface WorldTerrainRules {
   size: number;
   bornSide: number;
   resourceSide: number;
   monsterSide: number;
 }
+
 export interface WorldTerrainManifest extends WorldTerrainRules {
   version: 1;
   format: WorldTerrain["format"];

@@ -4,6 +4,7 @@ import type {
   OlympicQuestionResponse,
   OlympicBetResponse,
 } from "@opencok/contracts/responses/olympic";
+
 export const olympicQuestionSchema = z.strictObject({
   id: field.string,
   startBetTime: field.long,
@@ -12,6 +13,7 @@ export const olympicQuestionSchema = z.strictObject({
   resourceType: field.int,
   resourceNum: field.long,
 }) satisfies z.ZodType<OlympicQuestionResponse>;
+
 export const olympicBetSchema = z.strictObject({
   uid: field.string,
   questionId: field.string,

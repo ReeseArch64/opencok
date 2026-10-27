@@ -1,4 +1,5 @@
 import type { NewWkPersonRewardDefinition } from "../types/new_wk_person_reward.ts";
+
 export const records: readonly NewWkPersonRewardDefinition[] = [
   {
     "id": 222500,

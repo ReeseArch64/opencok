@@ -1,4 +1,5 @@
 import type { ServersDefinition } from "../types/servers.ts";
+
 export const records: readonly ServersDefinition[] = [
   {
     "id": 1,

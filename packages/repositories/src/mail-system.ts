@@ -38,6 +38,7 @@ export function readSystemMail(
     typeof inspect !== "function"
   )
     throw new DependencyError("system mail input");
+
   return databases.getKingdom(kingdomId).db.transaction(
     async (tx) => {
       const [profile] = await tx
@@ -50,6 +51,7 @@ export function readSystemMail(
         .from(userprofile)
         .where(eq(userprofile.uid, uid))
         .limit(1);
+
       if (
         !profile ||
         profile.uid !== uid ||
@@ -58,7 +60,9 @@ export function readSystemMail(
         (profile.banTime ?? 0n) > BigInt(query.now)
       )
         return { profile };
+
       let after: bigint | undefined;
+
       if (query.anchor !== null) {
         const [anchor] = await tx
           .select({ createTime: mail.createTime })
@@ -67,6 +71,7 @@ export function readSystemMail(
           .limit(1);
         after = anchor?.createTime ?? (query.time > 0n ? query.time : undefined);
       }
+
       const selection = and(
         eq(mail.toUser, uid),
         after === undefined ? undefined : gte(mail.createTime, after),
@@ -90,6 +95,7 @@ export function readSystemMail(
         .where(selection)
         .orderBy(...order)
         .limit(1001);
+
       if (
         sizes.length > 1000 ||
         new Set(sizes.map((row) => row.uid)).size !== sizes.length ||
@@ -97,6 +103,7 @@ export function readSystemMail(
         sizes.reduce((sum, row) => sum + row.size, 0) > 4 * 1024 * 1024
       )
         throw new DependencyError("system mail capacity");
+
       const entries = sizes.length
         ? await tx
             .select({
@@ -130,6 +137,7 @@ export function readSystemMail(
             )
             .orderBy(...order)
         : [];
+
       if (
         entries.length !== sizes.length ||
         entries.some(
@@ -143,10 +151,12 @@ export function readSystemMail(
         )
       )
         throw new DependencyError("system mail snapshot");
+
       await inspect(entries, {
         senders: (uids) => readMailSenders(databases, kingdomId, tx, uids),
         translations: (requests) => readMailTranslations(tx, requests),
       });
+
       return { profile };
     },
     { isolationLevel: "repeatable read", accessMode: "read only" },

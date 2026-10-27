@@ -8,4 +8,5 @@ export interface DeepLinkDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type DeepLinkDefinitionCatalog = CatalogTable<DeepLinkDefinition>;

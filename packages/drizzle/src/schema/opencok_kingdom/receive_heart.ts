@@ -1,5 +1,6 @@
 import { index, integer, primaryKey, varchar } from "drizzle-orm/pg-core";
 import { opencok_kingdom } from "../namespaces";
+
 export const receive_heart = opencok_kingdom.table(
   "receive_heart",
   {

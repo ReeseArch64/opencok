@@ -16,5 +16,6 @@ export async function moderateAvatar(
   ) => Promise<{ operationId: string; picVer: number; changed: boolean }>,
 ) {
   const captured = Object.freeze({ ...request });
+
   return commit(captured, now, rules.items.get("hero")?.k8);
 }

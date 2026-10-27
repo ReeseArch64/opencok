@@ -1,4 +1,5 @@
 import type { RoleDefinition } from "../types/role.ts";
+
 export const records: readonly RoleDefinition[] = [
   {
     "id": 100101,

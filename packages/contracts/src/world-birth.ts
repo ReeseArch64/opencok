@@ -3,6 +3,7 @@ export interface WorldBirthRules {
   readonly limits: readonly number[];
   readonly side: number;
 }
+
 export interface WorldBirthState {
   readonly schema: 1;
   version: number;
@@ -13,10 +14,12 @@ export interface WorldBirthState {
   limit: number;
   counts: Record<string, number>;
 }
+
 export interface WorldBirthPlacement {
   readonly point: number;
   readonly points: readonly import("./rows").Row[];
 }
+
 export interface WorldBirthAdoption {
   readonly operator: string;
   readonly reason: string;

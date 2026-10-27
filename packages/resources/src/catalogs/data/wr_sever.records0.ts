@@ -1,4 +1,5 @@
 import type { WrSeverDefinition } from "../types/wr_sever.ts";
+
 export const records: readonly WrSeverDefinition[] = [
   { "id": 780001, "sever": "1-10", "count": 1, "time": "2023-07-04" },
   { "id": 780002, "sever": "11-20", "count": 2, "time": "2023-07-04" },

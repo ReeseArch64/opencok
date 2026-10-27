@@ -1,4 +1,5 @@
 import type { AllianceQuestColorranDefinition } from "../types/alliance_quest_colorran.ts";
+
 export const records: readonly AllianceQuestColorranDefinition[] = [
   { "id": 2929801, "color": 1 },
   { "id": 2929802, "color": 2, "rate": 170000, "systemRate": 150000 },

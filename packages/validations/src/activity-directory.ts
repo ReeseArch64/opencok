@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { field } from "./response";
 import type { ActivityDirectoryResponse } from "@opencok/contracts/responses/activity-directory";
+
 export const activityDirectorySchema = z.strictObject({
   act: z
     .array(

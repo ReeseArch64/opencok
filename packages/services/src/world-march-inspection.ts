@@ -10,9 +10,11 @@ import { reconnectMarchDragon, reconnectMarchGeneral } from "@opencok/mappings/r
 import { readResourceRawArmyLoad } from "./world-resource-army-load";
 import { restoredResourcePlunder } from "./world-resource-detail";
 import type { Rules } from "@opencok/rules/game";
+
 function unavailable(): never {
   throw new GameError(errors.unsupported, "world_state");
 }
+
 export async function inspectWorldMarch(
   store: WorldMarchInspectionStore,
   observer: string,
@@ -23,14 +25,18 @@ export async function inspectWorldMarch(
   services: Pick<GameServices, "worldPowerEffects" | "emperorVersion" | "expeditionStage">,
 ): Promise<Fields> {
   if (int(params, "msFlag", 0) !== 0 || !Number.isSafeInteger(now) || now < 0) unavailable();
+
   const owner = str(params, "uid", observer),
     id = str(params, "uuid"),
     state = await store.read(observer, owner, id, kingdomId, now);
+
   if (!state) unavailable();
+
   const { march, point } = state,
     type = num(march, "type"),
     targetType = num(march, "targetType"),
     phase = num(march, "state");
+
   if (
     ![0, 1, 2].includes(phase) ||
     !(
@@ -40,7 +46,9 @@ export async function inspectWorldMarch(
     )
   )
     unavailable();
+
   const army = march.armyInfo ? decodeWorldMarchArmy(march.armyInfo as Buffer) : null;
+
   if (
     !army ||
     army.owner !== owner ||
@@ -48,6 +56,7 @@ export async function inspectWorldMarch(
     army.soldiers.some((unit) => unit.owner !== owner)
   )
     unavailable();
+
   const raw = await readResourceRawArmyLoad(
       army,
       { ownerUid: owner, residentOwner: true },
@@ -71,28 +80,38 @@ export async function inspectWorldMarch(
       load,
     ),
     speed = Math.fround(Number(march.collectSpd ?? 0));
+
   if (!Number.isFinite(speed) || speed < 0) unavailable();
+
   let end = long(march, "arrivalTime");
+
   if (phase === 1 && [3, 37].includes(targetType)) {
     if (speed <= 0) unavailable();
+
     const duration = Math.ceil(Math.fround(Math.fround(Math.fround(maximum) / speed) * 1000));
+
     if (!Number.isSafeInteger(duration)) unavailable();
+
     end += BigInt(duration);
   }
+
   const units = army.soldiers.filter((unit) => unit.total > unit.dead),
     savedDragon = army.dragons?.[0],
     dragon = savedDragon
       ? state.dragons.find((row) => row.uid === owner && row.uuid === savedDragon.uuid)
       : undefined;
+
   if (
     (savedDragon && savedDragon.owner !== owner) ||
     (army.general && army.general.owner !== owner)
   )
     unavailable();
+
   const petDragon = dragon ? reconnectMarchDragon(dragon, rules) : undefined,
     general = army.general
       ? reconnectMarchGeneral(army.general, state.skills, BigInt(now))
       : undefined;
+
   return {
     uuid: sfs.string(id),
     uid: sfs.string(owner),

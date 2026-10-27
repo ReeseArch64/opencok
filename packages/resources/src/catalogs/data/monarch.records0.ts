@@ -1,4 +1,5 @@
 import type { MonarchDefinition } from "../types/monarch.ts";
+
 export const records: readonly MonarchDefinition[] = [
   {
     "id": 20203001,

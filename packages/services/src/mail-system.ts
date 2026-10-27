@@ -20,6 +20,7 @@ export async function systemMailProjection(
   ) => Promise<void>,
 ): Promise<Fields> {
   validateMailWindow(owner, entries);
+
   if (
     !Number.isInteger(count) ||
     count < -2147483648 ||
@@ -28,24 +29,36 @@ export async function systemMailProjection(
     BigInt.asIntN(64, time) !== time
   )
     throw new Error("Invalid system mail pagination");
+
   const messages: { uid: string; time: bigint; body: Fields; sender: string | null }[] = [];
   const senderIds = new Set<string>();
+
   for (const entry of entries) {
     if (privateTypes.has(entry.type)) continue;
+
     let contents = storedMailText(entry.contents);
+
     if (contents.toLowerCase() === "extra") {
       if (entry.extra === null) throw new Error("Missing persisted mail contents");
+
       contents = storedMailText(entry.extra);
     }
+
     if (contents.toLowerCase() === "extra") continue;
+
     let fromUser = entry.fromUser ?? "";
+
     if (entry.type === 26) {
       fromUser = str(decodeLegacyJsonObject(contents), "inviterUid");
+
       if (!mailBlank(fromUser)) senderIds.add(fromUser);
     }
+
     if (entry.type === 10 && !mailBlank(fromUser)) senderIds.add(fromUser);
+
     contents = contents.replaceAll("\\n", "\n");
     const chunks: Value[] = [];
+
     for (let offset = 0; offset < contents.length; offset += 5000)
       chunks.push(
         sfs.string(
@@ -57,6 +70,7 @@ export async function systemMailProjection(
             ),
         ),
       );
+
     const body: Fields = {
       uid: sfs.string(entry.uid),
       toUser: sfs.string(entry.toUser),
@@ -85,16 +99,24 @@ export async function systemMailProjection(
       sender: entry.type === 10 || entry.type === 26 ? fromUser : null,
     });
   }
+
   const senders = await readers.senders([...senderIds]);
+
   for (const message of messages) {
     const sender = message.sender === null ? undefined : senders.get(message.sender);
+
     if (!sender) continue;
+
     if (mailBlank(str(message.body, "fromName")) && sender.name !== null)
       message.body.fromName = sfs.string(sender.name);
+
     if (sender.pic !== null) message.body.pic = sfs.string(sender.pic);
+
     message.body.picVer = sfs.string(sender.picVer ?? "0");
   }
+
   messages.sort((left, right) => (left.time < right.time ? -1 : left.time > right.time ? 1 : 0));
+
   if (page) {
     let result: Fields | undefined;
     await page(
@@ -109,6 +131,7 @@ export async function systemMailProjection(
           typeof more !== "boolean"
         )
           throw new Error("Invalid system mail page");
+
         const body: Fields = {
           id: sfs.string("0"),
           type: sfs.int(4),
@@ -121,30 +144,39 @@ export async function systemMailProjection(
         result = body;
       },
     );
+
     if (!result) throw new Error("Missing system mail page");
+
     return result;
   }
+
   const selected: typeof messages = [];
   let lastUid = "0";
+
   if (messages.length > count) {
     let nextTime = false;
+
     for (const message of messages) {
       if ((message.time / 1000n) * 1000n === time) {
         selected.push(message);
         lastUid = message.uid;
         continue;
       }
+
       if (!nextTime) {
         selected.push(message);
         lastUid = message.uid;
         nextTime = true;
         continue;
       }
+
       if (selected.length >= count) break;
+
       selected.push(message);
       lastUid = message.uid;
     }
   } else selected.push(...messages);
+
   const body: Fields = {
     id: sfs.string("0"),
     type: sfs.int(4),
@@ -155,5 +187,6 @@ export async function systemMailProjection(
     msg: sfs.array(selected.map((message) => sfs.object(message.body))),
   };
   encode(extension("chat.get.system.mails.v2", { ...body, ...envelope }));
+
   return body;
 }

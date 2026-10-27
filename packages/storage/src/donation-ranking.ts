@@ -19,17 +19,22 @@ export async function loadDonationRanking(
     (kind !== "resource-history" && !/^\d{8}$/.test(date))
   )
     throw new DependencyError("donation ranking input");
+
   const key =
     kind === "resource-history"
       ? `bsDonateRank${realm}${allianceId}`
       : `bsDonateRank${kind === "resource-day" ? "Day" : "Week"}${realm}${date}${allianceId}`;
   const values = await command("ZREVRANGE", key, "0", "100", "WITHSCORES");
+
   if (!Array.isArray(values) || values.length % 2 || values.length > 202)
     throw new DependencyError("donation ranking rows");
+
   const rows: DonationScore[] = [];
+
   for (let i = 0; i < values.length; i += 2) {
     const uid = values[i],
       raw = values[i + 1];
+
     if (
       typeof uid !== "string" ||
       !uid ||
@@ -39,7 +44,9 @@ export async function loadDonationRanking(
       !Number.isFinite(Number(raw))
     )
       throw new DependencyError("donation ranking score");
+
     rows.push({ uid, score: Number(raw) });
   }
+
   return rows;
 }

@@ -1,6 +1,7 @@
 import { z } from "zod";
 import type { LotteryInfoResponse } from "@opencok/contracts/responses/lottery";
 import { field } from "./response";
+
 export const lotteryInfoSchema = z.strictObject({
   type: field.int,
   supermode: field.int,

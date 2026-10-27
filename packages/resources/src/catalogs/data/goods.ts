@@ -42,6 +42,7 @@ import { records as records37 } from "./goods.records37.ts";
 import { records as records38 } from "./goods.records38.ts";
 import { records as records39 } from "./goods.records39.ts";
 import { records as records40 } from "./goods.records40.ts";
+
 export const catalog: CatalogTable<GoodsDefinition> = {
   "kind": CatalogKind.Table,
   "records": [

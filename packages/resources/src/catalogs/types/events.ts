@@ -11,4 +11,5 @@ export interface EventsDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type EventsDefinitionCatalog = CatalogTable<EventsDefinition>;

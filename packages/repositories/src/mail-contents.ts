@@ -43,6 +43,7 @@ export function readMailContents(
     typeof inspect !== "function"
   )
     throw new Error("Invalid mail content query");
+
   return db.transaction(
     async (tx) => {
       const profile = (
@@ -58,6 +59,7 @@ export function readMailContents(
           .limit(1)
           .for("update")
       )[0];
+
       if (
         !profile ||
         profile.uid !== uid ||
@@ -66,6 +68,7 @@ export function readMailContents(
         (profile.banTime ?? 0n) > BigInt(query.now)
       )
         return { profile };
+
       const selection = and(eq(selectedMail.toUser, uid), inArray(selectedMail.uid, query.ids));
       const extraOwner = and(
         eq(mail_contents.uid, selectedMail.uid),
@@ -85,12 +88,14 @@ export function readMailContents(
         .where(selection)
         .orderBy(asc(sql`${selectedMail.uid} collate "C"`))
         .for("update", { of: selectedMail });
+
       if (
         sizes.length > query.ids.length ||
         sizes.some((row) => !Number.isSafeInteger(row.size) || row.size < 0) ||
         sizes.reduce((sum, row) => sum + row.size, 0) > 4 * 1024 * 1024
       )
         throw new Error("Mail content capacity exceeded");
+
       const entries = sizes.length
         ? await tx
             .select({
@@ -105,6 +110,7 @@ export function readMailContents(
             .where(selection)
             .orderBy(asc(sql`${selectedMail.uid} collate "C"`))
         : [];
+
       if (
         entries.length !== sizes.length ||
         entries.some((entry, index) => entry.uid !== sizes[index]?.uid) ||
@@ -115,16 +121,20 @@ export function readMailContents(
           4 * 1024 * 1024
       )
         throw new Error("Inconsistent mail content snapshot");
+
       const invalid = inspect(entries);
       const selected = new Set(entries.map((row) => row.uid));
+
       if (
         !Array.isArray(invalid) ||
         new Set(invalid).size !== invalid.length ||
         invalid.some((id) => !selected.has(id))
       )
         throw new Error("Invalid mail content removal plan");
+
       if (invalid.length)
         await tx.delete(mail).where(and(eq(mail.toUser, uid), inArray(mail.uid, invalid)));
+
       return { profile };
     },
     { isolationLevel: "repeatable read", accessMode: "read write" },

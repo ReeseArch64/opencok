@@ -1,4 +1,5 @@
 import type { GeneralAbDefinition } from "../types/general_ab.ts";
+
 export const records: readonly GeneralAbDefinition[] = [
   {
     "id": 88203,

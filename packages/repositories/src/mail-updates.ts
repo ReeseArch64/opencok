@@ -32,6 +32,7 @@ export function readMailUpdates(
     typeof inspect !== "function"
   )
     throw new DependencyError("mail updates input");
+
   return db.transaction(
     async (tx) => {
       const [profile] = await tx
@@ -45,6 +46,7 @@ export function readMailUpdates(
         .where(eq(userprofile.uid, uid))
         .limit(1)
         .for("update");
+
       if (
         !profile ||
         profile.uid !== uid ||
@@ -53,6 +55,7 @@ export function readMailUpdates(
         (profile.banFlag ?? 0) !== 0
       )
         return { profile };
+
       const rows = await tx
         .select({
           uid: mail_update.mailUid,
@@ -67,7 +70,9 @@ export function readMailUpdates(
         .where(and(eq(mail_update.toUser, uid), gte(mail_update.updateTime, query.after)))
         .orderBy(asc(mail_update.mailUid))
         .limit(10001);
+
       if (rows.length > 10000) throw new DependencyError("mail updates limit");
+
       await inspect(
         rows.map((row) => ({
           uid: row.uid,
@@ -83,6 +88,7 @@ export function readMailUpdates(
         })),
       );
       const foreign = rows.filter((row) => row.owner !== null && row.owner !== uid);
+
       for (let offset = 0; offset < foreign.length; offset += 500)
         await tx
           .delete(mail_update)
@@ -101,6 +107,7 @@ export function readMailUpdates(
               ),
             ),
           );
+
       await tx
         .delete(mail_update)
         .where(
@@ -110,6 +117,7 @@ export function readMailUpdates(
             lt(mail_update.updateTime, BigInt.asIntN(64, query.after - 432000000n)),
           ),
         );
+
       return { profile };
     },
     { isolationLevel: "repeatable read", accessMode: "read write" },

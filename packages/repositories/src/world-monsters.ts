@@ -4,6 +4,7 @@ import { worldpoint } from "@opencok/drizzle/schema/opencok_kingdom/worldpoint";
 import { worldMonsterAreaRanges } from "@opencok/rules/world-monsters";
 import type { WorldMonsterReader } from "@opencok/contracts/world-monsters";
 import type { MutationTransaction } from "./mutation";
+
 export function worldMonsterReader(tx: MutationTransaction, size: number): WorldMonsterReader {
   const read = async (ranges: readonly number[][], free: boolean) => {
     const rows = await tx
@@ -31,9 +32,12 @@ export function worldMonsterReader(tx: MutationTransaction, size: number): World
       .orderBy(asc(worldpoint.id))
       .limit(4097)
       .for("update");
+
     if (rows.length > 4096) throw new Error("Monster candidate aggregate exceeds bound");
+
     return rows;
   };
+
   return {
     async claimed(points) {
       if (
@@ -42,6 +46,7 @@ export function worldMonsterReader(tx: MutationTransaction, size: number): World
         points.some((id) => !Number.isInteger(id) || id < 1 || id > size * size)
       )
         throw new Error("Invalid monster placement footprint");
+
       const [claim] = await tx
         .select({ id: worldpoint.id })
         .from(worldpoint)
@@ -53,11 +58,14 @@ export function worldMonsterReader(tx: MutationTransaction, size: number): World
           ),
         )
         .limit(1);
+
       return Boolean(claim);
     },
     async barbarians(points) {
       if (points.length > 4096) throw new Error("Barbarian actor aggregate exceeds bound");
+
       if (!points.length) return [];
+
       return tx
         .select()
         .from(world_barbarion)
@@ -67,9 +75,11 @@ export function worldMonsterReader(tx: MutationTransaction, size: number): World
     async nearestBoss(origin) {
       if (!Number.isInteger(origin) || origin < 0 || origin > size * size)
         throw new Error("Invalid boss search origin");
+
       const result = await tx.execute<{ id: number }>(
         sql`SELECT wp.id FROM opencok_kingdom.worldpoint wp JOIN opencok_kingdom.worldpoint origin ON origin.id=${origin} AND origin."worldId"=0 WHERE wp."worldId"=0 AND wp."pointType"=15 ORDER BY (wp.x-origin.x)*(wp.x-origin.x)+(wp.y-origin.y)*(wp.y-origin.y),wp.id LIMIT 1`,
       );
+
       return result.rows[0]?.id ?? 0;
     },
     nearby(origin, radius) {
@@ -82,8 +92,10 @@ export function worldMonsterReader(tx: MutationTransaction, size: number): World
         radius > 32
       )
         throw new Error("Invalid monster search range");
+
       const x = (origin - 1) % size,
         y = Math.floor((origin - 1) / size);
+
       return read(
         [
           [

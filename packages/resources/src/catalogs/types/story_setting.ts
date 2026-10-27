@@ -9,4 +9,5 @@ export interface StorySettingDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type StorySettingDefinitionCatalog = CatalogTable<StorySettingDefinition>;

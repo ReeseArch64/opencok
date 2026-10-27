@@ -2,6 +2,7 @@ import { CatalogKind } from "@opencok/enums/catalog-kind";
 import type { DragonWordsDefinition } from "../types/dragon_words.ts";
 import type { CatalogTable } from "../../catalog-model.ts";
 import { records as records0 } from "./dragon_words.records0.ts";
+
 export const catalog: CatalogTable<DragonWordsDefinition> = {
   "kind": CatalogKind.Table,
   "records": [...records0],

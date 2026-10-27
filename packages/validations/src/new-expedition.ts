@@ -24,6 +24,7 @@ export const expeditionActivitySchema = z.strictObject({
   count: field.int,
   rewardlist: z.array(field.int).max(100).optional(),
 }) satisfies z.ZodType<ExpeditionActivityResponse>;
+
 export const expeditionPanelSchema = expeditionActivitySchema.extend({
   id: field.string,
   activityid: field.string.optional(),

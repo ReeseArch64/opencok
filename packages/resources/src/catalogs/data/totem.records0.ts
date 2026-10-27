@@ -1,4 +1,5 @@
 import type { TotemDefinition } from "../types/totem.ts";
+
 export const records: readonly TotemDefinition[] = [
   {
     "id": 20015001,

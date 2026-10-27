@@ -1,4 +1,5 @@
 import type { SignInDefinition } from "../types/sign_in.ts";
+
 export const records: readonly SignInDefinition[] = [
   {
     "id": 46301,

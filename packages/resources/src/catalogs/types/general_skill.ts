@@ -38,4 +38,5 @@ export interface GeneralSkillDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type GeneralSkillDefinitionCatalog = CatalogTable<GeneralSkillDefinition>;

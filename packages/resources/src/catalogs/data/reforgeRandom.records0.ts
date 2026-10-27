@@ -1,4 +1,5 @@
 import type { ReforgeRandomDefinition } from "../types/reforgeRandom.ts";
+
 export const records: readonly ReforgeRandomDefinition[] = [
   {
     "id": 1493001,

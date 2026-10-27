@@ -27,4 +27,5 @@ export interface ComebackDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type ComebackDefinitionCatalog = CatalogTable<ComebackDefinition>;

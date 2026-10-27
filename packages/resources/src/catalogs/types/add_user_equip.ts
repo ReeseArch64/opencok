@@ -5,4 +5,5 @@ export interface AddUserEquipDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type AddUserEquipDefinitionCatalog = CatalogTable<AddUserEquipDefinition>;

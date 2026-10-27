@@ -1,4 +1,5 @@
 import type { SpecialPushDefinition } from "../types/special_push.ts";
+
 export const records: readonly SpecialPushDefinition[] = [
   {
     "id": 20023000,

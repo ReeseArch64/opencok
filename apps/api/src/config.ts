@@ -8,6 +8,7 @@ export const readConfig = Effect.gen(function* () {
   const url = new URL(yield* databaseUrl);
   url.pathname = `/${settings.GLOBAL_DATABASE_NAME}`;
   url.searchParams.delete("database");
+
   return {
     provisioning: settings.FIREBASE_PROJECT_ID
       ? {
@@ -33,5 +34,7 @@ export const readConfig = Effect.gen(function* () {
 });
 
 export type Config = Effect.Success<typeof readConfig>;
+
 export class ApiConfig extends Context.Service<ApiConfig, Config>()("@opencok/api/Config") {}
+
 export const ApiConfigLive = Layer.effect(ApiConfig, readConfig);

@@ -1,4 +1,5 @@
 import type { FunctionOn9180Definition } from "../types/function_on9.18.0.ts";
+
 export const records: readonly FunctionOn9180Definition[] = [
   { "id": "17_wk", "online": "all", "test": "all", "version": "2.1.0", "pf": "all" },
   { "id": "17_wk_ui", "online": "all", "test": "all", "version": "2.36.0", "pf": "all" },

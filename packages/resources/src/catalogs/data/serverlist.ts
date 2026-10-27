@@ -2,6 +2,7 @@ import { CatalogKind } from "@opencok/enums/catalog-kind";
 import type { ServerlistDefinition } from "../types/serverlist.ts";
 import type { CatalogTable } from "../../catalog-model.ts";
 import { records as records0 } from "./serverlist.records0.ts";
+
 export const catalog: CatalogTable<ServerlistDefinition> = {
   "kind": CatalogKind.Table,
   "records": [...records0],

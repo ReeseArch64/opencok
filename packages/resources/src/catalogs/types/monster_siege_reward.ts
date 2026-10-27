@@ -6,4 +6,5 @@ export interface MonsterSiegeRewardDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type MonsterSiegeRewardDefinitionCatalog = CatalogTable<MonsterSiegeRewardDefinition>;

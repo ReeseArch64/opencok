@@ -1,4 +1,5 @@
 import type { EventsDefinition } from "../types/events.ts";
+
 export const records: readonly EventsDefinition[] = [
   {
     "id": 48000,

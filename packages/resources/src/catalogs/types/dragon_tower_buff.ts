@@ -12,4 +12,5 @@ export interface DragonTowerBuffDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type DragonTowerBuffDefinitionCatalog = CatalogTable<DragonTowerBuffDefinition>;

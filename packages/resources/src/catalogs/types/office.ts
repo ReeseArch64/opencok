@@ -7,4 +7,5 @@ export interface OfficeDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type OfficeDefinitionCatalog = CatalogTable<OfficeDefinition>;

@@ -1,4 +1,5 @@
 import type { SkDefinition } from "../types/sk.ts";
+
 export const records: readonly SkDefinition[] = [
   { "id": 600000, "levelMax": 5, "type": 0, "source": 1, "para1": 78, "base": 2, "add": 2 },
   {

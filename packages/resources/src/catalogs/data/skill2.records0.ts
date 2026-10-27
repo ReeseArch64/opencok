@@ -1,4 +1,5 @@
 import type { Skill2Definition } from "../types/skill2.ts";
+
 export const records: readonly Skill2Definition[] = [
   { "id": 602400, "levelMax": 20, "type": 1, "para1": 502240 },
   { "id": 602401, "levelMax": 9, "type": 1, "conditionSkill": [[602400, 8]], "para1": 502241 },

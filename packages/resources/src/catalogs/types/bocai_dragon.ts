@@ -7,4 +7,5 @@ export interface BocaiDragonDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type BocaiDragonDefinitionCatalog = CatalogTable<BocaiDragonDefinition>;

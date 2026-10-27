@@ -7,6 +7,7 @@ import { cityInteger } from "@opencok/rules/city-progression";
 import { cycleField, cycleClaims, cycleBuffs } from "@opencok/rules/seven-day-cycle";
 import type { SevenDayCycleWrite } from "@opencok/contracts/seven-day-cycle";
 import type { MutationTransaction } from "./mutation";
+
 export async function readSevenDayCycle(tx: MutationTransaction, owner: string) {
   const [cycle] = await tx
     .select()
@@ -19,9 +20,12 @@ export async function readSevenDayCycle(tx: MutationTransaction, owner: string) 
     .where(eq(user_luck_draw.uid, owner))
     .limit(4)
     .for("update");
+
   if (draws.length > 3 || draws.some((row) => ![0, 1, 2].includes(row.type)))
     throw new Error("Invalid owned cycle draws");
+
   const history: Row[] = [];
+
   for (const page of [0, 1, 2])
     history.push(
       ...(await tx
@@ -34,6 +38,7 @@ export async function readSevenDayCycle(tx: MutationTransaction, owner: string) 
 
   return { cycle, draws, history };
 }
+
 export async function writeSevenDayCycle(
   tx: MutationTransaction,
   owner: string,
@@ -41,15 +46,20 @@ export async function writeSevenDayCycle(
 ) {
   if (write.cycle) {
     const row = write.cycle;
+
     if (row.uid !== owner) throw new Error("Invalid cycle owner");
+
     const value = {
       uid: owner,
       ...Object.fromEntries(
         [0, 1, 2].flatMap((page) => {
           const names = ["stage", "totalstage", "waittime", "cdtime", "receive_reward"];
+
           return names.map((name) => {
             const key = cycleField(name, page);
+
             if (name === "receive_reward") cycleClaims(text(row, key));
+
             const value =
               name === "stage"
                 ? cityInteger(row[key], 0, 6)
@@ -58,8 +68,10 @@ export async function writeSevenDayCycle(
                   : name === "receive_reward"
                     ? text(row, key)
                     : long(row, key);
+
             if (typeof value === "bigint" && (value < -1n || value > 9223372036854775807n))
               throw new Error("Invalid cycle timestamp");
+
             return [key, value];
           });
         }),
@@ -70,9 +82,12 @@ export async function writeSevenDayCycle(
       .values(value)
       .onConflictDoUpdate({ target: user_exchange_cycle.uid, set: value });
   }
+
   if (write.draw) {
     const row = write.draw;
+
     if (row.uid !== owner) throw new Error("Invalid cycle draw owner");
+
     cycleBuffs(text(row, "reward"));
     const value = {
       uid: owner,
@@ -82,21 +97,26 @@ export async function writeSevenDayCycle(
       randTime: long(row, "randTime"),
       reward: text(row, "reward"),
     };
+
     if ([value.upTime, value.randTime].some((at) => at < 0n || at > 9223372036854775807n))
       throw new Error("Invalid cycle draw timestamp");
+
     await tx
       .insert(user_luck_draw)
       .values(value)
       .onConflictDoUpdate({ target: [user_luck_draw.uid, user_luck_draw.type], set: value });
   }
+
   if (write.history) {
     const row = write.history;
+
     if (
       row.gameUid !== owner ||
       text(row, "roleName").length > 40 ||
       text(row, "allianceName").length > 40
     )
       throw new Error("Invalid cycle history owner");
+
     await tx.insert(luck_draw_history).values({
       gameUid: owner,
       roleName: text(row, "roleName"),

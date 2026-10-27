@@ -1,4 +1,5 @@
 import type { TerritoryEffectDefinition } from "../types/territory_effect.ts";
+
 export const records: readonly TerritoryEffectDefinition[] = [
   { "id": 45002, "k1": 65, "k2": [15, 15, 15, 15, 20, 20, 30, 30, 35, 35] },
   { "id": 45003, "k1": [50, 51, 52, 53], "k2": [30, 30, 30, 35, 35, 35, 40, 40, 45, 50] },

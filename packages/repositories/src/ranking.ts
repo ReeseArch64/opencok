@@ -22,6 +22,7 @@ export function readPlayerRanking(
     !Number.isSafeInteger(query.now)
   )
     throw new Error("Invalid player ranking query");
+
   return db.transaction(
     async (tx) => {
       const profile = (
@@ -37,10 +38,13 @@ export function readPlayerRanking(
           .where(eq(userprofile.uid, uid))
           .limit(1)
       )[0];
+
       if (!profile || (profile.banFlag ?? 0) !== 0 || (profile.banTime ?? 0n) > BigInt(query.now))
         return { profile, candidates: [], fallbackRank: 1n };
+
       if (query.kind === "building")
         return { profile, ...(await readBuildingRanking(tx, uid, query.limit)) };
+
       const identity = {
         profileUid: userprofile.uid,
         name: userprofile.name,
@@ -55,6 +59,7 @@ export function readPlayerRanking(
       };
       const joinAlliance = eq(alliance.uid, userprofile.allianceId);
       const countRank = { rank: sql<string>`(count(*) + 1)::text`.mapWith(BigInt) };
+
       if (query.kind === "contribution") {
         const candidates = await tx
           .select({
@@ -80,9 +85,12 @@ export function readPlayerRanking(
           .select(countRank)
           .from(material_cost_ranking)
           .where(gt(material_cost_ranking.contributeSum, own));
+
         if (counts.length !== 1) throw new Error("Missing contribution ranking count");
+
         return { profile, candidates, fallbackRank: counts[0]!.rank };
       }
+
       if (query.kind === "level") {
         const candidates = await tx
           .select({
@@ -105,9 +113,12 @@ export function readPlayerRanking(
           .select(countRank)
           .from(userprofile)
           .where(gt(userprofile.level, profile.level));
+
         if (counts.length !== 1) throw new Error("Missing player ranking count");
+
         return { profile, candidates, fallbackRank: counts[0]!.rank };
       }
+
       const selection = {
         uid: playerinfo.uid,
         power: playerinfo.power,
@@ -152,7 +163,9 @@ export function readPlayerRanking(
         .where(eq(playerinfo.uid, uid))
         .limit(1);
       const counts = await tx.select(countRank).from(playerinfo).where(gt(metric, own));
+
       if (counts.length !== 1) throw new Error("Missing player ranking count");
+
       return { profile, candidates, fallbackRank: counts[0]!.rank };
     },
     { isolationLevel: "repeatable read", accessMode: "read only" },

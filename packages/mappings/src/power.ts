@@ -10,16 +10,22 @@ import type { Rules } from "@opencok/rules/game";
 
 function signed(value: unknown, bits: 32 | 64): bigint {
   if (value === undefined || value === null) return 0n;
+
   if (typeof value === "number" && !Number.isSafeInteger(value))
     throw new GameError(errors.unsupported, "power_rule");
+
   if (!/^[+-]?\d+$/.test(String(value))) throw new GameError(errors.unsupported, "power_rule");
+
   const parsed = BigInt(String(value));
+
   if (BigInt.asIntN(bits, parsed) !== parsed) throw new GameError(errors.unsupported, "power_rule");
+
   return parsed;
 }
 
 function serializePlayerStatistics(statistics: Row | undefined): Fields {
   const fields: Fields = {};
+
   for (const [wire, column] of Object.entries({
     battleWin: "battlesWin",
     battleLose: "battlesLose",
@@ -32,7 +38,9 @@ function serializePlayerStatistics(statistics: Row | undefined): Fields {
     cityDes: "cityDestroyed",
   }))
     fields[wire] = sfs.int(Number(signed(statistics?.[column], 32)));
+
   fields.armyKill = sfs.long(signed(statistics?.armyKill, 64));
+
   return fields;
 }
 
@@ -43,6 +51,7 @@ function serializePowerInfo(
   rules: Rules,
 ): Fields {
   const fields = playerStatistics(statistics);
+
   for (const key of [
     "playerPower",
     "heroPower",
@@ -55,17 +64,24 @@ function serializePowerInfo(
     "sagatower_science",
   ] as const)
     fields[key] = sfs.int(Number(signed(power[key], 32)));
+
   for (const key of ["armyPower", "fortPower", "petDragonPower", "prinessPower"] as const)
     fields[key] = sfs.long(signed(power[key], 64));
+
   let nextUpdateTime = 0n;
+
   if (upload) {
     const seconds = rules.items.get("hero")?.k7;
+
     if (seconds === undefined) throw new GameError(errors.unsupported, "power_rule");
+
     nextUpdateTime = BigInt.asIntN(64, signed(upload.updateTime, 64) + signed(seconds, 64) * 1000n);
   }
+
   fields.nextUpdateTime = sfs.long(nextUpdateTime);
   fields.banTime = sfs.long(signed(upload?.banTime, 64));
   fields.banCount = sfs.int(Number(signed(upload?.banCount, 32)));
+
   return fields;
 }
 

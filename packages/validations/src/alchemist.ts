@@ -1,6 +1,7 @@
 import { z } from "zod";
 import type { AlchemistInfoResponse } from "@opencok/contracts/responses/alchemist";
 import { field } from "./response";
+
 export const alchemistInfoSchema = z.strictObject({
   listen: field.int,
   listentime: field.long,

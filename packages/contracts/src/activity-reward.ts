@@ -1,4 +1,5 @@
 import type { Row } from "./rows";
+
 export interface ActivityRewardReader {
   alliance(id: string): Promise<{ member?: Row; alliance?: Row }>;
   owned(actId: string): Promise<{ entitlement: Row; announcement?: Row } | undefined>;

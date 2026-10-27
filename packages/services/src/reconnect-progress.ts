@@ -47,7 +47,9 @@ import { reconnectOwnGenerals } from "./reconnect.ts";
 import { projectReconnectMarches } from "./reconnect-marches.ts";
 
 const int = (value: unknown) => Number(javaDecimal(String(value ?? 0), 32));
+
 const long = (value: unknown) => javaDecimal(String(value ?? 0), 64);
+
 export interface ReconnectResult {
   body: Fields;
   pushes: { command: string; body: Fields }[];
@@ -74,6 +76,7 @@ export async function planReconnectProgress(
 ): Promise<{ write: ReconnectProgressWrite; result: ReconnectResult }> {
   const uid = String(state.profile.uid);
   const now = BigInt(context.now);
+
   if (
     !Number.isSafeInteger(context.now) ||
     context.now < 0 ||
@@ -83,6 +86,7 @@ export async function planReconnectProgress(
     !services.worldPowerEffects
   )
     throw new Error("Incomplete reconnect context");
+
   const random = environment.random ?? randomInt;
   const repairs = reconnectGeneralRepairs(
     state.generals,
@@ -110,6 +114,7 @@ export async function planReconnectProgress(
       states: effects.states.filter((row) => long(row.startTime) <= at),
     };
     const world = worldPowerEffects(worldRecords, rules, instant);
+
     return (effect: Parameters<typeof playerGameEffect>[6]) =>
       playerGameEffect(snapshot, rules, instant, abilities, world, emperor, effect);
   };
@@ -126,6 +131,7 @@ export async function planReconnectProgress(
   const losses = new Map<string, { armyId: string; weakened: number; dead: number }>();
   const upkeepAt = (at: bigint) => {
     const resolve = resolveAt(at);
+
     return reconnectUpkeep(
       armies,
       state.buildings,
@@ -149,13 +155,16 @@ export async function planReconnectProgress(
     );
   };
   const times = reconnectSettlementTimes(state, worldRecords, rules, context);
+
   for (let index = 1; index < times.length; index++) {
     const upkeep = upkeepAt(times[index - 1]!);
+
     while (
       index < times.length - 1 &&
       JSON.stringify(upkeepAt(times[index]!)) === JSON.stringify(upkeep)
     )
       index++;
+
     const settled = settleReconnectFood(resource, times[index]!, upkeep.rates, upkeep.options);
     resource = {
       ...resource,
@@ -164,6 +173,7 @@ export async function planReconnectProgress(
       lastUpdateTime: settled.lastUpdateTime,
     };
     starvingMillis += settled.starvingMillis;
+
     if (upkeep.weakness && settled.starvingMillis > 0n) {
       const weak = reconnectWeaknessPlan(
         armies,
@@ -179,6 +189,7 @@ export async function planReconnectProgress(
       writeWeaknessTime = weaknessTime;
       weakened = (weakened + weak.weakened) | 0;
       dead = (dead + weak.dead) | 0;
+
       for (const loss of weak.losses) {
         const prior = losses.get(loss.armyId) ?? { armyId: loss.armyId, weakened: 0, dead: 0 };
         losses.set(loss.armyId, {
@@ -189,6 +200,7 @@ export async function planReconnectProgress(
       }
     }
   }
+
   const resolve = resolveAt(now);
   let playerInfo: Row | undefined;
   const countState = {
@@ -217,6 +229,7 @@ export async function planReconnectProgress(
         );
         playerInfo = { ...power, power: power.total };
       }
+
       return playerInfo;
     },
     get prestigeLevel() {
@@ -251,10 +264,12 @@ export async function planReconnectProgress(
     : undefined;
   const changedArmies = armies.filter((row) => {
     const before = state.armies.find((original) => original.armyId === row.armyId)!;
+
     return int(row.free) !== int(before.free) || int(row.defence) !== int(before.defence);
   });
   const changedWeakness = weakness.filter((row) => {
     const before = state.weakness.find((original) => original.armyId === row.armyId);
+
     return (
       !before ||
       int(row.weakness) !== int(before.weakness) ||
@@ -296,7 +311,9 @@ export async function planReconnectProgress(
     troopChanges: changedArmies.map((row) => {
       const before = state.armies.find((original) => original.armyId === row.armyId)!;
       const loss = losses.get(String(row.armyId));
+
       if (!loss) throw new Error("Unaccounted reconnect loss");
+
       return {
         ...loss,
         freeBefore: int(before.free),
@@ -341,11 +358,13 @@ export async function planReconnectProgress(
     },
     pushes: taskView.pushes.map((push) => ({ command: push.command, body: push.fields })),
   };
+
   if (changedArmies.length)
     result.pushes.push({
       command: "army.info",
       body: { soldiers: sfs.array(changedArmies.map((row) => sfs.object(reconnectArmy(row)))) },
     });
+
   if (changedWeakness.length)
     result.pushes.push({
       command: "push.weakness.receive",
@@ -364,6 +383,7 @@ export async function planReconnectProgress(
         ),
       },
     });
+
   if (refresh)
     result.pushes.push({
       command: "resource.time.refresh",
@@ -379,12 +399,16 @@ export async function planReconnectProgress(
         ),
       },
     });
+
   const fullMail = rules.items.get("chat_switch")?.k3?.split("|").includes("1") ?? false;
+
   for (const message of mail)
     result.pushes.push({
       command: "push.mail",
       body: { ...avatarMailPush(message, fullMail), itemIdFlag: sfs.int(message.itemIdFlag) },
     });
+
   validateReconnectResult(result, "user.lv");
+
   return { write, result };
 }

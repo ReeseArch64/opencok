@@ -15,12 +15,15 @@ import type { MutationResult } from "@opencok/contracts/mutation";
 import { createMutationExecutor, type MutationTransaction } from "./mutation";
 import type { RealmAuthority } from "./realm-authority";
 import type { Database } from "./game";
+
 const maximum = (...values: bigint[]) =>
   values.reduce((left, right) => (left > right ? left : right), 0n);
+
 export async function lockComebackDevice(tx: MutationTransaction, profile: Row) {
   const key = createHash("sha256").update(comebackDeviceId(profile)).digest("hex");
   await tx.execute(sql`select pg_advisory_xact_lock(hashtextextended(${`comeback:${key}`},0))`);
 }
+
 export async function readComebackSession(tx: MutationTransaction, owner: string) {
   const [row] = await tx
     .select({ value: sql<string>`left(${trigger_var.value},2049)` })
@@ -32,8 +35,10 @@ export async function readComebackSession(tx: MutationTransaction, owner: string
         eq(trigger_var.key, comebackSessionKey),
       ),
     );
+
   return decodeComebackSession(row?.value);
 }
+
 export async function writeComebackSession(
   tx: MutationTransaction,
   owner: string,
@@ -49,6 +54,7 @@ export async function writeComebackSession(
       set: { value, refreshtime: now },
     });
 }
+
 export function createComebackSessions(
   db: Database["kingdom"]["db"],
   authority: RealmAuthority,
@@ -69,6 +75,7 @@ export function createComebackSessions(
       sessionId.includes("\0")
     )
       throw new Error("Invalid comeback session");
+
     const now = BigInt(captured),
       suffix = kind === "observe" ? `${sessionId}:${now / 60000n}` : sessionId;
     const execute = createMutationExecutor(db, authority, () => captured);
@@ -82,13 +89,18 @@ export function createComebackSessions(
       },
       async (tx) => {
         const [profile] = await tx.select().from(userprofile).where(eq(userprofile.uid, owner));
+
         if (!profile) throw new Error("Missing comeback session owner");
+
         await lockComebackDevice(tx, profile);
         const saved = await readComebackSession(tx, owner);
+
         if (saved && now < saved.openedAt) throw new Error("Reversed comeback session clock");
+
         if (kind !== "open") {
           if (!saved || saved.sessionId !== sessionId || saved.closedAt > 0n)
             return { response: Buffer.alloc(0) };
+
           const observed = maximum(now, saved.observedAt);
           await writeComebackSession(
             tx,
@@ -103,8 +115,10 @@ export function createComebackSessions(
               ...(kind === "close" ? { offLineTime: observed } : {}),
             })
             .where(eq(userprofile.uid, owner));
+
           return { response: Buffer.alloc(0) };
         }
+
         const [history] = await tx
           .select({ id: command_receipt.requestId })
           .from(command_receipt)
@@ -123,6 +137,7 @@ export function createComebackSessions(
         let devicePrevious = now;
         const rawDevice = text(profile, "deviceId"),
           device = rawDevice.trim() ? rawDevice : "";
+
         if (device) {
           const actors = await tx
             .select({
@@ -144,21 +159,28 @@ export function createComebackSessions(
             )
             .where(eq(userprofile.deviceId, device))
             .limit(257);
+
           if (actors.length > 256) throw new Error("Comeback device aggregate exceeds bound");
+
           let latest = 0n,
             unknown = false;
+
           for (const actor of actors) {
             const session = decodeComebackSession(actor.metadata ?? undefined);
+
             if (
               (actor.history && !session) ||
               actor.realm !== authority.kingdomId ||
               (actor.cross ?? 0) > 0
             )
               unknown = true;
+
             latest = maximum(latest, actor.at ?? 0n, session?.observedAt ?? 0n);
           }
+
           devicePrevious = unknown || latest === 0n ? now : latest;
         }
+
         await writeComebackSession(
           tx,
           owner,
@@ -176,10 +198,12 @@ export function createComebackSessions(
           .update(userprofile)
           .set({ lastOnlineTime: maximum(long(profile, "lastOnlineTime"), now) })
           .where(eq(userprofile.uid, owner));
+
         return afterOpen ? afterOpen(tx, owner, now) : { response: Buffer.alloc(0) };
       },
     );
   };
+
   return {
     open: (owner: string, id: string, now: number) => run(owner, id, now, "open"),
     close: (owner: string, id: string, now: number) => run(owner, id, now, "close"),

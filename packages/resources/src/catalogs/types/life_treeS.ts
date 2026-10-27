@@ -9,4 +9,5 @@ export interface LifeTreeSDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type LifeTreeSDefinitionCatalog = CatalogTable<LifeTreeSDefinition>;

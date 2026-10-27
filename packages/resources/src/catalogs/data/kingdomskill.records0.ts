@@ -1,4 +1,5 @@
 import type { KingdomskillDefinition } from "../types/kingdomskill.ts";
+
 export const records: readonly KingdomskillDefinition[] = [
   {
     "id": 1501001,

@@ -14,8 +14,10 @@ function serializeMailSave(result: MailSaveResult): Fields {
 
 function serializeMailStatus(result: MailStatusResult): Fields {
   if (result.mode === "unknown") return {};
+
   if (result.mode === "category")
     return { total: sfs.long(result.total), unread: sfs.long(result.unread) };
+
   return Object.fromEntries(
     result.categories.map(({ total, unread }, index) => [
       String(index + 1),

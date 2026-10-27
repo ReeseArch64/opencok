@@ -3,6 +3,7 @@ export interface NicknameItemDeleteResponse {
   readonly itemId: string;
   readonly count: number;
 }
+
 export interface NicknameItemAddResponse {
   readonly uuid: string;
   readonly itemId: string;
@@ -18,16 +19,19 @@ export interface NicknameItemAddResponse {
   readonly para8?: string;
   readonly para9?: string;
 }
+
 export interface NicknameMobileGoldResponse {
   readonly freeGold: bigint;
   readonly paidGold: bigint;
   readonly paidSpecialGold: bigint;
 }
+
 export interface NicknameDmmGoldResponse {
   readonly dmmGold: bigint;
   readonly dmmPaidGold: bigint;
   readonly dmmPaidSpecialGold: bigint;
 }
+
 export interface NicknameChangeReplyResponse {
   readonly gold?: bigint;
   readonly status: boolean;

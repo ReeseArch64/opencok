@@ -11,4 +11,5 @@ export interface EggDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type EggDefinitionCatalog = CatalogTable<EggDefinition>;

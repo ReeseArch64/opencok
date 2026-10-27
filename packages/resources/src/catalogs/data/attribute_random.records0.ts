@@ -1,4 +1,5 @@
 import type { AttributeRandomDefinition } from "../types/attribute_random.ts";
+
 export const records: readonly AttributeRandomDefinition[] = [
   { "id": 45600, "effect": 53, "quantity": 5, "dialog": 113840, "rate": 100 },
   { "id": 45601, "effect": 53, "quantity": 5, "dialog": 113840, "rate": 100 },

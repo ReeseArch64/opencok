@@ -19,7 +19,9 @@ export interface QuestAction {
   key?: string;
   count: number;
 }
+
 export const questPeriod = (now: bigint, delay = 0n) => (now - delay) / 86400000n;
+
 export function castleLevel(state: CityProgressionState) {
   return state.buildings.reduce(
     (level, row) =>
@@ -27,9 +29,12 @@ export function castleLevel(state: CityProgressionState) {
     0,
   );
 }
+
 export function questInitial(rule: Rule, state: CityProgressionState, rules: Rules) {
   if (rule.type2 === "4") return state.tasks.filter((row) => num(row, "state") > 0).length;
+
   if (rule.type2 === "40") return text(state.profile, "allianceId") ? 1 : 0;
+
   return Math.max(
     0,
     reconnectTaskInitialCount(
@@ -51,6 +56,7 @@ export function questInitial(rule: Rule, state: CityProgressionState, rules: Rul
     ),
   );
 }
+
 export function progressQuests(
   state: CityProgressionState,
   rules: Rules,
@@ -73,7 +79,9 @@ export function progressQuests(
   const catalog = new Map((rules.reconnect.quests ?? []).map((rule) => [rule.id, rule]));
   const tasks = plan.tasks.map((task) => {
     const row = { uid, id: task.id, num: task.num, state: task.state, type: task.type };
+
     if (row.state !== 0) return row;
+
     const rule = catalog.get(task.id)!;
     const total = (rule.para2 ?? "0").split("|").reduce((sum, n) => sum + cityInteger(n), 0);
     const matches =
@@ -87,18 +95,27 @@ export function progressQuests(
         matches ? (rule.add === undefined ? action.count : row.num + action.count) : 0,
       ),
     );
+
     if (row.num >= total) row.state = 1;
+
     return row;
   });
+
   if (!q) return { tasks };
+
   const story = q.story.map((row) => ({ ...row }));
+
   for (const rule of rules.progression.story?.values() ?? [])
     if (!story.some((row) => String(row.id) === rule.id))
       story.push({ uid, id: Number(rule.id), type: rule.type === "0" ? 1 : 0, num: 0, state: 0 });
+
   for (const row of story) {
     if (num(row, "state") !== 0) continue;
+
     const rule = rules.progression.story?.get(String(row.id));
+
     if (!rule || rule.type === "0") continue;
+
     const kinds: Record<string, string> = {
       "1": "0",
       "2": "12",
@@ -126,10 +143,13 @@ export function progressQuests(
         matches ? (rule.set === "1" ? num(row, "num") + action.count : action.count) : 0,
       ),
     );
+
     if (num(row, "num") >= cityInteger(rule.target)) row.state = 1;
   }
+
   for (const row of story.filter((row) => num(row, "type") === 1 && num(row, "state") === 0)) {
     const group = rules.progression.story?.get(String(row.id))?.group;
+
     if (
       story
         .filter(
@@ -143,8 +163,10 @@ export function progressQuests(
       row.state = 1;
     }
   }
+
   const reset = questPeriod(now, 300000n) > questPeriod(long(q.lord, "newDailyTaskFlushTime"));
   let daily = q.daily.map((row) => ({ ...row }));
+
   if (reset || !daily.length) {
     daily = [];
     const level = num(state.profile, "level"),
@@ -156,6 +178,7 @@ export function progressQuests(
         .filter(Boolean)
         .every((pair) => {
           const [kind, value] = pair.split(";").map(Number);
+
           switch (kind) {
             case 0:
               return level >= value!;
@@ -174,21 +197,29 @@ export function progressQuests(
     );
     const take = (type: number, count: number) => {
       const pool = [...candidates];
+
       for (let n = 0; n < count && pool.length; n++) {
         const total = pool.reduce((sum, rule) => sum + cityInteger(rule.weight), 0);
+
         if (!total) break;
+
         let draw = random(total),
           index = 0;
+
         while (index < pool.length - 1 && draw >= cityInteger(pool[index]!.weight))
           draw -= cityInteger(pool[index++]!.weight);
+
         const [rule] = pool.splice(index, 1);
         daily.push({ uid, id: Number(rule!.id), type, num: 0, state: 0 });
       }
     };
     const info = rules.items.get("dailytasks_info");
+
     if (random(100) <= Number(info?.k2 ?? 0)) take(1, 1);
+
     take(0, cityInteger(info?.k1 ?? 5));
   }
+
   if (
     action?.daily !== undefined &&
     questPeriod(now, 300000n) >= questPeriod(long(q.lord, "newDailyTaskFlushTime")) &&
@@ -196,8 +227,10 @@ export function progressQuests(
   )
     for (const row of daily) {
       if (num(row, "state") !== 0) continue;
+
       const rule = rules.progression.daily?.get(String(row.id)),
         parts = rule?.num?.split(";") ?? [];
+
       if (
         Number(rule?.type) !== action.daily ||
         parts
@@ -205,9 +238,12 @@ export function progressQuests(
           .some((key, index) => key !== "0" && key !== (action.key ?? "").split(";")[index])
       )
         continue;
+
       row.num = Math.min(cityInteger(parts.at(-1)), num(row, "num") + action.count);
+
       if (num(row, "num") >= cityInteger(parts.at(-1))) row.state = 1;
     }
+
   const resetLegacy = questPeriod(now) > questPeriod(long(q.lord, "dailyTaskFlushTime"));
   const legacy = [...(rules.progression.legacyDaily?.values() ?? [])]
     .filter((rule) => castleLevel(state) >= Number(rule.accept1))
@@ -221,6 +257,7 @@ export function progressQuests(
         cityInteger(rule.para2) * cityInteger(rule.para3),
         num(previous ?? {}, "num") + (matches ? action.count : 0),
       );
+
       return {
         uid,
         id: rule.id!,
@@ -228,6 +265,7 @@ export function progressQuests(
         times: Math.min(cityInteger(rule.para3), Math.floor(count / cityInteger(rule.para2, 1))),
       };
     });
+
   return {
     tasks,
     story,
@@ -243,14 +281,18 @@ export function progressQuests(
     },
   };
 }
+
 export function storySection(rows: readonly Row[], rules: Rules) {
   const groups = rows
     .filter((row) => num(row, "type") === 1 && num(row, "state") !== 2)
     .map((row) => Number(rules.progression.story?.get(String(row.id))?.group));
+
   return groups.length ? Math.min(...groups) : 0;
 }
+
 export function rewardAtLevel(raw: string | undefined, level: number) {
   if (!raw?.includes(";")) return raw;
+
   return raw
     .split("|")
     .map((pair) => pair.split(";"))

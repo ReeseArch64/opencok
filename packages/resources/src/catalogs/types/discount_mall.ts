@@ -5,4 +5,5 @@ export interface DiscountMallDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type DiscountMallDefinitionCatalog = CatalogTable<DiscountMallDefinition>;

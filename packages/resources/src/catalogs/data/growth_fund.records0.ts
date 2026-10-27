@@ -1,4 +1,5 @@
 import type { GrowthFundDefinition } from "../types/growth_fund.ts";
+
 export const records: readonly GrowthFundDefinition[] = [
   { "id": 89800, "type": 1, "level": 5, "reward": 249634 },
   { "id": 89801, "type": 1, "level": 10, "reward": 249635 },

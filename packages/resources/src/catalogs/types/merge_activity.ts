@@ -7,4 +7,5 @@ export interface MergeActivityDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type MergeActivityDefinitionCatalog = CatalogTable<MergeActivityDefinition>;

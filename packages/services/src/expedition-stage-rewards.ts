@@ -1,3 +1,4 @@
+import { CityCommandDomain } from "./city-command-domain.ts";
 import { sfs, encode, str } from "@opencok/messages/sfs";
 import { num, text, long } from "@opencok/contracts/rows";
 import {
@@ -24,10 +25,12 @@ import type {
 } from "@opencok/contracts/expedition-stage-rewards";
 import type { AvatarSystemMail } from "@opencok/contracts/files";
 import type { Rules } from "@opencok/rules/game";
-import type { CityDomain } from "./city-progression";
+import type { CityDomain } from "./city-domain.ts";
+
 export class ExpeditionStageRewardService {
   private running?: Promise<void>;
   private start = 0;
+
   constructor(
     readonly store: ExpeditionAwardStore,
     readonly standings: ExpeditionAwardStandings,
@@ -35,16 +38,20 @@ export class ExpeditionStageRewardService {
     readonly deliver: (owner: string, id: string) => Promise<unknown>,
     readonly now = Date.now,
   ) {}
+
   refresh() {
     this.running ??= this.run().finally(() => {
       this.running = undefined;
     });
+
     return this.running;
   }
+
   private async admit(at: bigint) {
     const closures = await this.store.candidates(),
       begin = this.start;
     let work = 0;
+
     for (let offset = 0; offset < closures.length && work < 64; offset++) {
       const index = (begin + offset) % closures.length,
         closure = closures[index]!,
@@ -54,14 +61,18 @@ export class ExpeditionStageRewardService {
         closure,
         members.map((row) => text(row, "uid")),
       );
+
       if (!shared) continue;
+
       const history = closure.history
         ? text(closure, "history")
         : expeditionHistorySnapshot(shared.result);
+
       if (!members.length) {
         await this.store.finished(closure, history);
         continue;
       }
+
       for (const member of members) {
         let count = 1;
         await this.store.plan(
@@ -78,6 +89,7 @@ export class ExpeditionStageRewardService {
               stage = num(closure, "stage"),
               periodId = text(closure, "periodId");
             const ranking: unknown = JSON.parse(text(shared.result, "ranking"));
+
             if (
               !ranking ||
               typeof ranking !== "object" ||
@@ -85,18 +97,25 @@ export class ExpeditionStageRewardService {
               !Array.isArray(ranking.totals)
             )
               throw new Error("Missing final expedition totals");
+
             const total = ranking.totals.find(
               (row) => row.serverId === this.rules.kingdomId,
             )?.score;
+
             if (typeof total !== "number" || !Number.isFinite(total) || total < 0)
               throw new Error("Invalid final expedition total");
+
             const won = num(closure, "winner") === this.rules.kingdomId,
               parameters = [String(stage), expeditionScoreText(total)],
               threshold = this.rules.items.get("17_wk")?.k2 ?? "";
+
             if (won) parameters.push(threshold);
+
             const top = shared.top;
+
             if (top?.metadata && (!won || num(top, "score") >= Number(threshold))) {
               const metadata: unknown = JSON.parse(text(top, "metadata"));
+
               if (
                 metadata &&
                 typeof metadata === "object" &&
@@ -105,6 +124,7 @@ export class ExpeditionStageRewardService {
               )
                 parameters.push(metadata.name, expeditionScoreText(num(top, "score")));
             }
+
             plans.push({
               kind: "summary",
               reward: "0",
@@ -118,12 +138,16 @@ export class ExpeditionStageRewardService {
                     ? `${template.message}${plan.parameters.length ? "|" + plan.parameters.join("|") : ""}`
                     : undefined,
                 );
+
               if (!template || !contents) throw new Error("Missing expedition award mail template");
+
               const reward =
                 plan.reward === "0"
                   ? null
                   : pinProgressionReward({ rules: this.rules, now: at }, plan.reward);
+
               if (reward !== null) mailRewardEntries(reward);
+
               return {
                 id: expeditionAwardId(periodId, stage, uid, plan.kind),
                 sender: template.sender ?? "",
@@ -133,6 +157,7 @@ export class ExpeditionStageRewardService {
               };
             });
             count = Math.max(1, mails.length);
+
             return { mails, claims };
           },
           history,
@@ -140,20 +165,24 @@ export class ExpeditionStageRewardService {
         );
         closure.awardCursor = text(member, "uid");
         work += count;
+
         if (work >= 64) break;
       }
     }
   }
+
   private async run() {
     const at = BigInt(this.now());
     let failed = false,
       failure: unknown;
+
     try {
       await this.admit(at);
     } catch (error) {
       failed = true;
       failure = error;
     }
+
     for (const award of await this.store.pending(at)) {
       try {
         await this.deliver(text(award, "ownerUid"), text(award, "id"));
@@ -161,11 +190,14 @@ export class ExpeditionStageRewardService {
         await this.store.defer(text(award, "id"), BigInt(this.now()));
       }
     }
+
     if (failed) throw failure;
   }
 }
+
 function payload(value: string): ExpeditionAwardPayload {
   const parsed: unknown = JSON.parse(value);
+
   if (
     !parsed ||
     typeof parsed !== "object" ||
@@ -178,7 +210,9 @@ function payload(value: string): ExpeditionAwardPayload {
     parsed.claims.some((id) => !Number.isSafeInteger(id) || id < 1)
   )
     throw new Error("Invalid expedition award payload");
+
   const ids = new Set<string>();
+
   for (const mail of parsed.mails) {
     if (
       !mail ||
@@ -193,18 +227,26 @@ function payload(value: string): ExpeditionAwardPayload {
       (mail.reward !== null && typeof mail.reward !== "string")
     )
       throw new Error("Invalid expedition award mail");
+
     ids.add(mail.id);
   }
+
   return parsed as ExpeditionAwardPayload;
 }
-export const expeditionStageRewardDomain: CityDomain = {
-  commands: ["expedition.award.deliver"],
-  types: [],
-  async prepare(context, _command, params) {
+
+export class ExpeditionStageRewardDomain extends CityCommandDomain {
+  public readonly commands: CityDomain["commands"] = ["expedition.award.deliver"];
+
+  public readonly types: CityDomain["types"] = [];
+
+  public readonly prepare: CityDomain["prepare"] = async (context, _command, params) => {
     const id = str(params, "awardId");
+
     if (!/^[a-f0-9]{32}$/.test(id) || str(params, "operationId") !== expeditionAwardOperation(id))
       throw new Error("Invalid expedition delivery operation");
+
     const award = await context.state.expeditionAward?.load(id);
+
     if (
       !award ||
       award.ownerUid !== context.owner ||
@@ -212,13 +254,19 @@ export const expeditionStageRewardDomain: CityDomain = {
       id !== expeditionAwardId(text(award, "periodId"), num(award, "stage"), context.owner)
     )
       throw new Error("Missing owned expedition entitlement");
+
     if (long(award, "deliveredAt") > 0n) return { response: encode({}), event: null };
+
     const saved = payload(text(award, "payload"));
+
     if (!context.economy.event) throw new Error("Expedition mail publication unavailable");
+
     const quests = (context.write.quests ??= {}),
       full = context.rules.items.get("chat_switch")?.k3?.split("|").includes("1") ?? false;
+
     for (const draft of saved.mails) {
       if (draft.reward !== null) mailRewardEntries(draft.reward);
+
       const mail: AvatarSystemMail = {
         uid: draft.id + "00",
         owner: context.owner,
@@ -242,22 +290,31 @@ export const expeditionStageRewardDomain: CityDomain = {
         }),
       });
     }
+
     context.write.expeditionAward = id;
+
     return { response: encode({}), event: null };
-  },
-  async apply() {
+  };
+
+  public readonly apply: CityDomain["apply"] = async () => {
     throw new Error("Unsupported expedition reward activity");
-  },
-};
+  };
+}
+
+export const expeditionStageRewardDomain: CityDomain = new ExpeditionStageRewardDomain();
+
 export class ExpeditionHistoryService {
   constructor(
     readonly source: ExpeditionHistorySource,
     readonly rules: Rules,
     readonly now = Date.now,
   ) {}
+
   async read(owner: string) {
     const at = BigInt(this.now());
+
     if (!expeditionOpen(this.rules, at)) throw new Error("Expedition history is unavailable");
+
     const rows = await this.source.owned(owner, at),
       ids = [
         ...new Set(
@@ -266,6 +323,7 @@ export class ExpeditionHistoryService {
             .filter((id) => id > 0),
         ),
       ];
+
     return expeditionHistory(rows, await this.source.servers(ids));
   }
 }

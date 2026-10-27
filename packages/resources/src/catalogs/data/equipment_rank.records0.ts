@@ -1,4 +1,5 @@
 import type { EquipmentRankDefinition } from "../types/equipment_rank.ts";
+
 export const records: readonly EquipmentRankDefinition[] = [
   {
     "id": 2901998,

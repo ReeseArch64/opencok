@@ -5,4 +5,5 @@ export interface ConvertDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type ConvertDefinitionCatalog = CatalogTable<ConvertDefinition>;

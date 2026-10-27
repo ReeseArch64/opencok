@@ -1,4 +1,5 @@
 import type { ChatbgColorDefinition } from "../types/chatbg_color.ts";
+
 export const records: readonly ChatbgColorDefinition[] = [
   { "id": 1, "chatbgId": 16, "color": [200, 158, 130] },
   { "id": 2, "chatbgId": 17, "color": [244, 217, 153] },

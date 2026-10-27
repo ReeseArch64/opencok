@@ -1,4 +1,5 @@
 import type { PlayerNameDefinition } from "../types/playerName.ts";
+
 export const records: readonly PlayerNameDefinition[] = [
   { "id": 99750, "name": "Gail" },
   { "id": 99751, "name": "Gemma" },

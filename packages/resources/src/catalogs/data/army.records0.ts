@@ -1,4 +1,5 @@
 import type { ArmyDefinition } from "../types/army.ts";
+
 export const records: readonly ArmyDefinition[] = [
   { "id": 300000, "arm": [[107700, 1]] },
   { "id": 300001, "arm": [[107700, 1]] },

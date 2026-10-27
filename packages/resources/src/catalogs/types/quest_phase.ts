@@ -5,4 +5,5 @@ export interface QuestPhaseDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type QuestPhaseDefinitionCatalog = CatalogTable<QuestPhaseDefinition>;

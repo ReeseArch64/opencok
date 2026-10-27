@@ -26,16 +26,20 @@ export function createShopRepository(
   ) => Promise<MutationResult | undefined>,
 ): ShopRepository {
   const execute = createMutationExecutor(db, authority, now);
+
   return {
     async read(owner, select) {
       return db.transaction(
         async (tx) => {
           const [profile] = await tx.select().from(userprofile).where(eq(userprofile.uid, owner));
+
           if (!profile) throw new Error("Missing shop account");
+
           const buildings = await tx
             .select()
             .from(user_building)
             .where(eq(user_building.uid, owner));
+
           return select({
             inventory: {
               profile,
@@ -57,6 +61,7 @@ export function createShopRepository(
     },
     execute(input, offer, plan) {
       if (!offer || offer.length > 40) throw new Error("Invalid shop offer");
+
       return execute(input, async (tx) => {
         await tx.insert(shop_stock).values({ id: offer }).onConflictDoNothing();
         const stock = await tx
@@ -71,14 +76,17 @@ export function createShopRepository(
           .for("update");
         const timestamp = now();
         let savedPurchase: ShopPurchase | undefined;
+
         return executeInventoryTransaction(
           tx,
           input.owner,
           async (inventory) => {
             const result = await plan({ inventory, purchases, stock, now: timestamp });
+
             if (result.purchase) {
               const purchase = result.purchase;
               savedPurchase = purchase;
+
               if (
                 purchase.id !== offer ||
                 !Number.isInteger(purchase.count) ||
@@ -86,6 +94,7 @@ export function createShopRepository(
                 purchase.count > 2147483647
               )
                 throw new Error("Invalid shop purchase");
+
               const values = {
                 buyDaily: purchase.daily,
                 buyTotal: purchase.total,
@@ -101,6 +110,7 @@ export function createShopRepository(
                 .set({ purchased: stock[0]!.purchased + BigInt(purchase.count) })
                 .where(eq(shop_stock.id, offer));
             }
+
             return result.inventory;
           },
           input.command,

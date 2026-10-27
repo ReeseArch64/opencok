@@ -5,4 +5,5 @@ export interface SpResourcesRoundDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type SpResourcesRoundDefinitionCatalog = CatalogTable<SpResourcesRoundDefinition>;

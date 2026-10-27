@@ -19,4 +19,5 @@ export interface SagaTowerScienceBaseDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type SagaTowerScienceBaseDefinitionCatalog = CatalogTable<SagaTowerScienceBaseDefinition>;

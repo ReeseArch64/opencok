@@ -5,6 +5,7 @@ import type { Rules } from "./game.ts";
 
 export function serverFeature(rules: Rules, key: string, context: RuleContext): boolean {
   const rule = rules.features.get(key);
+
   if (
     !rule ||
     mailBlank(rule.version) ||
@@ -13,11 +14,13 @@ export function serverFeature(rules: Rules, key: string, context: RuleContext): 
     !featureRealmEnabled(context.testServer ? rule.test : rule.online, context.kingdomId)
   )
     return false;
+
   return ruleTimeWindow(rule, context);
 }
 
 export function powerFeatureContext(rules: Rules, context: RuleContext) {
   const enabled = serverFeature(rules, "dragon_new", context);
+
   return {
     dragonLevelUp: enabled && serverFeature(rules, "dragon_levelup", context),
     dragonScience: enabled && serverFeature(rules, "dragon_science", context),

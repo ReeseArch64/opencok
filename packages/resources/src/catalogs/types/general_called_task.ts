@@ -7,4 +7,5 @@ export interface GeneralCalledTaskDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type GeneralCalledTaskDefinitionCatalog = CatalogTable<GeneralCalledTaskDefinition>;

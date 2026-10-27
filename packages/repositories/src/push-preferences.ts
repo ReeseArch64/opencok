@@ -13,6 +13,7 @@ export async function setPushPreference(
   now: number,
 ): Promise<void> {
   const preference = { type: input.type, status: input.status, audio: input.audio };
+
   if (
     !uid ||
     uid.length > 40 ||
@@ -27,6 +28,7 @@ export async function setPushPreference(
     )
   )
     throw new DependencyError("push preference input");
+
   await db.transaction(
     async (tx) => {
       const [profile] = await tx
@@ -40,6 +42,7 @@ export async function setPushPreference(
         .where(eq(userprofile.uid, uid))
         .limit(1)
         .for("update");
+
       if (
         !profile ||
         profile.uid !== uid ||
@@ -48,10 +51,13 @@ export async function setPushPreference(
         (profile.banTime ?? 0n) > BigInt(now)
       )
         throw new DependencyError("push preference owner");
+
       const key = and(eq(parse_info.uid, uid), eq(parse_info.type, preference.type));
       const [existing] = await tx.select({ uid: parse_info.uid }).from(parse_info).where(key);
+
       if (existing) {
         if (existing.uid !== uid) throw new DependencyError("push preference selection");
+
         await tx
           .update(parse_info)
           .set({ status: preference.status, audio: preference.audio })

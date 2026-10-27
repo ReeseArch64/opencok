@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { field, responseValueSchema } from "./response";
 import type { SeasonalExchangeResponse } from "@opencok/contracts/responses/seasonal-exchange";
+
 export const seasonalExchangeSchema = z.strictObject({
   level: field.int,
   refreshTime: field.long,

@@ -27,6 +27,7 @@ export interface PrayerResponse {
   FOOD?: bigint;
   SILVER?: bigint;
 }
+
 export interface PrayerLoginResponse {
   pray: { prayCount: number; freeFromItem: number; prayCountFree: number; prayCountMax: number };
 }

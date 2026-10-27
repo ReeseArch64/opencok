@@ -6,4 +6,5 @@ export interface BrResourceRefreshDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type BrResourceRefreshDefinitionCatalog = CatalogTable<BrResourceRefreshDefinition>;

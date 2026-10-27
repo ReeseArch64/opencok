@@ -10,4 +10,5 @@ export interface NpcDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type NpcDefinitionCatalog = CatalogTable<NpcDefinition>;

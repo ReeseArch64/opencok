@@ -5,4 +5,5 @@ export interface MaterialDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type MaterialDefinitionCatalog = CatalogTable<MaterialDefinition>;

@@ -1,11 +1,15 @@
 import { sfs, type Fields } from "@opencok/messages/sfs";
 import { num, text, long, type Row } from "@opencok/contracts/rows";
+
 function kingdom(id: number, win: number, servers: readonly Row[]) {
   const row = servers.find((server) => num(server, "Id") === id);
+
   return row ? { serverId: id, name: text(row, "name"), banner: text(row, "banner"), win } : {};
 }
+
 export function expeditionHistorySnapshot(result: Row) {
   const raw: unknown = JSON.parse(text(result, "ranking"));
+
   if (
     !raw ||
     typeof raw !== "object" ||
@@ -14,15 +18,20 @@ export function expeditionHistorySnapshot(result: Row) {
     raw.users.length > 10
   )
     throw new Error("Invalid expedition final history");
+
   const userlist: Row[] = [];
+
   for (const row of raw.users) {
     if (!row || typeof row !== "object" || typeof row.uid !== "string" || !row.metadata) break;
+
     let value: unknown;
+
     try {
       value = JSON.parse(row.metadata);
     } catch {
       break;
     }
+
     if (
       !value ||
       typeof value !== "object" ||
@@ -32,6 +41,7 @@ export function expeditionHistorySnapshot(result: Row) {
       typeof value.abbr !== "string"
     )
       break;
+
     const metadata = value as Row;
     userlist.push({
       uid: row.uid,
@@ -45,8 +55,10 @@ export function expeditionHistorySnapshot(result: Row) {
       ranking: userlist.length + 1,
     });
   }
+
   const winner = num(result, "winner"),
     loser = winner === num(result, "leader") ? num(result, "opponent") : num(result, "leader");
+
   return JSON.stringify({
     stage: num(result, "stage"),
     begintime: String(long(result, "finalizedAt")),
@@ -55,8 +67,10 @@ export function expeditionHistorySnapshot(result: Row) {
     loseServerId: loser,
   });
 }
+
 function users(raw: unknown): Fields[] {
   if (!Array.isArray(raw) || raw.length > 10) throw new Error("Invalid expedition history users");
+
   return raw.map((row): Fields => {
     if (
       !row ||
@@ -68,6 +82,7 @@ function users(raw: unknown): Fields[] {
       !Number.isInteger(row.ranking)
     )
       throw new Error("Invalid expedition history member");
+
     return {
       uid: sfs.string(row.uid),
       name: sfs.string(row.name),
@@ -80,12 +95,16 @@ function users(raw: unknown): Fields[] {
     };
   });
 }
+
 function kingdoms(raw: unknown): Fields[] {
   if (!Array.isArray(raw) || raw.length !== 2)
     throw new Error("Invalid expedition history kingdoms");
+
   return raw.map((row): Fields => {
     if (!row || typeof row !== "object") throw new Error("Invalid expedition history kingdom");
+
     if (Object.keys(row).length === 0) return {};
+
     if (
       !Number.isInteger(row.serverId) ||
       typeof row.name !== "string" ||
@@ -93,6 +112,7 @@ function kingdoms(raw: unknown): Fields[] {
       ![0, 1].includes(row.win)
     )
       throw new Error("Invalid expedition history kingdom");
+
     return {
       serverId: sfs.int(row.serverId),
       name: sfs.string(row.name),
@@ -101,6 +121,7 @@ function kingdoms(raw: unknown): Fields[] {
     };
   });
 }
+
 export function expeditionHistory(rows: readonly Row[], servers: readonly Row[]): Fields {
   return {
     ranklist: sfs.array(
@@ -109,8 +130,10 @@ export function expeditionHistory(rows: readonly Row[], servers: readonly Row[])
           at = long(row, "createTime"),
           userlist: unknown,
           kingdomlist: unknown;
+
         if (row.history) {
           const value: unknown = JSON.parse(text(row, "history"));
+
           if (
             !value ||
             typeof value !== "object" ||
@@ -125,6 +148,7 @@ export function expeditionHistory(rows: readonly Row[], servers: readonly Row[])
             !/^\d{1,19}$/.test(value.begintime)
           )
             throw new Error("Invalid owned expedition history");
+
           stage = Number(value.stage);
           at = BigInt(value.begintime);
           userlist = value.userlist;
@@ -139,8 +163,10 @@ export function expeditionHistory(rows: readonly Row[], servers: readonly Row[])
             kingdom(num(row, "loseServerId"), 0, servers),
           ];
         }
+
         if (!Number.isInteger(stage) || stage < 0 || stage > 8 || at < 0n)
           throw new Error("Invalid expedition history stage");
+
         return sfs.object({
           stage: sfs.int(stage),
           begintime: sfs.long(at),

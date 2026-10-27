@@ -1,4 +1,5 @@
 import type { GoldenEggStepDefinition } from "../types/golden_egg_step.ts";
+
 export const records: readonly GoldenEggStepDefinition[] = [
   {
     "id": 9051501,

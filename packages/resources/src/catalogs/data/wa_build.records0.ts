@@ -1,4 +1,5 @@
 import type { WaBuildDefinition } from "../types/wa_build.ts";
+
 export const records: readonly WaBuildDefinition[] = [
   { "id": 7000001, "type": 24, "time": 300, "parm1": 8, "location": [75, 75], "itemId": 7900001 },
   { "id": 7000002, "type": 28, "time": 300, "parm1": 8, "location": [45, 105], "itemId": 7900002 },

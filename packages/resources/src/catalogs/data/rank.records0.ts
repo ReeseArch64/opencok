@@ -1,4 +1,5 @@
 import type { RankDefinition } from "../types/rank.ts";
+
 export const records: readonly RankDefinition[] = [
   { "id": 7101, "allmail": 1, "member": 1, "trade": 1, "help": 1, "rankdetails": 1, "quit": 1 },
   { "id": 7102, "allmail": 1, "member": 1, "trade": 1, "help": 1, "rankdetails": 1, "quit": 1 },

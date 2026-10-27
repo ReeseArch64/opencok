@@ -8,12 +8,18 @@ import { chatRetention } from "@opencok/rules/chat-retention";
 import type { Database } from "./game.ts";
 
 export const chatUtc = (date: Date) => date.toISOString().slice(0, 23).replace("T", " ");
+
 const milliseconds = (value: string) => Date.parse(`${value.replace(" ", "T")}Z`);
+
 const hash = (body: string) => createHash("sha256").update(body).digest("hex");
+
 type Row = typeof chat_message.$inferSelect;
+
 export function chatMessage(row: Row): ChatMessage {
   const sequenceId = Number(row.sequence_id);
+
   if (!Number.isSafeInteger(sequenceId)) throw new Error("Chat sequence exceeds wire precision");
+
   return {
     sequenceId,
     roomId: row.room_key,
@@ -24,6 +30,7 @@ export function chatMessage(row: Row): ChatMessage {
     createdAt: `${row.created_at.replace(" ", "T")}Z`,
   };
 }
+
 export function createChatMessageStore(
   db: Database["databases"]["global"]["db"],
   archive: ChatArchiveStore | undefined,
@@ -52,6 +59,7 @@ export function createChatMessageStore(
     for (const row of rows)
       if (!Number.isSafeInteger(Number(row.sequence_id)))
         throw new Error("Chat sequence exceeds wire precision");
+
     const output: ChatMessage[] = [];
     const missing = rows
       .filter((row) => row.body === null && !row.deleted_at && row.expires_at > current())
@@ -62,13 +70,16 @@ export function createChatMessageStore(
         message,
       ]),
     );
+
     for (const row of rows) {
       if (row.deleted_at || row.expires_at <= current()) continue;
+
       if (row.body !== null) output.push(chatMessage(row));
       else if (archive) {
         const copy = archive.getMany
           ? copies.get(Number(row.sequence_id))
           : await archive.get(Number(row.sequence_id));
+
         if (
           copy &&
           copy.version === row.version &&
@@ -85,7 +96,9 @@ export function createChatMessageStore(
         else throw new Error("Chat archive copy unavailable");
       } else throw new Error("Chat archive unavailable");
     }
+
     if (!output.length) return output;
+
     const valid = await db
       .select({ id: chat_message.sequence_id })
       .from(chat_message)
@@ -100,13 +113,16 @@ export function createChatMessageStore(
         ),
       );
     const ids = new Set(valid.map((row) => Number(row.id)));
+
     return output.filter((message) => ids.has(message.sequenceId));
   }
   const messages: MessageStore = {
     durableDelivery: true,
     async create(input) {
       validate(input);
+
       if (!(await canSend(input.senderUid))) throw new TypeError("Chat sender muted");
+
       return db.transaction(async (tx) => {
         await tx.execute(sql`select pg_advisory_xact_lock(hashtextextended('chat:append',0))`);
         const [existing] = await tx
@@ -121,13 +137,17 @@ export function createChatMessageStore(
           )
           .limit(1);
         const digest = hash(input.body);
+
         if (existing) {
           if (existing.expires_at <= current() || existing.deleted_at)
             throw new TypeError("Chat message expired");
+
           if ((existing.body_hash ?? hash(existing.body ?? "")) !== digest)
             throw new TypeError("Chat receipt content conflict");
+
           return { ...chatMessage(existing), inserted: false };
         }
+
         const created = input.now;
         const retention = chatRetention(input.roomId, created.getTime());
         const [saved] = await tx
@@ -145,7 +165,9 @@ export function createChatMessageStore(
             expires_at: chatUtc(new Date(retention.expiresAt)),
           })
           .returning();
+
         if (!saved) throw new Error("Chat insert failed");
+
         await tx.insert(chat_event).values({
           id: randomUUID(),
           kind: "message",
@@ -155,11 +177,13 @@ export function createChatMessageStore(
           createdAt: BigInt(created.getTime()),
           expiresAt: BigInt(created.getTime() + 86_400_000),
         });
+
         return { ...chatMessage(saved), inserted: true };
       });
     },
     async getAll(roomId, afterMs = 0) {
       if (!Number.isSafeInteger(afterMs) || afterMs < 0) throw new TypeError("Invalid time");
+
       return hydrate(
         (
           await db
@@ -187,6 +211,7 @@ export function createChatMessageStore(
         endMs <= startMs
       )
         throw new TypeError("Invalid time");
+
       return hydrate(
         (
           await db
@@ -218,6 +243,7 @@ export function createChatMessageStore(
         query.limit > 100
       )
         throw new TypeError("Invalid cursor");
+
       const rows = await db
         .select()
         .from(chat_message)
@@ -235,6 +261,7 @@ export function createChatMessageStore(
         .orderBy(desc(chat_message.sequence_id))
         .limit(query.limit + 1);
       const selected = rows.slice(0, query.limit);
+
       return {
         messages: await hydrate(selected),
         cursor: rows.length > query.limit ? Number(selected.at(-1)!.sequence_id) : null,
@@ -243,6 +270,7 @@ export function createChatMessageStore(
     async remove(sequenceId) {
       if (!Number.isSafeInteger(sequenceId) || sequenceId < 0)
         throw new TypeError("Invalid message");
+
       await db.transaction(async (tx) => {
         await tx.execute(sql`select pg_advisory_xact_lock(hashtextextended('chat:append',0))`);
         const [removed] = await tx
@@ -252,6 +280,7 @@ export function createChatMessageStore(
             and(eq(chat_message.sequence_id, BigInt(sequenceId)), isNull(chat_message.deleted_at)),
           )
           .returning();
+
         if (removed)
           await tx.insert(chat_event).values({
             id: randomUUID(),
@@ -269,6 +298,7 @@ export function createChatMessageStore(
       await archive?.remove(sequenceId);
     },
   };
+
   return {
     messages,
     async archivePending() {
@@ -279,6 +309,7 @@ export function createChatMessageStore(
         .where(and(lte(chat_message.expires_at, now), isNotNull(chat_message.body)))
         .orderBy(asc(chat_message.expires_at))
         .limit(500);
+
       for (const row of expired)
         await db
           .update(chat_message)
@@ -289,6 +320,7 @@ export function createChatMessageStore(
               eq(chat_message.version, row.version),
             ),
           );
+
       if (!archive) {
         const due = await db
           .select({ id: chat_message.sequence_id })
@@ -301,9 +333,12 @@ export function createChatMessageStore(
             ),
           )
           .limit(100);
+
         if (due.length) throw new Error("Chat archive unavailable");
+
         return 0;
       }
+
       await archive.purge(clock().getTime());
       const pending = await db
         .select()
@@ -318,6 +353,7 @@ export function createChatMessageStore(
         )
         .orderBy(asc(chat_message.archive_at))
         .limit(100);
+
       for (const row of pending) {
         const copy: ChatArchiveMessage = {
           ...chatMessage(row),
@@ -328,6 +364,7 @@ export function createChatMessageStore(
         };
         await archive.put(copy);
         const verified = await archive.get(copy.sequenceId);
+
         if (
           !verified ||
           verified.version !== copy.version ||
@@ -336,6 +373,7 @@ export function createChatMessageStore(
           verified.expiresAt !== copy.expiresAt
         )
           throw new Error("Archive verification failed");
+
         await db
           .update(chat_message)
           .set({ body: null, body_hash: copy.hash })
@@ -348,6 +386,7 @@ export function createChatMessageStore(
             ),
           );
       }
+
       const removed = await db
         .select({ id: chat_message.sequence_id, version: chat_message.version })
         .from(chat_message)
@@ -359,6 +398,7 @@ export function createChatMessageStore(
           ),
         )
         .limit(100);
+
       for (const row of removed) {
         await archive.remove(Number(row.id));
         await db
@@ -372,6 +412,7 @@ export function createChatMessageStore(
             ),
           );
       }
+
       return pending.length;
     },
   };

@@ -1,4 +1,5 @@
 import type { ReputationLevelDefinition } from "../types/reputation_level.ts";
+
 export const records: readonly ReputationLevelDefinition[] = [
   {
     "id": 5600000,

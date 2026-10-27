@@ -37,4 +37,5 @@ export interface ExchangeDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type ExchangeDefinitionCatalog = CatalogTable<ExchangeDefinition>;

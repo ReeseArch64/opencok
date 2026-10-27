@@ -4,4 +4,5 @@ export interface NewbieItemsDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type NewbieItemsDefinitionCatalog = CatalogTable<NewbieItemsDefinition>;

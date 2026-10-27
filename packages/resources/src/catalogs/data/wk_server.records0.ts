@@ -1,4 +1,5 @@
 import type { WkServerDefinition } from "../types/wk_server.ts";
+
 export const records: readonly WkServerDefinition[] = [
   { "id": 1, "value": 1, "time": 1 },
   { "id": 2, "value": 2, "time": 2 },

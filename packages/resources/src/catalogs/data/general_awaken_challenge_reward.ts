@@ -3,6 +3,7 @@ import type { GeneralAwakenChallengeRewardDefinition } from "../types/general_aw
 import type { CatalogTable } from "../../catalog-model.ts";
 import { records as records0 } from "./general_awaken_challenge_reward.records0.ts";
 import { records as records1 } from "./general_awaken_challenge_reward.records1.ts";
+
 export const catalog: CatalogTable<GeneralAwakenChallengeRewardDefinition> = {
   "kind": CatalogKind.Table,
   "records": [...records0, ...records1],

@@ -1,18 +1,27 @@
-import type { CommandHandler, RoomHandlerOptions } from "@opencok/contracts/chat";
+import type { CommandContext, CommandHandler, RoomHandlerOptions } from "@opencok/contracts/chat";
 import { isSafeInteger } from "@opencok/contracts/chat";
-import { ChatCommandError } from "@opencok/controllers/chat-rooms";
+import { ChatCommand } from "@opencok/enums/chat-command";
+import { ChatCommandError } from "@opencok/errors/chat";
+import { ChatRoomController } from "./chat-room.controller.ts";
 
-export function createSendHandler({
-  authorizeRoom,
-  messages,
-  access,
-}: RoomHandlerOptions): CommandHandler {
-  return async ({ uid, params, sendTime, connection, peers }) => {
+export class ChatSendController extends ChatRoomController {
+  public readonly command = ChatCommand.SendRoomMessage;
+
+  public constructor(options: RoomHandlerOptions) {
+    super(options);
+  }
+
+  public async execute({ uid, params, sendTime, connection, peers }: CommandContext) {
+    const { authorizeRoom, messages, access } = this.options;
     const roomId = params.roomId;
+
     if (typeof roomId !== "string" || !connection.joinedRooms.has(roomId))
       throw new ChatCommandError("invalid_room");
+
     const room = await authorizeRoom(uid, roomId);
+
     if (!room) throw new ChatCommandError("invalid_room");
+
     if (
       !isSafeInteger(sendTime) ||
       sendTime <= 0 ||
@@ -23,7 +32,9 @@ export function createSendHandler({
     }
 
     if (access && !(await access.canSend(uid))) throw new ChatCommandError("chat_muted");
+
     let saved;
+
     try {
       saved = await messages.create({
         roomId,
@@ -34,6 +45,7 @@ export function createSendHandler({
       });
     } catch (error) {
       if (error instanceof TypeError) throw new ChatCommandError("invalid_message");
+
       throw error;
     }
 
@@ -48,8 +60,10 @@ export function createSendHandler({
         seqId: saved.sequenceId,
         extra: { seqId: saved.sequenceId },
       };
+
       for (const peer of peers) {
         if (!peer.connection.joinedRooms.has(roomId)) continue;
+
         try {
           if (
             (!peer.authorizeSession || (await peer.authorizeSession())) &&
@@ -59,11 +73,16 @@ export function createSendHandler({
         } catch {}
       }
     }
+
     return {
       roomId,
       group: room.group,
       serverTime: Date.parse(saved.createdAt),
       seqId: saved.sequenceId,
     };
-  };
+  }
+}
+
+export function createSendHandler(options: RoomHandlerOptions): CommandHandler {
+  return new ChatSendController(options).handle;
 }

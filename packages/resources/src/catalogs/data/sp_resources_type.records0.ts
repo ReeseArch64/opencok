@@ -1,4 +1,5 @@
 import type { SpResourcesTypeDefinition } from "../types/sp_resources_type.ts";
+
 export const records: readonly SpResourcesTypeDefinition[] = [
   { "id": 523000, "type": 1, "ratio": 10000, "dialog": 160017 },
   { "id": 523001, "type": 2, "ratio": 10000, "dialog": 104000 },

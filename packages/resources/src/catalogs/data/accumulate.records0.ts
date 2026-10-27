@@ -1,4 +1,5 @@
 import type { AccumulateDefinition } from "../types/accumulate.ts";
+
 export const records: readonly AccumulateDefinition[] = [
   { "id": 46650, "Node": 200, "Gift": 239041 },
   { "id": 46651, "Node": 1000, "Gift": 239042 },

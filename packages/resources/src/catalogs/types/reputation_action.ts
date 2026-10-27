@@ -10,4 +10,5 @@ export interface ReputationActionDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type ReputationActionDefinitionCatalog = CatalogTable<ReputationActionDefinition>;

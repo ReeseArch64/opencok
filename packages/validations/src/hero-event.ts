@@ -7,6 +7,7 @@ import type {
   HeroEventRewardResponse,
   HeroPanelResponse,
 } from "@opencok/contracts/responses/hero-event";
+
 const score = z.strictObject({
   uid: field.string,
   actId: field.string,
@@ -15,6 +16,7 @@ const score = z.strictObject({
   finishFlag: field.int,
   rewardFlagList: field.string,
 });
+
 export const heroEventEntrySchema = z.strictObject({
   eventId: field.string,
   actId: field.string,
@@ -27,6 +29,7 @@ export const heroEventEntrySchema = z.strictObject({
   target: field.string,
   userScore: z.union([score, z.strictObject({})]),
 }) satisfies z.ZodType<HeroEventEntryResponse>;
+
 export const heroEventInfoSchema = z.strictObject({
   eventList: z.array(heroEventEntrySchema).max(256),
   type: field.int,
@@ -44,6 +47,7 @@ export const heroEventInfoSchema = z.strictObject({
   ranking: field.int.optional(),
   rankingAlliance: field.int.optional(),
 }) satisfies z.ZodType<HeroEventInfoResponse>;
+
 export const heroEventRewardSchema = z.strictObject({
   reward: z.array(rewardPreviewArraySchema).max(128),
   rewardArr: field.string.optional(),

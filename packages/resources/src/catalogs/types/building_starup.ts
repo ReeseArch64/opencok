@@ -8,4 +8,5 @@ export interface BuildingStarupDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type BuildingStarupDefinitionCatalog = CatalogTable<BuildingStarupDefinition>;

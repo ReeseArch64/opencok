@@ -1,4 +1,5 @@
 import type { PositionUnlockDefinition } from "../types/position_unlock.ts";
+
 export const records: readonly PositionUnlockDefinition[] = [
   {
     "id": 9990,

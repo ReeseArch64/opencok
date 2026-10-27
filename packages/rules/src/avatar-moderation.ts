@@ -17,6 +17,7 @@ export function avatarModerationPlan(
     !["approve", "reject"].includes(decision)
   )
     throw new Error("Invalid avatar moderation input");
+
   if (decision === "approve")
     return {
       picVer: version,
@@ -32,10 +33,14 @@ export function avatarModerationPlan(
             stat: 1,
           },
     };
+
   if (version >= 4000000) throw new Error("Invalid restored avatar state");
+
   if (version >= 3000000) return { picVer: version, changed: false, record: null };
+
   const picVer = (version % 1000000) + 3000000;
   const savedCount = record?.banCount ?? 0;
+
   if (
     typeof savedCount !== "number" ||
     !Number.isInteger(savedCount) ||
@@ -43,6 +48,7 @@ export function avatarModerationPlan(
     savedCount > 2147483647
   )
     throw new Error("Invalid avatar ban count");
+
   const banCount = Number(BigInt.asIntN(32, BigInt(savedCount) + 1n));
   const interval = BigInt.asIntN(64, javaDecimal(banSeconds, 64) * 1000n);
   const values = {
@@ -51,6 +57,7 @@ export function avatarModerationPlan(
     updateTime: BigInt(now),
     stat: 2,
   };
+
   return {
     picVer,
     changed: picVer !== version,

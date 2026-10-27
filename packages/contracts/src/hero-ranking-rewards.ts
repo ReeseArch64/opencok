@@ -1,4 +1,5 @@
 import type { Row } from "./rows";
+
 export interface HeroRankAwardDraft {
   id: string;
   ownerUid: string;
@@ -8,13 +9,16 @@ export interface HeroRankAwardDraft {
   rewardId: string | null;
   pinnedReward: string | null;
 }
+
 export interface HeroRankAwardReader {
   load(id: string): Promise<{ award: Row; recorded: boolean } | undefined>;
 }
+
 export interface HeroRankAwardWrite {
   id: string;
   history?: Row;
 }
+
 export interface HeroRankRewardStore {
   candidates(): Promise<readonly Row[]>;
   plan(
@@ -27,6 +31,7 @@ export interface HeroRankRewardStore {
   pending(now: bigint): Promise<readonly Row[]>;
   defer(id: string, now: bigint): Promise<void>;
 }
+
 export interface HeroRankRewardStandings {
   page(closure: Row): Promise<readonly Row[] | undefined>;
 }

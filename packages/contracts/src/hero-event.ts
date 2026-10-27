@@ -1,9 +1,11 @@
 import type { Row } from "./rows";
+
 export interface HeroEventSelection {
   activityId?: string;
   eventId?: string;
   panels?: boolean;
 }
+
 export interface HeroEventSnapshot {
   profile?: Row;
   activities: readonly Row[];

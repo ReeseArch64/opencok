@@ -1,4 +1,5 @@
 import type { DgRefinementDefinition } from "../types/dg_refinement.ts";
+
 export const records: readonly DgRefinementDefinition[] = [
   {
     "id": 45701,

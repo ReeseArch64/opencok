@@ -131,6 +131,7 @@ export function playerGameEffect(
     ].includes(effect)
   )
     return invalid();
+
   const vip = vipEffects(state.vip, rules, context.now);
   const general = generalSkillEffects(abilities, rules);
   const alliance = allianceScienceEffects(state.allianceSciences, rules);
@@ -154,10 +155,12 @@ export function playerGameEffect(
   const stored = (id: number, loadingEquipment: boolean) => {
     const cache = loadingEquipment ? earlyEffects : finalEffects;
     let result = cache.get(id);
+
     if (!result) {
       result = storedPowerEffects(loadingEquipment ? early : state, rules, context.now, id);
       cache.set(id, result);
     }
+
     return result;
   };
   const resolve = (
@@ -167,11 +170,14 @@ export function playerGameEffect(
   ): number => {
     const base = stored(id, loadingEquipment);
     let equipped = equipment.get(id) ?? 0;
+
     if (id !== 218)
       equipped = float(
         equipped * float(1 + float(resolve(218, equipment, loadingEquipment) / 100)),
       );
+
     let other = float((vip.get(id) ?? 0) + float(base.status));
+
     for (const value of [
       general.get(id),
       alliance.get(id),
@@ -182,6 +188,7 @@ export function playerGameEffect(
       hero.get(id),
     ])
       other = float(other + float(value ?? 0));
+
     other = float(other + float(loadingEquipment ? 0 : (lucky.get(id) ?? 0)));
     other = float(other + (dragon.get(id) ?? 0));
     other = float(other + float(loadingEquipment ? 0 : (military.get(id) ?? 0)));
@@ -196,15 +203,19 @@ export function playerGameEffect(
           id,
           base.initialAndScience,
         );
+
     return float(initial + other);
   };
   const equipment = equipmentEffects(state.equipment, rules, (id, loaded) =>
     resolve(id, loaded, true),
   );
   const selection = state.profile.decomposeSuitEffect ?? state.profile.decomposesuiteffect;
+
   if (selection !== undefined && selection !== null && typeof selection !== "string")
     return invalid();
+
   const complete = equipmentSetEffects(state.equipment, selection, rules, context, equipment);
+
   return resolve(effect, complete, false);
 }
 

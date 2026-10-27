@@ -1,4 +1,5 @@
 import type { SkillDefinition } from "../types/skill.ts";
+
 export const records: readonly SkillDefinition[] = [
   {
     "id": 105029,

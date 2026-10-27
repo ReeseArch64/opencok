@@ -1,4 +1,5 @@
 import type { EmulatorDefinition } from "../types/emulator.ts";
+
 export const records: readonly EmulatorDefinition[] = [
   { "id": 46550, "name": "[MEmu]" },
   { "id": 46551, "name": "[Droid4X]" },

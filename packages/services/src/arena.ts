@@ -1,3 +1,4 @@
+import { CityCommandDomain } from "./city-command-domain.ts";
 import { createHash, randomUUID } from "node:crypto";
 import { encode, decode, sfs, str, int, Type, type Fields } from "@opencok/messages/sfs";
 import { num, text, type Row } from "@opencok/contracts/rows";
@@ -11,11 +12,18 @@ import { arenaArmySelection, arenaFailure, arenaRankDelta } from "@opencok/rules
 import { cityInteger } from "@opencok/rules/city-progression";
 import { serverFeature } from "@opencok/rules/power-context";
 import { arenaInfo, arenaArmy } from "@opencok/mappings/arena";
-import type { CityDomain } from "./city-progression";
+import type { CityDomain } from "./city-domain.ts";
 
-export function createArenaDomain(gateway?: ArenaBattleGateway): CityDomain {
-  return {
-    commands: [
+export class ArenaDomain extends CityCommandDomain {
+  public readonly commands: CityDomain["commands"];
+  public readonly types: CityDomain["types"];
+  public readonly prepare: CityDomain["prepare"];
+  public readonly apply: CityDomain["apply"];
+
+  public constructor(gateway?: ArenaBattleGateway) {
+    super();
+
+    this.commands = [
       "arena.info",
       "arena.apply",
       "arena.army",
@@ -24,11 +32,15 @@ export function createArenaDomain(gateway?: ArenaBattleGateway): CityDomain {
       "arena.leave",
       "arena.matched",
       "arena.finished",
-    ],
-    types: [],
-    async prepare(context, command, params) {
+    ];
+
+    this.types = [];
+
+    this.prepare = async (context, command, params) => {
       const saved = context.state.arena;
+
       if (!saved) arenaFailure();
+
       const castle = context.state.buildings.reduce(
         (level, row) =>
           num(row, "itemId") === 400000
@@ -51,6 +63,7 @@ export function createArenaDomain(gateway?: ArenaBattleGateway): CityDomain {
         ...saved.legacy,
         ...saved.registration,
       };
+
       if (!saved.registration && num(row, "state") > 0)
         row.applicationId = createHash("sha256")
           .update(
@@ -58,16 +71,21 @@ export function createArenaDomain(gateway?: ArenaBattleGateway): CityDomain {
           )
           .digest("hex")
           .slice(0, 32);
+
       const armies = saved.armies.map((row) => ({ ...row }));
       const write: ArenaWrite = (context.write.arena = { registration: row });
       const notification = () =>
         encode({ owner: sfs.string(context.owner), info: sfs.object(arenaInfo(row)) });
+
       if (command === "arena.info") return { response: encode(arenaInfo(row)), event: null };
+
       if (command === "show.arena.army")
         return { response: encode(arenaArmy(armies)), event: null };
+
       if (command === "arena.army") {
         if (!saved.world || num(saved.world, "worldId") !== 0 || num(row, "state") === 3)
           arenaFailure();
+
         const selection = arenaArmySelection(
           context.rules,
           str(params, "armies"),
@@ -78,9 +96,12 @@ export function createArenaDomain(gateway?: ArenaBattleGateway): CityDomain {
           armyId: unit.armyId,
           free: unit.count,
         }));
+
         return { response: encode({}), event: null };
       }
+
       if (!gateway?.validated()) arenaFailure();
+
       if (command === "arena.apply") {
         if (
           !serverFeature(context.rules, "fight_arena", {
@@ -94,9 +115,11 @@ export function createArenaDomain(gateway?: ArenaBattleGateway): CityDomain {
           num(row, "state") !== 0
         )
           arenaFailure();
+
         row.state = 1;
         row.time = context.now;
         row.applicationId = randomUUID().replaceAll("-", "");
+
         return {
           response: encode(arenaInfo(row)),
           event: encode({
@@ -107,12 +130,16 @@ export function createArenaDomain(gateway?: ArenaBattleGateway): CityDomain {
           }),
         };
       }
+
       const applicationId = str(params, "applicationId", text(row, "applicationId"));
+
       if (!applicationId || applicationId !== text(row, "applicationId")) arenaFailure();
+
       if (command === "arena.matched") {
         const worldId = cityInteger(int(params, "worldId"), 1),
           fightServerId = cityInteger(int(params, "fightServerId"), 1),
           version = cityInteger(int(params, "version"), 1);
+
         if (
           [2, 3].includes(num(row, "state")) &&
           num(row, "worldId") === worldId &&
@@ -120,10 +147,14 @@ export function createArenaDomain(gateway?: ArenaBattleGateway): CityDomain {
           num(row, "fightServerId") === fightServerId
         )
           return { response: encode(arenaInfo(row)), event: null };
+
         if (num(row, "state") !== 1) arenaFailure();
+
         Object.assign(row, { worldId, fightServerId, version, state: 2 });
+
         return { response: encode(arenaInfo(row)), event: notification() };
       }
+
       if (command === "arena.enter") {
         if (
           ![2, 3].includes(num(row, "state")) ||
@@ -132,6 +163,7 @@ export function createArenaDomain(gateway?: ArenaBattleGateway): CityDomain {
           !armies.some((unit) => num(unit, "free") > 0)
         )
           arenaFailure();
+
         const result = await gateway.enter({
           owner: context.owner,
           applicationId,
@@ -143,13 +175,16 @@ export function createArenaDomain(gateway?: ArenaBattleGateway): CityDomain {
             count: num(unit, "free"),
           })),
         });
+
         if (
           result.uid !== context.owner ||
           !Object.keys(result.serverInfo).length ||
           Object.values(result.serverInfo).some((value) => typeof value !== "string")
         )
           arenaFailure();
+
         row.state = 3;
+
         return {
           response: encode({
             serverInfo: sfs.object(
@@ -162,6 +197,7 @@ export function createArenaDomain(gateway?: ArenaBattleGateway): CityDomain {
           event: notification(),
         };
       }
+
       if (command === "arena.leave") {
         if (
           num(row, "state") !== 3 ||
@@ -169,6 +205,7 @@ export function createArenaDomain(gateway?: ArenaBattleGateway): CityDomain {
           num(saved.world, "worldId") !== num(row, "worldId")
         )
           arenaFailure();
+
         await gateway.leave({
           owner: context.owner,
           applicationId,
@@ -176,8 +213,10 @@ export function createArenaDomain(gateway?: ArenaBattleGateway): CityDomain {
           version: num(row, "version"),
         });
         row.state = 0;
+
         return { response: encode({}), event: notification() };
       }
+
       if (command === "arena.finished") {
         if (
           ![2, 3].includes(num(row, "state")) ||
@@ -186,6 +225,7 @@ export function createArenaDomain(gateway?: ArenaBattleGateway): CityDomain {
           params.won?.type !== Type.Bool
         )
           arenaFailure();
+
         const result: ArenaResult = {
           owner: context.owner,
           applicationId,
@@ -196,15 +236,18 @@ export function createArenaDomain(gateway?: ArenaBattleGateway): CityDomain {
           teamTotal: cityInteger(int(params, "teamTotal")),
           resultId: str(params, "resultId"),
         };
+
         if (
           !result.resultId ||
           result.resultId.length > 128 ||
           !(await gateway.acceptResult(result))
         )
           arenaFailure();
+
         row.rankScore = cityInteger(
           num(row, "rankScore") + arenaRankDelta(result.playerScore, result.teamTotal, result.won),
         );
+
         if (result.won) {
           row.totalWinCount = cityInteger(num(row, "totalWinCount") + 1);
           row.serialWinCount = cityInteger(num(row, "serialWinCount") + 1);
@@ -212,16 +255,25 @@ export function createArenaDomain(gateway?: ArenaBattleGateway): CityDomain {
           row.totalLoseCount = cityInteger(num(row, "totalLoseCount") + 1);
           row.serialWinCount = 0;
         }
+
         row.state = 0;
+
         return { response: encode(arenaInfo(row)), event: notification() };
       }
+
       return arenaFailure();
-    },
-    async apply() {
+    };
+
+    this.apply = async () => {
       arenaFailure();
-    },
-  };
+    };
+  }
 }
+
+export function createArenaDomain(gateway?: ArenaBattleGateway): CityDomain {
+  return new ArenaDomain(gateway);
+}
+
 export async function publishArenaMutation(
   payload: Buffer,
   command: string,
@@ -230,8 +282,10 @@ export async function publishArenaMutation(
 ) {
   const body = decode(payload),
     owner = str(body, "owner");
+
   if (command === "arena.apply") {
     if (!gateway?.validated()) arenaFailure();
+
     const application: ArenaApplication = {
       owner,
       applicationId: str(body, "applicationId"),
@@ -239,8 +293,11 @@ export async function publishArenaMutation(
       registeredAt: BigInt(body.registeredAt!.value as bigint),
     };
     await gateway.enqueue(application);
+
     return;
   }
+
   if (body.info?.type !== Type.Object) arenaFailure();
+
   await publish(owner, "push.arena.state", body.info.value as Fields);
 }

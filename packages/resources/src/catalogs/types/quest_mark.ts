@@ -5,4 +5,5 @@ export interface QuestMarkDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type QuestMarkDefinitionCatalog = CatalogTable<QuestMarkDefinition>;

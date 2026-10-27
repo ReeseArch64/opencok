@@ -1,5 +1,6 @@
 import type { Row } from "./rows";
 import type { WorldResourceOwnerSnapshot } from "./world-point-detail";
+
 export interface ScoutParticipant {
   profile: Row;
   world: Row;
@@ -22,6 +23,7 @@ export interface ScoutParticipant {
   effects: WorldResourceOwnerSnapshot;
   alliance?: Row;
 }
+
 export interface ScoutReinforcement {
   march: Row;
   profile: Row;
@@ -29,11 +31,13 @@ export interface ScoutReinforcement {
   dragons: readonly Row[];
   alliance?: Row;
 }
+
 export interface ScoutRally {
   march: Row;
   team?: Row;
   members: readonly ScoutReinforcement[];
 }
+
 export interface WorldScoutTarget {
   point: Row;
   participant?: ScoutParticipant;
@@ -44,6 +48,7 @@ export interface WorldScoutTarget {
   barbarian?: Row;
   cityBosses: readonly Row[];
 }
+
 export interface WorldScoutMail {
   id: string;
   march: string;

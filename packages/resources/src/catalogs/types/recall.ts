@@ -13,4 +13,5 @@ export interface RecallDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type RecallDefinitionCatalog = CatalogTable<RecallDefinition>;

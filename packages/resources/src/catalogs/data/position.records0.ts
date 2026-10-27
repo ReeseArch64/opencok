@@ -1,4 +1,5 @@
 import type { PositionDefinition } from "../types/position.ts";
+
 export const records: readonly PositionDefinition[] = [
   { "id": 9900, "default": 1, "position": 0, "building": 400000, "unlock": 1 },
   { "id": 9901, "default": 1, "position": 1, "building": 419000, "unlock": 1 },

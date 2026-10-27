@@ -1,4 +1,5 @@
 import type { AllianceMissionDefinition } from "../types/alliance_mission.ts";
+
 export const records: readonly AllianceMissionDefinition[] = [
   {
     "id": 4900000,

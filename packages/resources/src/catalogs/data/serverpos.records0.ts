@@ -1,4 +1,5 @@
 import type { ServerposDefinition } from "../types/serverpos.ts";
+
 export const records: readonly ServerposDefinition[] = [
   { "id": 0, "X": 0, "Y": 0 },
   { "id": 1, "X": 0, "Y": -1 },

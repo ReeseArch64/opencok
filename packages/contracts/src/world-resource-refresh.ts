@@ -7,6 +7,7 @@ export interface WorldResourceClock {
   areaCursor: number;
   nextRefreshAt: bigint;
 }
+
 export interface WorldResourceRefreshStore {
   readonly now: bigint;
   readonly opening: bigint;
@@ -24,6 +25,7 @@ export interface WorldResourceRefreshStore {
   spawn(point: Row, type: number, level: number, amount: number, deadline: bigint): Promise<void>;
   save(clock: WorldResourceClock): Promise<void>;
 }
+
 export interface WorldResourceRefreshExecutor {
   execute(
     now: bigint | undefined,

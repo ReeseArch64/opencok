@@ -1,4 +1,5 @@
 import type { RewardPreviewResponse } from "./rewards";
+
 export interface GroupBuyResponse {
   rewardArr: readonly {
     level: number;

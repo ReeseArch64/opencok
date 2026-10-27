@@ -9,4 +9,5 @@ export interface LuckDrawDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type LuckDrawDefinitionCatalog = CatalogTable<LuckDrawDefinition>;

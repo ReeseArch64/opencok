@@ -1,4 +1,5 @@
 import type { GeneralTalentDefinition } from "../types/general_talent.ts";
+
 export const records: readonly GeneralTalentDefinition[] = [
   {
     "id": 600000,

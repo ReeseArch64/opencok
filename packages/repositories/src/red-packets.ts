@@ -10,6 +10,7 @@ import { red_packets_records } from "@opencok/drizzle/schema/opencok_kingdom/red
 import { long, num, text, type Row } from "@opencok/contracts/rows";
 import type { RedPacketReader, RedPacketWrite } from "@opencok/contracts/paid-gifts";
 import type { MutationTransaction } from "./mutation";
+
 export function redPacketReader(tx: MutationTransaction, owner: string): RedPacketReader {
   return {
     async payment(orderId, platform) {
@@ -28,19 +29,24 @@ export function redPacketReader(tx: MutationTransaction, owner: string): RedPack
     },
     async packet(uid) {
       if (!uid || uid.length > 255) throw new Error("Invalid red packet identity");
+
       const [packet] = await tx
         .select()
         .from(red_packets)
         .where(eq(red_packets.uid, uid))
         .for("update");
+
       if (!packet) return undefined;
+
       const records = await tx
         .select()
         .from(red_packets_records)
         .where(eq(red_packets_records.uid, uid))
         .orderBy(asc(red_packets_records.getTime), asc(red_packets_records.player))
         .limit(4097);
+
       if (records.length > 4096) throw new Error("Red packet records exceed bound");
+
       return { packet, records };
     },
     async received() {
@@ -50,11 +56,14 @@ export function redPacketReader(tx: MutationTransaction, owner: string): RedPack
         .where(eq(red_packets_records.player, owner))
         .orderBy(asc(red_packets_records.uid))
         .limit(4097);
+
       if (rows.length > 4096) throw new Error("Received red packets exceed bound");
+
       return rows;
     },
   };
 }
+
 function packetValues(row: Row) {
   return {
     uid: text(row, "uid"),
@@ -74,13 +83,16 @@ function packetValues(row: Row) {
     state: num(row, "state"),
   };
 }
+
 export async function writeRedPackets(
   tx: MutationTransaction,
   owner: string,
   write: RedPacketWrite,
 ) {
   if ((write.created?.length ?? 0) > 128) throw new Error("Too many red packet creations");
+
   for (const row of write.created ?? []) await tx.insert(red_packets).values(packetValues(row));
+
   if (write.updated) {
     const row = write.updated;
     await tx
@@ -92,9 +104,12 @@ export async function writeRedPackets(
       })
       .where(eq(red_packets.uid, text(row, "uid")));
   }
+
   if (write.claim) {
     const row = write.claim;
+
     if (text(row, "player") !== owner) throw new Error("Foreign red packet claimant");
+
     await tx.insert(red_packets_records).values({
       uid: text(row, "uid"),
       player: owner,
@@ -106,15 +121,18 @@ export async function writeRedPackets(
     });
   }
 }
+
 export function createRedPacketExpiryStore(
   db: import("./game").Database["kingdom"]["db"],
   authority: import("./realm-authority").RealmAuthority,
 ): import("@opencok/contracts/paid-gifts").RedPacketExpiryStore {
   const expiringPacket = alias(red_packets, "expiring_packet");
+
   return {
     settle(now, refund) {
       if (now < 0n || !Number.isSafeInteger(Number(now)))
         throw new Error("Invalid packet expiry clock");
+
       return db.transaction(async (tx) => {
         await fenceRealmTransaction(tx, authority);
         const candidates = await tx
@@ -135,12 +153,14 @@ export function createRedPacketExpiryStore(
           .limit(128)
           .for("update", { of: expiringPacket, skipLocked: true });
         let settled = 0;
+
         for (const { packet } of candidates) {
           const rows = await tx
             .select({ value: red_packets_records.value })
             .from(red_packets_records)
             .where(eq(red_packets_records.uid, packet.uid))
             .limit(4097);
+
           if (
             rows.length > 4096 ||
             rows.length !== packet.curPeople ||
@@ -148,7 +168,9 @@ export function createRedPacketExpiryStore(
             rows.reduce((sum, row) => sum + (row.value ?? 0), packet.remain ?? 0) !== packet.total
           )
             throw new Error("Invalid packet funding history");
+
           const refundPlan = refund(packet);
+
           if (refundPlan) {
             const { mail, event } = refundPlan;
             await insertSystemMail(tx, mail, mail.owner, mail.uid.slice(0, 32), mail.createTime);
@@ -165,10 +187,13 @@ export function createRedPacketExpiryStore(
               now,
             );
           }
+
           await tx.update(red_packets).set({ state: 1 }).where(eq(red_packets.uid, packet.uid));
           settled++;
         }
+
         authority.assertReady();
+
         return settled;
       });
     },

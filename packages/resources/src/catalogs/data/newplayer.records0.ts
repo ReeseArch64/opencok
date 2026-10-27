@@ -1,4 +1,5 @@
 import type { NewplayerDefinition } from "../types/newplayer.ts";
+
 export const records: readonly NewplayerDefinition[] = [
   {
     "id": 180000,

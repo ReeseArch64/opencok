@@ -1,4 +1,5 @@
 import type { FbShareDefinition } from "../types/fb_share.ts";
+
 export const records: readonly FbShareDefinition[] = [
   {
     "id": "level_up",

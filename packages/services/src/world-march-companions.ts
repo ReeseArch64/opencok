@@ -12,7 +12,7 @@ import { cityInteger } from "@opencok/rules/city-progression";
 import { worldMutationFailure } from "@opencok/rules/world-march-runtime";
 import { reconnectMarchDragon, reconnectMarchGeneral } from "@opencok/mappings/reconnect-marches";
 import { ownedGeneral, writeGeneral, generalChanges } from "./generals";
-import type { CityProgressionContext } from "./city-progression";
+import type { CityProgressionContext } from "./city-progression-context.ts";
 
 function dragonChange(context: CityProgressionContext, uuid: string, marching: boolean) {
   const write = (context.write.worldMutation ??= {});
@@ -24,6 +24,7 @@ function dragonChange(context: CityProgressionContext, uuid: string, marching: b
     { command: "push.petdragon.march", body },
   ];
 }
+
 export function selectMarchCompanions(
   context: CityProgressionContext,
   params: Fields,
@@ -32,24 +33,31 @@ export function selectMarchCompanions(
   const dragonId = str(params, "petDragonUid", ""),
     generalId = str(params, "generalId", ""),
     heroId = str(params, "heroUid", "");
+
   if (
     [dragonId, generalId, heroId].some(
       (id) => id.length > 40 || id.includes("\0") || !id.isWellFormed(),
     )
   )
     worldMutationFailure();
+
   const armies = marches.map((row) =>
     row.armyInfo ? decodeWorldMarchArmy(row.armyInfo as Buffer) : null,
   );
+
   if (armies.some((army) => army && army.owner !== context.owner)) worldMutationFailure();
+
   let dragon: Row | undefined, general: Row | undefined;
+
   if (dragonId) {
     if (
       !dragonFeature(context.rules, "dragon_new", context.now) ||
       !dragonFeature(context.rules, "dragon_battle", context.now)
     )
       worldMutationFailure();
+
     dragon = context.state.dragons?.dragons.find((row) => row.uuid === dragonId);
+
     if (
       !dragon ||
       dragon.uid !== context.owner ||
@@ -59,11 +67,14 @@ export function selectMarchCompanions(
       armies.some((army) => army?.dragons?.some((row) => row.uuid === dragonId))
     )
       worldMutationFailure();
+
     dragonDefinition(context.rules, dragon);
   }
+
   if (generalId.trim()) {
     const castle = context.state.buildings.find((row) => num(row, "itemId") === 400000),
       id = cityInteger(generalId, 1);
+
     if (
       String(id) !== generalId ||
       !dragonFeature(context.rules, "general_battle", context.now) ||
@@ -72,16 +83,20 @@ export function selectMarchCompanions(
       armies.some((army) => army?.general?.id === id)
     )
       worldMutationFailure();
+
     general = generalMarch(context.rules, ownedGeneral(context, id));
   }
+
   return { dragon, general };
 }
+
 export function attachMarchCompanions(
   context: CityProgressionContext,
   army: SavedMarchArmy,
   selected: ReturnType<typeof selectMarchCompanions>,
 ) {
   const { dragon, general } = selected;
+
   if (dragon) {
     army.dragons = [
       {
@@ -93,27 +108,36 @@ export function attachMarchCompanions(
     ];
     dragonChange(context, text(dragon, "uuid"), true);
   }
+
   if (general) {
     army.general = { owner: context.owner, id: num(general, "id"), level: num(general, "level") };
     writeGeneral(context, general);
   }
 }
+
 export function releaseMarchCompanions(context: CityProgressionContext, row: Row) {
   const army = row.armyInfo ? decodeWorldMarchArmy(row.armyInfo as Buffer) : null;
+
   if (!army || army.owner !== context.owner) worldMutationFailure();
+
   for (const dragon of army.dragons ?? []) {
     if (dragon.owner !== context.owner) worldMutationFailure();
+
     if (context.state.dragons?.dragons.some((row) => row.uuid === dragon.uuid))
       dragonChange(context, dragon.uuid!, false);
   }
+
   if (army.general) {
     if (army.general.owner !== context.owner) worldMutationFailure();
+
     const general =
       context.write.generalRoster?.generals?.find((row) => row.id === army.general!.id) ??
       context.state.generalRoster?.generals.find((row) => row.id === army.general!.id);
+
     if (general && num(general, "state") === 3) writeGeneral(context, generalMarchReturn(general));
   }
 }
+
 export function marchCompanionFields(
   context: CityProgressionContext,
   army: SavedMarchArmy | null,
@@ -128,18 +152,22 @@ export function marchCompanionFields(
   const general = army?.general
     ? reconnectMarchGeneral(army.general, context.state.generalRoster?.skills ?? [], context.now)
     : undefined;
+
   return {
     ...(petDragon ? { petDragon: sfs.object(petDragon) } : {}),
     dragonList: sfs.array(petDragon ? [sfs.object(petDragon)] : []),
     generalList: sfs.array(general ? [sfs.object(general)] : []),
   };
 }
+
 export function marchCompanionPushes(context: CityProgressionContext) {
   const pushes = [...(context.write.worldMutation?.companionPushes ?? [])];
+
   if (context.write.generalRoster?.generals?.length)
     pushes.push({
       command: "push.general.info",
       body: encode(generalChanges(context, context.write.generalRoster.generals)),
     });
+
   return pushes;
 }

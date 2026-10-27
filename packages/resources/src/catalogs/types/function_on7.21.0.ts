@@ -7,4 +7,5 @@ export interface FunctionOn7210Definition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type FunctionOn7210DefinitionCatalog = CatalogTable<FunctionOn7210Definition>;

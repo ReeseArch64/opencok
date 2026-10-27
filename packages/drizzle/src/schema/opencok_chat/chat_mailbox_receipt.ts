@@ -1,5 +1,6 @@
 import { bigint, integer, primaryKey, uuid, varchar } from "drizzle-orm/pg-core";
 import { opencok_chat } from "../namespaces";
+
 export const chat_mailbox_receipt = opencok_chat.table(
   "chat_mailbox_receipt",
   {

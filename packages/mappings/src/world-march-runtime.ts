@@ -2,6 +2,7 @@ import type { WorldMarchCheckResponse } from "@opencok/contracts/responses/world
 import { num, long, text, type Row } from "@opencok/contracts/rows";
 import { decodeWorldMarchArmy } from "@opencok/messages/world-resource-army";
 import { sfs, Type, type Fields } from "@opencok/messages/sfs";
+
 export function worldMarchDetail(
   row: Row,
   armies: readonly Row[],
@@ -10,6 +11,7 @@ export function worldMarchDetail(
 ): Fields {
   const army = row.armyInfo ? decodeWorldMarchArmy(row.armyInfo as Buffer) : null;
   const soldiers = (army?.soldiers ?? []).filter((unit) => unit.total > unit.dead);
+
   return {
     uuid: sfs.string(text(row, "uuid")),
     uid: sfs.string(text(row, "ownerUid")),

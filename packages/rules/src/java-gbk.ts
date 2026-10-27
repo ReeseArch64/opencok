@@ -142,15 +142,19 @@ const twoByteRanges = [
 
 export function javaGbkLength(text: string): number {
   if (typeof text !== "string" || text.length > 65535) throw new Error("Invalid GBK input");
+
   let length = 0;
+
   for (const character of text) {
     const unit = character.charCodeAt(0);
     let first = 0,
       last = twoByteRanges.length - 1,
       width = 1;
+
     while (first <= last) {
       const middle = (first + last) >>> 1;
       const [start, end] = twoByteRanges[middle]!;
+
       if (unit < start) last = middle - 1;
       else if (unit > end) first = middle + 1;
       else {
@@ -158,7 +162,9 @@ export function javaGbkLength(text: string): number {
         break;
       }
     }
+
     length += width;
   }
+
   return length;
 }

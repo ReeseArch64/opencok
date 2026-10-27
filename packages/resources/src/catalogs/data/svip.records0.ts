@@ -1,4 +1,5 @@
 import type { SvipDefinition } from "../types/svip.ts";
+
 export const records: readonly SvipDefinition[] = [
   {
     "id": 7010,

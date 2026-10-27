@@ -1,4 +1,5 @@
 import type { GeneralAwakeDefinition } from "../types/general_awake.ts";
+
 export const records: readonly GeneralAwakeDefinition[] = [
   {
     "id": 40919001,

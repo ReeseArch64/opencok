@@ -4,6 +4,7 @@ import { sfs, type Fields } from "@opencok/messages/sfs";
 import { fightRankingSchema, playoffRankingSchema } from "@opencok/validations/battle-ranking";
 import { playoffBattleStart, playoffTimes, playoffPairs } from "@opencok/rules/battle-ranking";
 import { validateFields } from "./validation.ts";
+
 export function fightRanking(rows?: readonly Row[]): Fields {
   return validateFields(
     fightRankingSchema,
@@ -30,6 +31,7 @@ export function fightRanking(rows?: readonly Row[]): Fields {
         },
   );
 }
+
 export function playoffRanking(
   publication: PlayoffPublication,
   teams: readonly PlayoffTeam[],
@@ -41,8 +43,11 @@ export function playoffRanking(
   const self = teams.find((team) => team.teamId === allianceId);
   const times = playoffTimes(publication, self, now);
   const fields: Fields = {};
+
   if (times.battleState !== undefined) fields.battleState = sfs.int(times.battleState);
+
   if (times.endTime !== undefined) fields.endTime = sfs.long(times.endTime);
+
   fields.teamId = sfs.string(allianceId);
   fields.enemyId = sfs.string(self?.enemyIds[publication.turns - 1] ?? "");
   fields.inBattle = sfs.bool(self?.curEnemyId != null);
@@ -51,6 +56,7 @@ export function playoffRanking(
   fields.groups = sfs.array(
     playoffPairs(teams, publication.turns, allianceId).map((team) => {
       const start = playoffBattleStart(now, weekday, team.index);
+
       return sfs.object({
         kingId: sfs.int(team.kingId),
         kingName: sfs.string(team.kingName),
@@ -69,5 +75,6 @@ export function playoffRanking(
       });
     }),
   );
+
   return validateFields(playoffRankingSchema, fields);
 }

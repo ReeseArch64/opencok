@@ -9,4 +9,5 @@ export interface RewardAddDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type RewardAddDefinitionCatalog = CatalogTable<RewardAddDefinition>;

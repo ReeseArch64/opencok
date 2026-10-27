@@ -14,19 +14,31 @@ export async function validateNicknameChange(
   filters: NicknameChangeFilters,
 ): Promise<string> {
   if (typeof raw !== "string" || raw.length > 65535) throw new GameError(errors.invalid);
+
   const replaced = raw.replace(/\n|\\n/g, " ");
+
   if (await filters.forbidden(nicknameTrim(replaced))) throw new GameError(errors.nicknameOccupied);
+
   if (await filters.badWords(replaced)) throw new GameError(errors.nicknameOccupied);
+
   for (let index = 0; index < replaced.length; index++) {
     const code = replaced.charCodeAt(index);
+
     if (code <= 31 || (code >= 127 && code <= 159)) throw new GameError(errors.nicknameOccupied);
   }
+
   if (mailBlank(replaced)) throw new GameError(errors.invalid);
+
   const name = nicknameTrim(replaced);
+
   if (name.startsWith("(")) throw new GameError(errors.nicknameInvalid);
+
   const length = nicknameLength(name);
+
   if (length < 3 || length > 16) throw new GameError(errors.invalid);
+
   if (!nicknameCharactersAllowed(name)) throw new GameError(errors.nicknameCharacters);
+
   return name;
 }
 
@@ -47,11 +59,14 @@ export interface NicknameGoldChange {
 }
 
 const mobile = ["gold", "paidGold", "paidSpecialGold"] as const;
+
 const dmm = ["dmmGold", "dmmPaidGold", "dmmPaidSpecialGold"] as const;
+
 const long = (value: bigint) => BigInt.asIntN(64, value);
 
 function balance(value: bigint): bigint {
   if (typeof value !== "bigint" || long(value) !== value) throw new Error("Invalid gold balance");
+
   return value;
 }
 
@@ -65,30 +80,41 @@ export function nicknameGoldDebit(
   rawPrice: unknown,
 ): NicknameGoldChange {
   const price = javaDecimal(rawPrice, 32);
+
   if (price < 0n) throw new Error("Negative nickname gold cost");
+
   const keys = platform === "dmm" ? dmm : mobile;
   const before = total(balances, keys);
+
   if (before < 0n) throw new Error("Negative total gold");
+
   if (before < price) throw new GameError(errors.gold);
+
   const result = { ...balances };
   const [free, paid, special] = keys;
+
   if (result[free] > 0n) {
     result[free] = long(result[free] - price);
+
     if (result[free] < 0n) {
       result[special] = long(result[special] + result[free]);
+
       if (result[special] < 0n) {
         result[paid] = long(result[paid] + result[special]);
         result[special] = 0n;
       }
+
       result[free] = 0n;
     }
   } else if (result[special] > 0n) {
     result[special] = long(result[special] - price);
+
     if (result[special] < 0n) {
       result[paid] = long(result[paid] + result[special]);
       result[special] = 0n;
     }
   } else result[paid] = long(result[paid] - price);
+
   return {
     balances: result,
     gold: platform === "dmm" ? before : total(result, keys),
@@ -105,7 +131,9 @@ export function nicknameGoldRefund(
 ): NicknameGoldChange {
   const price = javaDecimal(rawPrice, 32);
   const ratio = platform === "cn1" ? readRatio() : 1;
+
   if (typeof ratio !== "number") throw new Error("Invalid nickname refund ratio");
+
   const product = Math.fround(Math.fround(Number(price)) * Math.fround(ratio));
   const delta = Number.isNaN(product)
     ? 0n
@@ -116,6 +144,7 @@ export function nicknameGoldRefund(
         : BigInt(Math.trunc(product));
   const free = platform === "dmm" ? "dmmGold" : "gold";
   const result = { ...balances, [free]: long(balance(balances[free]) + delta) };
+
   return {
     balances: result,
     gold: total(result, mobile),
@@ -126,13 +155,16 @@ export function nicknameGoldRefund(
 
 export function nicknameItemDebit(count: number | null | undefined, rawType: unknown): number {
   const type = javaDecimal(rawType, 32);
+
   if (
     count !== undefined &&
     count !== null &&
     (!Number.isInteger(count) || count < -2147483648 || count > 2147483647)
   )
     throw new Error("Invalid nickname item count");
+
   if (count === undefined || count === null || count < 1)
     throw new GameError(type === 17n || type === 20n ? "E100165" : "102198");
+
   return count - 1;
 }

@@ -1,4 +1,5 @@
 import type { NotiTimezoneDefinition } from "../types/noti_timezone.ts";
+
 export const records: readonly NotiTimezoneDefinition[] = [
   { "country": "AO", "time": 2 },
   { "country": "AF", "time": 9 },

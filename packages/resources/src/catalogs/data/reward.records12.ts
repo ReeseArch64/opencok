@@ -1,4 +1,5 @@
 import type { RewardDefinition } from "../types/reward.ts";
+
 export const records: readonly RewardDefinition[] = [
   { "id": 248903, "islink": 0, "rate": 100, "item": 210488, "quantity": 1, "circle": 50 },
   {

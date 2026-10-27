@@ -7,6 +7,7 @@ export function createAvatarFiles(options: {
   fetch?: (url: string, options: RequestInit) => Promise<Response>;
 }): AvatarFiles {
   const url = new URL(options.origin);
+
   if (
     !["http:", "https:"].includes(url.protocol) ||
     !url.hostname ||
@@ -20,6 +21,7 @@ export function createAvatarFiles(options: {
     options.timeoutMs > 30000
   )
     throw new Error("Invalid avatar files configuration");
+
   const request = options.fetch ?? fetch;
   const exchange = async (
     owner: string,
@@ -37,7 +39,9 @@ export function createAvatarFiles(options: {
     let reader: Pick<ReadableStreamDefaultReader<Uint8Array>, "read" | "cancel"> | undefined;
     const operation = async () => {
       const token = await options.tickets.issue(owner, sequence, image ? "image" : "confirm");
+
       if (controller.signal.aborted) throw new Error();
+
       const response = await request(
         `${url.origin}/_internal/avatars/${owner}/${sequence}${image ? "/url" : ""}`,
         {
@@ -49,29 +53,44 @@ export function createAvatarFiles(options: {
       );
       reader = response.body?.getReader();
       const limit = image ? 4096 : 128;
+
       if (response.redirected || ![200, 404].includes(response.status) || controller.signal.aborted)
         throw new Error();
+
       if (
         response.status === 200 &&
         !/^text\/plain(?:\s*;|$)/i.test(response.headers.get("content-type") ?? "")
       )
         throw new Error();
+
       const length = response.headers.get("content-length");
+
       if (length !== null && (!/^\d+$/.test(length) || Number(length) > limit)) throw new Error();
+
       const chunks: Uint8Array[] = [];
       let size = 0;
+
       while (reader) {
         const chunk = await reader.read();
+
         if (chunk.done) break;
+
         size += chunk.value.length;
+
         if (size > limit || controller.signal.aborted) throw new Error();
+
         chunks.push(chunk.value);
       }
+
       const body = new TextDecoder("utf-8", { fatal: true }).decode(Buffer.concat(chunks));
+
       if (response.status === 404 && body === "") return null;
+
       if (response.status !== 200 || controller.signal.aborted) throw new Error();
+
       return body;
     };
+
     try {
       return await Promise.race([operation(), timeout]);
     } catch {
@@ -82,12 +101,16 @@ export function createAvatarFiles(options: {
       void reader?.cancel().catch(() => {});
     }
   };
+
   return {
     issue: (owner, sequence) => options.tickets.issue(owner, sequence, "upload"),
     async image(owner, sequence) {
       const body = await exchange(owner, sequence, true);
+
       if (!body) throw new Error("Avatar image unavailable");
+
       const image = new URL(body);
+
       if (
         !["http:", "https:"].includes(image.protocol) ||
         image.username ||
@@ -97,12 +120,16 @@ export function createAvatarFiles(options: {
         !/^[a-f0-9]{64}$/.test(image.searchParams.get("X-Amz-Signature") ?? "")
       )
         throw new Error("Invalid avatar image URL");
+
       return image.href;
     },
     async find(owner, sequence) {
       const body = await exchange(owner, sequence, false);
+
       if (body === null) return null;
+
       const fields = body.split("\n");
+
       if (
         fields.length !== 5 ||
         fields[0] !== "v1" ||
@@ -112,6 +139,7 @@ export function createAvatarFiles(options: {
         fields[4] !== ""
       )
         throw new Error("Avatar files unavailable");
+
       return { owner, sequence: String(sequence), hash: fields[3]! };
     },
   };

@@ -4,6 +4,7 @@ import type { Row } from "@opencok/contracts/rows";
 import { validAvatarProfile } from "@opencok/contracts/chat-avatar-profile";
 import { GameError } from "@opencok/errors/game";
 import { errors } from "@opencok/constants/game";
+
 export function legacyAvatarVersion(version: unknown): number {
   if (
     typeof version !== "number" ||
@@ -12,8 +13,10 @@ export function legacyAvatarVersion(version: unknown): number {
     version > 2147483647
   )
     throw new GameError(errors.invalid, "avatar_rule");
+
   return version >= 1000000 ? (version % 1000000) + 1 : version > 0 ? version + 1 : 1;
 }
+
 import { avatarMailFromTemplate } from "./avatar-mail.ts";
 import type { Rule } from "./game.ts";
 
@@ -25,7 +28,9 @@ export function avatarVersionPlan(
   mailTemplate: Rule | undefined,
 ): AvatarVersionPlan {
   if (!Number.isSafeInteger(now) || now < 0) throw new GameError(errors.invalid, "avatar_rule");
+
   const sequence = legacyAvatarVersion(profile.picVer);
+
   if (
     [profile.name, profile.pf].some(
       (value) =>
@@ -36,6 +41,7 @@ export function avatarVersionPlan(
     )
   )
     throw new GameError(errors.invalid, "avatar_rule");
+
   const mail =
     moderated && mailTemplate && Object.keys(mailTemplate).length ? { ...mailTemplate } : null;
   const effects = JSON.stringify({
@@ -47,8 +53,10 @@ export function avatarVersionPlan(
       updatedAt: String(Math.floor(now / 1000)),
     },
   });
+
   if (Buffer.byteLength(effects) > 65535 || (moderated && interval === null))
     throw new GameError(errors.unsupported, "avatar_rule");
+
   return {
     picVer: sequence + (moderated ? 0 : 2000000),
     nextUpdateTime: moderated ? BigInt.asIntN(64, BigInt(now) + interval!) : null,
@@ -82,14 +90,19 @@ function snapshot(entry: AvatarVersionIntent) {
     Buffer.byteLength(entry.effects) > 65535
   )
     throw new Error("Invalid avatar version intent");
+
   const value = JSON.parse(entry.effects);
+
   if (value?.version !== 1) throw new Error("Invalid avatar version effects");
+
   return value;
 }
 
 export function avatarVersionMail(entry: AvatarVersionIntent): AvatarSystemMail {
   if (!(entry.pendingEffects & 1)) throw new Error("Avatar version mail not pending");
+
   const value = snapshot(entry);
+
   return avatarMailFromTemplate(entry.ownerUid, entry.committedAt, value.mail, entry.operationId);
 }
 
@@ -109,6 +122,8 @@ export function avatarVersionProfile(
     platform: value.profile?.platform,
     ...(entry.revision ? { revision: entry.revision } : {}),
   };
+
   if (!validAvatarProfile(result)) throw new Error("Invalid avatar version profile");
+
   return result;
 }

@@ -1,5 +1,7 @@
 import { isRecord } from "./chat.ts";
+
 export const chatMailboxPath = "/_internal/mailbox";
+
 export interface ChatMailboxUpdate {
   owner: string;
   kingdomId: number;
@@ -10,7 +12,9 @@ export interface ChatMailboxUpdate {
   types: readonly number[];
   requestedAt: number;
 }
+
 export type ChatMailboxResult = "applied" | "unchanged";
+
 export interface ChatMailboxMessage {
   id: string;
   peer: string;
@@ -20,6 +24,7 @@ export interface ChatMailboxMessage {
   body: string;
   read: boolean;
 }
+
 export interface ChatMailboxStore {
   apply(update: ChatMailboxUpdate): Promise<ChatMailboxResult>;
   list(
@@ -30,16 +35,19 @@ export interface ChatMailboxStore {
     limit: number,
   ): Promise<readonly ChatMailboxMessage[]>;
 }
+
 export type ChatMailboxPublisher = (
   update: ChatMailboxUpdate,
   signal: AbortSignal,
 ) => Promise<void>;
+
 const identifier = (value: unknown, empty = false): value is string =>
   typeof value === "string" &&
   (empty || value.length > 0) &&
   value.length <= 40 &&
   !value.includes("\0") &&
   value.isWellFormed();
+
 export function validChatMailbox(value: unknown): value is ChatMailboxUpdate {
   return (
     isRecord(value) &&
@@ -63,8 +71,10 @@ export function validChatMailbox(value: unknown): value is ChatMailboxUpdate {
     Number(value.requestedAt) >= 0
   );
 }
+
 export function encodeChatMailbox(update: ChatMailboxUpdate): string {
   if (!validChatMailbox(update)) throw new Error("Invalid chat mailbox operation");
+
   return JSON.stringify({
     owner: update.owner,
     kingdomId: update.kingdomId,
@@ -76,9 +86,12 @@ export function encodeChatMailbox(update: ChatMailboxUpdate): string {
     requestedAt: update.requestedAt,
   });
 }
+
 export function decodeChatMailbox(body: string): ChatMailboxUpdate {
   const value: unknown = JSON.parse(body);
+
   if (!validChatMailbox(value) || Object.keys(value).length !== 8)
     throw new Error("Invalid chat mailbox operation");
+
   return value;
 }

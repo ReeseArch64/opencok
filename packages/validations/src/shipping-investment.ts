@@ -1,6 +1,7 @@
 import { z } from "zod";
 import type { ShippingInvestmentResponse } from "@opencok/contracts/responses/shipping-investment";
 import { field, responseRecord } from "./response";
+
 export const shippingInvestmentSchema = z.strictObject({
   count: field.int,
   sum_count: field.int,

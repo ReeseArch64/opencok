@@ -9,6 +9,7 @@ import { text, num, long } from "@opencok/contracts/rows";
 import type { RealmAuthority } from "./realm-authority.ts";
 import type { Database } from "./game.ts";
 import type { FriendshipMine } from "@opencok/contracts/reconnect";
+
 export function createFriendshipMineExecutor(
   database: {
     kingdom: Pick<Database["kingdom"], "db">;
@@ -20,13 +21,16 @@ export function createFriendshipMineExecutor(
   preparation?: InventoryPreparation,
 ): FriendshipMineExecutor {
   const execute = createMutationExecutor(database.kingdom.db, authority, now);
+
   return async (command, plan) => {
     const binding = await readFriendshipBinding(
       database.databases.global.db,
       authority.kingdomId,
       command.owner,
     );
+
     if (!binding) throw new Error("Friendship binding required");
+
     return execute(command, async (tx) => {
       await preparation?.before?.(tx, command.owner, BigInt(now()));
       await tx
@@ -38,10 +42,13 @@ export function createFriendshipMineExecutor(
         .from(user_mine)
         .where(and(eq(user_mine.uid, command.owner), eq(user_mine.fId, binding)))
         .for("update");
+
       if (!mine) throw new Error("Friendship mine unavailable");
+
       const helpers: unknown = mine.helpInfo?.length
         ? JSON.parse(mine.helpInfo.toString("utf8"))
         : [];
+
       if (
         !Array.isArray(helpers) ||
         helpers.length > 50 ||
@@ -54,6 +61,7 @@ export function createFriendshipMineExecutor(
         )
       )
         throw new Error("Invalid mine helper history");
+
       return executeInventoryTransaction(
         tx,
         command.owner,
@@ -65,6 +73,7 @@ export function createFriendshipMineExecutor(
             async save(row, history) {
               if (text(row, "uid") !== command.owner || history.length > 50)
                 throw new Error("Foreign mine mutation");
+
               await tx
                 .update(user_mine)
                 .set({

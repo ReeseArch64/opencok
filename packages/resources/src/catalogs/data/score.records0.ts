@@ -1,4 +1,5 @@
 import type { ScoreDefinition } from "../types/score.ts";
+
 export const records: readonly ScoreDefinition[] = [
   { "id": 47000, "type": 1, "value": 0, "points": 1 },
   { "id": 47001, "type": 1, "value": 1, "points": 1 },

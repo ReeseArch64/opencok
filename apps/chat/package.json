@@ -7,7 +7,8 @@
     "dev": "bun --no-env-file --watch src/index.ts",
     "check-types": "tsc --noEmit",
     "test": "bun --no-env-file test tests",
-    "test:integration": "bun --no-env-file test integration"
+    "test:integration": "bun --no-env-file test integration",
+    "build": "bun build src/index.ts --target bun --minify --outdir dist/src"
   },
   "dependencies": {
     "@opencok/contracts": "workspace:*",
@@ -19,7 +20,8 @@
     "@opencok/core": "workspace:*",
     "@opencok/services": "workspace:*",
     "@opencok/mongoose": "workspace:*",
-    "@opencok/errors": "workspace:*"
+    "@opencok/errors": "workspace:*",
+    "@opencok/enums": "workspace:*"
   },
   "devDependencies": {
     "@opencok/config": "workspace:*",

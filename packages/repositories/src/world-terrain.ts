@@ -17,11 +17,13 @@ import type { MutationTransaction } from "./mutation";
 import type { Database } from "./game";
 
 type RealmDatabase = Database["kingdom"]["db"];
+
 const identity = and(
   eq(trigger_var.type, -1),
   eq(trigger_var.uid, worldTerrainOwner),
   eq(trigger_var.key, worldTerrainKey),
 );
+
 const keys = [
   "version",
   "format",
@@ -36,9 +38,12 @@ const keys = [
   "complete",
   "epoch",
 ].sort();
+
 function decode(raw: string): WorldTerrainManifest {
   if (Buffer.byteLength(raw) > 4096) throw new Error("Invalid terrain manifest");
+
   const value = JSON.parse(raw) as WorldTerrainManifest;
+
   if (
     !value ||
     typeof value !== "object" ||
@@ -54,6 +59,7 @@ function decode(raw: string): WorldTerrainManifest {
     typeof value.complete !== "boolean"
   )
     throw new Error("Invalid terrain manifest");
+
   for (const key of [
     "kingdomId",
     "size",
@@ -64,6 +70,7 @@ function decode(raw: string): WorldTerrainManifest {
   ] as const)
     if (!Number.isSafeInteger(value[key]) || value[key] < (key === "cursor" ? 0 : 1))
       throw new Error("Invalid terrain manifest counter");
+
   if (
     BigInt(value.epoch) > 9223372036854775807n ||
     value.kingdomId > 2147483647 ||
@@ -76,23 +83,29 @@ function decode(raw: string): WorldTerrainManifest {
     (value.complete && value.cursor !== value.size * value.size)
   )
     throw new Error("Invalid terrain manifest dimensions");
+
   return value;
 }
+
 async function manifest(tx: MutationTransaction, mode: "share" | "update") {
   const [saved] = await tx
     .select({ value: trigger_var.value })
     .from(trigger_var)
     .where(identity)
     .for(mode);
+
   return saved ? decode(saved.value) : undefined;
 }
+
 async function shape(tx: MutationTransaction, size: number) {
   const result = await tx.execute<{ count: string; maximum: number | null; invalid: string }>(sql`
     SELECT count(*)::text AS count, max(id) AS maximum,
     count(*) FILTER (WHERE "worldId" <> 0 OR id <> 1+x+y*${size} OR x<0 OR y<0 OR x>=${size} OR y>=${size})::text AS invalid
     FROM opencok_kingdom.worldpoint`);
+
   return result.rows[0]!;
 }
+
 export async function assertWorldTerrain(
   db: RealmDatabase,
   authority: RealmAuthority,
@@ -100,10 +113,13 @@ export async function assertWorldTerrain(
 ) {
   if (!Number.isInteger(size) || size < 2 || size > 4000)
     throw new Error("Invalid configured map size");
+
   return db.transaction(async (tx) => {
     await fenceRealmTransaction(tx, authority);
     const saved = await manifest(tx, "share");
+
     if (!saved) return undefined;
+
     if (
       saved.kingdomId !== authority.kingdomId ||
       BigInt(saved.epoch) > authority.epoch ||
@@ -111,16 +127,20 @@ export async function assertWorldTerrain(
       !saved.complete
     )
       throw new Error("Realm terrain incomplete or configured map size mismatch");
+
     const actual = await shape(tx, size);
+
     if (
       Number(actual.count) !== size * size ||
       actual.maximum !== size * size ||
       Number(actual.invalid)
     )
       throw new Error("Realm terrain shape changed");
+
     return saved;
   });
 }
+
 async function fresh(
   tx: MutationTransaction,
   cursor: number,
@@ -141,15 +161,20 @@ async function fresh(
     EXISTS(SELECT 1 FROM opencok_kingdom.world_res_dead) OR
     EXISTS(SELECT 1 FROM opencok_kingdom.world_field_monster_dead) OR
     ${full ? sql`EXISTS(SELECT 1 FROM opencok_kingdom.worldpoint WHERE coalesce("ownerId",'')<>'' OR coalesce("ownerMarchUUid",'')<>'' OR coalesce("territoryAlliance",'')<>'' OR coalesce("territoryId",0)<>0 OR "pointType" NOT IN (0,10,11,12,13,48))` : sql`false`} AS occupied`);
+
   if (!full) {
     const actual = await tx.execute<{ maximum: number | null }>(
       sql`SELECT max(id) AS maximum FROM opencok_kingdom.worldpoint`,
     );
+
     if (result.rows[0]!.occupied || (actual.rows[0]!.maximum ?? 0) !== cursor)
       throw new Error("Terrain import prefix changed");
+
     return;
   }
+
   const actual = await shape(tx, size);
+
   if (
     result.rows[0]!.occupied ||
     Number(actual.count) !== cursor ||
@@ -158,29 +183,38 @@ async function fresh(
   )
     throw new Error("Terrain import requires an untouched fresh realm");
 }
+
 export async function checkWorldTerrainImportTarget(db: RealmDatabase, kingdomId: number) {
   if (!Number.isInteger(kingdomId) || kingdomId < 1 || kingdomId > 2147483647)
     throw new Error("Invalid terrain realm");
+
   await db.transaction(
     async (tx) => {
       const foreign = await tx.execute<{ foreign: boolean }>(
         sql`SELECT EXISTS(SELECT 1 FROM opencok_kingdom.realm_authority WHERE "kingdomId"<>${kingdomId}) AS foreign`,
       );
+
       if (foreign.rows[0]!.foreign) throw new Error("Foreign terrain database");
+
       const [raw] = await tx.select({ value: trigger_var.value }).from(trigger_var).where(identity);
       const saved = raw ? decode(raw.value) : undefined;
+
       if (saved) {
         if (saved.kingdomId !== kingdomId) throw new Error("Foreign terrain manifest");
+
         return;
       }
+
       const occupied = await tx.execute<{ occupied: boolean }>(
         sql`SELECT EXISTS(SELECT 1 FROM opencok_kingdom.userprofile) OR EXISTS(SELECT 1 FROM opencok_kingdom.worldpoint) OR EXISTS(SELECT 1 FROM opencok_kingdom.world_march) AS occupied`,
       );
+
       if (occupied.rows[0]!.occupied) throw new Error("Terrain import requires a fresh realm");
     },
     { accessMode: "read only" },
   );
 }
+
 export async function importWorldTerrain(
   db: RealmDatabase,
   authority: RealmAuthority,
@@ -198,6 +232,7 @@ export async function importWorldTerrain(
     pageSize = options.pageSize ?? 1000,
     pageLimit = options.pageLimit ?? 2147483647,
     total = terrain.size * terrain.size;
+
   if (
     terrain.format !== "worldcreator-v2.normal.v1" ||
     terrain.size !== settings.size ||
@@ -216,11 +251,14 @@ export async function importWorldTerrain(
     typeof options.complete !== "function"
   )
     throw new Error("Invalid terrain import plan");
+
   for (const side of [settings.bornSide, settings.resourceSide, settings.monsterSide])
     if (!Number.isInteger(side) || side < 1 || side > terrain.size)
       throw new Error("Invalid terrain area width");
+
   if (terrain.grid.some((value) => value > 2) || terrain.overlay.some((value) => value > 1))
     throw new Error("Invalid terrain cell");
+
   const description = {
       format: terrain.format,
       size: terrain.size,
@@ -235,12 +273,14 @@ export async function importWorldTerrain(
       .update(terrain.overlay)
       .digest("hex");
   let result: WorldTerrainManifest | undefined;
+
   for (let page = 0; page < pageLimit; page++) {
     result = await db.transaction(async (tx) => {
       await fenceRealmTransaction(tx, authority);
       await tx.execute(sql`select pg_advisory_xact_lock(728214, 0)`);
       const saved = await manifest(tx, "update"),
         now = BigInt((options.now ?? Date.now)());
+
       if (
         saved &&
         (saved.kingdomId !== authority.kingdomId ||
@@ -253,11 +293,15 @@ export async function importWorldTerrain(
           saved.monsterSide !== settings.monsterSide)
       )
         throw new Error("Terrain import identity changed");
+
       if (now < 0n) throw new Error("Invalid terrain import clock");
+
       if (saved?.complete) {
         await assertShape();
+
         return saved;
       }
+
       const cursor = saved?.cursor ?? 0;
       await fresh(
         tx,
@@ -268,14 +312,19 @@ export async function importWorldTerrain(
       );
       const next = Math.min(total, cursor + pageSize),
         rows = [];
+
       for (let index = cursor; index < next; index++)
         rows.push(worldTerrainPoint(terrain, settings, index));
+
       if (rows.length) await tx.insert(worldpoint).values(rows);
+
       const complete = next === total;
+
       if (complete) {
         await options.complete(tx, authority, now);
         await assertShape();
       }
+
       const value: WorldTerrainManifest = {
         version: 1,
         ...description,
@@ -299,14 +348,19 @@ export async function importWorldTerrain(
           set: { value: JSON.stringify(value), refreshtime: now },
         });
       authority.assertReady();
+
       return value;
+
       async function assertShape() {
         const actual = await shape(tx, terrain.size);
+
         if (Number(actual.count) !== total || actual.maximum !== total || Number(actual.invalid))
           throw new Error("Realm terrain shape changed");
       }
     });
+
     if (result.complete) break;
   }
+
   return result!;
 }

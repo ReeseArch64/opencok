@@ -1,3 +1,4 @@
+import { CityCommandDomain } from "./city-command-domain.ts";
 import { worldBirthRules } from "@opencok/rules/world-birth";
 import { num, long, text } from "@opencok/contracts/rows";
 import { encode } from "@opencok/messages/sfs";
@@ -10,23 +11,39 @@ import {
   relocateWorldMarches,
   worldMarchMutationEvent,
 } from "./world-march-runtime";
-import type { CityDomain } from "./city-progression";
+import type { CityDomain } from "./city-domain.ts";
 
 export const worldRecreationCommands = ["world.user.rcr"];
-export function createWorldRecreationDomain(size: number): CityDomain {
-  return {
-    commands: worldRecreationCommands,
-    types: [],
-    async prepare(context, _command, params) {
+
+export class WorldRecreationDomain extends CityCommandDomain {
+  public readonly commands: CityDomain["commands"];
+  public readonly types: CityDomain["types"];
+  public readonly prepare: CityDomain["prepare"];
+  public readonly apply: CityDomain["apply"];
+
+  public constructor(size: number) {
+    super();
+
+    this.commands = worldRecreationCommands;
+
+    this.types = [];
+
+    this.prepare = async (context, _command, params) => {
       const state = context.state.worldMutation;
+
       if (!state || num(state.world, "pointId") !== 0) worldMutationFailure();
+
       if (!context.birthPoint) worldMutationFailure();
+
       const placement = await context.birthPoint(worldBirthRules(context.rules)),
         target = cityInteger(placement.point, 1, size * size),
         footprint = worldFootprint(target, size),
         castle = context.state.buildings.find((row) => num(row, "itemId") === 400000);
+
       if (!castle) worldMutationFailure();
+
       const rows = footprint.map((id) => placement.points.find((row) => num(row, "id") === id));
+
       if (
         rows.some(
           (row) =>
@@ -41,6 +58,7 @@ export function createWorldRecreationDomain(size: number): CityDomain {
         )
       )
         worldMutationFailure();
+
       const maximum = cityDefenseMaximum(context),
         shield = context.state.effects.states
           .filter(
@@ -54,6 +72,7 @@ export function createWorldRecreationDomain(size: number): CityDomain {
           .reduce((end, row) => (long(row, "endTime") > end ? long(row, "endTime") : end), 0n);
       recoverWorldMarches(context);
       const write = (context.write.worldMutation ??= {});
+
       for (const row of rows) {
         const id = num(row!, "id"),
           value = {
@@ -79,6 +98,7 @@ export function createWorldRecreationDomain(size: number): CityDomain {
           };
         write.points = [...(write.points ?? []).filter((prior) => prior.id !== id), value];
       }
+
       relocateWorldMarches(context, target);
       write.world = {
         ...state.world,
@@ -86,6 +106,7 @@ export function createWorldRecreationDomain(size: number): CityDomain {
         lastCityDefTime: context.now,
         lastMoveCityTime: context.now,
       };
+
       return {
         response: encode(
           worldCityRecreated({
@@ -98,9 +119,14 @@ export function createWorldRecreationDomain(size: number): CityDomain {
         ),
         event: encode(worldMarchMutationEvent(context, params)),
       };
-    },
-    async apply() {
+    };
+
+    this.apply = async () => {
       worldMutationFailure();
-    },
-  };
+    };
+  }
+}
+
+export function createWorldRecreationDomain(size: number): CityDomain {
+  return new WorldRecreationDomain(size);
 }

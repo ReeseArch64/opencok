@@ -12,6 +12,7 @@ export async function readFlowerRanking(
 ): Promise<FlowerRankingState> {
   if (!uid || uid.length > 40 || uids.length > 32767 || uids.some((id) => !id || id.length > 40))
     throw new Error("Invalid flower ranking identities");
+
   return db.transaction(
     async (tx) => {
       const profile = (
@@ -26,7 +27,9 @@ export async function readFlowerRanking(
           .where(eq(userprofile.uid, uid))
           .limit(1)
       )[0];
+
       if (!profile) return { profile, profiles: [], hide: 0, time: undefined };
+
       const hide =
         (
           await tx
@@ -55,6 +58,7 @@ export async function readFlowerRanking(
             .from(userprofile)
             .where(inArray(userprofile.uid, [...new Set(uids)]))
         : [];
+
       return { profile, profiles, hide, time };
     },
     { isolationLevel: "repeatable read", accessMode: "read only" },

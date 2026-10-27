@@ -8,7 +8,7 @@ import { previewRewards } from "@opencok/rules/rewards";
 import { mailRewardEntries } from "@opencok/rules/mail-rewards";
 import { rewardPreviewArray } from "@opencok/mappings/rewards";
 import type { RewardPreview } from "@opencok/contracts/rewards";
-import type { CityProgressionContext } from "./city-progression";
+import type { CityProgressionContext } from "./city-progression-context.ts";
 
 const assets = [
   "wood",
@@ -29,12 +29,14 @@ const assets = [
   "dragon_food",
   "dragon_gold",
 ] as const;
+
 export function pinProgressionReward(
   context: Pick<CityProgressionContext, "rules" | "now">,
   id: string,
   catalog = context.rules.reconnect.rewards,
 ) {
   if (!catalog?.has(id)) throw new GameError(errors.unsupported, "city_progression");
+
   return previewRewards(
     id,
     context.rules,
@@ -45,11 +47,14 @@ export function pinProgressionReward(
     .map((row) => {
       if (row.kind === "item")
         return `${row.type === 7 ? "goods" : "equip"},${row.id},${row.count}`;
+
       if (row.kind === "count" && assets[row.type]) return `${assets[row.type]},0,${row.value}`;
+
       throw new GameError(errors.unsupported, "city_progression");
     })
     .join("|");
 }
+
 export function progressionRewardPreview(raw: string): RewardPreview[] {
   return mailRewardEntries(raw).map((row) => {
     if (row.category === "goods" || row.category === "equip")
@@ -59,22 +64,29 @@ export function progressionRewardPreview(raw: string): RewardPreview[] {
         id: row.itemId,
         count: row.count,
       };
+
     const type = assets.indexOf(row.category as (typeof assets)[number]);
+
     if (type < 0) throw new GameError(errors.unsupported, "city_progression");
+
     return { kind: "count", type, value: row.count };
   });
 }
+
 export function grantPinnedProgressionReward(context: CityProgressionContext, raw: string) {
   const rows = progressionRewardPreview(raw);
+
   for (const row of rows) {
     if (row.kind === "item") {
       if (row.type === 7) context.economy.item(row.id, row.count);
       else {
         const equipment = [...(context.write.equipment ?? [])];
+
         for (let i = 0; i < row.count; i++) {
           context.write.equipment = equipment;
           equipment.push(newEquipment(context, row.id));
         }
+
         context.write.equipment = equipment;
       }
     } else if (row.kind === "count") {
@@ -96,6 +108,7 @@ export function grantPinnedProgressionReward(context: CityProgressionContext, ra
         );
     }
   }
+
   return rewardPreviewArray(rows);
 }
 
@@ -115,6 +128,7 @@ export function grantNativeProgressionReward(
               throw new GameError(errors.unsupported, "city_progression");
             })();
     grantPinnedProgressionReward(context, encoded);
+
     if (reward.kind === "item")
       return sfs.object({
         type: sfs.int(reward.type),
@@ -135,13 +149,16 @@ export function grantNativeProgressionReward(
                   .map((row) => sfs.object(equipmentView(row))),
               ),
       });
+
     if (reward.kind !== "count") throw new GameError(errors.unsupported, "city_progression");
+
     const asset = assets[reward.type];
     const total =
       asset && asset !== "exp"
         ? context.balance(asset) +
           (["wood", "stone", "iron", "food"].includes(asset) ? context.balance(`${asset}bind`) : 0n)
         : undefined;
+
     return sfs.object({
       type: sfs.int(reward.type),
       value: sfs.int(reward.value),

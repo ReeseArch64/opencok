@@ -31,6 +31,7 @@ export async function readResourceOwnerLoadEffects(
     snapshot.effects.generals.length > 4096
   )
     throw new GameError(errors.unsupported, "power_state");
+
   const context = resourceOwnerRuleContext(snapshot, environment);
   const state = snapshot.effects;
   const abilities = generalSkillPoints(state.generals);
@@ -44,6 +45,7 @@ export async function readResourceOwnerLoadEffects(
     : undefined;
   const resolve = (effect: Parameters<typeof playerGameEffect>[6]) =>
     playerGameEffect(state, rules, context, abilities, world, emperor, effect);
+
   return {
     ...resourceOrdinaryLoadEffects(state, rules, context, abilities, world, emperor),
     newGeneral: resourceGeneralBuildingEffect(snapshot, rules, context, 78, resolve, clock),

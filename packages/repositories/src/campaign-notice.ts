@@ -7,6 +7,7 @@ import { fenceRealmTransaction, type RealmAuthority } from "./realm-authority";
 import type { CampaignAudience } from "@opencok/contracts/campaign-notice";
 import type { MutationTransaction } from "./mutation";
 import type { Database } from "./game";
+
 export async function readCampaignProfile(tx: MutationTransaction, owner: string) {
   const [row] = await tx
     .select({
@@ -27,8 +28,10 @@ export async function readCampaignProfile(tx: MutationTransaction, owner: string
     .leftJoin(alliance, eq(alliance.uid, alliance_member.allianceId))
     .where(eq(userprofile.uid, owner))
     .limit(1);
+
   return row;
 }
+
 export function createCampaignAudience(
   db: Database["kingdom"]["db"],
   authority: RealmAuthority,
@@ -43,9 +46,12 @@ export function createCampaignAudience(
         (allianceId !== undefined && (!allianceId || allianceId.length > 40))
       )
         throw new Error("Invalid campaign audience page");
+
       return db.transaction(async (tx) => {
         await fenceRealmTransaction(tx, authority);
+
         if (!owners.length) return [];
+
         const rows = await tx
           .select({ uid: userprofile.uid })
           .from(userprofile)
@@ -64,6 +70,7 @@ export function createCampaignAudience(
             ),
           );
         authority.assertReady();
+
         return rows.map((row) => row.uid);
       });
     },

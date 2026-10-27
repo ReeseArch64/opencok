@@ -1,4 +1,5 @@
 import type { GeneralStationDefinition } from "../types/general_station.ts";
+
 export const records: readonly GeneralStationDefinition[] = [
   {
     "id": 53800,

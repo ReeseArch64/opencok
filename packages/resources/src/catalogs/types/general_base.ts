@@ -39,4 +39,5 @@ export interface GeneralBaseDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type GeneralBaseDefinitionCatalog = CatalogTable<GeneralBaseDefinition>;

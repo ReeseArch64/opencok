@@ -6,4 +6,5 @@ export interface WagReTeamDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type WagReTeamDefinitionCatalog = CatalogTable<WagReTeamDefinition>;

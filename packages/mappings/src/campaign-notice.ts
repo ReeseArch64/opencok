@@ -11,6 +11,7 @@ import {
 } from "@opencok/messages/sfs";
 import type { CampaignNotice } from "@opencok/contracts/campaign-notice";
 import type { CampaignNoticeResponse } from "@opencok/contracts/responses/campaign-notice";
+
 export function campaignNoticeBody(notice: CampaignNoticeResponse): Fields {
   if (
     !notice.msgId ||
@@ -19,6 +20,7 @@ export function campaignNoticeBody(notice: CampaignNoticeResponse): Fields {
     notice.para.some((value) => typeof value !== "string" || Buffer.byteLength(value) > 4096)
   )
     throw new Error("Invalid native campaign notice");
+
   return {
     msgId: sfs.string(notice.msgId),
     ...(notice.para.length
@@ -26,6 +28,7 @@ export function campaignNoticeBody(notice: CampaignNoticeResponse): Fields {
       : {}),
   };
 }
+
 export function campaignNoticeFrame(notice: CampaignNotice) {
   if (
     !notice.owner ||
@@ -36,6 +39,7 @@ export function campaignNoticeFrame(notice: CampaignNotice) {
     (notice.scope === 1 && !notice.allianceId)
   )
     throw new Error("Invalid campaign notice envelope");
+
   return encode({
     at: sfs.long(notice.at),
     owner: sfs.string(notice.owner),
@@ -44,12 +48,14 @@ export function campaignNoticeFrame(notice: CampaignNotice) {
     notice: sfs.object(campaignNoticeBody(notice.message)),
   });
 }
+
 export function readCampaignNotice(payload: Uint8Array, owner: string): CampaignNotice {
   const data = decode(Buffer.from(payload)),
     scope = int(data, "scope"),
     allianceId = str(data, "allianceId"),
     body = fields(data.notice),
     parameters = body.para?.value ?? [];
+
   if (
     data.at?.type !== Type.Long ||
     typeof data.at.value !== "bigint" ||
@@ -65,10 +71,12 @@ export function readCampaignNotice(payload: Uint8Array, owner: string): Campaign
     parameters.some((value: Value) => value.type !== Type.String || typeof value.value !== "string")
   )
     throw new Error("Invalid owned campaign notice");
+
   const message = {
     msgId: str(body, "msgId"),
     para: parameters.map((value: Value) => value.value as string),
   };
   campaignNoticeBody(message);
+
   return { owner, at: data.at!.value as bigint, scope: scope as 1 | 2, allianceId, message };
 }

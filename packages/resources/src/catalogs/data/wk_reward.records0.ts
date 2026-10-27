@@ -1,4 +1,5 @@
 import type { WkRewardDefinition } from "../types/wk_reward.ts";
+
 export const records: readonly WkRewardDefinition[] = [
   { "id": 7400001, "min": 1, "max": 1, "score": [0, 5000], "reward": 239200 },
   { "id": 7400002, "min": 2, "max": 2, "score": [0, 5000], "reward": 239201 },

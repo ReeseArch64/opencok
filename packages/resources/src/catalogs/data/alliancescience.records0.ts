@@ -1,4 +1,5 @@
 import type { AlliancescienceDefinition } from "../types/alliancescience.ts";
+
 export const records: readonly AlliancescienceDefinition[] = [
   {
     "id": 250000,

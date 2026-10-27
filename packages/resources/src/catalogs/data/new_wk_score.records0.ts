@@ -1,4 +1,5 @@
 import type { NewWkScoreDefinition } from "../types/new_wk_score.ts";
+
 export const records: readonly NewWkScoreDefinition[] = [
   { "id": 221200, "type": 1, "value": 3, "points": 1, "effect": [883, 889] },
   { "id": 221201, "type": 1, "value": 0, "points": 1, "effect": [883, 889] },

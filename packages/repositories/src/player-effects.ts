@@ -6,6 +6,7 @@ import { ability_page } from "@opencok/drizzle/schema/opencok_kingdom/ability_pa
 import type { CityProgressionWrite } from "@opencok/contracts/city-progression";
 import { text, num, long } from "@opencok/contracts/rows";
 import type { MutationTransaction } from "./mutation";
+
 export async function readProgressionEffects(
   tx: MutationTransaction,
   owner: string,
@@ -18,14 +19,20 @@ export async function readProgressionEffects(
     .limit(257);
   const states = await tx.select().from(user_state).where(eq(user_state.uid, owner)).limit(4097);
   const [vip] = await tx.select().from(user_vip).where(eq(user_vip.uid, owner));
+
   if (generals.length > 256 || states.length > 4096) throw new Error("Oversized effect aggregate");
+
   return { ...effects, generals, states, vip };
 }
+
 export async function readAbilityPages(tx: MutationTransaction, owner: string) {
   const pages = await tx.select().from(ability_page).where(eq(ability_page.uid, owner)).limit(4);
+
   if (pages.length > 3) throw new Error("Oversized talent pages");
+
   return pages;
 }
+
 export async function writePlayerEffects(
   tx: MutationTransaction,
   owner: string,
@@ -39,13 +46,16 @@ export async function writePlayerEffects(
       ![1, 2, 3].includes(num(row, "abilityIndex"))
     )
       throw new Error("Invalid talent write");
+
     const updated = await tx
       .update(user_general)
       .set({ ability: row.ability as Buffer | null, abilityIndex: num(row, "abilityIndex") })
       .where(and(eq(user_general.uid, owner), eq(user_general.uuid, text(row, "uuid"))))
       .returning({ id: user_general.uuid });
+
     if (updated.length !== 1) throw new Error("Foreign talent general");
   }
+
   for (const row of write.abilityPages ?? []) {
     if (
       row.uid !== owner ||
@@ -54,18 +64,23 @@ export async function writePlayerEffects(
       row.ability.length > 65535
     )
       throw new Error("Invalid talent page");
+
     const value = { uid: owner, page: num(row, "page"), ability: row.ability };
     await tx
       .insert(ability_page)
       .values(value)
       .onConflictDoUpdate({ target: [ability_page.uid, ability_page.page], set: value });
   }
+
   if (write.vip) {
     const row = write.vip;
+
     if (row.uid !== owner) throw new Error("Foreign VIP");
+
     for (const key of ["score", "sPoint", "sLevel", "loginDays"])
       if (!Number.isInteger(num(row, key)) || num(row, key) < 0 || num(row, key) > 2147483647)
         throw new Error("Invalid VIP quantity");
+
     const value = {
       uid: owner,
       score: num(row, "score"),
@@ -84,10 +99,12 @@ export async function writePlayerEffects(
       .values(value)
       .onConflictDoUpdate({ target: user_vip.uid, set: value });
   }
+
   if (write.deletedStates?.length)
     await tx
       .delete(user_state)
       .where(and(eq(user_state.uid, owner), inArray(user_state.stateId, [...write.deletedStates])));
+
   for (const row of write.states ?? []) {
     if (
       row.uid !== owner ||
@@ -95,6 +112,7 @@ export async function writePlayerEffects(
       long(row, "endTime") > 9223372036854775807n
     )
       throw new Error("Invalid temporary effect");
+
     const value = {
       uid: owner,
       stateId: num(row, "stateId"),

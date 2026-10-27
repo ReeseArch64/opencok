@@ -25,6 +25,7 @@ import type { PlayerStateLoader } from "@opencok/contracts/chat";
 import { ChatCommandError } from "@opencok/errors/chat";
 import { chatMessage, chatUtc } from "./chat-messages.ts";
 import type { Database } from "./game.ts";
+
 export function createChatSocialStore(
   db: Database["databases"]["global"]["db"],
   load: PlayerStateLoader,
@@ -36,11 +37,14 @@ export function createChatSocialStore(
   const timestamp = () => BigInt(clock().getTime());
   async function ensureImported(uid: string) {
     if (!legacy) return;
+
     const [existing] = await db
       .select()
       .from(chat_social_import)
       .where(eq(chat_social_import.owner, uid));
+
     if (existing || !(await load(uid))) return;
+
     const data = await legacy(uid);
     await db.transaction(async (tx) => {
       await tx.execute(sql`select pg_advisory_xact_lock(hashtextextended('chat:append',0))`);
@@ -49,7 +53,9 @@ export function createChatSocialStore(
         .values({ owner: uid, realm: data.realm, createdAt: timestamp() })
         .onConflictDoNothing()
         .returning();
+
       if (!marker) return;
+
       for (const row of data.contacts)
         await tx
           .insert(chat_relation)
@@ -62,6 +68,7 @@ export function createChatSocialStore(
             createdAt: timestamp(),
           })
           .onConflictDoNothing();
+
       for (const row of data.blocks)
         await tx
           .insert(chat_relation)
@@ -78,12 +85,15 @@ export function createChatSocialStore(
   }
   async function ensureManyImported(uids: string[]) {
     const ids = [...new Set(uids)];
+
     if (!legacy || !ids.length) return;
+
     const markers = await db
       .select({ uid: chat_social_import.owner })
       .from(chat_social_import)
       .where(inArray(chat_social_import.owner, ids));
     const present = new Set(markers.map((row) => row.uid));
+
     for (const uid of ids) if (!present.has(uid)) await ensureImported(uid);
   }
   const activeMember = (uid: string, room: string) =>
@@ -95,14 +105,19 @@ export function createChatSocialStore(
   const access: ChatAccessStore = {
     async roomInfo(uid, roomId) {
       if (!/^private_[a-f0-9-]{36}$/.test(roomId)) return null;
+
       const id = roomId.slice(8);
       const [member] = await db.select().from(chat_private_member).where(activeMember(uid, id));
+
       if (!member) return null;
+
       const [room] = await db
         .select()
         .from(chat_private_room)
         .where(and(eq(chat_private_room.id, id), isNull(chat_private_room.deletedAt)));
+
       if (!room) return null;
+
       const members = await db
         .select()
         .from(chat_private_member)
@@ -116,6 +131,7 @@ export function createChatSocialStore(
       const presentation = await Promise.all(
         members.map(async (value) => {
           const state = await load(value.owner);
+
           return {
             uid: value.owner,
             name: state?.name ?? value.owner,
@@ -140,6 +156,7 @@ export function createChatSocialStore(
         )
         .orderBy(desc(chat_message.sequence_id))
         .limit(1);
+
       return {
         id: roomId,
         name:
@@ -158,8 +175,11 @@ export function createChatSocialStore(
     },
     async filter(uid, messages) {
       if (!messages.length) return [];
+
       const state = await load(uid);
+
       if (!state || state.banned || (state.banUntil ?? 0) > clock().getTime()) return [];
+
       const senders = [...new Set(messages.map((message) => message.senderUid))];
       await ensureManyImported([uid, ...senders]);
       const blocks = await db
@@ -197,17 +217,20 @@ export function createChatSocialStore(
       const joined = new Map(
         memberships.map((row) => [`private_${row.room}`, Number(row.joinedAt)]),
       );
+
       return messages.filter((message) => {
         if (
           blocked.has(message.senderUid) &&
           ![100, 101, 102, 103, 105].includes(message.post ?? 0)
         )
           return false;
+
         if (message.roomId.startsWith("private_"))
           return (
             joined.has(message.roomId) &&
             Date.parse(message.createdAt) >= joined.get(message.roomId)!
           );
+
         if (message.roomId.startsWith("alliance_"))
           return (
             !!state.allianceId &&
@@ -215,14 +238,18 @@ export function createChatSocialStore(
             message.roomId === `alliance_${state.originalServerId}_${state.allianceId}` &&
             Date.parse(message.createdAt) >= (state.allianceJoinedAt ?? 0)
           );
+
         return true;
       });
     },
     async canSend(uid, notice = false) {
       await ensureImported(uid);
       const state = await load(uid);
+
       if (!state || state.banned || (state.banUntil ?? 0) > clock().getTime()) return false;
+
       const [mute] = await db.select().from(chat_moderation).where(eq(chat_moderation.owner, uid));
+
       return (
         (notice
           ? (mute?.noticeUntil ?? BigInt(state.noticeBanUntil ?? 0))
@@ -231,7 +258,9 @@ export function createChatSocialStore(
     },
     async canReceive(uid, sender) {
       await ensureImported(uid);
+
       if (sender !== uid) await ensureImported(sender);
+
       const [block] = await db
         .select({ owner: chat_relation.owner })
         .from(chat_relation)
@@ -245,15 +274,18 @@ export function createChatSocialStore(
           ),
         )
         .limit(1);
+
       return !block;
     },
     async privateRoom(uid, roomId) {
       if (!roomId.startsWith("private_")) return false;
+
       const [member] = await db
         .select({ role: chat_private_member.role })
         .from(chat_private_member)
         .where(activeMember(uid, roomId))
         .limit(1);
+
       return !!member;
     },
     async canRead(uid, message) {
@@ -262,8 +294,10 @@ export function createChatSocialStore(
         !(await access.canReceive(uid, message.senderUid))
       )
         return false;
+
       if (message.roomId.startsWith("alliance_")) {
         const state = await load(uid);
+
         if (
           !state ||
           state.banned ||
@@ -272,32 +306,40 @@ export function createChatSocialStore(
           message.roomId !== `alliance_${state.originalServerId}_${state.allianceId}`
         )
           return false;
+
         return Date.parse(message.createdAt) >= (state.allianceJoinedAt ?? 0);
       }
+
       if (message.roomId.startsWith("private_")) {
         const [member] = await db
           .select()
           .from(chat_private_member)
           .where(activeMember(uid, message.roomId));
+
         return !!member && BigInt(Date.parse(message.createdAt)) >= member.joinedAt;
       }
+
       return true;
     },
   };
   const social: ChatSocialStore = {
     async execute(input, plan) {
       const imported: { owner: string; data: ChatLegacyRelations }[] = [];
+
       if (legacy)
         for (const uid of new Set([input.owner, input.target].filter(Boolean))) {
           const [marker] = await db
             .select()
             .from(chat_social_import)
             .where(eq(chat_social_import.owner, uid));
+
           if (!marker && (await load(uid))) imported.push({ owner: uid, data: await legacy(uid) });
         }
+
       const ids = new Set(
         [input.owner, input.target, ...input.members, ...input.notices].filter(Boolean),
       );
+
       if (["contact.get", "contact.get.server.current"].includes(input.command)) {
         const relations = await db
           .select({ other: chat_relation.other })
@@ -309,20 +351,27 @@ export function createChatSocialStore(
             ),
           )
           .limit(1000);
+
         for (const row of relations) ids.add(row.other);
+
         for (const item of imported)
           if (item.owner === input.owner) for (const row of item.data.contacts) ids.add(row.other);
       }
+
       const players = new Map<string, Awaited<ReturnType<PlayerStateLoader>>>();
       const selected = [...ids];
+
       for (let index = 0; index < selected.length; index += 16)
         await Promise.all(
           selected.slice(index, index + 16).map(async (uid) => {
             players.set(uid, await load(uid));
           }),
         );
+
       const actor = players.get(input.owner);
+
       if (!actor) throw new ChatCommandError("unauthorized");
+
       const target = players.get(input.target) ?? null;
       const facebookPlayers =
         input.command === "fb.friend.get" && facebook ? await facebook(input.ids) : [];
@@ -332,6 +381,7 @@ export function createChatSocialStore(
           : [];
       const canSend = await access.canSend(input.owner);
       const hash = createHash("sha256").update(JSON.stringify(input)).digest("hex");
+
       return db.transaction(async (tx) => {
         await tx.execute(sql`select pg_advisory_xact_lock(hashtextextended('chat:append',0))`);
         const [receipt] = await tx
@@ -343,18 +393,24 @@ export function createChatSocialStore(
               eq(chat_operation.operationId, input.operationId),
             ),
           );
+
         if (receipt) {
           if (receipt.hash !== hash) throw new ChatCommandError("conflicting_request");
+
           return JSON.parse(receipt.response.toString("utf8")) as Record<string, unknown>;
         }
+
         const now = timestamp();
+
         for (const item of imported) {
           const [marker] = await tx
             .insert(chat_social_import)
             .values({ owner: item.owner, realm: item.data.realm, createdAt: now })
             .onConflictDoNothing()
             .returning();
+
           if (!marker) continue;
+
           for (const row of item.data.contacts)
             await tx
               .insert(chat_relation)
@@ -367,6 +423,7 @@ export function createChatSocialStore(
                 createdAt: now,
               })
               .onConflictDoNothing();
+
           for (const row of item.data.blocks)
             await tx
               .insert(chat_relation)
@@ -380,6 +437,7 @@ export function createChatSocialStore(
               })
               .onConflictDoNothing();
         }
+
         async function event(
           owner: string,
           command: string,
@@ -420,6 +478,7 @@ export function createChatSocialStore(
                 ),
               )
               .limit(1);
+
             return !!row;
           },
           relations(owner, kind) {
@@ -476,6 +535,7 @@ export function createChatSocialStore(
               .select()
               .from(chat_private_room)
               .where(and(eq(chat_private_room.id, id), isNull(chat_private_room.deletedAt)));
+
             return row ?? null;
           },
           myRooms(owner) {
@@ -554,7 +614,9 @@ export function createChatSocialStore(
                 expires_at: chatUtc(new Date(Number(now) + 30 * 86_400_000)),
               })
               .returning();
+
             if (!saved) throw new Error("Room message insert failed");
+
             await tx.insert(chat_event).values({
               id: randomUUID(),
               kind: "message",
@@ -564,6 +626,7 @@ export function createChatSocialStore(
               createdAt: now,
               expiresAt: now + 86_400_000n,
             });
+
             return chatMessage(saved);
           },
           async history(room, joinedAt, before, limit) {
@@ -581,6 +644,7 @@ export function createChatSocialStore(
               )
               .orderBy(desc(chat_message.sequence_id))
               .limit(limit);
+
             return rows.filter((row) => row.body !== null).map(chatMessage);
           },
           async markRead(room, owner, sequence) {
@@ -590,8 +654,10 @@ export function createChatSocialStore(
               .where(eq(chat_message.room_key, `private_${room}`))
               .orderBy(desc(chat_message.sequence_id))
               .limit(1);
+
             if (BigInt(sequence) > (last?.sequence ?? 0n))
               throw new ChatCommandError("invalid_cursor");
+
             await tx
               .update(chat_private_member)
               .set({ readSequence: sql`greatest(${chat_private_member.readSequence},${sequence})` })
@@ -612,6 +678,7 @@ export function createChatSocialStore(
                 ),
               )
               .returning();
+
             if (row)
               await event(
                 input.owner,
@@ -653,10 +720,12 @@ export function createChatSocialStore(
               createdAt: now,
               expiresAt: now + 30n * 86_400_000n,
             });
+
             return id;
           },
           async direct(owner, recipient, body, senderRealm, recipientRealm) {
             const id = randomUUID();
+
             for (const [uid, peer, realm] of [
               [owner, recipient, senderRealm],
               [recipient, owner, recipientRealm],
@@ -673,7 +742,9 @@ export function createChatSocialStore(
                     sql`${chat_mailbox_intent.cutoff} >= ${now}`,
                   ),
                 );
+
               if (intents.some((intent) => intent.action === "delete")) continue;
+
               await tx.insert(chat_mailbox_message).values({
                 kingdom_id: realm,
                 owner_uid: uid,
@@ -687,6 +758,7 @@ export function createChatSocialStore(
                 read: uid === owner || intents.some((intent) => intent.action === "read"),
               });
             }
+
             await tx.insert(chat_event).values({
               id: randomUUID(),
               kind: "direct",
@@ -696,6 +768,7 @@ export function createChatSocialStore(
               createdAt: now,
               expiresAt: now + 86_400_000n,
             });
+
             return id;
           },
           event,
@@ -710,6 +783,7 @@ export function createChatSocialStore(
                   gt(chat_feed.expiresAt, now),
                 ),
               );
+
             return row ?? null;
           },
           feeds(owner, realm, alliance) {
@@ -766,6 +840,7 @@ export function createChatSocialStore(
           "chat.room.invitee",
           "fb.friend.get",
         ];
+
         if (!reads.includes(input.command))
           await tx.insert(chat_operation).values({
             owner: input.owner,
@@ -775,9 +850,11 @@ export function createChatSocialStore(
             response: Buffer.from(JSON.stringify(result)),
             createdAt: now,
           });
+
         return result;
       });
     },
   };
+
   return { social, access };
 }

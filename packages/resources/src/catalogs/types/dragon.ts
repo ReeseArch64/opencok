@@ -3,4 +3,5 @@ export interface DragonDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type DragonDefinitionCatalog = CatalogTable<DragonDefinition>;

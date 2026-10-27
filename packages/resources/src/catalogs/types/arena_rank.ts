@@ -5,4 +5,5 @@ export interface ArenaRankDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type ArenaRankDefinitionCatalog = CatalogTable<ArenaRankDefinition>;

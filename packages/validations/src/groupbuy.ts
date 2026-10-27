@@ -2,6 +2,7 @@ import { z } from "zod";
 import { field } from "./response";
 import { rewardPreviewArraySchema } from "./rewards";
 import type { GroupBuyResponse } from "@opencok/contracts/responses/groupbuy";
+
 export const groupBuySchema = z.strictObject({
   rewardArr: z
     .array(

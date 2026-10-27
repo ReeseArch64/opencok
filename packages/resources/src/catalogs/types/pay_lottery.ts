@@ -9,4 +9,5 @@ export interface PayLotteryDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type PayLotteryDefinitionCatalog = CatalogTable<PayLotteryDefinition>;

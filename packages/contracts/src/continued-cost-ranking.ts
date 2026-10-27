@@ -1,4 +1,5 @@
 import type { Row } from "./rows";
+
 export interface CostRankingPeriod {
   id: string;
   startTime: bigint;
@@ -7,6 +8,7 @@ export interface CostRankingPeriod {
   rewards: string;
   expectedRealms: readonly number[];
 }
+
 export interface CostRankingScore {
   uid: string;
   score: bigint;
@@ -15,11 +17,13 @@ export interface CostRankingScore {
   lastAt: bigint;
   metadata: string;
 }
+
 export interface CostRankingFacts {
   ingest(now: bigint): Promise<number>;
   periods(cursor: string | undefined): Promise<readonly Row[]>;
   top(period: CostRankingPeriod): Promise<readonly CostRankingScore[]>;
 }
+
 export interface CostRankingRegistry {
   register(period: CostRankingPeriod, now: bigint): Promise<CostRankingPeriod>;
   get(id: string): Promise<CostRankingPeriod | undefined>;

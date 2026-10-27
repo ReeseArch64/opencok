@@ -11,4 +11,5 @@ export interface LandingDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type LandingDefinitionCatalog = CatalogTable<LandingDefinition>;

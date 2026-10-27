@@ -1,4 +1,5 @@
 import type { ArmyUpBaseDefinition } from "../types/army_up_base.ts";
+
 export const records: readonly ArmyUpBaseDefinition[] = [
   {
     "id": 30391000,

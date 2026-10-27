@@ -1,4 +1,5 @@
 import type { KingdomshopDefinition } from "../types/kingdomshop.ts";
+
 export const records: readonly KingdomshopDefinition[] = [
   { "id": 53400, "itemId": 200004, "value": 500, "rank": 1 },
   { "id": 53401, "itemId": 200414, "value": 2500, "rank": 2 },

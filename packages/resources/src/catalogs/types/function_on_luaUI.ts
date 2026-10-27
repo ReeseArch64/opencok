@@ -7,4 +7,5 @@ export interface FunctionOnLuaUIDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type FunctionOnLuaUIDefinitionCatalog = CatalogTable<FunctionOnLuaUIDefinition>;

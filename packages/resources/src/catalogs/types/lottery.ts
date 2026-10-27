@@ -16,4 +16,5 @@ export interface LotteryDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type LotteryDefinitionCatalog = CatalogTable<LotteryDefinition>;

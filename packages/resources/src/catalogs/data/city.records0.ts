@@ -1,4 +1,5 @@
 import type { CityDefinition } from "../types/city.ts";
+
 export const records: readonly CityDefinition[] = [
   { "id": 216000, "typeCity": 1, "country": 8001 },
   { "id": 216001, "typeCity": 2, "country": 8001 },

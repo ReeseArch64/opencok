@@ -1,4 +1,5 @@
 import type { RecallActivityDefinition } from "../types/recall_activity.ts";
+
 export const records: readonly RecallActivityDefinition[] = [
   {
     "id": 9035001,

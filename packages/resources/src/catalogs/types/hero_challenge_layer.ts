@@ -10,4 +10,5 @@ export interface HeroChallengeLayerDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type HeroChallengeLayerDefinitionCatalog = CatalogTable<HeroChallengeLayerDefinition>;

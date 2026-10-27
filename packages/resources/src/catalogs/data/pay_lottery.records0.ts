@@ -1,4 +1,5 @@
 import type { PayLotteryDefinition } from "../types/pay_lottery.ts";
+
 export const records: readonly PayLotteryDefinition[] = [
   {
     "id": 7502500,

@@ -6,9 +6,13 @@ function tagged<T extends Type, S extends z.ZodType>(type: T, value: S) {
 }
 
 const integer = (minimum: number, maximum: number) => z.number().int().min(minimum).max(maximum);
+
 const floating = z.custom<number>((value) => typeof value === "number");
+
 const long = z.bigint().min(-9223372036854775808n).max(9223372036854775807n);
+
 const string = z.string().refine((value) => Buffer.byteLength(value, "utf8") <= 32767);
+
 const key = z.string().refine((value) => Buffer.byteLength(value, "utf8") <= 255);
 
 export function wireRecord<S extends z.ZodType>(keys: z.ZodType<string, string>, schema: S) {

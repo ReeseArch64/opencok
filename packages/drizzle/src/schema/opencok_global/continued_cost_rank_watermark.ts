@@ -1,6 +1,7 @@
 import { sql } from "drizzle-orm";
 import { bigint, check, integer, primaryKey, varchar } from "drizzle-orm/pg-core";
 import { opencok_global } from "../namespaces";
+
 export const continued_cost_rank_watermark = opencok_global.table(
   "continued_cost_rank_watermark",
   {

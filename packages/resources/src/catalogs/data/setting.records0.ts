@@ -1,4 +1,5 @@
 import type { SettingDefinition } from "../types/setting.ts";
+
 export const records: readonly SettingDefinition[] = [
   { "id": 46700, "name": 105253, "type": 0, "show": 1, "gm": 1, "rank": 1 },
   { "id": 46701, "name": 102910, "type": 1, "show": 1, "gm": 1, "rank": 2 },

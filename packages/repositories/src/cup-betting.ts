@@ -8,6 +8,7 @@ import { num, text } from "@opencok/contracts/rows";
 import type { CupBettingWrite } from "@opencok/contracts/cup-betting";
 import type { MutationTransaction } from "./mutation";
 import type { Database } from "./game";
+
 export async function readCupBetting(tx: MutationTransaction, owner: string) {
   await tx.execute(sql`set local lock_timeout='1s'`);
   await tx.execute(sql`select pg_advisory_xact_lock(728218,1)`);
@@ -24,9 +25,12 @@ export async function readCupBetting(tx: MutationTransaction, owner: string) {
     .orderBy(asc(user_bet.uuid))
     .limit(4097)
     .for("update");
+
   if (matches.length > 1024 || bets.length > 4096) throw new Error("Cup aggregate exceeds bound");
+
   return { matches, bets };
 }
+
 export async function writeCupBetting(
   tx: MutationTransaction,
   owner: string,
@@ -34,6 +38,7 @@ export async function writeCupBetting(
 ) {
   if ((write.matches?.length ?? 0) > 1024 || (write.bets?.length ?? 0) > 4096)
     throw new Error("Cup write exceeds bound");
+
   for (const row of write.matches ?? []) {
     const id = text(row, "id"),
       vs = text(row, "vs"),
@@ -42,6 +47,7 @@ export async function writeCupBetting(
       startTime = cityAmount(row.startTime),
       oddsA = num(row, "oddsA"),
       oddsB = num(row, "oddsB");
+
     if (
       !id ||
       id.length > 255 ||
@@ -51,6 +57,7 @@ export async function writeCupBetting(
       (winner && !vs.split("|").includes(winner))
     )
       throw new Error("Invalid cup match write");
+
     const value = {
       id,
       vs,
@@ -69,6 +76,7 @@ export async function writeCupBetting(
       .values(value)
       .onConflictDoUpdate({ target: soccer_match.id, set: value });
   }
+
   for (const row of write.bets ?? []) {
     if (
       row.uid !== owner ||
@@ -82,6 +90,7 @@ export async function writeCupBetting(
       num(row, "odds") <= 0
     )
       throw new Error("Invalid cup bet owner");
+
     const value = {
       uuid: text(row, "uuid"),
       uid: owner,
@@ -99,15 +108,19 @@ export async function writeCupBetting(
       .select({ uid: user_bet.uid, odds: user_bet.odds })
       .from(user_bet)
       .where(eq(user_bet.uuid, value.uuid));
+
     if (saved && saved.uid !== owner) throw new Error("Foreign cup bet");
+
     if (value.odds === Infinity && saved?.odds !== Infinity)
       throw new Error("Invalid new cup odds");
+
     await tx
       .insert(user_bet)
       .values(value)
       .onConflictDoUpdate({ target: user_bet.uuid, set: value });
   }
 }
+
 export async function pendingCupSettlements(db: Database["kingdom"]["db"], after?: string) {
   const rows = await db
     .select({
@@ -127,7 +140,9 @@ export async function pendingCupSettlements(db: Database["kingdom"]["db"], after
     .groupBy(user_bet.uid)
     .orderBy(asc(user_bet.uid))
     .limit(64);
+
   if (rows.some((row) => row.ids.length > 4096)) throw new Error("Cup settlement exceeds bound");
+
   return rows;
 }
 

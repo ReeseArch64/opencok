@@ -1,6 +1,7 @@
 import { z } from "zod";
 import type { SevenDayCycleResponse } from "@opencok/contracts/responses/seven-day-cycle";
 import { field } from "./response";
+
 export const sevenDayCycleSchema = z.strictObject({
   countdown: field.int,
   curstage: field.int,

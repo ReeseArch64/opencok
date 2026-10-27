@@ -17,6 +17,7 @@ import type {
   MilitaryRankAwardWrite,
 } from "@opencok/contracts/military-rank-awards";
 import type { MutationTransaction } from "./mutation";
+
 export function militaryRankAwardReader(
   tx: MutationTransaction,
   owner: string,
@@ -33,10 +34,12 @@ export function militaryRankAwardReader(
         .from(user_military_rank)
         .where(eq(user_military_rank.uid, owner))
         .for("update");
+
       return { row, clockMarker: clock?.clockMarker ?? undefined };
     },
   };
 }
+
 export async function writeMilitaryRankAward(
   tx: MutationTransaction,
   owner: string,
@@ -58,12 +61,14 @@ export async function writeMilitaryRankAward(
     write.periodEnd <= write.clockMarker
   )
     throw new Error("Invalid military award write");
+
   const requestId = militaryRankEntitlement(write.entitlementId),
     snapshot = await militaryRankAwardReader(tx, owner).load(),
     [profile] = await tx
       .select({ realm: userprofile.serverId })
       .from(userprofile)
       .where(eq(userprofile.uid, owner));
+
   if (
     profile?.realm !== write.kingdomId ||
     snapshot.clockMarker !== write.clockMarker ||
@@ -71,10 +76,14 @@ export async function writeMilitaryRankAward(
     (snapshot.row && write.before && !militaryRankSame(snapshot.row, write.before))
   )
     throw new Error("Stale military award snapshot");
+
   const before = snapshot.row ?? militaryRankDefault(owner);
   let after = before;
+
   for (const award of write.awards) after = militaryRankGrant(after, award, write.honorCap);
+
   if (!militaryRankSame(after, write.after)) throw new Error("Inconsistent military award facts");
+
   const value = {
     uid: owner,
     militaryScore: militaryRankValue(after.militaryScore),
@@ -92,6 +101,7 @@ export async function writeMilitaryRankAward(
     maxHonorWeekly: militaryRankValue(after.maxHonorWeekly),
     lastRewardTime: long(after, "lastRewardTime"),
   };
+
   if (snapshot.row) {
     const score = write.awards.some((award) => award.kind === "military"),
       honor = write.awards.some((award) => award.kind === "milhonor");
@@ -103,6 +113,7 @@ export async function writeMilitaryRankAward(
       })
       .where(eq(user_military_rank.uid, owner));
   } else await tx.insert(user_military_rank).values(value);
+
   await tx.insert(economy_posting).values(
     ["militaryScore", "honor", "maxHonorWeekly"].map((asset, entry) => ({
       kingdomId: write.kingdomId,

@@ -7,6 +7,7 @@ import { isRecord } from "@opencok/contracts/chat";
 import { realmSocialPath, type RealmSocialExecutor } from "@opencok/contracts/realm-social";
 import { signRealmSocial } from "@opencok/identity/realm-social";
 import { fetchChatJson } from "./chat-http.ts";
+
 export function createRealmSocialExecutor(options: {
   url: string;
   signingSecret: string;
@@ -15,6 +16,7 @@ export function createRealmSocialExecutor(options: {
   authority?: { instance: string; epoch: bigint };
 }): RealmSocialExecutor {
   const url = new URL(realmSocialPath, options.url);
+
   if (
     !["http:", "https:"].includes(url.protocol) ||
     url.username ||
@@ -24,6 +26,7 @@ export function createRealmSocialExecutor(options: {
     options.realm < 1
   )
     throw new TypeError("Invalid social configuration");
+
   return async (owner, command, params) => {
     const operationId = params.operationId
       ? str(params, "operationId")
@@ -47,7 +50,9 @@ export function createRealmSocialExecutor(options: {
           : {}),
       }).toString("base64"),
     });
+
     if (Buffer.byteLength(body) > 24_576) throw new TypeError("Social request too large");
+
     const timestamp = String(Date.now());
     const response = await fetchChatJson(
       url.toString(),
@@ -64,6 +69,7 @@ export function createRealmSocialExecutor(options: {
       fetch,
       1_048_576,
     );
+
     if (
       isRecord(response) &&
       response.code === 0 &&
@@ -74,8 +80,10 @@ export function createRealmSocialExecutor(options: {
         response.data.error === "provider_unavailable" ? errors.unsupported : errors.invalid,
         "social_rule",
       );
+
     if (!isRecord(response) || response.code !== 1 || typeof response.data !== "string")
       throw new Error("Social service unavailable");
+
     return decode(Buffer.from(response.data, "base64"));
   };
 }

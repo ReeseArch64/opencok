@@ -1,4 +1,5 @@
 import type { EquipmentRandomPowerDefinition } from "../types/equipmentRandomPower.ts";
+
 export const records: readonly EquipmentRandomPowerDefinition[] = [
   { "id": 1494001, "effect": [1011, 1012], "power": 160 },
   { "id": 1494002, "effect": [1013, 1014], "power": 250 },

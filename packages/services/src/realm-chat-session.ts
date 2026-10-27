@@ -26,7 +26,9 @@ export function realmChatSessionRequest(
     profile.level > 2147483647
   )
     throw new GameError(errors.invalid);
+
   const userinfo: Record<string, string> = {};
+
   for (const [target, source] of Object.entries({
     userName: "name",
     deviceid: "deviceId",
@@ -38,9 +40,12 @@ export function realmChatSessionRequest(
     phoneDevice: "phoneDevice",
   })) {
     const value = source === "phoneDevice" && profile[source] == null ? "" : profile[source];
+
     if (typeof value !== "string" || !value.isWellFormed()) throw new GameError(errors.invalid);
+
     userinfo[target] = value;
   }
+
   return {
     uid,
     userinfo: {
@@ -54,6 +59,7 @@ export function realmChatSessionRequest(
 
 export function realmChatSessionResponse(value: unknown, now: number): Fields {
   if (!isChatSessionTicket(value, now)) throw new GameError(errors.invalid);
+
   return {
     session: sfs.string(value.session),
     expire: value.expire <= 2147483647 ? sfs.int(value.expire) : sfs.long(value.expire),

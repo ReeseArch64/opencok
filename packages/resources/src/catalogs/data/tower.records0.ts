@@ -1,4 +1,5 @@
 import type { TowerDefinition } from "../types/tower.ts";
+
 export const records: readonly TowerDefinition[] = [
   { "id": 2945000, "type": 0, "armyLimit": 6, "numAttack": 2, "time": 600, "idStatus": 501000 },
   { "id": 2945001, "type": 1, "armyLimit": 5, "numAttack": 3, "time": 600, "idStatus": 501010 },

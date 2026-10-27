@@ -13,8 +13,11 @@ export function buildingStep<T>(
   next = false,
 ): BuildingStep<T> | undefined {
   if (!steps) return undefined;
+
   let index = -1;
+
   while (index + 1 < steps.length && steps[index + 1]!.progress <= progress) index++;
+
   return steps[index + (next ? 1 : 0)];
 }
 
@@ -36,18 +39,27 @@ export function buildingLevel(
     (level < 30 && star !== 0)
   )
     throw new GameError(errors.unsupported, "building_shape");
+
   const definition = catalog.get(Number(itemId) + level + star);
+
   if (!definition || definition.level !== level)
     throw new GameError(errors.unsupported, "building_rule");
+
   const result: BuildingState = { ...definition, starLevel: star, starProgress: progress };
+
   if (level < 30) return result;
+
   const upgrades = definition.upgrades;
   const effects: Partial<Record<keyof BuildingEffects, number>> = { ...definition.effects };
+
   for (const [name, steps] of Object.entries(definition.effectSteps ?? {})) {
     const step = buildingStep(steps, progress);
+
     if (step) effects[name as keyof BuildingEffects] = step.value;
   }
+
   const unlock = upgrades?.unlockConditions?.find((step) => step.progress === progress + 10);
+
   return {
     ...result,
     constructionSeconds:
@@ -74,10 +86,14 @@ export function nextBuildingLevel(
   maximumStar: number,
 ): BuildingState {
   const current = buildingLevel(catalog, itemId, level, star, progress);
+
   if (level < 30) return buildingLevel(catalog, itemId, level + 1, star, progress);
+
   if (star >= maximumStar) return current;
+
   const next =
     buildingStep(current.upgrades?.constructionSeconds, progress, true)?.progress ?? progress + 10;
+
   return buildingLevel(
     catalog,
     itemId,

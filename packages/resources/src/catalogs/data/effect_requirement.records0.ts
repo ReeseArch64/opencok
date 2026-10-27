@@ -1,4 +1,5 @@
 import type { EffectRequirementDefinition } from "../types/effect_requirement.ts";
+
 export const records: readonly EffectRequirementDefinition[] = [
   { "id": 19000001, "eventStateId": [1, 6], "effect": 894 },
   { "id": 19000002, "eventStateId": [1, 6], "effect": 895 },

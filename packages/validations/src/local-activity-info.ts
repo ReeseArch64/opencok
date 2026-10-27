@@ -5,9 +5,11 @@ import type {
 } from "@opencok/contracts/responses/local-activity-info";
 import { field } from "./response";
 import { rewardPreviewArraySchema } from "./rewards";
+
 export const closedActivitiesSchema = z.strictObject({
   act_close: z.array(z.strictObject({ id: field.string, close: field.string })).max(32767),
 }) satisfies z.ZodType<ClosedActivitiesResponse>;
+
 export const catalogRewardSchema = z.strictObject({
   award: rewardPreviewArraySchema,
   rewardId: field.string,

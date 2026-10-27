@@ -1,17 +1,5 @@
-import index from "./index.html";
-import { createPingHandler } from "./ping";
+import { WebApplication } from "./web-application.ts";
 
-const server = Bun.serve({
-  hostname: "0.0.0.0",
-  port: 5173,
-  development: process.env.NODE_ENV !== "production",
-  routes: {
-    "/": index,
-    "/api/ping": { GET: createPingHandler() },
-  },
-  fetch() {
-    return new Response("Not found", { status: 404 });
-  },
-});
+const application = new WebApplication();
 
-console.log(`OpenCok Web: ${server.url}`);
+console.log(`OpenCok Web: ${application.server.url}`);

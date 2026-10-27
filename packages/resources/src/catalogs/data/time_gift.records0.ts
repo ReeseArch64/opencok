@@ -1,4 +1,5 @@
 import type { TimeGiftDefinition } from "../types/time_gift.ts";
+
 export const records: readonly TimeGiftDefinition[] = [
   {
     "id": 100600,

@@ -5,4 +5,5 @@ export interface SignIn2Definition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type SignIn2DefinitionCatalog = CatalogTable<SignIn2Definition>;

@@ -1,6 +1,7 @@
 import { CatalogKind, type VariableScope } from "@opencok/enums/catalog-kind";
 
 export type CatalogScalar = string | number | bigint | boolean;
+
 export type CatalogValue = CatalogScalar | readonly CatalogValue[];
 
 export interface CatalogSection {
@@ -145,8 +146,10 @@ export function definitionIndex<T extends { readonly id?: CatalogScalar }>(
   table: CatalogTable<T>,
 ): Map<string, T> {
   const result = new Map<string, T>();
+
   for (const record of table.records)
     if (record.id !== undefined && String(record.id).trim()) result.set(String(record.id), record);
+
   return result;
 }
 
@@ -155,11 +158,13 @@ export function sectionRecords<T extends object>(
   id: CatalogScalar,
 ): readonly T[] {
   const section = table.sections.findLast((section) => section.id === id);
+
   return section ? table.records.slice(section.start, section.start + section.count) : [];
 }
 
 export function mapTile(map: TileMapDefinition, layer: number, x: number, y: number): number {
   const selected = map.layers[layer];
+
   if (
     !selected ||
     !Number.isInteger(x) ||
@@ -170,7 +175,10 @@ export function mapTile(map: TileMapDefinition, layer: number, x: number, y: num
     y >= selected.height
   )
     throw new Error("Tile coordinate outside layer");
+
   const value = selected.tiles[y * selected.width + x];
+
   if (value === undefined) throw new Error("Missing map tile");
+
   return value;
 }

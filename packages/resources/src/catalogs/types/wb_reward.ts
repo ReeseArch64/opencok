@@ -7,4 +7,5 @@ export interface WbRewardDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type WbRewardDefinitionCatalog = CatalogTable<WbRewardDefinition>;

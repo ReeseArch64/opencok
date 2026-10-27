@@ -1,4 +1,5 @@
 import type { DragonCrystalConditionDefinition } from "../types/dragon_crystal_condition.ts";
+
 export const records: readonly DragonCrystalConditionDefinition[] = [
   { "id": 35043001, "color": 1, "crystalid": 1101601, "position": [2, 1] },
   {

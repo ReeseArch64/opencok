@@ -2,6 +2,7 @@ import { CatalogKind } from "@opencok/enums/catalog-kind";
 import type { InspireDefinition } from "../types/inspire.ts";
 import type { CatalogTable } from "../../catalog-model.ts";
 import { records as records0 } from "./inspire.records0.ts";
+
 export const catalog: CatalogTable<InspireDefinition> = {
   "kind": CatalogKind.Table,
   "records": [...records0],

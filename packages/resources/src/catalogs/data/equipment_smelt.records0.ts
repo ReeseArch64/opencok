@@ -1,4 +1,5 @@
 import type { EquipmentSmeltDefinition } from "../types/equipment_smelt.ts";
+
 export const records: readonly EquipmentSmeltDefinition[] = [
   {
     "id": 52028601,

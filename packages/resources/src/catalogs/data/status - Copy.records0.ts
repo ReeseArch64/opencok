@@ -1,4 +1,5 @@
 import type { StatusCopyDefinition } from "../types/status - Copy.ts";
+
 export const records: readonly StatusCopyDefinition[] = [
   { "id": 500000, "type2": 1, "time": 28800, "effect": [[61, 1]], "overlap": 0, "group": 100 },
   { "id": 500001, "type2": 1, "time": 86400, "effect": [[61, 1]], "overlap": 0, "group": 100 },

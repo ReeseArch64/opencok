@@ -19,4 +19,5 @@ export interface TotemDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type TotemDefinitionCatalog = CatalogTable<TotemDefinition>;

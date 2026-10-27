@@ -4,12 +4,14 @@ import type {
   FortificationResponse,
 } from "@opencok/contracts/responses/military";
 import { field } from "./response";
+
 export const woundedTroopsSchema = z.strictObject({
   id: field.string,
   dead: field.int,
   heal: field.int.optional(),
   finish: field.long.optional(),
 }) satisfies z.ZodType<WoundedTroopsResponse>;
+
 export const fortificationSchema = z.strictObject({
   id: field.string,
   free: field.int,

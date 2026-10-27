@@ -7,4 +7,5 @@ export interface EquipmentRankDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type EquipmentRankDefinitionCatalog = CatalogTable<EquipmentRankDefinition>;

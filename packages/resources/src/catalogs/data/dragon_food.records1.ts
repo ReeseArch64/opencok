@@ -1,4 +1,5 @@
 import type { DragonFoodDefinition } from "../types/dragon_food.ts";
+
 export const records: readonly DragonFoodDefinition[] = [
   {
     "id": 1015330,

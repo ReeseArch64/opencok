@@ -17,11 +17,13 @@ export const throneRankingEntrySchema = z.strictObject({
   abbr: field.string,
   kingdomName: field.string,
 }) satisfies z.ZodType<ThroneRankingEntryResponse>;
+
 export const throneRankingBoardSchema = z.strictObject({
   list: z.array(throneRankingEntrySchema).max(19),
   selfRank: field.int,
   serverId: field.int,
 }) satisfies z.ZodType<ThroneRankingBoardResponse>;
+
 export const throneRankingSchema = z.strictObject({
   rank: z.array(throneRankingBoardSchema).max(2),
 }) satisfies z.ZodType<ThroneRankingResponse>;

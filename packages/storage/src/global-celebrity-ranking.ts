@@ -24,18 +24,26 @@ export async function loadGlobalCelebrityRanking(
     !Object.hasOwn(boards, rankType)
   )
     throw new DependencyError("global ranking input");
+
   const board = boards[rankType]!;
   const values = await command("LRANGE", `${board.key}_${kingdomId}`, "0", String(board.end));
+
   if (!Array.isArray(values) || values.length > board.end + 1)
     throw new DependencyError("global ranking list");
+
   let bytes = 0;
   const result: string[] = [];
+
   for (const value of values) {
     if (typeof value !== "string" || !value.isWellFormed())
       throw new DependencyError("global ranking value");
+
     bytes += Buffer.byteLength(value);
+
     if (bytes > 4 * 1024 * 1024) throw new DependencyError("global ranking size");
+
     result.push(value);
   }
+
   return result;
 }

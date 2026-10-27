@@ -1,4 +1,5 @@
 import type { OverlordDefinition } from "../types/overlord.ts";
+
 export const records: readonly OverlordDefinition[] = [
   {
     "id": 20200001,

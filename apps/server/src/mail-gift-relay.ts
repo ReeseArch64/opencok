@@ -1,39 +1,25 @@
-type Schedule = (run: () => void, delay: number) => () => void;
+import { PollingWorker } from "@opencok/core/polling-worker";
+import type { Schedule } from "@opencok/core/schedule";
 
-const schedule: Schedule = (run, delay) => {
-  const timer = setTimeout(run, delay);
-  return () => clearTimeout(timer);
-};
+export class MailGiftRelay extends PollingWorker {
+  public constructor(
+    private readonly dispatch: () => Promise<number>,
+    reportFailure: () => void,
+    after?: Schedule,
+  ) {
+    super(reportFailure, after);
+    this.start();
+  }
+
+  protected execute(): Promise<number> {
+    return this.dispatch();
+  }
+}
 
 export function startMailGiftRelay(
   dispatch: () => Promise<number>,
   reportFailure: () => void,
-  after: Schedule = schedule,
-) {
-  let stopped = false;
-  let cancel: (() => void) | undefined;
-  let active: Promise<void>;
-  const run = async () => {
-    try {
-      await dispatch();
-    } catch {
-      try {
-        reportFailure();
-      } catch {}
-    }
-    if (!stopped)
-      cancel = after(() => {
-        cancel = undefined;
-        active = run();
-      }, 5000);
-  };
-  active = run();
-  return {
-    close: async () => {
-      stopped = true;
-      cancel?.();
-      cancel = undefined;
-      await active;
-    },
-  };
+  after?: Schedule,
+): MailGiftRelay {
+  return new MailGiftRelay(dispatch, reportFailure, after);
 }

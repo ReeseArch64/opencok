@@ -1,4 +1,5 @@
 import type { DragonTowerLayerDefinition } from "../types/dragon_tower_layer.ts";
+
 export const records: readonly DragonTowerLayerDefinition[] = [
   {
     "id": 84501,

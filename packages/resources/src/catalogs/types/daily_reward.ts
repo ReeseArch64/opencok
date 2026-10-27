@@ -6,4 +6,5 @@ export interface DailyRewardDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type DailyRewardDefinitionCatalog = CatalogTable<DailyRewardDefinition>;

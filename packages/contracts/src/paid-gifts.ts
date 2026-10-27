@@ -1,4 +1,5 @@
 import type { Row } from "./rows";
+
 export interface DeliveredGiftProof {
   owner: string;
   kingdomId: number;
@@ -11,6 +12,7 @@ export interface DeliveredGiftProof {
   rechargeGold?: bigint;
   methodParam?: number;
 }
+
 export interface PaidGiftGateway {
   delivered(input: {
     owner: string;
@@ -19,16 +21,19 @@ export interface PaidGiftGateway {
     platform: string;
   }): Promise<DeliveredGiftProof | null>;
 }
+
 export interface RedPacketReader {
   payment(orderId: string, platform: string): Promise<Row | undefined>;
   packet(uid: string): Promise<{ packet: Row; records: readonly Row[] } | undefined>;
   received(): Promise<readonly Row[]>;
 }
+
 export interface RedPacketWrite {
   created?: readonly Row[];
   updated?: Row;
   claim?: Row;
 }
+
 export interface RedPacketExpiryStore {
   settle(
     now: bigint,

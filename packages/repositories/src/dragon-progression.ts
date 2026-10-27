@@ -39,16 +39,21 @@ export async function readDragonProgression(tx: MutationTransaction, owner: stri
     )
     .orderBy(desc(mutation_outbox.createdAt))
     .limit(1);
+
   if (dragons.length > 128 || skills.length > 4096 || marches.length > 256)
     throw new Error("Dragon aggregate exceeds bound");
+
   const talents = await tx
     .select()
     .from(dragon_talent_skill)
     .where(eq(dragon_talent_skill.uid, owner))
     .limit(1025);
+
   if (talents.length > 1024) throw new Error("Dragon talent aggregate exceeds bound");
+
   return { dragons, skills, marches, talents, switchedAt: switched?.time ?? 0n };
 }
+
 export async function writeDragonProgression(
   tx: MutationTransaction,
   owner: string,
@@ -56,6 +61,7 @@ export async function writeDragonProgression(
 ) {
   for (const row of write.talents ?? []) {
     if (row.uid !== owner) throw new Error("Foreign dragon talent");
+
     const value = {
       uid: owner,
       dragonId: num(row, "dragonId"),
@@ -80,8 +86,10 @@ export async function writeDragonProgression(
         set: value,
       });
   }
+
   for (const row of write.dragons ?? []) {
     if (row.uid !== owner) throw new Error("Foreign dragon write");
+
     const value = {
       uuid: text(row, "uuid"),
       uid: owner,
@@ -107,14 +115,18 @@ export async function writeDragonProgression(
       .select({ uid: user_pet_dragon.uid })
       .from(user_pet_dragon)
       .where(eq(user_pet_dragon.uuid, value.uuid));
+
     if (existing && existing.uid !== owner) throw new Error("Foreign dragon identity");
+
     await tx
       .insert(user_pet_dragon)
       .values(value)
       .onConflictDoUpdate({ target: user_pet_dragon.uuid, set: value });
   }
+
   for (const row of write.skills ?? []) {
     if (row.uid !== owner) throw new Error("Foreign dragon skill write");
+
     const value = {
       uuid: text(row, "uuid"),
       uid: owner,
@@ -130,12 +142,15 @@ export async function writeDragonProgression(
       .select({ uid: user_pet_dragon_skill.uid })
       .from(user_pet_dragon_skill)
       .where(eq(user_pet_dragon_skill.uuid, value.uuid));
+
     if (existing && existing.uid !== owner) throw new Error("Foreign dragon skill identity");
+
     await tx
       .insert(user_pet_dragon_skill)
       .values(value)
       .onConflictDoUpdate({ target: user_pet_dragon_skill.uuid, set: value });
   }
+
   if (write.deletedSkills?.length)
     await tx
       .delete(user_pet_dragon_skill)

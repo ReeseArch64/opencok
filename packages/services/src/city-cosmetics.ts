@@ -6,7 +6,8 @@ import { long, num, text, type Row } from "@opencok/contracts/rows";
 import { cityCosmeticProjection } from "@opencok/rules/city-cosmetics";
 import { cityCosmeticFields, cityCosmeticUpdate } from "@opencok/mappings/city-cosmetics";
 import { playerItemGiftRecipient } from "@opencok/rules/player-item-gifts";
-import type { CityProgressionContext } from "./city-progression";
+import type { CityProgressionContext } from "./city-progression-context.ts";
+
 export function cosmeticOwnership(
   context: CityProgressionContext,
   uid: string,
@@ -16,6 +17,7 @@ export function cosmeticOwnership(
 ) {
   const target = context.state.cosmeticTarget,
     rule = context.rules.power.statuses?.get(id);
+
   if (
     target?.uid !== uid ||
     !rule?.subgroup ||
@@ -27,6 +29,7 @@ export function cosmeticOwnership(
     })
   )
     return;
+
   const dirty = context.write.cosmeticTarget?.avatars ?? [];
   const avatars = [
     ...target.avatars.filter((row) => !dirty.some((next) => next.avatarId === row.avatarId)),
@@ -34,6 +37,7 @@ export function cosmeticOwnership(
   ];
   let owned = avatars.find((row) => {
     const old = context.rules.power.statuses?.get(text(row, "avatarId"));
+
     return (
       (long(row, "expirationTime") === -1n || long(row, "expirationTime") > context.now) &&
       old?.type2 === rule.type2 &&
@@ -43,6 +47,7 @@ export function cosmeticOwnership(
   const counter =
     rule.overlap === "5" &&
     previous.some((row) => String(row.stateId) === id && long(row, "endTime") > context.now);
+
   if (!counter) {
     const duration = BigInt(cityInteger(rule.time ?? 0)) * 1000n;
     const expiration =
@@ -53,19 +58,26 @@ export function cosmeticOwnership(
           : (owned ? long(owned, "expirationTime") : context.now) + duration;
     owned = { uid, avatarId: owned?.avatarId ?? id, expirationTime: expiration, effectiveSign: 0 };
   }
+
   if (owned)
     for (const state of states)
       state.endTime =
         long(owned, "expirationTime") === -1n
           ? 9223372036854775807n
           : long(owned, "expirationTime");
+
   return counter ? undefined : [...dirty.filter((row) => row.avatarId !== owned!.avatarId), owned!];
 }
+
 export function cosmeticTargetStates(context: CityProgressionContext) {
   const target = context.state.cosmeticTarget;
+
   if (!target) throw new Error("Missing cosmetic target");
+
   const write = context.write.cosmeticTarget;
+
   if (!write) return target.states;
+
   return [
     ...target.states.filter(
       (row) =>
@@ -75,6 +87,7 @@ export function cosmeticTargetStates(context: CityProgressionContext) {
     ...write.states,
   ];
 }
+
 export function cosmeticInteractionParticipants(owner: string, command: string, params: Fields) {
   if (
     command !== "trigger.activity" ||
@@ -82,15 +95,20 @@ export function cosmeticInteractionParticipants(owner: string, command: string, 
     !str(params, "uid", "").trim()
   )
     return;
+
   return [...new Set([owner, playerItemGiftRecipient(str(params, "uid"))])];
 }
+
 export function cosmeticInteractionEvent(
   context: CityProgressionContext,
   statusResponse?: Fields,
 ): Uint8Array | null {
   const changed = context.write.cosmeticChanges;
+
   if (!changed?.length) return null;
+
   const target = context.state.cosmeticTarget;
+
   if (
     !target ||
     target.realm !== context.rules.kingdomId ||
@@ -98,6 +116,7 @@ export function cosmeticInteractionEvent(
     changed.some((row) => row.uid !== target.uid)
   )
     throw new Error("Invalid cosmetic interaction changes");
+
   const states =
     target.uid === context.owner
       ? (context.write.states ?? context.state.effects.states)
@@ -105,9 +124,13 @@ export function cosmeticInteractionEvent(
   const kinds = new Set<number>();
   const updates = changed.map((change) => {
     const row = states.find((row) => row.stateId === change.id);
+
     if (!row) throw new Error("Missing changed cosmetic status");
+
     const type = num(row, "type2");
+
     if (![100, 105, 200].includes(type)) throw new Error("Unsupported cosmetic status kind");
+
     kinds.add(type);
     const body: Fields = {
       effectState: sfs.object({
@@ -121,8 +144,10 @@ export function cosmeticInteractionEvent(
       status: sfs.array([]),
       ...(change.previous === undefined ? {} : { oldStatus: sfs.string(String(change.previous)) }),
     };
+
     return sfs.object({ kind: sfs.int(type), body: sfs.object(statusResponse ?? body) });
   });
+
   return encode({
     owner: sfs.string(context.owner),
     uid: sfs.string(target.uid),
@@ -134,6 +159,7 @@ export function cosmeticInteractionEvent(
     ),
   });
 }
+
 export async function publishCosmeticInteractionMutation(
   payload: Uint8Array,
   interested: (
@@ -147,6 +173,7 @@ export async function publishCosmeticInteractionMutation(
     owner = playerItemGiftRecipient(str(event, "owner")),
     uid = playerItemGiftRecipient(str(event, "uid")),
     point = int(event, "point");
+
   if (
     event.statuses?.type !== Type.Array ||
     !Array.isArray(event.statuses.value) ||
@@ -157,14 +184,18 @@ export async function publishCosmeticInteractionMutation(
     point < 0
   )
     throw new Error("Invalid cosmetic interaction event");
+
   for (const status of event.statuses.value) {
     const update = fields(status),
       kind = int(update, "kind"),
       body = fields(update.body),
       id = int(body, "statusId");
+
     if (![100, 105, 200].includes(kind)) throw new Error("Invalid cosmetic private status kind");
+
     if (id <= 0 || body.endTime?.type !== Type.Long || body.effectState?.type !== Type.Object)
       throw new Error("Invalid cosmetic status notification");
+
     if (body.status) {
       if (
         body.status.type !== Type.Array ||
@@ -172,8 +203,10 @@ export async function publishCosmeticInteractionMutation(
         body.status.value.length > 128
       )
         throw new Error("Invalid cosmetic status effects");
+
       for (const effect of body.status.value) {
         const value = fields(effect);
+
         if (
           value.effNum?.type !== Type.Int ||
           value.effVal?.type !== Type.Int ||
@@ -183,16 +216,22 @@ export async function publishCosmeticInteractionMutation(
           throw new Error("Invalid cosmetic status effect");
       }
     }
+
     await publish(uid, "status.push", body);
+
     if (kind === 100)
       await publish(uid, "push.server.action", { type: sfs.int(9), params: sfs.object(body) });
   }
+
   if (!point) return;
+
   const projection = fields(event.projection),
     recipients = new Set([owner, uid, ...(await interested([point], owner, uid))]);
+
   for (const kind of event.kinds.value) {
     const type = int({ kind }, "kind");
     let data: CityCosmeticResponse = {};
+
     if (type === 100) {
       if (projection.sid) data = { sid: int(projection, "sid"), set: int(projection, "set") };
     } else if (type === 105) {
@@ -212,6 +251,7 @@ export async function publishCosmeticInteractionMutation(
         };
       }
     } else throw new Error("Invalid cosmetic notification kind");
+
     const body = cityCosmeticUpdate(data, uid, point),
       command =
         type === 100
@@ -219,6 +259,7 @@ export async function publishCosmeticInteractionMutation(
           : type === 105
             ? "push.bubble.status"
             : "push.overlap.status";
+
     for (const recipient of recipients) if (recipient) await publish(recipient, command, body);
   }
 }

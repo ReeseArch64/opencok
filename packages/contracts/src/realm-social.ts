@@ -1,5 +1,7 @@
 import type { Fields } from "@opencok/messages/sfs";
+
 export const realmSocialPath = "/_internal/social";
+
 export interface RealmSocialRequest {
   owner: string;
   realm: number;
@@ -7,6 +9,7 @@ export interface RealmSocialRequest {
   operationId: string;
   params: string;
 }
+
 export type RealmSocialExecutor = (
   owner: string,
   command: string,

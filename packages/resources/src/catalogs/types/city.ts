@@ -7,4 +7,5 @@ export interface CityDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type CityDefinitionCatalog = CatalogTable<CityDefinition>;

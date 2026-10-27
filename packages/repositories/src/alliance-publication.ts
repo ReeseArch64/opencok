@@ -8,6 +8,7 @@ import { alliance_science } from "@opencok/drizzle/schema/opencok_kingdom/allian
 import { alliance_science_upgrade } from "@opencok/drizzle/schema/opencok_kingdom/alliance_science_upgrade";
 import type { Database } from "./game";
 import { fenceRealmTransaction, type RealmAuthority } from "./realm-authority";
+
 export function createAlliancePublicationReader(
   db: Database["kingdom"]["db"],
   authority: RealmAuthority,
@@ -71,6 +72,7 @@ export function createAlliancePublicationReader(
                 ),
               )
           : [];
+
         return { record, members, queues, helps, sciences, research, profiles };
       },
       { isolationLevel: "repeatable read" },

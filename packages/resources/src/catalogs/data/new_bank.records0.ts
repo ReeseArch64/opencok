@@ -1,4 +1,5 @@
 import type { NewBankDefinition } from "../types/new_bank.ts";
+
 export const records: readonly NewBankDefinition[] = [
   {
     "id": 9053003,

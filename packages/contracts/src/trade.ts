@@ -1,11 +1,13 @@
 import type { InventoryPlan, InventoryState } from "./inventory.ts";
 import type { MutationCommand } from "./mutation.ts";
+
 export interface TradeState {
   trade: string;
   time: bigint;
   num: number;
   superValue: number;
 }
+
 export type TradeExecutor = (
   input: MutationCommand,
   plan: (
