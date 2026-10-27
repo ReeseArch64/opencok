@@ -160,7 +160,8 @@
     "./gold-eggs": "./src/gold-eggs.ts",
     "./egg-activity": "./src/egg-activity.ts",
     "./world-march-inspection": "./src/world-march-inspection.ts",
-    "./world-scout": "./src/world-scout.ts"
+    "./world-scout": "./src/world-scout.ts",
+    "./world-scout-report": "./src/world-scout-report.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",

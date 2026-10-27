@@ -10,7 +10,10 @@ import { refreshQuests } from "./quests";
 import { GameError } from "@opencok/errors/game";
 import { errors } from "@opencok/constants/game";
 import { unitPower } from "@opencok/rules/military";
-import { resourceGeneralBuildingEffect } from "./world-resource-owner-context";
+import {
+  resourceOwnerRuleContext,
+  resourceGeneralBuildingEffect,
+} from "./world-resource-owner-context";
 import type {
   ActivityAction,
   ActivityEconomy,
@@ -131,6 +134,16 @@ export function createCityProgressionHandlers<T>(
           ),
         repository.treasurePoints,
         repository.birthPoint,
+        (snapshot, id, at = now) =>
+          playerGameEffect(
+            snapshot.effects,
+            rules,
+            resourceOwnerRuleContext(snapshot, { kingdomId: rules.kingdomId, now: Number(at) }),
+            generalSkillPoints(snapshot.effects.generals),
+            world,
+            emperor,
+            id as Parameters<typeof playerGameEffect>[6],
+          ),
       ),
     };
   };
@@ -276,6 +289,11 @@ export class CityProgressionContext {
       rules: import("@opencok/contracts/world-birth").WorldBirthRules,
       mode?: import("@opencok/contracts/world-birth").WorldBirthMode,
     ) => Promise<import("@opencok/contracts/world-birth").WorldBirthPlacement>,
+    readonly foreignEffect?: (
+      snapshot: import("@opencok/contracts/world-point-detail").WorldResourceOwnerSnapshot,
+      id: number,
+      at?: bigint,
+    ) => number,
   ) {}
   get owner() {
     return text(this.state.profile, "uid");

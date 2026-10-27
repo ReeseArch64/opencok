@@ -230,7 +230,13 @@ export interface CityProgressionWrite {
   forts?: readonly Row[];
   queues?: readonly Row[];
   profile?: { level: number; exp: number };
-  statistics?: { power: bigint; buildingPower: bigint; armyCure: number; questPower?: number };
+  statistics?: {
+    power: bigint;
+    buildingPower: bigint;
+    armyCure: number;
+    detectNum?: number;
+    questPower?: number;
+  };
   buildingExperience?: { currentMax: bigint; historyMax: bigint };
 }
 

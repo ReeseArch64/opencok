@@ -231,6 +231,7 @@ export function createCityProgressionStore(
           command?.startsWith("normal.recharge.") ||
           command?.startsWith("campaign.") ||
           command === "activity.accept.reward" ||
+          command === "world.march" ||
           command?.startsWith("redPackets.") ||
           command === "trigger.activity" ||
           command?.startsWith("hot.item.")
