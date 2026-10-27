@@ -109,7 +109,7 @@ new hero's keys even when an older native language cache remains active. The
 hero's talent popup parses fractional scalar bonuses without truncating them.
 Original APKs, artwork, signing identity and other reserved heroes stay unchanged.
 
-The versioned CDN bundle `dr_newHero1.0.93_android.zip` retains original resources
+The versioned CDN bundle `dr_newHero1.0.94_android.zip` retains original resources
 and extends the shared head atlas with hero_head_72, card_72 and hero_body_72.
 The body deliberately uses the already loaded `newHero_head` resource, since the
 native loader did not install a newly named body atlas during device verification.
@@ -119,3 +119,8 @@ body and 104×124 portrait sizes. Verify its MD5 against
 split with the existing base APK and signing identity without clearing app data.
 Rollback restores the prior server artifact and retained before-split; retain
 versioned CDN archives. Full combat balance requires gameplay evidence.
+
+Device comparison with the adjacent Kevin hero established that the initial full-body
+framing made Hua Mulan appear too small. Bundle 1.0.94 doubles her artwork scale,
+centers the face and crops the outer weapon/legs inside the same 640×1136 frame.
+Her portrait, gameplay values and APK remain unchanged.

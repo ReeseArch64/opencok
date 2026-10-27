@@ -302,9 +302,9 @@ are updated.
 
 The Android 12.06.0 native login response (`controller=0`, `action=1`, payload `p`)
 announces the legacy hero resource bundle before the `init` extension through
-the string fields `newHeroVersion` (`1.0.93`) and `newHeroMd5Android`
-(`99d126feeb3c80e98abbc691eec3230b`). The native loader uses this metadata for
-`/cok/lua/dr_newHero1.0.93_android.zip`; operators must supply the matching authorized
+the string fields `newHeroVersion` (`1.0.94`) and `newHeroMd5Android`
+(`cf7be0a136aebb4dd22b40ae320bcd13`). The native loader uses this metadata for
+`/cok/lua/dr_newHero1.0.94_android.zip`; operators must supply the matching authorized
 archive through the CDN gateway. Bundling its textures alone does not initialize the
 native resource check used by the Hero Palace. These fields preserve the legacy
 download protocol and are separate from the signed release updater described below.
