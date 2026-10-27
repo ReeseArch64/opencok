@@ -1,3 +1,5 @@
+import { activityDirectory } from "@opencok/mappings/activity-directory";
+import { activityDirectoryEntries } from "@opencok/rules/activity-directory";
 import { rewardPreviewArray } from "@opencok/mappings/rewards";
 import { heroEventBand, heroEventRewards, nextHeroPanel } from "@opencok/rules/hero-event";
 import {
@@ -938,6 +940,9 @@ export class GameService {
       case "dragon.battle.fight.rank":
       case "dragon.playoff.rank.info":
         body = await this.battleRanking(uid, command);
+        break;
+      case "act.ls":
+        body = await this.activityDirectory(uid);
         break;
       case "hero.event.info.get":
       case "hero.event.ranking.get":
@@ -2037,6 +2042,18 @@ export class GameService {
     if (!teamId) throw new GameError(errors.invalid);
     if (!this.services.battleFightPublication) throw new GameError(errors.unsupported, "ranking");
     return fightRanking(decodeFightRanking(await this.services.battleFightPublication(), teamId));
+  }
+  private async activityDirectory(uid: string): Promise<Fields> {
+    const now = this.now();
+    if (!this.db.activityDirectory) throw new GameError(errors.unsupported, "activity_directory");
+    const state = await this.db.activityDirectory(uid),
+      profile = this.checkProfile(state.profile, now);
+    if (profile.uid !== uid || num(profile, "serverId") !== this.config.kingdomId)
+      throw new GameError(errors.invalid);
+    const body = activityDirectory(activityDirectoryEntries(state.activities, now));
+    if (encode(extension("act.ls", body)).length > MAX_FRAME)
+      throw new GameError(errors.unsupported, "activity_directory");
+    return body;
   }
   private async heroEventDetails(uid: string, command: string, params: Fields): Promise<Fields> {
     const now = this.now(),

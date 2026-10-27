@@ -142,7 +142,8 @@
     "./monster-exchange": "./src/monster-exchange.ts",
     "./merge-campaign": "./src/merge-campaign.ts",
     "./world-resource-refresh": "./src/world-resource-refresh.ts",
-    "./red-packets": "./src/red-packets.ts"
+    "./red-packets": "./src/red-packets.ts",
+    "./activity-directory": "./src/activity-directory.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",
