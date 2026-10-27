@@ -113,24 +113,31 @@ test("invalid ordering and unrepresentable item costs fail instead of losing dom
     stars: { ...original.stars, upgrades: [...original.stars.upgrades].reverse() },
   });
   expect(() => mapper.toDefinition(unsorted)).toThrow("Invalid hero definition");
-  const differentItem = Object.assign(new Mulan(), {
+  const mixedUnlockItems = Object.assign(new Mulan(), {
     refinement: {
       ...original.refinement,
-      valueRollCostPerAttribute: { item: HeroItem.HeroBadge, quantity: 20 },
+      slots: original.refinement.slots.map((slot) => ({
+        ...slot,
+        unlockCost: { item: HeroItem.MulanFragment, quantity: 1 },
+      })),
     },
   });
-  expect(() => mapper.toDefinition(differentItem)).toThrow("consume recruitment fragments");
+  expect(() => mapper.toDefinition(mixedUnlockItems)).toThrow("one refinement unlock item");
   const missingSlot = Object.assign(new Mulan(), {
     refinement: { ...original.refinement, slots: [] },
   });
   expect(() => mapper.toDefinition(missingSlot)).toThrow("Invalid hero definition");
 });
 
-test("catalog imports retain named Mulan authorship and leave unrelated rows unchanged", () => {
-  expect(namedHeroRecord("general_base", { id: 53571, levelMax: 48 })).toEqual({
-    declaration: 'import { mulan } from "../../heroes/mulan.ts";',
-    expression: "mulan",
-  });
-  expect(namedHeroRecord("general_base", { id: 53572 })).toBeUndefined();
+test("catalog imports retain named hero authorship and reject unmodeled heroes", () => {
+  expect(namedHeroRecord("general_base", { id: 53571, levelMax: 48 })?.expression).toBe(
+    "heroDefinitionByIdentity[HeroIdentity.Mulan]",
+  );
+  expect(namedHeroRecord("general_base", { id: 53572 })?.expression).toBe(
+    "heroDefinitionByIdentity[HeroIdentity.Unknown1]",
+  );
+  expect(() => namedHeroRecord("general_base", { id: 999999 })).toThrow(
+    "requires a named definition",
+  );
   expect(namedHeroRecord("general_skill", { id: 53571 })).toBeUndefined();
 });

@@ -20,104 +20,75 @@ export class Mulan extends Hero {
     maximumLevel: 99,
     automatedGrantLevelLimit: 100,
     talentPointDivisor: 10,
-    breakthroughs: [
-      { stage: 1, cost: { item: HeroItem.MulanFragment, quantity: 0 } },
-      { stage: 2, cost: { item: HeroItem.MulanFragment, quantity: 0 } },
-      { stage: 3, cost: { item: HeroItem.MulanFragment, quantity: 0 } },
-      { stage: 4, cost: { item: HeroItem.MulanFragment, quantity: 0 } },
-      { stage: 5, cost: { item: HeroItem.MulanFragment, quantity: 0 } },
-    ],
+    breakthroughs: this.freeBreakthroughs(HeroItem.MulanFragment, 5),
   };
   public readonly stars: HeroDefinition["stars"] = {
     initial: 1,
     maximum: 5,
-    initialSkill: HeroSkill.MulanFormation,
+    initialSkills: [HeroSkill.MulanFormation],
     upgrades: [
       {
         stars: 2,
         cost: { item: HeroItem.MulanFragment, quantity: 6000 },
-        skill: HeroSkill.InfantryBasicAttack,
+        skills: [HeroSkill.InfantryBasicAttack],
       },
       {
         stars: 3,
         cost: { item: HeroItem.MulanFragment, quantity: 15000 },
-        skill: HeroSkill.InfantryDamage,
+        skills: [HeroSkill.InfantryDamage],
       },
       {
         stars: 4,
         cost: { item: HeroItem.MulanFragment, quantity: 30000 },
-        skill: HeroSkill.InfantryStrikingDistance,
+        skills: [HeroSkill.InfantryStrikingDistance],
       },
       {
         stars: 5,
         cost: { item: HeroItem.MulanFragment, quantity: 60000 },
-        skill: HeroSkill.InfantryBasicPuncture,
+        skills: [HeroSkill.InfantryBasicPuncture],
       },
     ],
   };
-  public readonly talentTrees = [
+  public readonly talentTrees: HeroDefinition["talentTrees"] = [
     HeroTalentTree.MulanVanguard,
     HeroTalentTree.MulanOffensive,
     HeroTalentTree.MulanSpear,
   ];
-  public readonly assignments = {
-    canLoot: true,
-    minimumLootLevel: 5,
-    canGarrison: true,
-    canBattle: true,
-    canUseLordExperience: true,
-  };
-  public readonly refinement: HeroDefinition["refinement"] = {
-    valueRollCostPerAttribute: { item: HeroItem.MulanFragment, quantity: 20 },
-    typeRollPrices: [
-      { attributes: 1, gold: 1000 },
-      { attributes: 2, gold: 1000 },
-      { attributes: 3, gold: 1000 },
-      { attributes: 4, gold: 1000 },
-      { attributes: 5, gold: 1000 },
-    ],
-    lockedAttributePrices: [
-      { lockedAttributes: 1, gold: 1000 },
-      { lockedAttributes: 2, gold: 3000 },
-      { lockedAttributes: 3, gold: 7000 },
-      { lockedAttributes: 4, gold: 15000 },
-    ],
-    slots: [
-      {
-        position: 1,
-        requiredLevel: 1,
-        requiredStars: 1,
-        unlockCost: { item: HeroItem.HeroBadge, quantity: 0 },
-        refinementItemQuantity: 1,
-      },
-      {
-        position: 2,
-        requiredLevel: 1,
-        requiredStars: 2,
-        unlockCost: { item: HeroItem.HeroBadge, quantity: 0 },
-        refinementItemQuantity: 1,
-      },
-      {
-        position: 3,
-        requiredLevel: 30,
-        requiredStars: 3,
-        unlockCost: { item: HeroItem.HeroBadge, quantity: 1 },
-        refinementItemQuantity: 1,
-      },
-      {
-        position: 4,
-        requiredLevel: 1,
-        requiredStars: 4,
-        unlockCost: { item: HeroItem.HeroBadge, quantity: 1 },
-        refinementItemQuantity: 0,
-      },
-      {
-        position: 5,
-        requiredLevel: 1,
-        requiredStars: 5,
-        unlockCost: { item: HeroItem.HeroBadge, quantity: 1 },
-        refinementItemQuantity: 0,
-      },
-    ],
-  };
+  public readonly refinement = this.standardRefinement(HeroItem.MulanFragment, [
+    {
+      position: 1,
+      refinementItemQuantity: 1,
+      requiredLevel: 1,
+      requiredStars: 1,
+      unlockCost: { item: HeroItem.HeroBadge, quantity: 0 },
+    },
+    {
+      position: 2,
+      refinementItemQuantity: 1,
+      requiredLevel: 1,
+      requiredStars: 2,
+      unlockCost: { item: HeroItem.HeroBadge, quantity: 0 },
+    },
+    {
+      position: 3,
+      refinementItemQuantity: 1,
+      requiredLevel: 30,
+      requiredStars: 3,
+      unlockCost: { item: HeroItem.HeroBadge, quantity: 1 },
+    },
+    {
+      position: 4,
+      refinementItemQuantity: 0,
+      requiredLevel: 1,
+      requiredStars: 4,
+      unlockCost: { item: HeroItem.HeroBadge, quantity: 1 },
+    },
+    {
+      position: 5,
+      refinementItemQuantity: 0,
+      requiredLevel: 1,
+      requiredStars: 5,
+      unlockCost: { item: HeroItem.HeroBadge, quantity: 1 },
+    },
+  ]);
 }

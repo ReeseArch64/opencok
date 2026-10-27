@@ -1,5 +1,4 @@
-import { heroCatalogBindings } from "@opencok/constants/hero-catalog-bindings";
-import { Mulan } from "@opencok/hero/domain/mulan";
-import { HeroDefinitionMapper } from "@opencok/hero/mappings/hero-definition";
+import { HeroIdentity } from "@opencok/enums/hero-identity";
+import { heroDefinitionByIdentity } from "./roster.ts";
 
-export const mulan = new HeroDefinitionMapper(heroCatalogBindings).toDefinition(new Mulan());
+export const mulan = heroDefinitionByIdentity[HeroIdentity.Mulan];

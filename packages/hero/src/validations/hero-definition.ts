@@ -22,10 +22,10 @@ export function validateHeroDefinition(hero: HeroDefinition): void {
   integer(stars.maximum, stars.initial, 5);
   sequence(
     stars.upgrades.map((step) => step.stars),
-    stars.initial + 1,
+    2,
   );
 
-  if (stars.upgrades.length !== stars.maximum - stars.initial) invalid();
+  if (stars.upgrades.length !== 4 || !stars.initialSkills.length) invalid();
 
   for (const step of stars.upgrades) cost(step.cost);
 
@@ -36,8 +36,7 @@ export function validateHeroDefinition(hero: HeroDefinition): void {
 
   for (const step of progression.breakthroughs) cost(step.cost);
 
-  if (!hero.talentTrees.length || new Set(hero.talentTrees).size !== hero.talentTrees.length)
-    invalid();
+  if (new Set(hero.talentTrees).size !== hero.talentTrees.length) invalid();
 
   integer(hero.assignments.minimumLootLevel, 1, progression.maximumLevel);
   cost(refinement.valueRollCostPerAttribute);
@@ -50,9 +49,9 @@ export function validateHeroDefinition(hero: HeroDefinition): void {
   );
 
   for (const slot of refinement.slots) {
-    integer(slot.requiredLevel, 1, progression.maximumLevel);
-    integer(slot.requiredStars, 1, stars.maximum);
-    cost(slot.unlockCost);
+    if (slot.requiredLevel !== undefined) integer(slot.requiredLevel, 1, progression.maximumLevel);
+    if (slot.requiredStars !== undefined) integer(slot.requiredStars, 1);
+    if (slot.unlockCost) cost(slot.unlockCost);
     integer(slot.refinementItemQuantity);
   }
 

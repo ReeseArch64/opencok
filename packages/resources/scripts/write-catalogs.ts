@@ -5,7 +5,7 @@ import { GameplayCatalog } from "@opencok/enums/gameplay-catalog";
 import { CatalogKind } from "@opencok/enums/catalog-kind";
 import type { CatalogValue, CatalogCodec } from "../src/catalog-model.ts";
 import { convertCatalog, type SourceElement } from "./catalog-conversion.ts";
-import { namedHeroRecord } from "./named-hero-records.ts";
+import { namedHeroRecord, namedHeroDefinition } from "./named-hero-records.ts";
 
 export interface CatalogSource {
   readonly id: string;
@@ -108,7 +108,11 @@ export async function writeCatalogModules(sources: AsyncIterable<CatalogSource>)
   }[] = [];
   for await (const source of sources) {
     if (source.id === GameplayCatalog.Building) continue;
-    const { definition, codec } = convertCatalog(source.ordered, source.id);
+    const { definition, codec: sourceCodec } = convertCatalog(source.ordered, source.id);
+    const codec =
+      source.id === GameplayCatalog.GeneralBase
+        ? { ...sourceCodec, talent_point_divisor: { field: "talentPointDivisor" } }
+        : sourceCodec;
     const hash = catalogHash({ definition, codec });
     let module = modules.get(hash);
     const member = names.get(source.id as GameplayCatalog);
@@ -135,7 +139,12 @@ export async function writeCatalogModules(sources: AsyncIterable<CatalogSource>)
         const catalogModule = hero ? recordModule : "./catalogs/types/" + module + ".ts";
         typeImports.push("import type { " + typeName + ' } from "' + catalogModule + '";');
         const model =
-          recordType(definition.records, recordName) +
+          recordType(
+            module === GameplayCatalog.GeneralBase
+              ? definition.records.map(namedHeroDefinition)
+              : definition.records,
+            recordName,
+          ) +
           '\nimport type { CatalogTable } from "' +
           (hero ? "@opencok/resources/catalog-model" : "../../catalog-model.ts") +
           '";\nexport type ' +

@@ -1,3 +1,4 @@
+import type { HeroCatalogValueShape } from "@opencok/enums/hero-catalog-value-shape";
 import type { HeroIdentity } from "@opencok/enums/hero-identity";
 import type { HeroGender } from "@opencok/enums/hero-gender";
 import type { HeroItem } from "@opencok/enums/hero-item";
@@ -13,6 +14,22 @@ export interface HeroCatalogBindings {
         readonly nameTextId: number;
         readonly talentGroupId: number;
         readonly experienceColumnSet: number;
+        readonly fragmentSaleId?: number;
+        readonly publishTalentPointDivisor: boolean;
+        readonly shape: Readonly<
+          Record<
+            | "baseSkill"
+            | "baseSkill2"
+            | "baseSkill3"
+            | "baseSkill4"
+            | "baseSkill5"
+            | "generalAb"
+            | "unlockLevel"
+            | "unlockStar"
+            | "unlockGoodsNum",
+            HeroCatalogValueShape
+          >
+        >;
       }
     >
   >;

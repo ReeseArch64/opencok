@@ -114,9 +114,10 @@ while validation and wire serialization remain in their existing packages.
 Hero and general implementations live in `packages/hero/src`, with `contracts`,
 `rules`, `services`, `mappings`, `validations`, `repositories`, `storage` and
 `resources` directories preserving those responsibilities inside the domain.
-Named hero archetypes begin in `hero/src/domain`: `Mulan extends Hero` owns
-recruitment, progression, stars, assignments, talent tree references and refinement
-configuration. The generic `HeroDefinitionMapper` projects it into the existing
+All 109 Hero Palace archetypes live in `hero/src/domain` as named `Hero`
+subclasses, with a complete `heroRoster`. They own recruitment, progression,
+stars, talent tree references and refinement configuration; `Hero` supplies shared
+policies. Unknown entries retain stable `unknown-1` and `unknown-2` identities. The generic `HeroDefinitionMapper` projects it into the existing
 general catalog using injected numeric bindings from `constants`. Native IDs stay
 in those bindings; domain definitions use semantic enums from `enums`. See the
 [named hero migration proposal](../packages/resources/README.md#named-hero-definitions-and-migration-proposal)

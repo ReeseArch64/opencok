@@ -28,11 +28,11 @@ export interface HeroDefinition {
   readonly stars: {
     readonly initial: number;
     readonly maximum: number;
-    readonly initialSkill: HeroSkill;
+    readonly initialSkills: readonly HeroSkill[];
     readonly upgrades: readonly {
       readonly stars: number;
       readonly cost: HeroItemCost;
-      readonly skill: HeroSkill;
+      readonly skills: readonly HeroSkill[];
     }[];
   };
   readonly talentTrees: readonly HeroTalentTree[];
@@ -45,6 +45,7 @@ export interface HeroDefinition {
   };
   readonly refinement: {
     readonly valueRollCostPerAttribute: HeroItemCost;
+    readonly unlockItem: HeroItem;
     readonly typeRollPrices: readonly { readonly attributes: number; readonly gold: number }[];
     readonly lockedAttributePrices: readonly {
       readonly lockedAttributes: number;
@@ -52,9 +53,9 @@ export interface HeroDefinition {
     }[];
     readonly slots: readonly {
       readonly position: number;
-      readonly requiredLevel: number;
-      readonly requiredStars: number;
-      readonly unlockCost: HeroItemCost;
+      readonly requiredLevel?: number;
+      readonly requiredStars?: number;
+      readonly unlockCost?: HeroItemCost;
       readonly refinementItemQuantity: number;
     }[];
   };
