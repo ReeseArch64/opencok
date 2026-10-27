@@ -1,3 +1,4 @@
+export { expedition_manifest } from "./opencok_kingdom/expedition_manifest";
 export { expedition_clock } from "./opencok_kingdom/expedition_clock";
 export { expedition_admission } from "./opencok_kingdom/expedition_admission";
 export { hero_rank_award } from "./opencok_kingdom/hero_rank_award";

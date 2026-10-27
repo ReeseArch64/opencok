@@ -120,6 +120,13 @@
       "when": 1793042297614,
       "tag": "0016_expedition_matching",
       "breakpoints": false
+    },
+    {
+      "idx": 17,
+      "version": "7",
+      "when": 1793044971522,
+      "tag": "0017_expedition_score_publication",
+      "breakpoints": false
     }
   ]
 }

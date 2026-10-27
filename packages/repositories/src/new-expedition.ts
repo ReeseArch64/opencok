@@ -1,3 +1,4 @@
+import { expedition_manifest } from "@opencok/drizzle/schema/opencok_kingdom/expedition_manifest";
 import { expedition_clock } from "@opencok/drizzle/schema/opencok_kingdom/expedition_clock";
 import { server_info } from "@opencok/drizzle/schema/opencok_kingdom/server_info";
 import { and, asc, desc, eq, sql } from "drizzle-orm";
@@ -24,6 +25,7 @@ export async function installExpeditionPeriod(
   authority: RealmAuthority,
   manifest: ExpeditionManifest,
   authorize: (manifest: ExpeditionManifest) => Promise<boolean>,
+  recordedAt = BigInt(Date.now()),
 ) {
   await fenceRealmTransaction(tx, authority);
   if (manifest.serverId !== authority.kingdomId || !(await authorize(manifest)))
@@ -42,6 +44,51 @@ export async function installExpeditionPeriod(
       endTime: String(phase.endTime),
     })),
   );
+  const archive = async (
+    value: {
+      periodId: string;
+      serverId: number;
+      matchServerId: number;
+      schedule: string;
+      startTime: bigint;
+      endTime: bigint;
+    },
+    at: bigint,
+  ) => {
+    const saved = { ...value, recordedAt: at };
+    await tx.insert(expedition_manifest).values(saved).onConflictDoNothing();
+    const [existing] = await tx
+      .select()
+      .from(expedition_manifest)
+      .where(
+        and(
+          eq(expedition_manifest.periodId, value.periodId),
+          eq(expedition_manifest.serverId, value.serverId),
+        ),
+      )
+      .limit(1);
+    if (
+      !existing ||
+      existing.serverId !== value.serverId ||
+      existing.matchServerId !== value.matchServerId ||
+      existing.schedule !== value.schedule ||
+      existing.startTime !== value.startTime ||
+      existing.endTime !== value.endTime
+    )
+      expeditionFailure();
+  };
+  if (prior)
+    await archive(
+      {
+        periodId: prior.periodId,
+        serverId: prior.serverId,
+        matchServerId: prior.matchServerId,
+        schedule: prior.schedule,
+        startTime: prior.startTime,
+        endTime: prior.endTime,
+      },
+      0n,
+    );
   if (prior?.periodId === manifest.periodId) {
     if (prior.schedule !== schedule || prior.matchServerId !== manifest.matchServerId)
       expeditionFailure();
@@ -58,6 +105,17 @@ export async function installExpeditionPeriod(
     victoryTimes: prior?.victoryTimes ?? 0,
     count: (prior?.count ?? 0) + 1,
   };
+  await archive(
+    {
+      periodId: value.periodId,
+      serverId: value.serverId,
+      matchServerId: value.matchServerId,
+      schedule: value.schedule,
+      startTime: value.startTime,
+      endTime: value.endTime,
+    },
+    recordedAt,
+  );
   await tx
     .insert(expedition_period)
     .values(value)
