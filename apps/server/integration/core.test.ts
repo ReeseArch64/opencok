@@ -1,6 +1,7 @@
 import { avatar_storage } from "@opencok/drizzle/schema/opencok_kingdom/avatar_storage";
 import { catalog as campaignRulesCatalog } from "../../../packages/resources/src/catalogs/data/trigger-activity";
 import { flower_info } from "@opencok/drizzle/schema/opencok_kingdom/flower_info";
+import { new_general } from "@opencok/drizzle/schema/opencok_kingdom/new_general";
 import { catalog as campaignVariablesCatalog } from "../../../packages/resources/src/catalogs/data/trigger-var";
 import { mail } from "@opencok/drizzle/schema/opencok_kingdom/mail";
 import { eq } from "drizzle-orm";
@@ -126,6 +127,17 @@ test("PostgreSQL SFS login, city and map preserve state and isolate both realms"
         createTime: 1000n,
       });
       await db.insert(user_mixed_info).values({ uid, mdata: "{}" });
+      await db.insert(new_general).values({
+        uid,
+        id: 53500,
+        level: 3,
+        exp: 123,
+        quality: 1,
+        state: 1,
+        star: 2,
+        talentpoint: 4,
+        talent: "53900;1",
+      });
       await db.insert(user_resource).values({
         uid,
         wood: BigInt(10000 * id),
@@ -193,7 +205,8 @@ test("PostgreSQL SFS login, city and map preserve state and isolate both realms"
       role: '<ItemSpec id="100101" player_exp="100000"/><ItemSpec id="100102" player_exp="200000"/>',
       position: '<ItemSpec id="9900" position="0"/><ItemSpec id="9906" position="6"/>',
       item: `<Group id="data_config">${configRecords}</Group>`,
-      function_on: '<ItemSpec id="avatar" online="all" test="all" version="7.23.0" pf="all"/>',
+      function_on:
+        '<ItemSpec id="avatar" online="all" test="all" version="7.23.0" pf="all"/><ItemSpec id="general" online="all" test="all" version="7.23.0" pf="all"/>',
       status:
         '<ItemSpec id="509878" type2="100" time="3600" overlap="2" group="500500" subgroup="265"/>',
       arms: '<ItemSpec id="100001" attack="12" attack_add="3" defence="10" defence_add="2" upkeep="24" power="0.5"/><ItemSpec id="100002"/>',
@@ -275,6 +288,8 @@ test("PostgreSQL SFS login, city and map preserve state and isolate both realms"
         zkPath: `/opencok-experiment/COK${id}`,
       };
       const runtimeRules = await loadRules(resources, id);
+      (runtimeRules.power.newGeneralBases ??= new Map()).set("53500", { id: "53500" });
+      (runtimeRules.power.newGeneralSkills ??= new Map()).set("53900", { id: "53900", type: "0" });
       runtimeRules.advanced.campaignRules = campaignRulesCatalog.rules;
       for (const [itemId, rule] of exchangeCatalog.goods)
         if (!runtimeRules.goods.has(itemId)) runtimeRules.goods.set(itemId, rule);
@@ -338,6 +353,13 @@ test("PostgreSQL SFS login, city and map preserve state and isolate both realms"
       expect(loginPower.playerPower?.type).toBe(Type.Int);
       expect(loginPower.armyPower?.type).toBe(Type.Long);
       expect(loginPower.battleWin?.type).toBe(Type.Int);
+      const heroes = data.generallist!.value as Value[];
+      const hero = heroes.map(fields).find((entry) => entry.id?.value === 53500)!;
+      expect(hero.level).toEqual(sfs.int(3));
+      expect(hero.exp).toEqual(sfs.int(123));
+      expect(hero.talent).toEqual(
+        sfs.array([sfs.object({ id: sfs.int(53900), level: sfs.int(1) })]),
+      );
       expect(
         (await client.command("cmd.finishinit", { _cok_: sfs.string("synthetic-init") }))._cok_
           ?.value,
@@ -751,7 +773,10 @@ test("PostgreSQL SFS login, city and map preserve state and isolate both realms"
     clients[0]!.close();
     await servers[0]!.close();
     servers.shift();
-    const restarted = await startServer(base, await loadRules(resources, base.kingdomId));
+    const restartRules = await loadRules(resources, base.kingdomId);
+    (restartRules.power.newGeneralBases ??= new Map()).set("53500", { id: "53500" });
+    (restartRules.power.newGeneralSkills ??= new Map()).set("53900", { id: "53900", type: "0" });
+    const restarted = await startServer(base, restartRules);
     servers.push(restarted);
     await eventually(
       async () =>
@@ -771,6 +796,11 @@ test("PostgreSQL SFS login, city and map preserve state and isolate both realms"
       Type.Int,
     );
     const restartInit = fields(fields((await reconnected.next()).p).p);
+    const restartedHero = (restartInit.generallist!.value as Value[]).map(fields)[0]!;
+    expect(restartedHero.exp).toEqual(sfs.int(123));
+    expect(restartedHero.talent).toEqual(
+      sfs.array([sfs.object({ id: sfs.int(53900), level: sfs.int(1) })]),
+    );
     expect(fields(restartInit.user).name?.value).toBe("Renamed 1");
     expect(
       (

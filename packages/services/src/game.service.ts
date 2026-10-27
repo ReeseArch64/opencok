@@ -140,6 +140,7 @@ import type { CityState, GameServices, GameStore } from "@opencok/contracts/game
 import { long, num, text, type Row } from "@opencok/contracts/rows";
 import {
   sfs,
+  fields,
   Type,
   int as wireInt,
   str as wireString,
@@ -341,7 +342,7 @@ export class GameService {
       ...hearts?.body,
       ...gifts?.body,
       ...equipment?.body,
-      ...generals?.body,
+      ...(generals?.body.data ? fields(generals.body.data) : {}),
       ...dragons?.body,
       ...dragonTower?.body,
       ...vipBox?.body,
