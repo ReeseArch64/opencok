@@ -618,6 +618,10 @@ export class GameService {
       case "target.task.ui":
       case "target.task.receive":
       case "target.task.item":
+      case "redPackets.sd":
+      case "redPackets.rv":
+      case "redPackets.status":
+      case "redPackets.rvd.id":
       case "pay.recharge.ui.state":
       case "new.sercum.ui":
       case "new.sercum.reward":

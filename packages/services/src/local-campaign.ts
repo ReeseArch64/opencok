@@ -1,3 +1,4 @@
+import { createSystemPacket } from "./red-packets";
 import { avatarMailPush } from "@opencok/mappings/avatar-mail";
 import type { AvatarSystemMail } from "@opencok/contracts/files";
 import { campaignNoticeFrame } from "@opencok/mappings/campaign-notice";
@@ -136,6 +137,19 @@ export class CampaignPlanner {
     const parts = (clause.parameters ?? "").split(";");
     const nested = clause.conditions ?? [];
     switch (clause.code) {
+      case 104:
+        return parts.length === 1 && String(this.attributes.gift_product_id ?? "") === parts[0];
+      case 81:
+        return (
+          parts.length === 3 &&
+          (parts[0] !== "true" || this.attributes.red_packet_system === 1) &&
+          Object.hasOwn(this.attributes, "key_goldSum") &&
+          campaignCompare(
+            campaignNumber(this.attributes.key_goldSum),
+            parts[1]!,
+            this.value(parts[2]!),
+          )
+        );
       case 72: {
         const id = parts[0],
           count = cityInteger(parts[1]);
@@ -245,6 +259,9 @@ export class CampaignPlanner {
       case 27:
       case 30:
       case 42:
+        return;
+      case 47:
+        createSystemPacket(this.context, action.parameters ?? "");
         return;
       case 61: {
         if (parts.length !== 2 || !parts[1]) campaignFailure();

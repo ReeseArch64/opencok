@@ -102,6 +102,7 @@ export interface CityProgressionState {
   monsterExchange?: readonly Row[];
   vipBox?: import("./vip-box").VipBoxState;
   targetTask?: import("./target-task").TargetTaskState;
+  redPackets?: import("./paid-gifts").RedPacketReader;
   rechargeFeedback?: import("./recharge-feedback").RechargeFeedbackReader;
   rechargeActivity?: import("./recharge-activity").RechargeActivityState;
   ordinaryBoxServer?: { openedAt: bigint };
@@ -169,6 +170,7 @@ export interface CityProgressionWrite {
   monsterExchange?: readonly Row[];
   vipBox?: import("./vip-box").VipBoxWrite;
   targetTask?: import("./target-task").TargetTaskWrite;
+  redPackets?: import("./paid-gifts").RedPacketWrite;
   rechargeFeedback?: readonly import("./recharge-feedback").RechargeFeedbackClaim[];
   rechargeActivity?: import("./recharge-activity").RechargeActivityWrite;
   ordinaryBox?: import("./ordinary-box").OrdinaryBoxWrite;
