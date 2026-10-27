@@ -101,7 +101,8 @@
     "./fragment-exchange": "./src/fragment-exchange.ts",
     "./monster-exchange": "./src/monster-exchange.ts",
     "./world-utility": "./src/world-utility.ts",
-    "./city-defense": "./src/city-defense.ts"
+    "./city-defense": "./src/city-defense.ts",
+    "./treasure-map": "./src/treasure-map.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",
