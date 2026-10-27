@@ -17,3 +17,5 @@ jobs:
       - run: bun run lint
       - run: bun run format:check
       - run: bun run test:packages
+      - run: bun --no-env-file install --cwd .github/formatting-pilot --frozen-lockfile --ignore-scripts
+      - run: bun --no-env-file run .github/formatting-pilot/verify.ts
