@@ -150,9 +150,9 @@ export async function cityHarness(
     ) => {
       if (totems)
         await settleTotemEffects(
-          createTotemEffectStore(tx, owner, at, 1200, 1, baseBoundary),
+          createTotemEffectStore(tx, owner, at, mapSize, 1, baseBoundary),
           rules,
-          1200,
+          mapSize,
         );
     };
     const boundary: typeof baseBoundary = async (tx, owner, at, change, deleted, economy) => {

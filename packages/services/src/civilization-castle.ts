@@ -88,6 +88,10 @@ export function createCivilizationCastleDomain(size: number): CityDomain {
           const entry = world.points.find((value) => num(value, "id") === id);
           if (
             !entry ||
+            text(entry, "ownerId") ||
+            text(entry, "ownerMarchUUid") ||
+            text(entry, "territoryAlliance") ||
+            world.placementClaims?.includes(id) ||
             num(entry, "pointType") !== 0 ||
             num(entry, "gridType") !== 2 ||
             num(entry, "grid2Type") !== 0 ||

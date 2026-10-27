@@ -206,6 +206,10 @@ export function createTotemDomain(size: number): CityDomain {
           const point = world.points.find((row) => num(row, "id") === id);
           if (
             !point ||
+            text(point, "ownerId") ||
+            text(point, "ownerMarchUUid") ||
+            text(point, "territoryAlliance") ||
+            world.placementClaims?.includes(id) ||
             num(point, "pointType") !== 0 ||
             num(point, "gridType") !== 2 ||
             num(point, "grid2Type") !== 0 ||
