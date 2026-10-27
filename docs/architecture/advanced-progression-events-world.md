@@ -2928,3 +2928,29 @@ and safe retry. Native two-realm acceptance configures the proof adapter and
 checks the real server composition, canonical retry and login replay. The
 existing default composition remains unconfigured for external payment
 providers. This composition adds no schema, dependency or environment setting.
+
+## Owned resource placement items
+
+`UseWorldPoint` and the resource branch of `TreasureMapService.useWorldPoint`
+now route `world.use` through the owned city transaction and world mutation lock.
+The native request selects an owned item UUID and a point. Type-11 goods choose
+their configured weighted target from the first `resources` group and create a
+real ordinary resource node with the selected type, level, base capacity and
+lifetime. Player placement deliberately uses no natural-spawn capacity bonus.
+The source free-point check admits grid types 0 and 1 as well as 2 when the point
+is empty, has no owner and has no secondary terrain restriction.
+
+The exact selected stack is consumed once. Foreign items, occupied points,
+unsupported goods and invalid resource definitions fail before the debit.
+The native `pointId` integer and `itemid` string response is also published as
+`push.world.use` to other interested residents through the durable outbox.
+Source `flushFlag=1` is persisted so player nodes do not count toward natural
+resource quotas or create replacement tickets. Expiry postpones occupied nodes;
+a free expired player node clears without replenishing it. Natural nodes retain
+the existing delayed replenishment behavior. PostgreSQL acceptance covers the
+owned stack, receipts, costs, actual stored capacity, terrain, notification,
+expiry and occupied-node preservation. No schema or dependency is added.
+
+Type-12 monster placement has a separate ordinary point creation and expiry
+recipe. That producer remains to be established independently of battle
+admission; this resource route does not charge a monster item.

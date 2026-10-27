@@ -36,6 +36,8 @@ export async function publishWorldMutation(
   }
   const recipients = await interested(pointIds, owner, "");
   for (const recipient of recipients.filter(Boolean)) {
+    if (command === "world.use" && body.used && recipient !== owner)
+      await publish(recipient, "push.world.use", fields(body.used));
     for (const totem of (body.totems?.value ?? []) as { value: Fields }[])
       await publish(recipient, "push.totem.change.info", totem.value);
     for (const march of marches)

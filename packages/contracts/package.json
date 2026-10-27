@@ -194,7 +194,8 @@
     "./activity-operators": "./src/activity-operators.ts",
     "./responses/activity-operators": "./src/responses/activity-operators.ts",
     "./comeback": "./src/comeback.ts",
-    "./normal-recharge": "./src/normal-recharge.ts"
+    "./normal-recharge": "./src/normal-recharge.ts",
+    "./responses/world-use": "./src/responses/world-use.ts"
   },
   "dependencies": {
     "@opencok/enums": "workspace:*",
