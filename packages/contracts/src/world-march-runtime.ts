@@ -26,6 +26,7 @@ export interface WorldMutationState {
   checkpoints: readonly Row[];
 }
 export interface WorldMutationWrite {
+  barbarianActors?: import("./world-monsters").WorldBarbarianActorWrite;
   treasures?: readonly Row[];
   deletedTreasures?: readonly string[];
   troubleDeliveries?: readonly import("./trouble").TroubleDelivery[];

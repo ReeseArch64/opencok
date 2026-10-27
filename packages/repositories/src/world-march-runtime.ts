@@ -1,3 +1,4 @@
+import { writeWorldBarbarianActors } from "./world-barbarian-write";
 import { readTreasureMaps, writeTreasureMaps, withTreasureMarchTimes } from "./treasure-map";
 import { treasure_map } from "@opencok/drizzle/schema/opencok_kingdom/treasure_map";
 import { t_worldboss } from "@opencok/drizzle/schema/opencok_kingdom/t_worldboss";
@@ -169,6 +170,7 @@ export async function writeWorldMutation(
   owner: string,
   write: WorldMutationWrite,
 ) {
+  await writeWorldBarbarianActors(tx, write);
   await writeTreasureMaps(tx, owner, write);
   if (write.world) {
     if (write.world.uid !== owner) throw new Error("Foreign world write");

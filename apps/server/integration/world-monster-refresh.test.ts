@@ -34,7 +34,7 @@ async function fixture(size = 4, fresh = false) {
     h.rules.world.fieldMonsterGroups = new Map([["refresh", [{ day: "0;999", para1: "9414;1" }]]]);
     h.rules.world.barbarians = new Map(
       Array.from({ length: size }, (_, band) => [
-        String(band),
+        String(100 + band),
         {
           id: String(100 + band),
           area_level: String(band),

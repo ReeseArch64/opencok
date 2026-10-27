@@ -1443,6 +1443,7 @@ export const RealmDependenciesLive = Layer.effect(
         "treasuremap.spd",
         "world.use",
         "world.get.monster",
+        "world.get.barbarion",
         "world.user.rcr",
         "world.resources",
         "world.monsters",
