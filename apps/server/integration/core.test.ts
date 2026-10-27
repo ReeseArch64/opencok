@@ -351,6 +351,9 @@ test("PostgreSQL SFS login, city and map preserve state and isolate both realms"
         sfs.array([sfs.string(""), sfs.string(`Synthetic ${id}`)]),
       );
       expect((await client.command("get.trouble.list")).array).toEqual(sfs.array([]));
+      expect((await client.command("act.exchange", { ids: sfs.string("57006") })).exchange).toEqual(
+        sfs.array([]),
+      );
       const costInfo = await client.command("continuedcost.info", {
         _cok_: sfs.long(9007199254740993n),
       });

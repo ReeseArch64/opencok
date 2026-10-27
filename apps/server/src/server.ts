@@ -1,3 +1,4 @@
+import { createFragmentExchangeDomain } from "@opencok/services/fragment-exchange";
 import { avatarActivationDomain } from "@opencok/services/avatar-activation";
 import {
   campaignInventoryObservations,
@@ -621,6 +622,7 @@ export const RealmDependenciesLive = Layer.effect(
         regionalRecallDomain,
         playerItemGiftDomain,
         createSeasonalExchangeDomain(),
+        createFragmentExchangeDomain(),
         createVipBoxDomain(),
         createTargetTaskDomain(),
         createLuckyDayDomain(),

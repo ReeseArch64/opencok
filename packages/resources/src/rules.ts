@@ -330,6 +330,7 @@ export async function loadRules(directory?: string, kingdomId = 1) {
       olympicBets: await optional(GameplayCatalog.Bet),
       specialExchanges: await optional(GameplayCatalog.Exchange),
       continuedCosts: await optional(GameplayCatalog.ContinuedCost),
+      fragments: await optional(GameplayCatalog.Fragment),
       recallTasks: await optional(GameplayCatalog.RecallQuest),
       recallActivities: await optional(GameplayCatalog.RecallActivity),
       regionalRecalls: await optional(GameplayCatalog.Recall),
