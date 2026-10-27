@@ -110,3 +110,4 @@ export * from "./opencok_global/expedition_stage_watermark";
 export * from "./opencok_global/continued_cost_rank_period";
 export * from "./opencok_global/continued_cost_rank_owner";
 export * from "./opencok_global/continued_cost_rank_score";
+export { continued_cost_rank_watermark } from "./opencok_global/continued_cost_rank_watermark";

@@ -10,10 +10,10 @@ import { sampleRow } from "./support/rows";
 const dialect = new PgDialect();
 const db = drizzle.mock();
 
-test("application inventory contains all 845 tables and 6,895 fields", async () => {
+test("application inventory contains all 847 tables and 6,907 fields", async () => {
   expect(catalog.map((entry) => entry.id)).toEqual(Object.keys(contract).sort());
-  expect(catalog).toHaveLength(845);
-  expect(catalog.reduce((n, entry) => n + entry.config.columns.length, 0)).toBe(6895);
+  expect(catalog).toHaveLength(847);
+  expect(catalog.reduce((n, entry) => n + entry.config.columns.length, 0)).toBe(6907);
   for (const namespaces of Object.values(databaseSchemas))
     for (const namespace of namespaces) {
       expect(
@@ -25,8 +25,8 @@ test("application inventory contains all 845 tables and 6,895 fields", async () 
           .sort(),
       );
     }
-  expect(catalog.filter((entry) => entry.spec.role === "global")).toHaveLength(150);
-  expect(catalog.filter((entry) => entry.spec.role === "kingdom")).toHaveLength(695);
+  expect(catalog.filter((entry) => entry.spec.role === "global")).toHaveLength(151);
+  expect(catalog.filter((entry) => entry.spec.role === "kingdom")).toHaveLength(696);
 });
 
 test("package entrypoint exposes role-specific typed PostgreSQL queries without connecting on import", async () => {

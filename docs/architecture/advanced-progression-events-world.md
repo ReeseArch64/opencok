@@ -1675,3 +1675,52 @@ snapshots passed 1,699 tests with 49,977 assertions and 845 snapshots. Physical
 schema and upgrade checks passed 1,546 tests with 37,283 assertions. Required
 lint, formatting, both migration consistency checks and server/nine package type
 checks passed. Device execution remains unverified.
+
+## Consumption ranking finality
+
+Consumption competitions now close after a five-minute recovery interval and
+require a financial proof from every realm in their original registered census.
+The worker recovers confirmed older frames before sealing. Sealing takes the
+exclusive owned authority barrier, waits for authorized pending progression due
+before the period deadline and waits for prepared gold nickname reservations
+that can still confirm competition spending. It then freezes the realm's best
+hundred members and seals its economic aggregate in the same transaction.
+An empty realm records an explicit empty proof even when its feature has since
+been disabled. An unavailable realm remains in the census and delays finality.
+
+The owned snapshot retains exact decimal 64-bit values. Its SHA-256 proof covers
+member identity, total spend, paid/free split and last confirmed spending time in
+UTF-8 member order. Public names, pictures and privacy remain outside that
+financial proof. Upload writes the full bounded snapshot and its shared watermark
+atomically under the existing publication fence. Even before the other realms
+finish, live publishers cannot change that realm's economic values or population.
+Repeating a proof validates its saved economic rows and preserves newer public
+metadata, including a changed privacy preference.
+
+Shared finality verifies every census member's count and digest before recording
+one immutable result. Equal spend retains ascending member identity. A failed
+owned seal, shared proof or final acknowledgement retries from its saved boundary;
+replacement authority cannot restart totals or permit its predecessor to write.
+Confirmed debits that arrive after sealing retain their original financial
+posting and an uncounted fact rather than altering the finalized ranking.
+Only registered competitions can enter this process. Unverified legacy totals
+remain local, and automatic funded ranking rewards are the next module.
+
+Apply global migration `0020_continued_cost_finality` and kingdom migration
+`0040_continued_cost_finality` before this binary. They add one owned closure table
+and one shared watermark table. Inventory becomes 847 tables and 6,907 fields:
+151 global and 696 kingdom tables. No dependency, configuration or environment
+variable is added. Back up closures and watermarks with original payment witnesses,
+facts, aggregates, manifests, ownership versions, receipts and outbox. Preserve
+all these records during binary rollback. Do not delete a census member or proof
+to force a pending competition to finish; restore the corresponding realm and
+resume its saved snapshot. Device execution remains unverified.
+
+Twenty-three finality, consumption and publication acceptance cases passed with
+150 assertions. Two snapshot units passed with twelve assertions. The complete
+server unit suite passed 1,488 tests with 245,156 assertions. Native TCP and
+process-kill recovery passed two cases with 249 assertions. Schema contracts and
+snapshots passed 1,703 tests with 50,069 assertions and 847 snapshots; physical
+schema and upgrade checks passed 1,549 tests with 37,357 assertions. Required
+lint, formatting, both migration consistency checks and server/nine package type
+checks passed.

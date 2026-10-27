@@ -281,6 +281,13 @@
       "when": 1793049535042,
       "tag": "0039_continued_cost_facts",
       "breakpoints": false
+    },
+    {
+      "idx": 40,
+      "version": "7",
+      "when": 1793052189870,
+      "tag": "0040_continued_cost_finality",
+      "breakpoints": false
     }
   ]
 }

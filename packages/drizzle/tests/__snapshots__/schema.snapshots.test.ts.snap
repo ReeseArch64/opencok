@@ -15419,3 +15419,35 @@ select "periodId", "uid", "total", "paid", "free", "lastAt" from "opencok_kingdo
 update "opencok_kingdom"."continued_cost_score" set "periodId" = $1, "uid" = $2, "total" = $3, "paid" = $4, "free" = $5, "lastAt" = $6 where "opencok_kingdom"."continued_cost_score"."periodId" = $7
 delete from "opencok_kingdom"."continued_cost_score" where "opencok_kingdom"."continued_cost_score"."periodId" = $1"
 `;
+
+exports[`opencok_global.continued_cost_rank_watermark: schema and CRUD SQL 1`] = `
+"schema opencok_global
+column ["periodId","varchar(32)",true,null,null,null]
+column ["kingdomId","integer",true,null,null,null]
+column ["digest","varchar(64)",true,null,null,null]
+column ["scoreCount","integer",true,null,null,null]
+column ["completedAt","bigint",true,null,null,null]
+primary ["continued_cost_rank_watermark_PRIMARY",["periodId","kingdomId"]]
+check ["continued_cost_rank_watermark_bounds","\\"kingdomId\\">0 AND \\"scoreCount\\" BETWEEN 0 AND 100 AND \\"completedAt\\">=0"]
+insert into "opencok_global"."continued_cost_rank_watermark" ("periodId", "kingdomId", "digest", "scoreCount", "completedAt") values ($1, $2, $3, $4, $5)
+select "periodId", "kingdomId", "digest", "scoreCount", "completedAt" from "opencok_global"."continued_cost_rank_watermark" where "opencok_global"."continued_cost_rank_watermark"."periodId" = $1
+update "opencok_global"."continued_cost_rank_watermark" set "periodId" = $1, "kingdomId" = $2, "digest" = $3, "scoreCount" = $4, "completedAt" = $5 where "opencok_global"."continued_cost_rank_watermark"."periodId" = $6
+delete from "opencok_global"."continued_cost_rank_watermark" where "opencok_global"."continued_cost_rank_watermark"."periodId" = $1"
+`;
+
+exports[`opencok_kingdom.continued_cost_closure: schema and CRUD SQL 1`] = `
+"schema opencok_kingdom
+column ["periodId","varchar(32)",true,null,null,null]
+column ["snapshot","text",true,null,null,null]
+column ["digest","varchar(64)",true,null,null,null]
+column ["scoreCount","integer",true,null,null,null]
+column ["createdAt","bigint",true,null,null,null]
+column ["phase","integer",true,"0",null,null]
+column ["finalizedAt","bigint",true,"0",null,null]
+primary ["continued_cost_closure_PRIMARY",["periodId"]]
+check ["continued_cost_closure_bounds","\\"scoreCount\\" BETWEEN 0 AND 100 AND \\"createdAt\\">=0 AND \\"phase\\" BETWEEN 0 AND 2 AND \\"finalizedAt\\">=0 AND octet_length(\\"snapshot\\")<=1048576"]
+insert into "opencok_kingdom"."continued_cost_closure" ("periodId", "snapshot", "digest", "scoreCount", "createdAt", "phase", "finalizedAt") values ($1, $2, $3, $4, $5, $6, $7)
+select "periodId", "snapshot", "digest", "scoreCount", "createdAt", "phase", "finalizedAt" from "opencok_kingdom"."continued_cost_closure" where "opencok_kingdom"."continued_cost_closure"."periodId" = $1
+update "opencok_kingdom"."continued_cost_closure" set "periodId" = $1, "snapshot" = $2, "digest" = $3, "scoreCount" = $4, "createdAt" = $5, "phase" = $6, "finalizedAt" = $7 where "opencok_kingdom"."continued_cost_closure"."periodId" = $8
+delete from "opencok_kingdom"."continued_cost_closure" where "opencok_kingdom"."continued_cost_closure"."periodId" = $1"
+`;
