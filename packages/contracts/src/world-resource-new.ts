@@ -5,6 +5,7 @@ export interface WorldResourceNewClock {
   areaCursor: number;
   nextRefreshAt: string;
 }
+
 export interface WorldResourceNewStore {
   readonly now: bigint;
   readonly clock: WorldResourceNewClock | undefined;
@@ -21,6 +22,7 @@ export interface WorldResourceNewStore {
   spawn(area: number, amount: number, slots: number, deadline: bigint): Promise<boolean>;
   save(clock: WorldResourceNewClock): Promise<void>;
 }
+
 export interface WorldResourceNewExecutor {
   execute(
     now: bigint | undefined,

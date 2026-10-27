@@ -6,4 +6,5 @@ export interface ScoreDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type ScoreDefinitionCatalog = CatalogTable<ScoreDefinition>;

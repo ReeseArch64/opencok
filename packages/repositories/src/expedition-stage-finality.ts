@@ -16,7 +16,9 @@ import type {
 import { fenceRealmTransaction, type RealmAuthority } from "./realm-authority";
 import { pendingOwnedProgression } from "./progression-finality";
 import type { Database } from "./game";
+
 export { createExpeditionStageRegistry } from "./expedition-stage-finality-global";
+
 export function createExpeditionStageRealm(
   db: Database["kingdom"]["db"],
   authority: RealmAuthority,
@@ -27,9 +29,12 @@ export function createExpeditionStageRealm(
     and(eq(closures.periodId, text(row, "periodId")), eq(closures.stage, num(row, "stage")));
   const owned = async (tx: Parameters<Parameters<typeof db.transaction>[0]>[0], row: Row) => {
     const [saved] = await tx.select().from(closures).where(key(row)).for("update");
+
     if (!saved) throw new Error("Missing owned expedition stage closure");
+
     return saved;
   };
+
   return {
     candidates(now) {
       return db.transaction(async (tx) => {
@@ -71,6 +76,7 @@ export function createExpeditionStageRealm(
           archives.length === 8 && tail ? { end: tail.endTime, id: tail.periodId } : undefined;
         const result = new Map<string, ExpeditionStagePeriod>();
         const manifests = new Map(archives.map((row) => [row.periodId, row]));
+
         for (const row of pending) {
           if (!manifests.has(row.periodId)) {
             const [manifest] = await tx
@@ -83,23 +89,32 @@ export function createExpeditionStageRealm(
                 ),
               )
               .limit(1);
+
             if (!manifest) throw new Error("Missing sealed expedition manifest");
+
             manifests.set(row.periodId, manifest);
           }
         }
+
         for (const manifest of manifests.values()) {
           const raw: unknown = JSON.parse(manifest.schedule);
+
           if (!Array.isArray(raw) || raw.length > 9)
             throw new Error("Invalid expedition phase archive");
+
           for (const item of raw) {
             const phase = expeditionPhase(manifest, BigInt(item.startTime));
+
             if (!phase || phase.endTime > now - 300000n) continue;
+
             const [prior] = await tx
               .select({ phase: closures.phase })
               .from(closures)
               .where(and(eq(closures.periodId, manifest.periodId), eq(closures.stage, phase.stage)))
               .limit(1);
+
             if (prior && prior.phase >= 2) continue;
+
             result.set(`${manifest.periodId}:${phase.stage}`, {
               periodId: manifest.periodId,
               stage: phase.stage,
@@ -111,6 +126,7 @@ export function createExpeditionStageRealm(
             });
           }
         }
+
         return [...result.values()];
       });
     },
@@ -119,13 +135,16 @@ export function createExpeditionStageRealm(
         await tx.execute(sql`set local lock_timeout='1s'`);
         await fenceRealmTransaction(tx, authority, "update");
         await tx.execute(sql`select pg_advisory_xact_lock(728220,1)`);
+
         if (period.kingdomId !== authority.kingdomId || now < period.endTime + 300000n)
           throw new Error("Premature expedition stage seal");
+
         const [prior] = await tx
           .select()
           .from(closures)
           .where(key({ ...period }))
           .for("update");
+
         if (prior) {
           if (
             prior.opponent !== period.opponent ||
@@ -133,8 +152,10 @@ export function createExpeditionStageRealm(
             prior.endTime !== period.endTime
           )
             throw new Error("Conflicting expedition stage closure");
+
           return prior;
         }
+
         const [manifest] = await tx
           .select()
           .from(expedition_manifest)
@@ -146,6 +167,7 @@ export function createExpeditionStageRealm(
           )
           .for("share");
         const phase = expeditionPhase(manifest, period.startTime);
+
         if (
           !manifest ||
           manifest.matchServerId !== period.opponent ||
@@ -154,7 +176,9 @@ export function createExpeditionStageRealm(
           phase.endTime !== period.endTime
         )
           throw new Error("Unowned expedition stage closure");
+
         if (await pendingOwnedProgression(tx, authority.kingdomId, period.endTime, now)) return;
+
         await tx.execute(sql`insert into ${members}("periodId",stage,uid,score,"allianceId","takeReward",eligibility,metadata)
         select p."periodId",p.stage,p.uid,p.score,coalesce(u."allianceId",''),coalesce(p."takeReward",''),
           json_build_object('home',u.uid is not null,'level',coalesce((select max(b.level+coalesce(b.star,0)) from ${user_building} b where b.uid=p.uid and b."itemId"=400000),0),'sciences',coalesce((select json_agg(s."itemId" order by s."itemId" collate "C") from ${user_science} s where s.uid=p.uid and s.level>0),'[]'::json))::text,
@@ -165,8 +189,10 @@ export function createExpeditionStageRealm(
           sql`select count(*)::text as count,md5(coalesce(string_agg(length(uid)::text||':'||uid||':'||length("allianceId")::text||':'||"allianceId"||':'||encode(float8send(score),'hex'),'|' order by uid collate "C"),'')) as digest,coalesce(sum(score order by uid collate "C"),0)::float8 as total from ${members} where "periodId"=${period.periodId} and stage=${period.stage}`,
         );
         const value = proof.rows[0]!;
+
         if (BigInt(value.count) > 1000000n || !Number.isFinite(value.total))
           throw new Error("Expedition stage seal bound exceeded");
+
         const [closure] = await tx
           .insert(closures)
           .values({
@@ -187,6 +213,7 @@ export function createExpeditionStageRealm(
           })
           .returning();
         authority.assertReady();
+
         return closure;
       });
     },
@@ -203,7 +230,9 @@ export function createExpeditionStageRealm(
             ),
           )
           .limit(1);
+
         if (!manifest) throw new Error("Missing expedition upload manifest");
+
         const rows = await tx
           .select()
           .from(members)
@@ -216,6 +245,7 @@ export function createExpeditionStageRealm(
           )
           .orderBy(sql`${members.uid} collate "C"`)
           .limit(64);
+
         return rows.map((row) => ({
           periodId: row.periodId,
           stage: row.stage,
@@ -233,6 +263,7 @@ export function createExpeditionStageRealm(
       await db.transaction(async (tx) => {
         await fenceRealmTransaction(tx, authority);
         const row = await owned(tx, closure);
+
         if (
           row.phase !== 0 ||
           row.cursor !== text(closure, "cursor") ||
@@ -242,6 +273,7 @@ export function createExpeditionStageRealm(
           Buffer.compare(Buffer.from(cursor), Buffer.from(row.cursor)) < 0
         )
           throw new Error("Stale expedition stage cursor");
+
         await tx.update(closures).set({ cursor, processed }).where(key(row));
       });
     },
@@ -249,6 +281,7 @@ export function createExpeditionStageRealm(
       await db.transaction(async (tx) => {
         await fenceRealmTransaction(tx, authority);
         const row = await owned(tx, closure);
+
         if (row.phase === 0)
           await tx.update(closures).set({ cursor: "", processed: 0n }).where(key(row));
       });
@@ -257,7 +290,9 @@ export function createExpeditionStageRealm(
       await db.transaction(async (tx) => {
         await fenceRealmTransaction(tx, authority);
         const row = await owned(tx, closure);
+
         if (row.processed !== row.scoreCount) throw new Error("Incomplete expedition stage upload");
+
         if (row.phase === 0) await tx.update(closures).set({ phase: 1 }).where(key(row));
       });
     },
@@ -265,16 +300,20 @@ export function createExpeditionStageRealm(
       await db.transaction(async (tx) => {
         await fenceRealmTransaction(tx, authority);
         const row = await owned(tx, closure);
+
         if (
           row.phase < 1 ||
           ![authority.kingdomId, row.opponent].includes(winner) ||
           now < row.endTime
         )
           throw new Error("Invalid expedition stage result");
+
         if (row.phase >= 2) {
           if (row.winner !== winner) throw new Error("Conflicting expedition stage result");
+
           return;
         }
+
         await tx.update(closures).set({ phase: 2, winner, finalizedAt: now }).where(key(row));
       });
     },

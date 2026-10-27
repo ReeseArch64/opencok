@@ -8,6 +8,7 @@ import { normalRechargeOperation, normalRechargeParameters } from "./normal-rech
 import { paidGiftParameters } from "./red-packets";
 import { rechargeActivityOperationId } from "./recharge-activity";
 import { rechargeFeedbackOperationId } from "./recharge-feedback";
+
 export function createPaymentObservers(
   gateway: PaidGiftGateway | undefined,
   rules: Rules,
@@ -23,7 +24,9 @@ export function createPaymentObservers(
   }>();
   const accepted = async (owner: string, eventId: string) => {
     const delivery = deliveries.getStore();
+
     if (!delivery || delivery.owner !== owner || delivery.eventId !== eventId) return null;
+
     return deliveredPayment(
       gateway,
       owner,
@@ -34,10 +37,12 @@ export function createPaymentObservers(
       (order, platform) => read(owner, order, platform),
     );
   };
+
   return {
     newcomer: {
       async accepted({ owner, eventId }: { owner: string; eventId: string }) {
         const evidence = await accepted(owner, eventId);
+
         return evidence
           ? { rechargeGold: evidence.gold, occurredAt: evidence.proof.occurredAt }
           : null;
@@ -46,6 +51,7 @@ export function createPaymentObservers(
     feedback: {
       async accepted({ owner, eventId }: { owner: string; eventId: string }) {
         const evidence = await accepted(owner, eventId);
+
         return evidence
           ? {
               orderId: evidence.proof.orderId,

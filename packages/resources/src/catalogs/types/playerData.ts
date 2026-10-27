@@ -25,4 +25,5 @@ export interface PlayerDataDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type PlayerDataDefinitionCatalog = CatalogTable<PlayerDataDefinition>;

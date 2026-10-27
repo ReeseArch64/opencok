@@ -1,4 +1,5 @@
 import type { GeneralAwakenChallengeRewardDefinition } from "../types/general_awaken_challenge_reward.ts";
+
 export const records: readonly GeneralAwakenChallengeRewardDefinition[] = [
   {
     "id": 40921001,

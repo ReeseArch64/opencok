@@ -26,11 +26,14 @@ export class LoginError extends Error {
     super("Login rejected");
   }
 }
+
 function equal(left: string, right: string): boolean {
   const a = Buffer.from(left);
   const b = Buffer.from(right);
+
   return a.length === b.length && timingSafeEqual(a, b);
 }
+
 export async function authenticate(
   packet: Fields,
   db: AuthenticationStore,
@@ -38,11 +41,13 @@ export async function authenticate(
   now = Date.now(),
 ): Promise<Row> {
   if (str(packet, "zn") !== `COK${config.kingdomId}`) throw new LoginError("zone");
+
   const data = fields(packet.p);
   const uid = str(data, "gameUid", "");
   const timestamp = str(data, "cmdBaseTime");
   const signature = str(data, "SecurityCode");
   const deviceUuid = str(data, "uuid");
+
   if (
     !uid ||
     uid.length > 255 ||
@@ -51,25 +56,36 @@ export async function authenticate(
     !deviceUuid
   )
     throw new LoginError("identity");
+
   if (str(data, "appVersion") !== MOBILE_CLIENT_VERSION) throw new LoginError("version");
 
   if (!timestamp || timestamp.length > 64) throw new LoginError("timestamp");
+
   if (!/^[a-f0-9]{32}$/.test(signature)) throw new LoginError("signature_format");
+
   const expected = createHash("md5")
     .update(timestamp + config.loginSecret + uid)
     .digest("hex");
+
   if (!equal(signature, expected)) throw new LoginError("signature");
+
   const profile = await db.getProfileById(uid);
+
   if (!profile) throw new LoginError("profile_missing");
+
   if (!equal(deviceUuid, text(profile, "deviceUuid"))) throw new LoginError("device");
+
   if (long(profile, "banTime") > BigInt(now) || num(profile, "banFlag") !== 0)
     throw new LoginError("banned");
 
   const platform = str(data, "pf", "").trim() || text(profile, "pf");
   const devicePlatforms = ["csmod_games", "Google", "market_global"];
+
   if (!devicePlatforms.includes(platform) || !devicePlatforms.includes(text(profile, "pf")))
     throw new LoginError("platform");
+
   const accounts = await db.getAccountsByPlayerId(uid);
+
   if (
     !accounts.some(
       (a) =>
@@ -79,5 +95,6 @@ export async function authenticate(
     )
   )
     throw new LoginError("global_account");
+
   return profile;
 }

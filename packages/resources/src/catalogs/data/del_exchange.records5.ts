@@ -1,4 +1,5 @@
 import type { DelExchangeDefinition } from "../types/del_exchange.ts";
+
 export const records: readonly DelExchangeDefinition[] = [
   {
     "id": 5255160,

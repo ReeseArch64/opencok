@@ -8,4 +8,5 @@ export interface VoteServerDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type VoteServerDefinitionCatalog = CatalogTable<VoteServerDefinition>;

@@ -105,9 +105,11 @@ export function createCityProgressionStore(
 ): CityProgressionStore {
   let alliance = "";
   let cosmeticTarget: Awaited<ReturnType<typeof readCosmeticTarget>>;
+
   return {
     async birthPoint(rules, mode) {
       if (!authority) throw new Error("Missing world birth authority");
+
       if (mode !== "random") {
         const [existing] = await tx
           .select({ id: worldpoint.id })
@@ -121,8 +123,10 @@ export function createCityProgressionStore(
           )
           .limit(1)
           .for("update");
+
         if (existing) throw new Error("Resident city already exists");
       }
+
       return allocateWorldBirth(tx, authority, mapSize, rules, now, mode);
     },
     async treasurePoints(ids) {
@@ -131,7 +135,9 @@ export function createCityProgressionStore(
         ids.some((id) => !Number.isInteger(id) || id < 1 || id > mapSize * mapSize)
       )
         throw new Error("Invalid treasure target query");
+
       if (!ids.length) return [];
+
       return tx
         .select()
         .from(worldpoint)
@@ -142,7 +148,9 @@ export function createCityProgressionStore(
     async getState(command, ranking, request) {
       const [profile] = await tx.select().from(userprofile).where(eq(userprofile.uid, owner));
       const [resource] = await tx.select().from(user_resource).where(eq(user_resource.uid, owner));
+
       if (!profile || !resource) throw new Error("Missing city owner");
+
       const [statistics] = await tx.select().from(playerinfo).where(eq(playerinfo.uid, owner));
       const [buildingExperience] = await tx
         .select()
@@ -179,6 +187,7 @@ export function createCityProgressionStore(
         .orderBy(asc(user_wall.armyId))
         .limit(1025);
       const queues = await tx.select().from(queue).where(eq(queue.ownerId, owner)).limit(257);
+
       if (
         buildings.length > 256 ||
         sciences.length > 4096 ||
@@ -188,6 +197,7 @@ export function createCityProgressionStore(
         queues.length > 256
       )
         throw new Error("City aggregate exceeds bound");
+
       const skills = await tx.select().from(user_skill).where(eq(user_skill.ownerId, owner));
       const tasks = await tx.select().from(user_task).where(eq(user_task.uid, owner));
       const achievements = await tx
@@ -201,8 +211,10 @@ export function createCityProgressionStore(
         .from(user_civilization_science)
         .where(eq(user_civilization_science.userID, owner))
         .limit(4097);
+
       if (civilizationSciences.length > 4096)
         throw new Error("Civilization science aggregate exceeds bound");
+
       alliance = profile.allianceId ?? "";
       const worldMutation =
         command?.startsWith("world.") ||
@@ -216,6 +228,7 @@ export function createCityProgressionStore(
         command === "civilizationCastle"
           ? await readWorldMutationState(tx, owner, request, mapSize, command)
           : undefined;
+
       return {
         militaryAward:
           command === "activity.accept.reward" ? militaryRankAwardReader(tx, owner) : undefined,
@@ -409,6 +422,7 @@ export function createCityProgressionStore(
       const persist = async () => {
         for (const row of write.civilizationSciences ?? []) {
           if (row.userID !== owner) throw new Error("Foreign civilization science write");
+
           const value = {
             userID: owner,
             baseItemID: num(row, "baseItemID"),
@@ -422,10 +436,13 @@ export function createCityProgressionStore(
               set: { level: value.level },
             });
         }
+
         if (write.minstrel) {
           const row = write.minstrel;
+
           if (row.uid !== owner || ![0, 1].includes(num(row, "type")))
             throw new Error("Foreign minstrel write");
+
           const value = {
             uid: owner,
             type: num(row, "type"),
@@ -445,49 +462,85 @@ export function createCityProgressionStore(
               set: value,
             });
         }
+
         if (write.monsterExchange) await writeMonsterExchanges(tx, owner, write.monsterExchange);
+
         if (write.fragmentExchange) await writeFragmentExchanges(tx, owner, write.fragmentExchange);
+
         if (write.cosmeticTarget)
           await writeCosmeticTarget(tx, owner, cosmeticTarget?.uid, write.cosmeticTarget);
+
         if (write.costRankAward) await writeCostRankAward(tx, owner, write.costRankAward, now);
+
         if (write.expeditionAward)
           await writeExpeditionAward(tx, owner, write.expeditionAward, now);
+
         if (write.heroRankingAward)
           await writeHeroRankAward(tx, owner, write.heroRankingAward, now);
+
         if (write.heroScore) await writeHeroScore(tx, owner, alliance, write.heroScore);
+
         if (write.olympic) await writeOlympic(tx, owner, write.olympic);
+
         if (write.cupBetting) await writeCupBetting(tx, owner, write.cupBetting);
+
         if (write.groupBuy) await writeGroupBuy(tx, owner, write.groupBuy);
+
         if (write.specialEventPurchase)
           await writeSpecialEventPurchase(tx, owner, write.specialEventPurchase);
+
         if (write.continuedCostHide !== undefined)
           await writeContinuedCostHide(tx, owner, write.continuedCostHide);
+
         if (write.continuedCost) await writeContinuedCost(tx, owner, write.continuedCost);
+
         if (write.troubleHistory) await writeTrouble(tx, owner, write.troubleHistory);
+
         if (write.comeback) await writeComeback(tx, owner, write.comeback);
+
         if (write.hotItem) await writeHotItems(tx, owner, write.hotItem);
+
         if (write.prayer) await writePrayer(tx, owner, write.prayer);
+
         if (write.recallTask) await writeRecallTasks(tx, owner, write.recallTask);
+
         if (write.regionalRecall) await writeRegionalRecall(tx, owner, write.regionalRecall);
+
         if (write.allianceHeart) await writeAllianceHeart(tx, owner, write.allianceHeart);
+
         if (write.playerItemGifts) await writePlayerItemGifts(tx, owner, write.playerItemGifts);
+
         if (write.seasonalExchange) await writeSeasonalExchange(tx, owner, write.seasonalExchange);
+
         if (write.vipBox) await writeVipBox(tx, owner, write.vipBox);
+
         if (write.targetTask) await writeTargetTasks(tx, owner, write.targetTask);
+
         if (write.redPackets) await writeRedPackets(tx, owner, write.redPackets);
+
         if (write.militaryAward) await writeMilitaryRankAward(tx, owner, write.militaryAward, now);
+
         if (write.activityRewardClaim)
           await writeActivityReward(tx, owner, write.activityRewardClaim);
+
         if (write.rechargeFeedback)
           await writeRechargeFeedback(tx, owner, write.rechargeFeedback, now);
+
         if (write.eggActivity) await writeEggActivity(tx, owner, write.eggActivity);
+
         if (write.goldEggs) await writeGoldEggs(tx, owner, write.goldEggs, now);
+
         if (write.normalRecharge) await writeNormalRecharge(tx, owner, write.normalRecharge, now);
+
         if (write.rechargeActivity) await writeRechargeActivity(tx, owner, write.rechargeActivity);
+
         if (write.ordinaryBox) await writeOrdinaryBox(tx, owner, write.ordinaryBox);
+
         if (write.sevenDayCycle) await writeSevenDayCycle(tx, owner, write.sevenDayCycle);
+
         if (write.shippingInvestment)
           await writeShippingInvestment(tx, owner, write.shippingInvestment);
+
         if (write.branchCityOpenState !== undefined)
           await tx
             .insert(user_branch_city_info)
@@ -500,7 +553,9 @@ export function createCityProgressionStore(
               target: user_branch_city_info.uid,
               set: { openstate: write.branchCityOpenState },
             });
+
         if (write.dailyInvestment) await writeDailyInvestment(tx, owner, write.dailyInvestment);
+
         if (write.castleLevelEvent || write.castleLevelEnrollments)
           await writeCastleLevelEvent(
             tx,
@@ -508,22 +563,35 @@ export function createCityProgressionStore(
             write.castleLevelEvent ?? [],
             write.castleLevelEnrollments ?? [],
           );
+
         if (write.luckyDay) await writeLuckyDay(tx, owner, write.luckyDay);
+
         if (write.dragonTower) await writeDragonTower(tx, owner, write.dragonTower);
+
         if (write.expedition) await writeExpedition(tx, owner, write.expedition);
+
         if (write.arena) await writeArena(tx, owner, write.arena);
+
         if (write.campaignVariables)
           await writeCampaignVariables(tx, owner, write.campaignVariables, now);
+
         if (write.lottery) await writeLottery(tx, owner, write.lottery);
+
         if (write.totems) await writeTotems(tx, owner, write.totems);
+
         if (write.civilizationCastle)
           await writeCivilizationCastle(tx, owner, write.civilizationCastle);
+
         if (write.worldMutation) await writeWorldMutation(tx, owner, write.worldMutation);
+
         if (write.dragons) await writeDragonProgression(tx, owner, write.dragons);
+
         await writePlayerEffects(tx, owner, write);
 
         await writeEquipment(tx, owner, write);
+
         if (write.quests) await writeQuests(tx, owner, write.quests);
+
         for (const row of write.buildings ?? []) {
           const value = {
             uuid: text(row, "uuid"),
@@ -546,7 +614,9 @@ export function createCityProgressionStore(
             .select({ uid: user_building.uid })
             .from(user_building)
             .where(eq(user_building.uuid, value.uuid));
+
           if (existing && existing.uid !== owner) throw new Error("Foreign building");
+
           await tx
             .insert(user_building)
             .values(value)
@@ -556,9 +626,11 @@ export function createCityProgressionStore(
               setWhere: eq(user_building.uid, owner),
             });
         }
+
         for (const row of write.skills ?? []) {
           if (row.ownerId !== owner || !/^6[0-9]{5}$/.test(text(row, "skillId")))
             throw new Error("Invalid research skill owner");
+
           const value = {
             uuid: text(row, "uuid"),
             ownerId: owner,
@@ -574,7 +646,9 @@ export function createCityProgressionStore(
             .select({ ownerId: user_skill.ownerId })
             .from(user_skill)
             .where(eq(user_skill.uuid, value.uuid));
+
           if (existing && existing.ownerId !== owner) throw new Error("Foreign research skill");
+
           await tx
             .insert(user_skill)
             .values(value)
@@ -584,6 +658,7 @@ export function createCityProgressionStore(
               setWhere: eq(user_skill.ownerId, owner),
             });
         }
+
         for (const row of write.sciences ?? []) {
           const value = {
             uid: owner,
@@ -596,6 +671,7 @@ export function createCityProgressionStore(
             .values(value)
             .onConflictDoUpdate({ target: [user_science.uid, user_science.itemId], set: value });
         }
+
         for (const row of write.armies ?? []) {
           const value = {
             uid: owner,
@@ -614,6 +690,7 @@ export function createCityProgressionStore(
             .values(value)
             .onConflictDoUpdate({ target: [user_army.uid, user_army.armyId], set: value });
         }
+
         for (const row of write.hospital ?? []) {
           const value = {
             uid: owner,
@@ -627,6 +704,7 @@ export function createCityProgressionStore(
             .values(value)
             .onConflictDoUpdate({ target: [user_hospital.uid, user_hospital.armyId], set: value });
         }
+
         for (const row of write.forts ?? []) {
           const value = {
             uid: owner,
@@ -641,14 +719,17 @@ export function createCityProgressionStore(
             .values(value)
             .onConflictDoUpdate({ target: [user_wall.uid, user_wall.armyId], set: value });
         }
+
         for (const row of write.queues ?? []) {
           if (text(row, "ownerId") !== owner) throw new Error("Foreign queue");
+
           const [existing] = await tx
             .select({ uuid: queue.uuid })
             .from(queue)
             .where(
               and(eq(queue.ownerId, owner), eq(queue.type, num(row, "type")), eq(queue.qid, 1)),
             );
+
           if (!existing)
             await tx.insert(queue).values({
               uuid: text(row, "uuid"),
@@ -664,25 +745,31 @@ export function createCityProgressionStore(
               para: 0,
             });
         }
+
         if (write.profile) {
           await tx.update(userprofile).set(write.profile).where(eq(userprofile.uid, owner));
+
           if (write.legacyGeneralLevel !== undefined)
             await tx
               .update(user_general)
               .set({ level: write.legacyGeneralLevel })
               .where(eq(user_general.uid, owner));
         }
+
         if (write.generalRoster) await writeGeneralRoster(tx, owner, write.generalRoster, now);
+
         if (write.statistics)
           await tx
             .insert(playerinfo)
             .values({ uid: owner, ...write.statistics })
             .onConflictDoUpdate({ target: playerinfo.uid, set: write.statistics });
+
         if (write.buildingExperience)
           await tx
             .insert(user_building_exp)
             .values({ uid: owner, ...write.buildingExperience })
             .onConflictDoUpdate({ target: user_building_exp.uid, set: write.buildingExperience });
+
         if (write.deletedBuildings?.length) {
           await tx
             .update(new_general)
@@ -715,6 +802,7 @@ export function createCityProgressionStore(
           num(row, "level") !==
           (scienceBefore.find((before) => before.itemId === row.itemId)?.level ?? 0),
       );
+
       if (
         write.luckyDay ||
         write.generalRoster ||
@@ -734,6 +822,7 @@ export function createCityProgressionStore(
       )
         await boundary(tx, owner, now, persist, write.deletedBuildings ?? [], economy);
       else await persist();
+
       if (write.deletedBuildings?.length)
         await tx
           .delete(building_production)
@@ -770,16 +859,21 @@ function validateWrite(write: CityProgressionWrite, owner: string) {
     [write.forts, "armyId", ["level", "num", "build"]],
   ] as const) {
     if (!rows) continue;
+
     if (rows.length > 1024 || new Set(rows.map((row) => row[identity])).size !== rows.length)
       throw new Error("Invalid city write set");
+
     for (const row of rows) {
       if (row.uid !== owner || !text(row, identity) || text(row, identity).length > 40)
         throw new Error("Invalid city owner");
+
       for (const key of fields) {
         const value = num(row as Row, key);
+
         if (!Number.isInteger(value) || value < 0 || value > 2147483647)
           throw new Error("Invalid city quantity");
       }
+
       for (const key of ["finishTime", "cd", "refreshTime", "updateTime", "foodCostTime"]) {
         if (long(row as Row, key) < 0n || long(row as Row, key) > 9223372036854775807n)
           throw new Error("Invalid city deadline");

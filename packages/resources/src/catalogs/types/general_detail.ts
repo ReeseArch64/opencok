@@ -8,4 +8,5 @@ export interface GeneralDetailDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type GeneralDetailDefinitionCatalog = CatalogTable<GeneralDetailDefinition>;

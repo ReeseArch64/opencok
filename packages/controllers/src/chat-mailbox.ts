@@ -47,7 +47,9 @@ export class ChatMailboxController extends SignedChatController<Update, Result> 
 
   protected async apply(update: Readonly<Update>): Promise<Result> {
     const result = await this.mailboxes.apply(update);
+
     if (!["applied", "unchanged"].includes(result)) throw new Error();
+
     return result;
   }
 

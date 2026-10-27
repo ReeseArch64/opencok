@@ -1,4 +1,5 @@
 import type { DailyLoginDefinition } from "../types/daily_login.ts";
+
 export const records: readonly DailyLoginDefinition[] = [
   {
     "id": 46301,

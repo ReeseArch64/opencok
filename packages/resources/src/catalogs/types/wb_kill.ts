@@ -8,4 +8,5 @@ export interface WbKillDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type WbKillDefinitionCatalog = CatalogTable<WbKillDefinition>;

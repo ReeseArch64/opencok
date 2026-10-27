@@ -10,4 +10,5 @@ export interface Skill2Definition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type Skill2DefinitionCatalog = CatalogTable<Skill2Definition>;

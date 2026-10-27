@@ -1,4 +1,5 @@
 import type { ComebackDefinition } from "../types/comeback.ts";
+
 export const records: readonly ComebackDefinition[] = [
   {
     "id": 9010001,

@@ -1,4 +1,5 @@
 import type { NewExchangeDefinition } from "../types/new_exchange.ts";
+
 export const records: readonly NewExchangeDefinition[] = [
   {
     "dollar": 9.99,

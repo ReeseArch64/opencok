@@ -1,5 +1,6 @@
 import type { Row } from "./rows";
 import type { ExpeditionPublishedScore } from "./expedition-score-publication";
+
 export interface ExpeditionStagePeriod {
   periodId: string;
   stage: number;
@@ -9,6 +10,7 @@ export interface ExpeditionStagePeriod {
   endTime: bigint;
   activityEnd: bigint;
 }
+
 export interface ExpeditionStageRealm {
   candidates(now: bigint): Promise<readonly ExpeditionStagePeriod[]>;
   seal(period: ExpeditionStagePeriod, now: bigint): Promise<Row | undefined>;
@@ -18,6 +20,7 @@ export interface ExpeditionStageRealm {
   completed(closure: Row): Promise<void>;
   finished(closure: Row, winner: number, now: bigint): Promise<void>;
 }
+
 export interface ExpeditionStageRegistry {
   verify(period: ExpeditionStagePeriod): Promise<boolean>;
   begin(period: ExpeditionStagePeriod, closure: Row, now: bigint): Promise<void>;

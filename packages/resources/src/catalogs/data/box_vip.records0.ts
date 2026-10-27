@@ -1,4 +1,5 @@
 import type { BoxVipDefinition } from "../types/box_vip.ts";
+
 export const records: readonly BoxVipDefinition[] = [
   {
     "id": 290000,

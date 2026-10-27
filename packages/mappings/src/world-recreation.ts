@@ -1,5 +1,6 @@
 import { sfs, type Fields } from "@opencok/messages/sfs";
 import type { WorldRecreationResponse } from "@opencok/contracts/responses/world-recreation";
+
 export function worldCityRecreated(response: WorldRecreationResponse): Fields {
   return {
     srcPoint: sfs.int(response.srcPoint),

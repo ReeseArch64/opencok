@@ -6,6 +6,7 @@ import { worldMutationFailure } from "./world-march-runtime";
 export function treasureMapItem(colour: number) {
   return String(200041 + cityInteger(colour, 1, 5));
 }
+
 export function treasureMapRules(rules: Rules, level: number, colour: number) {
   const rows = [...(rules.world.heritage?.values() ?? [])].filter(
     (row) =>
@@ -14,9 +15,12 @@ export function treasureMapRules(rules: Rules, level: number, colour: number) {
       Number(row.lvlmax) >= level &&
       row.roll !== undefined,
   );
+
   if (!rows.length) worldMutationFailure();
+
   return rows;
 }
+
 export function treasureMapCandidates(
   origin: number,
   size: number,
@@ -30,12 +34,14 @@ export function treasureMapCandidates(
     points = new Set<number>();
   const clamp = (value: number) => Math.max(0, Math.min(size - 1, value));
   const black = (value: number) => value >= 574 && value <= 626;
+
   for (const [fromX, toX] of [
     [clamp(x - maximum), clamp(x - minimum)],
     [clamp(x + minimum), clamp(x + maximum)],
   ])
     for (let currentX = fromX!; currentX <= toX!; currentX++) {
       if (black(currentX)) continue;
+
       for (const [fromY, toY] of [
         [clamp(y - maximum), clamp(y - minimum)],
         [clamp(y + minimum), clamp(y + maximum)],
@@ -43,31 +49,39 @@ export function treasureMapCandidates(
         for (let currentY = fromY!; currentY <= toY!; currentY++)
           if (!black(currentY)) points.add(1 + currentX + currentY * size);
     }
+
   return [...points];
 }
+
 export function treasureMapFallback(point: number, size: number, range: number) {
   cityInteger(range, 0, 32);
   const x = (point - 1) % size,
     y = Math.floor((point - 1) / size),
     points: number[] = [];
+
   for (
     let currentX = Math.max(0, x - range);
     currentX <= Math.min(size - 1, x + range);
     currentX++
   ) {
     if (currentX >= 574 && currentX <= 626) continue;
+
     for (
       let currentY = Math.max(0, y - range);
       currentY <= Math.min(size - 1, y + range);
       currentY++
     ) {
       const id = 1 + currentX + currentY * size;
+
       if ((currentY >= 574 && currentY <= 626) || id === point) continue;
+
       points.push(id);
     }
   }
+
   return points;
 }
+
 export function treasureMapFree(point: Row | undefined) {
   return (
     point !== undefined &&

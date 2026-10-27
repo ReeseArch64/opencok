@@ -40,22 +40,29 @@ export async function readBuildingRanking(tx: Transaction, uid: string, limit: n
       sql`${user_building.uuid} collate "C" asc`,
     )
     .limit(limit * 2);
+
   if (candidates.some((row) => row.uid === uid && row.banTime !== 9223372036854775807n))
     return { candidates, fallbackRank: 1n };
+
   const castles = await tx
     .select({ uuid: user_building.uuid, level: user_building.level })
     .from(user_building)
     .where(and(eq(user_building.uid, uid), eq(user_building.itemId, 400000)))
     .orderBy(sql`${user_building.uuid} collate "C" asc`)
     .limit(2);
+
   if (castles.length > 1) throw new Error("Ambiguous own castle ranking fallback");
+
   if (!castles.length) return { candidates, fallbackRank: 1n };
+
   const level = castles[0]!.level;
   const counts = await tx
     .select({ rank: sql<string>`(count(*) + 1)::text`.mapWith(BigInt) })
     .from(user_building)
     .where(and(eq(user_building.itemId, 400000), gt(user_building.level, level)));
+
   if (counts.length !== 1) throw new Error("Missing castle ranking count");
+
   const peers = tx
     .select({
       uid: user_building.uid,
@@ -73,6 +80,8 @@ export async function readBuildingRanking(tx: Transaction, uid: string, limit: n
     .from(peers)
     .where(eq(peers.uid, uid))
     .limit(2);
+
   if (offsets.length > 1) throw new Error("Ambiguous castle ranking offset");
+
   return { candidates, fallbackRank: counts[0]!.rank + (offsets[0]?.offset ?? 0n) };
 }

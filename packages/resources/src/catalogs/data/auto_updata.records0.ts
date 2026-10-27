@@ -1,4 +1,5 @@
 import type { AutoUpdataDefinition } from "../types/auto_updata.ts";
+
 export const records: readonly AutoUpdataDefinition[] = [
   {
     "id": 901001,

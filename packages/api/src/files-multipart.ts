@@ -20,10 +20,12 @@ export function multipart(body: Buffer, contentType: string): Promise<FormData> 
         form.append(name, new File([Buffer.concat(chunks)], "image", { type: info.mimeType })),
       );
     });
+
     for (const event of ["filesLimit", "fieldsLimit", "partsLimit"] as const)
       parser.on(event, () => {
         invalid = true;
       });
+
     parser.on("error", reject);
     parser.on("close", () => (invalid ? reject(new Error("Multipart limit")) : resolve(form)));
     parser.end(body);

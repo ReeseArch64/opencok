@@ -19,6 +19,7 @@ export function restoredResourceGenerals(
   rules: Rules,
 ): NewGeneralEquippedState[] {
   if (typeof snapshot.moved !== "boolean") throw new Error("Invalid general transfer state");
+
   const ids: number[] = [];
   const selected = new Map<
     number,
@@ -29,9 +30,12 @@ export function restoredResourceGenerals(
       slots: string[];
     }
   >();
+
   for (const row of bounded(snapshot.generals)) {
     const state = integer(row.state);
+
     if (state < -128 || state > 127) throw new Error("Invalid saved general byte");
+
     const statuses: NewGeneralStatus[] = [];
     const general: NewGeneralEquippedState = {
       id: integer(row.id),
@@ -49,27 +53,39 @@ export function restoredResourceGenerals(
     ids.push(general.id);
     selected.set(general.id, { general, statuses, equipment: new Map(), slots: [] });
   }
+
   if (!snapshot.moved) {
     for (const row of bounded(snapshot.statuses)) {
       const entry = selected.get(integer(row.newGeneralId));
+
       if (!entry) continue;
+
       entry.statuses.push({
         stateId: integer(row.stateId),
         startTime: long(row.startTime),
         endTime: long(row.endTime),
       });
     }
+
     for (const row of bounded(snapshot.equipment)) {
       const generalId = integer(row.generalId);
+
       if (generalId <= 0) continue;
+
       const entry = selected.get(generalId);
+
       if (!entry) continue;
+
       const itemId = integer(row.itemId);
       const rule = rules.power.equipment?.get(String(itemId));
+
       if (!rule) throw new Error("Missing general equipment binding rule");
+
       if (entry.general.state === 4) continue;
+
       if (typeof rule.site !== "string" || rule.site.length > 65535)
         throw new Error("Missing or oversized general equipment site");
+
       entry.slots.push(rule.site);
       entry.equipment.set(rule.site, {
         itemId,
@@ -77,11 +93,13 @@ export function restoredResourceGenerals(
       });
     }
   }
+
   return legacyIntegerOrder(ids).map((id) => {
     const entry = selected.get(id)!;
     entry.general.orderedEquipment = legacyObjectOrder(entry.slots).map((site) =>
       entry.equipment.get(site)!,
     );
+
     return entry.general;
   });
 }

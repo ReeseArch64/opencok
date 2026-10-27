@@ -1,9 +1,11 @@
 import type { ResponseValue } from "./value";
+
 export interface VipBoxNoticeResponse {
   name: string;
   itemid: string;
   itemnum: string;
 }
+
 export interface VipBoxResponse {
   box_vip_list: readonly {
     table_info: Readonly<Record<string, ResponseValue>>;

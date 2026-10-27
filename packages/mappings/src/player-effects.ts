@@ -1,5 +1,6 @@
 import { sfs, type Fields } from "@opencok/messages/sfs";
 import { num, long, type Row } from "@opencok/contracts/rows";
+
 export function vipState(row: Row): Fields {
   return {
     vipEndTime: sfs.long(long(row, "vipEndTime")),
@@ -11,6 +12,7 @@ export function vipState(row: Row): Fields {
     shop_level: sfs.int(num(row, "shop_level")),
   };
 }
+
 export function temporaryState(row: Row): Fields {
   return {
     id: sfs.int(num(row, "stateId")),
@@ -22,6 +24,7 @@ export function temporaryState(row: Row): Fields {
     ranEffValue: sfs.int(num(row, "ranEffValue")),
   };
 }
+
 export function talentTrees(trees: readonly Record<string, string | number | null>[]) {
   return sfs.array(
     trees.map((tree) =>

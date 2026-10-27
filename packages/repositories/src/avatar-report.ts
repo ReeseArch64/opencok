@@ -31,6 +31,7 @@ export async function reportAvatar(
     now < 0
   )
     throw new DependencyError("avatar report input");
+
   const key = mysqlUtf8UnicodeKey(target);
   const pattern = mysqlUtf8UnicodeCandidates([target]);
   const lock = createHash("sha256")
@@ -52,6 +53,7 @@ export async function reportAvatar(
         .where(eq(userprofile.uid, owner))
         .limit(1)
         .for("update");
+
       if (
         !profile ||
         profile.uid !== owner ||
@@ -60,13 +62,16 @@ export async function reportAvatar(
         (profile.banTime ?? 0n) > BigInt(now)
       )
         throw new DependencyError("avatar report owner");
+
       await tx.execute(sql`select pg_advisory_xact_lock(${lock}::bigint)`);
       const candidates = await tx
         .select({ uid: pic_upload_record.uid })
         .from(pic_upload_record)
         .where(sql`${pic_upload_record.uid} collate "C" ~ ${pattern}`);
       const matches = candidates.filter((row) => mysqlUtf8UnicodeKey(row.uid) === key);
+
       if (matches.length > 1) throw new DependencyError("ambiguous avatar report target");
+
       const existing = matches[0];
       const increment = sql`case when coalesce(${pic_upload_record.report}, 0) = 2147483647 then -2147483648 else coalesce(${pic_upload_record.report}, 0) + 1 end`;
       const changed = existing
@@ -88,6 +93,7 @@ export async function reportAvatar(
             })
             .onConflictDoUpdate({ target: pic_upload_record.uid, set: { report: increment } })
             .returning({ uid: pic_upload_record.uid });
+
       if (changed.length !== 1 || changed[0]!.uid !== (existing?.uid ?? target))
         throw new DependencyError("avatar report result");
     },

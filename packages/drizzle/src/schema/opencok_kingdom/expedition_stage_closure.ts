@@ -10,6 +10,7 @@ import {
   text,
 } from "drizzle-orm/pg-core";
 import { opencok_kingdom } from "../namespaces";
+
 export const expedition_stage_closure = opencok_kingdom.table(
   "expedition_stage_closure",
   {

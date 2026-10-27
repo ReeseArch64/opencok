@@ -13,4 +13,5 @@ export interface P6ArmsDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type P6ArmsDefinitionCatalog = CatalogTable<P6ArmsDefinition>;

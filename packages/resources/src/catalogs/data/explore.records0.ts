@@ -1,4 +1,5 @@
 import type { ExploreDefinition } from "../types/explore.ts";
+
 export const records: readonly ExploreDefinition[] = [
   {
     "id": 41050,

@@ -4,4 +4,5 @@ export interface LuckyEffectDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type LuckyEffectDefinitionCatalog = CatalogTable<LuckyEffectDefinition>;

@@ -1,4 +1,5 @@
 import type { AllianceshopDefinition } from "../types/allianceshop.ts";
+
 export const records: readonly AllianceshopDefinition[] = [
   { "id": 7200, "item": 200000, "type": 0, "contribution": 200, "funds": 2000, "time": 30 },
   { "id": 7201, "item": 200001, "type": 0, "contribution": 300, "funds": 3000, "time": 60 },

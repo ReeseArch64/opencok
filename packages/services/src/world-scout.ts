@@ -13,9 +13,11 @@ import { worldPowerEffects } from "@opencok/rules/power-world";
 import { playerGameEffect } from "@opencok/rules/power-resolver";
 import { generalSkillPoints, decodeWorldPowerEffects } from "./power";
 import { resourceOwnerRuleContext } from "./world-resource-owner-context";
+
 function invalid(): never {
   throw new GameError(errors.unsupported, "world_point_detail");
 }
+
 export async function worldScoutQuotation(
   store: WorldScoutStore,
   observer: string,
@@ -27,8 +29,11 @@ export async function worldScoutQuotation(
   services: Pick<GameServices, "worldPowerEffects" | "emperorVersion">,
 ): Promise<Fields> {
   const id = int(params, "point");
+
   if (id < 1 || id > size * size || !Number.isSafeInteger(now) || now < 0) invalid();
+
   const snapshot = await store.read(observer, id, kingdomId, now);
+
   if (
     !snapshot ||
     snapshot.profile.uid !== observer ||
@@ -39,6 +44,7 @@ export async function worldScoutQuotation(
     long(snapshot.profile, "banTime") > BigInt(now)
   )
     invalid();
+
   const point = snapshot.point,
     kind = num(point, "pointType"),
     barbarian =
@@ -46,9 +52,13 @@ export async function worldScoutQuotation(
       text(point, "pointItem") &&
       long(point, "flushTime") > BigInt(now) &&
       barbarianCurrentHP(point, snapshot.barbarian, rules, BigInt(now)) > 0;
+
   if (point.ownerId == null && ![14, 23, 46, 47].includes(kind) && !barbarian) invalid();
+
   const context = resourceOwnerRuleContext(snapshot.owner, { kingdomId, now });
+
   if (!services.worldPowerEffects) invalid();
+
   const world = worldPowerEffects(
       decodeWorldPowerEffects(await services.worldPowerEffects(kingdomId)),
       rules,
@@ -67,8 +77,11 @@ export async function worldScoutQuotation(
   ).speed;
   const source = num(snapshot.world, "pointId"),
     origin = resolveWorldCityGeometry(source, size, observer, snapshot.points)?.points;
+
   if (!origin) invalid();
+
   let destination: readonly number[] | undefined;
+
   if (kind === 1 || kind === 68) {
     destination = resolveWorldCityGeometry(
       id,
@@ -78,13 +91,16 @@ export async function worldScoutQuotation(
       kind,
       kind === 68 ? [69] : [8, 2],
     )?.points;
+
     if (!destination) invalid();
   } else if ([6, 12, 18, 21, 15, 49, 66].includes(kind)) destination = worldFootprint(id, size);
+
   if (size > 600 && id === 1 + 600 + 600 * size)
     destination = Array.from(
       { length: 9 },
       (_, index) => id + ((index % 3) - 1) + (Math.floor(index / 3) - 1) * size,
     );
+
   const route = ordinaryMarchRoute(
     rules,
     size,
@@ -99,6 +115,7 @@ export async function worldScoutQuotation(
     origin,
     destination,
   );
+
   return {
     pic: sfs.string(text(snapshot.profile, "pic")),
     point: sfs.int(id),

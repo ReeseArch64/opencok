@@ -1,6 +1,7 @@
 import { sql } from "drizzle-orm";
 import { bigint, integer, primaryKey, varchar, index, check } from "drizzle-orm/pg-core";
 import { opencok_kingdom } from "../namespaces";
+
 export const arena_registration = opencok_kingdom.table(
   "arena_registration",
   {

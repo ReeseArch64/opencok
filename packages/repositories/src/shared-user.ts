@@ -8,6 +8,7 @@ import { user_vip } from "@opencok/drizzle/schema/opencok_kingdom/user_vip";
 import { and, eq } from "drizzle-orm";
 
 type Realm = ReturnType<ReturnType<typeof createDatabases>["getKingdom"]>["db"];
+
 type Transaction = Parameters<Parameters<Realm["transaction"]>[0]>[0];
 
 export async function readSharedUserProfile(tx: Transaction, uid: string, kingdomId: number) {
@@ -43,7 +44,9 @@ export async function readSharedUserProfile(tx: Transaction, uid: string, kingdo
     .leftJoin(alliance_member, eq(alliance_member.uid, userprofile.uid))
     .where(eq(userprofile.uid, uid))
     .limit(2);
+
   if (rows.length !== 1 || rows[0]!.uid !== uid || rows[0]!.profileServerId !== kingdomId)
     throw new Error("Shared user profile unavailable");
+
   return rows[0]!;
 }

@@ -10,6 +10,7 @@ import type { CommunityRankingSnapshot } from "@opencok/contracts/community-rank
 import type { Database } from "./game.ts";
 
 type Db = Database["kingdom"]["db"];
+
 const owner = {
   uid: userprofile.uid,
   serverId: userprofile.serverId,
@@ -17,6 +18,7 @@ const owner = {
   banFlag: userprofile.banFlag,
   banTime: userprofile.banTime,
 };
+
 const presentation = {
   profileUid: userprofile.uid,
   name: userprofile.name,
@@ -32,20 +34,26 @@ export async function readDonationRanking(
 ): Promise<CommunityRankingSnapshot> {
   if (!uid || uid.length > 40 || !Number.isSafeInteger(now))
     throw new Error("Invalid donation ranking owner");
+
   return db.transaction(
     async (tx) => {
       const profile = (
         await tx.select(owner).from(userprofile).where(eq(userprofile.uid, uid)).limit(1)
       )[0];
+
       if (!profile || profile.banFlag || (profile.banTime ?? 0n) > BigInt(now))
         return { profile, rows: [] };
+
       if (!profile.allianceId?.trim()) throw new Error("Missing alliance membership");
+
       const found = await tx
         .select({ uid: alliance.uid })
         .from(alliance)
         .where(eq(alliance.uid, profile.allianceId))
         .limit(1);
+
       if (!found.length) throw new Error("Missing alliance");
+
       const rows = await tx
         .select({
           uid: alliance_member.uid,
@@ -76,8 +84,10 @@ export async function readDonationRanking(
         .where(eq(alliance_member.allianceId, profile.allianceId))
         .orderBy(asc(alliance_member.uid))
         .limit(32768);
+
       if (rows.length > 32767 || rows.some((row) => row.allianceId !== profile.allianceId))
         throw new Error("Invalid alliance ranking members");
+
       return { profile, rows };
     },
     { isolationLevel: "repeatable read", accessMode: "read only" },
@@ -92,13 +102,16 @@ export async function readCemeteryRanking(
 ): Promise<CommunityRankingSnapshot> {
   if (!uid || uid.length > 40 || !["0", "1"].includes(type) || !Number.isSafeInteger(now))
     throw new Error("Invalid cemetery ranking query");
+
   return db.transaction(
     async (tx) => {
       const profile = (
         await tx.select(owner).from(userprofile).where(eq(userprofile.uid, uid)).limit(1)
       )[0];
+
       if (!profile || profile.banFlag || (profile.banTime ?? 0n) > BigInt(now))
         return { profile, rows: [] };
+
       const own = (
         await tx
           .select({ useItemSum: user_cemetery.useItemSum })
@@ -127,6 +140,7 @@ export async function readCemeteryRanking(
         .where(gt(metric, 0))
         .orderBy(desc(metric), asc(user_cemetery.uid))
         .limit(100);
+
       return { profile, rows, ownItems: own?.useItemSum ?? 0 };
     },
     { isolationLevel: "repeatable read", accessMode: "read only" },

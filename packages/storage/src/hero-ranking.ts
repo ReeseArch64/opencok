@@ -25,6 +25,7 @@ export async function loadHeroRankingPosition(
     )
   )
     throw new DependencyError("hero ranking input");
+
   const result = await command(
     "EVAL",
     lookup,
@@ -32,12 +33,14 @@ export async function loadHeroRankingPosition(
     ...query.keys,
     query.member,
   );
+
   if (
     (typeof result !== "number" && typeof result !== "string") ||
     !/^\d+$/.test(String(result)) ||
     Number(result) > 5001
   )
     throw new DependencyError("hero ranking result");
+
   return Number(result);
 }
 
@@ -56,7 +59,9 @@ export async function loadHeroHistoryPublication(
     )
   )
     throw new DependencyError("hero history input");
+
   if (!keys.length) return [];
+
   const result = await command(
     "EVAL",
     `local result = {}
@@ -75,12 +80,17 @@ return result`,
     ...keys,
     alliance ? "1" : "0",
   );
+
   if (!Array.isArray(result) || result.length !== keys.length)
     throw new DependencyError("hero history result");
+
   let bytes = 0;
+
   return result.map((value) => {
     if (!Array.isArray(value) || value.length !== 2) throw new DependencyError("hero history row");
+
     const [members, alliances] = value;
+
     if (
       !Array.isArray(members) ||
       members.length > 10 ||
@@ -90,12 +100,16 @@ return result`,
       alliances.length !== (alliance ? members.length : 0)
     )
       throw new DependencyError("hero history members");
+
     for (const raw of alliances) {
       if (raw !== null && typeof raw !== "string")
         throw new DependencyError("hero history metadata");
+
       bytes += typeof raw === "string" ? new TextEncoder().encode(raw).length : 0;
+
       if (bytes > 1048576) throw new DependencyError("hero history size");
     }
+
     return { members, alliances };
   });
 }
@@ -106,6 +120,7 @@ export async function publishHeroRanking(
   rows: readonly import("@opencok/contracts/hero-rank-publication").HeroRankVersionedScore[],
 ): Promise<void> {
   if (!rows.length) return;
+
   if (
     rows.length > 64 ||
     new Set(rows.map((row) => `${row.rankKey}:${row.member}`)).size !== rows.length ||
@@ -134,6 +149,7 @@ export async function publishHeroRanking(
     )
   )
     throw new DependencyError("hero rank publication input");
+
   const result = await command(
     "EVAL",
     `local function less(a,b)
@@ -187,5 +203,6 @@ return 1`,
       })),
     ),
   );
+
   if (Number(result) !== 1) throw new DependencyError("hero rank publication result");
 }

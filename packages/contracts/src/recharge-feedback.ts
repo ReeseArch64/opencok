@@ -3,6 +3,7 @@ export interface RechargeFeedbackClaim {
   startTime: bigint;
   endTime: bigint;
 }
+
 export interface RechargeFeedbackReader {
   counts(
     start: bigint,
@@ -15,6 +16,7 @@ export interface RechargeFeedbackReader {
     platform: string,
   ): Promise<{ productId: string; time: bigint | null; spend: number } | undefined>;
 }
+
 export interface RechargeFeedbackGateway {
   accepted(input: {
     owner: string;

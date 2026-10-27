@@ -12,4 +12,5 @@ export interface BankDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type BankDefinitionCatalog = CatalogTable<BankDefinition>;

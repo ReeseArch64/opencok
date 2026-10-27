@@ -28,6 +28,7 @@ export function createAvatarCompletion(options: {
       report(effect);
     } catch {}
   };
+
   return {
     finish(owner, receipt, now) {
       return finishAvatar(
@@ -35,6 +36,7 @@ export function createAvatarCompletion(options: {
           commit: (uid, query, find, inspect) =>
             store.commit(uid, query, find, async (profile, readers) => {
               const plan = await inspect(profile, readers);
+
               if (plan.pendingEffects & 1)
                 avatarSystemMail(
                   {
@@ -46,6 +48,7 @@ export function createAvatarCompletion(options: {
                   },
                   "0".repeat(32),
                 );
+
               return plan;
             }),
         },
@@ -59,6 +62,7 @@ export function createAvatarCompletion(options: {
     async deliver(owner, sequence) {
       try {
         const result = await mail(owner, sequence);
+
         if (result.mail) {
           if (
             result.profile?.uid !== owner ||
@@ -66,6 +70,7 @@ export function createAvatarCompletion(options: {
             result.mail.owner !== owner
           )
             throw new Error("Invalid avatar mail recipient");
+
           try {
             const full = rules.items.get("chat_switch")?.k3?.split("|").includes("1") ?? false;
             await notify(owner, "push.mail", avatarMailPush(result.mail, full));
@@ -76,6 +81,7 @@ export function createAvatarCompletion(options: {
       } catch {
         reportFailure("mail");
       }
+
       for (const [effect, send] of [
         ["profile", profile],
         ["chat", chat],

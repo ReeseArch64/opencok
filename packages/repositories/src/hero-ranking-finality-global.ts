@@ -16,16 +16,19 @@ import type {
 } from "@opencok/contracts/hero-ranking-finality";
 import type { RealmAuthority } from "./realm-authority";
 import type { Database } from "./game";
+
 function periodRow(row: Row): HeroRankPeriod {
   const expectedRealms = text(row, "expectedRealms")
     .split("|")
     .map((value) => cityInteger(value, 1));
+
   if (
     expectedRealms.length < 1 ||
     expectedRealms.length > 128 ||
     new Set(expectedRealms).size !== expectedRealms.length
   )
     throw new Error("Invalid persisted hero finality cohort");
+
   return {
     id: text(row, "id"),
     type: num(row, "type"),
@@ -35,6 +38,7 @@ function periodRow(row: Row): HeroRankPeriod {
     expectedRealms,
   };
 }
+
 export function createHeroRankFinalityRegistry(
   db: Database["databases"]["global"]["db"],
   authority: RealmAuthority,
@@ -51,9 +55,11 @@ export function createHeroRankFinalityRegistry(
       eq(hero_rank_score.endTime, period.endTime),
       sql`right(${hero_rank_score.rankKey},length(${`_${period.group}_${BigInt.asIntN(32, period.endTime / 1000n)}`}))=${`_${period.group}_${BigInt.asIntN(32, period.endTime / 1000n)}`}`,
     );
+
   return {
     async register(period, now) {
       authority.assertReady();
+
       if (
         period.id !== heroFinalityIdentity(period.type, period.group, period.endTime) ||
         now < period.endTime + 300000n ||
@@ -62,6 +68,7 @@ export function createHeroRankFinalityRegistry(
         new Set(period.expectedRealms).size !== period.expectedRealms.length
       )
         throw new Error("Invalid hero ranking finality admission");
+
       await db.transaction(async (tx) => {
         await deadline(tx);
         await tx.execute(sql`select pg_advisory_xact_lock(728224,hashtext(${period.id}))`);
@@ -71,6 +78,7 @@ export function createHeroRankFinalityRegistry(
           .where(eq(hero_rank_period.id, period.id))
           .for("update");
         const expected = period.expectedRealms.join("|");
+
         if (old) {
           if (
             old.type !== period.type ||
@@ -80,8 +88,10 @@ export function createHeroRankFinalityRegistry(
             old.expectedRealms !== expected
           )
             throw new Error("Conflicting hero ranking finality period");
+
           return;
         }
+
         await tx.insert(hero_rank_period).values({
           id: period.id,
           type: period.type,
@@ -103,10 +113,12 @@ export function createHeroRankFinalityRegistry(
         .from(hero_rank_period)
         .where(eq(hero_rank_period.id, periodId))
         .limit(1);
+
       return row ? periodRow(row) : undefined;
     },
     async pending(kingdomId) {
       if (kingdomId !== authority.kingdomId) throw new Error("Foreign hero finality subscriber");
+
       const rows = await db
         .select({ period: hero_rank_period })
         .from(hero_rank_period)
@@ -134,16 +146,19 @@ export function createHeroRankFinalityRegistry(
         .limit(8);
       const last = rows.at(-1)?.period;
       cursor = rows.length === 8 && last ? { end: last.endTime, id: last.id } : undefined;
+
       return rows.map((row) => periodRow(row.period));
     },
     async complete(period, closure, now) {
       authority.assertReady();
+
       if (
         now < period.endTime + 300000n ||
         text(closure, "periodId") !== period.id ||
         long(closure, "processed") !== long(closure, "scoreCount")
       )
         throw new Error("Incomplete hero finality upload");
+
       return db.transaction(async (tx) => {
         await deadline(tx);
         await tx.execute(sql`select pg_advisory_xact_lock(728223,${authority.kingdomId})`);
@@ -153,6 +168,7 @@ export function createHeroRankFinalityRegistry(
           .where(eq(hero_rank_period.id, period.id))
           .limit(1)
           .for("share");
+
         if (
           !savedPeriod ||
           savedPeriod.type !== period.type ||
@@ -163,16 +179,19 @@ export function createHeroRankFinalityRegistry(
           !periodRow(savedPeriod).expectedRealms.includes(authority.kingdomId)
         )
           throw new Error("Conflicting hero ranking proof cohort");
+
         const [owner] = await tx
           .select()
           .from(hero_rank_owner)
           .where(eq(hero_rank_owner.kingdomId, authority.kingdomId));
+
         if (
           owner &&
           (owner.ownerEpoch > authority.epoch ||
             (owner.ownerEpoch === authority.epoch && owner.instanceId !== authority.instance))
         )
           throw new Error("Stale hero finality projection owner");
+
         const [existing] = await tx
           .select()
           .from(hero_rank_watermark)
@@ -183,6 +202,7 @@ export function createHeroRankFinalityRegistry(
             ),
           )
           .for("update");
+
         if (existing) {
           if (
             existing.actId !== (closure.actId ?? null) ||
@@ -191,8 +211,10 @@ export function createHeroRankFinalityRegistry(
             existing.eligible !== num(closure, "eligible")
           )
             throw new Error("Conflicting hero ranking sealed proof");
+
           return existing.state === 1;
         }
+
         const filter = and(
           periodFilter(period),
           closure.actId ? eq(hero_rank_score.actId, text(closure, "actId")) : undefined,
@@ -202,7 +224,9 @@ export function createHeroRankFinalityRegistry(
           .from(hero_rank_score)
           .where(filter);
         const size = BigInt(count?.count ?? "0");
+
         if (size !== long(closure, "scoreCount") || size > 1000000n) return false;
+
         const [proof] = await tx
           .select({
             digest: sql<string>`md5(coalesce(string_agg(length(${hero_rank_score.member})::text||':'||${hero_rank_score.member}||':'||${hero_rank_score.level}::text||':'||${hero_rank_score.score}::text,'|' order by ${hero_rank_score.member} collate "C"),''))`,
@@ -210,7 +234,9 @@ export function createHeroRankFinalityRegistry(
           })
           .from(hero_rank_score)
           .where(filter);
+
         if ((proof?.digest ?? heroEmptyDigest) !== text(closure, "digest")) return false;
+
         await tx.insert(hero_rank_watermark).values({
           periodId: period.id,
           kingdomId: authority.kingdomId,
@@ -223,6 +249,7 @@ export function createHeroRankFinalityRegistry(
           total: BigInt(proof?.total ?? "0"),
         });
         authority.assertReady();
+
         return true;
       });
     },
@@ -236,8 +263,11 @@ export function createHeroRankFinalityRegistry(
           .from(hero_rank_period)
           .where(eq(hero_rank_period.id, period.id))
           .for("update");
+
         if (!saved || saved.state === 1 || now < saved.endTime + 300000n) return;
+
         const authoritative = periodRow(saved);
+
         if (
           authoritative.type !== period.type ||
           authoritative.endTime !== period.endTime ||
@@ -246,6 +276,7 @@ export function createHeroRankFinalityRegistry(
           authoritative.expectedRealms.join("|") !== period.expectedRealms.join("|")
         )
           throw new Error("Conflicting hero ranking finality cohort");
+
         const proofs = await tx
           .select()
           .from(hero_rank_watermark)
@@ -256,22 +287,29 @@ export function createHeroRankFinalityRegistry(
               inArray(hero_rank_watermark.kingdomId, authoritative.expectedRealms),
             ),
           );
+
         if (proofs.length !== authoritative.expectedRealms.length) return;
+
         let kingdomRank: string | null = null;
+
         if (period.type === 3)
           kingdomRank = heroCountryOrder(
             period.group,
             new Map(proofs.map((row) => [row.kingdomId, row.total])),
           );
+
         if (period.type === 4) {
           const [personal] = await tx
             .select()
             .from(hero_rank_period)
             .where(eq(hero_rank_period.id, heroFinalityIdentity(3, period.group, period.endTime)))
             .limit(1);
+
           if (!personal || personal.state !== 1 || !personal.kingdomRank) return;
+
           kingdomRank = personal.kingdomRank;
         }
+
         await tx
           .update(hero_rank_period)
           .set({ state: 1, finalizedAt: now, kingdomRank })
@@ -285,6 +323,7 @@ export function createHeroRankFinalityRegistry(
         .from(hero_rank_period)
         .where(and(eq(hero_rank_period.id, periodId), eq(hero_rank_period.state, 1)))
         .limit(1);
+
       return row ? { kingdomRank: row.kingdomRank } : undefined;
     },
   };

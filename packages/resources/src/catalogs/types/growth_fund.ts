@@ -6,4 +6,5 @@ export interface GrowthFundDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type GrowthFundDefinitionCatalog = CatalogTable<GrowthFundDefinition>;

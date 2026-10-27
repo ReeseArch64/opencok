@@ -49,8 +49,10 @@ export class ChatWebSocketConnection implements Peer {
     if (this.socket.readyState !== this.socket.OPEN) return;
 
     const encoded = JSON.stringify({ ...frame, ...this.clientIdentity });
+
     if (this.socket.bufferedAmount + Buffer.byteLength(encoded) > 262_144) {
       this.socket.close(1013, "Reconnect and resync history");
+
       return;
     }
 
@@ -61,8 +63,10 @@ export class ChatWebSocketConnection implements Peer {
     if (!(this.options.isReady ?? (() => true))()) return false;
 
     const identity = await this.deadline.run(() => this.options.verifyToken(this.token, this.uid));
+
     if (identity?.uid !== this.uid) {
       if (closeOnFailure) this.socket.close(1008, "Session unavailable");
+
       return false;
     }
 
@@ -74,14 +78,18 @@ export class ChatWebSocketConnection implements Peer {
     const { handlers = {}, log = () => {} } = this.options;
     const { uid, connection, sendFrame, authorizeSession, peers } = this;
     const connectionId = this.clientIdentity.clientid;
+
     if (++this.queued > 32) {
       socket.close(1013, "Reconnect and resync history");
       this.queued--;
+
       return;
     }
+
     this.queue = this.queue
       .then(async () => {
         if (socket.readyState !== socket.OPEN) return;
+
         const started = performance.now();
         const operationId = randomUUID();
         const report = (operation: string, outcome: string, reason?: string) =>
@@ -99,9 +107,12 @@ export class ChatWebSocketConnection implements Peer {
             outcome === "success" ? "info" : reason === "unavailable" ? "error" : "warn",
           );
         let frame: IncomingFrame;
+
         try {
           if (binary) throw new Error("binary frame");
+
           const parsed: unknown = JSON.parse(raw.toString());
+
           if (
             !isRecord(parsed) ||
             typeof parsed.cmd !== "string" ||
@@ -109,10 +120,12 @@ export class ChatWebSocketConnection implements Peer {
             !isRecord(parsed.params)
           )
             throw new Error("invalid frame");
+
           frame = { cmd: parsed.cmd, params: parsed.params, sendTime: parsed.sendTime };
         } catch {
           report("unknown", "failure", "bad_frame");
           sendFrame({ cmd: "error", error: { code: "bad_frame" } });
+
           return;
         }
 
@@ -120,12 +133,17 @@ export class ChatWebSocketConnection implements Peer {
           cmd: frame.cmd,
           ...(isSafeInteger(frame.sendTime) ? { sendTime: frame.sendTime } : {}),
         };
+
         try {
           const result = await this.deadline.run(async () => {
             if (!(await authorizeSession(false))) throw new ChatCommandError("unauthorized");
+
             if (this.bootstrap.has(frame.cmd)) return { status: "ok" };
+
             const handler = Object.hasOwn(handlers, frame.cmd) ? handlers[frame.cmd] : null;
+
             if (!handler) throw new ChatCommandError("unsupported_command");
+
             return handler({
               uid,
               params: frame.params,
@@ -142,6 +160,7 @@ export class ChatWebSocketConnection implements Peer {
           report(frame.cmd, "failure", code);
           log({ correlationId: randomUUID(), operation: frame.cmd, category: code });
           sendFrame({ ...base, error: { code } });
+
           if (code === "unauthorized") socket.close(1008, "Session unavailable");
         }
       })

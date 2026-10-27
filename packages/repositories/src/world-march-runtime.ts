@@ -35,7 +35,9 @@ export async function readWorldMutationState(
 ) {
   await tx.execute(sql`select pg_advisory_xact_lock(728214, 0)`);
   const [world] = await tx.select().from(user_world).where(eq(user_world.uid, owner)).for("update");
+
   if (!world || world.worldId !== 0) throw new Error("Missing resident world owner");
+
   const marches = await tx
     .select()
     .from(world_march)
@@ -49,8 +51,10 @@ export async function readWorldMutationState(
     .where(and(eq(world_march_checkpoint.ownerUid, owner), eq(world_march_checkpoint.status, 0)))
     .limit(257)
     .for("update");
+
   if (marches.length > 256 || checkpoints.length > 256)
     throw new Error("World march aggregate exceeds bound");
+
   const params = request ? decode(Buffer.from(request)) : {};
   const [castle] =
     command === "civilizationCastle"
@@ -71,13 +75,16 @@ export async function readWorldMutationState(
     command !== "world.march.check",
   );
   const ids = new Set<number>();
+
   if (command === "totem") {
     const active = await tx
       .select({ point: totem_activation.pointId, payload: totem_activation.payload })
       .from(totem_activation)
       .where(eq(totem_activation.status, 0))
       .limit(4097);
+
     if (active.length > 4096) throw new Error("Totem map bound exceeded");
+
     for (const entry of active)
       for (const id of totemFootprint(
         entry.point,
@@ -85,13 +92,16 @@ export async function readWorldMutationState(
         size,
       ))
         ids.add(id);
+
     const target = int(params, "pointId", 1),
       x = (target - 1) % size,
       y = Math.floor((target - 1) / size);
+
     if (target > 0 && target <= size * size)
       for (let dx = 0; dx < 4 && x + dx < size; dx++)
         for (let dy = 0; dy < 4 && y + dy < size; dy++) ids.add(target + dx + dy * size);
   }
+
   for (const point of [
     world.pointId,
     castle?.pointId ?? 0,
@@ -101,6 +111,7 @@ export async function readWorldMutationState(
     command === "totem" ? 0 : int(params, "pointId", 0),
   ])
     if (point > 0) for (const id of worldCityCandidates(point, size)) ids.add(id);
+
   const points = await tx
     .select()
     .from(worldpoint)
@@ -139,7 +150,9 @@ export async function readWorldMutationState(
         .limit(4097)
         .for("update")
     : [];
+
   if (sharedMarches.length > 4096) throw new Error("Shared resource party bound exceeded");
+
   const sharedOwners = [
     ...new Set(
       sharedMarches.map((row) => row.ownerUid).filter((owner): owner is string => Boolean(owner)),
@@ -180,8 +193,10 @@ export async function readWorldMutationState(
         .where(inArray(new_general_skill.uid, sharedOwners))
         .limit(65537)
     : [];
+
   if ([sharedArmies, sharedDragons, sharedGeneralSkills].some((rows) => rows.length > 65536))
     throw new Error("Shared resource companion bound exceeded");
+
   const cityBosses =
     command === "buy.citydef" || command === "world.user.rcd"
       ? await tx
@@ -200,8 +215,10 @@ export async function readWorldMutationState(
           .where(eq(t_worldboss.status, 1))
           .limit(1025)
       : undefined;
+
   if (cityBosses && cityBosses.length > 1024)
     throw new Error("City fire source aggregate exceeds bound");
+
   const [targetMarchCount] =
     command === "world.march.check"
       ? await tx
@@ -234,7 +251,9 @@ export async function readWorldMutationState(
         .from(userprofile)
         .where(eq(userprofile.uid, owner))
     : [];
+
   if (scoutIds.length && !actorRealm?.realm) throw new Error("Missing scout actor realm");
+
   return {
     mapSize: size,
     placementClaims: placementClaims.map((point) => point.id),
@@ -257,6 +276,7 @@ export async function readWorldMutationState(
     treasures: await readTreasureMaps(tx, owner),
   };
 }
+
 export async function writeWorldMutation(
   tx: MutationTransaction,
   owner: string,
@@ -264,9 +284,12 @@ export async function writeWorldMutation(
 ) {
   await writeWorldBarbarianActors(tx, write);
   await writeTreasureMaps(tx, owner, write);
+
   if (write.scoutMails) await writeWorldScoutMails(tx, owner, write.scoutMails);
+
   if (write.world) {
     if (write.world.uid !== owner) throw new Error("Foreign world write");
+
     await tx
       .update(userprofile)
       .set({ worldPoint: num(write.world, "pointId") })
@@ -280,8 +303,10 @@ export async function writeWorldMutation(
       })
       .where(eq(user_world.uid, owner));
   }
+
   for (const row of write.points ?? []) {
     if (num(row, "worldId") !== 0) throw new Error("Foreign world point");
+
     await tx
       .update(worldpoint)
       .set({
@@ -308,8 +333,10 @@ export async function writeWorldMutation(
       })
       .where(and(eq(worldpoint.id, num(row, "id")), eq(worldpoint.worldId, 0)));
   }
+
   for (const row of write.marches ?? []) {
     if (row.ownerUid !== owner) throw new Error("Foreign march write");
+
     const value = {
       uuid: text(row, "uuid"),
       ownerUid: owner,
@@ -344,15 +371,19 @@ export async function writeWorldMutation(
       .select({ owner: world_march.ownerUid })
       .from(world_march)
       .where(eq(world_march.uuid, value.uuid));
+
     if (existing && existing.owner !== owner) throw new Error("Foreign march identity");
+
     await tx
       .insert(world_march)
       .values(value)
       .onConflictDoUpdate({ target: world_march.uuid, set: value });
   }
+
   for (const timing of write.sharedTimings ?? []) {
     if (timing.owner === owner || timing.version !== timing.expectedVersion + 1)
       throw new Error("Invalid shared resource timing");
+
     const [march] = await tx
       .select()
       .from(world_march)
@@ -389,9 +420,12 @@ export async function writeWorldMutation(
         ),
       )
       .for("update");
+
     if (!march || !target || !prior) throw new Error("Stale shared resource timing");
+
     const before = decode(prior.payload),
       after = decode(Buffer.from(timing.payload));
+
     if (
       before.id?.value !== timing.id ||
       before.owner?.value !== timing.owner ||
@@ -402,12 +436,16 @@ export async function writeWorldMutation(
       after.dueAt?.value !== timing.dueAt
     )
       throw new Error("Invalid shared resource checkpoint");
+
     const normalize = (body: typeof before) => {
       const { version: _version, dueAt: _dueAt, ...rest } = body;
+
       return Buffer.from(encode(rest));
     };
+
     if (!normalize(before).equals(normalize(after)))
       throw new Error("Foreign shared resource mutation");
+
     await tx
       .update(world_march_checkpoint)
       .set({ version: timing.version, dueAt: timing.dueAt, payload: Buffer.from(timing.payload) })
@@ -424,8 +462,10 @@ export async function writeWorldMutation(
       })
       .where(eq(world_march.uuid, timing.id));
   }
+
   for (const row of write.checkpoints ?? []) {
     if (row.ownerUid !== owner) throw new Error("Foreign march checkpoint");
+
     const value = {
       id: text(row, "id"),
       ownerUid: owner,
@@ -434,6 +474,7 @@ export async function writeWorldMutation(
       dueAt: long(row, "dueAt"),
       payload: row.payload as Buffer,
     };
+
     if (num(row, "expectedVersion") === 0) await tx.insert(world_march_checkpoint).values(value);
     else {
       const saved = await tx
@@ -448,9 +489,11 @@ export async function writeWorldMutation(
           ),
         )
         .returning({ id: world_march_checkpoint.id });
+
       if (saved.length !== 1) throw new Error("Stale march checkpoint");
     }
   }
+
   if (write.deletedMarches?.length)
     await tx
       .delete(world_march)
@@ -458,6 +501,7 @@ export async function writeWorldMutation(
         and(eq(world_march.ownerUid, owner), inArray(world_march.uuid, [...write.deletedMarches])),
       );
 }
+
 export async function dueWorldMarches(
   db: Database["kingdom"]["db"],
   now: bigint,
@@ -483,6 +527,7 @@ export async function dueWorldMarches(
     .orderBy(asc(world_march_checkpoint.dueAt), asc(world_march_checkpoint.id))
     .limit(64);
 }
+
 export function createWorldInterest(
   db: Database["kingdom"]["db"],
   authority: RealmAuthority,
@@ -493,10 +538,13 @@ export function createWorldInterest(
     async subscribe(owner: string, x: number, y: number) {
       if (!Number.isInteger(x) || !Number.isInteger(y) || x < 0 || y < 0 || x >= size || y >= size)
         throw new Error("Invalid world interest");
+
       await db.transaction(async (tx) => {
         await fenceRealmTransaction(tx, authority);
         const [world] = await tx.select().from(user_world).where(eq(user_world.uid, owner));
+
         if (!world || world.worldId !== 0) throw new Error("Foreign world interest");
+
         const value = { ownerUid: owner, worldId: 0, x, y, updatedAt: BigInt(now()) };
         await tx
           .insert(world_interest)
@@ -514,6 +562,7 @@ export function createWorldInterest(
             sql`${world_interest.updatedAt} >= ${BigInt(now() - 300000)}`,
           ),
         );
+
       return [
         ...new Set([
           owner,
@@ -532,6 +581,7 @@ export function createWorldInterest(
     },
     async marches(ids: readonly number[]) {
       if (!ids.length) return [];
+
       const rows = await db
         .select()
         .from(world_march)
@@ -543,6 +593,7 @@ export function createWorldInterest(
         )
         .orderBy(asc(world_march.uuid))
         .limit(1025);
+
       return withTreasureMarchTimes(db, rows);
     },
   };

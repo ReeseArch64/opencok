@@ -46,12 +46,14 @@ export function mailGroupQuery(
     now < 0
   )
     return invalid();
+
   return { moderation: type === 10, begin, limit, now };
 }
 
 export function mailGroupRule(type: number): MailGroupRule | undefined {
   if (singleTypes.some((candidate) => candidate === type))
     return { kind: "uid", field: "detail", types: singleTypes };
+
   switch (type) {
     case 100:
       return { kind: "sender", field: "chats", types: [20, 21, 22] };
@@ -73,9 +75,13 @@ export function mailGroupContains(
   entry: Pick<MailListEntry, "uid" | "type" | "fromUser">,
 ): boolean {
   const rule = mailGroupRule(group.groupType);
+
   if (!rule?.types.includes(entry.type)) return false;
+
   if (rule.kind === "sender") return group.groupIndex === entry.fromUser;
+
   if (rule.kind === "uid") return group.groupIndex === entry.uid;
+
   return true;
 }
 
@@ -98,7 +104,9 @@ export function mailGroupWindow(
   groups: readonly MailGroupEntry[],
 ): readonly MailGroupEntry[] {
   if (typeof query.moderation !== "boolean") return invalid();
+
   mailGroupQuery(query.moderation ? 10 : 1000, query.begin, query.limit, query.now);
+
   if (
     !identifier(owner) ||
     mailBlank(owner) ||
@@ -118,5 +126,6 @@ export function mailGroupWindow(
     )
   )
     return invalid();
+
   return groups.slice(0, 7);
 }

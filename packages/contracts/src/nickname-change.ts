@@ -79,11 +79,13 @@ export type NicknameNotification =
         dmmPaidSpecialGold: bigint;
       };
     };
+
 export type NicknameNotificationPublisher = (
   owner: string,
   snapshot: NicknameNotification,
   signal: AbortSignal,
 ) => Promise<boolean>;
+
 export interface NicknameNotificationDelivery {
   publish: NicknameNotificationPublisher;
   timeoutMs: number;
@@ -107,10 +109,12 @@ export interface NicknameAllianceTask {
   readonly num: bigint | null;
   readonly state: number | null;
 }
+
 export interface NicknameAlliancePlan {
   readonly updates: readonly NicknameAllianceTask[];
   readonly complete: boolean;
 }
+
 export type NicknameAlliancePlanner = (
   tasks: readonly NicknameAllianceTask[],
   stem: string,

@@ -21,4 +21,5 @@ export interface StatusCopyDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type StatusCopyDefinitionCatalog = CatalogTable<StatusCopyDefinition>;

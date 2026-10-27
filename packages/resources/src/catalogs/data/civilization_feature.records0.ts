@@ -1,4 +1,5 @@
 import type { CivilizationFeatureDefinition } from "../types/civilization_feature.ts";
+
 export const records: readonly CivilizationFeatureDefinition[] = [
   {
     "id": 5532000,

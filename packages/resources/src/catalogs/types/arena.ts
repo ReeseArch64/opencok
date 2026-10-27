@@ -10,4 +10,5 @@ export interface ArenaDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type ArenaDefinitionCatalog = CatalogTable<ArenaDefinition>;

@@ -7,6 +7,7 @@ import { continued_cost_score as scores } from "@opencok/drizzle/schema/opencok_
 import { readContinuedCostSpending } from "@opencok/mappings/continued-cost";
 import { costRankingPeriodId, verifyCostFactCoverage } from "@opencok/rules/continued-cost-ranking";
 import type { MutationTransaction } from "./mutation";
+
 export async function captureCostFact(
   tx: MutationTransaction,
   event: {
@@ -20,8 +21,10 @@ export async function captureCostFact(
   witnessedPostings?: readonly import("@opencok/contracts/rows").Row[],
 ) {
   const value = readContinuedCostSpending(event.payload);
+
   if (value.owner !== event.ownerUid || value.at > now || event.eventId !== "continued-cost")
     throw new Error("Foreign or premature confirmed consumption fact");
+
   const postings =
     witnessedPostings ??
     (await tx
@@ -41,6 +44,7 @@ export async function captureCostFact(
     .values({ id, startTime: value.start, endTime: value.end, type: value.type, createdAt: now })
     .onConflictDoNothing();
   const [period] = await tx.select().from(periods).where(eq(periods.id, id)).for("share");
+
   if (
     !period ||
     period.startTime !== value.start ||
@@ -48,6 +52,7 @@ export async function captureCostFact(
     period.type !== value.type
   )
     throw new Error("Conflicting confirmed consumption period");
+
   const inserted = await tx
     .insert(facts)
     .values({
@@ -65,7 +70,9 @@ export async function captureCostFact(
     })
     .onConflictDoNothing()
     .returning({ id: facts.eventId });
+
   if (inserted.length !== 1) throw new Error("Consumption fact ingestion race");
+
   if (period.state === 0)
     await tx
       .insert(scores)

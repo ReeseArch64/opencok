@@ -29,6 +29,7 @@ export const worldBirthIdentity = Object.freeze({
   uid: "@world:0",
   key: "opencok.world.birth.v1",
 });
+
 export async function initializeWorldBirth(
   tx: MutationTransaction,
   authority: RealmAuthority,
@@ -36,6 +37,7 @@ export async function initializeWorldBirth(
   now: bigint,
 ): Promise<void> {
   if (now < 0n || now > 9223372036854775807n) throw new Error("Invalid world birth time");
+
   await fenceRealmTransaction(tx, authority);
   await assertBirthRealm(tx, authority);
   await tx.execute(sql`select pg_advisory_xact_lock(728214, 0)`);
@@ -56,8 +58,10 @@ export async function initializeWorldBirth(
     .from(worldpoint)
     .where(and(eq(worldpoint.worldId, 0), eq(worldpoint.pointType, 1)))
     .limit(1);
+
   if (prior || profile || city)
     throw new Error("World birth initialization requires a fresh resident world");
+
   const state = initialWorldBirth(rules, authority.epoch),
     value = JSON.stringify(state);
   parseWorldBirth(value);
@@ -72,15 +76,19 @@ async function readBirthCounts(tx: MutationTransaction) {
       and(eq(worldpoint.worldId, 0), eq(worldpoint.pointType, 1), isNotNull(worldpoint.bornAreaId)),
     )
     .groupBy(worldpoint.bornAreaId);
+
   if (rows.length > 16384) throw new Error("World birth occupancy exceeds bound");
+
   return Object.fromEntries(rows.map((row) => [String(row.area), row.count]));
 }
+
 const birthIdentity = () =>
   and(
     eq(trigger_var.type, worldBirthIdentity.type),
     eq(trigger_var.uid, worldBirthIdentity.uid),
     eq(trigger_var.key, worldBirthIdentity.key),
   );
+
 export async function allocateWorldBirth(
   tx: MutationTransaction,
   authority: RealmAuthority,
@@ -93,16 +101,22 @@ export async function allocateWorldBirth(
   await assertBirthRealm(tx, authority);
   await tx.execute(sql`select pg_advisory_xact_lock(728214, 0)`);
   const [record] = await tx.select().from(trigger_var).where(birthIdentity()).for("update");
+
   if (!record) throw new GameError(errors.unsupported, "world_state");
+
   const state = parseWorldBirth(record.value);
+
   if (state.epoch !== String(authority.epoch)) {
     state.counts = await readBirthCounts(tx);
     state.epoch = String(authority.epoch);
     state.limit = rules.limits[state.round - 1] ?? 2147483647;
   }
+
   const find = async (areas?: readonly number[]) => {
     const candidates = areas ? worldBirthCandidates(areas, size, rules.side) : undefined;
+
     if (candidates?.length === 0) return undefined;
+
     const admitted = candidates
       ? sql`and p.id=ANY(${sql.param(candidates)}::integer[]) and p."bornAreaId"=ANY(${sql.param(areas)}::integer[]) and e."bornAreaId"=ANY(${sql.param(areas)}::integer[]) and s."bornAreaId"=ANY(${sql.param(areas)}::integer[]) and c."bornAreaId"=ANY(${sql.param(areas)}::integer[])`
       : sql``;
@@ -121,6 +135,7 @@ export async function allocateWorldBirth(
       AND coalesce(p.reserve,0)=0 AND coalesce(e.reserve,0)=0 AND coalesce(s.reserve,0)=0 AND coalesce(c.reserve,0)=0
       ${admitted} ORDER BY random() LIMIT 1 FOR UPDATE OF p,e,s,c
     `);
+
     return result.rows[0]?.id;
   };
   let selected: number | undefined,
@@ -142,28 +157,39 @@ export async function allocateWorldBirth(
             )
             .limit(1)
         : [];
+
   if (mode === "random" && free) {
     const start = randomInt(98);
+
     for (let visited = 0; visited < 98; visited++) {
       selected = await find(rules.priorities[(start + visited) % 98]!.areas);
+
       if (selected !== undefined) {
         randomSelected = true;
         break;
       }
     }
   }
+
   if (selected === undefined && state.phase !== 2) {
     for (let visited = 0; free && visited < 98; visited++) {
       selected = await find(rules.priorities.find((row) => row.id === state.priority)!.areas);
+
       if (selected !== undefined) break;
+
       advanceWorldBirth(state, rules);
     }
+
     if (selected === undefined) state.phase = 2;
   }
+
   if (selected === undefined) selected = await find();
+
   if (selected === undefined) throw new GameError(errors.unsupported, "world_state");
+
   if (randomSelected) recordWorldBirth(state, worldBirthArea(selected, size, rules.side));
   else countWorldBirth(state, rules, worldBirthArea(selected, size, rules.side));
+
   state.version++;
   parseWorldBirth(JSON.stringify(state));
   const changed = await tx
@@ -171,13 +197,17 @@ export async function allocateWorldBirth(
     .set({ value: JSON.stringify(state), refreshtime: now })
     .where(and(birthIdentity(), eq(trigger_var.value, record.value)))
     .returning({ key: trigger_var.key });
+
   if (changed.length !== 1) throw new Error("World birth version changed");
+
   const points = await tx
     .select()
     .from(worldpoint)
     .where(and(eq(worldpoint.worldId, 0), inArray(worldpoint.id, worldFootprint(selected, size))))
     .for("update");
+
   if (points.length !== 4) throw new Error("World birth footprint changed");
+
   return { point: selected, points };
 }
 
@@ -189,6 +219,7 @@ export function createWorldBirthAdopter(
 ) {
   return async (input: WorldBirthAdoption) => {
     const request = Object.freeze({ ...input });
+
     if (
       !request.operator ||
       request.operator.length > 100 ||
@@ -212,14 +243,18 @@ export function createWorldBirthAdopter(
           request.expectedVersion > 2147483646))
     )
       throw new Error("Invalid world birth adoption");
+
     const payload = Buffer.from(JSON.stringify(request));
+
     return db.transaction(async (tx) => {
       await fenceRealmTransaction(tx, authority);
       await assertBirthRealm(tx, authority);
       await tx.execute(sql`select pg_advisory_xact_lock(728214, 0)`);
       const captured = clock();
+
       if (!Number.isSafeInteger(captured) || captured < 0)
         throw new Error("Invalid world birth adoption clock");
+
       const [receipt] = await tx
         .select()
         .from(command_receipt)
@@ -230,9 +265,11 @@ export function createWorldBirthAdopter(
             eq(command_receipt.requestId, request.operationId),
           ),
         );
+
       if (receipt) {
         if (receipt.command !== "world.birth.adopt" || !receipt.request.equals(payload))
           throw new Error("World birth adoption receipt conflict");
+
         return JSON.parse(receipt.response.toString()) as {
           operationId: string;
           version: number;
@@ -241,10 +278,13 @@ export function createWorldBirthAdopter(
           phase: number;
         };
       }
+
       const [prior] = await tx.select().from(trigger_var).where(birthIdentity()).for("update"),
         version = prior ? parseWorldBirth(prior.value).version : null;
+
       if (version !== request.expectedVersion)
         throw new Error("World birth adoption version changed");
+
       const state: import("@opencok/contracts/world-birth").WorldBirthState = {
           schema: 1,
           version: (version ?? 0) + 1,
@@ -257,6 +297,7 @@ export function createWorldBirthAdopter(
         },
         value = JSON.stringify(state);
       parseWorldBirth(value);
+
       if (prior)
         await tx
           .update(trigger_var)
@@ -266,6 +307,7 @@ export function createWorldBirthAdopter(
         await tx
           .insert(trigger_var)
           .values({ ...worldBirthIdentity, value, refreshtime: BigInt(captured) });
+
       const response = {
         operationId: request.operationId,
         version: state.version,
@@ -285,6 +327,7 @@ export function createWorldBirthAdopter(
         { response: Buffer.from(JSON.stringify(response)) },
         BigInt(captured),
       );
+
       return response;
     });
   };
@@ -296,5 +339,6 @@ async function assertBirthRealm(tx: MutationTransaction, authority: RealmAuthori
     .from(realm_authority)
     .where(ne(realm_authority.kingdomId, authority.kingdomId))
     .limit(1);
+
   if (other) throw new Error("Foreign resident world birth realm");
 }

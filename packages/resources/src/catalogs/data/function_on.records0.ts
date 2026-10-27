@@ -1,4 +1,5 @@
 import type { FunctionOnDefinition } from "../types/function_on.ts";
+
 export const records: readonly FunctionOnDefinition[] = [
   { "id": "17_wk", "online": "all", "test": "all", "version": "2.1.0", "pf": "all" },
   { "id": "17_wk_ui", "online": "all", "test": "all", "version": "2.36.0", "pf": "all" },

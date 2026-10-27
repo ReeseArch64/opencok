@@ -23,6 +23,7 @@ export function readOwnedMailWindow(
   inspect: MailCategoryInspector,
 ): Promise<MailCategorySnapshot> {
   const { limit } = query;
+
   if (
     !uid.trim() ||
     uid.length > 40 ||
@@ -39,6 +40,7 @@ export function readOwnedMailWindow(
     typeof inspect !== "function"
   )
     throw new Error("Invalid mail window query");
+
   return databases.getKingdom(kingdomId).db.transaction(
     async (tx) => {
       const profile = (
@@ -54,6 +56,7 @@ export function readOwnedMailWindow(
           .limit(1)
           .for("update")
       )[0];
+
       if (
         !profile ||
         profile.uid !== uid ||
@@ -62,6 +65,7 @@ export function readOwnedMailWindow(
         (profile.banTime ?? 0n) > BigInt(query.now)
       )
         return { profile };
+
       const extraOwner = and(
         eq(mail_contents.uid, selectedMail.uid),
         or(
@@ -90,6 +94,7 @@ export function readOwnedMailWindow(
             .offset(query.begin)
             .for("update", { of: selectedMail })
         : [];
+
       if (
         sizes.length > Math.min(limit, 1000) ||
         new Set(sizes.map((row) => row.uid)).size !== sizes.length ||
@@ -97,6 +102,7 @@ export function readOwnedMailWindow(
         sizes.reduce((total, row) => total + row.size, 0) > 4 * 1024 * 1024
       )
         throw new Error("Mail list capacity exceeded");
+
       const entries = sizes.length
         ? await tx
             .select({
@@ -130,6 +136,7 @@ export function readOwnedMailWindow(
             )
             .orderBy(...order)
         : [];
+
       if (
         entries.length !== sizes.length ||
         entries.some(
@@ -143,19 +150,23 @@ export function readOwnedMailWindow(
         )
       )
         throw new Error("Inconsistent mail list snapshot");
+
       const invalid = await inspect(entries, {
         senders: (uids) => readMailSenders(databases, kingdomId, tx, uids),
         translations: (requests) => readMailTranslations(tx, requests),
       });
       const selected = new Set(entries.map((row) => row.uid));
+
       if (
         !Array.isArray(invalid) ||
         new Set(invalid).size !== invalid.length ||
         invalid.some((id) => !selected.has(id))
       )
         throw new Error("Invalid mail list removal plan");
+
       if (invalid.length)
         await tx.delete(mail).where(and(eq(mail.toUser, uid), inArray(mail.uid, invalid)));
+
       return { profile };
     },
     { isolationLevel: "repeatable read", accessMode: "read write" },

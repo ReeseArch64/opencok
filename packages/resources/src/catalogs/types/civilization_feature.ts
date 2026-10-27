@@ -9,4 +9,5 @@ export interface CivilizationFeatureDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type CivilizationFeatureDefinitionCatalog = CatalogTable<CivilizationFeatureDefinition>;

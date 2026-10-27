@@ -15,6 +15,7 @@ function serializeWorldMonsterHealth(detail: WorldMonsterHealth | undefined): Fi
     ? {}
     : { mchp: sfs.int(detail.current), mmhp: sfs.int(detail.maximum) };
 }
+
 function serializeWorldMonsterExploration(detail: WorldExplorationDetail | undefined): Fields {
   return detail === undefined
     ? {}

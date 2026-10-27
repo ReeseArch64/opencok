@@ -1,4 +1,5 @@
 import type { GeneralRandomEffectDefinition } from "../types/general_random_effect.ts";
+
 export const records: readonly GeneralRandomEffectDefinition[] = [
   {
     "id": 5516466,

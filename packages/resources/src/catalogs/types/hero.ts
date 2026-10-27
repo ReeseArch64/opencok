@@ -18,4 +18,5 @@ export interface HeroDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type HeroDefinitionCatalog = CatalogTable<HeroDefinition>;

@@ -210,6 +210,7 @@ type GameConfig = Pick<
 > & { mapSize?: number };
 
 type ReadyCity = CityState & { profile: Row; resource: Row };
+
 export interface Result {
   body: Fields;
   pushes: { command: string; body: Fields }[];
@@ -223,33 +224,44 @@ export class GameService {
     readonly now = Date.now,
     readonly services: GameServices = {},
   ) {}
+
   private async state(uid: string): Promise<ReadyCity> {
     const state = await this.db.getCityByPlayerId(uid, this.now());
+
     if (!state.profile || !state.resource) throw new GameError(errors.missing);
+
     if (long(state.profile, "banTime") > BigInt(this.now()) || num(state.profile, "banFlag") !== 0)
       throw new GameError(errors.invalid);
+
     return { ...state, profile: state.profile, resource: state.resource };
   }
+
   private queueFields(q: Row, state: ReadyCity, helped = true, now = this.now()): Fields {
     const target = state.buildings.find((b) => text(b, "uuid") === text(q, "itemId"));
+
     if ([1, 8, 9, 10, 17].includes(num(q, "type")) && text(q, "itemId"))
       return queue(
         q,
         { itemId: sfs.string(text(q, "itemId")), allId: sfs.string(text(q, "itemId")) },
         helped,
       );
+
     if ([2, 3].includes(num(q, "type")) && text(q, "itemId"))
       return queue(q, { itemId: sfs.string(text(q, "itemId")) }, helped);
+
     if (num(q, "type") === 6 && text(q, "itemId"))
       return queue(q, { itemId: sfs.string(text(q, "itemId")) }, helped);
+
     if (num(q, "type") === 11 && text(q, "itemId")) {
       const row = state.equipment?.find((row) => row.uuid === q.itemId);
+
       return queue(
         q,
         row ? { itemId: sfs.string(text(row, "itemId")), cost: sfs.string(text(row, "cost")) } : {},
         helped,
       );
     }
+
     if (num(q, "type") === 12 && text(q, "itemId"))
       return queue(
         q,
@@ -260,12 +272,16 @@ export class GameService {
         },
         helped,
       );
+
     if (num(q, "type") !== 0 && text(q, "itemId"))
       throw new GameError(errors.unsupported, "queue_kind");
+
     return queue(q, target ? building(target, this.rules, true, now) : {}, helped);
   }
+
   private info(state: ReadyCity): Fields {
     const now = this.now();
+
     return {
       building: sfs.array(
         state.buildings.map((b) => sfs.object(building(b, this.rules, false, now))),
@@ -282,6 +298,7 @@ export class GameService {
         : {}),
     };
   }
+
   private initialWorld(world: Row): Fields {
     return {
       m: sfs.array(),
@@ -297,9 +314,11 @@ export class GameService {
       maxSearchCount: sfs.int(Number(this.rules.items.get("shake")?.k10 ?? 0)),
     };
   }
+
   async initial(uid: string): Promise<Fields> {
     return (await this.initialize(uid)).body;
   }
+
   async initialize(uid: string, correlation: Fields = {}): Promise<Result> {
     const businessMan = await this.services.hotItemBusinessMan?.();
     const eggActivity = await this.services.cityProgression?.(uid, "egg.activity.init", {});
@@ -340,8 +359,10 @@ export class GameService {
     const alliance = await this.services.alliance?.(uid, "alliance.init", {});
     const state = await this.state(uid);
     const world = state.world;
+
     if (!world || num(world, "worldId") !== 0 || (state.hasMarches && !this.services.reconnect))
       throw new GameError(errors.unsupported, "world_state");
+
     const expeditionActivity = await this.services.expeditionActivity?.(uid);
     const playerInfo = await this.power(uid, true);
     const body: Fields = {
@@ -418,23 +439,30 @@ export class GameService {
       totems,
       alliance,
     ].flatMap((result) => result?.pushes ?? []);
+
     if (this.services.worldEffectBoard)
       initialPushes.push({
         command: "world.effect.push",
         body: await this.services.worldEffectBoard(),
       });
+
     if (!this.services.reconnect) return { body, pushes: initialPushes };
+
     const now = this.now();
     const context = { kingdomId: this.config.kingdomId, version: MOBILE_CLIENT_VERSION, now };
+
     return this.services.reconnect(uid, now, async (progress) => {
       const planned = await planReconnectProgress(progress, this.rules, context, this.services, {
         specialServer: serverFeature(this.rules, "araf_mode", context),
         cn1: null,
       });
+
       if (!progress.world || num(progress.world, "worldId") !== 0)
         throw new GameError(errors.unsupported, "world_state");
+
       const buildings = progress.buildings.map((row) => {
         const refresh = planned.write.buildingRefreshes.find((entry) => entry.uuid === row.uuid);
+
         return refresh ? { ...row, refreshTime: refresh.refreshTime } : { ...row };
       });
       const prestige = progress.effects.prestige.find(
@@ -465,36 +493,53 @@ export class GameService {
         }),
       };
       planned.result.pushes = [...initialPushes, ...planned.result.pushes];
+
       if (correlation._cok_) planned.result.body._cok_ = correlation._cok_;
+
       validateReconnectResult(planned.result, "init");
+
       return planned;
     });
   }
+
   async execute(uid: string, command: string, params: Fields): Promise<Result> {
     ({ command, params } = generalRequest(command, params));
+
     if ((allianceCommands as readonly string[]).includes(command)) {
       if (!this.services.alliance) throw new GameError(errors.unsupported);
+
       return this.services.alliance(uid, command, params);
     }
+
     if (friendshipMineCommands.includes(command)) {
       if (!this.services.friendshipMine) throw new GameError(errors.unsupported);
+
       return this.services.friendshipMine(uid, command, params);
     }
+
     if (noticeCommands.includes(command)) {
       if (!this.services.notice) throw new GameError(errors.unsupported);
+
       return this.services.notice(uid, command, params);
     }
+
     if (postboxCommands.includes(command)) {
       if (!this.services.postbox) throw new GameError(errors.unsupported);
+
       return this.services.postbox(uid, command, params);
     }
+
     if (command === "chat.get.new") return { body: await this.chatNews(uid, params), pushes: [] };
+
     if ([...chatSocialCommands, ...nativeChatCommands].includes(command)) {
       if (!this.services.social) throw new GameError(errors.unsupported);
+
       return { body: await this.services.social(uid, command, params), pushes: [] };
     }
+
     if (command === "al.fight.bulletin") {
       if (!this.services.worldFightBulletins) throw new GameError(errors.unsupported);
+
       return this.worldQueryResult(
         command,
         params,
@@ -507,8 +552,10 @@ export class GameService {
         ),
       );
     }
+
     if (command === "world.scout.detail") {
       if (!this.services.worldScout) throw new GameError(errors.unsupported);
+
       return this.worldQueryResult(
         command,
         params,
@@ -524,8 +571,10 @@ export class GameService {
         ),
       );
     }
+
     if (command === "world.get.march") {
       if (!this.services.worldMarchInspection) throw new GameError(errors.unsupported);
+
       return this.worldQueryResult(
         command,
         params,
@@ -540,7 +589,9 @@ export class GameService {
         ),
       );
     }
+
     if (command !== "activity.operators") await this.services.reconcileAlliance?.(uid);
+
     let body: Fields;
     let pushes: Result["pushes"] = [];
 
@@ -557,12 +608,18 @@ export class GameService {
         !this.services.cityProgression
       )
         throw new GameError(errors.unsupported);
+
       const result = await this.services.cityProgression(uid, command, params);
+
       if (Object.keys(result.body).length === 0) result.body.success = sfs.bool(true);
+
       if (params._cok_) result.body._cok_ = params._cok_;
+
       if (params.cmdBaseTime) result.body.cmdBaseTime = params.cmdBaseTime;
+
       return result;
     }
+
     if (dragonProgressionCommands.includes(command)) {
       if (
         command === "dragon.item" ||
@@ -571,12 +628,18 @@ export class GameService {
         !this.services.cityProgression
       )
         throw new GameError(errors.unsupported);
+
       const result = await this.services.cityProgression(uid, command, params);
+
       if (Object.keys(result.body).length === 0) result.body.success = sfs.bool(true);
+
       if (params._cok_) result.body._cok_ = params._cok_;
+
       if (params.cmdBaseTime) result.body.cmdBaseTime = params.cmdBaseTime;
+
       return result;
     }
+
     switch (command) {
       case "activity.close.info":
         body = closedActivities(
@@ -598,6 +661,7 @@ export class GameService {
       case "trade.exchange":
       case "trade.cancel":
         if (!this.services.trade) throw new GameError(errors.unsupported);
+
         ({ body, pushes } = await this.services.trade(uid, command, params));
         break;
       case "mall.info":
@@ -605,20 +669,25 @@ export class GameService {
       case "mall.data":
       case "shoppingMall.buy":
         if (!this.services.shop) throw new GameError(errors.unsupported);
+
         ({ body, pushes } = await this.services.shop(uid, command, params));
         break;
       case "mail.reward":
       case "mail.reward.batch":
         if (!this.services.mailReward) throw new GameError(errors.unsupported);
+
         ({ body, pushes } = await this.services.mailReward(uid, command, params));
         break;
       case "activity.operators": {
         if (!this.db.activityOperators)
           throw new GameError(errors.unsupported, "activity_operators");
+
         const now = this.now(),
           snapshot = await this.db.activityOperators(uid, now);
+
         if (snapshot.profile?.uid !== uid)
           throw new GameError(errors.unsupported, "activity_operators");
+
         body = activityOperatorsView(
           activityOperators(this.rules, snapshot, {
             kingdomId: this.config.kingdomId,
@@ -813,6 +882,7 @@ export class GameService {
       case "buildingUnlock.glory":
       case "building.reward":
         if (!this.services.cityProgression) throw new GameError(errors.unsupported);
+
         ({ body, pushes } = await this.services.cityProgression(uid, command, params));
         break;
       case "equip.q.finish":
@@ -830,11 +900,13 @@ export class GameService {
       case "queue.open":
       case "queue.rent":
         if (!this.services.timed) throw new GameError(errors.unsupported);
+
         ({ body, pushes } = await this.services.timed(uid, command, params));
         break;
       case "build.collect":
       case "building.addOutPut":
         if (!this.services.production) throw new GameError(errors.unsupported);
+
         ({ body, pushes } = await this.services.production(uid, command, params));
         break;
       case "item.buy":
@@ -844,10 +916,12 @@ export class GameService {
       case "item.compose2":
       case "item.compose.suitequipment.store":
         if (!this.services.inventory) throw new GameError(errors.unsupported);
+
         ({ body, pushes } = await this.services.inventory(uid, command, params));
         break;
       case "user.lv": {
         if (!this.services.reconnect) throw new GameError(errors.unsupported, "reconnect");
+
         const now = this.now();
         const context = { kingdomId: this.config.kingdomId, version: MOBILE_CLIENT_VERSION, now };
         ({ body, pushes } = await this.services.reconnect(uid, now, async (state) => {
@@ -855,9 +929,13 @@ export class GameService {
             specialServer: serverFeature(this.rules, "araf_mode", context),
             cn1: null,
           });
+
           if (params._cok_) planned.result.body._cok_ = params._cok_;
+
           if (params.cmdBaseTime) planned.result.body.cmdBaseTime = params.cmdBaseTime;
+
           validateReconnectResult(planned.result, command);
+
           return planned;
         }));
         break;
@@ -905,6 +983,7 @@ export class GameService {
         break;
       case "world.get.detail":
         if (!this.services.worldPointDetail) throw new GameError(errors.unsupported);
+
         body = await worldPointDetail(
           this.services.worldPointDetail,
           uid,
@@ -923,6 +1002,7 @@ export class GameService {
       case "world.al.leader.pt":
       case "world.leave":
         if (!this.services.worldUtility) throw new GameError(errors.unsupported);
+
         body = await worldUtility(
           this.services.worldUtility,
           uid,
@@ -1119,18 +1199,26 @@ export class GameService {
       default:
         throw new GameError(errors.unsupported);
     }
+
     if (Object.keys(body).length === 0 && command !== "world.get.detail")
       body.success = sfs.bool(true);
+
     if (params._cok_) body._cok_ = params._cok_;
+
     if (params.cmdBaseTime) body.cmdBaseTime = params.cmdBaseTime;
+
     if (command.startsWith("world.favo.") && encode(extension(command, body)).length > MAX_FRAME)
       throw new GameError(errors.unsupported, "world_favorite_size");
+
     if (command === "world.search.user" && encode(extension(command, body)).length > MAX_FRAME)
       throw new GameError(errors.unsupported, "world_search_size");
+
     if (command === "search.player" && encode(extension(command, body)).length > MAX_FRAME)
       throw new GameError(errors.unsupported, "player_search");
+
     if (command === "world.get.detail" && encode(extension(command, body)).length > MAX_FRAME)
       throw new GameError(errors.unsupported, "world_point_detail");
+
     if (
       [
         "al.donate.rank.all",
@@ -1161,11 +1249,15 @@ export class GameService {
       encode(extension(command, body)).length > MAX_FRAME
     )
       throw new GameError(errors.unsupported, "ranking");
+
     return { body, pushes };
   }
+
   private async playerSearch(uid: string, params: Fields): Promise<Fields> {
     const store = this.services.playerSearch;
+
     if (!store) throw new GameError(errors.unsupported);
+
     if (
       params.key?.type !== Type.String ||
       !worldSearchName(params.key.value) ||
@@ -1173,6 +1265,7 @@ export class GameService {
       !favoriteInteger(params.page.value)
     )
       throw new GameError(errors.invalid);
+
     const query = playerSearchQuery(
       params.key.value,
       params.page.value,
@@ -1181,71 +1274,102 @@ export class GameService {
       this.rules,
     );
     const now = this.now();
+
     if (!Number.isSafeInteger(now) || now < 0) throw new GameError(errors.invalid);
+
     const state = await store.search(uid, query, now, (rows) =>
       playerSearchRemoteBudget(query, rows),
     );
     const profile = this.checkProfile(state.profile, now);
+
     if (profile.uid !== uid || profile.serverId !== this.config.kingdomId)
       throw new GameError(errors.invalid);
+
     const remote = state.remote.map((entry) => ({
       ...entry,
       data: entry.data.uid == null ? entry.data : sharedSearchProfile(entry.data, this.rules, now),
     }));
+
     return playerSearch(selectPlayerSearch(query, state.local, remote));
   }
+
   private async worldSearch(uid: string, params: Fields): Promise<Fields> {
     const store = this.services.worldSearch;
+
     if (!store) throw new GameError(errors.unsupported);
+
     const integer = (key: string, fallback: number) => {
       const field = params[key];
+
       if (field === undefined) return fallback;
+
       if (field.type !== Type.Int || !favoriteInteger(field.value))
         throw new GameError(errors.invalid);
+
       return field.value;
     };
     const name = params.name === undefined ? "" : params.name.value;
+
     if ((params.name !== undefined && params.name.type !== Type.String) || !worldSearchName(name))
       throw new GameError(errors.invalid);
+
     const kingdomId = integer("serverId", this.config.kingdomId);
     const offset = worldSearchOffset(integer("page", 1));
     const now = this.now();
+
     if (kingdomId < 1 || !Number.isSafeInteger(now) || now < 0) throw new GameError(errors.invalid);
+
     const state = await store.search(uid, { name, offset, kingdomId, now });
     const profile = this.checkProfile(state.profile, now);
+
     if (
       profile.uid !== uid ||
       profile.serverId !== this.config.kingdomId ||
       state.kingdomId !== kingdomId
     )
       throw new GameError(errors.invalid);
+
     return worldSearch(state.rows);
   }
+
   private async worldFavorites(uid: string, command: string, params: Fields): Promise<Fields> {
     const store = this.services.worldFavorites;
+
     if (!store) throw new GameError(errors.unsupported);
+
     const now = this.now();
+
     if (!Number.isSafeInteger(now) || now < 0) throw new GameError(errors.invalid);
+
     const check = (profile: Row | undefined) => {
       const owned = this.checkProfile(profile, now);
+
       if (owned.uid !== uid || owned.serverId !== this.config.kingdomId)
         throw new GameError(errors.invalid);
     };
+
     if (command === "world.favo.get") {
       const state = await store.list(uid, now);
       check(state.profile);
+
       return worldFavorites(state, uid);
     }
+
     const integer = (key: string, fallback?: number) => {
       const field = params[key];
+
       if (field === undefined && fallback !== undefined) return fallback;
+
       if (field?.type !== Type.Int || !favoriteInteger(field.value))
         throw new GameError(errors.invalid);
+
       return field.value;
     };
+
     if (command === "world.favo.add") {
       if (params.name?.type !== Type.String || !favoriteName(params.name.value))
         throw new GameError(errors.invalid);
+
       const dto: CreateWorldFavoriteDto = {
         point: integer("point"),
         type: integer("type"),
@@ -1261,42 +1385,56 @@ export class GameService {
       const state = await store.add(uid, { ...dto, now });
       check(state.profile);
       const repliedAt = this.now();
+
       if (!Number.isSafeInteger(repliedAt) || repliedAt < 0) throw new GameError(errors.invalid);
+
       return { state: sfs.int(1), createTime: sfs.long(repliedAt), point: sfs.int(dto.point) };
     }
+
     const selection = (key: string): number[] => {
       const field = params[key];
+
       if (field?.type !== Type.Array || !Array.isArray(field.value) || field.value.length > 32767)
         throw new GameError(errors.invalid);
+
       return field.value.map((entry: Value) => {
         if (entry?.type !== Type.Int || !favoriteInteger(entry.value))
           throw new GameError(errors.invalid);
+
         return entry.value;
       });
     };
     const points = selection("point"),
       servers = selection("server");
+
     if (points.length !== servers.length) throw new GameError(errors.invalid);
+
     const result = await store.remove(
       uid,
       points.map((point, index) => ({ point, server: servers[index]! })),
       now,
     );
     check(result.profile);
+
     return {
       state: sfs.int(result.success ? 1 : 0),
       pointArray: sfs.array(points.map(sfs.int)),
       serverArray: sfs.array(servers.map(sfs.int)),
     };
   }
+
   private async avatarVersion(uid: string): Promise<Fields> {
     const service = this.services.avatarVersion;
+
     if (!service) throw new GameError(errors.unsupported);
+
     if (!/^[0-9]{1,20}$/.test(uid)) throw new GameError(errors.invalid);
+
     const now = this.now();
     const state = await service.update(uid, now);
     const profile = this.checkProfile(state.profile, now);
     const intent = state.intent;
+
     if (
       profile.uid !== uid ||
       profile.serverId !== this.config.kingdomId ||
@@ -1311,16 +1449,23 @@ export class GameService {
           BigInt.asIntN(64, intent.nextUpdateTime) !== intent.nextUpdateTime))
     )
       throw new GameError(errors.invalid);
+
     try {
       await service.deliver(uid, intent.operationId);
     } catch {}
+
     const body: Fields = { uid: sfs.string(uid), picVer: sfs.int(intent.picVer) };
+
     if (intent.nextUpdateTime !== null) body.nextUpdateTime = sfs.long(intent.nextUpdateTime);
+
     return body;
   }
+
   private async avatarFinish(uid: string, params: Fields): Promise<Result> {
     const service = this.services.avatarFinish;
+
     if (!service) throw new GameError(errors.unsupported);
+
     if (
       !/^[0-9]{1,20}$/.test(uid) ||
       params.receipt?.type !== Type.String ||
@@ -1330,11 +1475,13 @@ export class GameService {
         (params.gameuid.type !== Type.String || params.gameuid.value !== uid))
     )
       throw new GameError(errors.invalid);
+
     const now = this.now();
     const receipt = params.receipt.value;
     const state = await service.finish(uid, receipt, now);
     const profile = this.checkProfile(state.profile, now);
     const sequence = Number(receipt.split(":")[0]);
+
     if (
       profile.uid !== uid ||
       profile.serverId !== this.config.kingdomId ||
@@ -1345,34 +1492,47 @@ export class GameService {
       state.superseded !== sequence < state.picVer! % 1000000
     )
       throw new GameError(errors.invalid);
+
     try {
       await service.deliver(uid, sequence);
     } catch {}
+
     const body: Fields = {
       uid: sfs.string(uid),
       picVer: sfs.int(state.picVer!),
       superseded: sfs.bool(state.superseded),
     };
+
     return { body, pushes: [{ command: "push.picVer.update", body: { ...body } }] };
   }
+
   private async avatarUrl(uid: string, params: Fields): Promise<Fields> {
     const service = this.services.avatar;
+
     if (!service) throw new GameError(errors.unsupported);
+
     const now = this.now();
     const requester = this.checkProfile(await this.db.getProfileById(uid), now);
+
     if (requester.uid !== uid || requester.serverId !== this.config.kingdomId)
       throw new GameError(errors.invalid);
+
     const target = params.gameuid === undefined ? uid : params.gameuid.value;
+
     if (
       (params.gameuid !== undefined && params.gameuid.type !== Type.String) ||
       typeof target !== "string" ||
       !/^[0-9]{1,20}$/.test(target)
     )
       throw new GameError(errors.invalid);
+
     const profile = this.checkProfile(await this.db.getProfileById(target), now);
+
     if (profile.uid !== target || profile.serverId !== this.config.kingdomId)
       throw new GameError(errors.invalid);
+
     const version = profile.picVer;
+
     if (
       typeof version !== "number" ||
       !Number.isInteger(version) ||
@@ -1380,35 +1540,48 @@ export class GameService {
       version > 2147483647
     )
       throw new GameError(errors.invalid);
+
     const sequence = Math.max(0, version % 1000000);
+
     return {
       owner: sfs.string(target),
       path: sfs.string(sequence ? await service.image(target, sequence) : ""),
     };
   }
+
   private async avatarGrant(uid: string, params: Fields): Promise<Fields> {
     const service = this.services.avatar;
+
     if (!service) throw new GameError(errors.unsupported);
+
     if (
       !/^[0-9]{1,20}$/.test(uid) ||
       (params.gameuid !== undefined &&
         (params.gameuid.type !== Type.String || params.gameuid.value !== uid))
     )
       throw new GameError(errors.invalid);
+
     const now = this.now();
     const state = await service.read(uid, now, async (profile, readers) => {
       this.checkProfile(profile, now);
+
       if (profile.uid !== uid || profile.serverId !== this.config.kingdomId)
         throw new GameError(errors.invalid);
+
       const sequence = avatarSequence(profile.picVer);
       const minimum = avatarMinimumLevel(this.rules);
+
       if (minimum !== undefined) {
         checkAvatarLevel(await readers.castleLevel(), minimum);
         const record = await readers.uploadRecord();
+
         if (record && record.uid !== uid) throw new GameError(errors.invalid);
+
         checkAvatarRecord(this.rules, record, now);
       }
+
       const receipt = await service.find(uid, sequence);
+
       if (
         receipt &&
         (receipt.owner !== uid ||
@@ -1416,6 +1589,7 @@ export class GameService {
           !/^[a-f0-9]{64}$/.test(receipt.hash))
       )
         throw new GameError(errors.invalid);
+
       return {
         owner: uid,
         sequence,
@@ -1424,6 +1598,7 @@ export class GameService {
       };
     });
     const profile = this.checkProfile(state.profile, now);
+
     if (
       profile.uid !== uid ||
       profile.serverId !== this.config.kingdomId ||
@@ -1431,6 +1606,7 @@ export class GameService {
       state.grant.owner !== uid
     )
       throw new GameError(errors.invalid);
+
     return {
       owner: sfs.string(state.grant.owner),
       sequence: sfs.int(state.grant.sequence),
@@ -1439,38 +1615,50 @@ export class GameService {
       pendingHash: sfs.string(state.grant.pendingHash),
     };
   }
+
   private async chatSession(uid: string): Promise<Fields> {
     if (!this.services.chatSession) throw new GameError(errors.unsupported);
+
     const now = this.now();
     const profile = this.checkProfile(await this.db.getProfileById(uid), now);
     const request = realmChatSessionRequest(profile, uid, this.config.kingdomId);
+
     try {
       return realmChatSessionResponse(await this.services.chatSession(request), this.now());
     } catch {
       throw new GameError(errors.invalid);
     }
   }
+
   private async profile(uid: string): Promise<Row> {
     return this.checkProfile(await this.db.getProfileById(uid));
   }
+
   private async mailStatus(uid: string, params: Fields): Promise<Fields> {
     const field = params.category;
     let category: number | undefined;
+
     if (field !== undefined) {
       if (field.type !== Type.Int || typeof field.value !== "number")
         throw new GameError(errors.invalid);
+
       category = field.value;
     }
+
     const query = mailStatusQuery(category, this.now());
     const state = await this.db.mailStatus(uid, query);
     const profile = this.checkProfile(state.profile, query.now);
+
     if (profile.uid !== uid || num(profile, "serverId") !== this.config.kingdomId)
       throw new GameError(errors.invalid);
+
     return mailStatus(calculateMailStatus(query, state.counts));
   }
+
   private async mailSave(uid: string, mode: MailSaveMode, params: Fields): Promise<Fields> {
     const ids = mode === "batch" ? params.uids : params.uid;
     const flag = mode === "batch" ? params.flag : params.type;
+
     if (
       !ids ||
       ids.type !== Type.String ||
@@ -1480,16 +1668,21 @@ export class GameService {
       typeof flag.value !== "number"
     )
       throw new GameError(errors.invalid);
+
     const query = mailSaveQuery(mode, ids.value, flag.value, this.now());
     const state = await this.db.mailSave(uid, query);
     const profile = this.checkProfile(state.profile, query.now);
+
     if (profile.uid !== uid || num(profile, "serverId") !== this.config.kingdomId)
       throw new GameError(errors.invalid);
+
     return mailSave(state.result);
   }
+
   private async mailRead(uid: string, batch: boolean, params: Fields): Promise<Fields> {
     const ids = batch ? params.uids : params.uid;
     const type = params.type;
+
     if (
       !ids ||
       ids.type !== Type.String ||
@@ -1503,16 +1696,21 @@ export class GameService {
           type.value > 2147483647))
     )
       throw new GameError(errors.invalid);
+
     const query = mailReadQuery(batch, ids.value, this.now());
     const state = await this.db.mailRead(uid, query);
     const profile = this.checkProfile(state.profile, query.now);
+
     if (profile.uid !== uid || num(profile, "serverId") !== this.config.kingdomId)
       throw new GameError(errors.invalid);
+
     return {};
   }
+
   private async mailDelete(uid: string, params: Fields): Promise<Fields> {
     const ids = params.uids;
     const legacyNum = params.num;
+
     if (
       !ids ||
       ids.type !== Type.String ||
@@ -1525,23 +1723,32 @@ export class GameService {
           legacyNum.value > 2147483647))
     )
       throw new GameError(errors.invalid);
+
     const query = mailDeleteQuery(ids.value, this.now());
     const state = await this.db.mailDelete(uid, query, (entries) => planMailDeletion(uid, entries));
     const profile = this.checkProfile(state.profile, query.now);
+
     if (profile.uid !== uid || num(profile, "serverId") !== this.config.kingdomId)
       throw new GameError(errors.invalid);
+
     return mailDeleted(state.deleted);
   }
+
   private async chatNews(uid: string, params: Fields): Promise<Fields> {
     if (!this.services.social) throw new GameError(errors.unsupported);
+
     let rooms: unknown;
+
     try {
       rooms = JSON.parse(wireString(params, "params"));
     } catch {
       throw new GameError(errors.invalid);
     }
+
     if (!Array.isArray(rooms) || rooms.length > 16) throw new GameError(errors.invalid);
+
     const results: Value[] = [];
+
     for (const room of rooms) {
       if (
         !room ||
@@ -1552,16 +1759,21 @@ export class GameService {
         typeof room.seqid !== "string"
       )
         throw new GameError(errors.invalid);
+
       if (room.type !== 4 && room.type !== 2) {
         const response = await this.services.social(uid, "chat.get.new", {
           params: sfs.string(JSON.stringify([room])),
         });
         const values = response.rooms?.value;
+
         if (!Array.isArray(values) || values.length !== 1) throw new GameError(errors.invalid);
+
         results.push((values as Value[])[0]!);
         continue;
       }
+
       if (!this.db.getSystemMailByPlayerId) throw new GameError(errors.unsupported);
+
       const now = this.now();
       const anchor = ["-1", "0", ""].includes(room.seqid) ? null : room.seqid;
       let body: Fields | undefined;
@@ -1612,8 +1824,10 @@ export class GameService {
         },
       );
       const profile = this.checkProfile(state.profile, now);
+
       if (profile.uid !== uid || num(profile, "serverId") !== this.config.kingdomId || !body)
         throw new GameError(errors.invalid);
+
       results.push(
         sfs.object({
           ...body,
@@ -1624,19 +1838,25 @@ export class GameService {
         }),
       );
     }
+
     return { rooms: sfs.array(results) };
   }
+
   private async mailSystem(uid: string, params: Fields, legacy = false): Promise<Fields> {
     if (legacy && !this.services.systemMailPage) throw new GameError(errors.unsupported);
+
     const clientseq = params.clientseq;
+
     if (
       !clientseq ||
       (clientseq.type !== Type.Null &&
         (clientseq.type !== Type.String || typeof clientseq.value !== "string"))
     )
       throw new GameError(errors.invalid);
+
     const count = wireInt(params, "count");
     let time = 0n;
+
     if (params.time !== undefined) {
       try {
         time = javaDecimal(wireString(params, "time"), 64);
@@ -1644,22 +1864,33 @@ export class GameService {
         throw new GameError(errors.invalid);
       }
     }
+
     const now = this.now();
     const profile = this.checkProfile(await this.db.getProfileById(uid), now);
+
     if (profile.uid !== uid || num(profile, "serverId") !== this.config.kingdomId)
       throw new GameError(errors.invalid);
+
     if (!this.db.getSystemMailByPlayerId) throw new GameError(errors.unsupported);
+
     let anchor = clientseq.type === Type.Null ? null : (clientseq.value as string);
+
     if (mailBlank(anchor) || anchor === "0") {
       if (!this.services.lastSystemMail) throw new GameError(errors.unsupported);
+
       anchor = await this.services.lastSystemMail(uid);
     }
+
     if (mailBlank(anchor) || anchor === "0") anchor = null;
+
     if (anchor !== null && (anchor.length > 40 || anchor.includes("\0") || !anchor.isWellFormed()))
       throw new GameError(errors.invalid);
+
     const envelope: Fields = {};
+
     for (const key of ["_cok_", "cmdBaseTime"])
       if (params[key] !== undefined) envelope[key] = params[key]!;
+
     let body: Fields | undefined;
     const state = await this.db.getSystemMailByPlayerId(
       uid,
@@ -1679,59 +1910,82 @@ export class GameService {
       },
     );
     const current = this.checkProfile(state.profile, now);
+
     if (current.uid !== uid || num(current, "serverId") !== this.config.kingdomId)
       throw new GameError(errors.invalid);
+
     if (!body) throw new GameError(errors.unsupported);
+
     return body;
   }
+
   private async mailUpdates(uid: string, params: Fields): Promise<Fields> {
     const now = this.now();
     const profile = this.checkProfile(await this.db.getProfileById(uid), now);
+
     if (profile.uid !== uid || num(profile, "serverId") !== this.config.kingdomId)
       throw new GameError(errors.invalid);
+
     if (!Object.hasOwn(params, "time")) return {};
+
     const time = params.time;
+
     if (
       !time ||
       (time.type !== Type.Null && (time.type !== Type.String || typeof time.value !== "string"))
     )
       throw new GameError(errors.invalid);
+
     if (!this.db.mailUpdates) throw new GameError(errors.unsupported);
+
     const after = mailUpdateCursor(time.type === Type.Null ? null : (time.value as string));
     const envelope: Fields = {};
+
     for (const key of ["_cok_", "cmdBaseTime"])
       if (params[key] !== undefined) envelope[key] = params[key]!;
+
     let body: Fields | undefined;
     const state = await this.db.mailUpdates(uid, { after, now }, (entries) => {
       body = mailUpdatesProjection(entries, envelope);
     });
     const current = this.checkProfile(state.profile, now);
+
     if (current.uid !== uid || num(current, "serverId") !== this.config.kingdomId)
       throw new GameError(errors.invalid);
+
     if (!body) throw new GameError(errors.unsupported);
+
     return body;
   }
+
   private async mailBatch(uid: string, params: Fields, command: MailListCommand): Promise<Fields> {
     const fromUser =
       params.fromUser === undefined || params.fromUser.type === Type.Null
         ? null
         : wireString(params, "fromUser");
+
     if (fromUser !== null && typeof fromUser !== "string") throw new GameError(errors.invalid);
+
     const type =
       command === "mread.chat" && params.type === undefined ? 4 : wireInt(params, "type");
     const begin = wireInt(params, "num");
     const limit = wireInt(params, "offset");
     const now = this.now();
+
     if (type === 10 || type === 1000)
       return this.mailGroups(uid, params, mailGroupQuery(type, begin, limit, now), command);
+
     const query = mailBatchQuery(type, begin, limit, fromUser, now);
     const chat = mailBatchIsChat(query);
     let body: Fields | undefined;
     const envelope: Fields = {};
+
     for (const key of ["_cok_", "cmdBaseTime"])
       if (params[key] !== undefined) envelope[key] = params[key]!;
+
     const state = await this.db.mailBatch(uid, query, async (entries, readers) => {
       if (entries.length > query.limit) throw new GameError(errors.invalid);
+
       const presentation = await resolveMailPresentation(
         entries,
         readers,
@@ -1749,13 +2003,17 @@ export class GameService {
         envelope,
       );
       body = projection.body;
+
       return projection.invalidIds;
     });
     const profile = this.checkProfile(state.profile, query.now);
+
     if (profile.uid !== uid || num(profile, "serverId") !== this.config.kingdomId || !body)
       throw new GameError(errors.invalid);
+
     return body;
   }
+
   private async mailGroups(
     uid: string,
     params: Fields,
@@ -1763,13 +2021,16 @@ export class GameService {
     command: MailListCommand,
   ): Promise<Fields> {
     const envelope: Fields = {};
+
     for (const key of ["_cok_", "cmdBaseTime"])
       if (params[key] !== undefined) envelope[key] = params[key]!;
+
     let body: Fields | undefined;
     const state = await this.db.mailGroups(uid, query, async (groups, readers) => {
       const selected = mailGroupWindow(uid, query, groups);
       const senders = await readers.senders(mailGroupSenders(groups));
       const previews: MailGroupPreview[] = [];
+
       for (const group of selected) {
         const rule = mailGroupRule(group.groupType);
         previews.push(
@@ -1778,6 +2039,7 @@ export class GameService {
             : { entries: [], total: 0n, unread: 0n },
         );
       }
+
       const chatEntries = previews.flatMap((preview, index) =>
         mailGroupRule(selected[index]!.groupType)?.kind === "uid" ? [] : [...preview.entries],
       );
@@ -1799,13 +2061,17 @@ export class GameService {
         command,
       );
       body = projection.body;
+
       return projection.cleanup;
     });
     const profile = this.checkProfile(state.profile, query.now);
+
     if (profile.uid !== uid || num(profile, "serverId") !== this.config.kingdomId || !body)
       throw new GameError(errors.invalid);
+
     return body;
   }
+
   private async mailCategory(uid: string, params: Fields): Promise<Fields> {
     const query = mailCategoryQuery(
       wireInt(params, "category"),
@@ -1813,11 +2079,15 @@ export class GameService {
       wireInt(params, "offset"),
       this.now(),
     );
+
     if (params.fromUser !== undefined && typeof wireString(params, "fromUser") !== "string")
       throw new GameError(errors.invalid);
+
     const envelope: Fields = {};
+
     for (const key of ["_cok_", "cmdBaseTime"])
       if (params[key] !== undefined) envelope[key] = params[key]!;
+
     let body: Fields | undefined;
     const state = await this.db.mailCategory(uid, query, async (window, readers) => {
       const entries = selectMailCategory(query, window);
@@ -1831,40 +2101,54 @@ export class GameService {
       );
       const projection = mailCategoryProjection(uid, query, window, presentation, envelope);
       body = projection.body;
+
       return projection.invalidIds;
     });
     const profile = this.checkProfile(state.profile, query.now);
+
     if (profile.uid !== uid || num(profile, "serverId") !== this.config.kingdomId || !body)
       throw new GameError(errors.invalid);
+
     return body;
   }
+
   private async mailContents(uid: string, params: Fields): Promise<Fields> {
     const ids = wireString(params, "uid");
+
     if (typeof wireString(params, "type") !== "string") throw new GameError(errors.invalid);
+
     const query = mailContentsQuery(ids, this.now());
     let body: Fields | undefined;
     const envelope: Fields = {};
+
     for (const key of ["_cok_", "cmdBaseTime"])
       if (params[key] !== undefined) envelope[key] = params[key]!;
+
     const state = await this.db.mailContents(uid, query, (entries) => {
       const projection = mailContentsProjection(entries, envelope);
       body = projection.body;
+
       return projection.invalidIds;
     });
     const profile = this.checkProfile(state.profile, query.now);
+
     if (profile.uid !== uid || num(profile, "serverId") !== this.config.kingdomId || !body)
       throw new GameError(errors.invalid);
+
     return body;
   }
+
   private async mailConversationSave(uid: string, params: Fields): Promise<Fields> {
     const sender = params.fromUser !== undefined;
     const type = params.type !== undefined;
+
     if (
       sender
         ? typeof params.fromUser!.value !== "string"
         : type && typeof params.type!.value !== "number"
     )
       throw new GameError(errors.invalid);
+
     const query = mailConversationSaveQuery(
       {
         mod: wireInt(params, "mod", 0),
@@ -1879,46 +2163,63 @@ export class GameService {
     );
     const state = await this.db.mailConversationSave(uid, query);
     const profile = this.checkProfile(state.profile, query.now);
+
     if (profile.uid !== uid || num(profile, "serverId") !== this.config.kingdomId)
       throw new GameError(errors.invalid);
+
     return {};
   }
+
   private async mailConversationRead(uid: string, params: Fields): Promise<Fields> {
     const query = mailConversationReadRequest(params, this.now());
+
     if (
       !this.db.mailConversationRead ||
       (query.effects.some((effect) => effect.kind === "chat") && !this.services.mailChatEnabled)
     )
       throw new GameError(errors.unsupported, "mail");
+
     const body: Fields = { success: sfs.bool(true) };
+
     for (const key of ["_cok_", "cmdBaseTime"])
       if (params[key] !== undefined) body[key] = params[key]!;
+
     if (encode(extension("chatMail.read", body)).length > MAX_FRAME)
       throw new GameError(errors.unsupported, "mail");
+
     const state = await this.db.mailConversationRead(uid, query);
     const profile = this.checkProfile(state.profile, query.now);
+
     if (profile.uid !== uid || num(profile, "serverId") !== this.config.kingdomId)
       throw new GameError(errors.invalid);
+
     return body;
   }
+
   private async mailCategoryDelete(uid: string, params: Fields): Promise<Fields> {
     const read = (key: string) =>
       params[key] === undefined || params[key]!.type === Type.Null ? null : wireString(params, key);
     const query = mailCategoryDeleteQuery(read("uids"), read("types"), this.now());
+
     if (!this.db.mailCategoryDelete) throw new GameError(errors.unsupported, "mail");
+
     let body: Fields | undefined;
     const state = await this.db.mailCategoryDelete(
       uid,
       query,
       (counts) => {
         const result: Fields = Object.create(null);
+
         for (const entry of counts) {
           result[entry.raw] = sfs.int(entry.unread);
           result[`total${entry.raw}`] = sfs.int(entry.total);
         }
+
         body = { RetObj: sfs.object(result) };
+
         for (const key of ["_cok_", "cmdBaseTime"])
           if (params[key] !== undefined) body[key] = params[key]!;
+
         if (encode(extension("mail.delete.batch", body)).length > MAX_FRAME)
           throw new GameError(errors.unsupported, "mail");
       },
@@ -1926,10 +2227,13 @@ export class GameService {
       !!this.services.mailChatEnabled,
     );
     const profile = this.checkProfile(state.profile, query.now);
+
     if (profile.uid !== uid || num(profile, "serverId") !== this.config.kingdomId || !body)
       throw new GameError(errors.invalid);
+
     return body;
   }
+
   private async mailConversationDelete(
     uid: string,
     params: Fields,
@@ -1937,14 +2241,18 @@ export class GameService {
   ): Promise<Fields> {
     if (!this.services.mailChatEnabled || !this.db.mailConversationDelete)
       throw new GameError(errors.unsupported, "mail");
+
     const mod = wireInt(params, "mod", 0);
     const bottle = batch && wireInt(params, "driftingBottle", 0) === 1;
     let senders: (string | null)[];
+
     if (batch) {
       const raw = wireString(params, "users");
       senders = raw.split(",");
+
       if (raw !== "") while (senders.at(-1) === "") senders.pop();
     } else senders = [params.fromUser?.type === Type.Null ? null : wireString(params, "fromUser")];
+
     if (
       senders.length > 1000 ||
       senders.some(
@@ -1954,14 +2262,18 @@ export class GameService {
       )
     )
       throw new GameError(errors.invalid, "mail");
+
     const body: Fields = { success: sfs.bool(true) };
+
     for (const key of ["_cok_", "cmdBaseTime"])
       if (params[key] !== undefined) body[key] = params[key]!;
+
     if (
       encode(extension(batch ? "chatMail.delete.batch" : "chatMail.delete", body)).length >
       MAX_FRAME
     )
       throw new GameError(errors.unsupported, "mail");
+
     const now = this.now();
     const state = await this.db.mailConversationDelete(uid, {
       now,
@@ -1970,34 +2282,49 @@ export class GameService {
       bottle,
     });
     const profile = this.checkProfile(state.profile, now);
+
     if (profile.uid !== uid || num(profile, "serverId") !== this.config.kingdomId)
       throw new GameError(errors.invalid);
+
     return body;
   }
+
   private async mailTypeDelete(uid: string, params: Fields): Promise<Fields> {
     wireInt(params, "mod", 0);
+
     if (params.fromUser !== undefined) return this.mailConversationDelete(uid, params, false);
+
     const query = mailTypeDeleteQuery(
       params.type === undefined ? undefined : wireInt(params, "type"),
       this.now(),
     );
+
     if (!this.db.mailTypeDelete) throw new GameError(errors.unsupported, "mail");
+
     const body: Fields = { success: sfs.bool(true) };
+
     for (const key of ["_cok_", "cmdBaseTime"])
       if (params[key] !== undefined) body[key] = params[key]!;
+
     if (encode(extension("chatMail.delete", body)).length > MAX_FRAME)
       throw new GameError(errors.unsupported, "mail");
+
     const state = await this.db.mailTypeDelete(uid, query);
     const profile = this.checkProfile(state.profile, query.now);
+
     if (profile.uid !== uid || num(profile, "serverId") !== this.config.kingdomId)
       throw new GameError(errors.invalid);
+
     return body;
   }
+
   private async militaryRanking(uid: string, params: Fields): Promise<Fields> {
     const now = this.now();
     const profile = this.checkProfile(await this.db.getProfileById(uid), now);
+
     if (profile.uid !== uid || num(profile, "serverId") !== this.config.kingdomId)
       throw new GameError(errors.invalid);
+
     if (
       !serverFeature(this.rules, "wr_switch", {
         kingdomId: this.config.kingdomId,
@@ -2006,10 +2333,15 @@ export class GameService {
       })
     )
       throw new GameError(errors.unsupported, "ranking");
+
     const type = wireInt(params, "type");
+
     if (![0, 1].includes(type)) throw new GameError(errors.invalid);
+
     if (!this.services.militaryRanking) throw new GameError(errors.unsupported, "ranking");
+
     const group = militaryRankingGroup(this.rules, this.config.kingdomId);
+
     return militaryRanking(
       await this.services.militaryRanking(type, group),
       uid,
@@ -2017,23 +2349,31 @@ export class GameService {
       type,
     );
   }
+
   private async flowerRanking(uid: string): Promise<Fields> {
     const now = this.now();
     const current = this.checkProfile(await this.db.getProfileById(uid), now);
+
     if (current.uid !== uid || num(current, "serverId") !== this.config.kingdomId)
       throw new GameError(errors.invalid);
+
     if (
       !this.db.crossRankingRealm ||
       !this.db.flowerRanking ||
       !this.services.flowerRankingPublication
     )
       throw new GameError(errors.unsupported, "ranking");
+
     const cross = await this.db.crossRankingRealm();
     const realm = cross ? Number(current.crossFightSrcServerId) : this.config.kingdomId;
+
     if (!Number.isInteger(realm) || realm < 1) throw new GameError(errors.invalid);
+
     const limit = Number(this.rules.items.get("ranking")?.k2);
+
     if (!Number.isInteger(limit) || limit < 1 || limit > 32767)
       throw new GameError(errors.unsupported, "ranking");
+
     const feature = this.rules.features.get("flowers_all_sev");
     const global =
       serverFeature(this.rules, "flowers_all_sev", {
@@ -2048,15 +2388,20 @@ export class GameService {
       flowerRankingEntries(publication.local).map((row) => row.uid),
     );
     const profile = this.checkProfile(state.profile, now);
+
     if (profile.uid !== uid || num(profile, "serverId") !== realm)
       throw new GameError(errors.invalid);
+
     if (global && cross) {
       const own = await this.db.flowerRanking(uid, this.config.kingdomId, []);
       const ownProfile = this.checkProfile(own.profile, now);
+
       if (ownProfile.uid !== uid || num(ownProfile, "serverId") !== this.config.kingdomId)
         throw new GameError(errors.invalid);
+
       state.hide = own.hide;
     }
+
     return flowerRanking(
       publication,
       state,
@@ -2065,56 +2410,79 @@ export class GameService {
       global,
     );
   }
+
   private async donationRanking(uid: string, command: string): Promise<Fields> {
     const now = this.now();
     const resource = command.startsWith("al.donate.res.");
     const current = this.checkProfile(await this.db.getProfileById(uid), now);
+
     if (current.uid !== uid || num(current, "serverId") !== this.config.kingdomId)
       throw new GameError(errors.invalid);
+
     if (resource) {
       if (!this.db.crossRankingRealm) throw new GameError(errors.unsupported, "ranking");
+
       if (await this.db.crossRankingRealm()) return {};
     }
+
     if (!this.db.donationRanking) throw new GameError(errors.unsupported, "ranking");
+
     const snapshot = await this.db.donationRanking(uid, now);
     const profile = this.checkProfile(snapshot.profile, now);
+
     if (
       profile.uid !== uid ||
       num(profile, "serverId") !== this.config.kingdomId ||
       !text(profile, "allianceId").trim()
     )
       throw new GameError(errors.invalid);
+
     const suffix = command.split(".").at(-1)!;
     const kind = (resource ? `resource-${suffix}` : suffix) as DonationRankingKind;
+
     if (!resource) return donationRanking(snapshot, kind, now);
+
     if (!this.services.donationScores) throw new GameError(errors.unsupported, "ranking");
+
     const date = rankingCalendar(now);
     const scores = await this.services.donationScores(
       text(profile, "allianceId"),
       kind as "resource-day" | "resource-week" | "resource-history",
       kind === "resource-day" ? date.dayKey : date.weekKey,
     );
+
     return resourceDonationRanking(snapshot, scores, kind === "resource-week", now);
   }
+
   private async cemeteryRanking(uid: string, params: Fields): Promise<Fields> {
     const now = this.now();
     const profile = this.checkProfile(await this.db.getProfileById(uid), now);
+
     if (profile.uid !== uid || num(profile, "serverId") !== this.config.kingdomId)
       throw new GameError(errors.invalid);
+
     const type = wireString(params, "type");
+
     if (type !== "0" && type !== "1") throw new GameError(errors.invalid);
+
     if (!this.db.cemeteryRanking) throw new GameError(errors.unsupported, "ranking");
+
     const snapshot = await this.db.cemeteryRanking(uid, type, now);
     const owner = this.checkProfile(snapshot.profile, now);
+
     if (owner.uid !== uid || num(owner, "serverId") !== this.config.kingdomId)
       throw new GameError(errors.invalid);
+
     return cemeteryRanking(snapshot, uid);
   }
+
   private async throneRanking(uid: string, params: Fields): Promise<Fields> {
     const now = this.now();
     const profile = this.checkProfile(await this.db.getProfileById(uid), now);
+
     if (profile.uid !== uid || num(profile, "serverId") !== this.config.kingdomId)
       throw new GameError(errors.invalid);
+
     const own = this.config.kingdomId;
     const peer = own % 2 === 0 ? own - 1 : own + 1;
     const enabled = (realm: number) =>
@@ -2125,30 +2493,47 @@ export class GameService {
       });
     const target = enabled(own) && enabled(peer) ? peer : -1;
     const selected = params.serverId === undefined ? undefined : wireInt(params, "serverId");
+
     if (selected !== undefined && selected <= 0) throw new GameError(errors.invalid);
+
     if (selected !== undefined && selected !== own && selected !== target) return throneRanking([]);
+
     if (!this.services.throneRankingPeriod || !this.db.throneRanking)
       throw new GameError(errors.unsupported, "ranking");
+
     const boards: Fields[] = [];
+
     for (const realm of [own, ...(target > 0 ? [target] : [])]) {
       if (selected !== undefined && selected !== realm) continue;
+
       const period = await this.services.throneRankingPeriod(realm);
+
       if (realm !== own && !period) continue;
+
       if (period && !throneRankingOpen(period)) continue;
+
       const snapshot = await this.db.throneRanking(realm, period);
       const board = throneRankingBoard(snapshot, realm, realm === own ? uid : "");
+
       if (board) boards.push(board);
     }
+
     return throneRanking(boards);
   }
+
   private async battleRanking(uid: string, command: string): Promise<Fields> {
     const now = this.now();
+
     if (!this.db.battleRankingState) throw new GameError(errors.unsupported, "ranking");
+
     const state = await this.db.battleRankingState(uid, now);
     const profile = this.checkProfile(state.profile, now);
+
     if (profile.uid !== uid || num(profile, "serverId") !== this.config.kingdomId)
       throw new GameError(errors.invalid);
+
     const playoff = command === "dragon.playoff.rank.info" || [7, 8].includes(state.realmType);
+
     if (
       (playoff || [3, 5].includes(state.realmType)) &&
       !battleRankingOpen(
@@ -2161,11 +2546,14 @@ export class GameService {
       )
     )
       throw new GameError(errors.battleClosed, "ranking");
+
     if (command === "dragon.playoff.rank.info") {
       if (!this.services.playoffPublication) throw new GameError(errors.unsupported, "ranking");
+
       const publication = await this.services.playoffPublication();
       const teams = decodePlayoffTeams(publication.teams);
       const weekday = Number(javaDecimal(this.rules.items.get("wap_info")?.k9 ?? "", 32));
+
       return playoffRanking(
         publication,
         teams,
@@ -2175,47 +2563,68 @@ export class GameService {
         weekday,
       );
     }
+
     if (![3, 5, 7, 8, 13, 14].includes(state.realmType)) return fightRanking();
+
     const teamId = state.observerTeam ?? text(profile, "allianceId");
+
     if (!teamId) throw new GameError(errors.invalid);
+
     if (!this.services.battleFightPublication) throw new GameError(errors.unsupported, "ranking");
+
     return fightRanking(decodeFightRanking(await this.services.battleFightPublication(), teamId));
   }
+
   private async activityDirectory(uid: string): Promise<Fields> {
     const now = this.now();
+
     if (!this.db.activityDirectory) throw new GameError(errors.unsupported, "activity_directory");
+
     const state = await this.db.activityDirectory(uid),
       profile = this.checkProfile(state.profile, now);
+
     if (profile.uid !== uid || num(profile, "serverId") !== this.config.kingdomId)
       throw new GameError(errors.invalid);
+
     const body = activityDirectory(
       activityDirectoryEntries(state.activities, now, legacyIntegerOrder),
     );
+
     if (encode(extension("act.ls", body)).length > MAX_FRAME)
       throw new GameError(errors.unsupported, "activity_directory");
+
     return body;
   }
+
   private async heroEventDetails(uid: string, command: string, params: Fields): Promise<Fields> {
     const now = this.now(),
       at = BigInt(now),
       current = this.checkProfile(await this.db.getProfileById(uid), now);
+
     if (current.uid !== uid || num(current, "serverId") !== this.config.kingdomId)
       throw new GameError(errors.invalid);
+
     const source = current.crossFightSrcServerId,
       realm = source == null || Number(source) === -1 ? this.config.kingdomId : Number(source),
       cross = command === "hero.cross.info";
+
     if (cross && realm === this.config.kingdomId) return {};
+
     if (!this.db.heroEvents) throw new GameError(errors.unsupported, "ranking");
+
     const selection = cross
       ? { panels: true }
       : command === "hero.event.info.get"
         ? { activityId: wireString(params, "activityId") }
         : { eventId: wireString(params, "actId") };
+
     try {
       const state = await this.db.heroEvents(uid, realm, selection, now),
         profile = this.checkProfile(state.profile, now);
+
       if (profile.uid !== uid || num(profile, "serverId") !== realm)
         throw new GameError(errors.invalid);
+
       const preview = (id: string) =>
         id === "0"
           ? sfs.array([])
@@ -2227,12 +2636,16 @@ export class GameService {
                 randomInt,
               ),
             );
+
       if (cross) {
         const panels: Fields[] = [];
+
         for (const panel of this.rules.power.activityPanels?.values() ?? []) {
           const type =
             panel.type === "10" ? 1 : panel.type === "12" ? 2 : panel.type === "14" ? 3 : 0;
+
           if (!type || panel.function_on === "0") continue;
+
           const merge = [...(this.rules.power.mergeActivities?.values() ?? [])].some(
             (row) =>
               row.activityId === panel.id &&
@@ -2240,15 +2653,21 @@ export class GameService {
               at - state.lastMergeMillis >= BigInt(cityInteger(row.merge_start)) * 60000n &&
               at - state.lastMergeMillis < BigInt(cityInteger(row.merge_end)) * 60000n,
           );
+
           if (!merge && panel.start !== undefined && panel.end !== undefined) {
             const start = eventTimestamp(panel.start),
               end = eventTimestamp(panel.end);
+
             if (start === undefined || end === undefined || at <= start || at >= end) continue;
           }
+
           let activity = state.activities.find((row) => num(row, "activityType") === type);
+
           if (!activity && !state.scoreManagerRunning)
             activity = nextHeroPanel(this.rules, type, realm, at);
+
           if (!activity || (type === 1 && long(activity, "startTime") - at > 86400000n)) continue;
+
           panels.push(
             heroPanelView(
               activity,
@@ -2259,24 +2678,38 @@ export class GameService {
             ),
           );
         }
+
         if (panels.length > 256) throw new GameError(errors.invalid);
+
         return { activity: sfs.array(panels.map(sfs.object)) };
       }
+
       const activity = state.activities[0];
+
       if (!activity) return {};
+
       if (command === "hero.event.ranking.get") {
         const event = state.events[0];
+
         if (!event) return {};
+
         const { level } = heroEventBand(event, state, this.rules);
+
         if (level < 0) return heroEventReward([]);
+
         const view = heroEventRewards(event, level, this.rules);
+
         return heroEventReward(view.ranking.map(preview), view.ranking, view.rankLevels);
       }
+
       const entries: Fields[] = [],
         ranked: { type: number; ranking: number; countries: Row[] }[] = [];
+
       for (const event of state.events) {
         const { level, score } = heroEventBand(event, state, this.rules);
+
         if (level < 0) continue;
+
         const view = heroEventRewards(event, level, this.rules),
           query = heroRankingLookup(
             event,
@@ -2287,12 +2720,15 @@ export class GameService {
             MOBILE_CLIENT_VERSION,
           );
         let position: number;
+
         if (typeof query === "number") position = query;
         else {
           if (!this.services.heroRankingPosition)
             throw new GameError(errors.unsupported, "ranking");
+
           position = await this.services.heroRankingPosition(query);
         }
+
         const type = cityInteger(event.type, 1, 4),
           ids =
             type >= 3
@@ -2301,15 +2737,21 @@ export class GameService {
                   .filter(Boolean)
                   .map((value) => cityInteger(value, 1))
               : [];
+
         if (ids.length > 64 || new Set(ids).size !== ids.length)
           throw new GameError(errors.invalid);
+
         let details: readonly Row[] = [];
+
         if (ids.length) {
           if (!this.db.heroHistoryPresentation) throw new GameError(errors.unsupported, "ranking");
+
           details = (await this.db.heroHistoryPresentation([], ids)).realms;
         }
+
         const countries = ids.map((id, index) => {
           const row = details.find((row) => num(row, "id") === id);
+
           return {
             id,
             rank: index + 1,
@@ -2326,30 +2768,43 @@ export class GameService {
           ),
         );
       }
+
       return heroEventInfo(entries, cityInteger(activity.activityType, 1, 3), ranked);
     } catch (error) {
       if (realm !== this.config.kingdomId) return {};
+
       throw error;
     }
   }
+
   private async heroHistory(uid: string, params: Fields): Promise<Fields> {
     const now = this.now();
     const current = this.checkProfile(await this.db.getProfileById(uid), now);
+
     if (current.uid !== uid || num(current, "serverId") !== this.config.kingdomId)
       throw new GameError(errors.invalid);
+
     const source = current.crossFightSrcServerId;
     const realm = source == null || Number(source) === -1 ? this.config.kingdomId : Number(source);
     const type = wireInt(params, "type");
+
     if (!Number.isInteger(type) || type < 0 || type > 4) throw new GameError(errors.invalid);
+
     if (!this.db.heroHistory) throw new GameError(errors.unsupported, "ranking");
+
     const state = await this.db.heroHistory(uid, realm, type, now);
     const profile = this.checkProfile(state.profile, now);
+
     if (profile.uid !== uid || num(profile, "serverId") !== realm)
       throw new GameError(errors.invalid);
+
     if (!state.active || !state.events.length) return heroHistory([]);
+
     const alliance = type === 2 || type === 4;
     const band = heroHistoryBand(type, state.castleLevel, state.alliancePower, this.rules);
+
     if (band < 0 || (!alliance && band >= 40)) return heroHistory([]);
+
     const rewards = heroHistoryRewards(this.rules, text(state.active, "eventId"), band);
     const keys = state.events.map((event) => {
       const lookup = heroRankingLookup(
@@ -2361,13 +2816,19 @@ export class GameService {
         MOBILE_CLIENT_VERSION,
         false,
       );
+
       if (typeof lookup === "number" || !lookup.keys[band]) throw new GameError(errors.invalid);
+
       return lookup.keys[band]!;
     });
+
     if (!this.services.heroHistoryPublication || !this.db.heroHistoryPresentation)
       throw new GameError(errors.unsupported, "ranking");
+
     const publications = await this.services.heroHistoryPublication(keys, alliance);
+
     if (publications.length !== state.events.length) throw new GameError(errors.invalid);
+
     const ids = [...new Set(publications.flatMap((row) => [...row.members]))];
     const realmIds = [
       ...new Set(
@@ -2382,39 +2843,48 @@ export class GameService {
     ];
     const presentation = await this.db.heroHistoryPresentation(alliance ? ids : [], realmIds);
     const players = new Map<string, Row>();
+
     if (!alliance) {
       for (let offset = 0; offset < ids.length; offset += 50) {
         const summaries = await this.db.getPlayerSummariesByIds(
           ids.slice(offset, offset + 50),
           true,
         );
+
         for (const summary of summaries)
           players.set(text(summary.data, "uid"), { ...summary.data, server: summary.kingdomId });
       }
     }
+
     return heroHistory(
       state.events.map((event, index) => {
         const publication = publications[index]!;
         const members = publication.members.flatMap((id, position) => {
           const rewardId = rewards[position];
+
           if (rewardId === undefined) return [];
+
           const member: Row = {
             [alliance ? "allianceId" : "uid"]: id,
             rewardId,
             rank: position + 1,
           };
+
           if (alliance) {
             const raw = publication.alliances[position];
             const data: unknown = raw
               ? JSON.parse(raw)
               : presentation.alliances.find((row) => row.allianceId === id);
+
             if (data != null && (typeof data !== "object" || Array.isArray(data)))
               throw new GameError(errors.invalid);
+
             if (data)
               for (const key of ["name", "server", "abbr", "icon"])
                 if ((data as Row)[key] != null) member[key] = (data as Row)[key]!;
           } else {
             const data = players.get(id);
+
             if (data && text(data, "name").trim()) {
               member.name = text(data, "name");
               member.server = data.server!;
@@ -2424,6 +2894,7 @@ export class GameService {
               member.abbr = text(data, "abbr");
             }
           }
+
           return [member];
         });
         const realms =
@@ -2432,6 +2903,7 @@ export class GameService {
                 .split("|")
                 .map((raw, rank) => {
                   const id = Number(javaDecimal(raw, 32));
+
                   return {
                     ...presentation.realms.find((row) => Number(row.id) === id),
                     id,
@@ -2439,38 +2911,54 @@ export class GameService {
                   };
                 })
             : [];
+
         return { event, members, realms };
       }),
     );
   }
+
   private async heroInsideRanking(uid: string, params: Fields): Promise<Fields> {
     const now = this.now();
     const current = this.checkProfile(await this.db.getProfileById(uid), now);
+
     if (current.uid !== uid || num(current, "serverId") !== this.config.kingdomId)
       throw new GameError(errors.invalid);
+
     const source = current.crossFightSrcServerId;
     const realm = source == null || Number(source) === -1 ? this.config.kingdomId : Number(source);
+
     if (!this.db.heroInsideRanking) throw new GameError(errors.unsupported, "ranking");
+
     const state = await this.db.heroInsideRanking(uid, realm, wireString(params, "actId"), now);
     const profile = this.checkProfile(state.profile, now);
+
     if (profile.uid !== uid || num(profile, "serverId") !== realm)
       throw new GameError(errors.invalid);
+
     return heroInsideRanking(state.rows);
   }
+
   private async heroSelfRanking(uid: string, params: Fields): Promise<Fields> {
     const now = this.now();
     const current = this.checkProfile(await this.db.getProfileById(uid), now);
+
     if (current.uid !== uid || num(current, "serverId") !== this.config.kingdomId)
       throw new GameError(errors.invalid);
+
     const source = current.crossFightSrcServerId;
     const realm = source == null || Number(source) === -1 ? this.config.kingdomId : Number(source);
     const activityId = wireString(params, "activityId");
+
     if (!this.db.heroRanking) throw new GameError(errors.unsupported, "ranking");
+
     const state = await this.db.heroRanking(uid, realm, activityId, now);
     const profile = this.checkProfile(state.profile, now);
+
     if (profile.uid !== uid || num(profile, "serverId") !== realm)
       throw new GameError(errors.invalid);
+
     const positions: number[] = [];
+
     for (const event of state.events) {
       const query = heroRankingLookup(
         event,
@@ -2480,20 +2968,27 @@ export class GameService {
         realm,
         MOBILE_CLIENT_VERSION,
       );
+
       if (typeof query === "number") positions.push(query);
       else {
         if (!this.services.heroRankingPosition) throw new GameError(errors.unsupported, "ranking");
+
         positions.push(await this.services.heroRankingPosition(query));
       }
     }
+
     return mapHeroSelfRanking(heroSelfRanking(state.events, positions));
   }
+
   private async publishedRanking(uid: string, kind: "payment" | "consumption"): Promise<Fields> {
     const now = this.now();
     const profile = this.checkProfile(await this.db.getProfileById(uid), now);
+
     if (profile.uid !== uid || num(profile, "serverId") !== this.config.kingdomId)
       throw new GameError(errors.invalid);
+
     const key = kind === "payment" ? "new_rank_recharge" : "new_rank_cost";
+
     if (
       !serverFeature(this.rules, key, {
         kingdomId: this.config.kingdomId,
@@ -2502,109 +2997,170 @@ export class GameService {
       })
     )
       return {};
+
     if (!versionAtLeast(MOBILE_CLIENT_VERSION, this.rules.features.get(key)!.version!)) return {};
+
     if (!this.services.publishedGlobalRanking || !this.db.rankingPrivacy)
       throw new GameError(errors.unsupported, "ranking");
+
     const hide = await this.db.rankingPrivacy(uid, kind);
+
     return publishedRanking(await this.services.publishedGlobalRanking(kind), uid, hide);
   }
+
   private async attributeRanking(uid: string, params: Fields): Promise<Fields> {
     if (this.config.kingdomId > 999999) return {};
+
     if (!this.db.normalRankingRealm) throw new GameError(errors.unsupported, "ranking");
+
     if (!(await this.db.normalRankingRealm())) return {};
+
     const type = wireInt(params, "rankType");
     const profile = this.checkProfile(await this.db.getProfileById(uid), this.now());
+
     if (profile.uid !== uid || num(profile, "serverId") !== this.config.kingdomId)
       throw new GameError(errors.invalid);
+
     if (![0, 1, 2].includes(type)) return {};
+
     if (!this.services.attributeRanking) throw new GameError(errors.unsupported, "ranking");
+
     return attributeRanking(await this.services.attributeRanking(type), type);
   }
+
   private async dragonRanking(uid: string, params: Fields): Promise<Fields> {
     const profile = this.checkProfile(await this.db.getProfileById(uid), this.now());
+
     if (profile.uid !== uid || num(profile, "serverId") !== this.config.kingdomId)
       throw new GameError(errors.invalid);
+
     const ranges = dragonRankingRanges(wireString(params, "index_limit"));
+
     if (ranges === undefined) return {};
+
     if (!this.services.dragonRanking) throw new GameError(errors.unsupported, "ranking");
+
     const entries = await this.services.dragonRanking(ranges, text(profile, "allianceId"));
+
     return dragonRanking(decodeDragonRanking(entries));
   }
+
   private async globalCelebrityRanking(uid: string, params: Fields): Promise<Fields> {
     if (this.config.kingdomId > 999999) return {};
+
     if (!this.db.normalRankingRealm) throw new GameError(errors.unsupported, "ranking");
+
     if (!(await this.db.normalRankingRealm())) return {};
+
     const rankType = wireInt(params, "rankType");
+
     if (!Number.isInteger(rankType) || rankType < -2147483648 || rankType > 2147483647)
       throw new GameError(errors.invalid);
+
     const profile = this.checkProfile(await this.db.getProfileById(uid), this.now());
+
     if (profile.uid !== uid || num(profile, "serverId") !== this.config.kingdomId)
       throw new GameError(errors.invalid);
+
     if (![0, 1, 2, 3, 4, 5, 6, 11].includes(rankType)) return {};
+
     if (!this.services.globalCelebrityRanking) throw new GameError(errors.unsupported, "ranking");
+
     const rows = await this.services.globalCelebrityRanking(rankType);
+
     if (!Array.isArray(rows) || rows.length > (rankType === 4 ? 30 : 151))
       throw new GameError(errors.unsupported, "ranking");
+
     return { rankMap: sfs.array(rows.map((row) => sfs.object(decodeLegacyJsonObject(row)))) };
   }
+
   private async scoreActivityRanking(uid: string): Promise<Fields> {
     const profile = this.checkProfile(await this.db.getProfileById(uid), this.now());
+
     if (profile.uid !== uid || num(profile, "serverId") !== this.config.kingdomId)
       throw new GameError(errors.invalid);
+
     if (!this.services.scoreActivityRanking) throw new GameError(errors.unsupported, "ranking");
+
     const board = await this.services.scoreActivityRanking();
+
     if (
       !Array.isArray(board) ||
       board.length > 32767 ||
       board.some((value) => typeof value !== "string" || !value.isWellFormed())
     )
       throw new GameError(errors.unsupported, "ranking");
+
     return { rank: { type: Type.StringArray, value: [...board] } };
   }
+
   private async expeditionRanking(uid: string): Promise<Fields> {
     if (this.rules.kingdomId !== this.config.kingdomId || !this.services.expeditionRanking)
       throw new GameError(errors.unsupported, "ranking");
+
     const now = this.now();
     const profile = this.checkProfile(await this.db.getProfileById(uid), now);
+
     if (profile.uid !== uid || num(profile, "serverId") !== this.config.kingdomId)
       throw new GameError(errors.invalid);
+
     const limit = expeditionRankingLimit(this.rules);
     const entries = await this.services.expeditionRanking(limit);
+
     return expeditionRanking(selectExpeditionRanking(uid, limit, decodeExpeditionRanking(entries)));
   }
+
   private async allianceRanking(uid: string, kind: AllianceRankingKind): Promise<Fields> {
     if (this.rules.kingdomId !== this.config.kingdomId)
       throw new GameError(errors.unsupported, "ranking");
+
     const query = allianceRankingQuery(kind, this.rules, this.now());
     const snapshot = await this.db.allianceRanking(uid, query);
     const profile = this.checkProfile(snapshot.profile, query.now);
+
     if (profile.uid !== uid || num(profile, "serverId") !== this.config.kingdomId)
       throw new GameError(errors.invalid);
+
     return allianceRanking(kind, selectAllianceRanking(query, snapshot, this.rules));
   }
+
   private async ranking(uid: string, kind: PlayerRankingKind): Promise<Fields> {
     if (this.rules.kingdomId !== this.config.kingdomId)
       throw new GameError(errors.unsupported, "ranking");
+
     const query = playerRankingQuery(kind, this.rules, this.now());
     const snapshot = await this.db.playerRanking(uid, query);
     const profile = this.checkProfile(snapshot.profile, query.now);
+
     if (profile.uid !== uid || num(profile, "serverId") !== this.config.kingdomId)
       throw new GameError(errors.invalid);
+
     return playerRanking(kind, selectPlayerRanking(uid, query, snapshot));
   }
+
   private async publicProfile(uid: string, params: Fields): Promise<Fields> {
     const now = this.now();
     const observer = this.checkProfile(await this.db.getProfileById(uid), now);
+
     if (text(observer, "uid") !== uid) throw new GameError(errors.invalid);
+
     const target = params.uid;
+
     if (!target || target.type === Type.Null) throw new GameError(errors.missing);
+
     if (target.type !== Type.String || typeof target.value !== "string")
       throw new GameError(errors.invalid);
+
     if (!target.value.trim()) throw new GameError(errors.missing);
+
     if (!/^[0-9]{1,40}$/.test(target.value)) throw new GameError(errors.invalid);
+
     const result = await this.db.publicProfile(target.value, text(observer, "allianceId"));
+
     if (!result?.state.profile) throw new GameError(errors.missing);
+
     const { state, kingdomId } = result;
+
     if (
       !Number.isInteger(kingdomId) ||
       kingdomId <= 0 ||
@@ -2613,12 +3169,14 @@ export class GameService {
       num(state.profile!, "serverId") !== kingdomId
     )
       throw new GameError(errors.invalid);
+
     if (
       state.alliance &&
       state.alliance.withEffects !==
         (text(observer, "allianceId") !== text(state.profile!, "allianceId"))
     )
       throw new GameError(errors.invalid);
+
     const context = { kingdomId: this.config.kingdomId, version: MOBILE_CLIENT_VERSION, now };
     const body = {
       ...publicProfileBase(state, this.rules, context, "", kingdomId),
@@ -2627,25 +3185,31 @@ export class GameService {
     };
     const updates = await this.services.playerUpdateTimes?.(kingdomId, [target.value]);
     body.lastUpdateTime = sfs.string(updates?.get(target.value) ?? "");
+
     return body;
   }
+
   private async power(uid: string, login = false): Promise<Fields> {
     const now = this.now();
     const state = await this.db.getPowerByPlayerId(uid, now);
     const profile = this.checkProfile(state.profile, now);
+
     if (text(profile, "uid") !== uid) throw new GameError(errors.invalid);
+
     const ruleContext = {
       now,
       kingdomId: this.config.kingdomId,
       version: MOBILE_CLIENT_VERSION,
     };
     const context = powerContext(this.rules, state.knight, ruleContext);
+
     if (
       context.dragonLevelUp &&
       context.dragonScience &&
       state.dragons.some((dragon) => num(dragon, "dragonState") === 3)
     ) {
       if (!this.services.worldPowerEffects) throw new GameError(errors.unsupported, "power_state");
+
       const world = worldPowerEffects(
         decodeWorldPowerEffects(await this.services.worldPowerEffects()),
         this.rules,
@@ -2663,8 +3227,10 @@ export class GameService {
         emperor,
       );
     }
+
     const power = calculatePlayerPower({ ...state, profile }, this.rules, context);
     const result = powerInfo(state.statistics, power, login ? undefined : state.upload, this.rules);
+
     if (login) {
       delete result.nextUpdateTime;
       delete result.banTime;
@@ -2672,38 +3238,53 @@ export class GameService {
       result.skillPoint = sfs.int(num(state.generals[0] ?? {}, "plusSkillPoint"));
       result.isPayFlag = sfs.bool(long(profile, "payTotal") > 0n);
     }
+
     return result;
   }
+
   private async playerSummaries(params: Fields): Promise<Fields> {
     const value = params.uids;
+
     if (!value || value.type === Type.Null) return { uids: sfs.array() };
+
     if (value.type !== Type.Array || !Array.isArray(value.value))
       throw new GameError(errors.invalid);
+
     const uids: string[] = [];
+
     for (const entry of value.value as Value[]) {
       if (entry?.type !== Type.String || typeof entry.value !== "string")
         throw new GameError(errors.invalid);
+
       if (!entry.value.trim()) continue;
+
       if (entry.value.length > 255) throw new GameError(errors.invalid);
+
       uids.push(entry.value);
     }
+
     if (!uids.length || uids.length > 50) return { uids: sfs.array() };
+
     const summaries = await this.db.getPlayerSummariesByIds(
       uids.filter((id) => id !== "3000002"),
       "allservers" in params,
     );
     const groups = new Map<number, string[]>();
+
     for (const summary of summaries) {
       const ids = groups.get(summary.kingdomId) ?? [];
       ids.push(text(summary.data, "uid"));
       groups.set(summary.kingdomId, ids);
     }
+
     const updates = new Map<number, ReadonlyMap<string, string>>();
+
     for (const [id, ids] of groups)
       updates.set(
         id,
         (await this.services.playerUpdateTimes?.(id, [...new Set(ids)])) ?? new Map(),
       );
+
     const fallback = String(Math.trunc(this.now() / 1000));
     const out = summaries.map((summary) =>
       sfs.object(
@@ -2713,23 +3294,33 @@ export class GameService {
         ),
       ),
     );
+
     if (uids.includes("3000002")) out.push(sfs.object(guidePlayerSummary()));
+
     return { uids: sfs.array(out) };
   }
+
   private worldQueryResult(command: string, params: Fields, body: Fields): Result {
     for (const key of ["_cok_", "cmdBaseTime"]) if (params[key]) body[key] = params[key]!;
+
     if (encode(extension(command, body)).length > MAX_FRAME)
       throw new GameError(errors.unsupported, "world_state");
+
     return { body, pushes: [] };
   }
+
   private checkProfile(profile: Row | undefined, now = this.now()): Row {
     if (!profile) throw new GameError(errors.missing);
+
     if (long(profile, "banTime") > BigInt(now) || num(profile, "banFlag") !== 0)
       throw new GameError(errors.invalid);
+
     return profile;
   }
+
   private featureContext(profile: Row): FeatureContext {
     const now = this.now();
+
     return {
       uid: text(profile, "uid"),
       platform: text(profile, "pf"),
@@ -2739,32 +3330,41 @@ export class GameService {
       bossRunning: (key) => this.services.featureAvailability?.(profile, now)[key] === true,
     };
   }
+
   private async configuration(uid: string): Promise<Fields> {
     const state = await this.db.getConfigurationByPlayerId(uid);
     const profile = this.checkProfile(state.profile);
     const context = this.featureContext(profile);
     const result = loginConfigurationPreferences(this.rules, state);
     await this.initializeWorldNewsPreference(uid, state.pushSettings, context.now);
+
     try {
       const switchRows = this.db.configurationSwitches
         ? await this.db.configurationSwitches()
         : state.switches;
+
       if (switchRows !== undefined) {
         Object.assign(result, loginSwitches(switchRows));
         let count: string | null = null;
+
         if (accountVerificationEnabled(this.rules, context)) {
           if (!this.services.changeAccountCount)
             throw new GameError(errors.unsupported, "account_rule");
+
           count = await this.services.changeAccountCount(String(profile.deviceId ?? "null"));
         }
+
         result.isVerifyChangeAccount = sfs.bool(
           accountVerificationRequired(this.rules, context, count),
         );
       }
     } catch {}
+
     Object.assign(result, featureConfig(this.rules, context));
+
     return result;
   }
+
   private async initializeWorldNewsPreference(uid: string, rows: readonly Row[], now: number) {
     if (
       rows.length < PUSH_SETTING_COUNT &&
@@ -2772,27 +3372,34 @@ export class GameService {
     ) {
       if (!this.db.initializeWorldNewsPreference)
         throw new GameError(errors.unsupported, "config_record");
+
       await this.db.initializeWorldNewsPreference(uid, now);
     }
   }
+
   private async nicknameCheck(uid: string, params: Fields): Promise<Fields> {
     const profile = await this.profile(uid);
+
     if (profile.uid !== uid || num(profile, "serverId") !== this.config.kingdomId)
       throw new GameError(errors.invalid);
+
     const result = await checkNickname(
       wireString(params, "nickName"),
       Object.hasOwn(params, "type") ? wireInt(params, "type") : 0,
       {
         containsBadWords: (name) => {
           if (!this.services.nicknameBadWords) throw new GameError(errors.unsupported);
+
           return this.services.nicknameBadWords(name);
         },
         occupied: (name) => {
           if (!this.db.nicknameOccupied) throw new GameError(errors.unsupported);
+
           return this.db.nicknameOccupied(name);
         },
       },
     );
+
     return {
       occupied: sfs.int(result.occupied),
       exist: sfs.int(result.exist),
@@ -2800,51 +3407,69 @@ export class GameService {
       remainLength: sfs.int(result.remainLength),
     };
   }
+
   private async getPushPreferences(uid: string): Promise<Fields> {
     const state = await this.db.getConfigurationByPlayerId(uid);
     const now = this.now();
     this.checkProfile(state.profile, now);
     const pushSetting = pushPreferences(state.pushSettings);
     await this.initializeWorldNewsPreference(uid, state.pushSettings, now);
+
     return { pushSetting };
   }
+
   private async setPushPreference(uid: string, params: Fields): Promise<Fields> {
     const audio = wireInt(params, "audio", 1);
     const type = wireInt(params, "type");
     const status = wireInt(params, "status");
+
     if (
       [type, status, audio].some(
         (value) => !Number.isInteger(value) || value < -2147483648 || value > 2147483647,
       )
     )
       throw new GameError(errors.invalid);
+
     if (!this.db.setPushPreference) throw new GameError(errors.unsupported);
+
     await this.profile(uid);
     const dto: UpdatePushPreferenceDto = { type, status, audio };
     await this.db.setPushPreference(uid, dto, this.now());
+
     return {};
   }
+
   private async otherLogin(uid: string, params: Fields): Promise<Fields> {
     if (!params.army) {
       if (params.config) return this.configuration(uid);
+
       if (params.store) return { store: sfs.array() };
+
       if (params.exchange) return { exchange: sfs.array(), exchange_gift: sfs.array() };
     }
+
     const state = await this.state(uid);
+
     if (params.army)
       return {
         resource: sfs.object(resource(state.resource)),
         ...militarySnapshot(state.armies, state.hospital ?? [], state.forts ?? [], this.rules),
         items: sfs.array(state.items.map((r) => sfs.object(inventoryItem(r, this.rules)))),
       };
+
     const lord = state.lord;
+
     if (!lord) throw new GameError(errors.missing);
+
     const out: Fields = { medal: sfs.string(text(lord, "medal")) };
     const time = serverClock(this.now(), 0);
     out.nextDay = sfs.long(Number(time.tomorrow!.value) * 1000);
+
     for (const key of ["levelUp", "pveLevel", "freshRechargeTotal", "castleLevelUp"])
       out[key] = sfs.int(num(lord, key));
+
     out.remainAttackTime = sfs.int(num(lord, "remainAttackLeaderBossTime"));
+
     return { lord: sfs.object(out), tomorrow: time.tomorrow! };
   }
 }

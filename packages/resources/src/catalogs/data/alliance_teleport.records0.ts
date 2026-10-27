@@ -1,4 +1,5 @@
 import type { AllianceTeleportDefinition } from "../types/alliance_teleport.ts";
+
 export const records: readonly AllianceTeleportDefinition[] = [
   { "id": 46600, "name": "chat", "type": 1, "para1": 3, "functionOn": 1 },
   { "id": 46601, "name": "depot", "type": 2, "para1": 2, "functionOn": 1 },

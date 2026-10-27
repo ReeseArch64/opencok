@@ -1,4 +1,5 @@
 import type { DragonNewDefinition } from "../types/dragon_new.ts";
+
 export const records: readonly DragonNewDefinition[] = [
   {
     "id": 4907101,

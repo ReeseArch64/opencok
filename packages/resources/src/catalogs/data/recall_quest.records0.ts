@@ -1,4 +1,5 @@
 import type { RecallQuestDefinition } from "../types/recall_quest.ts";
+
 export const records: readonly RecallQuestDefinition[] = [
   { "id": 9040001, "type": 27, "extendType": 1, "quantity": 7, "rewardall": 249045 },
   { "id": 9040002, "type": 1, "extendType": 0, "quantity": 2000000, "rewardall": 249046 },

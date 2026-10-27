@@ -1,4 +1,5 @@
 import type { MailDefinition } from "../types/mail.ts";
+
 export const records: readonly MailDefinition[] = [
   { "id": 12192, "sender": 3000002, "title": 165719, "message": 165705, "type": 2 },
   { "id": 12193, "sender": 3000002, "title": 165720, "message": 165706, "type": 2 },

@@ -15,4 +15,5 @@ export interface KingdomBuildingBuffDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type KingdomBuildingBuffDefinitionCatalog = CatalogTable<KingdomBuildingBuffDefinition>;

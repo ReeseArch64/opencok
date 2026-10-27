@@ -1,4 +1,5 @@
 import type { NewbeeCastleRewardDefinition } from "../types/newbee_castle_reward.ts";
+
 export const records: readonly NewbeeCastleRewardDefinition[] = [
   { "id": 9021501, "level": 2, "reward": 250730 },
   { "id": 9021502, "level": 3, "reward": 250731 },

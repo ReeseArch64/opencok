@@ -1,4 +1,5 @@
 import type { BanlistDefinition } from "../types/banlist.ts";
+
 export const records: readonly BanlistDefinition[] = [
   { "id": "country_cn", "online": [1365, 1385, 1398, 1408], "test": "close" },
   { "id": "pf_cn_mi", "online": [1381, 1382, 1385, 1398, 1408], "test": "close" },

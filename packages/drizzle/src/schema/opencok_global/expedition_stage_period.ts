@@ -1,6 +1,7 @@
 import { sql } from "drizzle-orm";
 import { bigint, check, index, integer, primaryKey, text, varchar } from "drizzle-orm/pg-core";
 import { opencok_global } from "../namespaces";
+
 export const expedition_stage_period = opencok_global.table(
   "expedition_stage_period",
   {

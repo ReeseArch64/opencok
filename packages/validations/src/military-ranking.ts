@@ -4,6 +4,7 @@ import type {
   MilitaryRankingEntryResponse,
 } from "@opencok/contracts/responses/military-ranking";
 import { field } from "./response.ts";
+
 export const militaryRankingEntrySchema = z.strictObject({
   serverId: field.string,
   uid: field.string,
@@ -16,6 +17,7 @@ export const militaryRankingEntrySchema = z.strictObject({
   militaryRank: field.int.optional(),
   ranking: field.int,
 }) satisfies z.ZodType<MilitaryRankingEntryResponse>;
+
 export const militaryRankingSchema = z.strictObject({
   playerArr: z.array(militaryRankingEntrySchema).max(151),
   selfRanking: field.int,

@@ -9,6 +9,7 @@ import type { HeroRankProjection, HeroRankSource } from "@opencok/contracts/hero
 import { cityAmount, cityInteger } from "@opencok/rules/city-progression";
 import { fenceRealmTransaction, type RealmAuthority } from "./realm-authority";
 import type { Database } from "./game";
+
 export function createHeroRankSource(
   db: Database["kingdom"]["db"],
   authority: RealmAuthority,
@@ -51,11 +52,13 @@ export function createHeroRankSource(
                 .where(inArray(alliance.uid, guilds))
             : [];
         authority.assertReady();
+
         return rows.map((row) => ({
           ...row,
           metadata: [2, 4].includes(row.event.type ?? 0)
             ? (() => {
                 const guild = metadata.find((guild) => guild.uid === row.score.uid);
+
                 return guild ? JSON.stringify({ ...guild, server: authority.kingdomId }) : null;
               })()
             : null,
@@ -64,6 +67,7 @@ export function createHeroRankSource(
     },
   };
 }
+
 export function createHeroRankProjection(
   db: Database["databases"]["global"]["db"],
   authority: RealmAuthority,
@@ -72,12 +76,14 @@ export function createHeroRankProjection(
     async write(rows, observedAt) {
       authority.assertReady();
       cityAmount(observedAt);
+
       if (
         !rows.length ||
         rows.length > 64 ||
         new Set(rows.map((row) => `${row.rankKey}:${row.member}`)).size !== rows.length
       )
         throw new Error("Invalid hero rank publication batch");
+
       for (const row of rows) {
         if (
           row.kingdomId !== authority.kingdomId ||
@@ -97,10 +103,12 @@ export function createHeroRankProjection(
           (row.metadata !== null && Buffer.byteLength(row.metadata) > 8192)
         )
           throw new Error("Invalid owned hero rank score");
+
         cityInteger(row.type, 1, 4);
         cityInteger(row.level, 0, 4095);
         cityAmount(row.endTime);
       }
+
       return db.transaction(async (tx) => {
         await tx.execute(sql`set local lock_timeout='1s'`);
         await tx.execute(sql`set local statement_timeout='3s'`);
@@ -110,12 +118,14 @@ export function createHeroRankProjection(
           .from(hero_rank_owner)
           .where(eq(hero_rank_owner.kingdomId, authority.kingdomId))
           .for("update");
+
         if (
           owner &&
           (owner.ownerEpoch > authority.epoch ||
             (owner.ownerEpoch === authority.epoch && owner.instanceId !== authority.instance))
         )
           throw new Error("Stale global hero rank owner");
+
         if (!owner) {
           [owner] = await tx
             .insert(hero_rank_owner)
@@ -133,13 +143,17 @@ export function createHeroRankProjection(
             .where(eq(hero_rank_owner.kingdomId, authority.kingdomId))
             .returning();
         }
+
         if (!owner) throw new Error("Missing global hero rank owner");
+
         const [version] = await tx
           .update(hero_rank_owner)
           .set({ sequence: sql`${hero_rank_owner.sequence}+1` })
           .where(eq(hero_rank_owner.kingdomId, authority.kingdomId))
           .returning();
+
         if (!version) throw new Error("Missing hero rank publication version");
+
         const seals = await tx
           .select({ actId: hero_rank_watermark.actId })
           .from(hero_rank_watermark)
@@ -171,8 +185,10 @@ export function createHeroRankProjection(
                 ),
               )
           : [];
+
         if (existing.some((row) => row.kingdomId !== authority.kingdomId))
           throw new Error("Foreign sealed hero ranking member");
+
         const preserved = existing.map((row) => ({
           ...row,
           metadata:
@@ -190,7 +206,9 @@ export function createHeroRankProjection(
             sequence: version.sequence,
             observedAt,
           }));
+
         if (!values.length) return [];
+
         const result = await tx
           .insert(hero_rank_score)
           .values(values)
@@ -211,8 +229,11 @@ export function createHeroRankProjection(
             setWhere: eq(hero_rank_score.kingdomId, authority.kingdomId),
           })
           .returning();
+
         if (result.length !== values.length) throw new Error("Foreign hero rank member ownership");
+
         authority.assertReady();
+
         return result;
       });
     },

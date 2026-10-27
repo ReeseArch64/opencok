@@ -1,4 +1,5 @@
 import type { ResponseValue } from "./value";
+
 export interface SeasonalExchangeResponse {
   level: number;
   refreshTime: bigint;

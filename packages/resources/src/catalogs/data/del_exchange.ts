@@ -11,6 +11,7 @@ import { records as records6 } from "./del_exchange.records6.ts";
 import { records as records7 } from "./del_exchange.records7.ts";
 import { records as records8 } from "./del_exchange.records8.ts";
 import { records as records9 } from "./del_exchange.records9.ts";
+
 export const catalog: CatalogTable<DelExchangeDefinition> = {
   "kind": CatalogKind.Table,
   "records": [

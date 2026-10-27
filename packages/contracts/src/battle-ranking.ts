@@ -1,4 +1,5 @@
 import type { Row } from "./rows.ts";
+
 export interface BattleRankingState {
   profile: Row | undefined;
   realmType: number;
@@ -6,6 +7,7 @@ export interface BattleRankingState {
   observerTeam: string | undefined;
   tickets: readonly string[];
 }
+
 export interface PlayoffPublication {
   state: number;
   turns: number;
@@ -13,6 +15,7 @@ export interface PlayoffPublication {
   duration: bigint;
   teams: readonly string[];
 }
+
 export interface PlayoffTeam {
   teamId: string;
   name: string;

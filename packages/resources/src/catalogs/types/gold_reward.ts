@@ -9,4 +9,5 @@ export interface GoldRewardDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type GoldRewardDefinitionCatalog = CatalogTable<GoldRewardDefinition>;

@@ -13,4 +13,5 @@ export interface HotstoreDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type HotstoreDefinitionCatalog = CatalogTable<HotstoreDefinition>;

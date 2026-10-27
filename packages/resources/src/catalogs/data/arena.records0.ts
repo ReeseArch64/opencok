@@ -1,4 +1,5 @@
 import type { ArenaDefinition } from "../types/arena.ts";
+
 export const records: readonly ArenaDefinition[] = [
   {
     "id": 9300,

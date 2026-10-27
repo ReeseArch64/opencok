@@ -34,12 +34,15 @@ export interface DataConfigContext {
 
 function requiredRecord(rule: Rule | undefined): Rule {
   if (!rule) throw new GameError(errors.unsupported, "config_record");
+
   return rule;
 }
 
 function requiredString(rule: Rule | undefined, key: string): string {
   const value = requiredRecord(rule)[key];
+
   if (typeof value !== "string") throw new GameError(errors.unsupported, "config_string");
+
   return value;
 }
 
@@ -61,6 +64,7 @@ function signedLong(value: string): bigint {
 
 function strings(rule: Rule | undefined, projection?: Record<string, string>): Fields {
   const result: Fields = {};
+
   if (rule)
     for (const [target, source] of Object.entries(
       projection ??
@@ -72,12 +76,15 @@ function strings(rule: Rule | undefined, projection?: Record<string, string>): F
     )) {
       if (rule[source] !== undefined) result[target] = sfs.string(rule[source]);
     }
+
   return result;
 }
 
 function serializeDataConfig(rules: Rules, context: DataConfigContext = {}): Fields {
   const items = rules.configuration.dataConfig ?? rules.items;
+
   if (!items.size) throw new GameError(errors.unsupported);
+
   const result: Fields = {};
   const version = context.version ?? MOBILE_CLIENT_VERSION;
   const now = context.now ?? Date.now();
@@ -92,19 +99,24 @@ function serializeDataConfig(rules: Rules, context: DataConfigContext = {}): Fie
   const object = (target: string, rule: Rule | undefined, projection?: Record<string, string>) => {
     result[target] = sfs.object(strings(requiredRecord(rule), projection));
   };
+
   for (const key of objectKeys) object(key, items.get(key));
+
   for (const [target, source] of [
     ["hero", "hero_soul"],
     ["hero_yutao", "hero"],
   ])
     object(target!, items.get(source!));
+
   for (const [target, source] of [
     ["followFB", "FB_follow"],
     ["lordtips_time", "lordtips_time"],
   ] as const) {
     const rule = items.get(source);
+
     if (rule && Object.keys(rule).length) object(target, rule);
   }
+
   object("w_thedoor", rules.features.get("w_thedoor") ?? {});
   object("69008", rules.configuration.payControl?.get("69008") ?? {});
   const pve = requiredRecord(items.get("worldmap_pve"));
@@ -117,6 +129,7 @@ function serializeDataConfig(rules: Rules, context: DataConfigContext = {}): Fie
   );
   object("facebook_gift", items.get("facebook_gift"), { k7: "k7" });
   const ranking = requiredRecord(items.get("ranking"));
+
   if (ranking.k3 !== undefined) object("ranking", ranking, { k3: "k3" });
 
   for (const [target, id, key] of [
@@ -137,6 +150,7 @@ function serializeDataConfig(rules: Rules, context: DataConfigContext = {}): Fie
   ] as const) {
     result[target] = sfs.int(integer(requiredString(items.get(id), key)));
   }
+
   for (const [target, id, key] of [
     ["quickEndBattle", "resources_basics", "k5"],
     ["chatShieldMax", "resources_basics", "k6"],
@@ -146,24 +160,37 @@ function serializeDataConfig(rules: Rules, context: DataConfigContext = {}): Fie
   ] as const) {
     result[target] = sfs.string(requiredString(items.get(id), key));
   }
+
   result.overlord_open_type = sfs.string(requiredString(rules.items.get("overlord"), "k1"));
   const loading = items.get("loading_show_type");
+
   if (loading && Object.keys(loading).length)
     result.loading_show_type = sfs.string(requiredString(loading, "k1"));
+
   const questLevel = items.get("alliance_quest")?.k10;
+
   if (questLevel !== undefined) result.alliance_quest_init_level = sfs.int(integer(questLevel));
+
   if (context.profileLevel !== undefined && available("stamina_limit")) {
     const stamina = rules.role(context.profileLevel).stamina;
+
     if (stamina === undefined) throw new GameError(errors.unsupported, "stamina_rule");
+
     result.monster_count = sfs.int(integer(stamina));
   }
+
   const bossMembers = requiredString(items.get("monster"), "k11").split(";").filter(Boolean)[1];
+
   if (bossMembers === undefined) throw new GameError(errors.unsupported, "boss_members_rule");
+
   result.boss_max_member = sfs.string(bossMembers);
   result.cross_open = sfs.bool(!!context.crossOpen && versionAtLeast(version, "1.0.59"));
   const scout = items.get("scoutmark_on");
+
   if (scout && enabled(scout.k1)) result.scoutmark_on = sfs.string(requiredString(scout, "k2"));
+
   const terms = requiredRecord(items.get("serviceterms_on"));
+
   if (requiredString(terms, "k1") === "1" && enabled(terms.k3))
     result.serviceTerms_on = sfs.string(requiredString(terms, "k2"));
 
@@ -192,12 +219,14 @@ function serializeDataConfig(rules: Rules, context: DataConfigContext = {}): Fie
     signedLong(requiredString(items.get(`${prefix}_score`), "k10")),
   );
   result.dragon_world_row = sfs.int(integer(requiredString(items.get(`${prefix}_scene`), "k1")));
+
   for (const [key, switchKey] of [
     ["wa_switch", "k1"],
     ["graveyard", "k3"],
   ] as const) {
     const rule = requiredRecord(items.get(key));
     const value = strings(rule);
+
     if (key === "graveyard" || rule[switchKey] !== undefined) {
       const open =
         key === "wa_switch"
@@ -205,18 +234,25 @@ function serializeDataConfig(rules: Rules, context: DataConfigContext = {}): Fie
           : enabled(rule[switchKey]);
       value[switchKey] = sfs.string(open ? "1" : "0");
     }
+
     result[key] = sfs.object(value);
   }
+
   const activityFields = strings(requiredRecord(items.get("activityconfig2")));
+
   if (version === "1.1.10") activityFields.k12 = sfs.string("0");
+
   result.activityconfig2 = sfs.object(activityFields);
   const icon = requiredRecord(items.get("icon"));
   const iconFields = strings(icon);
+
   for (const key of ["k4", "k5"]) {
     if (icon[key] === undefined) continue;
+
     const date = javaCalendarDate(icon[key], 3) ?? 0n;
     iconFields[key] = sfs.string(String(date));
   }
+
   result.icon = sfs.object(iconFields);
   const boss = (key: string) => {
     const rule = requiredRecord(items.get(key));
@@ -225,14 +261,17 @@ function serializeDataConfig(rules: Rules, context: DataConfigContext = {}): Fie
       citylevel: sfs.string(requiredString(rule, "k1")),
     });
   };
+
   for (const family of ["worldboss", "worldboss_elite", "worldboss_special"]) {
     boss(family);
+
     for (const range of ["10_19", "20_29", "30_40"]) {
       const key = `${family}_${range}`;
       boss(key);
       object(`${key}_other`, items.get(`${key}_other`));
     }
   }
+
   boss("worldboss_npc");
   const generalSales = rules.configuration.generalSaleRecords ?? [
     ...(rules.configuration.generalSales?.values() ?? []),
@@ -242,6 +281,7 @@ function serializeDataConfig(rules: Rules, context: DataConfigContext = {}): Fie
       generalSales.map((rule) => {
         if (typeof rule.id !== "string" || rule.id.length > 255 || typeof rule.limit !== "string")
           throw new GameError(errors.unsupported, "general_sale_rule");
+
         return [rule.id, sfs.string(rule.limit)];
       }),
     ),
@@ -251,30 +291,36 @@ function serializeDataConfig(rules: Rules, context: DataConfigContext = {}): Fie
   const records = rules.configuration.kingdomSkillRecords ?? [
     ...(rules.configuration.kingdomSkills?.values() ?? []),
   ];
+
   for (const skill of restoredKingdomSkills(records)) {
     const tab = skill.showTab;
     const list = tabs.get(tab) ?? [];
     list.push(skill);
     tabs.set(tab, list);
   }
+
   for (const tab of javaIntHashMapOrder(tabs.keys())) {
     const skills = tabs.get(tab)!;
     skillFields[`k${tab}`] = sfs.string(
       javaListSort(skills, (a, b) => (a.id === b.id ? 0 : (a.tabIndex - b.tabIndex) | 0))
         .map((skill, index) => {
           if (skill.tabIndex === -1) return "";
+
           const selector = context.testServer ? skill.test : skill.online;
           const enabled = selector !== undefined && featureRealmEnabled(selector, rules.kingdomId);
+
           return `${skill.id}_${enabled ? "1" : "0"}${index === skills.length - 1 ? "" : ";"}`;
         })
         .join(""),
     );
   }
+
   result.kingdomskill = sfs.object(skillFields);
   result.serverConfig = sfs.object({
     chat_interval: sfs.int(integer(String(context.chatInterval ?? 1))),
     feed_maxCount: sfs.int(integer(String(context.feedMaxCount ?? 3))),
   });
+
   return { dataConfig: sfs.object(result) };
 }
 

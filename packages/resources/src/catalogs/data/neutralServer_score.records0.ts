@@ -1,4 +1,5 @@
 import type { NeutralServerScoreDefinition } from "../types/neutralServer_score.ts";
+
 export const records: readonly NeutralServerScoreDefinition[] = [
   { "id": 523300, "level": 1, "score": 4 },
   { "id": 523301, "level": 2, "score": 6 },

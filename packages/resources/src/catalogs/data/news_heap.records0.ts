@@ -1,4 +1,5 @@
 import type { NewsHeapDefinition } from "../types/news_heap.ts";
+
 export const records: readonly NewsHeapDefinition[] = [
   { "id": 9012001, "type": 1, "payNode": 500, "payReward": 239163 },
   { "id": 9012002, "type": 1, "payNode": 1000, "payReward": 239164 },

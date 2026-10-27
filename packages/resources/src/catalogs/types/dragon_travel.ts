@@ -8,4 +8,5 @@ export interface DragonTravelDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type DragonTravelDefinitionCatalog = CatalogTable<DragonTravelDefinition>;

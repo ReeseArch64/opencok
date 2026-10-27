@@ -10,4 +10,5 @@ export interface HeroeventDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type HeroeventDefinitionCatalog = CatalogTable<HeroeventDefinition>;

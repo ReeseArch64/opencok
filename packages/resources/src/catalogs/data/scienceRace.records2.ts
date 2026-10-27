@@ -1,4 +1,5 @@
 import type { ScienceRaceDefinition } from "../types/scienceRace.ts";
+
 export const records: readonly ScienceRaceDefinition[] = [
   {
     "id": 5703509,

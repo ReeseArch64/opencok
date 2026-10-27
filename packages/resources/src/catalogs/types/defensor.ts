@@ -20,4 +20,5 @@ export interface DefensorDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type DefensorDefinitionCatalog = CatalogTable<DefensorDefinition>;

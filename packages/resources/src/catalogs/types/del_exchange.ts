@@ -42,4 +42,5 @@ export interface DelExchangeDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type DelExchangeDefinitionCatalog = CatalogTable<DelExchangeDefinition>;

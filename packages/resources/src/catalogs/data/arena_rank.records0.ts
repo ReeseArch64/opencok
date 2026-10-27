@@ -1,4 +1,5 @@
 import type { ArenaRankDefinition } from "../types/arena_rank.ts";
+
 export const records: readonly ArenaRankDefinition[] = [
   { "id": 5010100, "min": 0, "max": 500 },
   { "id": 5010101, "min": 501, "max": 1000 },

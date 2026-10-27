@@ -1,4 +1,5 @@
 import type { WkBuildDefinition } from "../types/wk_build.ts";
+
 export const records: readonly WkBuildDefinition[] = [
   { "id": 108600, "level": 1, "winNum": 2 },
   { "id": 108601, "level": 2, "winNum": 4 },

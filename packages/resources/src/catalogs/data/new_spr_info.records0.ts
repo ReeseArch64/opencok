@@ -1,4 +1,5 @@
 import type { NewSprInfoDefinition } from "../types/new_spr_info.ts";
+
 export const records: readonly NewSprInfoDefinition[] = [
   {
     "id": 2905000,

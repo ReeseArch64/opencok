@@ -33,20 +33,29 @@ export async function loadExpeditionRanking(
     limit > 32767
   )
     return invalid();
+
   const matchKey = `opencok:global:expedition-match:${kingdomId}`;
+
   for (let attempt = 0; attempt < 2; attempt++) {
     const raw = await command("GET", matchKey);
+
     if (raw === null) return undefined;
+
     if (typeof raw !== "string" || Buffer.byteLength(raw) > 65535) return invalid();
+
     let pairing: unknown;
+
     try {
       pairing = JSON.parse(raw);
     } catch {
       return invalid();
     }
+
     if (!pairing || typeof pairing !== "object" || Array.isArray(pairing)) return invalid();
+
     const record = pairing as Record<string, unknown>;
     const other = record.matchServerId;
+
     if (
       record.serverId !== kingdomId ||
       typeof other !== "number" ||
@@ -56,7 +65,9 @@ export async function loadExpeditionRanking(
       other === 0
     )
       return invalid();
+
     if (other < 0) return undefined;
+
     const owner = Math.min(kingdomId, other);
     const board = `opencok:kingdom:${owner}:expedition-ranking`;
     const response = await command(
@@ -69,15 +80,22 @@ export async function loadExpeditionRanking(
       raw,
       String(limit - 1),
     );
+
     if (!Array.isArray(response)) return invalid();
+
     if (response.length === 1 && response[0] === 0) continue;
+
     if (response[0] !== 1 || response.length > limit + 1) return invalid();
+
     const entries: ExpeditionRankingEntry[] = [];
     const seen = new Set<string>();
     let bytes = 0;
+
     for (const row of response.slice(1)) {
       if (!Array.isArray(row) || row.length !== 3) return invalid();
+
       const [uid, rawScore, info] = row;
+
       if (
         typeof uid !== "string" ||
         !uid.trim() ||
@@ -87,6 +105,7 @@ export async function loadExpeditionRanking(
         (info !== null && typeof info !== "string")
       )
         return invalid();
+
       seen.add(uid);
       const score =
         rawScore === "inf" || rawScore === "+inf"
@@ -94,22 +113,29 @@ export async function loadExpeditionRanking(
           : rawScore === "-inf"
             ? -Infinity
             : Number(rawScore);
+
       if (
         !/^[+-]?(?:\d+\.?\d*|\.\d+)(?:e[+-]?\d+)?$/i.test(rawScore) &&
         !["inf", "+inf", "-inf"].includes(rawScore)
       )
         return invalid();
+
       if (
         Number.isNaN(score) ||
         (!Number.isFinite(score) && !["inf", "+inf", "-inf"].includes(rawScore))
       )
         return invalid();
+
       const size = info === null ? 0 : Buffer.byteLength(info);
       bytes += size + Buffer.byteLength(uid) + rawScore.length;
+
       if (size > 65535 || bytes > 1048576) return invalid();
+
       entries.push({ uid, score, info });
     }
+
     return entries;
   }
+
   return invalid();
 }

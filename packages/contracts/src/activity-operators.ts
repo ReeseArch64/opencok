@@ -1,4 +1,5 @@
 import type { Row } from "./rows";
+
 export interface ActivityOperatorsSnapshot {
   profile?: Row;
   server: Row;

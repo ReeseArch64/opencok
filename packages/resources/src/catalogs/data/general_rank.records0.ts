@@ -1,4 +1,5 @@
 import type { GeneralRankDefinition } from "../types/general_rank.ts";
+
 export const records: readonly GeneralRankDefinition[] = [
   {
     "term": 1,

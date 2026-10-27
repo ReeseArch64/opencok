@@ -1,4 +1,5 @@
 import type { TrialDefinition } from "../types/trial.ts";
+
 export const records: readonly TrialDefinition[] = [
   { "id": 999000, "hp": 11, "sequence": 1, "reward": 245715 },
   { "id": 999001, "hp": 22, "sequence": 2, "reward": 245716 },

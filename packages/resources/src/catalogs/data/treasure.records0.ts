@@ -1,4 +1,5 @@
 import type { TreasureDefinition } from "../types/treasure.ts";
+
 export const records: readonly TreasureDefinition[] = [
   {
     "id": 44200,

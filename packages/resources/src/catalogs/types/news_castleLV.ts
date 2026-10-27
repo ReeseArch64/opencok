@@ -9,4 +9,5 @@ export interface NewsCastleLVDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type NewsCastleLVDefinitionCatalog = CatalogTable<NewsCastleLVDefinition>;

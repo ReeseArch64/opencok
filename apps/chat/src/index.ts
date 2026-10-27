@@ -7,9 +7,13 @@ import { ChatApplication } from "./chat-application.ts";
 import { createChatArchiveStore } from "@opencok/mongoose/chat-archive";
 
 initializeLogging("chat");
+
 logEvent("starting", { service: "chat" });
+
 const config = loadChatEnvironment();
+
 const archive = config.MONGODB_URI ? createChatArchiveStore(config.MONGODB_URI) : undefined;
+
 const repository: ReturnType<typeof createChatRepository> = createChatRepository({
   renderRealmEvents: (realm, owners, events) =>
     realmChatDeliveries(repository, realm, owners, events),
@@ -20,7 +24,9 @@ const repository: ReturnType<typeof createChatRepository> = createChatRepository
     kingdoms: config.CHAT_KINGDOM_DATABASES,
   },
 });
+
 let app: ChatApplication | undefined;
+
 try {
   app = new ChatApplication({
     repository,
@@ -49,12 +55,17 @@ try {
   await app?.close();
   await repository.close();
   await archive?.close();
+
   throw new Error("Chat startup failed");
 }
+
 let stopping = false;
+
 async function stop() {
   if (stopping) return;
+
   stopping = true;
+
   try {
     await app?.close();
   } finally {
@@ -63,6 +74,7 @@ async function stop() {
     logEvent("stopped", { service: "chat", outcome: "success" });
   }
 }
+
 for (const signal of ["SIGTERM", "SIGINT"] as const)
   process.once(signal, () => {
     void stop().catch(() => {

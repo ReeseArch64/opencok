@@ -11,6 +11,7 @@ export function readReconnectBase(
   uid: string,
 ): Promise<ReconnectBaseState> {
   if (!uid.trim() || uid.length > 40) throw new Error("Invalid reconnect identity");
+
   return db.transaction(
     async (tx) => {
       const profile = (
@@ -31,7 +32,9 @@ export function readReconnectBase(
           .where(eq(userprofile.uid, uid))
           .limit(1)
       )[0];
+
       if (!profile) return { profile: undefined, armies: [], generals: [], skills: [] };
+
       const armies = await tx
         .select({
           armyId: user_army.armyId,
@@ -45,7 +48,9 @@ export function readReconnectBase(
         .where(eq(user_army.uid, uid))
         .orderBy(asc(user_army.armyId))
         .limit(32768);
+
       if (armies.length > 32767) throw new Error("Reconnect armies exceed wire limit");
+
       const generals = await tx
         .select({
           uuid: user_general.uuid,
@@ -59,7 +64,9 @@ export function readReconnectBase(
         .where(eq(user_general.uid, uid))
         .orderBy(asc(user_general.uuid))
         .limit(32768);
+
       if (generals.length > 32767) throw new Error("Reconnect generals exceed wire limit");
+
       const skills = generals.length
         ? await tx
             .select({
@@ -78,7 +85,9 @@ export function readReconnectBase(
             .orderBy(asc(user_skill.endTime), asc(user_skill.uuid))
             .limit(32768)
         : [];
+
       if (skills.length > 32767) throw new Error("Reconnect skills exceed wire limit");
+
       return { profile, armies, generals, skills };
     },
     { isolationLevel: "repeatable read", accessMode: "read only" },

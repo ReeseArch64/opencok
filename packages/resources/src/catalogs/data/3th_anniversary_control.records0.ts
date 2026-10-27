@@ -1,4 +1,5 @@
 import type { Catalog3thAnniversaryControlDefinition } from "../types/3th_anniversary_control.ts";
+
 export const records: readonly Catalog3thAnniversaryControlDefinition[] = [
   {
     "id": 9055501,

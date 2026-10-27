@@ -1,4 +1,5 @@
 import type { RewardPreviewResponse } from "./rewards";
+
 export interface HeroScoreResponse {
   uid: string;
   actId: string;
@@ -7,6 +8,7 @@ export interface HeroScoreResponse {
   finishFlag: number;
   rewardFlagList: string;
 }
+
 export interface HeroEventEntryResponse {
   eventId: string;
   actId: string;
@@ -19,6 +21,7 @@ export interface HeroEventEntryResponse {
   target: string;
   userScore: HeroScoreResponse | Record<string, never>;
 }
+
 export interface HeroEventInfoResponse {
   eventList: readonly HeroEventEntryResponse[];
   type: number;
@@ -26,6 +29,7 @@ export interface HeroEventInfoResponse {
   ranking?: number;
   rankingAlliance?: number;
 }
+
 export interface HeroEventRewardResponse {
   reward: readonly (readonly RewardPreviewResponse[])[];
   rewardArr?: string;

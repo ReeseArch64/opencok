@@ -29,6 +29,7 @@ export function readMailBatch(
 ): Promise<MailCategorySnapshot> {
   const selected = types.get(query.kind);
   const sender = query.kind === "personal" || query.kind === "moderation";
+
   if (
     !selected ||
     (query.kind === "empty" && (query.begin !== 0 || query.limit !== 0)) ||
@@ -41,6 +42,7 @@ export function readMailBatch(
       : query.fromUser !== null)
   )
     throw new Error("Invalid mail batch query");
+
   return readOwnedMailWindow(
     databases,
     kingdomId,

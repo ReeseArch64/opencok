@@ -5,4 +5,5 @@ export interface WagReRankDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type WagReRankDefinitionCatalog = CatalogTable<WagReRankDefinition>;

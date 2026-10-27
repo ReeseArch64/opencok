@@ -7,11 +7,13 @@ export type DonationRankingKind =
   | "resource-day"
   | "resource-week"
   | "resource-history";
+
 export interface CommunityRankingSnapshot {
   profile: Row | undefined;
   rows: readonly Row[];
   ownItems?: number;
 }
+
 export interface DonationScore {
   uid: string;
   score: number;

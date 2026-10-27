@@ -1,4 +1,5 @@
 import type { MiracleBuffDefinition } from "../types/miracle_buff.ts";
+
 export const records: readonly MiracleBuffDefinition[] = [
   { "id": 422900, "level": 0 },
   { "id": 422901, "level": 1 },

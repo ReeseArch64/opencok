@@ -1,4 +1,5 @@
 import type { GeneralSaleDefinition } from "../types/general_sale.ts";
+
 export const records: readonly GeneralSaleDefinition[] = [
   {
     "id": 53600,

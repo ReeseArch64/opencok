@@ -1,4 +1,5 @@
 import type { KingdomBuildingDefinition } from "../types/kingdom_building.ts";
+
 export const records: readonly KingdomBuildingDefinition[] = [
   {
     "id": 516000,

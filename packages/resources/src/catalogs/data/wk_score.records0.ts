@@ -1,4 +1,5 @@
 import type { WkScoreDefinition } from "../types/wk_score.ts";
+
 export const records: readonly WkScoreDefinition[] = [
   { "id": 800000, "level": 1, "score": 2 },
   { "id": 800001, "level": 2, "score": 3 },

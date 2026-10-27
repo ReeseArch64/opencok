@@ -14,13 +14,17 @@ import { activityEconomy } from "./timed-activity";
 import type { AllianceContext } from "./alliances";
 
 const assets = ["wood", "stone", "iron", "food", "silver", "gold"] as const;
+
 export class AllianceScienceContext {
   constructor(readonly context: AllianceContext) {}
+
   get c() {
     return this.context;
   }
+
   row(id: number) {
     allianceScienceRule(this.c.rules, id);
+
     return allianceScienceRow(
       this.c.allianceId,
       id,
@@ -29,6 +33,7 @@ export class AllianceScienceContext {
       ),
     );
   }
+
   snapshot(row: Row): Fields {
     const rule = allianceScienceRule(this.c.rules, num(row, "scienceId"), num(row, "level")),
       stage = allianceScienceStage(rule, num(row, "donateprogress")),
@@ -39,6 +44,7 @@ export class AllianceScienceContext {
               queue.allianceId === row.allianceId &&
               num(queue, "scienceId") === num(row, "scienceId"),
           );
+
     return {
       scienceId: sfs.int(num(row, "scienceId")),
       level: sfs.int(num(row, "level")),
@@ -62,6 +68,7 @@ export class AllianceScienceContext {
         : {}),
     };
   }
+
   snapshots(id: string) {
     const rows = [...(this.c.rules.power.allianceSciences?.values() ?? [])]
       .filter((rule) => rule.science_lv === "0")
@@ -77,20 +84,28 @@ export class AllianceScienceContext {
             ),
         ),
       );
+
     return sfs.array(rows.map((row) => sfs.object(this.snapshot(row))));
   }
+
   complete(): Fields {
     if (!this.c.allianceId) return {};
+
     const queue = this.c.state.research.find((row) => row.allianceId === this.c.allianceId);
+
     if (!queue || long(queue, "startTime") + long(queue, "needTime") > this.c.now) return {};
+
     const id = num(queue, "scienceId"),
       row = this.row(id),
       data = queue.accelerate;
     let saved: { version: number; from: number; to: number; power: number };
+
     try {
       if (!data || (Buffer.isBuffer(data) && data.length === 0)) {
         const target = allianceScienceRule(this.c.rules, id, num(row, "level") + 1);
+
         if (long(row, "researchstarttime") !== long(queue, "startTime")) allianceFailure();
+
         saved = {
           version: 1,
           from: num(row, "level"),
@@ -101,8 +116,10 @@ export class AllianceScienceContext {
     } catch {
       allianceFailure();
     }
+
     if (saved.version !== 1 || saved.from !== num(row, "level") || saved.to !== saved.from + 1)
       allianceFailure();
+
     allianceScienceRule(this.c.rules, id, saved.to);
     const next = {
       ...allianceScienceRow(this.c.allianceId, id),
@@ -112,10 +129,14 @@ export class AllianceScienceContext {
     this.c.write.sciences = [next];
     this.c.write.deletedResearch = [this.c.allianceId];
     this.c.productionAt = this.c.now;
+
     for (const member of this.c.list()) this.c.productionOwners.add(text(member, "uid"));
+
     this.c.ledger.pushes.push({ command: "push.al.science", body: this.snapshot(next) });
+
     return this.snapshot(next);
   }
+
   options(row: Row): Fields {
     return {
       scienceId: sfs.int(num(row, "scienceid")),
@@ -138,6 +159,7 @@ export class AllianceScienceContext {
       ),
     };
   }
+
   option(row: Row, prefix: string): Fields {
     return {
       resource: sfs.string(text(row, prefix + "res")),
@@ -146,6 +168,7 @@ export class AllianceScienceContext {
       progress: sfs.int(num(row, prefix === "high" ? "higprogress" : prefix + "progress")),
     };
   }
+
   offers(id: number, previous?: Row, used?: number): Row {
     const c = this.c,
       science = this.row(id),
@@ -180,6 +203,7 @@ export class AllianceScienceContext {
     });
     const same = randomInt(1000),
       available = randomInt(1000);
+
     for (const [prefix, index] of [
       ["mid", 1],
       ["high", 2],
@@ -187,6 +211,7 @@ export class AllianceScienceContext {
       const counter = prefix + "NotUse",
         notUsed =
           used === undefined ? num(next, counter) : used < index ? num(next, counter) + 1 : 0;
+
       if (
         !previous ||
         used === index ||
@@ -209,57 +234,79 @@ export class AllianceScienceContext {
           available < cityInteger(config?.[index === 1 ? "k1" : "k2"], 0, 1000) ? 1 : 0;
       } else next[counter] = notUsed;
     }
+
     return next;
   }
+
   async command(command: string, params: Fields): Promise<Fields> {
     const c = this.c,
       member = c.member(),
       config = c.rules.items.get("alliance_science"),
       economy = activityEconomy(c.ledger);
+
     if (command === "al.science.donate.cd") {
       const remaining = long(member, "donateCDTime") - c.now;
+
       if (remaining <= 0n) allianceFailure();
+
       const cost = Math.max(1, Math.floor(Number(remaining) / 1000 / cityInteger(config?.k4, 1)));
       economy.gold(-BigInt(cost));
       c.setMember({ ...member, donateCDTime: 0n, donateAvailable: 1 });
+
       return { gold: sfs.long(c.ledger.total()), donateCDTime: sfs.long(0n) };
     }
+
     if (command === "al.targetscience.set") {
       c.right("alliancescience");
       const id = cityInteger(Number(str(params, "scienceId")), 1);
       this.row(id);
       let selected: string[];
+
       try {
         selected = JSON.parse(text(c.alliance(), "targetScience") || "[]");
       } catch {
         allianceFailure();
       }
+
       if (!Array.isArray(selected) || selected.some((id) => typeof id !== "string"))
         allianceFailure();
+
       selected = selected.filter((value) => value !== String(id));
+
       if (cityInteger(int(params, "isuse"), 0, 1)) selected.push(String(id));
+
       if (JSON.stringify(selected).length > 255) allianceFailure();
+
       c.setAlliance({ ...c.alliance(), targetScience: JSON.stringify(selected) });
+
       return { targetScience: sfs.string(selected.join(";")) };
     }
+
     const id = cityInteger(int(params, "scienceId"), 1),
       row = this.row(id),
       rule = allianceScienceRule(c.rules, id, num(row, "level"));
+
     if (num(row, "level") >= cityInteger(rule.max_lv, 1)) allianceFailure();
+
     if (command === "al.science.fresh") {
       const previous = c.state.donations.find((row) => num(row, "scienceid") === id),
         next = previous ?? this.offers(id);
+
       if (!previous) c.write.donations = [next];
+
       return this.options(next);
     }
+
     if (command === "al.science.research") {
       c.right("alliancescience");
+
       if (
         c.state.research.some((row) => row.allianceId === c.allianceId) ||
         num(row, "donatefinish") !== 1 ||
         num(row, "donateprogress") < allianceScienceStage(rule, num(row, "donateprogress")).total
       )
         allianceFailure();
+
       const target = allianceScienceRule(c.rules, id, num(row, "level") + 1),
         duration = BigInt(
           Math.max(
@@ -267,7 +314,9 @@ export class AllianceScienceContext {
             Math.ceil((cityInteger(rule.time, 1) * 1000) / (1 + c.scienceEffect(510) / 100)),
           ),
         );
+
       for (const member of c.list()) c.productionOwners.add(text(member, "uid"));
+
       c.write.sciences = [{ ...row, researchstarttime: c.now }];
       c.write.research = [
         {
@@ -285,17 +334,21 @@ export class AllianceScienceContext {
           ),
         },
       ];
+
       return {
         ...this.snapshot(row),
         startTime: sfs.long(c.now),
         finishTime: sfs.long(c.now + duration),
       };
     }
+
     if (command !== "al.science.donate") allianceFailure();
+
     const cd = long(member, "donateCDTime"),
       available = cd <= c.now ? 1 : Number(member.donateAvailable ?? 1),
       first =
         Number(c.state.lords.find((row) => row.uid === c.owner)?.firstJoinAllianceFlag ?? 1) === 1;
+
     if (
       !available ||
       cd - c.now > BigInt(cityInteger(config?.k6, 1)) * 1000n ||
@@ -307,15 +360,20 @@ export class AllianceScienceContext {
       )
     )
       allianceFailure();
+
     const option = cityInteger(int(params, "option"), 0, 2),
       prefix = ["low", "mid", "high"][option]!,
       offer = c.state.donations.find((row) => num(row, "scienceid") === id);
+
     if (!offer || (option > 0 && num(offer, prefix + "Available") !== 1)) allianceFailure();
+
     const resource = text(offer, prefix + "res"),
       quantity = cityInteger(num(offer, prefix + "num"), 1),
       contribution = cityInteger(num(offer, prefix + "contribute"), 1),
       progress = cityInteger(num(offer, option === 2 ? "higprogress" : prefix + "progress"), 1);
+
     if (!(assets as readonly string[]).includes(resource)) allianceFailure();
+
     if (resource === "gold") economy.gold(-BigInt(quantity));
     else {
       const asset = resource as Exclude<(typeof assets)[number], "gold">,
@@ -324,9 +382,12 @@ export class AllianceScienceContext {
           ? long(c.state.inventory.resource, bound)
           : 0n,
         take = boundBalance < BigInt(quantity) ? boundBalance : BigInt(quantity);
+
       if (take) economy.resource(bound as "woodbind", -take);
+
       if (BigInt(quantity) > take) economy.resource(asset, -(BigInt(quantity) - take));
     }
+
     const total = allianceScienceStage(rule, num(row, "donateprogress")).total,
       nextProgress = Math.min(total, num(row, "donateprogress") + progress),
       next = { ...row, donateprogress: nextProgress, donatefinish: nextProgress >= total ? 1 : 0 };
@@ -369,6 +430,7 @@ export class AllianceScienceContext {
         donateTime: c.now,
       },
     ];
+
     return {
       ...this.snapshot(next),
       options: sfs.object(this.options(offers)),

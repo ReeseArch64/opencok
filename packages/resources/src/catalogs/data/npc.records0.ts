@@ -1,4 +1,5 @@
 import type { NpcDefinition } from "../types/npc.ts";
+
 export const records: readonly NpcDefinition[] = [
   {
     "id": 120000,

@@ -1,4 +1,5 @@
 import type { TradeDefinition } from "../types/trade.ts";
+
 export const records: readonly TradeDefinition[] = [
   {
     "id": 4500750,

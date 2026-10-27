@@ -13,6 +13,7 @@ export function createNicknameAllianceDelivery(options: {
     options.store.deliverAlliance(owner, operationId, now, (tasks, stem) => {
       const plan = nicknameAllianceTask(tasks, options.rules, options.kingdomId, now);
       const template = plan.complete ? options.rules.mail.get("10113") : undefined;
+
       return {
         ...plan,
         mail: template

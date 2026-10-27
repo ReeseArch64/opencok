@@ -17,25 +17,34 @@ async function limitedBody(
   maximum: number,
 ): Promise<string> {
   if (!stream) throw new HttpError(400, "Missing body");
+
   const reader = stream.getReader();
   const chunks: Uint8Array[] = [];
   let size = 0;
+
   try {
     for (;;) {
       const next = await reader.read();
+
       if (next.done) break;
+
       size += next.value.length;
+
       if (size > maximum) {
         await reader.cancel();
+
         throw new HttpError(413, "Oversized body");
       }
+
       chunks.push(next.value);
     }
+
     return Buffer.concat(chunks).toString("utf8");
   } finally {
     reader.releaseLock();
   }
 }
+
 function failure(error: unknown) {
   return Response.json(
     { state: "unavailable" },
@@ -45,23 +54,33 @@ function failure(error: unknown) {
     },
   );
 }
+
 export function provisioningHandler(controller: Pick<ProvisioningController, "create">) {
   return async (request: Request): Promise<Response> => {
     if (request.method !== "POST") return new Response(null, { status: 405 });
+
     try {
       const auth = /^Bearer ([^\s]+)$/.exec(request.headers.get("Authorization") ?? "");
+
       if (!auth || auth[1]!.length > 16384)
         throw new HttpError(401, "Identity authentication required");
+
       let parsed: unknown;
+
       try {
         parsed = JSON.parse(await limitedBody(request.body, 4096));
       } catch (error) {
         if (error instanceof HttpError) throw error;
+
         throw new HttpError(400, "Invalid body");
       }
+
       const input = createCharacterSchema.safeParse(parsed);
+
       if (!input.success) throw new HttpError(400, "Invalid character input");
+
       const response = await controller.create(auth[1]!, input.data);
+
       return Response.json(response, {
         status: response.state === "ready" ? 200 : 202,
         headers: { "Cache-Control": "no-store" },
@@ -71,6 +90,7 @@ export function provisioningHandler(controller: Pick<ProvisioningController, "cr
     }
   };
 }
+
 export function characterProvisioningHandler(
   controller: Pick<CharacterProvisioningController, "create">,
   secret: string,
@@ -79,8 +99,10 @@ export function characterProvisioningHandler(
   return async (request: Request): Promise<Response> => {
     if (request.method !== "POST" || new URL(request.url).pathname !== provisionPath)
       return new Response(null, { status: 404 });
+
     try {
       const body = await limitedBody(request.body, 8192);
+
       if (
         !verifyProvisioning(
           body,
@@ -91,17 +113,23 @@ export function characterProvisioningHandler(
         )
       )
         throw new HttpError(401, "Invalid provisioning authorization");
+
       let parsed: unknown;
+
       try {
         parsed = JSON.parse(body);
       } catch {
         throw new HttpError(400, "Invalid body");
       }
+
       const input = reservationSchema.safeParse(parsed);
+
       if (!input.success) throw new HttpError(400, "Invalid reservation");
+
       const result = await controller.create(input.data);
       const output = JSON.stringify(provisionReceiptSchema.parse(result));
       const timestamp = String(now());
+
       return new Response(output, {
         headers: {
           "Content-Type": "application/json",
@@ -115,6 +143,7 @@ export function characterProvisioningHandler(
     }
   };
 }
+
 export function realmProvisioner(
   url: string,
   secret: string,
@@ -123,6 +152,7 @@ export function realmProvisioner(
   now = Date.now,
 ): RealmProvisioner {
   const target = new URL(url);
+
   if (
     !["http:", "https:"].includes(target.protocol) ||
     target.pathname !== provisionPath ||
@@ -133,6 +163,7 @@ export function realmProvisioner(
     !secret
   )
     throw new Error("Invalid provisioning endpoint");
+
   return {
     async create(reservation) {
       const body = reservationJson(reservation),
@@ -148,11 +179,15 @@ export function realmProvisioner(
         },
         body,
       });
+
       if (!response.ok) {
         await response.body?.cancel();
+
         throw new HttpError(503, "Realm provisioning unavailable");
       }
+
       const output = await limitedBody(response.body, 8192);
+
       if (
         !verifyProvisioning(
           output,
@@ -164,6 +199,7 @@ export function realmProvisioner(
         )
       )
         throw new HttpError(503, "Invalid realm receipt");
+
       return provisionReceiptSchema.parse(JSON.parse(output));
     },
   };

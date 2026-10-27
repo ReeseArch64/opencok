@@ -1,4 +1,5 @@
 import type { AbDefinition } from "../types/ab.ts";
+
 export const records: readonly AbDefinition[] = [
   {
     "id": 50000,

@@ -6,6 +6,7 @@ import { tiles as layer0tiles1 } from "./crossFightWorld.layer0.tiles1.ts";
 import { tiles as layer1tiles1 } from "./crossFightWorld.layer1.tiles1.ts";
 import { tiles as layer0tiles2 } from "./crossFightWorld.layer0.tiles2.ts";
 import { tiles as layer1tiles2 } from "./crossFightWorld.layer1.tiles2.ts";
+
 export const catalog: TileMapDefinition = {
   "kind": CatalogKind.TileMap,
   "orientation": "isometric",

@@ -22,12 +22,18 @@ export async function readResourceExpeditionLoadEffect(
       )
     )
       return 0;
+
     const stage = await services.expeditionStage?.(context.kingdomId);
+
     if (stage !== 3) return 0;
+
     const origin = ownerInteger(profile.crossFightSrcServerId);
     const home = origin === -1 ? ownerInteger(profile.serverId) : origin;
+
     if (home !== context.kingdomId) return 0;
+
     const value = resolve(895);
+
     return typeof value === "number" ? Math.fround(value) : 0;
   } catch {
     return 0;

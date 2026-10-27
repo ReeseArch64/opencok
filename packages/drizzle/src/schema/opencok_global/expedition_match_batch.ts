@@ -1,6 +1,7 @@
 import { sql } from "drizzle-orm";
 import { bigint, check, primaryKey, text, varchar } from "drizzle-orm/pg-core";
 import { opencok_global } from "../namespaces";
+
 export const expedition_match_batch = opencok_global.table(
   "expedition_match_batch",
   {

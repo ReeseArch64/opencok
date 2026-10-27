@@ -1,4 +1,5 @@
 import type { ExchangeCycleDefinition } from "../types/exchange_cycle.ts";
+
 export const records: readonly ExchangeCycleDefinition[] = [
   {
     "id": 62270010,

@@ -14,4 +14,5 @@ export interface EffectDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type EffectDefinitionCatalog = CatalogTable<EffectDefinition>;

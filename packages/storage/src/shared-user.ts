@@ -42,6 +42,7 @@ redis.call('HSET', KEYS[2], ARGV[1], version)
 return 1`;
 
 type Command = (command: string, ...args: string[]) => Promise<unknown>;
+
 function validOwner(owner: string, layout: SharedUserLayout) {
   if (
     typeof owner !== "string" ||
@@ -53,15 +54,18 @@ function validOwner(owner: string, layout: SharedUserLayout) {
   )
     throw new DependencyError("shared user cache");
 }
+
 function cacheKey(owner: string, layout: SharedUserLayout) {
   return layout === "hash" ? "cross_user_info_global" : `USER_INFO_${owner}`;
 }
+
 export async function publishSharedUser(
   command: Command,
   update: SharedUserUpdate,
   layout: SharedUserLayout = "hash",
 ): Promise<void> {
   validOwner(update.owner, layout);
+
   if (
     !Number.isInteger(update.kingdomId) ||
     update.kingdomId < 1 ||
@@ -77,6 +81,7 @@ export async function publishSharedUser(
     Buffer.byteLength(update.body) > 65535
   )
     throw new DependencyError("shared user cache");
+
   try {
     const result = await command(
       "EVAL",
@@ -92,6 +97,7 @@ export async function publishSharedUser(
       update.body,
       layout,
     );
+
     if (result !== 0 && result !== 1) throw new Error();
   } catch {
     throw new DependencyError("shared user cache");
@@ -104,14 +110,18 @@ export async function loadSharedUser(
   layout: SharedUserLayout = "hash",
 ): Promise<string | null> {
   validOwner(owner, layout);
+
   try {
     const result =
       layout === "hash"
         ? await command("HGET", cacheKey(owner, layout), owner)
         : await command("GET", cacheKey(owner, layout));
+
     if (result === null) return null;
+
     if (typeof result !== "string" || !result.isWellFormed() || Buffer.byteLength(result) > 65535)
       throw new Error();
+
     return result;
   } catch {
     throw new DependencyError("shared user cache");

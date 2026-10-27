@@ -2,6 +2,7 @@ import { sql } from "drizzle-orm";
 import { bigint, check, index, integer, primaryKey, varchar } from "drizzle-orm/pg-core";
 import { bytea } from "../../types";
 import { opencok_kingdom } from "../namespaces";
+
 export const totem_activation = opencok_kingdom.table(
   "totem_activation",
   {

@@ -8,12 +8,15 @@ import { DependencyError } from "@opencok/errors/dependency";
 import { and, asc, eq, ilike, ne, sql } from "drizzle-orm";
 
 type Databases = Pick<ReturnType<typeof createDatabases>, "getKingdom" | "kingdoms">;
+
 type Db = ReturnType<Databases["getKingdom"]>["db"];
+
 type Reader = Pick<Db, "select">;
 
 function realm(value: number): boolean {
   return Number.isInteger(value) && value > 0 && value <= 2147483647;
 }
+
 function string(value: unknown, limit: number): value is string {
   return (
     typeof value === "string" &&
@@ -22,6 +25,7 @@ function string(value: unknown, limit: number): value is string {
     !value.includes("\0")
   );
 }
+
 function authorized(profile: Row | undefined, owner: string, kingdomId: number, now: number) {
   return (
     profile?.uid === owner &&
@@ -30,6 +34,7 @@ function authorized(profile: Row | undefined, owner: string, kingdomId: number, 
     ((profile.banTime ?? 0n) as bigint) <= BigInt(now)
   );
 }
+
 async function read(db: Reader, query: WorldSearchQuery): Promise<Row[]> {
   const rows = await db
     .select({
@@ -53,18 +58,23 @@ async function read(db: Reader, query: WorldSearchQuery): Promise<Row[]> {
     .orderBy(asc(userprofile.uid))
     .limit(8)
     .offset(query.offset);
+
   if (rows.length > 8 || new Set(rows.map((row) => row.uid)).size !== rows.length)
     throw new DependencyError("world search results");
+
   return rows;
 }
 
 export function createWorldSearchStore(databases: Databases, kingdomId: number): WorldSearchStore {
   if (!realm(kingdomId) || !databases.kingdoms.has(kingdomId))
     throw new Error("Invalid world search realm");
+
   const options = { isolationLevel: "repeatable read", accessMode: "read only" } as const;
+
   return {
     async search(owner, input) {
       const query = Object.freeze({ ...input });
+
       if (
         !string(owner, 255) ||
         !owner ||
@@ -79,6 +89,7 @@ export function createWorldSearchStore(databases: Databases, kingdomId: number):
         query.now < 0
       )
         throw new Error("Invalid world search query");
+
       try {
         const snapshot = await databases.getKingdom(kingdomId).db.transaction(async (tx) => {
           const [profile] = await tx
@@ -95,15 +106,21 @@ export function createWorldSearchStore(databases: Databases, kingdomId: number):
             authorized(profile, owner, kingdomId, query.now) && query.kingdomId === kingdomId
               ? await read(tx, query)
               : [];
+
           return { profile, kingdomId: query.kingdomId, rows };
         }, options);
+
         if (!authorized(snapshot.profile, owner, kingdomId, query.now)) return snapshot;
+
         if (query.kingdomId === kingdomId) return snapshot;
+
         if (!databases.kingdoms.has(query.kingdomId))
           throw new DependencyError("world search realm");
+
         const rows = await databases
           .getKingdom(query.kingdomId)
           .db.transaction((tx) => read(tx, query), options);
+
         return { ...snapshot, rows };
       } catch {
         throw new DependencyError("world search");

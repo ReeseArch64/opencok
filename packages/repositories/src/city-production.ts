@@ -14,9 +14,12 @@ export function createCityProductionBoundary(
     const rates = await preparation.prepare(tx, owner, now);
     const buildings = await tx.select().from(user_building).where(eq(user_building.uid, owner));
     const initial: ProductionAccount[] = [];
+
     for (const building of buildings) {
       const resource = asset(building);
+
       if (resource === undefined) continue;
+
       const from = long(building, "refreshTime") || (now >= 5000n ? now - 5000n : 0n);
       initial.push({
         buildingId: building.uuid,
@@ -28,19 +31,24 @@ export function createCityProductionBoundary(
         rates: await rates(building, from),
       });
     }
+
     await changeProductionInTransaction(tx, owner, now, initial, async () => {
       await change();
       const nextRates = await preparation.prepare(tx, owner, now);
       const next = await tx.select().from(user_building).where(eq(user_building.uid, owner));
+
       return {
         result: undefined,
         rates: async (buildingId) => {
           const building = next.find((row) => row.uuid === buildingId);
+
           if (!building) return [{ at: now, perHour: 0n, capacity: 0n }];
+
           return nextRates(building, now);
         },
       };
     });
+
     if (deleted.length) {
       const accounts = await tx
         .select()
@@ -51,10 +59,12 @@ export function createCityProductionBoundary(
             inArray(building_production.buildingId, [...deleted]),
           ),
         );
+
       for (const account of accounts)
         if (account.amount > 0n) {
           if (!["wood", "stone", "iron", "food"].includes(account.asset))
             throw new Error("Invalid demolished production asset");
+
           economy.resource(
             text(account, "asset") as "wood" | "stone" | "iron" | "food",
             account.amount,

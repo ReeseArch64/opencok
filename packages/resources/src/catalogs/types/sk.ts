@@ -21,4 +21,5 @@ export interface SkDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type SkDefinitionCatalog = CatalogTable<SkDefinition>;

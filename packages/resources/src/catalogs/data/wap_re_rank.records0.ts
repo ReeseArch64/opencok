@@ -1,4 +1,5 @@
 import type { WapReRankDefinition } from "../types/wap_re_rank.ts";
+
 export const records: readonly WapReRankDefinition[] = [
   { "id": 7100013, "rank": 1, "reward": 239947, "tpye": [1, 3], "quantity": [20, 1] },
   { "id": 7100014, "rank": 2, "reward": 239948, "tpye": [1, 4], "quantity": [10, 1] },

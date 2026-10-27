@@ -21,6 +21,7 @@ export abstract class ChatDiscoveryController {
     response.setHeader("Cache-Control", "no-store");
 
     let ready = false;
+
     try {
       ready = this.isReady() === true;
     } catch {

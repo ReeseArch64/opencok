@@ -12,4 +12,5 @@ export interface BoxVipDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type BoxVipDefinitionCatalog = CatalogTable<BoxVipDefinition>;

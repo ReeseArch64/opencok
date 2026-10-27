@@ -1,6 +1,7 @@
 import { sql } from "drizzle-orm";
 import { bigint, check, integer, primaryKey, varchar } from "drizzle-orm/pg-core";
 import { opencok_global } from "../namespaces";
+
 export const hero_match_period = opencok_global.table(
   "hero_match_period",
   {

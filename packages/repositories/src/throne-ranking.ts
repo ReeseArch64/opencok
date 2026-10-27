@@ -21,7 +21,9 @@ export async function readThroneRanking(
             .orderBy(desc(fight_king_status.index))
             .limit(1)
         )[0];
+
       if (!period) return { period: undefined, rows: [] };
+
       if (
         !Number.isInteger(period.index) ||
         period.index < 1 ||
@@ -30,6 +32,7 @@ export async function readThroneRanking(
         period.info.length > 8192
       )
         throw new Error("Invalid throne period");
+
       const rows = await tx
         .select({
           id: user_cross_throne.id,
@@ -50,7 +53,9 @@ export async function readThroneRanking(
         )
         .orderBy(desc(user_cross_throne.totalKills), asc(user_cross_throne.id))
         .limit(32768);
+
       if (rows.length > 32767) throw new Error("Oversized throne ranking");
+
       return { period: { index: period.index, info: period.info }, rows };
     },
     { isolationLevel: "repeatable read", accessMode: "read only" },
@@ -62,6 +67,7 @@ export async function readThroneRanking(
         .from(server_king_info)
         .where(inArray(server_king_info.Id, ids))
     : [];
+
   return {
     ...snapshot,
     rows: snapshot.rows.map((row) => ({

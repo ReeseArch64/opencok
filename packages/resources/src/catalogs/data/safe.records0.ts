@@ -1,4 +1,5 @@
 import type { SafeDefinition } from "../types/safe.ts";
+
 export const records: readonly SafeDefinition[] = [
   {
     "id": "2.1.0",

@@ -11,4 +11,5 @@ export interface Resource3Definition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type Resource3DefinitionCatalog = CatalogTable<Resource3Definition>;

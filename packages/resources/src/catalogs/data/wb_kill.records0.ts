@@ -1,4 +1,5 @@
 import type { WbKillDefinition } from "../types/wb_kill.ts";
+
 export const records: readonly WbKillDefinition[] = [
   { "id": 600001, "winningStreak": 1, "BonusPoints": 0, "shutDown": 0, "show": 0, "robRate": 20 },
   { "id": 600002, "winningStreak": 3, "BonusPoints": 1, "shutDown": 1, "show": 0, "robRate": 20 },

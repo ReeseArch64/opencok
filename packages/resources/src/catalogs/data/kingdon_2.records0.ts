@@ -1,4 +1,5 @@
 import type { Kingdon2Definition } from "../types/kingdon_2.ts";
+
 export const records: readonly Kingdon2Definition[] = [
   {
     "id": 2,

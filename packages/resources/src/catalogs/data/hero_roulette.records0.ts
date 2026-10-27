@@ -1,4 +1,5 @@
 import type { HeroRouletteDefinition } from "../types/hero_roulette.ts";
+
 export const records: readonly HeroRouletteDefinition[] = [
   {
     "id": 89699,

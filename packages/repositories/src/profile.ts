@@ -33,6 +33,7 @@ export async function loadPublicProfile(
   observerAllianceId: string,
 ): Promise<RoutedPublicProfile | undefined> {
   if (!/^[0-9]{1,40}$/.test(uid)) return undefined;
+
   const account = (
     await databases.global.db
       .select({ server: account_new.server })
@@ -41,8 +42,11 @@ export async function loadPublicProfile(
       .limit(1)
   )[0];
   const server = account?.server ?? String(localKingdomId);
+
   if (!/^[+-]?\d+$/.test(server)) throw new DependencyError("player realm");
+
   const kingdomId = Number(server);
+
   if (
     !Number.isInteger(kingdomId) ||
     kingdomId <= 0 ||
@@ -50,14 +54,18 @@ export async function loadPublicProfile(
     !databases.kingdoms.has(kingdomId)
   )
     throw new DependencyError("player realm");
+
   const state = await readPublicProfile(
     databases.getKingdom(kingdomId).db,
     uid,
     observerAllianceId,
   );
+
   if (!state.profile) return undefined;
+
   if (state.profile.uid !== uid || Number(state.profile.serverId) !== kingdomId)
     throw new DependencyError("player realm");
+
   return { state, kingdomId };
 }
 
@@ -67,6 +75,7 @@ export function readPublicProfile(
   observerAllianceId = "",
 ): Promise<PublicProfileState> {
   if (!uid.trim() || uid.length > 40) throw new Error("Invalid public profile identity");
+
   return db.transaction(
     async (tx) => {
       const profile = (
@@ -87,6 +96,7 @@ export function readPublicProfile(
           .where(eq(userprofile.uid, uid))
           .limit(1)
       )[0];
+
       if (!profile)
         return {
           profile: undefined,
@@ -105,6 +115,7 @@ export function readPublicProfile(
           honors: [],
           completedAchievements: 0,
         };
+
       const statistics = (
         await tx
           .select({
@@ -181,7 +192,9 @@ export function readPublicProfile(
         .where(and(eq(user_building.uid, uid), eq(user_building.itemId, 401000)))
         .orderBy(asc(user_building.uuid))
         .limit(2);
+
       if (taverns.length > 1) throw new Error("Ambiguous public profile tavern");
+
       const generals = await tx
         .select({
           uuid: user_general.uuid,
@@ -196,7 +209,9 @@ export function readPublicProfile(
         .where(eq(user_general.uid, uid))
         .orderBy(asc(user_general.uuid))
         .limit(32768);
+
       if (generals.length > 32767) throw new Error("Public profile collection exceeds wire limit");
+
       const skills = generals.length
         ? await tx
             .select({
@@ -215,7 +230,9 @@ export function readPublicProfile(
             .orderBy(asc(user_skill.endTime), asc(user_skill.uuid))
             .limit(32768)
         : [];
+
       if (skills.length > 32767) throw new Error("Public profile collection exceeds wire limit");
+
       const equipment = await tx
         .select({
           uuid: user_equip.uuid,
@@ -231,7 +248,9 @@ export function readPublicProfile(
         .where(and(eq(user_equip.uid, uid), eq(user_equip.on, 1)))
         .orderBy(asc(user_equip.uuid))
         .limit(32768);
+
       if (equipment.length > 32767) throw new Error("Public profile collection exceeds wire limit");
+
       const honors = await tx
         .select({
           id: user_honor.id,
@@ -241,14 +260,18 @@ export function readPublicProfile(
         .where(eq(user_honor.uid, uid))
         .orderBy(asc(user_honor.id))
         .limit(32768);
+
       if (honors.length > 32767) throw new Error("Public profile collection exceeds wire limit");
+
       const achievementCounts = await tx
         .select({ count: count() })
         .from(user_achievement)
         .where(and(eq(user_achievement.uid, uid), inArray(user_achievement.state, [1, 2])));
       const completedAchievements = achievementCounts[0]?.count;
+
       if (!Number.isSafeInteger(completedAchievements) || completedAchievements! < 0)
         throw new Error("Invalid public achievement count");
+
       const flowers = (
         await tx
           .select({ flowerVal: flower_ranking.flowerVal, eggVal: flower_ranking.eggVal })
@@ -260,6 +283,7 @@ export function readPublicProfile(
       const alliance = allianceId?.trim()
         ? await readProfileAlliance(tx, allianceId, allianceId !== observerAllianceId)
         : undefined;
+
       return {
         profile,
         statistics,

@@ -7,4 +7,5 @@ export interface RecallQuestDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type RecallQuestDefinitionCatalog = CatalogTable<RecallQuestDefinition>;

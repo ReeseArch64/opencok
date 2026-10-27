@@ -12,6 +12,7 @@ import { long, num, text } from "@opencok/contracts/rows";
 import { hotItemOffer } from "@opencok/rules/hot-item";
 import { cityInteger } from "@opencok/rules/city-progression";
 import type { MutationTransaction } from "./mutation";
+
 export async function readHotItems(
   tx: MutationTransaction,
   owner: string,
@@ -61,22 +62,31 @@ export async function readHotItems(
     .where(gte(server_score.endTime, (now / 86400000n - 1n) * 86400000n))
     .orderBy(asc(server_score.uid))
     .limit(129);
+
   if (v2.length > 64 || v3.length > 64 || purchases.length > 2048 || scores.length > 128)
     throw new Error("Hot item aggregate exceeds bound");
+
   return { v2, v3, bestV2, bestV3, refresh, purchases, server: server ?? {}, scores };
 }
+
 export async function writeHotItems(tx: MutationTransaction, owner: string, write: HotItemWrite) {
   if (write.offers.length > 64 || write.purchases.length > 2048 || ![2, 3].includes(write.version))
     throw new Error("Invalid hot item writes");
+
   const keys = new Set<string>();
+
   for (const row of write.offers) {
     const offer = hotItemOffer(row);
     const key = `${offer.goodsId}:${offer.price}`;
+
     if (row.uid !== owner || keys.has(key)) throw new Error("Foreign or duplicate hot offer");
+
     keys.add(key);
   }
+
   if (write.version === 2) {
     await tx.delete(user_hot_item_v2).where(eq(user_hot_item_v2.uid, owner));
+
     for (const row of write.offers)
       await tx.insert(user_hot_item_v2).values({
         uid: owner,
@@ -91,6 +101,7 @@ export async function writeHotItems(tx: MutationTransaction, owner: string, writ
       });
   } else {
     await tx.delete(user_hot_item_v3).where(eq(user_hot_item_v3.uid, owner));
+
     for (const row of write.offers)
       await tx.insert(user_hot_item_v3).values({
         uid: owner,
@@ -105,10 +116,13 @@ export async function writeHotItems(tx: MutationTransaction, owner: string, writ
         type: num(row, "type"),
       });
   }
+
   if (write.best) {
     const row = write.best;
+
     if (row.uid !== owner || text(row, "goodsId").length > 20)
       throw new Error("Invalid hot best offer");
+
     const value = {
       uid: owner,
       goodsId: text(row, "goodsId"),
@@ -117,6 +131,7 @@ export async function writeHotItems(tx: MutationTransaction, owner: string, writ
       price: cityInteger(row.price),
       price_hot: cityInteger(row.price_hot ?? 0),
     };
+
     if (write.version === 2)
       await tx
         .insert(user_hot_item_best)
@@ -128,6 +143,7 @@ export async function writeHotItems(tx: MutationTransaction, owner: string, writ
         .values(value)
         .onConflictDoUpdate({ target: user_hot_item_best_v3.uid, set: value });
   }
+
   await tx
     .insert(hot_refresh_record)
     .values({
@@ -137,9 +153,11 @@ export async function writeHotItems(tx: MutationTransaction, owner: string, writ
     })
     .onConflictDoUpdate({ target: hot_refresh_record.uid, set: write.refresh });
   await tx.delete(hot_buy_record).where(eq(hot_buy_record.uid, owner));
+
   for (const row of write.purchases) {
     if (row.uid !== owner || !/^\d{1,10};\d{1,10}$/.test(text(row, "goodsId")))
       throw new Error("Invalid hot purchase history");
+
     await tx
       .insert(hot_buy_record)
       .values({ uid: owner, goodsId: text(row, "goodsId"), buyCount: cityInteger(row.buyCount) });

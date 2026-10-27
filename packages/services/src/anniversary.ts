@@ -16,6 +16,7 @@ function weeks(context: CityProgressionContext) {
     .filter((row) => row.start !== undefined && row.end !== undefined && row.end >= row.start)
     .sort((a, b) => cityInteger(a.rule.id) - cityInteger(b.rule.id));
 }
+
 function info(context: CityProgressionContext, planner: CampaignPlanner): AnniversaryResponse {
   let current = 0;
   const tasks = [...(context.rules.advanced.anniversaryTasks?.values() ?? [])];
@@ -24,7 +25,9 @@ function info(context: CityProgressionContext, planner: CampaignPlanner): Annive
     .map(({ rule, end }) => {
       const week = cityInteger(rule.id),
         n = week % 100;
+
       if (context.now < end!) current = week;
+
       return {
         week_id: week,
         box_score: cityInteger(planner.value(`P$long_3th_week${n}_score_count`)),
@@ -48,12 +51,14 @@ function info(context: CityProgressionContext, planner: CampaignPlanner): Annive
           })),
       };
     });
+
   return {
     anniversary_array,
     cake_already_taken: cityInteger(planner.value("P$long_3th_anniversary_cake_taken")),
     curr_week_id: current,
   };
 }
+
 export const anniversaryDomain: CityDomain = {
   commands: [
     "1year.info",
@@ -70,6 +75,7 @@ export const anniversaryDomain: CityDomain = {
   async prepare(context, command, params) {
     if (command === "1year.info") {
       if (!context.state.anniversaryStatistics) campaignFailure();
+
       return {
         response: encode(
           anniversaryStatisticsView(
@@ -81,45 +87,58 @@ export const anniversaryDomain: CityDomain = {
         event: null,
       };
     }
+
     if (command === "trigger.activity") {
       const type = cityInteger(int(params, "type"));
       const target = str(params, "uid", "");
+
       if (type === 45 && !target.trim()) return { response: encode({}), event: null };
+
       if (
         type === 45 &&
         (context.state.cosmeticTarget?.uid !== target ||
           context.state.cosmeticTarget.realm !== context.rules.kingdomId)
       )
         campaignFailure();
+
       new CampaignPlanner(context, {
         uid: type === 45 ? target : context.owner,
         client_para1: int(params, "para1", -1),
       }).event(type === 47 ? 47 : 51, type === 47 ? "" : String(type));
       refreshCampaignGrants(context);
+
       return {
         response: encode(campaignTriggerView(type)),
         event: cosmeticInteractionEvent(context),
       };
     }
+
     if (command === "item.askFor") {
       const id = String(cityInteger(int(params, "itemId"), 1));
       new CampaignPlanner(context, { key_itemId: id }).event(57, id);
       refreshCampaignGrants(context);
+
       return { response: encode({ success: sfs.string("1") }), event: null };
     }
+
     if (command === "campaign.record") {
       for (const event of readCampaignObservations(params)) {
         new CampaignPlanner(context, event.attributes).event(event.code, event.selector);
         refreshCampaignGrants(context);
       }
+
       return { response: encode({}), event: null };
     }
+
     if (command === "campaign.init") {
       new CampaignPlanner(context).event(8);
       refreshCampaignGrants(context);
+
       return { response: encode({}), event: null };
     }
+
     const planner = new CampaignPlanner(context);
+
     if (command === "campaign.action") {
       const code = cityInteger(int(params, "event"), 1, 10000),
         selector = str(params, "selector", "");
@@ -127,28 +146,37 @@ export const anniversaryDomain: CityDomain = {
         key_itemId: str(params, "itemId", ""),
         key_itemNum: int(params, "count", 1),
       }).event(code, selector);
+
       return { response: encode({}), event: null };
     }
+
     if (command === "get.activity.value") {
       const keys = str(params, "keys").split(";").filter(Boolean);
+
       return { response: encode(campaignVariableFields(planner, keys)), event: null };
     }
+
     if (
       !context.rules.advanced.anniversaryWeeks?.size ||
       !context.rules.advanced.campaignVariables?.size
     )
       campaignFailure();
+
     if (command === "third.anniversary")
       return { response: encode(anniversaryView(info(context, planner))), event: null };
+
     const index = cityInteger(int(params, "boxIdx"), 1) - 1;
     const current = weeks(context).filter(
       (row) => context.now >= row.start! && context.now < row.end!,
     );
+
     if (current.length !== 1) campaignFailure();
+
     const week = current[0]!.rule,
       n = cityInteger(week.id) % 100;
     const reward = (week.score_reward ?? "").split("|")[index]?.split(";");
     const flag = `P$long_3th_anniversary_week${n}_box_${index + 1}_flag`;
+
     if (
       !reward ||
       reward.length !== 2 ||
@@ -156,11 +184,14 @@ export const anniversaryDomain: CityDomain = {
       planner.value(`P$long_3th_week${n}_score_count`) < BigInt(cityInteger(reward[0], 1))
     )
       campaignFailure();
+
     new CampaignPlanner(context, {
       take_or_preview_reward: 1,
       key_rewardId: cityInteger(reward[1], 1),
     }).event(58, `1;${reward[1]}`);
+
     if (new CampaignPlanner(context).value(flag) !== 1n) campaignFailure();
+
     return { response: encode({ success: sfs.string("1") }) };
   },
   async apply() {

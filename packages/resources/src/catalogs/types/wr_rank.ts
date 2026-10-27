@@ -8,4 +8,5 @@ export interface WrRankDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type WrRankDefinitionCatalog = CatalogTable<WrRankDefinition>;

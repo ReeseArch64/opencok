@@ -10,4 +10,5 @@ export interface RecruitDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type RecruitDefinitionCatalog = CatalogTable<RecruitDefinition>;

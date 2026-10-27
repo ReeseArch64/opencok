@@ -1,4 +1,5 @@
 import type { DiscountMallDefinition } from "../types/discount_mall.ts";
+
 export const records: readonly DiscountMallDefinition[] = [
   { "id": 41587001, "itemId": 213273, "percent": 50 },
   { "id": 41587002, "itemId": 213275, "percent": 50 },

@@ -2,6 +2,7 @@ import { CatalogKind } from "@opencok/enums/catalog-kind";
 import type { MonsterSiegeRewardDefinition } from "../types/monster_siege_reward.ts";
 import type { CatalogTable } from "../../catalog-model.ts";
 import { records as records0 } from "./monster_siege_reward.records0.ts";
+
 export const catalog: CatalogTable<MonsterSiegeRewardDefinition> = {
   "kind": CatalogKind.Table,
   "records": [...records0],

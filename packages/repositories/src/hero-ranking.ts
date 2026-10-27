@@ -31,6 +31,7 @@ export async function readHeroRanking(
     !Number.isSafeInteger(now)
   )
     throw new Error("Invalid hero ranking query");
+
   return db.transaction(
     async (tx) => {
       const profile = (
@@ -46,7 +47,9 @@ export async function readHeroRanking(
           .where(eq(userprofile.uid, uid))
           .limit(1)
       )[0];
+
       if (!profile) return { profile, events: [] };
+
       const activities = await tx
         .select({ uuid: hero_activity.uuid })
         .from(hero_activity)
@@ -58,9 +61,13 @@ export async function readHeroRanking(
           ),
         )
         .limit(2);
+
       if (activities.length > 1) throw new Error("Ambiguous active hero activity");
+
       const activity = activities[0];
+
       if (!activity) return { profile, events: [] };
+
       const events = await tx
         .select({
           uuid: hero_event.uuid,
@@ -74,8 +81,10 @@ export async function readHeroRanking(
         .where(and(eq(hero_event.activityId, activity.uuid), gt(hero_event.endTime, BigInt(now))))
         .orderBy(asc(hero_event.readyTime), asc(hero_event.uuid))
         .limit(257);
+
       if (events.length > 256 || events.some((event) => event.activityId !== activity.uuid))
         throw new Error("Invalid hero event snapshot");
+
       return { profile, events };
     },
     { isolationLevel: "repeatable read", accessMode: "read only" },
@@ -90,6 +99,7 @@ export async function readHeroInsideRanking(
 ): Promise<HeroInsideRankingSnapshot> {
   if (!uid || uid.length > 40 || !eventId || eventId.length > 100 || !Number.isSafeInteger(now))
     throw new Error("Invalid hero inside ranking query");
+
   return db.transaction(
     async (tx) => {
       const profile = (
@@ -105,7 +115,9 @@ export async function readHeroInsideRanking(
           .where(eq(userprofile.uid, uid))
           .limit(1)
       )[0];
+
       if (!profile?.allianceId) return { profile, rows: [] };
+
       const event = (
         await tx
           .select({ type: hero_event.type })
@@ -121,7 +133,9 @@ export async function readHeroInsideRanking(
           )
           .limit(1)
       )[0];
+
       if (!event || ![2, 4].includes(Number(event.type))) return { profile, rows: [] };
+
       const rows = await tx
         .select({
           uid: userprofile.uid,
@@ -156,8 +170,10 @@ export async function readHeroInsideRanking(
         )
         .orderBy(desc(score_act_in.score), asc(score_act_in.uid))
         .limit(32768);
+
       if (rows.length > 32767 || new Set(rows.map((row) => row.uid)).size !== rows.length)
         throw new Error("Invalid hero inside ranking snapshot");
+
       return { profile, rows };
     },
     { isolationLevel: "repeatable read", accessMode: "read only" },
@@ -179,6 +195,7 @@ export async function readHeroHistory(
     !Number.isSafeInteger(now)
   )
     throw new Error("Invalid hero history query");
+
   return db.transaction(
     async (tx) => {
       const profile = (
@@ -195,7 +212,9 @@ export async function readHeroHistory(
           .limit(1)
       )[0];
       const empty = { profile, active: undefined, events: [], castleLevel: 0, alliancePower: 0n };
+
       if (!profile || type === 0) return empty;
+
       const active = (
         await tx
           .select({ eventId: hero_event.eventId, type: hero_event.type })
@@ -212,13 +231,17 @@ export async function readHeroHistory(
           .orderBy(asc(hero_activity.uuid), asc(hero_event.readyTime), asc(hero_event.uuid))
           .limit(1)
       )[0];
+
       if (!active) return empty;
+
       const castle = await tx
         .select({ level: user_building.level })
         .from(user_building)
         .where(and(eq(user_building.uid, uid), eq(user_building.itemId, 400000)))
         .limit(2);
+
       if (castle.length > 1) throw new Error("Ambiguous main building");
+
       const power = profile.allianceId
         ? (
             await tx
@@ -241,6 +264,7 @@ export async function readHeroHistory(
         .where(and(eq(hero_event.type, type), eq(hero_event.rewardStatus, 1)))
         .orderBy(desc(hero_event.endTime), asc(hero_event.uuid))
         .limit(10);
+
       return {
         profile,
         active,
@@ -252,6 +276,7 @@ export async function readHeroHistory(
     { isolationLevel: "repeatable read", accessMode: "read only" },
   );
 }
+
 export async function readHeroHistoryPresentation(
   db: Database["databases"]["global"]["db"],
   alliances: readonly string[],
@@ -264,6 +289,7 @@ export async function readHeroHistoryPresentation(
     realms.some((id) => !Number.isInteger(id))
   )
     throw new Error("Invalid hero presentation query");
+
   return db.transaction(
     async (tx) => ({
       alliances: alliances.length

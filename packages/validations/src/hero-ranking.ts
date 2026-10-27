@@ -35,6 +35,7 @@ export const heroInsideMemberSchema = z.strictObject({
   rank: field.int,
   score: field.int,
 }) satisfies z.ZodType<HeroInsideMemberResponse>;
+
 export const heroInsideRankingSchema = z.strictObject({
   rankList: z.array(heroInsideMemberSchema).max(32767),
 }) satisfies z.ZodType<HeroInsideRankingResponse>;
@@ -52,6 +53,7 @@ export const heroHistoryMemberSchema = z.strictObject({
   abbr: z.string().optional(),
   icon: z.string().optional(),
 }) satisfies z.ZodType<HeroHistoryMemberResponse>;
+
 export const heroHistorySchema = z.strictObject({
   history: z
     .array(

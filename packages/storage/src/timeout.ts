@@ -2,6 +2,7 @@ import { DependencyError } from "@opencok/errors/dependency";
 
 export async function bounded<T>(task: Promise<T>, timeout: number, component: string): Promise<T> {
   let timer: ReturnType<typeof setTimeout> | undefined;
+
   try {
     return await Promise.race([
       task,

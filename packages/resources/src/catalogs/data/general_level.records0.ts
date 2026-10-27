@@ -1,4 +1,5 @@
 import type { GeneralLevelDefinition } from "../types/general_level.ts";
+
 export const records: readonly GeneralLevelDefinition[] = [
   { "id": 53701, "level": 1, "experience": 300, "point": 3, "exp1": 300, "point1": 3 },
   { "id": 53702, "level": 2, "experience": 800, "point": 6, "exp1": 800, "point1": 6 },

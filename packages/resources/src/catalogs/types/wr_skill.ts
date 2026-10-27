@@ -10,4 +10,5 @@ export interface WrSkillDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type WrSkillDefinitionCatalog = CatalogTable<WrSkillDefinition>;

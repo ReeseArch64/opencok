@@ -1,9 +1,11 @@
 import type { Row } from "./rows";
+
 export interface ExpeditionPhase {
   stage: number;
   startTime: bigint;
   endTime: bigint;
 }
+
 export interface ExpeditionManifest {
   serverId: number;
   periodId: string;
@@ -11,6 +13,7 @@ export interface ExpeditionManifest {
   startTime: bigint;
   stages: readonly { stage: number; durationMs: bigint }[];
 }
+
 export interface ExpeditionState {
   clock?: Row;
   lastMergeMillis?: bigint;
@@ -33,6 +36,7 @@ export interface ExpeditionScoreAction {
   count: number;
   at: bigint;
 }
+
 export interface ExpeditionScoreReader {
   load(at: bigint): Promise<ExpeditionState>;
 }

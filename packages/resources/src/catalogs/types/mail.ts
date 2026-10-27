@@ -13,4 +13,5 @@ export interface MailDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type MailDefinitionCatalog = CatalogTable<MailDefinition>;

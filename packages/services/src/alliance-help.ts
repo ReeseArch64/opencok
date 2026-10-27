@@ -11,13 +11,16 @@ interface HelpGeneration {
   activityId: string;
   helpers: string[];
 }
+
 function generation(row: Row): HelpGeneration {
   let value: HelpGeneration;
+
   try {
     value = JSON.parse(Buffer.isBuffer(row.helpers) ? row.helpers.toString("utf8") : "");
   } catch {
     allianceFailure();
   }
+
   if (
     value.version !== 1 ||
     typeof value.activityId !== "string" ||
@@ -27,43 +30,55 @@ function generation(row: Row): HelpGeneration {
     value.helpers.some((id) => typeof id !== "string" || !id || id.length > 40)
   )
     allianceFailure();
+
   return value;
 }
+
 export class AllianceHelpContext {
   constructor(readonly c: AllianceContext) {}
+
   activity(help: Row) {
     let saved: HelpGeneration,
       legacy = false;
+
     try {
       saved = generation(help);
     } catch {
       const raw = Buffer.isBuffer(help.helpers)
         ? help.helpers.toString("utf8").replace(/[\s\0]+$/g, "")
         : "";
+
       if (raw.startsWith("{") || raw.length > 65535) allianceFailure();
+
       const previous = this.c.state.activities.find(
         (row) =>
           row.queueId === help.content && row.ownerId === help.senderId && row.type === help.type,
       );
+
       if (
         !previous ||
         long(help, "startTime") < long(previous, "startedAt") ||
         long(help, "startTime") >= long(previous, "dueAt")
       )
         allianceFailure();
+
       const helpers = raw.split(",").filter(Boolean);
+
       if (
         helpers.some((id) => id.length > 40) ||
         new Set(helpers).size !== helpers.length ||
         helpers.length !== num(help, "nowcount")
       )
         allianceFailure();
+
       saved = { version: 1, activityId: text(previous, "id"), helpers };
       legacy = true;
     }
+
     const activity =
       (this.c.write.activities ?? []).find((row) => row.id === saved.activityId) ??
       this.c.state.activities.find((row) => row.id === saved.activityId);
+
     if (
       !activity ||
       activity.ownerId !== help.senderId ||
@@ -74,12 +89,16 @@ export class AllianceHelpContext {
       help.allianceId !== this.c.allianceId
     )
       allianceFailure();
+
     this.c.member(text(help, "senderId"));
+
     return { activity, saved };
   }
+
   snapshot(help: Row): Fields {
     const { activity } = this.activity(help),
       profile = this.c.profile(text(help, "senderId"));
+
     return {
       uid: sfs.string(text(help, "helpId")),
       helpId: sfs.string(text(help, "helpId")),
@@ -106,11 +125,14 @@ export class AllianceHelpContext {
       startTime: sfs.long(long(help, "startTime")),
     };
   }
+
   available() {
     if (this.c.state.helps.length > 4096) allianceFailure();
+
     return this.c.state.helps.filter((row) => {
       try {
         const { saved } = this.activity(row);
+
         return (
           row.senderId === this.c.owner ||
           (num(row, "nowcount") < num(row, "maxcount") && !saved.helpers.includes(this.c.owner))
@@ -120,23 +142,28 @@ export class AllianceHelpContext {
       }
     });
   }
+
   help(row: Row): Fields {
     const { activity, saved } = this.activity(row);
+
     if (
       row.senderId === this.c.owner ||
       saved.helpers.includes(this.c.owner) ||
       num(row, "nowcount") >= num(row, "maxcount")
     )
       allianceFailure();
+
     const queue = this.c.state.queues.find(
       (queue) => queue.uuid === activity.queueId && queue.ownerId === activity.ownerId,
     );
+
     if (
       !queue ||
       long(queue, "updateTime") !==
         long(this.c.state.activities.find((row) => row.id === activity.id) ?? {}, "dueAt")
     )
       allianceFailure();
+
     const before = long(activity, "dueAt"),
       reduction = BigInt(cityInteger(num(row, "reduceSec"), 1)),
       dueAt = before - reduction < this.c.now ? this.c.now : before - reduction;
@@ -174,12 +201,16 @@ export class AllianceHelpContext {
     };
     const previous = this.c.write.actions?.find((row) => row.kind === "alliance.help")?.count ?? 0;
     this.c.write.actions = [{ uid: this.c.owner, kind: "alliance.help", count: previous + 1 }];
+
     return response;
   }
+
   async command(command: string, params: Fields): Promise<Fields> {
     this.c.right("help");
+
     if (command === "al.showhelp")
       return { helps: sfs.array(this.available().map((row) => sfs.object(this.snapshot(row)))) };
+
     if (command === "al.helpall")
       return {
         helps: sfs.array(
@@ -189,12 +220,17 @@ export class AllianceHelpContext {
             .map((row) => sfs.object(this.help(row))),
         ),
       };
+
     if (command === "al.renderhelp") {
       if (params.uid && str(params, "uid") !== this.c.owner) allianceFailure();
+
       const help = this.c.state.helps.find((row) => row.helpId === str(params, "helpId"));
+
       if (!help) allianceFailure();
+
       return this.help(help);
     }
+
     const queueId = str(params, "queueId"),
       queue = this.c.state.queues.find(
         (queue) => queue.uuid === queueId && queue.ownerId === this.c.owner,
@@ -202,6 +238,7 @@ export class AllianceHelpContext {
       activity = this.c.state.activities.find(
         (row) => row.queueId === queueId && row.ownerId === this.c.owner,
       );
+
     if (
       !queue ||
       !activity ||
@@ -212,10 +249,13 @@ export class AllianceHelpContext {
       int(params, "qType") !== num(activity, "type")
     )
       allianceFailure();
+
     const embassy = this.c.state.cities.find(
       (row) => row.uid === this.c.owner && num(row, "itemId") === 402000 && num(row, "level") > 0,
     );
+
     if (!embassy) allianceFailure();
+
     const building =
       num(activity, "type") === 0
         ? this.c.state.cities.find(
@@ -223,7 +263,9 @@ export class AllianceHelpContext {
           )
         : undefined;
     const itemId = building ? text(building, "itemId") : text(activity, "itemId");
+
     if (params.itemId && str(params, "itemId") !== itemId) allianceFailure();
+
     const count = cityInteger(
         cityBuildingParameter(embassy, this.c.rules, 0) + (await this.c.effect(161)),
         1,
@@ -254,6 +296,7 @@ export class AllianceHelpContext {
     this.c.write.queues = [{ ...queue, isHelped: 1 }];
     const response = this.snapshot(help);
     this.c.ledger.pushes.push({ command: "push.al.help.new", body: response });
+
     return response;
   }
 }

@@ -6,6 +6,7 @@ import type {
 } from "@opencok/contracts/building";
 
 const resources = ["wood", "stone", "iron", "food", "silver"] as const;
+
 const production = new Map([
   [413000, 0],
   [412000, 1],
@@ -20,11 +21,13 @@ function steps<T>(
   decode: (parts: string[]) => T,
 ): BuildingStep<T>[] | undefined {
   if (value === undefined) return undefined;
+
   return value
     .split("|")
     .filter(Boolean)
     .map((entry) => {
       const parts = entry.split(";").filter(Boolean);
+
       return { progress: Number(parts[0]), value: decode(parts.slice(1)) };
     });
 }
@@ -34,8 +37,10 @@ export function importBuildingDefinition(
   fallbackId?: number,
 ): BuildingLevelDefinition {
   const id = record.id === undefined ? fallbackId : Number(record.id);
+
   if (id === undefined || !Number.isSafeInteger(id))
     throw new Error("Invalid building definition ID");
+
   const level = Number(record.level);
   const buildingId = Math.floor(id / 1000) * 1000;
   const scalar = (name: string) => (record[name] === undefined ? undefined : Number(record[name]));
@@ -46,6 +51,7 @@ export function importBuildingDefinition(
   const effectSteps: Record<string, BuildingStep<number>[]> = {};
   const parameters = Array.from({ length: 6 }, (_, index) => {
     const value = record["para" + (index + 1)];
+
     return value === undefined
       ? null
       : {
@@ -55,24 +61,35 @@ export function importBuildingDefinition(
   });
   const effect = (index: number, name: keyof BuildingEffects) => {
     const value = record["para" + (index + 1)];
+
     if (value === undefined) return;
+
     if (value.includes("|")) {
       const values = steps(value, (parts) => Number(parts[0]));
+
       if (values) effectSteps[name] = values;
     } else effects[name] = Number(value);
+
     parameters[index] = null;
   };
+
   if (production.has(buildingId)) {
     effects.productionResourceId = production.get(buildingId)!;
     effect(0, "productionPerHour");
     effect(1, "productionCapacity");
   }
+
   if (buildingId === 404000) effect(3, "protectedFood");
+
   if (buildingId === 427000) effect(0, "reinforcementCapacity");
+
   if (buildingId === 407000) effect(0, "rallyCapacity");
+
   if (buildingId === 441000) effect(0, "woundedKnightCapacity");
+
   const item = (value: string) => {
     const [itemId, quantity] = value.split(";");
+
     return {
       itemId: Number(itemId),
       ...(quantity === undefined ? {} : { quantity: BigInt(quantity) }),
@@ -115,12 +132,14 @@ export function importBuildingDefinition(
     requiredBuildings: steps(record.star_building, (parts) =>
       parts.map((value) => {
         const [levelId, quantity] = value.split(",");
+
         return { levelId: Number(levelId), quantity: Number(quantity ?? 1) };
       }),
     ),
     unlockConditions: unlock,
     unlockPayment: payment,
   };
+
   return {
     id,
     buildingId,
@@ -140,6 +159,7 @@ export function importBuildingDefinition(
         ? []
         : record.building?.split("|").map((entry) => {
             const [buildingId, level] = entry.split(";");
+
             return { buildingId: Number(buildingId), level: Number(level) };
           }),
     requiredItems: record.item === "" ? [] : record.item?.split("|").map(item),

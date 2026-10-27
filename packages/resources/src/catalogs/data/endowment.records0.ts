@@ -1,4 +1,5 @@
 import type { EndowmentDefinition } from "../types/endowment.ts";
+
 export const records: readonly EndowmentDefinition[] = [
   { "id": 20000, "levelmax": 5, "effect": 53, "value": [2, 4, 6, 8, 10], "power": 10, "mark": 1 },
   {

@@ -1,7 +1,9 @@
 import type { RewardPreviewResponse } from "./rewards";
+
 export interface ClosedActivitiesResponse {
   act_close: readonly { id: string; close: string }[];
 }
+
 export interface CatalogRewardResponse {
   award: readonly RewardPreviewResponse[];
   rewardId: string;

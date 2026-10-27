@@ -1,7 +1,9 @@
 import { DependencyError } from "@opencok/errors/dependency";
 
 const sentField = "chat_user_hassendmail";
+
 const counterField = "chat_user_sendtimemail";
+
 const commitPage = `local values = redis.call('HMGET', KEYS[1], ARGV[1], ARGV[2])
 if (values[1] or '') ~= ARGV[3] or (values[2] or '') ~= ARGV[4] then return 0 end
 redis.call('HSET', KEYS[1], ARGV[1], ARGV[5], ARGV[2], ARGV[6])
@@ -9,7 +11,9 @@ return 1`;
 
 function javaSplit(value: string, separator: string): string[] {
   const parts = value.split(separator);
+
   while (parts.length && parts.at(-1) === "") parts.pop();
+
   return parts;
 }
 
@@ -42,10 +46,13 @@ export async function selectSystemMailPage(
     typeof inspect !== "function"
   )
     throw new DependencyError("mail pagination");
+
   const ids = [...input];
   const key = `opencok:kingdom:${kingdomId}:chat-user-info:${owner}`;
+
   for (let attempt = 0; attempt < 5; attempt++) {
     const values = await command("HMGET", key, sentField, counterField);
+
     if (
       !Array.isArray(values) ||
       values.length !== 2 ||
@@ -55,24 +62,29 @@ export async function selectSystemMailPage(
       )
     )
       throw new DependencyError("mail pagination");
+
     const previous = values.map((value) => value ?? "") as [string, string];
     let nextSent = previous[0];
     let indices = ids.map((_, index) => index);
     let more = false;
+
     if (ids.length > count) {
       const sent = new Set<string>();
       const parts = javaSplit(previous[0], ":");
+
       if (time !== 0n && parts.length === 2) {
         if (
           !/^[+-]?\d+$/.test(parts[0]!) ||
           BigInt.asIntN(64, BigInt(parts[0]!)) !== BigInt(parts[0]!)
         )
           throw new DependencyError("mail pagination");
+
         if (BigInt(parts[0]!) === time)
           for (const id of javaSplit(parts[1]!, ","))
             if (
               [...id].some((character) => {
                 const code = character.charCodeAt(0);
+
                 return !(
                   (code >= 9 && code <= 13) ||
                   (code >= 28 && code <= 32) ||
@@ -86,23 +98,34 @@ export async function selectSystemMailPage(
             )
               sent.add(id);
       }
+
       indices = [];
+
       for (const [index, id] of ids.entries()) {
         if (sent.has(id)) continue;
+
         indices.push(index);
         sent.add(id);
+
         if (indices.length >= count) break;
       }
+
       more = indices.length >= count;
+
       if (sent.size && time !== 0n) nextSent = `${time}:${[...sent].join(",")},`;
+
       if (Buffer.byteLength(nextSent) > 1024 * 1024) throw new DependencyError("mail pagination");
     }
+
     let counter = 0;
     const parts = javaSplit(previous[1], ":");
+
     if (parts[0] === String(time) && parts[1] && /^[+-]?\d+$/.test(parts[1])) {
       const value = BigInt(parts[1]);
+
       if (BigInt.asIntN(32, value) === value) counter = Number(value);
     }
+
     const nextCounter = `${time}:${(counter + 1) | 0}`;
     inspect(indices, more);
     const result = await command(
@@ -117,8 +140,11 @@ export async function selectSystemMailPage(
       nextSent,
       nextCounter,
     );
+
     if (result === 1) return;
+
     if (result !== 0) throw new DependencyError("mail pagination");
   }
+
   throw new DependencyError("mail pagination contention");
 }

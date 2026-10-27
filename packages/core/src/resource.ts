@@ -9,14 +9,17 @@ export function fromPromise<A>(operation: string, run: () => Promise<A>) {
   return Effect.tryPromise({
     try: async () => {
       const started = performance.now();
+
       try {
         const result = await run();
+
         if (operation !== "realm.health")
           logEvent("resource_completed", {
             operation,
             outcome: "success",
             durationMs: Math.round(performance.now() - started),
           });
+
         return result;
       } catch (error) {
         logEvent(
@@ -29,6 +32,7 @@ export function fromPromise<A>(operation: string, run: () => Promise<A>) {
           },
           "error",
         );
+
         throw new ResourceError({ operation });
       }
     },

@@ -4,6 +4,7 @@ import type { Rules } from "@opencok/rules/game";
 import { continuedCostPeriod, continuedCostAmount } from "@opencok/rules/continued-cost";
 import { continuedCostSpending } from "@opencok/mappings/continued-cost";
 import { text, type Row } from "@opencok/contracts/rows";
+
 export function confirmedContinuedCost(
   state: InventoryState,
   rules: Rules,
@@ -11,13 +12,19 @@ export function confirmedContinuedCost(
   items: readonly InventoryItem[],
 ) {
   const period = continuedCostPeriod(rules, state.profile, state.buildings, now);
+
   if (!period) return undefined;
+
   const owner = text(state.profile, "uid");
+
   return (postings: readonly EconomyPosting[]): MutationEvent | undefined => {
     if (postings.some((entry) => entry.account !== owner))
       throw new Error("Foreign continued-cost posting");
+
     const spent = continuedCostAmount(period.type, postings, items, rules);
+
     if (!spent.amount) return undefined;
+
     return {
       id: "continued-cost",
       type: "continuedcost.spend",
@@ -34,9 +41,13 @@ export function confirmedNicknameCost(rules: Rules) {
     now: number,
   ) => {
     const period = continuedCostPeriod(rules, profile, buildings, now);
+
     if (!period) return;
+
     const amount = continuedCostAmount(period.type, postings, [], rules);
+
     if (!amount.amount) return;
+
     return {
       id: "continued-cost",
       type: "continuedcost.spend",

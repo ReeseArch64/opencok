@@ -44,6 +44,7 @@ export class S3ImageStore implements ImageStore {
 
   image(key: string): Promise<string> {
     if (!/^[0-9]{1,6}\/[a-f0-9]{32}\.jpg$/.test(key)) throw new Error("Invalid avatar object key");
+
     return getSignedUrl(
       this.signingClient,
       new GetObjectCommand({
@@ -58,6 +59,7 @@ export class S3ImageStore implements ImageStore {
 
   async put(key: string, bytes: Buffer, owner: string, seq: string, hash: string) {
     if (await this.archived(owner, seq)) throw new HttpError(409, "Image sequence already exists");
+
     try {
       await this.client.send(
         new PutObjectCommand({
@@ -73,6 +75,7 @@ export class S3ImageStore implements ImageStore {
     } catch (error) {
       if (status(error) === 409 || status(error) === 412)
         throw new HttpError(409, "Image sequence already exists");
+
       throw error;
     }
   }
@@ -83,14 +86,19 @@ export class S3ImageStore implements ImageStore {
         new GetObjectCommand({ Bucket: this.bucket, Key: key }),
         { abortSignal: AbortSignal.timeout(5000) },
       );
+
       if (!object.Body || !object.ContentLength || object.ContentLength > FILE_LIMIT)
         throw new Error("Invalid avatar object");
+
       const bytes = await object.Body.transformToByteArray();
+
       if (bytes.length !== object.ContentLength || bytes.length > FILE_LIMIT)
         throw new Error("Invalid avatar object size");
+
       return { object, bytes };
     } catch (error) {
       if (status(error) === 404) return null;
+
       throw error;
     }
   }
@@ -105,12 +113,17 @@ export class S3ImageStore implements ImageStore {
         new GetObjectCommand({ Bucket: this.bucket, Key: `_receipts/${owner}/${sequence}` }),
         { abortSignal: AbortSignal.timeout(5000) },
       );
+
       if (!object.Body || !object.ContentLength || object.ContentLength > 256)
         throw new Error("Invalid archived avatar receipt");
+
       const bytes = await object.Body.transformToByteArray();
+
       if (bytes.length !== object.ContentLength || bytes.length > 256)
         throw new Error("Invalid archived avatar receipt");
+
       const receipt = JSON.parse(Buffer.from(bytes).toString("utf8"));
+
       if (
         receipt.owner !== owner ||
         receipt.sequence !== sequence ||
@@ -118,9 +131,11 @@ export class S3ImageStore implements ImageStore {
         !/^[a-f0-9]{64}$/.test(receipt.hash)
       )
         throw new Error("Invalid archived avatar receipt");
+
       return { owner, sequence, hash: receipt.hash };
     } catch (error) {
       if (status(error) === 404) return null;
+
       throw error;
     }
   }
@@ -128,10 +143,14 @@ export class S3ImageStore implements ImageStore {
   async removePrevious(owner: string, sequence: string): Promise<void> {
     if (!/^[0-9]{1,20}$/.test(owner) || !/^[1-9][0-9]{0,5}$/.test(sequence))
       throw new Error("Invalid avatar replacement");
+
     if (sequence === "1") return;
+
     const previous = String(Number(sequence) - 1);
     const receipt = await this.find(owner, previous);
+
     if (!receipt) return;
+
     try {
       await this.client.send(
         new PutObjectCommand({
@@ -145,10 +164,13 @@ export class S3ImageStore implements ImageStore {
       );
     } catch (error) {
       if (![409, 412].includes(status(error) ?? 0)) throw error;
+
       const archived = await this.archived(owner, previous);
+
       if (!archived || archived.hash !== receipt.hash)
         throw new Error("Archived avatar receipt mismatch");
     }
+
     const name = createHash("md5").update(`${owner}_${previous}`).digest("hex");
     await this.client.send(
       new DeleteObjectCommand({
@@ -162,9 +184,12 @@ export class S3ImageStore implements ImageStore {
   async find(owner: string, sequence: string): Promise<UploadReceipt | null> {
     const name = createHash("md5").update(`${owner}_${sequence}`).digest("hex");
     const stored = await this.object(`${owner.slice(-6)}/${name}.jpg`);
+
     if (!stored) return this.archived(owner, sequence);
+
     const { object, bytes } = stored;
     const hash = createHash("sha256").update(bytes).digest("hex");
+
     if (
       object.ContentType !== "image/jpeg" ||
       bytes[0] !== 0xff ||
@@ -174,6 +199,7 @@ export class S3ImageStore implements ImageStore {
       object.Metadata.sha256 !== hash
     )
       throw new Error("Avatar integrity mismatch");
+
     return { owner, sequence, hash };
   }
 }

@@ -5,5 +5,6 @@ export interface EquipmentBagSuitFilterDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type EquipmentBagSuitFilterDefinitionCatalog =
   CatalogTable<EquipmentBagSuitFilterDefinition>;

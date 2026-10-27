@@ -6,4 +6,5 @@ export interface NewcomerTreviFountainDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type NewcomerTreviFountainDefinitionCatalog = CatalogTable<NewcomerTreviFountainDefinition>;

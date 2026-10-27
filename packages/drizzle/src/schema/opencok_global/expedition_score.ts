@@ -10,6 +10,7 @@ import {
   varchar,
 } from "drizzle-orm/pg-core";
 import { opencok_global } from "../namespaces";
+
 export const expedition_score = opencok_global.table(
   "expedition_score",
   {

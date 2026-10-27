@@ -6,6 +6,7 @@ import { ob_user } from "@opencok/drizzle/schema/opencok_kingdom/ob_user";
 import { ob_record } from "@opencok/drizzle/schema/opencok_kingdom/ob_record";
 import type { BattleRankingState } from "@opencok/contracts/battle-ranking";
 import type { Database } from "./game.ts";
+
 export async function readBattleRankingState(
   db: Database["kingdom"]["db"],
   global: Database["databases"]["global"]["db"],
@@ -15,6 +16,7 @@ export async function readBattleRankingState(
 ): Promise<BattleRankingState> {
   if (!uid || uid.length > 40 || !Number.isSafeInteger(now))
     throw new Error("Invalid battle ranking owner");
+
   const realmType =
     realm > 999999
       ? 0
@@ -25,6 +27,7 @@ export async function readBattleRankingState(
             .where(eq(globalServer.id, realm))
             .limit(1)
         )[0]?.type ?? 0);
+
   return db.transaction(
     async (tx) => {
       const profile = (
@@ -40,8 +43,10 @@ export async function readBattleRankingState(
           .where(eq(userprofile.uid, uid))
           .limit(1)
       )[0];
+
       if (!profile)
         return { profile, realmType, openedAt: 0n, observerTeam: undefined, tickets: [] };
+
       const openedAt =
         (
           await tx
@@ -63,7 +68,9 @@ export async function readBattleRankingState(
         .where(and(eq(ob_record.uid, uid), gt(ob_record.begin, BigInt(now) - 7200000n)))
         .orderBy(asc(ob_record.allianceIds))
         .limit(32768);
+
       if (records.length > 32767) throw new Error("Invalid observer tickets");
+
       return {
         profile,
         realmType,

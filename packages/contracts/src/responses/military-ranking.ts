@@ -10,6 +10,7 @@ export interface MilitaryRankingEntryResponse {
   readonly militaryRank?: number;
   readonly ranking: number;
 }
+
 export interface MilitaryRankingResponse {
   readonly playerArr: MilitaryRankingEntryResponse[];
   readonly selfRanking: number;

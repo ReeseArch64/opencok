@@ -16,4 +16,5 @@ export interface Kingdon2Definition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type Kingdon2DefinitionCatalog = CatalogTable<Kingdon2Definition>;

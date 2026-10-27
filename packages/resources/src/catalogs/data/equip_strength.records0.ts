@@ -1,4 +1,5 @@
 import type { EquipStrengthDefinition } from "../types/equip_strength.ts";
+
 export const records: readonly EquipStrengthDefinition[] = [
   {
     "id": 1495001,

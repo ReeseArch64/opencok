@@ -13,4 +13,5 @@ export interface LuckyReturnExchangeDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type LuckyReturnExchangeDefinitionCatalog = CatalogTable<LuckyReturnExchangeDefinition>;

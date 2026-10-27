@@ -1,4 +1,5 @@
 import type { CivilizationFortressDefinition } from "../types/civilization_fortress.ts";
+
 export const records: readonly CivilizationFortressDefinition[] = [
   {
     "id": 20017000,

@@ -8,12 +8,14 @@ export interface TreasureMapEntryResponse {
   readonly colour: number;
   readonly state: number;
 }
+
 export interface TreasureMapOccupationResponse {
   readonly time: number;
   readonly finishtime: bigint;
   readonly useitem: string;
   readonly treasureuuid: string;
 }
+
 export interface TreasureMapSpeedResponse {
   readonly gold: bigint;
 }

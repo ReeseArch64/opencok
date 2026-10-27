@@ -11,6 +11,7 @@ import type { Database } from "./game.ts";
 
 const integer = (value: number) =>
   Number.isInteger(value) && value >= -2147483648 && value <= 2147483647;
+
 const identifier = (value: string) =>
   typeof value === "string" && value.length <= 40 && !value.includes("\0") && value.isWellFormed();
 
@@ -31,10 +32,12 @@ export function markMailConversationRead(
     query.effects.length > 1002
   )
     throw new Error("Invalid conversation read query");
+
   const requestedAt = BigInt(query.now);
   const effects = query.effects.map((effect) => {
     if (!effect || !Array.isArray(effect.types))
       throw new Error("Invalid conversation read effect");
+
     if (effect.kind === "chat") {
       if (
         !identifier(effect.others) ||
@@ -44,14 +47,17 @@ export function markMailConversationRead(
         )
       )
         throw new Error("Invalid conversation chat intent");
+
       return { ...effect, types: [...effect.types] };
     }
+
     if (
       effect.kind !== "mail" ||
       typeof effect.unreadOnly !== "boolean" ||
       !effect.types.every(integer)
     )
       throw new Error("Invalid conversation mail assignment");
+
     if (effect.fromUser === undefined) {
       if (!effect.unreadOnly || effect.types.length !== 1)
         throw new Error("Invalid conversation type assignment");
@@ -60,6 +66,7 @@ export function markMailConversationRead(
       !(effect.unreadOnly ? ["20,21,22", "23,24"] : ["43,44"]).includes(effect.types.join(","))
     )
       throw new Error("Invalid conversation sender assignment");
+
     return { ...effect, types: [...effect.types] };
   });
   const chat = effects.flatMap((effect, effectIndex) =>
@@ -67,8 +74,11 @@ export function markMailConversationRead(
       ? [{ effectIndex, others: effect.others, chatTypes: effect.types.join(",") }]
       : [],
   );
+
   if (chat.length > 2) throw new Error("Conversation chat intent capacity exceeded");
+
   const assignments = effects.filter((effect) => effect.kind === "mail");
+
   return db.transaction(
     async (tx) => {
       const profile = (
@@ -84,6 +94,7 @@ export function markMailConversationRead(
           .limit(1)
           .for("update")
       )[0];
+
       if (
         !profile ||
         profile.uid !== owner ||
@@ -92,16 +103,20 @@ export function markMailConversationRead(
         (profile.banTime ?? 0n) > requestedAt
       )
         return { profile };
+
       if (chat.length) {
         const counts = await tx
           .select({ count: sql<string>`count(*)::text` })
           .from(mail_chat_read_intent)
           .where(eq(mail_chat_read_intent.ownerUid, owner));
+
         if (counts.length !== 1 || !/^(0|[1-9]\d*)$/.test(counts[0]!.count))
           throw new Error("Invalid conversation chat backlog");
+
         if (BigInt(counts[0]!.count) + BigInt(chat.length) > 1000n)
           throw new Error("Conversation chat backlog capacity exceeded");
       }
+
       if (assignments.length) {
         const predicates = assignments.map((effect) =>
           and(
@@ -119,12 +134,14 @@ export function markMailConversationRead(
           .set({ status: 1 })
           .where(and(eq(mail.toUser, owner), or(...predicates)));
       }
+
       if (chat.length) {
         const commandId = randomUUID();
         await tx
           .insert(mail_chat_read_intent)
           .values(chat.map((entry) => ({ ...entry, ownerUid: owner, requestedAt, commandId })));
       }
+
       return { profile };
     },
     { isolationLevel: "read committed", accessMode: "read write" },

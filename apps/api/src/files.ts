@@ -37,6 +37,7 @@ export const createFiles = (command: (name: string, ...args: string[]) => Promis
         }),
       async (resource) => resource.destroy(),
     );
+
     return createHandler(
       new S3ImageStore(client, config.S3_BUCKET, signingClient),
       createAvatarTickets(command),

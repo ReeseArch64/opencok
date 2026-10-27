@@ -1,4 +1,5 @@
 import type { TargetQuestDefinition } from "../types/target_quest.ts";
+
 export const records: readonly TargetQuestDefinition[] = [
   {
     "id": 6010001,

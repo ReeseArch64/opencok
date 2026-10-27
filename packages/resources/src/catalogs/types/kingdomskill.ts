@@ -28,4 +28,5 @@ export interface KingdomskillDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type KingdomskillDefinitionCatalog = CatalogTable<KingdomskillDefinition>;

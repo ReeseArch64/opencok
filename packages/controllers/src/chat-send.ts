@@ -14,10 +14,14 @@ export class ChatSendController extends ChatRoomController {
   public async execute({ uid, params, sendTime, connection, peers }: CommandContext) {
     const { authorizeRoom, messages, access } = this.options;
     const roomId = params.roomId;
+
     if (typeof roomId !== "string" || !connection.joinedRooms.has(roomId))
       throw new ChatCommandError("invalid_room");
+
     const room = await authorizeRoom(uid, roomId);
+
     if (!room) throw new ChatCommandError("invalid_room");
+
     if (
       !isSafeInteger(sendTime) ||
       sendTime <= 0 ||
@@ -28,7 +32,9 @@ export class ChatSendController extends ChatRoomController {
     }
 
     if (access && !(await access.canSend(uid))) throw new ChatCommandError("chat_muted");
+
     let saved;
+
     try {
       saved = await messages.create({
         roomId,
@@ -39,6 +45,7 @@ export class ChatSendController extends ChatRoomController {
       });
     } catch (error) {
       if (error instanceof TypeError) throw new ChatCommandError("invalid_message");
+
       throw error;
     }
 
@@ -53,8 +60,10 @@ export class ChatSendController extends ChatRoomController {
         seqId: saved.sequenceId,
         extra: { seqId: saved.sequenceId },
       };
+
       for (const peer of peers) {
         if (!peer.connection.joinedRooms.has(roomId)) continue;
+
         try {
           if (
             (!peer.authorizeSession || (await peer.authorizeSession())) &&
@@ -64,6 +73,7 @@ export class ChatSendController extends ChatRoomController {
         } catch {}
       }
     }
+
     return {
       roomId,
       group: room.group,

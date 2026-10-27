@@ -1,4 +1,5 @@
 import type { DailyQuestDefinition } from "../types/daily_quest.ts";
+
 export const records: readonly DailyQuestDefinition[] = [
   { "id": 5000000, "accept1": 1, "type1": 1, "para1": 3, "para2": 5000, "para3": 5, "point": 3 },
   { "id": 5000001, "accept1": 1, "type1": 1, "para1": 0, "para2": 5000, "para3": 5, "point": 3 },

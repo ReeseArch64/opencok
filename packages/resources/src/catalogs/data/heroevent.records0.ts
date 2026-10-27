@@ -1,4 +1,5 @@
 import type { HeroeventDefinition } from "../types/heroevent.ts";
+
 export const records: readonly HeroeventDefinition[] = [
   {
     "id": 9001000,

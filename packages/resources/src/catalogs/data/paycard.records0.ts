@@ -1,4 +1,5 @@
 import type { PaycardDefinition } from "../types/paycard.ts";
+
 export const records: readonly PaycardDefinition[] = [
   { "id": 69000, "castleLv": [1, 10], "cardNum": 3 },
   { "id": 69001, "castleLv": [11, 20], "cardNum": 5 },

@@ -11,4 +11,5 @@ export interface GeneralRandomEffectDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type GeneralRandomEffectDefinitionCatalog = CatalogTable<GeneralRandomEffectDefinition>;

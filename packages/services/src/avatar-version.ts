@@ -40,29 +40,37 @@ export function createAvatarVersion(options: {
       report(effect);
     } catch {}
   };
+
   return {
     async update(owner, now) {
       if (!/^[0-9]{1,20}$/.test(owner) || !Number.isSafeInteger(now) || now < 0)
         throw new GameError(errors.invalid, "avatar_rule");
+
       const operationId = randomBytes(16).toString("hex");
       const template = rules.mail.get("10111");
       const capturedTemplate = template ? { ...template } : undefined;
+
       return commit(owner, operationId, now, async (profile, readers) => {
         const minimum = avatarFinishMinimumLevel(rules);
         let interval: bigint | null = null;
+
         if (minimum !== undefined) {
           checkAvatarLevel(await readers.castleLevel(), minimum);
           interval = avatarFinishInterval(rules);
           const record = await readers.uploadRecord();
+
           if (record && record.uid !== owner) throw new GameError(errors.invalid, "avatar_rule");
+
           checkAvatarRecord(rules, record, now);
         }
+
         return avatarVersionPlan(profile, now, minimum !== undefined, interval, capturedTemplate);
       });
     },
     async deliver(owner, operationId) {
       try {
         const result = await mail(owner, operationId);
+
         if (result.mail) {
           if (
             result.profile?.uid !== owner ||
@@ -70,6 +78,7 @@ export function createAvatarVersion(options: {
             result.mail.owner !== owner
           )
             throw new Error("Invalid avatar version mail recipient");
+
           try {
             const full = rules.items.get("chat_switch")?.k3?.split("|").includes("1") ?? false;
             await notify(owner, "push.mail", avatarMailPush(result.mail, full));
@@ -80,6 +89,7 @@ export function createAvatarVersion(options: {
       } catch {
         reportFailure("mail");
       }
+
       for (const [effect, send] of [
         ["profile", profile],
         ["chat", chat],

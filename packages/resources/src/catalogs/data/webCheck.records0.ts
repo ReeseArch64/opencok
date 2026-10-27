@@ -1,4 +1,5 @@
 import type { WebCheckDefinition } from "../types/webCheck.ts";
+
 export const records: readonly WebCheckDefinition[] = [
   { "id": "com.elex.cok.web.ping.PaymentPingppRequest" },
   { "id": "com.elex.cok.web.ping.PaymentPingppCallback" },

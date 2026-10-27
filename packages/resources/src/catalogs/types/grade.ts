@@ -8,4 +8,5 @@ export interface GradeDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type GradeDefinitionCatalog = CatalogTable<GradeDefinition>;

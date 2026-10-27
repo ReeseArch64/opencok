@@ -1,4 +1,5 @@
 import type { EquipmentRandomDefinition } from "../types/equipmentRandom.ts";
+
 export const records: readonly EquipmentRandomDefinition[] = [
   {
     "id": 1495001,

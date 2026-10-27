@@ -10,10 +10,12 @@ import { ruleAvailable } from "./availability.ts";
 import { javaDecimal } from "./java-integer.ts";
 
 export type Rule = Record<string, string>;
+
 export interface RankingCatalogs {
   militaryGroups?: Map<string, Rule>;
   heroEvents?: Map<string, Rule>;
 }
+
 export interface WorldCatalogs {
   fieldMonsterGroups?: Map<string, readonly Rule[]>;
   residential?: Map<string, Rule>;
@@ -25,6 +27,7 @@ export interface WorldCatalogs {
   neutralResources?: Map<string, Rule>;
   barbarians?: Map<string, Rule>;
 }
+
 export interface AdvancedCatalogs {
   comebacks?: Map<string, Rule>;
   activityPages?: Map<string, Rule>;
@@ -73,11 +76,13 @@ export interface AdvancedCatalogs {
   dragonTowerBuffs?: Map<string, Rule>;
   dragonTowerMonsters?: Map<string, Rule>;
 }
+
 export interface AllianceCatalogs {
   buildingSkills?: Map<string, Rule>;
   gifts?: Map<string, Rule>;
   ranks?: Map<string, Rule>;
 }
+
 export interface GeneralCatalogs {
   levels?: Map<string, Rule>;
   stations?: Map<string, Rule>;
@@ -90,6 +95,7 @@ export interface GeneralCatalogs {
   recruits?: Map<string, Rule>;
   tavernRewards?: Map<string, Rule>;
 }
+
 export interface ProgressionCatalogs {
   equipmentRandom?: Map<string, Rule>;
   forgeRandom?: Map<string, Rule>;
@@ -104,12 +110,14 @@ export interface ProgressionCatalogs {
   questPhases?: Map<string, Rule>;
   signIn?: Map<string, Rule>;
 }
+
 export interface ReconnectCatalogs {
   treasures?: Map<string, Rule>;
   rewards?: Map<string, Rule>;
   quests?: readonly Rule[];
   positionUnlock?: readonly Rule[];
 }
+
 export interface ProfileCatalogs {
   nicknameWords?: readonly string[];
   characters?: Map<string, Rule>;
@@ -118,6 +126,7 @@ export interface ProfileCatalogs {
   militaryRanks?: Map<string, Rule>;
   servers?: Map<string, Rule>;
 }
+
 export interface ConfigurationCatalogs {
   allianceTeleport?: Map<string, Rule>;
   settingRecords?: readonly Rule[];
@@ -133,6 +142,7 @@ export interface ConfigurationCatalogs {
   facebookShare?: Map<string, Rule>;
   facebookShareRecords?: readonly Rule[];
 }
+
 export interface PowerCatalogs {
   generals?: Map<string, Rule>;
   sciences?: Map<string, Rule>;
@@ -170,6 +180,7 @@ export interface PowerCatalogs {
   luckyEffects?: Map<string, Rule>;
   monarchTitles?: Map<string, Rule>;
 }
+
 export class Rules {
   constructor(
     readonly buildings: Map<number, BuildingLevelDefinition>,
@@ -197,9 +208,11 @@ export class Rules {
     readonly alliance: AllianceCatalogs = {},
     readonly advanced: AdvancedCatalogs = {},
   ) {}
+
   building(itemId: string, level: number, star = 0, progress = 0): BuildingState {
     return buildingLevel(this.buildings, itemId, level, star, progress);
   }
+
   maxStar(itemId: string, now: number): number {
     const prefix = `${javaDecimal(itemId, 32) / 100n}00`;
     let max = 0;
@@ -211,8 +224,10 @@ export class Rules {
       )
         max = Math.max(max, Number(javaDecimal(rule.star ?? "", 32)));
     }
+
     return max;
   }
+
   nextBuilding(
     itemId: string,
     level: number,
@@ -221,6 +236,7 @@ export class Rules {
     now: number,
   ): BuildingState {
     this.building(itemId, level, star, progress);
+
     return nextBuildingLevel(
       this.buildings,
       itemId,
@@ -230,15 +246,21 @@ export class Rules {
       level < 30 ? 0 : this.maxStar(itemId, now),
     );
   }
+
   role(level: number): Rule {
     const rule = this.roles.get(String(100100 + level));
+
     if (!rule) throw new GameError(errors.unsupported, "role_rule");
+
     return rule;
   }
+
   cost(rule: BuildingState, key: BuildingResource): bigint {
     const value = rule.costs?.[key] ?? 0n;
+
     if (typeof value !== "bigint" || value < 0n)
       throw new GameError(errors.unsupported, "cost_rule");
+
     return value;
   }
 }

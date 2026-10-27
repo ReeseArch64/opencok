@@ -8,4 +8,5 @@ export interface DianjiRewardDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type DianjiRewardDefinitionCatalog = CatalogTable<DianjiRewardDefinition>;

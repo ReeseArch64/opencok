@@ -1,4 +1,5 @@
 import type { WishDefinition } from "../types/wish.ts";
+
 export const records: readonly WishDefinition[] = [
   {
     "id": 6900001,

@@ -12,6 +12,7 @@ import { records as records7 } from "./status.records7.ts";
 import { records as records8 } from "./status.records8.ts";
 import { records as records9 } from "./status.records9.ts";
 import { records as records10 } from "./status.records10.ts";
+
 export const catalog: CatalogTable<StatusDefinition> = {
   "kind": CatalogKind.Table,
   "records": [

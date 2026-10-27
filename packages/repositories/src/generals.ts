@@ -51,6 +51,7 @@ export async function readGeneralRoster(
     .from(new_general_status)
     .where(eq(new_general_status.uid, owner))
     .limit(4097);
+
   if (
     generals.length > 256 ||
     purchases.length > 256 ||
@@ -59,6 +60,7 @@ export async function readGeneralRoster(
     statuses.length > 4096
   )
     throw new Error("General aggregate exceeds bound");
+
   const drawHistory =
     command === "generaltrun"
       ? (
@@ -83,10 +85,12 @@ export async function readGeneralRoster(
     ? await tx.select().from(tavern).where(eq(tavern.uid, owner))
     : [];
   let wheelRanks: Row[] = [];
+
   if (ranking) {
     for (const weight of [ranking.normal, ranking.silver, ranking.gold])
       if (!Number.isInteger(weight) || weight < 0 || weight > 2147483647)
         throw new Error("Invalid draw ranking weights");
+
     const score = sql`(${user_gold_wheel.normal_total}::bigint * ${ranking.normal} + ${user_gold_wheel.silver_total}::bigint * ${ranking.silver} + ${user_gold_wheel.gold_total}::bigint * ${ranking.gold})`;
     wheelRanks = await tx
       .select({
@@ -109,6 +113,7 @@ export async function readGeneralRoster(
       .orderBy(desc(score), asc(user_gold_wheel.last_normal_wheel_millis), asc(user_gold_wheel.uid))
       .limit(1000);
   }
+
   const captive = alias(new_general, "captured_general");
   const prisoners =
     command === "robgeneral"
@@ -145,7 +150,9 @@ export async function readGeneralRoster(
           alliancename: row.alliancename,
         }))
       : [];
+
   if (prisoners.length > 256) throw new Error("Oversized prison");
+
   const graves = prisoners.length
     ? await tx
         .select()
@@ -163,6 +170,7 @@ export async function readGeneralRoster(
     : [];
   const prisonerRows = prisoners.map((row) => {
     const grave = graves.find((grave) => grave.uid === row.uid);
+
     return {
       ...row,
       graveLevel: grave?.level ?? 0,
@@ -182,7 +190,9 @@ export async function readGeneralRoster(
           .where(eq(world_march.ownerUid, owner))
           .limit(257)
       : [];
+
   if (marches.length > 256) throw new Error("Oversized general march set");
+
   return {
     generals,
     purchases,
@@ -197,20 +207,28 @@ export async function readGeneralRoster(
     marches,
   };
 }
+
 function owned(row: Row, owner: string) {
   if (row.uid !== owner) throw new Error("Foreign general mutation");
 }
+
 function integer(row: Row, key: string, max = 2147483647) {
   const value = num(row, key);
+
   if (!Number.isInteger(value) || value < 0 || value > max)
     throw new Error("Invalid general quantity");
+
   return value;
 }
+
 function bounded(row: Row, key: string, limit: number) {
   const value = text(row, key);
+
   if (value.length > limit) throw new Error("Oversized general value");
+
   return value;
 }
+
 export async function writeGeneralRoster(
   tx: MutationTransaction,
   owner: string,
@@ -218,6 +236,7 @@ export async function writeGeneralRoster(
   now: bigint,
 ) {
   await writeGeneralWorldResources(tx, write.worldResources ?? [], now);
+
   if (write.wheel) {
     owned(write.wheel, owner);
     const row = write.wheel,
@@ -253,6 +272,7 @@ export async function writeGeneralRoster(
       .values(value)
       .onConflictDoUpdate({ target: user_gold_wheel.uid, set: value });
   }
+
   if (write.tavern) {
     owned(write.tavern, owner);
     const row = write.tavern,
@@ -281,12 +301,14 @@ export async function writeGeneralRoster(
       };
     await tx.insert(tavern).values(value).onConflictDoUpdate({ target: tavern.uid, set: value });
   }
+
   if (write.deletedLegacy?.length)
     await tx
       .delete(user_general)
       .where(
         and(eq(user_general.uid, owner), inArray(user_general.uuid, [...write.deletedLegacy])),
       );
+
   for (const row of write.legacy ?? []) {
     owned(row, owner);
     const value = {
@@ -306,7 +328,9 @@ export async function writeGeneralRoster(
       .select({ uid: user_general.uid })
       .from(user_general)
       .where(eq(user_general.uuid, value.uuid));
+
     if (existing && existing.uid !== owner) throw new Error("Foreign legacy general");
+
     await tx
       .insert(user_general)
       .values(value)
@@ -316,9 +340,11 @@ export async function writeGeneralRoster(
         setWhere: eq(user_general.uid, owner),
       });
   }
+
   for (const row of write.prisoners ?? []) {
     if (row.uid === owner || row.actor !== owner || ![1, 4, 5].includes(num(row, "state")))
       throw new Error("Invalid prisoner operation");
+
     const result = await tx
       .update(new_general)
       .set({
@@ -349,20 +375,25 @@ export async function writeGeneralRoster(
         ),
       )
       .returning({ id: new_general.id });
+
     if (result.length !== 1) throw new Error("Stale prisoner ownership");
   }
+
   if (write.turntableAt !== undefined) {
     if (write.turntableAt !== now) throw new Error("Invalid turntable period");
+
     await tx
       .insert(user_mixed_info)
       .values({ uid: owner, mdata: "", generalFree: now })
       .onConflictDoUpdate({ target: user_mixed_info.uid, set: { generalFree: now } });
   }
+
   if (write.refinementPeriod) {
     const value = {
       generalRefineCount: write.refinementPeriod.count,
       generalRefineTime: write.refinementPeriod.time,
     };
+
     if (
       !Number.isInteger(value.generalRefineCount) ||
       value.generalRefineCount < 0 ||
@@ -370,11 +401,13 @@ export async function writeGeneralRoster(
       value.generalRefineTime !== now
     )
       throw new Error("Invalid refinement period");
+
     await tx
       .insert(user_mixed_info)
       .values({ uid: owner, mdata: "", ...value })
       .onConflictDoUpdate({ target: user_mixed_info.uid, set: value });
   }
+
   for (const status of write.deletedStatuses ?? [])
     await tx
       .delete(new_general_status)
@@ -385,6 +418,7 @@ export async function writeGeneralRoster(
           eq(new_general_status.stateId, status.stateId),
         ),
       );
+
   for (const acceleration of write.accelerations ?? []) {
     if (
       ![6, 11].includes(acceleration.type) ||
@@ -392,6 +426,7 @@ export async function writeGeneralRoster(
       acceleration.milliseconds > 315360000000n
     )
       throw new Error("Invalid general queue acceleration");
+
     const active = await tx
       .select()
       .from(timed_activity)
@@ -404,15 +439,19 @@ export async function writeGeneralRoster(
         ),
       )
       .limit(2);
+
     if (active.length !== 1) throw new Error("Missing general queue acceleration");
+
     if (active[0]) {
       const activity = active[0],
         dueAt =
           activity.dueAt - acceleration.milliseconds > now
             ? activity.dueAt - acceleration.milliseconds
             : now;
+
       if (activity.startedAt > now || activity.dueAt <= now)
         throw new Error("Unreconciled general queue");
+
       await tx
         .update(timed_activity)
         .set({ dueAt, version: activity.version + 1 })
@@ -430,6 +469,7 @@ export async function writeGeneralRoster(
         .where(and(eq(queue.uuid, activity.queueId), eq(queue.ownerId, owner)));
     }
   }
+
   for (const row of write.generals ?? []) {
     owned(row, owner);
     const value = {
@@ -462,13 +502,16 @@ export async function writeGeneralRoster(
       star: integer(row, "star", 5),
       baseSkill: bounded(row, "baseSkill", 256),
     };
+
     if (value.id === 0 || value.level === 0 || value.star === 0)
       throw new Error("Invalid general progression");
+
     await tx
       .insert(new_general)
       .values(value)
       .onConflictDoUpdate({ target: [new_general.id, new_general.uid], set: value });
   }
+
   for (const row of write.purchases ?? []) {
     owned(row, owner);
     const value = {
@@ -484,6 +527,7 @@ export async function writeGeneralRoster(
       .values(value)
       .onConflictDoUpdate({ target: [new_general_buy.uid, new_general_buy.generalId], set: value });
   }
+
   for (const row of write.offices ?? []) {
     owned(row, owner);
     const value = {
@@ -499,6 +543,7 @@ export async function writeGeneralRoster(
       .values(value)
       .onConflictDoUpdate({ target: [hero_office.id, hero_office.uid], set: value });
   }
+
   for (const row of write.skills ?? []) {
     owned(row, owner);
     const value = {
@@ -510,8 +555,10 @@ export async function writeGeneralRoster(
       endTime: long(row, "endTime"),
       stat: integer(row, "stat", 3),
     };
+
     if (value.endTime < value.startTime || value.actTime < value.startTime)
       throw new Error("Invalid general cooldown");
+
     await tx
       .insert(new_general_skill)
       .values(value)
@@ -520,6 +567,7 @@ export async function writeGeneralRoster(
         set: value,
       });
   }
+
   for (const row of write.statuses ?? []) {
     owned(row, owner);
     const value = {
@@ -529,7 +577,9 @@ export async function writeGeneralRoster(
       startTime: long(row, "startTime"),
       endTime: long(row, "endTime"),
     };
+
     if (value.endTime < value.startTime) throw new Error("Invalid general status");
+
     await tx
       .insert(new_general_status)
       .values(value)

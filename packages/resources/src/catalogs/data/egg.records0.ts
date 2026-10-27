@@ -1,4 +1,5 @@
 import type { EggDefinition } from "../types/egg.ts";
+
 export const records: readonly EggDefinition[] = [
   {
     "id": 132500,

@@ -9,4 +9,5 @@ export interface PowerRandomDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type PowerRandomDefinitionCatalog = CatalogTable<PowerRandomDefinition>;

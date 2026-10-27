@@ -1,4 +1,5 @@
 import type { GeneralDrawDefinition } from "../types/general_draw.ts";
+
 export const records: readonly GeneralDrawDefinition[] = [
   {
     "id": 5500000,

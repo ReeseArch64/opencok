@@ -18,4 +18,5 @@ export interface CivilizationFortressDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type CivilizationFortressDefinitionCatalog = CatalogTable<CivilizationFortressDefinition>;

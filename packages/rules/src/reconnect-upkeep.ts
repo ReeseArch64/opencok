@@ -11,9 +11,12 @@ import { javaHashMapOrder } from "./java-hash-map-order.ts";
 import { reconnectFoodRates } from "./reconnect-resources.ts";
 
 const int = (value: unknown) => Number(javaDecimal(String(value ?? 0), 32));
+
 const float = Math.fround;
+
 const cast = (value: number) =>
   Number.isNaN(value) ? 0 : Math.max(-2147483648, Math.min(2147483647, Math.trunc(value)));
+
 export type ReconnectUpkeepEffect = 38 | 64 | 72 | 2024 | 2804 | 2805 | 2806 | 2807;
 
 export function reconnectUpkeep(
@@ -29,7 +32,9 @@ export function reconnectUpkeep(
   },
 ) {
   const byUuid = new Map(buildings.map((row) => [String(row.uuid), row]));
+
   if (byUuid.size !== buildings.length) throw new Error("Duplicate upkeep building");
+
   const ordered = javaHashMapOrder(byUuid.keys()).map((key) => byUuid.get(key)!);
   const building = (id: number) => ordered.find((row) => int(row.itemId) === id);
   const configuration = (row: Row) =>
@@ -51,13 +56,16 @@ export function reconnectUpkeep(
   const protect = int(rules.items.get("account")?.k7) === 1;
   let protectedFood = 0;
   const cellar = building(404000);
+
   if (protect && cellar) {
     const rule = configuration(cellar);
     const additive = float(environment.effect(72) + environment.cellarGeneralEffect());
     protectedFood = cast(float(float(int(rule.effects?.protectedFood)) + additive));
     const multiplier = environment.effect(38);
+
     if (multiplier > 0) protectedFood = cast(protectedFood * (float(100 + multiplier) / 100));
   }
+
   const templar = building(439000);
   const templarDefinition =
     templar === undefined
@@ -75,12 +83,14 @@ export function reconnectUpkeep(
   const separateBound =
     !environment.specialServer &&
     switchRealmEnabled(rules.items.get("on_trumpet")?.k2, context.kingdomId);
+
   if (
     !Number.isFinite(environment.consumptionRatio) ||
     environment.consumptionRatio < 0 ||
     environment.consumptionRatio > 1
   )
     throw new Error("Invalid upkeep consumption ratio");
+
   return {
     rates,
     options: {

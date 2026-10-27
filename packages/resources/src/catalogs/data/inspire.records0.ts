@@ -1,4 +1,5 @@
 import type { InspireDefinition } from "../types/inspire.ts";
+
 export const records: readonly InspireDefinition[] = [
   { "id": 9750, "rate": 100, "effect1": [3, 2], "effect2": [4, 2] },
   { "id": 9751, "rate": 95, "effect1": [3, 4], "effect2": [4, 4] },

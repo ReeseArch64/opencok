@@ -5,4 +5,5 @@ export interface MonarchTitleLordDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type MonarchTitleLordDefinitionCatalog = CatalogTable<MonarchTitleLordDefinition>;

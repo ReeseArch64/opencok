@@ -6,4 +6,5 @@ export interface ExchangeFieldTypeDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type ExchangeFieldTypeDefinitionCatalog = CatalogTable<ExchangeFieldTypeDefinition>;

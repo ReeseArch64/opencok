@@ -4,4 +4,5 @@ export interface PlayerNameDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type PlayerNameDefinitionCatalog = CatalogTable<PlayerNameDefinition>;

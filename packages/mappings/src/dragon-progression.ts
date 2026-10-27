@@ -19,12 +19,15 @@ export function dragonSkillView(row: Row): Fields {
     exp: sfs.int(num(row, "exp")),
     totalExp: sfs.int(num(row, "totalExp")),
   };
+
   if (num(row, "ownerId") !== 0) {
     result.ownerId = sfs.int(num(row, "ownerId"));
     result.index = sfs.int(num(row, "index1"));
   }
+
   return result;
 }
+
 export function dragonView(
   row: Row,
   skills: readonly Row[],
@@ -62,9 +65,12 @@ export function dragonView(
         .join("|"),
     ),
   };
+
   if (row.nickName !== null && row.nickName !== undefined)
     result.nickName = sfs.string(text(row, "nickName"));
+
   if (dragonFeature(rules, "dragon_battle", now)) result.inMarch = sfs.byte(marching ? 1 : 0);
+
   if (dragonFeature(rules, "dragon_friendship", now)) {
     const timestamps = dragonJson(row.communicateData, {
       communicateTimestamps: {} as Record<string, number>,
@@ -83,6 +89,7 @@ export function dragonView(
               Math.fround(cd) * Math.fround(1 - Math.max(effect(490 + Number(kind)) / 100, 0)),
             ),
           );
+
           return sfs.object({
             commType: sfs.int(Number(kind)),
             endTime: sfs.long(BigInt(time) + BigInt(reduced) * 1000n),
@@ -91,6 +98,7 @@ export function dragonView(
       ),
     });
   }
+
   if (dragonFeature(rules, "dragon_travel", now)) {
     const travel = dragonJson(row.travelData, emptyDragonTravel);
     const travelRule = rules.advanced.dragonTravel?.get(String(travel.travelItemId));
@@ -103,8 +111,11 @@ export function dragonView(
           : 0n,
       ),
     };
+
     if (rewardItems) view.rewardItems = rewardItems;
+
     result.travelInfo = sfs.object(view);
   }
+
   return result;
 }

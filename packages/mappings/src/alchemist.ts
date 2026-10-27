@@ -4,6 +4,7 @@ import type { Rule } from "@opencok/rules/game";
 import { cityInteger } from "@opencok/rules/city-progression";
 import { alchemistInfoSchema } from "@opencok/validations/alchemist";
 import { validateFields } from "./validation";
+
 export function alchemistInfo(row: Row, rule: Rule): Fields {
   return validateFields(alchemistInfoSchema, {
     listen: sfs.int(num(row, "listen")),

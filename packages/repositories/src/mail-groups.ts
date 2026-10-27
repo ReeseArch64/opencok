@@ -14,8 +14,11 @@ import { alias } from "drizzle-orm/pg-core";
 import { readMailSenders, readMailTranslations } from "./mail-presentation.ts";
 
 const selectedMail = alias(mail, "group_mail");
+
 const key = (group: MailGroupKey) => JSON.stringify([group.groupType, group.groupIndex]);
+
 const integer = (value: number) => Number.isInteger(value) && value >= 0 && value <= 2147483647;
+
 const identifier = (value: string) =>
   typeof value === "string" && value.length <= 40 && !value.includes("\0") && value.isWellFormed();
 
@@ -39,6 +42,7 @@ export function readMailGroups(
     typeof inspect !== "function"
   )
     throw new Error("Invalid mail group query");
+
   return databases.getKingdom(kingdomId).db.transaction(
     async (tx) => {
       const profile = (
@@ -54,6 +58,7 @@ export function readMailGroups(
           .limit(1)
           .for("update")
       )[0];
+
       if (
         !profile ||
         profile.uid !== uid ||
@@ -62,6 +67,7 @@ export function readMailGroups(
         (profile.banTime ?? 0n) > BigInt(query.now)
       )
         return { profile };
+
       const groups = query.limit
         ? await tx
             .select({
@@ -86,6 +92,7 @@ export function readMailGroups(
             .offset(query.begin)
             .for("update")
         : [];
+
       if (
         groups.length > Math.min(query.limit, 1000) ||
         new Set(groups.map(key)).size !== groups.length ||
@@ -102,6 +109,7 @@ export function readMailGroups(
         )
       )
         throw new Error("Invalid mail group window");
+
       const selected = new Map(groups.slice(0, 7).map((group) => [key(group), { ...group }]));
       const groupIndexes = new Set(groups.map((group) => group.groupIndex));
       const inspected = new Set<string>();
@@ -111,12 +119,14 @@ export function readMailGroups(
         senders: (ids) => {
           if (ids.some((id) => !groupIndexes.has(id)))
             throw new Error("Invalid mail group senders");
+
           return readMailSenders(databases, kingdomId, tx, ids);
         },
         translations: (requests) => readMailTranslations(tx, requests),
         preview: async (requested, selection) => {
           const groupKey = key(requested);
           const group = selected.get(groupKey);
+
           if (
             !group ||
             inspected.has(groupKey) ||
@@ -128,6 +138,7 @@ export function readMailGroups(
             (selection.kind === "type" && selection.types.length !== 1)
           )
             throw new Error("Invalid mail group selection");
+
           inspected.add(groupKey);
           const predicate = and(
             eq(selectedMail.toUser, uid),
@@ -142,17 +153,22 @@ export function readMailGroups(
             })
             .from(selectedMail)
             .where(predicate);
+
           if (
             counts.length !== 1 ||
             !/^(0|[1-9]\d*)$/.test(counts[0]!.total) ||
             !/^(0|[1-9]\d*)$/.test(counts[0]!.unread)
           )
             throw new Error("Invalid mail group counts");
+
           const total = BigInt(counts[0]!.total);
           const unread = BigInt(counts[0]!.unread);
+
           if (total > 2147483647n || unread > total || (selection.kind === "uid" && total > 1n))
             throw new Error("Mail group count capacity exceeded");
+
           if (!total) return { total, unread, entries: [] };
+
           const limit = Number(total < 7n ? total : 7n);
           const extraOwner = and(
             eq(mail_contents.uid, selectedMail.uid),
@@ -174,6 +190,7 @@ export function readMailGroups(
             .orderBy(...order)
             .limit(limit)
             .for("update", { of: selectedMail });
+
           if (
             sizes.length !== limit ||
             new Set(sizes.map((row) => row.uid)).size !== sizes.length ||
@@ -183,8 +200,11 @@ export function readMailGroups(
             )
           )
             throw new Error("Invalid mail group metadata");
+
           bytes += sizes.reduce((sum, row) => sum + row.size, 0);
+
           if (bytes > 4 * 1024 * 1024) throw new Error("Mail group content capacity exceeded");
+
           const entries = await tx
             .select({
               uid: selectedMail.uid,
@@ -216,6 +236,7 @@ export function readMailGroups(
               ),
             )
             .orderBy(...order);
+
           if (
             entries.length !== sizes.length ||
             entries.some(
@@ -232,15 +253,20 @@ export function readMailGroups(
             )
           )
             throw new Error("Inconsistent mail group snapshot");
+
           const observedUnread = BigInt(
             entries.filter((entry) => (entry.status ?? 0) === 0).length,
           );
+
           if (observedUnread > unread || unread > total - BigInt(entries.length) + observedUnread)
             throw new Error("Inconsistent mail group counts");
+
           if (selection.kind === "uid") for (const entry of entries) removableMail.add(entry.uid);
+
           return { total, unread, entries };
         },
       });
+
       if (
         !cleanup ||
         !Array.isArray(cleanup.groups) ||
@@ -251,8 +277,10 @@ export function readMailGroups(
         cleanup.mailIds.some((id) => !removableMail.has(id))
       )
         throw new Error("Invalid mail group removal plan");
+
       if (cleanup.mailIds.length)
         await tx.delete(mail).where(and(eq(mail.toUser, uid), inArray(mail.uid, cleanup.mailIds)));
+
       if (cleanup.groups.length)
         await tx
           .delete(mail_group)
@@ -269,6 +297,7 @@ export function readMailGroups(
               ),
             ),
           );
+
       return { profile };
     },
     { isolationLevel: "repeatable read", accessMode: "read write" },

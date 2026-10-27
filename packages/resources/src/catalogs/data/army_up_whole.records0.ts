@@ -1,4 +1,5 @@
 import type { ArmyUpWholeDefinition } from "../types/army_up_whole.ts";
+
 export const records: readonly ArmyUpWholeDefinition[] = [
   {
     "id": 30420100,

@@ -8,4 +8,5 @@ export interface CompensationDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type CompensationDefinitionCatalog = CatalogTable<CompensationDefinition>;

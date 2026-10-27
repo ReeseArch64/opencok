@@ -25,6 +25,7 @@ export function inventoryPurchase(
     costGold: sfs.int(cost),
   };
 }
+
 export function inventoryUse(item: InventoryItem, effect: Fields): Fields {
   return {
     itemId: sfs.string(item.itemId),
@@ -32,9 +33,11 @@ export function inventoryUse(item: InventoryItem, effect: Fields): Fields {
     itemEffectObj: sfs.object(effect),
   };
 }
+
 export function inventoryBuyUse(buy: Fields, use: Fields): Fields {
   return { buyRet: sfs.object(buy), useRet: sfs.object(use) };
 }
+
 export function inventoryComposition(items: readonly InventoryItem[]): Fields {
   return {
     itemlist: sfs.array(
@@ -48,11 +51,13 @@ export function inventoryComposition(items: readonly InventoryItem[]): Fields {
     ),
   };
 }
+
 export function inventoryChanges(items: readonly InventoryItem[], rules: Rules): Fields {
   return {
     useritemlist: sfs.array(items.map((item) => sfs.object(inventoryItem({ ...item }, rules)))),
   };
 }
+
 export function inventoryEvent(postings: readonly EconomyPosting[]): Buffer {
   return encode({
     changes: sfs.array(
@@ -67,6 +72,7 @@ export function inventoryEvent(postings: readonly EconomyPosting[]): Buffer {
     ),
   });
 }
+
 export function inventoryResponse(
   body: Fields,
   pushes: readonly { command: string; body: Fields }[],
@@ -80,6 +86,7 @@ export function inventoryResponse(
     ),
   });
 }
+
 export function inventoryReplay(response: Buffer, requestId: string) {
   const reply = decode(response),
     body = fields(reply.body);
@@ -88,12 +95,14 @@ export function inventoryReplay(response: Buffer, requestId: string) {
     command: str(entry.value, "command"),
     body: fields(entry.value.body),
   }));
+
   return { body, pushes };
 }
 
 export function mergeInventoryResponses(primary: Uint8Array, secondary: Uint8Array): Buffer {
   const left = decode(Buffer.from(primary)),
     right = decode(Buffer.from(secondary));
+
   if (
     left.body?.type !== Type.Object ||
     right.body?.type !== Type.Object ||
@@ -103,10 +112,12 @@ export function mergeInventoryResponses(primary: Uint8Array, secondary: Uint8Arr
     !Array.isArray(right.pushes.value)
   )
     throw new Error("Invalid chained inventory response");
+
   return inventoryResponse(
     fields(left.body),
     [...(left.pushes.value as Value[]), ...(right.pushes.value as Value[])].map((entry) => {
       const value = fields(entry);
+
       return { command: str(value, "command"), body: fields(value.body) };
     }),
   );

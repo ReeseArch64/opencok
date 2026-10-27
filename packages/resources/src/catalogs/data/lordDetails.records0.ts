@@ -1,4 +1,5 @@
 import type { LordDetailsDefinition } from "../types/lordDetails.ts";
+
 export const records: readonly LordDetailsDefinition[] = [
   { "id": 46350, "where": "lord", "effect": 0 },
   { "id": 46351, "where": "lord", "effect": "war_win" },

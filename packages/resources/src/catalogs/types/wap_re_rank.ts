@@ -7,4 +7,5 @@ export interface WapReRankDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type WapReRankDefinitionCatalog = CatalogTable<WapReRankDefinition>;

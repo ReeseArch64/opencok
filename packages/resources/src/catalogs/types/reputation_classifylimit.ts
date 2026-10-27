@@ -7,5 +7,6 @@ export interface ReputationClassifylimitDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type ReputationClassifylimitDefinitionCatalog =
   CatalogTable<ReputationClassifylimitDefinition>;

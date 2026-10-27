@@ -1,4 +1,5 @@
 import type { CompensationDefinition } from "../types/compensation.ts";
+
 export const records: readonly CompensationDefinition[] = [
   { "id": 9021001, "compentime": 1, "lost": 40, "cdtime": 10, "rateNum": 50, "rateRes": 50 },
   { "id": 9021002, "compentime": 2, "lost": 40, "cdtime": 10, "rateNum": 50, "rateRes": 50 },

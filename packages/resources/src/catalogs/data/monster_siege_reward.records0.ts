@@ -1,4 +1,5 @@
 import type { MonsterSiegeRewardDefinition } from "../types/monster_siege_reward.ts";
+
 export const records: readonly MonsterSiegeRewardDefinition[] = [
   { "id": 1, "memberKill": 2000, "allianceKill": 800000, "reward": 236030 },
   { "id": 2, "memberKill": 5000, "allianceKill": 2000000, "reward": 236031 },

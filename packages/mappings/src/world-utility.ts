@@ -31,6 +31,7 @@ export function allianceWorldPoints(state: WorldUtilitySnapshot, owner: string):
         }
       : {}),
   };
+
   return {
     pointId: sfs.int(response.pointId),
     ...(response.territoryPointId

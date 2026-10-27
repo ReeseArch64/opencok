@@ -5,7 +5,9 @@ import type {
   DragonTowerLayerResponse,
 } from "@opencok/contracts/responses/dragon-tower";
 import { field, responseValueSchema } from "./response";
+
 const units = z.array(z.strictObject({ id: field.int, num: field.int, star: field.int })).max(128);
+
 export const towerArmySchema = z.strictObject({
   army: units,
   deadarmy: units,
@@ -13,6 +15,7 @@ export const towerArmySchema = z.strictObject({
   armyrevivenum: field.int,
   armyrevivecd: field.long,
 }) satisfies z.ZodType<DragonTowerArmyResponse>;
+
 export const towerUserSchema = z.strictObject({
   ...towerArmySchema.shape,
   currentlayer: field.int,
@@ -31,6 +34,7 @@ export const towerUserSchema = z.strictObject({
   limitlayer: field.int,
   sharetimes: field.short,
 }) satisfies z.ZodType<DragonTowerUserResponse>;
+
 export const towerLayerSchema = z.strictObject({
   layer: field.int,
   layerindex: field.int,

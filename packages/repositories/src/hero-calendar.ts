@@ -9,6 +9,7 @@ import { long, text } from "@opencok/contracts/rows";
 import type { HeroCalendarStore } from "@opencok/contracts/hero-calendar";
 import { fenceRealmTransaction, type RealmAuthority } from "./realm-authority";
 import type { Database } from "./game";
+
 export function createHeroCalendarStore(
   db: Database["kingdom"]["db"],
   authority: RealmAuthority,
@@ -35,8 +36,10 @@ export function createHeroCalendarStore(
             .orderBy(asc(hero_event.readyTime), asc(hero_event.uuid))
             .limit(4097)
             .for("update");
+
         if (activities.length > 4096 || events.length > 4096)
           throw new Error("Hero calendar persisted bound exceeded");
+
         const [lord] = await tx
             .select()
             .from(server_activity)
@@ -66,8 +69,10 @@ export function createHeroCalendarStore(
             (lord.endTime === null || long(lord, "endTime") > at)) ||
           (!!expedition && expedition.startTime <= at);
         const plan = build({ activities, events, blocked });
+
         if (plan.activities.length > 64 || plan.events.length > 64)
           throw new Error("Hero calendar write bound exceeded");
+
         for (const row of plan.activities) {
           const value = {
             uuid: text(row, "uuid"),
@@ -81,6 +86,7 @@ export function createHeroCalendarStore(
             serverGroup: row.serverGroup === null ? null : text(row, "serverGroup"),
             kingdomRank: row.kingdomRank === null ? null : text(row, "kingdomRank"),
           };
+
           if (
             value.uuid.length > 255 ||
             value.activityId.length > 100 ||
@@ -89,11 +95,13 @@ export function createHeroCalendarStore(
             value.roundTime <= 0n
           )
             throw new Error("Invalid hero calendar write");
+
           await tx
             .insert(hero_activity)
             .values(value)
             .onConflictDoUpdate({ target: hero_activity.uuid, set: value });
         }
+
         for (const row of plan.events) {
           const value = {
             uuid: text(row, "uuid"),

@@ -1,4 +1,5 @@
 import type { PrincessQuestDefinition } from "../types/princess_quest.ts";
+
 export const records: readonly PrincessQuestDefinition[] = [
   {
     "id": 2932353,

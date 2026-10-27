@@ -6,4 +6,5 @@ export interface GeneralMaxNumDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type GeneralMaxNumDefinitionCatalog = CatalogTable<GeneralMaxNumDefinition>;

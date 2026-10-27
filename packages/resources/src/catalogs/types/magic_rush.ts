@@ -14,4 +14,5 @@ export interface MagicRushDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type MagicRushDefinitionCatalog = CatalogTable<MagicRushDefinition>;

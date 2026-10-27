@@ -5,14 +5,18 @@ import { encodeJavaIntMap } from "@opencok/messages/java-int-map";
 import { num, text, long } from "@opencok/contracts/rows";
 import type { WorldMutationWrite } from "@opencok/contracts/world-march-runtime";
 import type { MutationTransaction } from "./mutation";
+
 export async function writeWorldBarbarianActors(
   tx: MutationTransaction,
   write: WorldMutationWrite,
 ) {
   const actor = write.barbarianActors;
+
   if (!actor) return;
+
   const ids = [...actor.points],
     points = write.points ?? [];
+
   if (
     ids.length !== 4 ||
     new Set(ids).size !== 4 ||
@@ -30,11 +34,13 @@ export async function writeWorldBarbarianActors(
     actor.currentHP > 2147483647
   )
     throw new Error("Invalid barbarian actor plan");
+
   const saved = await tx
     .select()
     .from(worldpoint)
     .where(and(eq(worldpoint.worldId, 0), inArray(worldpoint.id, ids)))
     .for("update");
+
   if (
     saved.length !== 4 ||
     saved.some(
@@ -47,6 +53,7 @@ export async function writeWorldBarbarianActors(
     )
   )
     throw new Error("Barbarian footprint changed");
+
   const [claimed] = await tx
     .select({ id: worldpoint.id })
     .from(worldpoint)
@@ -58,7 +65,9 @@ export async function writeWorldBarbarianActors(
       ),
     )
     .limit(1);
+
   if (claimed) throw new Error("Barbarian footprint claimed");
+
   const army = encodeJavaIntMap(actor.army),
     awards = encodeJavaIntMap(actor.awards);
   await tx.insert(world_barbarion).values(
@@ -71,6 +80,7 @@ export async function writeWorldBarbarianActors(
       lastAwardArmyMapByteArray: awards,
     })),
   );
+
   if (points.some((point) => long(point, "flushTime") <= 0n))
     throw new Error("Invalid barbarian lifetime");
 }

@@ -8,4 +8,5 @@ export interface NewSprInfoDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type NewSprInfoDefinitionCatalog = CatalogTable<NewSprInfoDefinition>;

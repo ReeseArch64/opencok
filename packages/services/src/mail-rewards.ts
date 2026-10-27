@@ -34,9 +34,11 @@ export class MailRewardService {
     readonly execute: MailRewardExecutor,
     readonly rules: Rules,
   ) {}
+
   async command(owner: string, command: string, params: Fields): Promise<InventoryCommandResponse> {
     if (command !== "mail.reward" && command !== "mail.reward.batch")
       throw new GameError(errors.unsupported);
+
     const batch = command === "mail.reward.batch";
     const selection = mailRewardSelection(
       batch ? undefined : str(params, "uid"),
@@ -45,6 +47,7 @@ export class MailRewardService {
       batch,
     );
     const operation = params.operationId;
+
     if (
       operation &&
       (operation.type !== Type.String ||
@@ -54,12 +57,14 @@ export class MailRewardService {
         ))
     )
       throw new GameError(errors.invalid);
+
     const requestId = operation ? (operation.value as string).toLowerCase() : randomUUID();
     const request = encode({
       ids: sfs.array(selection.ids.map(sfs.string)),
       labels: sfs.array(selection.labels.map(sfs.int)),
       batch: sfs.bool(batch),
     });
+
     return inventoryReplay(
       await this.execute(
         { owner, command, requestId, request },
@@ -70,8 +75,10 @@ export class MailRewardService {
       requestId,
     );
   }
+
   plan(state: InventoryState, entry: Row, now: number): InventoryPlan {
     const rewards = mailRewardEntries(text(entry, "rewardId"));
+
     for (const reward of rewards)
       if (
         reward.category !== "goods" &&
@@ -80,6 +87,7 @@ export class MailRewardService {
         !resources.has(reward.category)
       )
         throw new GameError(errors.unsupported);
+
     const plan = planInventoryGrants(
       state,
       this.rules,
@@ -101,7 +109,9 @@ export class MailRewardService {
       const changes = kind === "profile" ? profile : changedResources;
       const before = changes[key] ?? long(kind === "profile" ? state.profile : state.resource, key),
         after = before + BigInt(amount);
+
       if (before < 0n || after > maximum) throw new GameError(errors.invalid);
+
       changes[key] = after;
       postings.push({
         account: text(state.profile, "uid"),
@@ -110,10 +120,13 @@ export class MailRewardService {
         after,
         reason: "mail.reward",
       });
+
       return after;
     };
+
     for (const reward of rewards) {
       if (reward.category === "goods") continue;
+
       if (reward.category === "gold") {
         const dmm = text(state.profile, "pf") === "dmm";
         const value = credit("profile", dmm ? "dmmGold" : "gold", reward.count);
@@ -121,7 +134,9 @@ export class MailRewardService {
           value +
           long(state.profile, dmm ? "dmmPaidGold" : "paidGold") +
           long(state.profile, dmm ? "dmmPaidSpecialGold" : "paidSpecialGold");
+
         if (total < 0n || total > 9223372036854775807n) throw new GameError(errors.invalid);
+
         body.gold = sfs.long(total);
       } else if (reward.category === "crystal")
         body.crystal = sfs.long(credit("profile", "crystal", reward.count));
@@ -143,14 +158,18 @@ export class MailRewardService {
                 ? "diamond_stone"
                 : key;
         body[wire] = sfs.long(value);
+
         if (regular) body[`${key}_bind`] = sfs.long(long(state.resource, `${key}bind`));
       }
     }
+
     if (plan.items.length)
       body.goods = sfs.array(
         plan.items.map((item) => sfs.object(inventoryItem({ ...item }, this.rules))),
       );
+
     const pushes: InventoryCommandResponse["pushes"] = [];
+
     if (plan.items.length)
       pushes.push({
         command: "push.useritem",
@@ -160,11 +179,13 @@ export class MailRewardService {
           ),
         },
       });
+
     if (Object.keys(changedResources).length)
       pushes.push({
         command: "push.city.refresh",
         body: resource({ ...state.resource, ...changedResources }),
       });
+
     return {
       ...plan,
       profile,

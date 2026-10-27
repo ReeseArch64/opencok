@@ -90,6 +90,7 @@ import { tiles as layer0tiles43 } from "./SeaWorldmap.layer0.tiles43.ts";
 import { tiles as layer1tiles43 } from "./SeaWorldmap.layer1.tiles43.ts";
 import { tiles as layer0tiles44 } from "./SeaWorldmap.layer0.tiles44.ts";
 import { tiles as layer1tiles44 } from "./SeaWorldmap.layer1.tiles44.ts";
+
 export const catalog: TileMapDefinition = {
   "kind": CatalogKind.TileMap,
   "orientation": "isometric",

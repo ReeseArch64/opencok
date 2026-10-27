@@ -1,4 +1,5 @@
 import type { VoteServerDefinition } from "../types/vote_server.ts";
+
 export const records: readonly VoteServerDefinition[] = [
   {
     "id": 29001,

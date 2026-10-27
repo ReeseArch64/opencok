@@ -8,6 +8,7 @@ export interface ShopState {
   stock: readonly Row[];
   now: number;
 }
+
 export interface ShopPurchase {
   saleType?: string;
   id: string;
@@ -16,10 +17,12 @@ export interface ShopPurchase {
   total: number;
   cycle: bigint;
 }
+
 export interface ShopPlan {
   inventory: InventoryPlan;
   purchase?: ShopPurchase;
 }
+
 export interface ShopRepository {
   read<T>(owner: string, select: (state: ShopState) => Promise<T>): Promise<T>;
   execute(

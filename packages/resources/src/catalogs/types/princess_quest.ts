@@ -24,4 +24,5 @@ export interface PrincessQuestDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type PrincessQuestDefinitionCatalog = CatalogTable<PrincessQuestDefinition>;

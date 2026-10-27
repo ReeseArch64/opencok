@@ -1,4 +1,5 @@
 import type { EquipmentStrengthenMoveDefinition } from "../types/equipment_strengthen_move.ts";
+
 export const records: readonly EquipmentStrengthenMoveDefinition[] = [
   { "id": 41749001, "level": 1, "color": 0, "goodsid": 36005474, "quantity": 10 },
   { "id": 41749002, "level": 2, "color": 0, "goodsid": 36005474, "quantity": 20 },

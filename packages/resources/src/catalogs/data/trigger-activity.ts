@@ -1,5 +1,6 @@
 import { CatalogKind } from "@opencok/enums/catalog-kind";
 import type { AutomationCatalog } from "../../catalog-model.ts";
+
 export const catalog: AutomationCatalog = {
   "kind": CatalogKind.Automation,
   "version": "e82cac44f930536b4c5e5fce133a1fbd",

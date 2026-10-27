@@ -1,6 +1,7 @@
 import { sql } from "drizzle-orm";
 import { check, doublePrecision, integer, primaryKey, text, varchar } from "drizzle-orm/pg-core";
 import { opencok_kingdom } from "../namespaces";
+
 export const expedition_stage_member = opencok_kingdom.table(
   "expedition_stage_member",
   {

@@ -5,6 +5,7 @@ export interface ChatLegacyRelations {
   contacts: { other: string; state: number; description: string }[];
   blocks: { other: string; id: string }[];
 }
+
 export type ChatSocialCommand = `${ChatSocialAction}`;
 
 export interface ChatSocialOperation {
@@ -28,14 +29,18 @@ export interface ChatSocialOperation {
   notices: string[];
   localId: string;
 }
+
 export type { ChatSocialResponse } from "./responses/chat-social.ts";
+
 import type { ChatSocialResponse } from "./responses/chat-social.ts";
+
 export interface ChatSocialStore {
   execute(
     operation: ChatSocialOperation,
     plan: (tx: ChatSocialTransaction) => Promise<ChatSocialResponse>,
   ): Promise<ChatSocialResponse>;
 }
+
 export interface SocialRelation {
   owner: string;
   other: string;
@@ -47,6 +52,7 @@ export interface SocialRelation {
   facebookName: string | null;
   createdAt: bigint;
 }
+
 export interface SocialRoom {
   id: string;
   owner: string;
@@ -55,6 +61,7 @@ export interface SocialRoom {
   createdAt: bigint;
   deletedAt: bigint | null;
 }
+
 export interface SocialMember {
   room: string;
   owner: string;
@@ -63,6 +70,7 @@ export interface SocialMember {
   leftAt: bigint | null;
   readSequence: bigint;
 }
+
 export interface SocialFeed {
   id: string;
   owner: string;
@@ -75,6 +83,7 @@ export interface SocialFeed {
   expiresAt: bigint;
   deletedAt: bigint | null;
 }
+
 export interface ChatSocialTransaction {
   now: bigint;
   actor: import("./chat.ts").PlayerState;

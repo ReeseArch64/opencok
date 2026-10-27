@@ -17,4 +17,5 @@ export interface MonarchDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type MonarchDefinitionCatalog = CatalogTable<MonarchDefinition>;

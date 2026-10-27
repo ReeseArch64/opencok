@@ -9,6 +9,7 @@ import { records as records4 } from "./serverpos.records4.ts";
 import { records as records5 } from "./serverpos.records5.ts";
 import { records as records6 } from "./serverpos.records6.ts";
 import { records as records7 } from "./serverpos.records7.ts";
+
 export const catalog: CatalogTable<ServerposDefinition> = {
   "kind": CatalogKind.Table,
   "records": [

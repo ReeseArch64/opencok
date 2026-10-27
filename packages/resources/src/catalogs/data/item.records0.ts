@@ -1,4 +1,5 @@
 import type { ItemDefinition } from "../types/item.ts";
+
 export const records: readonly ItemDefinition[] = [
   {
     "id": "player_max",

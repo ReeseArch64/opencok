@@ -13,6 +13,7 @@ export class ApiRequestHandler {
   private readonly fetchRequest = async (request: Request): Promise<Response> => {
     const requestId = logContext().requestId;
     let response: Response, failure: string | undefined;
+
     try {
       response = await this.router.route(request);
     } catch (error) {
@@ -23,8 +24,11 @@ export class ApiRequestHandler {
         headers: { "Content-Type": "text/plain; charset=UTF-8" },
       });
     }
+
     if (requestId) response.headers.set("X-Request-ID", String(requestId));
+
     if (failure) logEvent("request_failed", { reason: failure, status: response.status }, "error");
+
     return request.method === "HEAD"
       ? new Response(null, { status: response.status, headers: response.headers })
       : response;

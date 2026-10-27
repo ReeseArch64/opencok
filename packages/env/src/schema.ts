@@ -11,5 +11,6 @@ export const environmentSchema = z
   .readonly();
 
 export type Environment = z.infer<typeof environmentSchema>;
+
 export const parseEnvironment = (source: Readonly<Record<string, string | undefined>>) =>
   validateEnvironment(environmentSchema, source);

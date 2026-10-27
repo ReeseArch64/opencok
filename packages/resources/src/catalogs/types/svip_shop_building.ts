@@ -6,4 +6,5 @@ export interface SvipShopBuildingDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type SvipShopBuildingDefinitionCatalog = CatalogTable<SvipShopBuildingDefinition>;

@@ -17,6 +17,7 @@ export async function insertSystemMail(
     contents: Buffer.from(input.contents),
     extra: input.extra === null ? null : Buffer.from(input.extra),
   };
+
   if (
     ![0, 1].includes(itemIdFlag) ||
     message.owner !== owner ||
@@ -55,10 +56,12 @@ export async function insertSystemMail(
         Buffer.byteLength(message.rewardId) > 262143))
   )
     throw new Error("Invalid system mail plan");
+
   if (message.extra !== null)
     await tx
       .insert(mail_contents)
       .values({ uid: message.uid, toUser: owner, contents: message.extra });
+
   await tx.insert(mail).values({
     uid: message.uid,
     toUser: owner,
@@ -76,6 +79,7 @@ export async function insertSystemMail(
     reply: message.reply,
     translationId: null,
   });
+
   if (message.type === 2)
     await tx.insert(mail_group).values({
       uid: owner,

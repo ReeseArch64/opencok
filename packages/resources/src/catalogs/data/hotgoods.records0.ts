@@ -1,4 +1,5 @@
 import type { HotgoodsDefinition } from "../types/hotgoods.ts";
+
 export const records: readonly HotgoodsDefinition[] = [
   { "id": 45000, "condition": [1, 0], "order": 1000 },
   { "id": 45001, "condition": [1, 1], "order": 1001 },

@@ -12,6 +12,7 @@ export abstract class ChatRoomController extends ChatCommandController {
       throw new ChatCommandError("invalid_room");
 
     const room = await this.options.authorizeRoom(context.uid, roomId);
+
     if (!room) throw new ChatCommandError("invalid_room");
 
     return room;

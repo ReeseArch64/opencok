@@ -1,4 +1,5 @@
 import type { FunctionOn7210Definition } from "../types/function_on7.21.0.ts";
+
 export const records: readonly FunctionOn7210Definition[] = [
   { "id": "imperial_crown_on", "online": "all", "test": "all", "version": "7.21.0", "pf": "all" },
   {

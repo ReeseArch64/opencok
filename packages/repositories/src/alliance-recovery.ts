@@ -3,6 +3,7 @@ import { alliance_science_upgrade } from "@opencok/drizzle/schema/opencok_kingdo
 import { alliance_member } from "@opencok/drizzle/schema/opencok_kingdom/alliance_member";
 import { userprofile } from "@opencok/drizzle/schema/opencok_kingdom/userprofile";
 import type { Database } from "./game";
+
 export async function dueAllianceResearch(
   db: Database["kingdom"]["db"],
   realm: number,

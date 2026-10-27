@@ -42,11 +42,14 @@ export function createInventoryExecutor(
   preparation?: InventoryPreparation,
 ): InventoryExecutor {
   const execute = createMutationExecutor(db, authority, now);
+
   return (input, plan) => {
     const command = { ...input, request: Buffer.from(input.request) };
+
     return execute(command, async (tx) => {
       const at = BigInt(now());
       await preparation?.before?.(tx, command.owner, at);
+
       return executeInventoryTransaction(
         tx,
         command.owner,
@@ -83,7 +86,9 @@ export async function executeInventoryTransaction(
     .from(user_resource)
     .where(eq(user_resource.uid, owner))
     .for("update");
+
   if (!profile || !resource) throw new Error("Missing inventory account");
+
   const items = await tx
     .select()
     .from(user_item)
@@ -105,8 +110,10 @@ export async function executeInventoryTransaction(
     recordAction,
     effects: () => readPlayerEffects(tx, profile, true),
   });
+
   if (result.items.length > 128 || result.cooldowns.size > 128)
     throw new Error("Inventory mutation too large");
+
   const expected = new Map<string, EconomyPosting>();
   const posting = (asset: string, before: bigint, after: bigint) => {
     const entry = { account: owner, asset, before, after, reason: reason };
@@ -114,6 +121,7 @@ export async function executeInventoryTransaction(
     expected.set(asset, entry);
   };
   const seen = new Set<string>();
+
   for (const item of result.items) {
     if (
       seen.has(item.uuid) ||
@@ -131,11 +139,15 @@ export async function executeInventoryTransaction(
       item.vanishTime > 9223372036854775807n
     )
       throw new Error("Invalid inventory item");
+
     seen.add(item.uuid);
     const before = items.find((row) => row.uuid === item.uuid);
+
     if (before && (before.itemId !== item.itemId || (before.value ?? 0) !== item.value))
       throw new Error("Inventory identity changed");
+
     posting(`item.${item.uuid}`, BigInt(before?.count ?? 0), BigInt(item.count));
+
     if (before)
       await tx
         .update(user_item)
@@ -143,6 +155,7 @@ export async function executeInventoryTransaction(
         .where(and(eq(user_item.uuid, item.uuid), eq(user_item.ownerId, owner)));
     else await tx.insert(user_item).values({ ...item, ownerId: owner });
   }
+
   const profileKeys = [
     "civilizationSorce",
     "gold",
@@ -173,6 +186,7 @@ export async function executeInventoryTransaction(
     "dragon_food",
     "dragon_gold",
   ];
+
   for (const [kind, changes, before, allowed] of [
     ["profile", result.profile, profile, profileKeys],
     ["resource", result.resource, resource, resourceKeys],
@@ -181,6 +195,7 @@ export async function executeInventoryTransaction(
     for (const [key, value] of Object.entries(changes)) {
       if (!(allowed as readonly string[]).includes(key) || typeof value !== "bigint")
         throw new Error("Invalid inventory balance");
+
       if (
         kind === "resource" &&
         [
@@ -198,6 +213,7 @@ export async function executeInventoryTransaction(
         value > 2147483647n
       )
         throw new Error("Inventory resource overflow");
+
       posting(
         `${kind}.${key}`,
         BigInt(((before as Record<string, unknown>)[key] as bigint) ?? 0n),
@@ -205,15 +221,19 @@ export async function executeInventoryTransaction(
       );
     }
   }
+
   if (result.assets?.winPoint !== undefined)
     await tx
       .insert(user_assets)
       .values({ uid: owner, winPoint: result.assets.winPoint })
       .onConflictDoUpdate({ target: user_assets.uid, set: { winPoint: result.assets.winPoint } });
+
   if (Object.keys(result.profile).length)
     await tx.update(userprofile).set(result.profile).where(eq(userprofile.uid, owner));
+
   if (Object.keys(result.resource).length)
     await tx.update(user_resource).set(result.resource).where(eq(user_resource.uid, owner));
+
   for (const [itemId, useTime] of result.cooldowns) {
     if (
       !itemId ||
@@ -223,6 +243,7 @@ export async function executeInventoryTransaction(
       useTime > 9223372036854775807n
     )
       throw new Error("Invalid item cooldown");
+
     await tx
       .insert(user_item_cd)
       .values({ uid: owner, itemId, useTime })
@@ -231,16 +252,23 @@ export async function executeInventoryTransaction(
         set: { useTime },
       });
   }
+
   if (result.postings.length > 256) throw new Error("Inventory posting limit exceeded");
+
   const current = new Map([...expected].map(([asset, entry]) => [asset, entry.before]));
+
   for (const entry of result.postings) {
     validatePosting(entry);
+
     if (entry.account !== owner || current.get(entry.asset) !== entry.before)
       throw new Error("Inventory posting chain mismatch");
+
     current.set(entry.asset, entry.after);
   }
+
   for (const [asset, entry] of expected)
     if (current.get(asset) !== entry.after) throw new Error("Inventory posting balance mismatch");
+
   const spending = result.confirmedSpending?.(result.postings);
   const base = {
       response: result.response,
@@ -248,5 +276,6 @@ export async function executeInventoryTransaction(
       postings: result.postings,
     },
     observed = await confirmed?.(result);
+
   return observed ? mergeInventoryConfirmation(base, observed) : base;
 }

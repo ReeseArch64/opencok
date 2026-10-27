@@ -10,4 +10,5 @@ export interface ActivityDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type ActivityDefinitionCatalog = CatalogTable<ActivityDefinition>;

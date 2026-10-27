@@ -29,6 +29,7 @@ const empty = {
   monsterCurrHP: 0,
   flushFlag: 0,
 };
+
 const owned = (point: Row) =>
   Boolean(
     text(point, "ownerId") ||
@@ -53,8 +54,10 @@ export function createWorldResourceNewExecutor(
         await tx.execute(sql`select pg_advisory_xact_lock(728214, 0)`);
         authority.assertReady();
         const now = at ?? BigInt(captureTime());
+
         if (now < 0n || now > BigInt(Number.MAX_SAFE_INTEGER))
           throw new Error("Invalid shared resource clock");
+
         const identity = and(
           eq(trigger_var.type, worldResourceNewIdentity.type),
           eq(trigger_var.uid, worldResourceNewIdentity.uid),
@@ -66,12 +69,14 @@ export function createWorldResourceNewExecutor(
         const footprint = async (point: Row) => {
           const id = num(point, "id"),
             ids = worldResourceNewFootprint(id, size);
+
           if (
             !ids.length ||
             num(point, "x") !== (id - 1) % size ||
             num(point, "y") !== Math.floor((id - 1) / size)
           )
             throw new Error("Invalid shared resource footprint");
+
           return tx
             .select()
             .from(worldpoint)
@@ -105,12 +110,15 @@ export function createWorldResourceNewExecutor(
               .for("update"),
           async occupied(point) {
             if (num(point, "monsterCurrHP") !== 0 || owned(point)) return true;
+
             const rows = await footprint(point);
+
             if (
               rows.length !== 4 ||
               rows.some((row) => row.id !== num(point, "id") && !matches(row, point))
             )
               return true;
+
             const [party] = await tx
               .select({ id: world_march.uuid })
               .from(world_march)
@@ -122,14 +130,18 @@ export function createWorldResourceNewExecutor(
                 ),
               )
               .limit(1);
+
             return Boolean(party);
           },
           async postpone(point, deadline) {
             if (deadline < 0n || deadline > BigInt(Number.MAX_SAFE_INTEGER))
               throw new Error("Invalid shared resource deadline");
+
             const rows = await footprint(point);
+
             for (const row of rows) {
               if (row.id !== num(point, "id") && !matches(row, point)) continue;
+
               await tx
                 .update(worldpoint)
                 .set({ flushTime: deadline })
@@ -139,11 +151,13 @@ export function createWorldResourceNewExecutor(
           },
           async clear(point) {
             const rows = await footprint(point);
+
             if (
               rows.length !== 4 ||
               rows.some((row) => row.id !== num(point, "id") && !matches(row, point))
             )
               throw new Error("Changed shared resource footprint");
+
             for (const row of rows) {
               await tx
                 .update(worldpoint)
@@ -169,14 +183,17 @@ export function createWorldResourceNewExecutor(
               .orderBy(asc(worldpoint.flushTime), asc(worldpoint.id))
               .limit(64)
               .for("update");
+
             for (const row of rows) {
               if (owned(row)) continue;
+
               await tx
                 .update(worldpoint)
                 .set(empty)
                 .where(and(eq(worldpoint.worldId, 0), eq(worldpoint.id, row.id)));
               changed.add(row.id);
             }
+
             return rows.length;
           },
           pending: () =>
@@ -191,6 +208,7 @@ export function createWorldResourceNewExecutor(
             const result = await tx.execute<{ count: string }>(
               sql`SELECT (SELECT count(*) FROM opencok_kingdom.worldpoint WHERE "worldId"=0 AND "pointType"=37 AND coalesce("flushFlag",0)=0 AND "areaId"=${area} AND coalesce("pointItem",'') IN ('','0','1','2','3','4','5')) + (SELECT count(*) FROM opencok_kingdom.world_res_new_dead WHERE "areaId"=${area} AND coalesce("pointItem",'') IN ('','0','1','2','3','4','5')) AS count`,
             );
+
             return Number(result.rows[0]!.count);
           },
           async ticket(point) {
@@ -216,15 +234,19 @@ export function createWorldResourceNewExecutor(
           async spawn(area, amount, slots, deadline) {
             if (deadline > BigInt(Number.MAX_SAFE_INTEGER))
               throw new Error("Invalid shared resource deadline");
+
             const free = (name: string) => {
               const p = sql.raw(name);
+
               return sql`${p}."worldId"=0 AND ${p}."areaId"=${area} AND ${p}."pointType"=0 AND ${p}."gridType"=2 AND ${p}."grid2Type"=0 AND ${p}."resInitValue"=0 AND coalesce(${p}."ownerId",'')='' AND coalesce(${p}."ownerMarchUUid",'')='' AND coalesce(${p}."territoryAlliance",'')='' AND coalesce(${p}."territoryId",0)=0 AND coalesce(${p}."reserve",0)=0 AND coalesce(${p}."trap",'')=''`;
             };
             const result = await tx.execute<{ id: number }>(
               sql`SELECT p.id FROM opencok_kingdom.worldpoint p JOIN opencok_kingdom.worldpoint w ON w.id=p.id-1 AND w."worldId"=0 JOIN opencok_kingdom.worldpoint n ON n.id=p.id-${size} AND n."worldId"=0 JOIN opencok_kingdom.worldpoint nw ON nw.id=p.id-${size}-1 AND nw."worldId"=0 WHERE ${free("p")} AND ${free("w")} AND ${free("n")} AND ${free("nw")} AND p.x>0 AND p.y>0 AND p.x<${size} AND p.y<${size} ORDER BY random() LIMIT 1`,
             );
             const candidate = result.rows[0];
+
             if (!candidate) return false;
+
             const ids = worldResourceNewFootprint(candidate.id, size),
               rows = await tx
                 .select()
@@ -232,6 +254,7 @@ export function createWorldResourceNewExecutor(
                 .where(and(eq(worldpoint.worldId, 0), inArray(worldpoint.id, ids)))
                 .orderBy(asc(worldpoint.id))
                 .for("update");
+
             if (
               rows.length !== 4 ||
               rows.some(
@@ -247,6 +270,7 @@ export function createWorldResourceNewExecutor(
               )
             )
               return false;
+
             for (const row of rows) {
               await tx
                 .update(worldpoint)
@@ -263,6 +287,7 @@ export function createWorldResourceNewExecutor(
                 .where(and(eq(worldpoint.worldId, 0), eq(worldpoint.id, row.id)));
               changed.add(row.id);
             }
+
             return true;
           },
           async save(value) {
@@ -280,6 +305,7 @@ export function createWorldResourceNewExecutor(
               });
           },
         });
+
         if (changed.size) {
           const id = randomUUID().replaceAll("-", "");
           await tx.insert(mutation_outbox).values({
@@ -299,6 +325,7 @@ export function createWorldResourceNewExecutor(
             publishedAt: 0n,
           });
         }
+
         authority.assertReady();
       });
     },

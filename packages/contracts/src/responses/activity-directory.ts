@@ -4,6 +4,7 @@ export interface ActivityDirectoryEntryResponse {
   st?: number;
   et?: number;
 }
+
 export interface ActivityDirectoryResponse {
   act: readonly ActivityDirectoryEntryResponse[];
 }

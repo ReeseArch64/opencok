@@ -20,4 +20,5 @@ export interface ServersConfigDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type ServersConfigDefinitionCatalog = CatalogTable<ServersConfigDefinition>;

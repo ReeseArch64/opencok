@@ -19,6 +19,7 @@ export function civilizationScienceView(
     para2: { type: Type.Float, value: effect(rule.para2) },
     nextPara2: { type: Type.Float, value: next ? effect(next.para2) : 0 },
   };
+
   for (const key of [
     "max_lv",
     "research_need",
@@ -31,5 +32,6 @@ export function civilizationScienceView(
     "vip",
   ])
     if (rule[key] !== undefined) result[key] = sfs.string(rule[key]);
+
   return result;
 }

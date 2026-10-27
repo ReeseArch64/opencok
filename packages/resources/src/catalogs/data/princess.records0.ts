@@ -1,4 +1,5 @@
 import type { PrincessDefinition } from "../types/princess.ts";
+
 export const records: readonly PrincessDefinition[] = [
   {
     "id": 4100001,

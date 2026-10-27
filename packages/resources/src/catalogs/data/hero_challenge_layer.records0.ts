@@ -1,4 +1,5 @@
 import type { HeroChallengeLayerDefinition } from "../types/hero_challenge_layer.ts";
+
 export const records: readonly HeroChallengeLayerDefinition[] = [
   {
     "id": 512101,

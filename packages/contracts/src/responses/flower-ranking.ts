@@ -1,4 +1,5 @@
 import type { ResponseValue } from "./value.ts";
+
 export interface FlowerRankingMemberResponse {
   readonly uid: string;
   readonly name: string;
@@ -7,6 +8,7 @@ export interface FlowerRankingMemberResponse {
   readonly picfraId: number;
   readonly flowerVal: number;
 }
+
 export interface FlowerRankingResponse {
   readonly selfRanking: number;
   readonly flowerRanking: FlowerRankingMemberResponse[];

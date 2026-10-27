@@ -4,6 +4,7 @@ export interface WoundedTroopsResponse {
   readonly heal?: number;
   readonly finish?: bigint;
 }
+
 export interface FortificationResponse {
   readonly id: string;
   readonly free: number;

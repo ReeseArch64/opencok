@@ -9,4 +9,5 @@ export interface ResouceLifeDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type ResouceLifeDefinitionCatalog = CatalogTable<ResouceLifeDefinition>;

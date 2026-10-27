@@ -1,4 +1,5 @@
 import type { GoldPriceDefinition } from "../types/gold_price.ts";
+
 export const records: readonly GoldPriceDefinition[] = [
   {
     "id": 45100,

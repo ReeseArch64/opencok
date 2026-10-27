@@ -1,4 +1,5 @@
 import type { GeneralSkillDefinition } from "../types/general_skill.ts";
+
 export const records: readonly GeneralSkillDefinition[] = [
   {
     "id": 87382,

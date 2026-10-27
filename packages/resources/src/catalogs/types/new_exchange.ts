@@ -44,4 +44,5 @@ export interface NewExchangeDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type NewExchangeDefinitionCatalog = CatalogTable<NewExchangeDefinition>;

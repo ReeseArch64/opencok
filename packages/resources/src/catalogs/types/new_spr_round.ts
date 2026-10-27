@@ -6,4 +6,5 @@ export interface NewSprRoundDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type NewSprRoundDefinitionCatalog = CatalogTable<NewSprRoundDefinition>;

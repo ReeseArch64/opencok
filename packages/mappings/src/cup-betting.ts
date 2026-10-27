@@ -3,9 +3,11 @@ import { validateFields } from "./validation";
 import { sfs, Type, type Fields } from "@opencok/messages/sfs";
 import { num, long, text, type Row } from "@opencok/contracts/rows";
 import { cupOddsString } from "@opencok/rules/cup-betting";
+
 function date(at: bigint) {
   return new Date(Number(at)).toISOString().slice(0, 16).replace("T", "-").replaceAll(":", "-");
 }
+
 export function cupMatchView(row: Row, count: number): Fields {
   return validateFields(cupMatchSchema, {
     id: sfs.string(text(row, "id")),
@@ -17,6 +19,7 @@ export function cupMatchView(row: Row, count: number): Fields {
     betCount: sfs.int(count),
   });
 }
+
 export function cupBetView(row: Row, match?: Row, history = false): Fields {
   return validateFields(cupBetSchema, {
     uuid: sfs.string(text(row, "uuid")),

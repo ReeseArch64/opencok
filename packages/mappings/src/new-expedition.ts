@@ -15,15 +15,18 @@ const scoreFormat = new Intl.NumberFormat("en-US", {
   maximumFractionDigits: 0,
   roundingMode: "halfEven",
 });
+
 export function expeditionScoreText(value: number) {
   return scoreFormat.format(value);
 }
+
 export function expeditionRewardList(row: Row | undefined) {
   return text(row ?? {}, "takeReward")
     .split("|")
     .filter(Boolean)
     .map((id) => sfs.int(Number(id)));
 }
+
 export function expeditionInfo(state: ExpeditionState, profile: Row, realmName: string): Fields {
   const phase = state.phase,
     period = state.period;
@@ -36,11 +39,14 @@ export function expeditionInfo(state: ExpeditionState, profile: Row, realmName: 
       banner: sfs.string(""),
     }),
   ];
+
   if (period && phase && phase.stage !== 0 && num(period, "matchServerId") > 0)
     kingdoms.push(
       sfs.object({ serverid: sfs.int(num(period, "matchServerId")), score: sfs.string("0") }),
     );
+
   const rewardlist = expeditionRewardList(row);
+
   return validateFields(expeditionActivitySchema, {
     state: sfs.int(phase?.stage ?? 0),
     score: sfs.string(expeditionScoreText(num(row ?? {}, "score"))),
@@ -53,6 +59,7 @@ export function expeditionInfo(state: ExpeditionState, profile: Row, realmName: 
     ...(rewardlist.length ? { rewardlist: sfs.array(rewardlist) } : {}),
   });
 }
+
 export function expeditionRecord(row: Row): Fields {
   return {
     time: sfs.long(long(row, "time")),
@@ -63,6 +70,7 @@ export function expeditionRecord(row: Row): Fields {
     type: sfs.int(num(row, "type")),
   };
 }
+
 export function expeditionTaxRecord(row: Row): Fields {
   return {
     time: sfs.long(long(row, "taxTime")),
@@ -75,6 +83,7 @@ export function expeditionTaxRecord(row: Row): Fields {
     stone: sfs.long(long(row, "stone")),
   };
 }
+
 export function expeditionDistribution(row: Row): Fields {
   return {
     time: sfs.long(long(row, "sendTime")),
@@ -88,6 +97,7 @@ export function expeditionDistribution(row: Row): Fields {
     stone: sfs.long(long(row, "stone")),
   };
 }
+
 export function expeditionPanels(
   state: ExpeditionState,
   profile: Row,
@@ -105,8 +115,10 @@ export function expeditionPanels(
         ...(merge ? { merge: sfs.bool(true) } : {}),
         id: sfs.string(rule.id!),
       };
+
       for (const key of ["activityid", "exchange", "res_andmd5", "res_iosmd5"])
         if (rule[key] !== undefined) result[key] = sfs.string(rule[key]!);
+
       if (rule.rewardid !== undefined)
         result.reward = rewardPreviewArray(
           previewRewards(
@@ -116,14 +128,17 @@ export function expeditionPanels(
             randomInt,
           ),
         );
+
       result.popup = sfs.string(
         now >= (state.phase?.startTime ?? 0n) &&
           now <= (state.phase?.endTime ?? 9223372036854775807n)
           ? (rule.popup ?? "0")
           : "0",
       );
+
       for (const key of ["androidmd5", "iosmd5"])
         if (rule[key] !== undefined) result[key] = sfs.string(rule[key]!);
+
       return validateFields(expeditionPanelSchema, result);
     },
   );

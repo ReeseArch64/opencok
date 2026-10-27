@@ -1,4 +1,5 @@
 import type { LuckyEffectDefinition } from "../types/lucky_effect.ts";
+
 export const records: readonly LuckyEffectDefinition[] = [
   { "id": 168040001, "effect": [180, 50] },
   { "id": 168040002, "effect": [450, 50] },

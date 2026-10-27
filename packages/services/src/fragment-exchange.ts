@@ -19,6 +19,7 @@ import { pinProgressionReward, grantNativeProgressionReward } from "./progressio
 import { CampaignPlanner, refreshCampaignGrants } from "./local-campaign";
 import type { FragmentExchangeOffer } from "@opencok/contracts/fragment-exchange";
 import type { CityDomain } from "./city-progression";
+
 export function createFragmentExchangeDomain(
   random: (maximum: number) => number = randomInt,
 ): CityDomain {
@@ -34,9 +35,11 @@ export function createFragmentExchangeDomain(
         );
       const panel = (id: string) => {
         if (!/^\d{1,10}$/.test(id)) campaignFailure();
+
         const row = context.rules.power.activityPanels?.get(id),
           start = eventTimestamp(row?.start),
           end = eventTimestamp(row?.end);
+
         if (
           !row ||
           row.exchange !== "2" ||
@@ -45,9 +48,12 @@ export function createFragmentExchangeDomain(
           (row.end !== undefined && (end === undefined || context.now >= end))
         )
           return;
+
         if (!recipes.length) campaignFailure();
+
         cityInteger(row.free_num);
         cityInteger(row.refresh_cost);
+
         return row;
       };
       const write = (row: Row) => {
@@ -59,28 +65,36 @@ export function createFragmentExchangeDomain(
       };
       const load = (id: string, initialize: boolean) => {
         let row = states.get(id);
+
         if (!row && !initialize) campaignFailure();
+
         row = {
           ...(row ?? { uid: context.owner, actId: id, refresh: 0, refreshTime: context.now }),
         };
+
         if (long(row, "refreshTime") / 86400000n !== context.now / 86400000n) {
           row.refresh = 0;
           row.refreshTime = context.now;
           write(row);
         }
+
         let offers: readonly FragmentExchangeOffer[];
+
         if (row.reward === null || row.reward === undefined) {
           offers = selectFragmentExchangeOffers(recipes, random);
           row.reward = Buffer.from(JSON.stringify(offers));
           write(row);
         } else {
           if (!Buffer.isBuffer(row.reward)) campaignFailure();
+
           offers = readFragmentExchangeOffers(row.reward);
         }
+
         for (const offer of offers) {
           const recipe = recipes.find(
             (recipe) => recipe.type === offer.type && recipe.same === offer.same,
           );
+
           if (
             !recipe ||
             !recipe.rewards.includes(offer.reward) ||
@@ -88,6 +102,7 @@ export function createFragmentExchangeDomain(
           )
             campaignFailure();
         }
+
         return { row, offers };
       };
       const preview = (reward: string) =>
@@ -123,16 +138,22 @@ export function createFragmentExchangeDomain(
           cityInteger(config.refresh_cost),
           includeIdentity,
         );
+
       if (command === "act.exchange") {
         const ids = str(params, "ids").split("|").filter(Boolean);
+
         if (ids.length > 64) campaignFailure();
+
         return {
           response: encode({
             exchange: sfs.array(
               [...new Set(ids)].flatMap((id) => {
                 const config = panel(id);
+
                 if (!config) return [];
+
                 const { row, offers } = load(id, true);
+
                 return [sfs.object(view(id, row, offers, config))];
               }),
             ),
@@ -140,13 +161,18 @@ export function createFragmentExchangeDomain(
           event: null,
         };
       }
+
       const id = str(params, command === "act.ex.flush" ? "actId" : "id"),
         config = panel(id);
+
       if (!config) campaignFailure();
+
       const { row, offers } = load(id, false);
+
       if (command === "act.ex.flush") {
         if (num(row, "refresh") >= cityInteger(config.free_num))
           context.economy.gold(-BigInt(cityInteger(config.refresh_cost)));
+
         const next = selectFragmentExchangeOffers(recipes, random);
         row.reward = Buffer.from(JSON.stringify(next));
         row.refresh = cityInteger(num(row, "refresh") + 1);
@@ -156,6 +182,7 @@ export function createFragmentExchangeDomain(
           keys = dmm
             ? ["dmmGold", "dmmPaidGold", "dmmPaidSpecialGold"]
             : ["gold", "paidGold", "paidSpecialGold"];
+
         return {
           response: encode({
             flush: sfs.object(view(id, row, next, config, false)),
@@ -164,17 +191,24 @@ export function createFragmentExchangeDomain(
           event: null,
         };
       }
+
       const level = cityInteger(int(params, "type"), 1, 64),
         selected = offers.find((offer) => offer.type === level);
+
       if (!selected) campaignFailure();
+
       const costs = new Map<string, number>();
+
       for (const itemId of selected.id) costs.set(itemId, (costs.get(itemId) ?? 0) + 1);
+
       for (const [itemId, count] of costs) context.economy.item(itemId, -count);
+
       const pinned = pinProgressionReward(context, selected.reward)
           .split("|")
           .map((entry) => {
             const fields = entry.split(",");
             fields[2] = String(cityInteger(Number(fields[2]) * selected.multiple, 1));
+
             return fields.join(",");
           })
           .join("|"),
@@ -189,6 +223,7 @@ export function createFragmentExchangeDomain(
         62,
         `${id};${selected.reward}`,
       );
+
       return {
         response: encode({
           reward: sfs.array(reward),

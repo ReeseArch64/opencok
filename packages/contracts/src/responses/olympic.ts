@@ -6,6 +6,7 @@ export interface OlympicQuestionResponse {
   resourceType: number;
   resourceNum: bigint;
 }
+
 export interface OlympicBetResponse {
   uid: string;
   questionId: string;

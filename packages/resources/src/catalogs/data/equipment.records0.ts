@@ -1,4 +1,5 @@
 import type { EquipmentDefinition } from "../types/equipment.ts";
+
 export const records: readonly EquipmentDefinition[] = [
   {
     "id": 10000000,

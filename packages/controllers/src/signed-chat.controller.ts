@@ -55,15 +55,18 @@ export abstract class SignedChatController<T extends object, Result> {
 
     if (!/^application\/json(?:\s*;|$)/i.test(String(request.headers["content-type"] ?? ""))) {
       fail(HttpStatus.UnsupportedMediaType, "bad_request");
+
       return;
     }
 
     const length = request.headers["content-length"];
+
     if (
       length !== undefined &&
       (typeof length !== "string" || !/^\d+$/.test(length) || Number(length) > 4096)
     ) {
       fail(HttpStatus.PayloadTooLarge, "bad_request");
+
       return;
     }
 
@@ -75,15 +78,20 @@ export abstract class SignedChatController<T extends object, Result> {
 
       for await (const chunk of request) {
         if (expired) throw new Error();
+
         const bytes = Buffer.from(chunk);
         size += bytes.length;
+
         if (size > 4096)
           return { status: HttpStatus.PayloadTooLarge, category: "bad_request" } as const;
+
         chunks.push(bytes);
       }
 
       if (expired) throw new Error();
+
       let body: string;
+
       try {
         body = new TextDecoder("utf-8", { fatal: true, ignoreBOM: true }).decode(
           Buffer.concat(chunks),
@@ -96,6 +104,7 @@ export abstract class SignedChatController<T extends object, Result> {
         return { status: HttpStatus.Forbidden, category: "unauthorized" } as const;
 
       let update: T;
+
       try {
         update = this.decode(body);
       } catch {
@@ -103,6 +112,7 @@ export abstract class SignedChatController<T extends object, Result> {
       }
 
       const result = await this.apply(Object.freeze(update));
+
       return { status: HttpStatus.Ok, data: this.response(update, result) } as const;
     };
 
@@ -116,6 +126,7 @@ export abstract class SignedChatController<T extends object, Result> {
           }, this.timeoutMs);
         }),
       ]);
+
       if (result.status === HttpStatus.Ok) reply(HttpStatus.Ok, result.data);
       else fail(result.status, result.category);
     } catch {

@@ -1,4 +1,5 @@
 import type { NewRecallQuestDefinition } from "../types/new_recall_quest.ts";
+
 export const records: readonly NewRecallQuestDefinition[] = [
   {
     "id": 9021701,

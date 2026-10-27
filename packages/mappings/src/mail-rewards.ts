@@ -8,17 +8,21 @@ export function combineMailRewards(responses: readonly Buffer[], ids: readonly s
     items = new Map<string, Value>();
   const extra: { command: string; body: Fields }[] = [];
   let resource: Fields | undefined;
+
   for (const response of responses) {
     const envelope = decode(response),
       result = fields(envelope.body);
+
     for (const [key, value] of Object.entries(result)) {
       if (key === "goods") {
         for (const item of value.value as Value[]) goods.set(str(fields(item), "uuid"), item);
       } else body[key] = value;
     }
+
     for (const value of envelope.pushes!.value as Value[]) {
       const push = fields(value),
         payload = fields(push.body);
+
       if (str(push, "command") === "push.useritem")
         for (const item of payload.useritemlist!.value as Value[])
           items.set(str(fields(item), "uuid"), item);
@@ -26,17 +30,23 @@ export function combineMailRewards(responses: readonly Buffer[], ids: readonly s
       else extra.push({ command: str(push, "command"), body: payload });
     }
   }
+
   if (goods.size) body.goods = sfs.array([...goods.values()]);
+
   body.successUids = sfs.string(ids.join(","));
   const pushes: { command: string; body: Fields }[] = [];
+
   if (items.size)
     pushes.push({
       command: "push.useritem",
       body: { useritemlist: sfs.array([...items.values()]) },
     });
+
   if (resource) pushes.push({ command: "push.city.refresh", body: resource });
+
   return inventoryResponse(body, [...pushes, ...extra]);
 }
+
 export function mailRewardEvent(entry: Row): Buffer {
   return encode({
     uid: sfs.string(text(entry, "uid")),

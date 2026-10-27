@@ -7,6 +7,7 @@ import type {
 export function extinguishedCity(response: CityExtinguishResponse): Fields {
   return { remainGold: sfs.long(response.remainGold), cityDef: sfs.int(response.cityDef) };
 }
+
 export function repairedCity(response: CityRepairResponse): Fields {
   return {
     lastCityDefTime: sfs.long(response.lastCityDefTime),

@@ -12,6 +12,7 @@ import { towerFailure, towerWeekStart } from "@opencok/rules/dragon-tower";
 import { cityInteger } from "@opencok/rules/city-progression";
 import { decode, str, int } from "@opencok/messages/sfs";
 import type { MutationTransaction } from "./mutation";
+
 export async function readDragonTower(
   tx: MutationTransaction,
   owner: string,
@@ -38,7 +39,9 @@ export async function readDragonTower(
     .orderBy(asc(dragon_tower_buff.buffid))
     .limit(129)
     .for("update");
+
   if (layers.length > 1024 || buffs.length > 128) towerFailure();
+
   const [server] = await tx
     .select({ at: server_info.activityTime })
     .from(server_info)
@@ -67,6 +70,7 @@ export async function readDragonTower(
   };
   const params = request ? decode(Buffer.from(request)) : {},
     action = str(params, "M__REQUEST_ID__H", "");
+
   if (action === "ranking") {
     const list = (key: "maxlayer" | "weeklymaxlayer") =>
       tx
@@ -95,6 +99,7 @@ export async function readDragonTower(
     result.weeklyRanking = await list("weeklymaxlayer");
     result.historyRanking = await list("maxlayer");
   }
+
   if (["report", "reportsimple"].includes(action)) {
     const layer = cityInteger(int(params, "layer"), 1, 1024) + 84500;
     result.reports = await tx
@@ -116,8 +121,10 @@ export async function readDragonTower(
       .orderBy(asc(dragon_tower_fightreport.citylevel))
       .limit(128);
   }
+
   return result;
 }
+
 export async function writeDragonTower(
   tx: MutationTransaction,
   owner: string,
@@ -125,7 +132,9 @@ export async function writeDragonTower(
 ) {
   if (write.user) {
     const row = write.user;
+
     if (row.uid !== owner) towerFailure();
+
     const value = {
       uid: owner,
       currentlayer: num(row, "currentlayer"),
@@ -150,8 +159,10 @@ export async function writeDragonTower(
       .values(value)
       .onConflictDoUpdate({ target: dragon_tower_user.uid, set: value });
   }
+
   for (const row of write.layers ?? []) {
     if (row.uid !== owner) towerFailure();
+
     const value = {
       uid: owner,
       layer: num(row, "layer"),
@@ -173,10 +184,13 @@ export async function writeDragonTower(
         set: value,
       });
   }
+
   if (write.buffs) {
     await tx.delete(dragon_tower_buff).where(eq(dragon_tower_buff.uid, owner));
+
     for (const row of write.buffs) {
       if (row.uid !== owner) towerFailure();
+
       await tx.insert(dragon_tower_buff).values({
         uid: owner,
         buffid: num(row, "buffid"),

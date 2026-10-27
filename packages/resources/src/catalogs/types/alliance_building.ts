@@ -18,4 +18,5 @@ export interface AllianceBuildingDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type AllianceBuildingDefinitionCatalog = CatalogTable<AllianceBuildingDefinition>;

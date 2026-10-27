@@ -1,4 +1,5 @@
 import type { DragonTravelDefinition } from "../types/dragon_travel.ts";
+
 export const records: readonly DragonTravelDefinition[] = [
   {
     "id": 4901000,

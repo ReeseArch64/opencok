@@ -1,4 +1,5 @@
 import type { ActivityPageDefinition } from "../types/activity_page.ts";
+
 export const records: readonly ActivityPageDefinition[] = [
   { "id": 9012501, "Type": 20, "callActivity": 0 },
   { "id": 9012510, "Type": 31, "callActivity": 57159 },

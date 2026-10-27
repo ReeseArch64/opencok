@@ -1,4 +1,5 @@
 import type { FunctionOn9180Definition } from "../types/function_on9.18.0.ts";
+
 export const records: readonly FunctionOn9180Definition[] = [
   { "id": "alliance_boss_des", "online": "all", "test": "all", "version": "7.23.0", "pf": "all" },
   {

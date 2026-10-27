@@ -26,26 +26,36 @@ export class ChatDeliveryService {
 
   private async deliver() {
     const { store, instance, peers, authorizeRoom, access } = this.options;
+
     if (!this.active) {
       await store.acquire(instance, this.token);
       this.active = true;
     }
+
     const batch = await store.poll(instance, this.token);
+
     if (batch.resync)
       for (const peer of peers)
         peer.sendFrame({ cmd: "chat.resync", data: { reason: "delivery_gap" } });
+
     for (const event of batch.events) {
       const recipients = [...peers];
+
       for (let index = 0; index < recipients.length; index += 16)
         await Promise.all(
           recipients.slice(index, index + 16).map(async (peer) => {
             if (event.target && peer.uid !== event.target && peer.uid !== event.owner) return;
+
             if (event.roomId && !peer.connection.joinedRooms.has(event.roomId)) return;
+
             if (peer.authorizeSession && !(await peer.authorizeSession())) return;
+
             if (event.roomId && !(await authorizeRoom(peer.uid, event.roomId))) {
               peer.connection.joinedRooms.delete(event.roomId);
+
               return;
             }
+
             const control =
               [100, 101, 102, 103, 105].includes(event.message?.post ?? 0) ||
               (event.frame &&
@@ -55,12 +65,17 @@ export class ChatDeliveryService {
                   "push.chat.room.quit",
                   "push.chat.room.kick",
                 ].includes(String(event.frame.cmd)));
+
             if (access && !control && !(await access.canReceive(peer.uid, event.owner))) return;
+
             if (event.message) {
               if (access && !(await access.canRead(peer.uid, event.message!))) return;
+
               const item = event.message;
               const room = await authorizeRoom(peer.uid, item.roomId);
+
               if (!room) return;
+
               if ((item.post ?? 0) >= 100) {
                 peer.sendFrame({
                   cmd: "push.chat.room.control",
@@ -72,8 +87,10 @@ export class ChatDeliveryService {
                     msg: item.post === 105 ? item.body : JSON.parse(item.body),
                   },
                 });
+
                 return;
               }
+
               peer.sendFrame({
                 cmd: "push.chat.room",
                 eventId: event.id,
@@ -92,17 +109,23 @@ export class ChatDeliveryService {
             } else if (event.frame) peer.sendFrame({ ...event.frame, eventId: event.id });
           }),
         );
+
       await store.acknowledge(instance, this.token, event.sequence);
     }
   }
+
   public readonly poll = (): Promise<void> => {
     const { log, peers } = this.options;
+
     return (this.running ??= this.deliver()
       .catch(() => {
         this.active = false;
+
         if (Date.now() - this.lastFailure < 30_000) return;
+
         this.lastFailure = Date.now();
         log({ operation: "chat.distribution", category: "unavailable" });
+
         for (const peer of peers)
           peer.sendFrame({ cmd: "chat.resync", data: { reason: "delivery_unavailable" } });
       })

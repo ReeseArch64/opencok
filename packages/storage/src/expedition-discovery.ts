@@ -1,5 +1,6 @@
 import type { ExpeditionDiscoveryPublication } from "@opencok/contracts/expedition-score-publication";
 import { DependencyError } from "@opencok/errors/dependency";
+
 const publish = `local function valid(value)
   return type(value) == 'string' and string.match(value, '^[1-9][0-9]*$') and #value <= 19
 end
@@ -21,12 +22,14 @@ end
 redis.call('SET',KEYS[1],ARGV[1])
 redis.call('PEXPIREAT',KEYS[1],ARGV[4])
 return 1`;
+
 export async function publishExpeditionDiscovery(
   command: (command: string, ...args: string[]) => Promise<unknown>,
   value: ExpeditionDiscoveryPublication,
 ) {
   const match = value.key.match(/^opencok:global:expedition-match:([1-9]\d{0,9})$/),
     decimal = (raw: string) => /^[1-9]\d{0,18}$/.test(raw) && BigInt(raw) <= 9223372036854775807n;
+
   if (
     !match ||
     Number(match[1]) > 2147483647 ||
@@ -36,12 +39,15 @@ export async function publishExpeditionDiscovery(
     Buffer.byteLength(value.value) > 8192
   )
     throw new DependencyError("redis");
+
   let parsed;
+
   try {
     parsed = JSON.parse(value.value);
   } catch {
     throw new DependencyError("redis");
   }
+
   if (
     !parsed ||
     typeof parsed !== "object" ||
@@ -50,6 +56,7 @@ export async function publishExpeditionDiscovery(
     parsed.sequence !== value.sequence
   )
     throw new DependencyError("redis");
+
   const result = await command(
     "EVAL",
     publish,
@@ -61,6 +68,8 @@ export async function publishExpeditionDiscovery(
     value.expiresAt,
     match[1]!,
   );
+
   if (result !== 0 && result !== 1) throw new DependencyError("redis");
+
   return result === 1;
 }

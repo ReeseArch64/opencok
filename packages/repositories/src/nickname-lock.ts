@@ -11,6 +11,7 @@ import type { Database } from "./game.ts";
 import { readNicknameOccupation } from "./nickname.ts";
 
 type GlobalDatabase = Database["databases"]["global"]["db"];
+
 export type NicknameGlobalTransaction = Pick<
   NodePgDatabase<typeof globalSchema>,
   "select" | "insert" | "update" | "delete" | "execute"
@@ -23,6 +24,7 @@ export async function withAvailableNickname<T>(
 ): Promise<T> {
   return withNicknameLock(db, name, async (tx) => {
     if (await readNicknameOccupation(tx, name)) throw new GameError(errors.nicknameOccupied);
+
     return operation(tx);
   });
 }
@@ -33,6 +35,7 @@ export async function withNicknameLock<T>(
   operation: (tx: NicknameGlobalTransaction) => Promise<T>,
 ): Promise<T> {
   let key: string;
+
   try {
     if (
       typeof name !== "string" ||
@@ -42,6 +45,7 @@ export async function withNicknameLock<T>(
       nicknameTrim(name) !== name
     )
       throw new Error("Invalid nickname lock input");
+
     key = createHash("sha256")
       .update("opencok:nickname-change:uca400:")
       .update(mysqlUtf8UnicodeKey(name))
@@ -51,9 +55,11 @@ export async function withNicknameLock<T>(
   } catch {
     throw new DependencyError("nickname change input");
   }
+
   let release: ((destroy: boolean) => void) | undefined;
   let rollback: (() => Promise<unknown>) | undefined;
   let ended = false;
+
   try {
     const client = await db.$client.connect();
     release = (destroy) => client.release(destroy);
@@ -63,12 +69,16 @@ export async function withNicknameLock<T>(
     const result = await tx.execute<{ acquired: boolean }>(
       sql`select pg_try_advisory_xact_lock(${key}::bigint) as acquired`,
     );
+
     if (result.rows.length !== 1 || typeof result.rows[0]?.acquired !== "boolean")
       throw new DependencyError("nickname lock result");
+
     if (!result.rows[0].acquired) throw new GameError(errors.nicknameOccupied);
+
     const value = await operation(tx);
     await tx.execute(sql`commit`);
     ended = true;
+
     return value;
   } catch (error) {
     if (rollback)
@@ -76,7 +86,9 @@ export async function withNicknameLock<T>(
         await rollback();
         ended = true;
       } catch {}
+
     if (ended && error instanceof GameError) throw error;
+
     throw new DependencyError("nickname change transaction");
   } finally {
     release?.(!ended);

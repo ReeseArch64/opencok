@@ -1,4 +1,5 @@
 import type { WagAreaDefinition } from "../types/wag_area.ts";
+
 export const records: readonly WagAreaDefinition[] = [
   {
     "id": 20000000,

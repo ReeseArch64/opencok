@@ -5,6 +5,7 @@ import type { ExpeditionCalendarStore } from "@opencok/contracts/expedition-cale
 import { long, num, text } from "@opencok/contracts/rows";
 import { expeditionCalendarPhases } from "@opencok/rules/expedition-calendar";
 import type { Database } from "./game";
+
 export function createExpeditionCalendarStore(
   db: Database["databases"]["global"]["db"],
 ): ExpeditionCalendarStore {
@@ -32,6 +33,7 @@ export function createExpeditionCalendarStore(
               .limit(2)
               .for("share");
         const plan = build({ latest, legacy });
+
         if (plan.close) {
           if (
             !latest ||
@@ -40,11 +42,13 @@ export function createExpeditionCalendarStore(
             long(plan.create, "startTime") < latest.endTime
           )
             throw new Error("Invalid expedition calendar replacement");
+
           await tx
             .update(expedition_calendar)
             .set({ state: 1 })
             .where(eq(expedition_calendar.id, latest.id));
         }
+
         if (plan.create) {
           const row = plan.create;
           expeditionCalendarPhases(row);
@@ -60,6 +64,7 @@ export function createExpeditionCalendarStore(
             sourceId: row.sourceId === null ? null : text(row, "sourceId"),
           });
         }
+
         return plan.current;
       });
     },

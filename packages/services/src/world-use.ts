@@ -27,6 +27,7 @@ export const worldUseCommands = [
   "world.get.barbarion",
   "get.act.boss.point",
 ];
+
 export function createWorldUseDomain(size: number, random = randomInt): CityDomain {
   return {
     commands: worldUseCommands,
@@ -35,15 +36,19 @@ export function createWorldUseDomain(size: number, random = randomInt): CityDoma
       if (command === "get.act.boss.point") {
         const world = context.state.worldMutation?.world,
           reader = context.state.worldMonsters;
+
         if (!world || !reader || num(world, "worldId") !== 0) worldMutationFailure();
+
         return {
           response: encode({ id: sfs.int(await reader.nearestBoss(num(world, "pointId"))) }),
           event: null,
         };
       }
+
       if (command === "world.get.barbarion") {
         const world = context.state.worldMutation?.world,
           reader = context.state.worldMonsters;
+
         if (
           !world ||
           !reader ||
@@ -51,6 +56,7 @@ export function createWorldUseDomain(size: number, random = randomInt): CityDoma
           num(context.state.profile, "serverId") !== context.rules.kingdomId
         )
           worldMutationFailure();
+
         if (
           !ruleAvailable(context.rules.features.get("barbarion_switch"), {
             kingdomId: context.rules.kingdomId,
@@ -59,6 +65,7 @@ export function createWorldUseDomain(size: number, random = randomInt): CityDoma
           })
         )
           throw new GameError(errors.unsupported, "world_state");
+
         const radius = cityInteger(context.rules.items.get("world_barbarion")?.k5, 1, 32),
           minimum =
             BigInt(cityInteger(context.rules.items.get("world_barbarion")?.k7 ?? 0)) * 60000n,
@@ -80,13 +87,17 @@ export function createWorldUseDomain(size: number, random = randomInt): CityDoma
               barbarianCurrentHP(point, actors.get(num(point, "id")), context.rules, context.now) >
               0,
           );
+
         if (living.length)
           return {
             response: encode({ pointId: sfs.int(num(living[random(living.length)]!, "id")) }),
             event: null,
           };
+
         const chosen = chooseWorldMonsterCells(nearby.filter(worldItemFree), true, size, random);
+
         if (!chosen.length) return { response: encode({ pointId: sfs.int(-1) }), event: null };
+
         const actor = worldBarbarianActor(context.rules, "4800000"),
           points = chosen.map((point, index) => ({
             ...point,
@@ -99,6 +110,7 @@ export function createWorldUseDomain(size: number, random = randomInt): CityDoma
           ...actor,
           points: points.map((point) => num(point, "id")),
         };
+
         return {
           response: encode({ pointId: sfs.int(num(points[0]!, "id")) }),
           event: encode({
@@ -108,9 +120,11 @@ export function createWorldUseDomain(size: number, random = randomInt): CityDoma
           }),
         };
       }
+
       if (command === "world.get.monster") {
         const world = context.state.worldMutation?.world,
           reader = context.state.worldMonsters;
+
         if (
           !world ||
           !reader ||
@@ -118,6 +132,7 @@ export function createWorldUseDomain(size: number, random = randomInt): CityDoma
           num(context.state.profile, "serverId") !== context.rules.kingdomId
         )
           worldMutationFailure();
+
         const config = context.rules.items.get("world_barbarion"),
           radius = cityInteger(config?.k5, 1, 32),
           target = config?.k8 ?? "",
@@ -128,6 +143,7 @@ export function createWorldUseDomain(size: number, random = randomInt): CityDoma
             reusableWorldMonster(row, target, minimum, context.now, context.rules),
           );
         const targetConfig = worldMonsterConfiguration(context.rules, target);
+
         if (reusable.length)
           return {
             response: encode({
@@ -135,8 +151,11 @@ export function createWorldUseDomain(size: number, random = randomInt): CityDoma
             }),
             event: null,
           };
+
         const free = nearby.filter(worldItemFree);
+
         if (!free.length) return { response: encode({ pointId: sfs.int(-1) }), event: null };
+
         const selected = free[random(free.length)]!,
           primary = {
             ...selected,
@@ -150,6 +169,7 @@ export function createWorldUseDomain(size: number, random = randomInt): CityDoma
           );
         const points = [primary],
           chosen = chooseWorldMonsterCells(refill, targetConfig.four, size, random);
+
         if (chosen.length)
           for (const row of spawnWorldMonsterCells(
             context.rules,
@@ -161,7 +181,9 @@ export function createWorldUseDomain(size: number, random = randomInt): CityDoma
             if (num(row, "id") === num(primary, "id")) points[0] = row;
             else points.push(row);
           }
+
         (context.write.worldMutation ??= {}).points = points;
+
         return {
           response: encode({ pointId: sfs.int(num(primary, "id")) }),
           event: encode({
@@ -171,16 +193,20 @@ export function createWorldUseDomain(size: number, random = randomInt): CityDoma
           }),
         };
       }
+
       if (command === "create.boss") {
         const state = context.state.worldMutation,
           reader = context.state.worldMonsters,
           id = cityInteger(int(params, "pointIndex"), 1, size * size),
           uuid = str(params, "uuid"),
           item = context.economy.ownedItem?.(uuid);
+
         if (!state || !reader || !item || item.count < 1 || !context.economy.consumeItem)
           worldMutationFailure();
+
         const rule = context.rules.goods.get(item.itemId),
           source = state.points.find((point) => num(point, "id") === id);
+
         if (
           !source ||
           !worldItemFree(source) ||
@@ -189,9 +215,12 @@ export function createWorldUseDomain(size: number, random = randomInt): CityDoma
           !rule.para1
         )
           worldMutationFailure();
+
         const config = worldMonsterConfiguration(context.rules, rule.para1),
           points = worldMonsterProp(context.rules, state.points, id, rule.para1, size, context.now);
+
         if (await reader.claimed(points.map((point) => num(point, "id")))) worldMutationFailure();
+
         const main = points[0]!,
           maximum = worldMonsterMaximum(num(main, "pointType"), rule.para1, context.rules),
           created = {
@@ -205,6 +234,7 @@ export function createWorldUseDomain(size: number, random = randomInt): CityDoma
           };
         context.economy.consumeItem(uuid, 1);
         (context.write.worldMutation ??= {}).points = points;
+
         return {
           response: encode({
             itemId: sfs.string(item.itemId),
@@ -219,26 +249,35 @@ export function createWorldUseDomain(size: number, random = randomInt): CityDoma
           }),
         };
       }
+
       const state = context.state.worldMutation,
         id = cityInteger(int(params, "point"), 1, size * size),
         uuid = str(params, "itemUUid"),
         item = context.economy.ownedItem?.(uuid);
+
       if (!state || !item || item.count < 1 || !context.economy.consumeItem) worldMutationFailure();
+
       const row = state.points.find((row) => num(row, "id") === id),
         rule = context.rules.goods.get(item.itemId);
+
       if (!row || !worldItemFree(row) || !["11", "12"].includes(rule?.type ?? ""))
         worldMutationFailure();
+
       const target = worldItemTarget(rule!, random);
+
       if (rule!.type === "12") {
         const points = worldMonsterProp(context.rules, state.points, id, target, size, context.now);
+
         if (
           !context.state.worldMonsters ||
           (await context.state.worldMonsters.claimed(points.map((point) => num(point, "id"))))
         )
           worldMutationFailure();
+
         const response = worldItemUsed({ pointId: id, itemid: item.itemId });
         context.economy.consumeItem(uuid, 1);
         (context.write.worldMutation ??= {}).points = points;
+
         return {
           response: encode(response),
           event: encode({
@@ -249,8 +288,10 @@ export function createWorldUseDomain(size: number, random = randomInt): CityDoma
           }),
         };
       }
+
       if (!context.state.worldMonsters || (await context.state.worldMonsters.claimed([id])))
         worldMutationFailure();
+
       const resource = worldItemResource(context.rules, target),
         point = {
           ...row,
@@ -265,6 +306,7 @@ export function createWorldUseDomain(size: number, random = randomInt): CityDoma
         response = worldItemUsed({ pointId: id, itemid: item.itemId });
       context.economy.consumeItem(uuid, 1);
       (context.write.worldMutation ??= {}).points = [point];
+
       return {
         response: encode(response),
         event: encode({

@@ -16,4 +16,5 @@ export interface AffairsDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type AffairsDefinitionCatalog = CatalogTable<AffairsDefinition>;

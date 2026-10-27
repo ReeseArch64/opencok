@@ -4,4 +4,5 @@ export interface LordImageXmlDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type LordImageXmlDefinitionCatalog = CatalogTable<LordImageXmlDefinition>;

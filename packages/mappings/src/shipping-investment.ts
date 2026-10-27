@@ -3,6 +3,7 @@ import type { ShippingInvestmentResponse } from "@opencok/contracts/responses/sh
 import { sfs, type Fields } from "@opencok/messages/sfs";
 import { shippingInvestmentSchema } from "@opencok/validations/shipping-investment";
 import { validateFields } from "./validation";
+
 export function shippingInvestmentView(row: ShippingInvestmentResponse): Fields {
   return validateFields(shippingInvestmentSchema, {
     ...(row.gold_reward

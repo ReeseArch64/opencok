@@ -58,4 +58,5 @@ export interface FieldMonsterDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type FieldMonsterDefinitionCatalog = CatalogTable<FieldMonsterDefinition>;

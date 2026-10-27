@@ -13,6 +13,7 @@ export const nicknameItemDeleteSchema = z.strictObject({
   itemId: field.string,
   count: field.int,
 }) satisfies z.ZodType<NicknameItemDeleteResponse>;
+
 export const nicknameItemAddSchema = z.strictObject({
   uuid: field.string,
   itemId: field.string,
@@ -28,16 +29,19 @@ export const nicknameItemAddSchema = z.strictObject({
   para8: field.string.optional(),
   para9: field.string.optional(),
 }) satisfies z.ZodType<NicknameItemAddResponse>;
+
 export const nicknameMobileGoldSchema = z.strictObject({
   freeGold: field.long,
   paidGold: field.long,
   paidSpecialGold: field.long,
 }) satisfies z.ZodType<NicknameMobileGoldResponse>;
+
 export const nicknameDmmGoldSchema = z.strictObject({
   dmmGold: field.long,
   dmmPaidGold: field.long,
   dmmPaidSpecialGold: field.long,
 }) satisfies z.ZodType<NicknameDmmGoldResponse>;
+
 export const nicknameChangeReplySchema = z.strictObject({
   gold: field.long.optional(),
   status: field.bool,

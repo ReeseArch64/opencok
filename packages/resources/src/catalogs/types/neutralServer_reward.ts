@@ -7,4 +7,5 @@ export interface NeutralServerRewardDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type NeutralServerRewardDefinitionCatalog = CatalogTable<NeutralServerRewardDefinition>;

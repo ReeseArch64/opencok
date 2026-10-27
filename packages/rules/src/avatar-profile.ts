@@ -3,6 +3,7 @@ import type { AvatarCompletionRecord, AvatarProfileUpdate } from "@opencok/contr
 function invalid(): never {
   throw new Error("Invalid avatar profile intent");
 }
+
 function projectAvatarProfile(
   bit: 2 | 4,
   entry: AvatarCompletionRecord,
@@ -38,14 +39,18 @@ function projectAvatarProfile(
     new TextEncoder().encode(entry.effects).length > 65535
   )
     return invalid();
+
   let snapshot;
+
   try {
     snapshot = JSON.parse(entry.effects);
   } catch {
     return invalid();
   }
+
   const profile = snapshot?.profile;
   const updatedAt = String(entry.committedAt / 1000n);
+
   if (
     snapshot?.version !== 1 ||
     !profile ||
@@ -61,6 +66,7 @@ function projectAvatarProfile(
     )
   )
     return invalid();
+
   return {
     owner: entry.ownerUid,
     kingdomId,
@@ -80,6 +86,7 @@ export function avatarProfileUpdate(
 ): AvatarProfileUpdate {
   return projectAvatarProfile(2, entry, kingdomId);
 }
+
 export function avatarChatUpdate(
   entry: AvatarCompletionRecord,
   kingdomId: number,

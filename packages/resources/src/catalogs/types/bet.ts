@@ -13,4 +13,5 @@ export interface BetDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type BetDefinitionCatalog = CatalogTable<BetDefinition>;

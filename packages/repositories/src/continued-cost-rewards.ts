@@ -12,6 +12,7 @@ import type {
 } from "@opencok/contracts/continued-cost-rewards";
 import type { MutationTransaction } from "./mutation";
 import type { Database } from "./game";
+
 export function costRankAwardReader(tx: MutationTransaction, owner: string): CostRankAwardReader {
   return {
     async load(id) {
@@ -20,10 +21,12 @@ export function costRankAwardReader(tx: MutationTransaction, owner: string): Cos
         .from(awards)
         .where(and(eq(awards.id, id), eq(awards.ownerUid, owner)))
         .for("update");
+
       return row;
     },
   };
 }
+
 export async function writeCostRankAward(
   tx: MutationTransaction,
   owner: string,
@@ -35,15 +38,19 @@ export async function writeCostRankAward(
     .from(awards)
     .where(and(eq(awards.id, id), eq(awards.ownerUid, owner), eq(awards.deliveredAt, 0n)))
     .for("update");
+
   if (!row || row.createdAt > now || id !== costRankAwardId(row.periodId, owner))
     throw new Error("Invalid owned consumption award acknowledgement");
+
   await tx.update(awards).set({ deliveredAt: now, nextAttemptAt: 0n }).where(eq(awards.id, id));
 }
+
 export function createCostRankAwardStore(
   db: Database["kingdom"]["db"],
   authority: RealmAuthority,
 ): CostRankAwardStore {
   let cursor: string | undefined;
+
   return {
     candidates() {
       return db.transaction(async (tx) => {
@@ -61,6 +68,7 @@ export function createCostRankAwardStore(
           .orderBy(sql`${closures.periodId} collate "C"`)
           .limit(8);
         cursor = rows.length === 8 ? rows.at(-1)?.periodId : undefined;
+
         return rows;
       });
     },
@@ -75,6 +83,7 @@ export function createCostRankAwardStore(
           rank = cityInteger(standing.rank, 1, 100),
           kingdom = cityInteger(standing.kingdomId, 1),
           uid = text(standing, "uid");
+
         if (
           !current ||
           current.phase !== 2 ||
@@ -87,6 +96,7 @@ export function createCostRankAwardStore(
           uid.length > 40
         )
           throw new Error("Stale consumption reward cursor");
+
         if (kingdom === authority.kingdomId && create) {
           const [profile] = await tx
             .select({ uid: userprofile.uid })
@@ -100,9 +110,11 @@ export function createCostRankAwardStore(
               ),
             )
             .for("share");
+
           if (profile) {
             const id = costRankAwardId(current.periodId, uid),
               [previous] = await tx.select().from(awards).where(eq(awards.id, id)).limit(1);
+
             if (previous) {
               if (
                 previous.periodId !== current.periodId ||
@@ -124,6 +136,7 @@ export function createCostRankAwardStore(
             }
           }
         }
+
         await tx
           .update(closures)
           .set({ awardCursor: rank })
@@ -140,6 +153,7 @@ export function createCostRankAwardStore(
           .from(closures)
           .where(eq(closures.periodId, text(closure, "periodId")))
           .for("update");
+
         if (
           !current ||
           current.phase !== 2 ||
@@ -150,6 +164,7 @@ export function createCostRankAwardStore(
           long(closure, "finalizedAt") !== current.finalizedAt
         )
           throw new Error("Incomplete consumption ranking awards");
+
         await tx
           .update(closures)
           .set({ awardedAt: now })
@@ -159,6 +174,7 @@ export function createCostRankAwardStore(
     pending(now) {
       return db.transaction(async (tx) => {
         await fenceRealmTransaction(tx, authority);
+
         return tx
           .select()
           .from(awards)

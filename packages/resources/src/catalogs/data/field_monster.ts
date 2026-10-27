@@ -3,6 +3,7 @@ import type { FieldMonsterDefinition } from "../types/field_monster.ts";
 import type { CatalogTable } from "../../catalog-model.ts";
 import { records as records0 } from "./field_monster.records0.ts";
 import { records as records1 } from "./field_monster.records1.ts";
+
 export const catalog: CatalogTable<FieldMonsterDefinition> = {
   "kind": CatalogKind.Table,
   "records": [...records0, ...records1],

@@ -8,6 +8,7 @@ import type { OlympicState, OlympicWrite } from "@opencok/contracts/olympic";
 import { fenceRealmTransaction, type RealmAuthority } from "./realm-authority";
 import type { MutationTransaction } from "./mutation";
 import type { Database } from "./game";
+
 export async function readOlympic(tx: MutationTransaction, owner: string): Promise<OlympicState> {
   await tx.execute(sql`set local lock_timeout='1s'`);
   await tx.execute(sql`select pg_advisory_xact_lock(728219,1)`);
@@ -24,8 +25,10 @@ export async function readOlympic(tx: MutationTransaction, owner: string): Promi
       .orderBy(asc(user_olympic_bet.uuid))
       .limit(4097)
       .for("update");
+
   if (questions.length > 1024 || bets.length > 4096)
     throw new Error("Olympic aggregate exceeds bound");
+
   return {
     questions,
     bets,
@@ -34,13 +37,16 @@ export async function readOlympic(tx: MutationTransaction, owner: string): Promi
         .select({ total: sql<string>`coalesce(sum(${user_olympic_bet.betNum}),0)::text` })
         .from(user_olympic_bet)
         .where(and(eq(user_olympic_bet.questionId, id), eq(user_olympic_bet.betCountry, result)));
+
       return cityAmount(sum?.total ?? 0);
     },
   };
 }
+
 export async function writeOlympic(tx: MutationTransaction, owner: string, write: OlympicWrite) {
   if ((write.questions?.length ?? 0) > 1024 || (write.bets?.length ?? 0) > 4096)
     throw new Error("Olympic write exceeds bound");
+
   for (const row of write.questions ?? []) {
     const id = text(row, "id"),
       result = text(row, "result"),
@@ -56,18 +62,22 @@ export async function writeOlympic(tx: MutationTransaction, owner: string, write
         tax: row.tax === null ? null : cityInteger(row.tax, 0, 50),
         rewardLimit: row.rewardLimit === null ? null : cityInteger(row.rewardLimit),
       };
+
     if (!id || id.length > 40 || result.length > 10 || value.startBetTime >= value.startTime)
       throw new Error("Invalid Olympic question write");
+
     await tx
       .insert(question_match)
       .values(value)
       .onConflictDoUpdate({ target: question_match.id, set: value });
   }
+
   for (const row of write.bets ?? []) {
     const uuid = text(row, "uuid"),
       questionId = text(row, "questionId"),
       betCountry = text(row, "betCountry"),
       result = text(row, "result");
+
     if (
       row.uid !== owner ||
       !uuid ||
@@ -79,13 +89,18 @@ export async function writeOlympic(tx: MutationTransaction, owner: string, write
       result.length > 10
     )
       throw new Error("Invalid Olympic bet owner");
+
     const type = cityInteger(row.resourceType, 0, 5);
+
     if (type === 4) throw new Error("Invalid Olympic resource");
+
     const [saved] = await tx
       .select({ uid: user_olympic_bet.uid })
       .from(user_olympic_bet)
       .where(eq(user_olympic_bet.uuid, uuid));
+
     if (saved && saved.uid !== owner) throw new Error("Foreign Olympic bet");
+
     const value = {
       uuid,
       uid: owner,
@@ -104,6 +119,7 @@ export async function writeOlympic(tx: MutationTransaction, owner: string, write
       .onConflictDoUpdate({ target: user_olympic_bet.uuid, set: value });
   }
 }
+
 export function createOlympicScheduleStore(
   db: Database["kingdom"]["db"],
   authority: RealmAuthority,
@@ -126,6 +142,7 @@ export function createOlympicScheduleStore(
     },
   };
 }
+
 export async function pendingOlympicSettlements(db: Database["kingdom"]["db"], after?: string) {
   return db
     .select({

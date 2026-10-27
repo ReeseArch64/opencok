@@ -5,4 +5,5 @@ export interface EffectRequirementDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type EffectRequirementDefinitionCatalog = CatalogTable<EffectRequirementDefinition>;

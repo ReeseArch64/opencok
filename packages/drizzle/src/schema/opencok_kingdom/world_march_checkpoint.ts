@@ -2,6 +2,7 @@ import { sql } from "drizzle-orm";
 import { bigint, index, integer, primaryKey, varchar, check } from "drizzle-orm/pg-core";
 import { bytea } from "../../types";
 import { opencok_kingdom } from "../namespaces";
+
 export const world_march_checkpoint = opencok_kingdom.table(
   "world_march_checkpoint",
   {

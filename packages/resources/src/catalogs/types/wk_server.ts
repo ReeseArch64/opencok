@@ -5,4 +5,5 @@ export interface WkServerDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type WkServerDefinitionCatalog = CatalogTable<WkServerDefinition>;

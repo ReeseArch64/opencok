@@ -1,4 +1,5 @@
 import type { GeneralBaseSkillTreeDefinition } from "../types/general_base_skill_tree.ts";
+
 export const records: readonly GeneralBaseSkillTreeDefinition[] = [
   {
     "id": 40990005,

@@ -42,6 +42,7 @@ export function deleteMail(
     )
   )
     throw new Error("Invalid mail delete query");
+
   return db.transaction(
     async (tx) => {
       const profile = (
@@ -57,6 +58,7 @@ export function deleteMail(
           .limit(1)
           .for("update")
       )[0];
+
       if (
         !profile ||
         profile.uid !== uid ||
@@ -66,6 +68,7 @@ export function deleteMail(
         !query.ids.length
       )
         return { profile, deleted: 0 };
+
       const deleted = await tx
         .delete(mail)
         .where(
@@ -82,7 +85,9 @@ export function deleteMail(
           fromUser: mail.fromUser,
           contents: sql<Buffer | null>`case when ${mail.type} = 26 then ${mail.contents} else null end`,
         });
+
       if (!deleted.length) return { profile, deleted: 0 };
+
       const ids = deleted.map((row) => row.uid);
       const invitationIds = deleted.filter((row) => row.type === 26).map((row) => row.uid);
       const extraOwner = or(
@@ -104,6 +109,7 @@ export function deleteMail(
         ...entry,
         extra: contents.get(entry.uid) ?? null,
       }));
+
       if (
         entries.reduce(
           (size, entry) => size + (entry.contents?.length ?? 0) + (entry.extra?.length ?? 0),
@@ -112,6 +118,7 @@ export function deleteMail(
         8 * 1024 * 1024
       )
         throw new Error("Mail deletion metadata exceeds limit");
+
       const cleanup = plan(entries);
       await tx.delete(mail_contents).where(and(inArray(mail_contents.uid, ids), extraOwner));
       await tx
@@ -121,6 +128,7 @@ export function deleteMail(
           target: [mail_update.toUser, mail_update.mailUid],
           set: { updateTime: sql`greatest(${mail_update.updateTime}, excluded."updateTime")` },
         });
+
       for (const group of cleanup.groups) {
         const key = and(
           eq(mail_group.uid, uid),
@@ -143,9 +151,11 @@ export function deleteMail(
                 .limit(1)
             )[0]
           : undefined;
+
         if (newest) await tx.update(mail_group).set({ updateTime: newest.createTime }).where(key);
         else await tx.delete(mail_group).where(key);
       }
+
       if (cleanup.inviters.length)
         await tx
           .delete(alliance_invite_move)
@@ -155,6 +165,7 @@ export function deleteMail(
               inArray(alliance_invite_move.inviter, cleanup.inviters),
             ),
           );
+
       return { profile, deleted: ids.length };
     },
     { isolationLevel: "read committed", accessMode: "read write" },

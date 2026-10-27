@@ -1,5 +1,6 @@
 import { CatalogKind, VariableScope } from "@opencok/enums/catalog-kind";
 import type { AutomationCatalog } from "../../catalog-model.ts";
+
 export const catalog: AutomationCatalog = {
   "kind": CatalogKind.Automation,
   "rules": [

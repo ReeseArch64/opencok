@@ -37,6 +37,7 @@ export function saveMailConversation(
         !query.fromUser.isWellFormed()))
   )
     throw new Error("Invalid conversation save query");
+
   return db.transaction(
     async (tx) => {
       const profile = (
@@ -52,6 +53,7 @@ export function saveMailConversation(
           .limit(1)
           .for("update")
       )[0];
+
       if (
         !profile ||
         profile.uid !== uid ||
@@ -61,6 +63,7 @@ export function saveMailConversation(
         query.scope === "none"
       )
         return { profile };
+
       await tx
         .update(mail)
         .set({ saveFlag: query.flag })
@@ -75,6 +78,7 @@ export function saveMailConversation(
               : eq(mail.type, query.type),
           ),
         );
+
       return { profile };
     },
     { isolationLevel: "read committed", accessMode: "read write" },

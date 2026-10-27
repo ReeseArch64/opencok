@@ -1,5 +1,6 @@
 import { sfs, type Fields } from "@opencok/messages/sfs";
 import { mergeEffectIds, type MergeEffect } from "@opencok/rules/merge-campaign";
+
 export function mergeEffectBoard(effects: readonly MergeEffect[]): Fields {
   if (
     effects.length > 4 ||
@@ -15,6 +16,7 @@ export function mergeEffectBoard(effects: readonly MergeEffect[]): Fields {
     )
   )
     throw new Error("Invalid merge effect board");
+
   return {
     status: sfs.array(
       effects.map((effect) =>

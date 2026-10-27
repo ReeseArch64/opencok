@@ -7,4 +7,5 @@ export interface DailyTaskBoxDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type DailyTaskBoxDefinitionCatalog = CatalogTable<DailyTaskBoxDefinition>;

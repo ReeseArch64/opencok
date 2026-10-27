@@ -16,4 +16,5 @@ export interface FbShareDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type FbShareDefinitionCatalog = CatalogTable<FbShareDefinition>;

@@ -1,4 +1,5 @@
 import type { EffectDefinition } from "../types/effect.ts";
+
 export const records: readonly EffectDefinition[] = [
   {
     "id": 100700,

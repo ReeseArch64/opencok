@@ -7,4 +7,5 @@ export interface ContinuedCostDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type ContinuedCostDefinitionCatalog = CatalogTable<ContinuedCostDefinition>;

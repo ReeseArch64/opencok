@@ -5,6 +5,7 @@ import type {
   PrayerLoginResponse,
   PrayerItemResponse,
 } from "@opencok/contracts/responses/prayer";
+
 export const prayerSchema = z.strictObject({
   prayCount: field.int,
   itemPrayCount: field.int,
@@ -34,6 +35,7 @@ export const prayerSchema = z.strictObject({
   FOOD: field.long.optional(),
   SILVER: field.long.optional(),
 }) satisfies z.ZodType<PrayerResponse>;
+
 export const prayerLoginSchema = z.strictObject({
   pray: z.strictObject({
     prayCount: field.int,

@@ -1,4 +1,5 @@
 import type { AllianceBossRewardDefinition } from "../types/alliance_boss_reward.ts";
+
 export const records: readonly AllianceBossRewardDefinition[] = [
   {
     "id": 9053501,

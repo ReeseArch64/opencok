@@ -1,4 +1,5 @@
 import type { GradeDefinition } from "../types/grade.ts";
+
 export const records: readonly GradeDefinition[] = [
   {
     "id": 24000001,

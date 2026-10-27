@@ -33,6 +33,7 @@ export function saveMail(
     )
   )
     throw new Error("Invalid mailbox save query");
+
   return db.transaction(
     async (tx) => {
       const profile = (
@@ -48,6 +49,7 @@ export function saveMail(
           .limit(1)
           .for("update")
       )[0];
+
       if (
         !profile ||
         profile.uid !== uid ||
@@ -57,6 +59,7 @@ export function saveMail(
         !query.ids.length
       )
         return { profile, result: "unchanged" };
+
       const changed = await tx
         .update(mail)
         .set({ saveFlag: query.flag })
@@ -72,6 +75,7 @@ export function saveMail(
           ),
         )
         .returning({ uid: mail.uid });
+
       if (changed.length)
         await tx
           .insert(mail_update)
@@ -86,6 +90,7 @@ export function saveMail(
             target: [mail_update.toUser, mail_update.mailUid],
             set: { updateTime: sql`greatest(${mail_update.updateTime}, excluded."updateTime")` },
           });
+
       return {
         profile,
         result: query.mode === "batch" ? "save" : changed.length ? query.mode : "unchanged",

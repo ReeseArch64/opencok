@@ -1,4 +1,5 @@
 import type { DrconfigDefinition } from "../types/drconfig.ts";
+
 export const records: readonly DrconfigDefinition[] = [
   {
     "id": 1,

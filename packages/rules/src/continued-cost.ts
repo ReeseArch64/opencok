@@ -6,6 +6,7 @@ import type { Rules } from "./game";
 import type { EconomyPosting } from "@opencok/contracts/mutation";
 import type { InventoryItem } from "@opencok/contracts/inventory";
 import type { ContinuedCostPeriod } from "@opencok/contracts/continued-cost";
+
 export function continuedCostPeriod(
   rules: Rules,
   profile: Row,
@@ -14,6 +15,7 @@ export function continuedCostPeriod(
 ): ContinuedCostPeriod | undefined {
   const config = rules.items.get("continued_cost"),
     panel = rules.power.activityPanels?.get("57159");
+
   if (
     !config ||
     !serverFeature(rules, "continued_cost", {
@@ -24,9 +26,11 @@ export function continuedCostPeriod(
     num(profile, "crossFightSrcServerId") > 0
   )
     return;
+
   const start = eventTimestamp(panel?.start),
     end = eventTimestamp(panel?.end),
     castle = buildings.find((row) => num(row, "itemId") === 400000);
+
   if (
     start === undefined ||
     end === undefined ||
@@ -37,6 +41,7 @@ export function continuedCostPeriod(
     num(castle ?? {}, "level") < cityInteger(config.k1 ?? 0)
   )
     return;
+
   const type = cityInteger(config.k2, 1, 6),
     tiers = [...(rules.advanced.continuedCosts?.values() ?? [])]
       .filter((row) => Number(row.type) === type)
@@ -47,6 +52,7 @@ export function continuedCostPeriod(
         important: row.important ?? "",
       }))
       .sort((a, b) => a.level - b.level);
+
   if (
     !tiers.length ||
     tiers.length > 128 ||
@@ -58,8 +64,10 @@ export function continuedCostPeriod(
     )
   )
     throw new Error("Invalid continued-cost reward tiers");
+
   return { start, end, type, face: config.k3 ?? "", tiers };
 }
+
 export function continuedCostAmount(
   type: number,
   postings: readonly EconomyPosting[],
@@ -83,28 +91,39 @@ export function continuedCostAmount(
       5: ["resource.iron", "resource.ironbind"],
       6: ["resource.stone", "resource.stonebind"],
     };
+
   for (const entry of postings) {
     const spent = entry.before - entry.after;
+
     if (spent <= 0n) continue;
+
     if (type === 1 && gold.has(entry.asset)) {
       amount += spent;
+
       if (["profile.gold", "profile.dmmGold"].includes(entry.asset)) free += spent;
       else paid += spent;
     } else if (type === 2 && entry.asset.startsWith("item.")) {
       const item = items.find((item) => `item.${item.uuid}` === entry.asset);
+
       if (item && rules.goods.get(item.itemId)?.type === "2") amount += spent;
     } else if (assets[type]?.includes(entry.asset)) amount += spent;
   }
+
   return { amount: cityAmount(amount), paid: cityAmount(paid), free: cityAmount(free) };
 }
+
 export function continuedCostClaims(raw: unknown) {
   const text = String(raw ?? "");
+
   if (text.length > 40 || (text && !/^(?:,\d+)+$/.test(text)))
     throw new Error("Invalid continued-cost claim flags");
+
   const values = text
     .split(",")
     .filter(Boolean)
     .map((value) => cityInteger(value, 1));
+
   if (new Set(values).size !== values.length) throw new Error("Duplicate continued-cost claims");
+
   return new Set(values);
 }

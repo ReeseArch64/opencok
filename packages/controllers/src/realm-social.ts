@@ -5,14 +5,17 @@ import { verifyRealmSocial } from "@opencok/identity/realm-social";
 import { decode, encode } from "@opencok/messages/sfs";
 import { chatSocialInput, chatSocialResponse } from "@opencok/mappings/chat-social";
 import { ChatCommandError } from "@opencok/errors/chat";
+
 export class RealmSocialController {
   constructor(
     readonly service: RealmSocialCommandService,
     readonly signingSecret: string,
   ) {}
+
   readonly handle: AsyncHttpHandler = async (request, response) => {
     const reply = (status: number, data: unknown) => {
       if (response.writableEnded) return;
+
       response.writeHead(status, {
         "content-type": "application/json",
         "cache-control": "no-store",
@@ -28,23 +31,32 @@ export class RealmSocialController {
       reply(503, {});
       request.destroy();
     }, 3000);
+
     try {
       if (!/^application\/json(?:\s*;|$)/i.test(String(request.headers["content-type"] ?? ""))) {
         reply(415, {});
+
         return;
       }
+
       let size = 0;
       const chunks: Buffer[] = [];
+
       for await (const chunk of request) {
         const bytes = Buffer.from(chunk);
         size += bytes.length;
+
         if (size > 24_576) {
           reply(413, {});
+
           return;
         }
+
         chunks.push(bytes);
       }
+
       const body = new TextDecoder("utf-8", { fatal: true }).decode(Buffer.concat(chunks));
+
       if (
         !verifyRealmSocial(
           body,
@@ -55,9 +67,12 @@ export class RealmSocialController {
         )
       ) {
         reply(403, {});
+
         return;
       }
+
       const input: unknown = JSON.parse(body);
+
       if (
         !isRecord(input) ||
         typeof input.owner !== "string" ||
@@ -70,8 +85,10 @@ export class RealmSocialController {
         !/^[a-zA-Z0-9+/]*={0,2}$/.test(input.params)
       ) {
         reply(400, {});
+
         return;
       }
+
       const params = chatSocialInput(decode(Buffer.from(input.params, "base64")));
       const result = await this.service.execute(
         input.owner,

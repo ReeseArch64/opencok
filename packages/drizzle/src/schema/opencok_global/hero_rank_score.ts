@@ -1,6 +1,7 @@
 import { sql } from "drizzle-orm";
 import { bigint, check, index, integer, primaryKey, text, varchar } from "drizzle-orm/pg-core";
 import { opencok_global } from "../namespaces";
+
 export const hero_rank_score = opencok_global.table(
   "hero_rank_score",
   {

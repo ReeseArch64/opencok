@@ -4,4 +4,5 @@ export interface NotiTimezoneDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type NotiTimezoneDefinitionCatalog = CatalogTable<NotiTimezoneDefinition>;

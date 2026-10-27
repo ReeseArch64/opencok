@@ -5,8 +5,10 @@ export interface DiscoveryRedisConfig {
   redisUrl: string;
   timeoutMs: number;
 }
+
 export class DiscoveryRedis {
   constructor(private readonly config: DiscoveryRedisConfig) {}
+
   async health(): Promise<void> {
     const client = new RedisClient(this.config.redisUrl, {
       connectionTimeout: this.config.timeoutMs,
@@ -15,10 +17,12 @@ export class DiscoveryRedis {
       enableOfflineQueue: false,
     });
     let timer: ReturnType<typeof setTimeout> | undefined;
+
     try {
       await Promise.race([
         (async () => {
           await client.connect();
+
           if ((await client.send("PING", [])) !== "PONG") throw new DependencyError("redis");
         })(),
         new Promise<never>((_, reject) => {

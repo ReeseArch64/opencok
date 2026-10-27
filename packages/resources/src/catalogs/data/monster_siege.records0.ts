@@ -1,4 +1,5 @@
 import type { MonsterSiegeDefinition } from "../types/monster_siege.ts";
+
 export const records: readonly MonsterSiegeDefinition[] = [
   {
     "id": 1,

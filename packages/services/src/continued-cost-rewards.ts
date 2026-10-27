@@ -16,9 +16,11 @@ import type { CostFinalityShared } from "@opencok/contracts/continued-cost-final
 import type { AvatarSystemMail } from "@opencok/contracts/files";
 import type { Rules } from "@opencok/rules/game";
 import type { CityDomain } from "./city-progression";
+
 export class ContinuedCostRewardService {
   private running?: Promise<void>;
   private start = 0;
+
   constructor(
     readonly store: CostRankAwardStore,
     readonly registry: Pick<CostRankingRegistry, "get">,
@@ -27,16 +29,20 @@ export class ContinuedCostRewardService {
     readonly deliver: (owner: string, id: string) => Promise<unknown>,
     readonly now = Date.now,
   ) {}
+
   refresh() {
     this.running ??= this.run().finally(() => {
       this.running = undefined;
     });
+
     return this.running;
   }
+
   private async admit(at: bigint) {
     const closures = await this.store.candidates(),
       begin = this.start;
     let work = 0;
+
     for (let offset = 0; offset < closures.length && work < 64; offset++) {
       const index = (begin + offset) % closures.length,
         closure = closures[index]!,
@@ -44,10 +50,14 @@ export class ContinuedCostRewardService {
         period = await this.registry.get(id),
         rows = await this.standings.standings(id);
       this.start = (index + 1) % closures.length;
+
       if (!period || !rows) continue;
+
       if (!period.expectedRealms.includes(this.rules.kingdomId))
         throw new Error("Foreign consumption ranking award period");
+
       const bands = costRankingBands(period.rewards);
+
       for (
         let position = num(closure, "awardCursor");
         position < rows.length && work < 64;
@@ -64,13 +74,17 @@ export class ContinuedCostRewardService {
                   contents = javaMailBytes(
                     template?.message ? `${template.message}|${standing.rank}` : undefined,
                   );
+
                 if (!template || !contents)
                   throw new Error("Missing consumption ranking award mail template");
+
                 const reward =
                   band.reward === "0"
                     ? null
                     : pinProgressionReward({ rules: this.rules, now: at }, band.reward);
+
                 if (reward !== null) mailRewardEntries(reward);
+
                 return {
                   sender: template.sender ?? "",
                   title: template.title ?? "",
@@ -84,37 +98,46 @@ export class ContinuedCostRewardService {
         closure.awardCursor = standing.rank;
         work++;
       }
+
       if (num(closure, "awardCursor") === rows.length)
         await this.store.finished(closure, rows.length, at);
     }
   }
+
   private async run() {
     const at = BigInt(this.now());
     let failed = false,
       failure: unknown;
+
     try {
       await this.admit(at);
     } catch (error) {
       failed = true;
       failure = error;
     }
+
     for (const award of await this.store.pending(at))
       try {
         await this.deliver(text(award, "ownerUid"), text(award, "id"));
       } catch {
         await this.store.defer(text(award, "id"), BigInt(this.now()));
       }
+
     if (failed) throw failure;
   }
 }
+
 export const continuedCostRewardDomain: CityDomain = {
   commands: ["continuedcost.rank.deliver"],
   types: [],
   async prepare(context, _command, params) {
     const id = str(params, "awardId");
+
     if (!/^[a-f0-9]{32}$/.test(id) || str(params, "operationId") !== costRankAwardOperation(id))
       throw new Error("Invalid consumption award delivery operation");
+
     const award = await context.state.costRankAward?.load(id);
+
     if (
       !award ||
       award.ownerUid !== context.owner ||
@@ -122,9 +145,13 @@ export const continuedCostRewardDomain: CityDomain = {
       id !== costRankAwardId(text(award, "periodId"), context.owner)
     )
       throw new Error("Missing owned consumption ranking entitlement");
+
     if (long(award, "deliveredAt") > 0n) return { response: encode({}), event: null };
+
     const draft = costRankMail(text(award, "payload"));
+
     if (!context.economy.event) throw new Error("Consumption reward publication unavailable");
+
     const mail: AvatarSystemMail = {
       uid: id + "00",
       owner: context.owner,
@@ -150,6 +177,7 @@ export const continuedCostRewardDomain: CityDomain = {
       }),
     });
     context.write.costRankAward = id;
+
     return { response: encode({}), event: null };
   },
   async apply() {

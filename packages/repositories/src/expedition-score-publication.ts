@@ -20,6 +20,7 @@ import { GameError } from "@opencok/errors/game";
 import { errors } from "@opencok/constants/game";
 import { fenceRealmTransaction, type RealmAuthority } from "./realm-authority";
 import type { Database } from "./game";
+
 export function createExpeditionScoreSource(
   db: Database["kingdom"]["db"],
   authority: RealmAuthority,
@@ -64,6 +65,7 @@ export function createExpeditionScoreSource(
           )
           .limit(64);
         authority.assertReady();
+
         return rows.map((row) => ({
           periodId: row.progress.periodId,
           stage: row.progress.stage,
@@ -94,11 +96,13 @@ export function createExpeditionScoreSource(
           .from(expedition_clock)
           .where(eq(expedition_clock.serverId, authority.kingdomId))
           .limit(1);
+
         return clock;
       });
     },
   };
 }
+
 export function createExpeditionScoreProjection(
   db: Database["databases"]["global"]["db"],
   authority: RealmAuthority,
@@ -107,10 +111,13 @@ export function createExpeditionScoreProjection(
     async write(rows, now) {
       authority.assertReady();
       cityAmount(now);
+
       if (rows.length > 256) throw new Error("Expedition score publication bound exceeded");
+
       for (const row of rows) {
         cityInteger(row.stage, 0, 8);
         cityAmount(row.endTime);
+
         if (
           row.kingdomId !== authority.kingdomId ||
           row.opponent === row.kingdomId ||
@@ -126,6 +133,7 @@ export function createExpeditionScoreProjection(
         )
           throw new Error("Invalid owned expedition publication");
       }
+
       return db.transaction(async (tx) => {
         await tx.execute(sql`set local lock_timeout='1s'`);
         await tx.execute(sql`set local statement_timeout='3s'`);
@@ -186,14 +194,17 @@ export function createExpeditionScoreProjection(
         accepted = accepted.flatMap((row) => {
           if (!seals.some((seal) => seal.periodId === row.periodId && seal.stage === row.stage))
             return [row];
+
           const frozen = refresh.find(
             (saved) =>
               saved.periodId === row.periodId &&
               saved.stage === row.stage &&
               saved.member === row.member,
           );
+
           return frozen ? [{ ...row, score: frozen.score, allianceId: frozen.allianceId }] : [];
         });
+
         if (accepted.length) {
           const written = await tx
             .insert(expedition_score)
@@ -218,10 +229,13 @@ export function createExpeditionScoreProjection(
               setWhere: sql`${expedition_score.kingdomId}=${authority.kingdomId} and ${expedition_score.opponent}=excluded.opponent and ${expedition_score.endTime}=excluded."endTime" and (${expedition_score.ownerEpoch},${expedition_score.sequence})<(excluded."ownerEpoch",excluded.sequence)`,
             })
             .returning({ member: expedition_score.member });
+
           if (written.length !== accepted.length)
             throw new Error("Foreign or stale expedition score member");
         }
+
         authority.assertReady();
+
         return {
           kingdomId: authority.kingdomId,
           ownerEpoch: version.ownerEpoch,
@@ -231,6 +245,7 @@ export function createExpeditionScoreProjection(
     },
   };
 }
+
 export function createExpeditionLiveSource(
   owned: Database["kingdom"]["db"],
   global: Database["databases"]["global"]["db"],
@@ -246,6 +261,7 @@ export function createExpeditionLiveSource(
           .from(userprofile)
           .where(eq(userprofile.uid, owner))
           .limit(1);
+
         if (
           !profile ||
           profile.serverId !== authority.kingdomId ||
@@ -253,13 +269,16 @@ export function createExpeditionLiveSource(
           (profile.banTime ?? 0n) > now
         )
           throw new GameError(errors.invalid);
+
         const [period] = await tx
             .select()
             .from(expedition_period)
             .where(eq(expedition_period.serverId, authority.kingdomId))
             .limit(1),
           phase = expeditionPhase(period, now);
+
         if (!period || !phase) return;
+
         return {
           periodId: period.periodId,
           stage: phase.stage,
@@ -287,6 +306,7 @@ export function createExpeditionLiveSource(
               ),
             own = proof.find((row) => row.kingdomId === view.kingdomId),
             other = proof.find((row) => row.kingdomId === view.opponent);
+
           if (
             !own ||
             !other ||
@@ -296,6 +316,7 @@ export function createExpeditionLiveSource(
             other.opponent !== own.kingdomId
           )
             return;
+
           const result = await tx.execute<{
             rank: number;
             allianceScore: number;
@@ -305,8 +326,10 @@ export function createExpeditionLiveSource(
             sql`with cohort as(select * from ${expedition_score} where "periodId"=${view.periodId} and stage=${view.stage} and (("kingdomId"=${view.kingdomId} and opponent=${view.opponent}) or ("kingdomId"=${view.opponent} and opponent=${view.kingdomId}))),ranking as(select member,row_number() over(order by score desc,member collate "C" desc)::integer as rank from cohort) select coalesce((select rank from ranking where member=${view.member}),-1)::integer as rank,coalesce(sum(score order by member collate "C") filter(where "allianceId"=${view.allianceId} and "allianceId"<>'' and "kingdomId"=${view.kingdomId}),0)::double precision as "allianceScore",coalesce(sum(score order by member collate "C") filter(where "kingdomId"=${view.kingdomId}),0)::double precision as "ownScore",coalesce(sum(score order by member collate "C") filter(where "kingdomId"=${view.opponent}),0)::double precision as "otherScore" from cohort`,
           );
           const row = result.rows[0];
+
           if (!row || Object.values(row).some((value) => !Number.isFinite(value)))
             throw new Error("Invalid shared expedition totals");
+
           return row;
         },
         { isolationLevel: "repeatable read" },

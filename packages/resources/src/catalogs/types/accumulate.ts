@@ -5,4 +5,5 @@ export interface AccumulateDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type AccumulateDefinitionCatalog = CatalogTable<AccumulateDefinition>;

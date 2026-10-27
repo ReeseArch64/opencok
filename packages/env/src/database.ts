@@ -3,11 +3,13 @@ import { parseDatabaseEnvironment, type DatabaseEnvironment } from "./database.s
 import { requireEnvironment } from "./validation";
 
 export const env = parseDatabaseEnvironment(loadEnvironment(process.env));
+
 export function requireEnv<K extends keyof DatabaseEnvironment>(
   key: K,
 ): NonNullable<DatabaseEnvironment[K]> {
   return requireEnvironment(env, key);
 }
+
 export { EnvironmentError } from "./validation";
 export { databaseSchema, type DatabaseEnvironment } from "./database.schema";
 export { rootEnvPath } from "./load";

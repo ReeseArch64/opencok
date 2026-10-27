@@ -1,5 +1,6 @@
 import { CatalogKind } from "@opencok/enums/catalog-kind";
 import type { VariableCatalog } from "../../catalog-model.ts";
+
 export const catalog: VariableCatalog = {
   "kind": CatalogKind.Variables,
   "connection": { "address": "tcp -h 10.1.6.242", "port": 10000 },

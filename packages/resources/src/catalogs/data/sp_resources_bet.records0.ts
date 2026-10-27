@@ -1,4 +1,5 @@
 import type { SpResourcesBetDefinition } from "../types/sp_resources_bet.ts";
+
 export const records: readonly SpResourcesBetDefinition[] = [
   { "id": 6550001, "double": 1 },
   {

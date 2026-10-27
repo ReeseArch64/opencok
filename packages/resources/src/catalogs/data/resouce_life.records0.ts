@@ -1,4 +1,5 @@
 import type { ResouceLifeDefinition } from "../types/resouce_life.ts";
+
 export const records: readonly ResouceLifeDefinition[] = [
   {
     "id": 105001,

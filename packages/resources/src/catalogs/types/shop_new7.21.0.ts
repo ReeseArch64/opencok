@@ -38,4 +38,5 @@ export interface ShopNew7210Definition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type ShopNew7210DefinitionCatalog = CatalogTable<ShopNew7210Definition>;

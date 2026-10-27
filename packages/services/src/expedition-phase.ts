@@ -15,20 +15,26 @@ export class ExpeditionPhaseService {
     readonly calendar: { refresh(): Promise<Row | undefined> },
     readonly store: ExpeditionPhaseStore,
   ) {}
+
   async refresh() {
     const period = await this.calendar.refresh();
+
     if (!period) return;
+
     return this.store.reconcile(period, (state, now) => expeditionPhaseView(period, state, now));
   }
 }
+
 export class ExpeditionActivityService {
   constructor(
     readonly reader: ExpeditionActivityReader,
     readonly rules: Rules,
     readonly now = Date.now,
   ) {}
+
   async activity(owner: string) {
     const { profile, state } = await this.reader.read(owner);
+
     return {
       activity: sfs.array(
         expeditionPanels(state, profile, this.rules, BigInt(this.now())).map(sfs.object),
@@ -36,6 +42,7 @@ export class ExpeditionActivityService {
     };
   }
 }
+
 export const expeditionPhaseDomain: CityDomain = {
   commands: ["expedition.notify"],
   types: [],
@@ -43,6 +50,7 @@ export const expeditionPhaseDomain: CityDomain = {
     const raw = str(params, "revision"),
       state = context.state.expedition,
       clock = state?.clock;
+
     if (
       !/^[1-9]\d{0,18}$/.test(raw) ||
       !clock ||
@@ -50,7 +58,9 @@ export const expeditionPhaseDomain: CityDomain = {
       str(params, "operationId") !== expeditionPhaseOperation(BigInt(raw))
     )
       throw new Error("Invalid owned expedition notification revision");
+
     if (!context.economy.event) throw new Error("Expedition phase publication unavailable");
+
     const panels = expeditionPanels(
       {
         ...state!,
@@ -74,12 +84,14 @@ export const expeditionPhaseDomain: CityDomain = {
         body: sfs.object({ activity: sfs.array(panels.map(sfs.object)) }),
       }),
     });
+
     return { response: encode({}), event: null };
   },
   async apply() {
     throw new Error("Unsupported expedition notification activity");
   },
 };
+
 export async function publishExpeditionPhaseNotification(
   payload: Uint8Array,
   owner: string,
@@ -87,11 +99,17 @@ export async function publishExpeditionPhaseNotification(
   publish: (owner: string, command: string, body: Fields) => Promise<unknown>,
 ) {
   const data = decode(Buffer.from(payload));
+
   if (str(data, "owner") !== owner) throw new Error("Foreign expedition activity notification");
+
   if (revision === undefined || str(data, "revision") !== String(revision)) return false;
+
   const body = fields(data.body);
+
   if (body.activity?.type !== Type.Array)
     throw new Error("Malformed expedition activity notification");
+
   await publish(owner, "push.activity.update", body);
+
   return true;
 }

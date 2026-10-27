@@ -8,4 +8,5 @@ export interface PayRewardDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type PayRewardDefinitionCatalog = CatalogTable<PayRewardDefinition>;

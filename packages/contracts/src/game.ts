@@ -65,6 +65,7 @@ export interface AuthenticationStore {
   getProfileById(uid: string): Promise<Row | undefined>;
   getAccountsByPlayerId(uid: string): Promise<Row[]>;
 }
+
 export interface CityState {
   profile: Row | undefined;
   resource: Row | undefined;
@@ -81,6 +82,7 @@ export interface CityState {
   lord: Row | undefined;
   civilizationPrestige?: bigint;
 }
+
 export interface GameStore extends AuthenticationStore {
   activityDirectory?(
     uid: string,

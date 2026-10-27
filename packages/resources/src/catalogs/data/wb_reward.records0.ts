@@ -1,4 +1,5 @@
 import type { WbRewardDefinition } from "../types/wb_reward.ts";
+
 export const records: readonly WbRewardDefinition[] = [
   { "id": 1, "reward": 238981, "min": 1, "max": 1 },
   { "id": 2, "reward": 238982, "min": 2, "max": 2 },

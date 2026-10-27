@@ -13,20 +13,27 @@ import {
 import type { CityDomain } from "./city-progression";
 
 export const worldRecreationCommands = ["world.user.rcr"];
+
 export function createWorldRecreationDomain(size: number): CityDomain {
   return {
     commands: worldRecreationCommands,
     types: [],
     async prepare(context, _command, params) {
       const state = context.state.worldMutation;
+
       if (!state || num(state.world, "pointId") !== 0) worldMutationFailure();
+
       if (!context.birthPoint) worldMutationFailure();
+
       const placement = await context.birthPoint(worldBirthRules(context.rules)),
         target = cityInteger(placement.point, 1, size * size),
         footprint = worldFootprint(target, size),
         castle = context.state.buildings.find((row) => num(row, "itemId") === 400000);
+
       if (!castle) worldMutationFailure();
+
       const rows = footprint.map((id) => placement.points.find((row) => num(row, "id") === id));
+
       if (
         rows.some(
           (row) =>
@@ -41,6 +48,7 @@ export function createWorldRecreationDomain(size: number): CityDomain {
         )
       )
         worldMutationFailure();
+
       const maximum = cityDefenseMaximum(context),
         shield = context.state.effects.states
           .filter(
@@ -54,6 +62,7 @@ export function createWorldRecreationDomain(size: number): CityDomain {
           .reduce((end, row) => (long(row, "endTime") > end ? long(row, "endTime") : end), 0n);
       recoverWorldMarches(context);
       const write = (context.write.worldMutation ??= {});
+
       for (const row of rows) {
         const id = num(row!, "id"),
           value = {
@@ -79,6 +88,7 @@ export function createWorldRecreationDomain(size: number): CityDomain {
           };
         write.points = [...(write.points ?? []).filter((prior) => prior.id !== id), value];
       }
+
       relocateWorldMarches(context, target);
       write.world = {
         ...state.world,
@@ -86,6 +96,7 @@ export function createWorldRecreationDomain(size: number): CityDomain {
         lastCityDefTime: context.now,
         lastMoveCityTime: context.now,
       };
+
       return {
         response: encode(
           worldCityRecreated({

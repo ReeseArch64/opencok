@@ -16,19 +16,24 @@ import { errors } from "@opencok/constants/game";
 import type { CityDomain } from "./city-progression";
 import type { OlympicScheduleStore } from "@opencok/contracts/olympic";
 import type { Rules } from "@opencok/rules/game";
+
 const assets = ["wood", "stone", "iron", "food"] as const;
+
 function invalid(): never {
   throw new GameError(errors.invalid, "city_progression");
 }
+
 export class OlympicScheduleService {
   constructor(
     readonly store: OlympicScheduleStore,
     readonly rules: Rules,
     readonly now = Date.now,
   ) {}
+
   refresh() {
     const now = BigInt(this.now()),
       period = olympicPeriod(this.rules);
+
     return this.store.reconcile(
       olympicDefinitions(this.rules),
       !!period?.enabled && now >= period.start && now <= period.end,
@@ -36,12 +41,15 @@ export class OlympicScheduleService {
     );
   }
 }
+
 export function olympicSettlementOperation(owner: string, ids: readonly string[]) {
   if (!ids.length || ids.length > 64 || new Set(ids).size !== ids.length) invalid();
+
   return `olympic:${createHash("sha256")
     .update(JSON.stringify([owner, [...ids].sort()]))
     .digest("hex")}`;
 }
+
 export const olympicDomain: CityDomain = {
   commands: [
     "Olympic.question.info",
@@ -53,13 +61,17 @@ export const olympicDomain: CityDomain = {
   types: [],
   async prepare(context, command, params) {
     const state = context.state.olympic;
+
     if (!state) invalid();
+
     const period = olympicPeriod(context.rules),
       active = !!period?.enabled && context.now >= period.start && context.now <= period.end,
       definitions = olympicDefinitions(context.rules),
       configuration = new Map(definitions.map((row) => [text(row, "id"), row])),
       mail = command === "Olympic.settle";
+
     if (mail && (!period || context.now <= period.end)) invalid();
+
     const questions = await reconcileOlympicQuestions(
         state.questions,
         definitions,
@@ -70,12 +82,15 @@ export const olympicDomain: CityDomain = {
       byId = new Map(questions.map((row) => [text(row, "id"), row])),
       bets = state.bets.map((row) => {
         const question = byId.get(text(row, "questionId"));
+
         if (!question || num(question, "ended") !== 1 || num(row, "ended") === 1) return row;
+
         const winner = text(question, "result") === text(row, "betCountry"),
           reward =
             winner && question.winningBetNum !== null
               ? olympicPayout(cityInteger(row.betNum, 1), question)
               : num(row, "reward");
+
         return { ...row, result: text(question, "result"), ended: 1, reward };
       });
     context.write.olympic = {
@@ -86,6 +101,7 @@ export const olympicDomain: CityDomain = {
       type === 5
         ? context.balance("gold")
         : context.balance(assets[type]!) + context.balance(`${assets[type]!}bind`);
+
     if (command === "Olympic.question.info")
       return {
         response: encode({
@@ -95,6 +111,7 @@ export const olympicDomain: CityDomain = {
               .map((row) => {
                 const definition = configuration.get(text(row, "id"))!,
                   type = cityInteger(definition.type, 0, 5);
+
                 return sfs.object(
                   olympicQuestionView(
                     row,
@@ -108,6 +125,7 @@ export const olympicDomain: CityDomain = {
         }),
         event: null,
       };
+
     if (command === "Olympic.bet.info")
       return {
         response: encode({
@@ -115,6 +133,7 @@ export const olympicDomain: CityDomain = {
             bets.map((row) => {
               const question = byId.get(text(row, "questionId")),
                 definition = configuration.get(text(row, "questionId"));
+
               return sfs.object(
                 olympicBetView(
                   row,
@@ -129,6 +148,7 @@ export const olympicDomain: CityDomain = {
         }),
         event: null,
       };
+
     if (command === "Olympic.bet") {
       const id = str(params, "questionId"),
         type = cityInteger(int(params, "resType"), 0, 5),
@@ -136,6 +156,7 @@ export const olympicDomain: CityDomain = {
         answer = str(params, "answer"),
         question = byId.get(id),
         definition = configuration.get(id);
+
       if (
         !active ||
         !question ||
@@ -152,8 +173,10 @@ export const olympicDomain: CityDomain = {
         context.now >= long(question, "startTime")
       )
         invalid();
+
       if (type === 5) context.economy.gold(-BigInt(count));
       else context.spend({ [assets[type]!]: BigInt(count) }, false);
+
       question.betNum = long(question, "betNum") + BigInt(count);
       context.write.olympic.bets = [
         ...(context.write.olympic.bets ?? []),
@@ -170,12 +193,15 @@ export const olympicDomain: CityDomain = {
           reward: 0,
         },
       ];
+
       return { response: encode({ gold: sfs.long(context.balance("gold")) }), event: null };
     }
+
     const pending = bets
         .filter((row) => num(row, "ended") === 1 && num(row, "rewarded") !== 1)
         .slice(0, mail ? 64 : 4096),
       totals = new Map<number, bigint>();
+
     if (
       mail &&
       str(params, "operationId") !==
@@ -185,16 +211,22 @@ export const olympicDomain: CityDomain = {
         )
     )
       invalid();
+
     for (const bet of pending) {
       if (text(bet, "result") === text(bet, "betCountry")) {
         const type = cityInteger(bet.resourceType, 0, 5),
           value = BigInt(cityInteger(bet.reward));
+
         if (type === 4) invalid();
+
         totals.set(type, (totals.get(type) ?? 0n) + value);
+
         if (mail && value > 0n) {
           const template = context.rules.mail.get("11811"),
             contents = javaMailBytes(template?.message);
+
           if (!template || !contents) invalid();
+
           const quests = (context.write.quests ??= {});
           quests.mail = [
             ...(quests.mail ?? []),
@@ -214,23 +246,31 @@ export const olympicDomain: CityDomain = {
           ];
         }
       }
+
       bet.rewarded = 1;
     }
+
     context.write.olympic.bets = bets.filter(
       (row) => pending.includes(row) || !state.bets.includes(row),
     );
+
     if (mail) return { response: encode({}), event: null };
+
     const rewards = [];
+
     for (const [type, value] of [...totals].toSorted((a, b) => a[0] - b[0])) {
       if (type === 5) context.economy.gold(value);
       else context.economy.resource(`${assets[type]!}bind`, value);
+
       let remaining = value;
+
       while (remaining > 0n) {
         const next = remaining > 2147483647n ? 2147483647n : remaining;
         rewards.push(sfs.object({ type: sfs.int(type), value: sfs.int(Number(next)) }));
         remaining -= next;
       }
     }
+
     return { response: encode({ reward: sfs.array(rewards) }), event: null };
   },
   async apply() {

@@ -11,4 +11,5 @@ export interface GeneralRandomNumDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type GeneralRandomNumDefinitionCatalog = CatalogTable<GeneralRandomNumDefinition>;

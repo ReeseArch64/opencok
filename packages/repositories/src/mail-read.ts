@@ -31,6 +31,7 @@ export function markMailRead(
     )
   )
     throw new Error("Invalid mail read query");
+
   return db.transaction(
     async (tx) => {
       const profile = (
@@ -46,6 +47,7 @@ export function markMailRead(
           .limit(1)
           .for("update")
       )[0];
+
       if (
         !profile ||
         profile.uid !== uid ||
@@ -55,6 +57,7 @@ export function markMailRead(
         !query.ids.length
       )
         return { profile };
+
       const changed = await tx
         .update(mail)
         .set({ status: 1 })
@@ -66,6 +69,7 @@ export function markMailRead(
           ),
         )
         .returning({ uid: mail.uid, type: mail.type, createTime: mail.createTime });
+
       if (changed.length)
         await tx
           .insert(mail_update)
@@ -80,7 +84,9 @@ export function markMailRead(
             target: [mail_update.toUser, mail_update.mailUid],
             set: { updateTime: sql`greatest(${mail_update.updateTime}, excluded."updateTime")` },
           });
+
       const gifts = query.batch ? [] : changed.filter((row) => row.type === 28);
+
       if (gifts.length)
         await tx
           .insert(mail_gift_opening)
@@ -93,6 +99,7 @@ export function markMailRead(
             })),
           )
           .onConflictDoNothing({ target: [mail_gift_opening.mailUid, mail_gift_opening.sendTime] });
+
       return { profile };
     },
     { isolationLevel: "read committed", accessMode: "read write" },

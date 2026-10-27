@@ -1,6 +1,7 @@
 import { sfs, type Fields } from "@opencok/messages/sfs";
 import { seasonalExchangeSchema } from "@opencok/validations/seasonal-exchange";
 import { validateFields } from "./validation";
+
 export function seasonalExchangeView(
   level: number,
   refreshTime: bigint,

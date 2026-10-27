@@ -9,19 +9,24 @@ import { playerItemGiftRecipient } from "@opencok/rules/player-item-gifts";
 import type { CosmeticTargetWrite } from "@opencok/contracts/city-cosmetics";
 import type { MutationTransaction } from "./mutation";
 import { writePlayerEffects } from "./player-effects";
+
 export async function readCosmeticTarget(
   tx: MutationTransaction,
   request?: Uint8Array,
   actor?: string,
 ) {
   const params = request ? decode(Buffer.from(request)) : {};
+
   if (!actor && (int(params, "type", -1) !== 45 || !str(params, "uid", "").trim())) return;
+
   const uid = playerItemGiftRecipient(actor ?? str(params, "uid"));
   const [profile] = await tx
     .select({ uid: userprofile.uid, realm: userprofile.serverId })
     .from(userprofile)
     .where(eq(userprofile.uid, uid));
+
   if (!profile) throw new Error("Missing cosmetic interaction target");
+
   const [world] = await tx
     .select({ point: user_world.pointId, worldId: user_world.worldId })
     .from(user_world)
@@ -33,17 +38,22 @@ export async function readCosmeticTarget(
     .orderBy(asc(user_state.stateId))
     .limit(4097)
     .for("update");
+
   if (states.length > 4096 || (world && world.worldId !== 0))
     throw new Error("Invalid cosmetic target world or state bound");
+
   const avatars = await tx
     .select()
     .from(avatar_storage)
     .where(eq(avatar_storage.uid, uid))
     .limit(4097)
     .for("update");
+
   if (avatars.length > 4096) throw new Error("Cosmetic storage exceeds bound");
+
   return { ...profile, point: world?.point ?? 0, states, avatars };
 }
+
 export async function writeCosmeticTarget(
   tx: MutationTransaction,
   owner: string,
@@ -52,9 +62,12 @@ export async function writeCosmeticTarget(
 ) {
   if (write.uid !== target || write.states.some((row) => row.uid !== target))
     throw new Error("Foreign cosmetic interaction write");
+
   if (write.uid !== owner)
     await writePlayerEffects(tx, write.uid, { states: write.states, deletedStates: write.deleted });
+
   if ((write.avatars?.length ?? 0) > 64) throw new Error("Cosmetic storage write exceeds bound");
+
   for (const row of write.avatars ?? []) {
     if (
       row.uid !== target ||
@@ -64,6 +77,7 @@ export async function writeCosmeticTarget(
       ![0, 1].includes(num(row, "effectiveSign"))
     )
       throw new Error("Invalid cosmetic ownership write");
+
     const value = {
       uid: write.uid,
       avatarId: text(row, "avatarId"),

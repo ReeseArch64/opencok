@@ -63,4 +63,5 @@ export interface ArmsDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type ArmsDefinitionCatalog = CatalogTable<ArmsDefinition>;

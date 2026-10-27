@@ -1,4 +1,5 @@
 import type { FunctionOnCopyDefinition } from "../types/function_on - Copy.ts";
+
 export const records: readonly FunctionOnCopyDefinition[] = [
   { "id": "newMonsterName_lord", "online": "all", "test": "all", "version": "7.23.0", "pf": "all" },
   {

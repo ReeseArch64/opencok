@@ -1,9 +1,11 @@
 import type { Row } from "./rows";
+
 export interface GroupBuyTier {
   level: number;
   reward: string;
   mail: string;
 }
+
 export interface GroupBuyRound {
   sTime: number;
   eTime: number;
@@ -13,11 +15,13 @@ export interface GroupBuyRound {
   total?: number;
   mail?: string;
 }
+
 export interface GroupBuyPeriod {
   start: bigint;
   end: bigint;
   rounds: readonly GroupBuyRound[];
 }
+
 export interface GroupBuyState {
   openedAt: bigint;
   load(
@@ -32,10 +36,12 @@ export interface GroupBuyState {
     recent: readonly Row[];
   }>;
 }
+
 export interface GroupBuyWrite {
   activity: Row;
   record?: Row;
 }
+
 export interface GroupBuyGateway {
   accepted(input: { owner: string; kingdomId: number; eventId: string }): Promise<{
     activityId: string;

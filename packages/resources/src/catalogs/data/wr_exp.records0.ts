@@ -1,4 +1,5 @@
 import type { WrExpDefinition } from "../types/wr_exp.ts";
+
 export const records: readonly WrExpDefinition[] = [
   { "id": 20019001, "min": 1, "max": 1, "experience": 70, "reward": 239955 },
   { "id": 20019002, "min": 2, "max": 3, "experience": 65, "reward": 239956 },

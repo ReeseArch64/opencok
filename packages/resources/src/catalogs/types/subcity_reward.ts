@@ -9,4 +9,5 @@ export interface SubcityRewardDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type SubcityRewardDefinitionCatalog = CatalogTable<SubcityRewardDefinition>;

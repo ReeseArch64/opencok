@@ -6,4 +6,5 @@ export interface TrialDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type TrialDefinitionCatalog = CatalogTable<TrialDefinition>;

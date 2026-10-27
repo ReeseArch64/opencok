@@ -28,6 +28,7 @@ export class ChatHistoryRoomsController extends ChatHistoryController {
     for (const [roomId, afterMs] of Object.entries(requested)) {
       if (!/^(original_|country_|alliance_|global_|local_|private_[a-f0-9-]{36}$)/.test(roomId))
         continue;
+
       if (!isSafeInteger(afterMs) || afterMs < 0) throw new ChatCommandError("invalid_time");
 
       const room = await this.requireRoom(context, roomId);

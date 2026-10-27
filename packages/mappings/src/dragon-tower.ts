@@ -11,6 +11,7 @@ import { towerArmy, towerIndex, towerFailure } from "@opencok/rules/dragon-tower
 import { cityInteger } from "@opencok/rules/city-progression";
 import type { Rules } from "@opencok/rules/game";
 import type { DragonTowerState } from "@opencok/contracts/dragon-tower";
+
 export function towerArmyView(row: Row, armies: readonly Row[]): Fields {
   const units = (key: string) =>
     sfs.array(
@@ -22,6 +23,7 @@ export function towerArmyView(row: Row, armies: readonly Row[]): Fields {
         }),
       ),
     );
+
   return validateFields(towerArmySchema, {
     army: units("army"),
     deadarmy: units("deadarmy"),
@@ -30,6 +32,7 @@ export function towerArmyView(row: Row, armies: readonly Row[]): Fields {
     armyrevivecd: sfs.long(long(row, "armyrevivecd")),
   });
 }
+
 export function towerUserView(
   state: DragonTowerState,
   row: Row,
@@ -38,6 +41,7 @@ export function towerUserView(
   limit: number,
 ): Fields {
   const config = rules.items.get("dragon_tower") ?? {};
+
   return validateFields(towerUserSchema, {
     currentlayer: sfs.int(towerIndex(num(row, "currentlayer"))),
     weeklymaxlayer: sfs.int(towerIndex(num(row, "weeklymaxlayer"))),
@@ -57,9 +61,12 @@ export function towerUserView(
     sharetimes: sfs.short(num(row, "sharetimes")),
   });
 }
+
 export function towerLayerView(row: Row): Fields {
   const awards = text(row, "awards");
+
   if (awards.length > 65535) towerFailure();
+
   return validateFields(towerLayerSchema, {
     layer: sfs.int(num(row, "layer")),
     layerindex: sfs.int(towerIndex(num(row, "layer"))),
@@ -73,15 +80,19 @@ export function towerLayerView(row: Row): Fields {
     fighttime: sfs.long(long(row, "fighttime")),
   });
 }
+
 export function towerBuffViews(rows: readonly Row[], layer: number, rules: Rules) {
   return rows
     .filter((row) => {
       const rule = rules.advanced.dragonTowerBuffs?.get(text(row, "buffid"));
+
       if (!rule) towerFailure();
+
       return rule.time === "-1" || layer <= num(row, "remainlayers");
     })
     .map((row) => {
       const time = Number(rules.advanced.dragonTowerBuffs!.get(text(row, "buffid"))!.time);
+
       return sfs.object({
         buffid: sfs.int(num(row, "buffid")),
         remainlayers: sfs.int(time > 0 ? towerIndex(num(row, "remainlayers")) : time),
@@ -89,6 +100,7 @@ export function towerBuffViews(rows: readonly Row[], layer: number, rules: Rules
       });
     });
 }
+
 export function towerRankingView(rows: readonly Row[]) {
   return rows.map((row, index) =>
     sfs.object({

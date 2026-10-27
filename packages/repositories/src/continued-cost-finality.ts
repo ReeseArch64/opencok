@@ -12,7 +12,9 @@ import { fenceRealmTransaction, type RealmAuthority } from "./realm-authority";
 import { pendingOwnedProgression } from "./progression-finality";
 import type { CostFinalityOwned } from "@opencok/contracts/continued-cost-finality";
 import type { Database } from "./game";
+
 export { createCostFinalityShared } from "./continued-cost-finality-global";
+
 export function createCostFinalityOwned(
   db: Database["kingdom"]["db"],
   authority: RealmAuthority,
@@ -22,19 +24,24 @@ export function createCostFinalityOwned(
       return db.transaction(async (tx) => {
         await tx.execute(sql`set local lock_timeout='1s'`);
         await fenceRealmTransaction(tx, authority, "update");
+
         if (
           period.id !== costRankingPeriodId(period.startTime, period.endTime, period.type) ||
           !period.expectedRealms.includes(authority.kingdomId) ||
           now < period.endTime + 300000n
         )
           throw new Error("Premature or foreign consumption closure");
+
         const [prior] = await tx
           .select()
           .from(closures)
           .where(eq(closures.periodId, period.id))
           .for("update");
+
         if (prior) return prior;
+
         if (await pendingOwnedProgression(tx, authority.kingdomId, period.endTime, now)) return;
+
         const [nickname] = await tx
           .select({ id: nickname_change.operationId })
           .from(nickname_change)
@@ -47,7 +54,9 @@ export function createCostFinalityOwned(
             ),
           )
           .limit(1);
+
         if (period.type === 1 && nickname) return;
+
         await tx
           .insert(periods)
           .values({
@@ -63,6 +72,7 @@ export function createCostFinalityOwned(
           .from(periods)
           .where(eq(periods.id, period.id))
           .for("update");
+
         if (
           !manifest ||
           manifest.state !== 0 ||
@@ -71,6 +81,7 @@ export function createCostFinalityOwned(
           manifest.type !== period.type
         )
           throw new Error("Conflicting owned consumption manifest");
+
         const rows = await tx
           .select({ score: scores, profile: userprofile, hide: user_mixed_info.costHide })
           .from(scores)
@@ -111,6 +122,7 @@ export function createCostFinalityOwned(
           .returning();
         await tx.update(periods).set({ state: 1 }).where(eq(periods.id, period.id));
         authority.assertReady();
+
         return saved;
       });
     },
@@ -122,12 +134,14 @@ export function createCostFinalityOwned(
           .from(closures)
           .where(eq(closures.periodId, period.id))
           .for("update");
+
         if (
           !saved ||
           finalizedAt < period.endTime + 300000n ||
           (saved.finalizedAt !== 0n && saved.finalizedAt !== finalizedAt)
         )
           throw new Error("Invalid consumption final acknowledgement");
+
         await tx
           .update(closures)
           .set({ phase: 2, finalizedAt })

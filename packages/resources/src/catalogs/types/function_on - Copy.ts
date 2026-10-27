@@ -7,4 +7,5 @@ export interface FunctionOnCopyDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type FunctionOnCopyDefinitionCatalog = CatalogTable<FunctionOnCopyDefinition>;

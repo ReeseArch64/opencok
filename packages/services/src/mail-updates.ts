@@ -15,9 +15,11 @@ export function mailUpdatesProjection(
   envelope: Fields = {},
 ): Fields {
   if (entries.length > 10000) throw new Error("Too many mail update markers");
+
   const ids = new Set<string>();
   const updates: string[] = [];
   const deleted: string[] = [];
+
   for (const entry of entries) {
     if (
       typeof entry.uid !== "string" ||
@@ -31,27 +33,35 @@ export function mailUpdatesProjection(
       entry.updateTime > 9223372036854775807n
     )
       throw new Error("Invalid mail update marker");
+
     ids.add(entry.uid);
     const uid = JSON.stringify(entry.uid);
+
     if (entry.flags === null) {
       deleted.push(uid);
       continue;
     }
+
     const { status, rewardStatus, saveFlag } = entry.flags;
+
     if (
       [status, rewardStatus, saveFlag].some(
         (value) => !Number.isInteger(value) || value < -2147483648 || value > 2147483647,
       )
     )
       throw new Error("Invalid mail update flags");
+
     updates.push(
       `{"uid":${uid},"status":${status},"rewardStatus":${rewardStatus},"saveFlag":${saveFlag},"mailLastUpdateTime":${entry.updateTime}}`,
     );
   }
+
   const data = `{"update":[${updates.join(",")}],"delete":[${deleted.join(",")}]}`;
   const body: Fields = { data: sfs.string(data.length >= 32767 ? "" : data) };
+
   if (data.length >= 32767) {
     const chunks: Value[] = [];
+
     for (let offset = 0; offset < data.length; offset += 5000)
       chunks.push(
         sfs.string(
@@ -63,8 +73,11 @@ export function mailUpdatesProjection(
             ),
         ),
       );
+
     body.updatemailArr = sfs.array(chunks);
   }
+
   encode(extension("chat.get.update.mails", { ...body, ...envelope }));
+
   return body;
 }

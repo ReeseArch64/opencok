@@ -1,4 +1,5 @@
 import type { WrRankDefinition } from "../types/wr_rank.ts";
+
 export const records: readonly WrRankDefinition[] = [
   { "id": 20018001, "type": 1, "level": 1, "experience": 0, "name": 171000 },
   { "id": 20018002, "type": 1, "level": 2, "experience": 15, "status": 510056, "name": 171001 },

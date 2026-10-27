@@ -7,4 +7,5 @@ export interface DefeatNoticeDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type DefeatNoticeDefinitionCatalog = CatalogTable<DefeatNoticeDefinition>;

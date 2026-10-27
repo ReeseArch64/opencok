@@ -24,11 +24,16 @@ export async function loadRules(directory?: string, kingdomId = 1) {
   const read = async (name: GameplayCatalog): Promise<string | CatalogDefinition> => {
     if (directory === undefined) {
       const factory = catalogDefinitions[name as keyof typeof catalogDefinitions];
+
       if (!factory) throw new Error("Missing gameplay catalog");
+
       return factory();
     }
+
     const file = join(directory, `${name}.xml`);
+
     if ((await stat(file)).size > 16 * 1024 * 1024) throw new Error("Oversized gameplay resource");
+
     return readFile(file, "utf8");
   };
   const records = (source: string | CatalogDefinition, name: GameplayCatalog): Rule[] =>
@@ -37,6 +42,7 @@ export async function loadRules(directory?: string, kingdomId = 1) {
       : legacyCatalogRecords(source, catalogCodecs[name] ?? {}, name);
   const load = async (name: GameplayCatalog): Promise<Map<string, Rule>> => {
     const source = await read(name);
+
     return typeof source === "string"
       ? fixtures!.parseRules(source, name)
       : indexRules(records(source, name), name);
@@ -45,7 +51,9 @@ export async function loadRules(directory?: string, kingdomId = 1) {
     (await available(name)) ? records(await read(name), name) : [];
   const parseDeclared = (source: string | CatalogDefinition, name: GameplayCatalog) => {
     if (typeof source === "string") return fixtures!.parseDeclaredCatalog(source);
+
     if (source.kind !== CatalogKind.Table) throw new Error("Expected gameplay table");
+
     return legacyDeclaredCatalog(source, catalogCodecs[name] ?? {});
   };
   const declared = async (name: GameplayCatalog) =>
@@ -224,6 +232,7 @@ export async function loadRules(directory?: string, kingdomId = 1) {
     ? records(await read(GameplayCatalog.Achievement), GameplayCatalog.Achievement)
     : [];
   const achievementCount = achievementRecords.length;
+
   return new Rules(
     buildings,
     roles,
@@ -401,9 +410,11 @@ export async function loadRules(directory?: string, kingdomId = 1) {
 async function exists(path: string): Promise<boolean> {
   try {
     await access(path);
+
     return true;
   } catch (error) {
     if ((error as NodeJS.ErrnoException).code === "ENOENT") return false;
+
     throw error;
   }
 }

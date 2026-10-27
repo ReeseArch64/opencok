@@ -7,5 +7,6 @@ export interface EquipmentStrengthenMoveDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type EquipmentStrengthenMoveDefinitionCatalog =
   CatalogTable<EquipmentStrengthenMoveDefinition>;

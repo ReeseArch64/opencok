@@ -13,4 +13,5 @@ export interface WapMatchDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type WapMatchDefinitionCatalog = CatalogTable<WapMatchDefinition>;

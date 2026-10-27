@@ -10,4 +10,5 @@ export interface WaBuildDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type WaBuildDefinitionCatalog = CatalogTable<WaBuildDefinition>;

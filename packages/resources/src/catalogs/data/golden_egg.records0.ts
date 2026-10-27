@@ -1,4 +1,5 @@
 import type { GoldenEggDefinition } from "../types/golden_egg.ts";
+
 export const records: readonly GoldenEggDefinition[] = [
   { "id": 9051001, "type": 0, "rate": 300, "score": 0, "max": 3 },
   { "id": 9051002, "type": 1, "reward": 249960, "rate": 2400, "score": 2 },

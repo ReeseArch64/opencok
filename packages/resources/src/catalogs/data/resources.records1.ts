@@ -1,4 +1,5 @@
 import type { ResourcesDefinition } from "../types/resources.ts";
+
 export const records: readonly ResourcesDefinition[] = [
   { "id": 110131, "areaLevel": 13, "ratio": 8, "resType": 2, "resLevel": 4, "hours": 0 },
   { "id": 110132, "areaLevel": 13, "ratio": 20, "resType": 3, "resLevel": 4, "hours": 0 },

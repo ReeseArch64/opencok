@@ -17,4 +17,5 @@ export interface OverlordDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type OverlordDefinitionCatalog = CatalogTable<OverlordDefinition>;

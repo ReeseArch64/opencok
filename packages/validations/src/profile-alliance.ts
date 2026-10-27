@@ -28,6 +28,7 @@ export const allianceStringFields = [
   "bannerStyle",
   "taskLimit",
 ];
+
 export const allianceIntegerFields = [
   "abbrRename",
   "curMember",
@@ -44,6 +45,7 @@ export const allianceIntegerFields = [
   "cdfVersion",
   "taskNum",
 ];
+
 export const allianceLongFields = [
   "alliancepoint",
   "createtime",

@@ -1,4 +1,5 @@
 import type { BuildingLevelDefinition } from "@opencok/contracts/building";
+
 export const building402000: readonly BuildingLevelDefinition[] = [
   {
     id: 402000,

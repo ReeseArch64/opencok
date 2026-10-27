@@ -1,4 +1,5 @@
 import type { LuckyReturnExchangeDefinition } from "../types/lucky_return_exchange.ts";
+
 export const records: readonly LuckyReturnExchangeDefinition[] = [
   {
     "id": 30447943,

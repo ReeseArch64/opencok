@@ -1,4 +1,5 @@
 import type { HeritageDefinition } from "../types/heritage.ts";
+
 export const records: readonly HeritageDefinition[] = [
   {
     "id": 1001,

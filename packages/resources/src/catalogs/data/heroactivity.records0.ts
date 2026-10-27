@@ -1,4 +1,5 @@
 import type { HeroactivityDefinition } from "../types/heroactivity.ts";
+
 export const records: readonly HeroactivityDefinition[] = [
   {
     "id": 9000000,

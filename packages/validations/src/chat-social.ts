@@ -1,14 +1,17 @@
 import { z } from "zod";
+
 const identifier = z
   .string()
   .min(1)
   .max(40)
   .regex(/^[a-zA-Z0-9_-]+$/);
+
 const text = (length: number) =>
   z
     .string()
     .max(length)
     .refine((value) => value.isWellFormed() && !value.includes("\0"));
+
 export const chatSocialParams = z.object({
   fid: text(100).optional(),
   type: z.number().int().min(0).max(102).optional(),

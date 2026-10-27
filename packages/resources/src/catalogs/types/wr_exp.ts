@@ -7,4 +7,5 @@ export interface WrExpDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type WrExpDefinitionCatalog = CatalogTable<WrExpDefinition>;

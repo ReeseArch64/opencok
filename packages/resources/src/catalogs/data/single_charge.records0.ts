@@ -1,4 +1,5 @@
 import type { SingleChargeDefinition } from "../types/single_charge.ts";
+
 export const records: readonly SingleChargeDefinition[] = [
   { "id": 9021801, "group": 1, "money": "gold_8", "reward": 250102, "number": 1, "times": 1 },
   { "id": 9021802, "group": 1, "money": "gold_1", "reward": 250103, "number": 1, "times": 3 },

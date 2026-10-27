@@ -38,6 +38,7 @@ export async function publishPlayerUpdate(
     BigInt(updatedAt) > 9223372036854775807n
   )
     throw new DependencyError("redis");
+
   try {
     const result = await command(
       "EVAL",
@@ -46,6 +47,7 @@ export async function publishPlayerUpdate(
       `opencok:kingdom:${kingdomId}:player-update:${uid}`,
       updatedAt,
     );
+
     if (result !== 0 && result !== 1) throw new Error();
   } catch {
     throw new DependencyError("redis");

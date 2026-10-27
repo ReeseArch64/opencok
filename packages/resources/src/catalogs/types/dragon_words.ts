@@ -33,4 +33,5 @@ export interface DragonWordsDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type DragonWordsDefinitionCatalog = CatalogTable<DragonWordsDefinition>;

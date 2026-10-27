@@ -1,4 +1,5 @@
 import type { SpResourcesInitDefinition } from "../types/sp_resources_init.ts";
+
 export const records: readonly SpResourcesInitDefinition[] = [
   { "id": 521605, "areaLevel": 5, "resourceId": 518037, "type": 10 },
   { "id": 521606, "areaLevel": 5, "resourceId": 518044, "type": 10 },

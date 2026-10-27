@@ -15,4 +15,5 @@ export interface HeroRouletteDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type HeroRouletteDefinitionCatalog = CatalogTable<HeroRouletteDefinition>;

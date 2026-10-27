@@ -7,4 +7,5 @@ export interface AttributeRandomDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type AttributeRandomDefinitionCatalog = CatalogTable<AttributeRandomDefinition>;

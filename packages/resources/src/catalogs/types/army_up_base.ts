@@ -10,4 +10,5 @@ export interface ArmyUpBaseDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type ArmyUpBaseDefinitionCatalog = CatalogTable<ArmyUpBaseDefinition>;

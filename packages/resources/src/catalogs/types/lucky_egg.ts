@@ -6,4 +6,5 @@ export interface LuckyEggDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type LuckyEggDefinitionCatalog = CatalogTable<LuckyEggDefinition>;

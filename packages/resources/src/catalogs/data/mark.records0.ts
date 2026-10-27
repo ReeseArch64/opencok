@@ -1,4 +1,5 @@
 import type { MarkDefinition } from "../types/mark.ts";
+
 export const records: readonly MarkDefinition[] = [
   { "what": "loading成功，进入游戏", "id": 4000001, "item": 5 },
   { "what": "选择跳过新手剧情", "id": 4000005, "item": 6 },

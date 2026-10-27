@@ -5,4 +5,5 @@ export interface GeneralDrawRateDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type GeneralDrawRateDefinitionCatalog = CatalogTable<GeneralDrawRateDefinition>;

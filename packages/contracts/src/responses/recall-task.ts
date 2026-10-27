@@ -1,4 +1,5 @@
 import type { ResponseValue } from "./value";
+
 export interface RecallTaskRowResponse {
   reward: readonly ResponseValue[];
   num: number;
@@ -7,6 +8,7 @@ export interface RecallTaskRowResponse {
   taskid: string;
   receive: boolean;
 }
+
 export interface RecallTaskResponse {
   targetList: readonly RecallTaskRowResponse[];
   opentime?: bigint;

@@ -5,6 +5,7 @@ export interface FragmentExchangeOffer {
   reward: string;
   multiple: number;
 }
+
 export interface FragmentExchangeRecipe {
   type: number;
   same: number;

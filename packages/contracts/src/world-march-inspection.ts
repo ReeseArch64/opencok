@@ -1,5 +1,6 @@
 import type { Row } from "./rows";
 import type { WorldResourceOwnerSnapshot } from "./world-point-detail";
+
 export interface WorldMarchInspection {
   march: Row;
   point: Row;
@@ -8,6 +9,7 @@ export interface WorldMarchInspection {
   skills: readonly Row[];
   owner: WorldResourceOwnerSnapshot;
 }
+
 export interface WorldMarchInspectionStore {
   read(
     observer: string,

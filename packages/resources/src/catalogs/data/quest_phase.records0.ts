@@ -1,4 +1,5 @@
 import type { QuestPhaseDefinition } from "../types/quest_phase.ts";
+
 export const records: readonly QuestPhaseDefinition[] = [
   { "id": 2900001, "para1": 10, "reward": 247415 },
   { "id": 2900002, "para1": 20, "reward": 247416 },

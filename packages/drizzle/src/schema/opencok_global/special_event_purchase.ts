@@ -9,6 +9,7 @@ import {
   varchar,
 } from "drizzle-orm/pg-core";
 import { opencok_global } from "../namespaces";
+
 export const special_event_purchase = opencok_global.table(
   "special_event_purchase",
   {

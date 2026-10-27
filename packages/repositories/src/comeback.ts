@@ -10,6 +10,7 @@ import type { ComebackState, ComebackWrite } from "@opencok/contracts/comeback";
 import { readComebackSession, lockComebackDevice } from "./comeback-session";
 import { insertSystemMail } from "./system-mail";
 import type { MutationTransaction } from "./mutation";
+
 export async function readComeback(
   tx: MutationTransaction,
   owner: string,
@@ -23,7 +24,9 @@ export async function readComeback(
     .orderBy(desc(user_comeback_record.backTime), asc(user_comeback_record.configId))
     .limit(65)
     .for("update");
+
   if (records.length > 64) throw new Error("Comeback history exceeds bound");
+
   const [deviceRecord] = await tx
     .select({
       uid: user_comeback_record.uid,
@@ -46,13 +49,17 @@ export async function readComeback(
         eq(trigger_var.key, comebackViewedKey),
       ),
     );
+
   if (viewed && viewed.value !== "1") throw new Error("Invalid comeback view marker");
+
   const [charges] = await tx
     .select({ total: sql<string>`coalesce(sum(${paylog.spend}),0)::text` })
     .from(paylog)
     .where(eq(paylog.uid, owner));
   const amount = Number(charges?.total ?? 0);
+
   if (!Number.isFinite(amount)) throw new Error("Invalid comeback payment history");
+
   return {
     records,
     deviceRecord,
@@ -61,13 +68,16 @@ export async function readComeback(
     totalCharge: Math.max(-2147483648, Math.min(2147483647, Math.trunc(amount))),
   };
 }
+
 export async function writeComeback(tx: MutationTransaction, owner: string, write: ComebackWrite) {
   if (write.record) {
     const row = write.record;
     const configId = text(row, "configId"),
       deviceId = text(row, "deviceId");
+
     if (row.uid !== owner || !/^\d{1,11}$/.test(configId) || deviceId.length > 255)
       throw new Error("Invalid comeback record identity");
+
     comebackClaims(row.dailyReward, 30);
     comebackClaims(row.payReward, 100);
     const value = {
@@ -86,6 +96,7 @@ export async function writeComeback(tx: MutationTransaction, owner: string, writ
       .from(user_comeback_record)
       .where(and(eq(user_comeback_record.uid, owner), eq(user_comeback_record.configId, configId)))
       .for("update");
+
     if (
       old &&
       (old.backTime !== value.backTime ||
@@ -94,6 +105,7 @@ export async function writeComeback(tx: MutationTransaction, owner: string, writ
         (old.deviceId ?? "") !== value.deviceId)
     )
       throw new Error("Comeback enrollment identity changed");
+
     await tx
       .insert(user_comeback_record)
       .values(value)
@@ -106,11 +118,13 @@ export async function writeComeback(tx: MutationTransaction, owner: string, writ
         },
       });
   }
+
   if (write.clearBackFlags)
     await tx
       .update(userprofile)
       .set({ backFlag_mc: 0, backFlag_op: 0 })
       .where(eq(userprofile.uid, owner));
+
   if (write.viewedAt !== undefined) {
     const at = cityAmount(write.viewedAt);
     await tx
@@ -121,12 +135,14 @@ export async function writeComeback(tx: MutationTransaction, owner: string, writ
         set: { value: "1", refreshtime: at },
       });
   }
+
   if (write.mail) {
     if (
       write.mail.owner !== owner ||
       long(write.record ?? {}, "backTime") !== write.mail.createTime
     )
       throw new Error("Invalid comeback enrollment mail");
+
     await insertSystemMail(
       tx,
       write.mail,

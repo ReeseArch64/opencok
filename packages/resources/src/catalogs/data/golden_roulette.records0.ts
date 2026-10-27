@@ -1,4 +1,5 @@
 import type { GoldenRouletteDefinition } from "../types/golden_roulette.ts";
+
 export const records: readonly GoldenRouletteDefinition[] = [
   {
     "id": 89600,

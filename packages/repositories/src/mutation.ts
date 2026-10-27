@@ -10,6 +10,7 @@ import { fenceRealmTransaction, type RealmAuthority } from "./realm-authority.ts
 import type { Database } from "./game.ts";
 
 type Realm = Database["kingdom"]["db"];
+
 export type MutationTransaction = Parameters<Parameters<Realm["transaction"]>[0]>[0];
 
 function identifier(value: string, limit: number) {
@@ -22,9 +23,11 @@ function identifier(value: string, limit: number) {
   )
     throw new Error("Invalid mutation identity");
 }
+
 function bytes(value: Uint8Array, maximum: number) {
   if (!(value instanceof Uint8Array) || value.byteLength > maximum)
     throw new Error("Invalid mutation payload");
+
   return Buffer.from(value);
 }
 
@@ -40,7 +43,9 @@ export function createMutationExecutor(
   additionalAccounts: ReadonlySet<string> = new Set(),
 ) {
   const accounts = new Set(additionalAccounts);
+
   for (const account of accounts) identifier(account, 40);
+
   return async (
     input: MutationCommand,
     apply: (tx: MutationTransaction) => Promise<MutationResult>,
@@ -52,14 +57,18 @@ export function createMutationExecutor(
       requestId = input.requestId,
       command = input.command;
     const request = bytes(input.request, 65536);
+
     return db.transaction(
       async (tx) => {
         await fenceRealmTransaction(tx, authority);
         const captured = now();
+
         if (!Number.isSafeInteger(captured) || captured < 0)
           throw new Error("Invalid mutation clock");
+
         const createdAt = BigInt(captured);
         const participants = input.participants === undefined ? undefined : [...input.participants];
+
         if (participants) {
           if (
             !participants.includes(owner) ||
@@ -67,19 +76,23 @@ export function createMutationExecutor(
             new Set(participants).size !== participants.length
           )
             throw new Error("Invalid mutation participants");
+
           for (const id of participants) identifier(id, 40);
+
           const locked = await tx
             .select({ uid: userprofile.uid, realm: userprofile.serverId })
             .from(userprofile)
             .where(inArray(userprofile.uid, participants))
             .orderBy(asc(userprofile.uid))
             .for("update");
+
           if (
             locked.length !== participants.length ||
             locked.some((row) => row.realm !== authority.kingdomId)
           )
             throw new Error("Foreign mutation participant");
         }
+
         const [profile] = await tx
           .select({
             realm: userprofile.serverId,
@@ -89,12 +102,14 @@ export function createMutationExecutor(
           .from(userprofile)
           .where(eq(userprofile.uid, owner))
           .for("update");
+
         if (
           profile?.realm !== authority.kingdomId ||
           (profile.banFlag ?? 0) !== 0 ||
           (profile.banTime ?? 0n) > createdAt
         )
           throw new Error("Invalid mutation owner");
+
         const key = { kingdomId: authority.kingdomId, ownerUid: owner, requestId };
         const [receipt] = await tx
           .select()
@@ -106,17 +121,22 @@ export function createMutationExecutor(
               eq(command_receipt.requestId, requestId),
             ),
           );
+
         if (receipt) {
           if (
             receipt.request.length === 0 ||
             (receipt.expiresAt !== null && receipt.expiresAt <= createdAt)
           )
             throw new Error("Mutation receipt expired");
+
           if (receipt.command !== command || !receipt.request.equals(request))
             throw new Error("Mutation receipt conflict");
+
           authority.assertReady();
+
           return Buffer.from(receipt.response);
         }
+
         const result = await apply(tx);
         const response = await appendMutationRecords(
           tx,
@@ -127,6 +147,7 @@ export function createMutationExecutor(
           accounts,
         );
         authority.assertReady();
+
         return response;
       },
       { isolationLevel: "read committed", accessMode: "read write" },
@@ -148,30 +169,40 @@ export async function appendMutationRecords(
   identifier(command, 128);
   const request = bytes(input.request, 65536);
   const key = { kingdomId: authority.kingdomId, ownerUid: owner, requestId };
+
   if (createdAt < 0n || createdAt > 9223372036854775807n) throw new Error("Invalid mutation clock");
+
   if (
     input.expiresAt !== undefined &&
     (input.expiresAt <= createdAt || input.expiresAt > 9223372036854775807n)
   )
     throw new Error("Invalid mutation expiry");
+
   await fenceRealmTransaction(tx, authority);
   const response = bytes(result.response, 1048576);
   const postings = result.postings ?? [],
     events = result.events ?? [];
+
   if (postings.length > 256 || events.length > 256)
     throw new Error("Mutation effect limit exceeded");
+
   const seen = new Set<string>();
+
   for (const event of events) {
     if (
       event.expiresAt !== undefined &&
       (event.expiresAt <= createdAt || event.expiresAt > 9223372036854775807n)
     )
       throw new Error("Invalid mutation event expiry");
+
     identifier(event.id, 40);
     identifier(event.type, 128);
+
     if (seen.has(event.id)) throw new Error("Duplicate mutation event");
+
     seen.add(event.id);
   }
+
   await tx.insert(command_receipt).values({
     ...key,
     command,
@@ -181,10 +212,13 @@ export async function appendMutationRecords(
     createdAt,
     expiresAt: input.expiresAt,
   });
+
   for (const [entry, posting] of postings.entries()) {
     const delta = validatePosting(posting);
+
     if (posting.account !== owner && !additionalAccounts.has(posting.account))
       throw new Error("Mutation posting owner mismatch");
+
     await tx.insert(economy_posting).values({
       ...key,
       entry,
@@ -196,6 +230,7 @@ export async function appendMutationRecords(
       reason: posting.reason,
     });
   }
+
   for (const event of events)
     await tx.insert(mutation_outbox).values({
       ...key,
@@ -206,6 +241,7 @@ export async function appendMutationRecords(
       publishedAt: 0n,
       expiresAt: event.expiresAt ?? input.expiresAt,
     });
+
   for (const event of events)
     if (event.type === "continuedcost.spend")
       await captureCostFact(
@@ -219,7 +255,9 @@ export async function appendMutationRecords(
         },
         createdAt,
       );
+
   authority.assertReady();
+
   return response;
 }
 
@@ -258,10 +296,15 @@ export async function relayMutationEvent(
       asc(mutation_outbox.eventId),
     )
     .limit(1);
+
   if (!event) return false;
+
   await db.transaction((tx) => fenceRealmTransaction(tx, authority));
+
   if (event.kingdomId !== authority.kingdomId) throw new Error("Invalid mutation event realm");
+
   let timer: ReturnType<typeof setTimeout> | undefined;
+
   try {
     await Promise.race([
       publish({
@@ -293,14 +336,18 @@ export async function relayMutationEvent(
             ),
           );
       });
+
     throw error;
   } finally {
     clearTimeout(timer);
   }
+
   await db.transaction(async (tx) => {
     await fenceRealmTransaction(tx, authority);
     const time = now();
+
     if (!Number.isSafeInteger(time) || time <= 0) throw new Error("Invalid mutation clock");
+
     await tx
       .update(mutation_outbox)
       .set({ publishedAt: BigInt(time) })
@@ -315,5 +362,6 @@ export async function relayMutationEvent(
       );
     authority.assertReady();
   });
+
   return true;
 }
