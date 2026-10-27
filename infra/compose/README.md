@@ -12,7 +12,8 @@ Use both files for local development. The `dev` profile starts the application s
 these three administration tools together with PostgreSQL, PostgreSQL setup and Redis.
 The `redis` profile selects Redis and Redis Insight; `database` selects PostgreSQL,
 PostgreSQL setup and pgAdmin. The `observability` profile selects only Maple, without
-application startup dependencies. Combine `--profile dev --profile devops` to start
+application startup dependencies. The `prod` profile selects Maple and ZooKeeper.
+Combine `--profile dev --profile devops` to start
 the development stack with administration tools.
 Chat runs as its own service. Media runs inside the API using the five S3 settings
 and shared Redis authorization; there is no Files container or media overlay. See the

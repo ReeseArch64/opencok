@@ -32,7 +32,7 @@ services:
       context: ./infra/observability/maple
       dockerfile: Dockerfile
     restart: unless-stopped
-    profiles: [all, dev, observability]
+    profiles: [all, dev, prod, observability]
     networks: [opencok-internal-network, opencok-external-network]
     environment:
       MAPLE_LOCAL_INGEST_KEY: ${MAPLE_LOCAL_INGEST_KEY}
@@ -180,7 +180,7 @@ services:
     image: zookeeper:3.4.14
     container_name: opencok-zookeeper
     restart: unless-stopped
-    profiles: [all, dev]
+    profiles: [all, dev, prod]
     networks: [opencok-internal-network]
     volumes:
       - zookeeper-data:/data
