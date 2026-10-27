@@ -34,6 +34,7 @@ export function sampleRow(spec: TableContract, variant = 1): Row {
   const row = Object.fromEntries(
     spec.columns.map((column) => [column.property ?? column.name, sampleValue(column, variant)]),
   );
+  if (spec.checks.some(([name]) => name === "question_match_settlement")) row.ended = 1;
   if (spec.checks.some(([name]) => name === "chat_relation_kind")) row.kind = "contact";
   if (spec.checks.some(([name]) => name === "user_mixed_info_box_gold_mode"))
     row.ordinaryBoxGold = (variant - 1) % 2;
