@@ -60,7 +60,8 @@
     "./lucky-day": "./src/lucky-day.ts",
     "./castle-level-event": "./src/castle-level-event.ts",
     "./alchemist": "./src/alchemist.ts",
-    "./daily-investment": "./src/daily-investment.ts"
+    "./daily-investment": "./src/daily-investment.ts",
+    "./shipping-investment": "./src/shipping-investment.ts"
   },
   "dependencies": {
     "@opencok/errors": "workspace:*",

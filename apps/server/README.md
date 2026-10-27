@@ -3839,6 +3839,11 @@ bun run --cwd apps/server test:mutations
 bun run --cwd apps/server test:integration
 ```
 
+The realm CI job reserves twenty-five minutes for the complete type, unit, mutation
+and disposable-service integration checks. The expanded PostgreSQL suite can take
+about ten minutes by itself. New runs cancel superseded runs for the same pull
+request or branch; the latest run still executes every check.
+
 The integration suite owns disposable Docker instances of PostgreSQL
 `17.11-bookworm`, Redis `6.2.24-bookworm` and ZooKeeper `3.4.14` (the source
 experiment's Redis/ZooKeeper versions). It applies the real Drizzle migrations,

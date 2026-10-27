@@ -389,3 +389,18 @@ mail use only configured template keys. The legacy catalog's `end_mai` spelling
 does not silently become an `end_mail` template. Notifications, claim flags, game
 gold and receipts share the player transaction. This workflow handles game currency
 only and introduces no payment provider, schema migration or dependency.
+
+Shipping investment persists its lifetime tier count and last gross return in the
+owner's mixed-info row. Only the next configured tier can execute. The opening
+game-gold stake and active VIP requirement are checked before drawing; the stake,
+weighted return, counter and receipt commit together. A retry returns its saved
+result without another draw. Native UI projects the next offer as catalog strings
+and retains the integer count and gross-return fields. Unrelated mixed-info
+columns are preserved.
+
+The configured weight bands all participate in selection and amount ranges retain
+the reference's exclusive upper endpoint. This corrects the decompiled selection
+loop that could keep selecting the first band, and prevents clients from skipping
+straight to a later tier. Closed realm controls and absent mixed-info rows return
+the native empty response without a grant. No schema migration, payment provider
+or additional dependency is introduced.
