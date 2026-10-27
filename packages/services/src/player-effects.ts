@@ -34,7 +34,7 @@ const commands = [
 const invalid = () => {
   throw new GameError(errors.locked, "city_progression");
 };
-function setStatus(context: CityProgressionContext, id: string, count = 1) {
+export function applyProgressionStatus(context: CityProgressionContext, id: string, count = 1) {
   const plan = temporaryEffect(
     context.state.effects.states,
     context.rules,
@@ -117,7 +117,7 @@ async function prepare(context: CityProgressionContext, command: string, params:
       count = cityInteger(int(params, "count"), 1),
       rule = context.rules.goods.get(id);
     if (!rule) invalid();
-    if (rule!.type === "4") body = setStatus(context, rule!.para1!, count);
+    if (rule!.type === "4") body = applyProgressionStatus(context, rule!.para1!, count);
     else if (rule!.type === "3" && ["70", "110", "249", "250"].includes(rule!.para1 ?? "")) {
       context.write.vip = vipMutation(
         context.state.effects.vip,
@@ -279,7 +279,7 @@ async function prepare(context: CityProgressionContext, command: string, params:
         } else {
           if (!context.rules.power.statuses?.has(rule!.para1 ?? ""))
             throw new GameError(errors.unsupported, "city_progression");
-          body = setStatus(context, rule!.para1!);
+          body = applyProgressionStatus(context, rule!.para1!);
         }
         if (rule!.duration)
           context.write.states = context.write.states?.map((state) => ({

@@ -1,3 +1,4 @@
+import { readSevenDayCycle, writeSevenDayCycle } from "./seven-day-cycle";
 import { writeShippingInvestment } from "./shipping-investment";
 import { readDailyInvestment, writeDailyInvestment } from "./daily-investment";
 import { readCastleLevelEvent, writeCastleLevelEvent } from "./castle-level-event";
@@ -131,6 +132,9 @@ export function createCityProgressionStore(
       return {
         profile,
         resource,
+        sevenDayCycle: command?.startsWith("sevenday.")
+          ? await readSevenDayCycle(tx, owner)
+          : undefined,
         dailyInvestment: command?.startsWith("invest.")
           ? await readDailyInvestment(tx, owner)
           : undefined,
@@ -241,6 +245,7 @@ export function createCityProgressionStore(
               set: value,
             });
         }
+        if (write.sevenDayCycle) await writeSevenDayCycle(tx, owner, write.sevenDayCycle);
         if (write.shippingInvestment)
           await writeShippingInvestment(tx, owner, write.shippingInvestment);
         if (write.dailyInvestment) await writeDailyInvestment(tx, owner, write.dailyInvestment);

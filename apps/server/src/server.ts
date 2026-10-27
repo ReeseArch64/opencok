@@ -1,3 +1,4 @@
+import { createSevenDayCycleDomain } from "@opencok/services/seven-day-cycle";
 import { createShippingInvestmentDomain } from "@opencok/services/shipping-investment";
 import { dailyInvestmentDomain } from "@opencok/services/daily-investment";
 import { alchemistDomain } from "@opencok/services/alchemist";
@@ -437,6 +438,7 @@ export const RealmDependenciesLive = Layer.effect(
         alchemistDomain,
         dailyInvestmentDomain,
         createShippingInvestmentDomain(),
+        createSevenDayCycleDomain(),
         createLuckyDayDomain(),
         castleLevelEventDomain,
         lotteryDomain,
