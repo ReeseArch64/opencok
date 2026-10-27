@@ -2318,3 +2318,72 @@ stake, pinned weighted return and atomic receipt. Completing a tier does not
 remove the Source navigation entry early. Historical dates and closed production
 controls remain intact. Neither projection adds a payment claim route, mutation,
 schema, dependency or environment setting.
+
+## Verified gift campaigns and funded red packets
+
+The internal delivered-gift consumer requires `ServerConfig.paidGiftGateway` and
+its owned, completed `paylog` record. `server.paidGifts.consume` binds the player,
+kingdom, provider, order, exchange catalog identity, product tier, exact price in
+cents and original delivery instant. The gateway attests that the original gift
+body has already been delivered; this consumer neither accepts money nor repeats
+that gift body. The default composition has no gateway and rejects consumption.
+Native commands cannot invoke the trusted producer or submit campaign counters.
+
+A permanent canonical command receipt pins the verified evidence and prevents
+repeated provider/order delivery from issuing a second bonus. Event 56 observes
+that evidence at its original instant. The six maintained system packet tiers
+retain `gold_8` at 0.99 and `gold_1` through `gold_5` at 4.99, 9.99, 19.99, 49.99
+and 99.99. Condition 104 compares the actual saved product tier. The declared
+window, rule state, open type and personal purchase quota continue through the
+campaign planner. Action 47 saves the declared funded pool, audience, distribution
+mode, claimant count and original expiry together with campaign progress and its
+announcement outbox event. Delayed consumption cannot extend that lifetime.
+
+Native `redPackets.sd` validates the owned type-15 envelope, actual castle level,
+item limits, message and current kingdom or alliance membership before reserving
+one item and the complete gold amount. Native correlation supplies a stable
+receipt for transport retries. Preview, status and received-history commands keep
+the source field names and SFS integer and long types. Alliance access rechecks
+matching current membership; visiting profiles and foreign kingdoms cannot claim.
+Group audiences and foreign-server transfers require their corresponding shared
+protocol and remain unavailable.
+
+Claims lock the shared packet row inside the recipient's fenced economic
+transaction. Saved funding history must match the remaining pool and claimant
+count. A recipient receives at most one grant, the configured claimant quota
+cannot be exceeded, and the final claimant receives the remainder. The random
+selector retains the configured single-precision distribution and its five
+parameters while reserving positive shares for later claimants. Average packets
+retain ceiling division and the final remainder. System claims require the
+configured castle threshold. Only a newly credited claim emits event 52;
+condition 81 reads its actual grant and system sender. Previews and receipt or
+claim-history retries cannot repeat score or gold.
+
+The packet lifecycle sweep closes at most 128 due pools per transaction, using
+row locks and the realm fence. Claims reject the exact expiry boundary even
+before that sweep runs. Player-funded remainders become deterministic funded
+mail for the original local sender, with the packet closure, mail notification
+and receipt committed together. Repeated or concurrent sweep attempts cannot
+repeat the refund, and an ordinary owned mail claim delivers the reserved gold.
+System remainders close without creating mail for the synthetic system sender.
+Imported pools with inconsistent funding history require reconciliation; missing
+or relocated original senders retain their reserved pool until local ownership
+can be established. The native post-12 announcement retains the packet identity,
+server, sender and dialog identity and rechecks its current online audience.
+Without a maintained localization table, its optional system message is empty.
+
+No schema migration, dependency or environment variable is added. Inventory stays
+at 848 tables and 6,917 fields. Back up packet pools and claim records, payment
+records, inventories, wallets, campaign variables, permanent receipts, refund mail
+and outbox together. Preserve outstanding pools and evidence during rollback;
+resume their claim and refund lifecycle with a supporting binary. Provider
+integration and native-device execution remain unverified.
+
+Fourteen PostgreSQL acceptance cases passed with 121 assertions, covering all six
+paid tiers, rejected evidence, native previews and claims, concurrent conservation,
+quotas, sender and audience isolation, funded refund-mail collection, transaction
+rollback, fencing and delayed delivery. Four rule and native-routing tests passed
+with 27,021 assertions. The complete server unit suite passed 1,504 tests with
+272,974 assertions. Native TCP regression passed one test with 222 assertions
+across two realms. Required lint, formatting and 19 implemented workspace type
+checks passed.

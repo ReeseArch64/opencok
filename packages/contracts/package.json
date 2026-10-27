@@ -182,7 +182,8 @@
     "./hot-item": "./src/hot-item.ts",
     "./activity-operators": "./src/activity-operators.ts",
     "./responses/activity-operators": "./src/responses/activity-operators.ts",
-    "./comeback": "./src/comeback.ts"
+    "./comeback": "./src/comeback.ts",
+    "./paid-gifts": "./src/paid-gifts.ts"
   },
   "dependencies": {
     "@opencok/enums": "workspace:*",

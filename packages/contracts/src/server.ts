@@ -1,4 +1,5 @@
 export interface ServerConfig {
+  paidGiftGateway?: import("./paid-gifts").PaidGiftGateway;
   provisioningSecret?: string;
   chatInterval?: number;
   feedMaxCount?: number;

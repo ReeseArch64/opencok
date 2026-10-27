@@ -1,5 +1,6 @@
 import { readComeback, writeComeback } from "./comeback";
 import { readHotItems, writeHotItems } from "./hot-item";
+import { redPacketReader, writeRedPackets } from "./red-packets";
 import { readMonsterExchanges, writeMonsterExchanges } from "./monster-exchange";
 import { readFragmentExchanges, writeFragmentExchanges } from "./fragment-exchange";
 import { readCampaignProfile } from "./campaign-notice";
@@ -160,10 +161,15 @@ export function createCityProgressionStore(
         throw new Error("Civilization science aggregate exceeds bound");
       alliance = profile.allianceId ?? "";
       return {
+        redPackets:
+          command?.startsWith("redPackets.") || command === "campaign.paid.gift"
+            ? redPacketReader(tx, owner)
+            : undefined,
         campaignProfile:
           command?.startsWith("campaign.") ||
-          command === "trigger.activity" ||
-          command?.startsWith("hot.item.")
+          command?.startsWith("redPackets.") ||
+          command?.startsWith("hot.item.") ||
+          command === "trigger.activity"
             ? await readCampaignProfile(tx, owner)
             : undefined,
         costRankAward:
@@ -382,6 +388,7 @@ export function createCityProgressionStore(
         if (write.seasonalExchange) await writeSeasonalExchange(tx, owner, write.seasonalExchange);
         if (write.vipBox) await writeVipBox(tx, owner, write.vipBox);
         if (write.targetTask) await writeTargetTasks(tx, owner, write.targetTask);
+        if (write.redPackets) await writeRedPackets(tx, owner, write.redPackets);
         if (write.rechargeFeedback)
           await writeRechargeFeedback(tx, owner, write.rechargeFeedback, now);
         if (write.rechargeActivity) await writeRechargeActivity(tx, owner, write.rechargeActivity);

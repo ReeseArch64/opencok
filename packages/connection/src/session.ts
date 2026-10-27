@@ -296,6 +296,8 @@ export function createSessionHandler(
               command === "mail.reward" ||
               command === "mail.reward.batch" ||
               command === "shoppingMall.buy" ||
+              command === "redPackets.sd" ||
+              command === "redPackets.rv" ||
               command === "trade.info" ||
               command === "trade.exchange" ||
               command === "trade.cancel") &&

@@ -103,7 +103,8 @@
     "./merge-campaign": "./src/merge-campaign.ts",
     "./hot-item": "./src/hot-item.ts",
     "./activity-operators": "./src/activity-operators.ts",
-    "./comeback": "./src/comeback.ts"
+    "./comeback": "./src/comeback.ts",
+    "./red-packets": "./src/red-packets.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",
