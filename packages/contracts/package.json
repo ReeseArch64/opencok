@@ -137,7 +137,9 @@
     "./alliance-heart": "./src/alliance-heart.ts",
     "./responses/alliance-heart": "./src/responses/alliance-heart.ts",
     "./regional-recall": "./src/regional-recall.ts",
-    "./responses/regional-recall": "./src/responses/regional-recall.ts"
+    "./responses/regional-recall": "./src/responses/regional-recall.ts",
+    "./recall-task": "./src/recall-task.ts",
+    "./responses/recall-task": "./src/responses/recall-task.ts"
   },
   "dependencies": {
     "@opencok/enums": "workspace:*",

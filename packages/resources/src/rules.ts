@@ -329,6 +329,8 @@ export async function loadRules(directory?: string, kingdomId = 1) {
     },
     { ranks: await optional(GameplayCatalog.Rank), gifts: await optional(GameplayCatalog.Gift) },
     {
+      recallTasks: await optional(GameplayCatalog.RecallQuest),
+      recallActivities: await optional(GameplayCatalog.RecallActivity),
       regionalRecalls: await optional(GameplayCatalog.Recall),
       vipBoxes: await optional(GameplayCatalog.BoxVip),
       targetTasks: await optional(GameplayCatalog.TargetQuest),

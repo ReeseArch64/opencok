@@ -22,6 +22,8 @@ export interface WorldCatalogs {
   barbarians?: Map<string, Rule>;
 }
 export interface AdvancedCatalogs {
+  recallTasks?: Map<string, Rule>;
+  recallActivities?: Map<string, Rule>;
   regionalRecalls?: Map<string, Rule>;
   vipBoxes?: Map<string, Rule>;
   targetTasks?: Map<string, Rule>;
