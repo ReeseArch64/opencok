@@ -134,7 +134,8 @@ Use both files for local development; the dev override adds local Redis readines
 dependencies. Set shared `REDIS_URL=redis://redis:6379/0` in the development env.
 Profiles `dev` and `all` select the same local services; `redis` selects only Redis
 from the base file. Production supplies an external `REDIS_URL` without the dev
-override. The Redis 8.2.11 Bookworm upgrade is runtime-unverified; see the
+override. Redis remains pinned to the existing 6.2.24 Bookworm baseline pending
+compatibility validation before any upgrade; see the
 [stack guide](infra/compose/README.md#external-redis-and-deployment-separation). The setup jobs apply
 PostgreSQL migrations and import the CDN; API/server and gateway wait for their
 prerequisites. Development credentials and exposed inspection ports are for a

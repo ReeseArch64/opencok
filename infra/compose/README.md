@@ -174,9 +174,9 @@ performed for this update.
 The existing PostgreSQL, Redis, ZooKeeper and MinIO named volumes are preserved.
 The service names are `postgres`, `postgres-setup` and `minio`; update local
 overrides that previously targeted `database`, `database-setup` or `storage`.
-Redis 8.2.11 Bookworm and ZooKeeper 3.4.14 use pinned upstream images with
-configuration in Compose. The Redis upgrade is runtime-unverified; the official
-image tag is not evidence of Bun client, managed-service or production compatibility.
+Redis 6.2.24 Bookworm and ZooKeeper 3.4.14 use pinned upstream images with
+configuration in Compose. Redis remains on the existing baseline; an upgrade requires
+client, command, persistence and recovery compatibility validation first.
 See [ADR-0005](../../docs/decisions/0005-adopt-redis-for-cache.md).
 Redis command arguments retain RDB/AOF persistence, a 384 MiB limit,
 `noeviction` and disabled command slowlogs. ZooKeeper environment variables retain
@@ -186,10 +186,10 @@ Recreate the affected service after configuration changes; no image rebuild is n
 The MariaDB volume is never mounted by this stack. Startup does not reseed players,
 reactivate accounts, flush Redis or remove objects/volumes. PostgreSQL remains the
 authority for player progress. Back up databases and local inputs before changes;
-an image rollback does not reverse SQL migrations. Before the Redis major upgrade,
-back up the existing Redis volume and test the upgrade on a disposable copy.
-Redis 8 persistence files may not be readable by Redis 6; rollback requires a
-compatible pre-upgrade backup, not merely changing the image tag.
+an image rollback does not reverse SQL migrations. Before any future Redis upgrade,
+back up the existing Redis volume and test compatibility on a disposable copy.
+Newer persistence files may not be readable by older Redis versions; rollback
+requires a compatible pre-upgrade backup, not merely changing the image tag.
 
 ```sh
 docker compose -f docker-compose.yml -f docker-compose.dev.yml --profile dev run --rm postgres-setup

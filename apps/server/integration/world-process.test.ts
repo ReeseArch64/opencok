@@ -166,7 +166,7 @@ test("a killed realm recovers the same march and publishes native transitions on
           .at(-1),
       );
     for (const [image, port] of [
-      ["redis:8.2.11-bookworm", 6379],
+      ["redis:6.2.24-bookworm", 6379],
       ["zookeeper:3.4.14", 2181],
     ] as const) {
       const name = `opencok-world-process-${randomUUID()}`;

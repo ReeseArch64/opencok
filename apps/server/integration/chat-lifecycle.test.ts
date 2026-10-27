@@ -189,7 +189,7 @@ test("realm sessions, API discovery and chat sockets preserve authorized message
     for (const [name, records] of Object.entries(xml))
       await Bun.write(join(resources, `${name}.xml`), `<database>${records}</database>`);
     for (const [name, image, port] of [
-      [redis, "redis:8.2.11-bookworm", 6379],
+      [redis, "redis:6.2.24-bookworm", 6379],
       [zk, "zookeeper:3.4.14", 2181],
     ] as const) {
       await pg.docker([

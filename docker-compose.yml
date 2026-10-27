@@ -137,7 +137,7 @@ services:
       start_period: 30s
 
   redis:
-    image: redis:8.2.11-bookworm
+    image: redis:6.2.24-bookworm
     container_name: opencok-redis
     restart: unless-stopped
     profiles: [all, dev, redis]

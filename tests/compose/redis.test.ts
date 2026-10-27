@@ -42,7 +42,7 @@ test("redis profile selects only Redis with no dependency expansion", () => {
   expect(selected).toEqual(["redis"]);
   expect(base.services.redis!.depends_on ?? {}).toEqual({});
   expect(base.services.redis!.ports ?? []).toEqual([]);
-  expect(base.services.redis!.image).toBe("redis:8.2.11-bookworm");
+  expect(base.services.redis!.image).toBe("redis:6.2.24-bookworm");
 });
 
 test("all and dev select the full stack while Redis Insight stays development-only", () => {
