@@ -1,4 +1,6 @@
 export const errors = {
+  worldResourceChanged: "108896",
+  worldTargetChanged: "103730",
   battleClosed: "140223",
   nicknameOccupied: "105251",
   nicknameInvalid: "113995",
