@@ -17,6 +17,8 @@ export interface WorldMutationState {
   targetMarchCount?: number;
   treasures?: readonly Row[];
   cityBosses?: readonly Row[];
+  cityFootprint?: readonly number[];
+  civilizationFootprint?: readonly number[];
   randomDestination?: number;
   world: Row;
   points: readonly Row[];

@@ -149,7 +149,7 @@ test("march acceleration, recall and teleport enforce ownership, costs and occup
     h.clock.now = Number(back!.dueAt);
     await h.tick();
     const move = {
-      point: sfs.int(20),
+      point: sfs.int(1221),
       itemUUid: sfs.string("teleport"),
       operationId: sfs.string(randomUUID()),
     };
@@ -167,7 +167,7 @@ test("march acceleration, recall and teleport enforce ownership, costs and occup
     ).toBe(true);
     expect(
       (await h.db.db.select().from(user_world).where(eq(user_world.uid, "owner")))[0]!.pointId,
-    ).toBe(20);
+    ).toBe(1221);
     expect(
       (await h.db.db.select().from(user_item).where(eq(user_item.uuid, "teleport")))[0]!.count,
     ).toBe(1);
@@ -192,10 +192,10 @@ test("directed teleport recalls active troops and random teleport pins one free 
     ]);
     await h.start();
     h.clock.now += 1000;
-    await h.command("world.mv", { point: sfs.int(20), itemUUid: sfs.string("teleport") });
+    await h.command("world.mv", { point: sfs.int(1221), itemUUid: sfs.string("teleport") });
     const [recalled] = await h.db.db.select().from(world_march);
     expect(recalled!.state).toBe(2);
-    expect(recalled!.ownerId).toBe(20);
+    expect(recalled!.ownerId).toBe(1221);
     await expect(
       h.command("world.mv", { point: sfs.int(0), itemUUid: sfs.string("random") }),
     ).rejects.toThrow();
