@@ -11,8 +11,8 @@ export function worldFootprint(point: number, size: number, four = true): number
   const x = (point - 1) % size,
     y = Math.floor((point - 1) / size);
   if (!four) return [point];
-  if (x + 1 >= size || y + 1 >= size) worldMutationFailure();
-  return [point, point + 1, point + size, point + size + 1];
+  if (x === 0 || y === 0) worldMutationFailure();
+  return [point - 1, point - size, point - size - 1, point];
 }
 export interface MarchRouteSegment {
   sp: number;
@@ -30,6 +30,8 @@ export function ordinaryMarchRoute(
   targetFour = false,
   blackEffect = 0,
   scout = false,
+  sourceFootprint?: readonly number[],
+  targetFootprint?: readonly number[],
 ) {
   const rule = rules.items.get("world_marchtime");
   if (
@@ -43,8 +45,8 @@ export function ordinaryMarchRoute(
   let distance = Infinity,
     fromPoint = source,
     toPoint = target;
-  for (const from of worldFootprint(source, size, sourceFour))
-    for (const to of worldFootprint(target, size, targetFour)) {
+  for (const from of sourceFootprint ?? worldFootprint(source, size, sourceFour))
+    for (const to of targetFootprint ?? worldFootprint(target, size, targetFour)) {
       const current = Math.hypot(
         ((from - 1) % size) - ((to - 1) % size),
         Math.floor((from - 1) / size) - Math.floor((to - 1) / size),

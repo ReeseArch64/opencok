@@ -56,14 +56,16 @@ test("civilization castles fence placement, recover elapsed production and settl
       });
     const key = sfs.string(randomUUID());
     await Promise.all(
-      Array.from({ length: 4 }, () => command("place", { pointId: sfs.int(10), operationId: key })),
+      Array.from({ length: 4 }, () =>
+        command("place", { pointId: sfs.int(1211), operationId: key }),
+      ),
     );
     const [profile] = await h.db.db.select().from(userprofile).where(eq(userprofile.uid, "owner"));
     expect(profile!.civilizationSorce).toBe(900n);
     const [placed] = await h.db.db.select().from(civilization_castle);
     expect(placed!.status).toBe(1);
-    expect(placed!.pointId).toBe(10);
-    await expect(command("place", { pointId: sfs.int(20) })).rejects.toThrow();
+    expect(placed!.pointId).toBe(1211);
+    await expect(command("place", { pointId: sfs.int(1221) })).rejects.toThrow();
     const interval = Number(h.rules.items.get("civilization_fortress")!.k2) * 1000;
     h.clock.now = Number(placed!.buildTime) + interval * 3 + 123;
     const info = await command("info");
@@ -140,7 +142,7 @@ test("castle speed and move costs roll back on invalid or occupied map tiles", a
         operationId: sfs.string(randomUUID()),
         ...params,
       });
-    await command("place", { pointId: sfs.int(10) });
+    await command("place", { pointId: sfs.int(1211) });
     await command("speedUp", { isGold: sfs.int(1) });
     expect((await h.db.db.select().from(civilization_castle))[0]!.status).toBe(2);
     const moveItem = h.rules.items.get("civilization_fortress")!.k4!;
@@ -156,7 +158,7 @@ test("castle speed and move costs roll back on invalid or occupied map tiles", a
       .update(worldpoint)
       .set({ pointType: 1, ownerId: "other" })
       .where(eq(worldpoint.id, 20));
-    await expect(command("move", { pointId: sfs.int(20) })).rejects.toThrow();
+    await expect(command("move", { pointId: sfs.int(1221) })).rejects.toThrow();
     expect(
       (await h.db.db.select().from(user_item).where(eq(user_item.uuid, "move-item")))[0]!.count,
     ).toBe(1);
@@ -164,14 +166,17 @@ test("castle speed and move costs roll back on invalid or occupied map tiles", a
       .update(worldpoint)
       .set({ pointType: 0, ownerId: "" })
       .where(eq(worldpoint.id, 20));
-    await command("move", { pointId: sfs.int(20) });
-    expect((await h.db.db.select().from(civilization_castle))[0]!.pointId).toBe(20);
+    await command("move", { pointId: sfs.int(1221) });
+    expect((await h.db.db.select().from(civilization_castle))[0]!.pointId).toBe(1221);
     expect(
       (await h.db.db.select().from(worldpoint).where(eq(worldpoint.id, 10)))[0]!.pointType,
     ).toBe(0);
     expect(
-      (await h.db.db.select().from(worldpoint).where(eq(worldpoint.id, 20)))[0]!.pointType,
+      (await h.db.db.select().from(worldpoint).where(eq(worldpoint.id, 1221)))[0]!.pointType,
     ).toBe(68);
+    expect((await h.db.db.select().from(worldpoint).where(eq(worldpoint.id, 20)))[0]).toMatchObject(
+      { pointType: 69, pointItem: "" },
+    );
     expect(
       (await h.db.db.select().from(user_item).where(eq(user_item.uuid, "move-item")))[0]!.count,
     ).toBe(0);
