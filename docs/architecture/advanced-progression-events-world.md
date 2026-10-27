@@ -198,3 +198,11 @@ which otherwise repeatedly apply first-spin guarantees or the daily free spin.
 Gold top-ups cover the currency deficit and all failures roll back costs and
 prizes together. Lottery actions also advance the maintained legacy, daily and
 main quest producers with their corresponding native action types.
+
+Campaign catalog conversion preserves nested Boolean conditions and both direct
+reference branch forms: a conditional action and an if/else action. Their nested
+rewards, claim-flag updates and score caps are maintained data rather than empty
+branch declarations. Existing scalar fields and top-level rules remain identical.
+The source XML remains read-only and is not a runtime dependency. Synthetic
+conversion tests verify nested conjunctions, rewards, claim flags and both arms
+of a branch before the campaign runtime interprets them.

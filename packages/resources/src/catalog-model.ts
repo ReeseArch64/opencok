@@ -67,6 +67,7 @@ export interface TileMapDefinition {
 }
 
 export interface AutomationClause {
+  readonly conditions?: readonly AutomationClause[];
   readonly code: number;
   readonly name?: string;
   readonly group?: number | string;

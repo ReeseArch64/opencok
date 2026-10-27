@@ -247,23 +247,39 @@ function clause(node: SourceElement, tag: string): AutomationClause {
     ...(attrs.name === undefined ? {} : { name: attrs.name }),
     ...(attrs.group === undefined ? {} : { group: scalar(attrs.group) as number | string }),
     ...(parameters.trim() ? { parameters } : {}),
+    ...(tag === "condition" && tagged(children(node, tag), "condition").length
+      ? {
+          conditions: tagged(children(node, tag), "condition").map((child) =>
+            clause(child, "condition"),
+          ),
+        }
+      : {}),
   };
 }
 function action(node: SourceElement): AutomationAction {
   const content = children(node, "action");
   const conditional = tagged(content, "if")[0];
+  const direct = [13, 41].includes(Number(attributes(node).type));
+  const conditions = conditional
+    ? tagged(children(conditional, "if"), "condition")
+    : tagged(content, "condition");
+  const actions = conditional
+    ? tagged(children(conditional, "if"), "action")
+    : tagged(content, "action");
   return {
     ...clause(node, "action"),
-    ...(conditional
+    ...(conditional || direct
       ? {
           branch: {
-            conditions: tagged(children(conditional, "if"), "condition").map((node) =>
-              clause(node, "condition"),
-            ),
-            onMatch: tagged(children(conditional, "if"), "action").map(action),
-            otherwise: tagged(content, "else").flatMap((node) =>
-              tagged(children(node, "else"), "action").map(action),
-            ),
+            conditions: conditions.map((child) => clause(child, "condition")),
+            onMatch: (conditional ? actions : actions.slice(0, 1)).map(action),
+            otherwise: conditional
+              ? tagged(content, "else").flatMap((child) =>
+                  tagged(children(child, "else"), "action").map(action),
+                )
+              : Number(attributes(node).type) === 13
+                ? actions.slice(1, 2).map(action)
+                : [],
           },
         }
       : {}),
