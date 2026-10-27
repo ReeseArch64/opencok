@@ -187,7 +187,8 @@
     "./responses/world-use": "./src/responses/world-use.ts",
     "./responses/world-recreation": "./src/responses/world-recreation.ts",
     "./world-birth": "./src/world-birth.ts",
-    "./world-monsters": "./src/world-monsters.ts"
+    "./world-monsters": "./src/world-monsters.ts",
+    "./world-monster-refresh": "./src/world-monster-refresh.ts"
   },
   "dependencies": {
     "@opencok/enums": "workspace:*",

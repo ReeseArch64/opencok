@@ -215,6 +215,7 @@ export async function loadRules(directory?: string, kingdomId = 1) {
   const resources = (await declared(GameplayCatalog.Resources))?.groups;
   const heritage = await optional(GameplayCatalog.Heritage);
   const residential = await optional(GameplayCatalog.Resdential);
+  const fieldMonsterGroups = (await declared(GameplayCatalog.FieldMonster))?.groups;
   const allianceBuildings = (await available(GameplayCatalog.AllianceBuilding))
     ? parseDeclared(await read(GameplayCatalog.AllianceBuilding), GameplayCatalog.AllianceBuilding)
         .records
@@ -298,6 +299,7 @@ export async function loadRules(directory?: string, kingdomId = 1) {
     mail,
     {
       fieldMonsters,
+      fieldMonsterGroups,
       armies,
       neutralResources,
       barbarians,
