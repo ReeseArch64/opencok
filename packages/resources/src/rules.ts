@@ -212,6 +212,7 @@ export async function loadRules(directory?: string, kingdomId = 1) {
     optional(GameplayCatalog.SpResources),
     optional(GameplayCatalog.Barbarion),
   ]);
+  const resources = (await declared(GameplayCatalog.Resources))?.groups;
   const allianceBuildings = (await available(GameplayCatalog.AllianceBuilding))
     ? parseDeclared(await read(GameplayCatalog.AllianceBuilding), GameplayCatalog.AllianceBuilding)
         .records
@@ -293,7 +294,7 @@ export async function loadRules(directory?: string, kingdomId = 1) {
     },
     { treasures, rewards, quests, positionUnlock },
     mail,
-    { fieldMonsters, armies, neutralResources, barbarians, allianceBuildings },
+    { fieldMonsters, armies, neutralResources, barbarians, allianceBuildings, resources },
     { militaryGroups, heroEvents },
     await optional(GameplayCatalog.Material),
     await optional(GameplayCatalog.ShopNew),

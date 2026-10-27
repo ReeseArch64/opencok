@@ -697,3 +697,5 @@ export * from "./opencok_kingdom/continued_cost_fact";
 export * from "./opencok_kingdom/continued_cost_score";
 export { continued_cost_closure } from "./opencok_kingdom/continued_cost_closure";
 export { continued_cost_rank_award } from "./opencok_kingdom/continued_cost_rank_award";
+
+export { world_resource_runtime } from "./opencok_kingdom/world_resource_runtime";

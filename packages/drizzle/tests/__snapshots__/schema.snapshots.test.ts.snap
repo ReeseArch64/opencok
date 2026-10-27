@@ -15474,3 +15474,18 @@ select "id", "periodId", "ownerUid", "rank", "payload", "createdAt", "deliveredA
 update "opencok_kingdom"."continued_cost_rank_award" set "id" = $1, "periodId" = $2, "ownerUid" = $3, "rank" = $4, "payload" = $5, "createdAt" = $6, "deliveredAt" = $7, "nextAttemptAt" = $8 where "opencok_kingdom"."continued_cost_rank_award"."id" = $9
 delete from "opencok_kingdom"."continued_cost_rank_award" where "opencok_kingdom"."continued_cost_rank_award"."id" = $1"
 `;
+
+exports[`opencok_kingdom.world_resource_runtime: schema and CRUD SQL 1`] = `
+"schema opencok_kingdom
+column ["worldId","integer",true,null,null,null]
+column ["groupStartedAt","bigint",true,null,null,null]
+column ["usedGroups","varchar(128)",true,null,null,null]
+column ["areaCursor","integer",true,null,null,null]
+column ["nextRefreshAt","bigint",true,null,null,null]
+primary ["world_resource_runtime_PRIMARY",["worldId"]]
+check ["world_resource_runtime_bounds","\\"worldId\\" = 0 AND \\"groupStartedAt\\" >= 0 AND \\"areaCursor\\" >= 0 AND \\"nextRefreshAt\\" >= 0 AND octet_length(\\"usedGroups\\") BETWEEN 1 AND 128"]
+insert into "opencok_kingdom"."world_resource_runtime" ("worldId", "groupStartedAt", "usedGroups", "areaCursor", "nextRefreshAt") values ($1, $2, $3, $4, $5)
+select "worldId", "groupStartedAt", "usedGroups", "areaCursor", "nextRefreshAt" from "opencok_kingdom"."world_resource_runtime" where "opencok_kingdom"."world_resource_runtime"."worldId" = $1
+update "opencok_kingdom"."world_resource_runtime" set "worldId" = $1, "groupStartedAt" = $2, "usedGroups" = $3, "areaCursor" = $4, "nextRefreshAt" = $5 where "opencok_kingdom"."world_resource_runtime"."worldId" = $6
+delete from "opencok_kingdom"."world_resource_runtime" where "opencok_kingdom"."world_resource_runtime"."worldId" = $1"
+`;

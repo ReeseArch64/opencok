@@ -161,7 +161,8 @@
     "./hero-calendar": "./src/hero-calendar.ts",
     "./fragment-exchange": "./src/fragment-exchange.ts",
     "./monster-exchange": "./src/monster-exchange.ts",
-    "./merge-campaign": "./src/merge-campaign.ts"
+    "./merge-campaign": "./src/merge-campaign.ts",
+    "./world-resource-refresh": "./src/world-resource-refresh.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",
