@@ -158,6 +158,10 @@ export function createCityProgressionStore(
       if (civilizationSciences.length > 4096)
         throw new Error("Civilization science aggregate exceeds bound");
       alliance = profile.allianceId ?? "";
+      const worldMutation =
+        command?.startsWith("world.") || command === "totem" || command === "civilizationCastle"
+          ? await readWorldMutationState(tx, owner, request, mapSize, command)
+          : undefined;
       return {
         redPackets:
           command?.startsWith("redPackets.") || command === "campaign.paid.gift"
@@ -268,10 +272,7 @@ export function createCityProgressionStore(
         ...(command === "civilizationCastle"
           ? await readCivilizationCastle(tx, owner, request)
           : {}),
-        worldMutation:
-          command?.startsWith("world.") || command === "totem" || command === "civilizationCastle"
-            ? await readWorldMutationState(tx, owner, request, mapSize, command)
-            : undefined,
+        worldMutation,
         dragons: await readDragonProgression(tx, owner),
         minstrel: ["minstrel", "alchemist"].includes(command ?? "")
           ? (

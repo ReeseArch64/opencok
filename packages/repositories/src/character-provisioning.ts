@@ -70,10 +70,10 @@ export function createCharacterCreator(
       const seed = plan(captured);
       const result = await tx.execute<{ id: number }>(sql`
       SELECT p.id FROM opencok_kingdom.worldpoint p
-      JOIN opencok_kingdom.worldpoint e ON e.id = p.id + 1 AND e."worldId" = 0 AND e.x = p.x + 1 AND e.y = p.y
-      JOIN opencok_kingdom.worldpoint s ON s.id = p.id + ${mapSize} AND s."worldId" = 0 AND s.x = p.x AND s.y = p.y + 1
-      JOIN opencok_kingdom.worldpoint c ON c.id = p.id + ${mapSize + 1} AND c."worldId" = 0 AND c.x = p.x + 1 AND c.y = p.y + 1
-      WHERE p."worldId" = 0 AND p.x >= 0 AND p.y >= 0 AND p.x < ${mapSize - 1} AND p.y < ${mapSize - 1}
+      JOIN opencok_kingdom.worldpoint e ON e.id = p.id - 1 AND e."worldId" = 0 AND e.x = p.x - 1 AND e.y = p.y
+      JOIN opencok_kingdom.worldpoint s ON s.id = p.id - ${mapSize} AND s."worldId" = 0 AND s.x = p.x AND s.y = p.y - 1
+      JOIN opencok_kingdom.worldpoint c ON c.id = p.id - ${mapSize + 1} AND c."worldId" = 0 AND c.x = p.x - 1 AND c.y = p.y - 1
+      WHERE p."worldId" = 0 AND p.x > 0 AND p.y > 0 AND p.x < ${mapSize} AND p.y < ${mapSize}
       AND p.id = 1 + p.x + p.y * ${mapSize}
       AND p."pointType" = 0 AND e."pointType" = 0 AND s."pointType" = 0 AND c."pointType" = 0
       AND p."gridType" = 0 AND e."gridType" = 0 AND s."gridType" = 0 AND c."gridType" = 0
@@ -140,7 +140,7 @@ export function createCharacterCreator(
         .where(
           and(
             eq(worldpoint.worldId, 0),
-            inArray(worldpoint.id, [point + 1, point + mapSize, point + mapSize + 1]),
+            inArray(worldpoint.id, [point - 1, point - mapSize, point - mapSize - 1]),
           ),
         );
       const response: ProvisionReceipt = {

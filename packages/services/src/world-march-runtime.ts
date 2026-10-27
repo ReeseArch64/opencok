@@ -1,3 +1,4 @@
+import { resolveWorldCityGeometry } from "@opencok/rules/world-city-geometry";
 import { buildingStep } from "@opencok/rules/building";
 import { troubleItem } from "@opencok/rules/trouble";
 import { recordTargetTask } from "./target-task";
@@ -677,6 +678,17 @@ export function createWorldMarchDomain(size: number): CityDomain {
               context.rules,
             );
         army.cachedLoad = capacity;
+        const sourceFootprint = context.state.worldMutation.cityFootprint;
+        if (!sourceFootprint) worldMutationFailure();
+        const targetFootprint = trouble
+          ? resolveWorldCityGeometry(
+              targetId,
+              size,
+              text(target, "ownerId"),
+              context.state.worldMutation.points,
+            )?.points
+          : undefined;
+        if (trouble && !targetFootprint) worldMutationFailure();
         const route = ordinaryMarchRoute(
           context.rules,
           size,
@@ -690,6 +702,8 @@ export function createWorldMarchDomain(size: number): CityDomain {
           trouble,
           context.effect(402),
           trouble,
+          sourceFootprint,
+          targetFootprint,
         );
         const duration = route.duration;
         const gatherEffect =
@@ -797,7 +811,8 @@ export function createWorldMarchDomain(size: number): CityDomain {
           world = context.state.worldMutation.world,
           source = num(world, "pointId"),
           destination = worldFootprint(target, size),
-          original = worldFootprint(source, size);
+          original = context.state.worldMutation.cityFootprint;
+        if (!original) worldMutationFailure();
         if (destination.some((id) => original.includes(id))) worldMutationFailure();
         for (const id of destination) {
           const row = point(context, id);
@@ -826,9 +841,14 @@ export function createWorldMarchDomain(size: number): CityDomain {
         const city = point(context, source);
         for (const id of original) {
           const row = point(context, id);
-          if (row.ownerId !== context.owner) worldMutationFailure();
+          if (
+            row.ownerId !== context.owner &&
+            !(id !== source && num(row, "pointType") === 8 && !text(row, "ownerId"))
+          )
+            worldMutationFailure();
           Object.assign(row, {
             pointType: 0,
+            pointItem: null,
             sendHeartDurationTime: 0n,
             heartType: "",
             ownerId: "",
@@ -841,7 +861,8 @@ export function createWorldMarchDomain(size: number): CityDomain {
         for (const id of destination) {
           const row = point(context, id);
           Object.assign(row, {
-            pointType: id === target ? 1 : 2,
+            pointType: id === target ? 1 : 8,
+            pointItem: id === target ? null : String(target),
             sendHeartDurationTime: 0n,
             heartType: "",
             ownerId: context.owner,

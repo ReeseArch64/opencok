@@ -161,7 +161,8 @@
     "./hero-calendar": "./src/hero-calendar.ts",
     "./fragment-exchange": "./src/fragment-exchange.ts",
     "./monster-exchange": "./src/monster-exchange.ts",
-    "./red-packets": "./src/red-packets.ts"
+    "./red-packets": "./src/red-packets.ts",
+    "./world-city-geometry": "./src/world-city-geometry.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",

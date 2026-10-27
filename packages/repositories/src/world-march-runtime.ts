@@ -10,7 +10,9 @@ import { world_interest } from "@opencok/drizzle/schema/opencok_kingdom/world_in
 import type { WorldMutationWrite } from "@opencok/contracts/world-march-runtime";
 import { num, long, text } from "@opencok/contracts/rows";
 import { decode, int } from "@opencok/messages/sfs";
-import { worldFootprint } from "@opencok/rules/world-march-runtime";
+import { worldCityCandidates } from "@opencok/rules/world-city-geometry";
+import { normalizeWorldCityGeometry } from "./world-city-geometry";
+import { userprofile } from "@opencok/drizzle/schema/opencok_kingdom/userprofile";
 import type { MutationTransaction } from "./mutation";
 import type { Database } from "./game";
 import type { RealmAuthority } from "./realm-authority";
@@ -43,16 +45,34 @@ export async function readWorldMutationState(
     throw new Error("World march aggregate exceeds bound");
   const params = request ? decode(Buffer.from(request)) : {};
   let randomDestination: number | undefined;
-  if (command === "world.mv" && params.point && int(params, "point") === 0) {
+  if (
+    ["world.mv", "world.mv.gold"].includes(command ?? "") &&
+    params.point &&
+    int(params, "point") === 0
+  ) {
     const result = await tx.execute<{ id: number }>(
-      sql`select p.id from opencok_kingdom.worldpoint p join opencok_kingdom.worldpoint e on e.id=p.id+1 and e."worldId"=0 join opencok_kingdom.worldpoint s on s.id=p.id+${size} and s."worldId"=0 join opencok_kingdom.worldpoint c on c.id=p.id+${size + 1} and c."worldId"=0 where p."worldId"=0 and p.x<${size - 1} and p.y<${size - 1} and p."pointType"=0 and e."pointType"=0 and s."pointType"=0 and c."pointType"=0 and p."gridType"=2 and e."gridType"=2 and s."gridType"=2 and c."gridType"=2 and p."grid2Type"=0 and e."grid2Type"=0 and s."grid2Type"=0 and c."grid2Type"=0 order by random() limit 1`,
+      sql`select p.id from opencok_kingdom.worldpoint p join opencok_kingdom.worldpoint e on e.id=p.id-1 and e."worldId"=0 join opencok_kingdom.worldpoint s on s.id=p.id-${size} and s."worldId"=0 join opencok_kingdom.worldpoint c on c.id=p.id-${size + 1} and c."worldId"=0 where p."worldId"=0 and p.x>0 and p.y>0 and p.x<${size} and p.y<${size} and e.x=p.x-1 and e.y=p.y and s.x=p.x and s.y=p.y-1 and c.x=p.x-1 and c.y=p.y-1 and p."pointType"=0 and e."pointType"=0 and s."pointType"=0 and c."pointType"=0 and p."gridType"=2 and e."gridType"=2 and s."gridType"=2 and c."gridType"=2 and p."grid2Type"=0 and e."grid2Type"=0 and s."grid2Type"=0 and c."grid2Type"=0 and coalesce(p."ownerId",'')='' and coalesce(e."ownerId",'')='' and coalesce(s."ownerId",'')='' and coalesce(c."ownerId",'')='' and coalesce(p."ownerMarchUUid",'')='' and coalesce(e."ownerMarchUUid",'')='' and coalesce(s."ownerMarchUUid",'')='' and coalesce(c."ownerMarchUUid",'')=''  order by random() limit 1`,
     );
     randomDestination = result.rows[0]?.id;
   }
   const [castle] =
     command === "civilizationCastle"
-      ? await tx.select().from(civilization_castle).where(eq(civilization_castle.uid, owner))
+      ? await tx
+          .select()
+          .from(civilization_castle)
+          .where(eq(civilization_castle.uid, owner))
+          .for("update")
       : [];
+  const geometry = await normalizeWorldCityGeometry(
+    tx,
+    owner,
+    size,
+    world,
+    marches,
+    checkpoints,
+    castle,
+    command !== "world.march.check",
+  );
   const ids = new Set<number>();
   if (command === "totem") {
     const active = await tx
@@ -83,14 +103,14 @@ export async function readWorldMutationState(
     int(params, "point", 0),
     command === "totem" ? 0 : int(params, "pointId", 0),
   ])
-    if (point > 0) for (const id of worldFootprint(point, size)) ids.add(id);
+    if (point > 0) for (const id of worldCityCandidates(point, size)) ids.add(id);
   const points = await tx
     .select()
     .from(worldpoint)
     .where(and(eq(worldpoint.worldId, 0), inArray(worldpoint.id, [...ids])))
     .orderBy(asc(worldpoint.id))
     .for("update");
-  return { world, points, marches, checkpoints, randomDestination };
+  return { world, points, marches, checkpoints, randomDestination, ...geometry };
 }
 export async function writeWorldMutation(
   tx: MutationTransaction,
@@ -99,6 +119,10 @@ export async function writeWorldMutation(
 ) {
   if (write.world) {
     if (write.world.uid !== owner) throw new Error("Foreign world write");
+    await tx
+      .update(userprofile)
+      .set({ worldPoint: num(write.world, "pointId") })
+      .where(eq(userprofile.uid, owner));
     await tx
       .update(user_world)
       .set({
