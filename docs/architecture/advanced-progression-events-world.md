@@ -366,3 +366,11 @@ automatic mail path; explicit claims preserve the reference's entitlement-based
 eligibility. Realm opening time comes from saved server metadata. Closed feature
 selectors and historical configuration remain unchanged. No migration or private
 resource input is required.
+
+The native alchemist `info` and `reward` actions use the independent type-one
+activity counter row. Its panel window, initial wait, subsequent cooldown and daily
+cap are enforced from maintained configuration. UTC daily reset clears counters
+while retaining action timestamps. Receipt replay pins rewards once, and a failed
+transaction rolls back inventory and counters together. A premature request returns
+the source's empty response without awarding a reward. Type-zero minstrel records
+remain independent. No migration or feature enabling is introduced.

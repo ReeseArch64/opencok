@@ -538,6 +538,7 @@ export class GameService {
       case "dragonskill":
       case "dragontower":
       case "minstrel":
+      case "alchemist":
       case "castle.ui.state":
       case "castle.level.reward":
       case "castle.share.reward":
