@@ -18,6 +18,7 @@ export interface WorldMutationState {
   checkpoints: readonly Row[];
 }
 export interface WorldMutationWrite {
+  companionPushes?: readonly { command: string; body: Uint8Array }[];
   world?: Row;
   points?: readonly Row[];
   marches?: readonly Row[];

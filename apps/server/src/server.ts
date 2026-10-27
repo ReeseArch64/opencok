@@ -720,6 +720,9 @@ export const RealmDependenciesLive = Layer.effect(
       for (const command of [
         "world.march",
         "world.march.retreat",
+        "world.march.check",
+        "world.user.march",
+        "world.get.march",
         "civilizationCastle",
         "totem",
         "totem.world",
