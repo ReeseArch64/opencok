@@ -544,3 +544,18 @@ rather than a comma-delimited encoding. Back up wheel rows, inventory, receipts
 and this history before deployment. Rollback must preserve awarded indices and
 the consumed-free-draw marker; the additive history table can remain in place.
 No new dependency is added.
+
+Seasonal exchange supports the reference's five-step jester-token activity using
+the existing persisted realm period and owned offer row. Queries pin weighted
+reward IDs and token prices, refresh elapsed offers only in the configured refresh
+mode, and project the native reward previews. Each claim must select exactly the
+next level, consumes owned tokens and grants the selected reward atomically. The
+fifth paid step starts a new saved offer cycle; a repeated receipt cannot repeat
+its cost or grant. Catalog IDs, prices and timestamps remain authoritative.
+
+The persisted period must be open, started and unexpired. Unsupported activity
+types reject rather than creating invalid rows with an empty exchange item.
+Frozen mode preserves saved offers after the refresh interval. Existing reserve
+and auxiliary fields remain intact on updates. Back up activity rows, inventory,
+receipts and ledger before rollout, and retain the saved level and offers during
+rollback. No new migration or dependency is added.

@@ -553,6 +553,8 @@ export class GameService {
       case "dragontower":
       case "minstrel":
       case "alchemist":
+      case "activity.exchange.info":
+      case "activity.exchange.reward":
       case "vip.box.turntable.ui":
       case "vip.box.turntable.reward":
       case "target.task.ui":

@@ -129,7 +129,9 @@
     "./target-task": "./src/target-task.ts",
     "./responses/target-task": "./src/responses/target-task.ts",
     "./vip-box": "./src/vip-box.ts",
-    "./responses/vip-box": "./src/responses/vip-box.ts"
+    "./responses/vip-box": "./src/responses/vip-box.ts",
+    "./seasonal-exchange": "./src/seasonal-exchange.ts",
+    "./responses/seasonal-exchange": "./src/responses/seasonal-exchange.ts"
   },
   "dependencies": {
     "@opencok/enums": "workspace:*",

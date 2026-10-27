@@ -1,3 +1,4 @@
+import { createSeasonalExchangeDomain } from "@opencok/services/seasonal-exchange";
 import { createVipBoxDomain } from "@opencok/services/vip-box";
 import { createTargetTaskDomain, publishTargetTaskMutation } from "@opencok/services/target-task";
 import { createRechargeFeedbackDomain } from "@opencok/services/recharge-feedback";
@@ -447,6 +448,7 @@ export const RealmDependenciesLive = Layer.effect(
         createOrdinaryBoxDomain(),
         createRechargeActivityDomain(),
         createRechargeFeedbackDomain(),
+        createSeasonalExchangeDomain(),
         createVipBoxDomain(),
         createTargetTaskDomain(),
         createLuckyDayDomain(),
