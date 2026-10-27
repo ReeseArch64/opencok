@@ -309,6 +309,16 @@ archive through the CDN gateway. Bundling its textures alone does not initialize
 native resource check used by the Hero Palace. These fields preserve the legacy
 download protocol and are separate from the signed release updater described below.
 
+Login also announces the 58 Android bundle versions and MD5 fingerprints recorded
+in `packages/constants/src/android-resources.ts`. Their native field names are
+`<bundle>Version` and `<bundle>Md5Android`; downloads use
+`/cok/lua/dr_<bundle><version>_android.zip`. Operators must provide those matching
+authorized archives through the CDN gateway. The maintained metadata contains no
+client payloads and does not read ignored local inputs at runtime. Missing world
+or dragon metadata can leave a connected client without the corresponding assets.
+The [Samsung execution record](../evidence/native-521/README.md) documents the
+observed downloads, world rendering and remaining native coverage limits.
+
 ### 27.2. Manifest, delivery and publishing on Cloudflare R2
 
 R2 is defined for APK releases and update bundles. The client queries the HTTPS manifest

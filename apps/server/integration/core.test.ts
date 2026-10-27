@@ -649,7 +649,7 @@ test("PostgreSQL SFS login, city and map preserve state and isolate both realms"
       const points = (map.points!.value as ReturnType<typeof sfs.string>[]).flatMap((part) =>
         JSON.parse(String(part.value)),
       );
-      expect(points.map((p: string) => JSON.parse(p).o)).toContain(`Synthetic ${id}`);
+      expect(points.map((p: { o?: string }) => p.o)).toContain(`Synthetic ${id}`);
       const after = await adapter.getCityByPlayerId(`synthetic-player-${id}`, Date.now());
       const checkpoint = after.resource?.lastUpdateTime;
       if (typeof checkpoint !== "bigint") throw new Error("Missing reconnect checkpoint");

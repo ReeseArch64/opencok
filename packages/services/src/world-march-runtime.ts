@@ -36,6 +36,7 @@ import {
 import { recordExpeditionScore } from "./new-expedition";
 import { worldMarchDetail, worldMarchCheck } from "@opencok/mappings/world-march-runtime";
 import { armySnapshot } from "@opencok/mappings/bootstrap";
+import { worldResourceOwner } from "@opencok/mappings/world-resource-detail";
 import { randomUUID } from "node:crypto";
 import { encode, decode, sfs, str, int, fields, Type, type Fields } from "@opencok/messages/sfs";
 import { num, long, text, type Row } from "@opencok/contracts/rows";
@@ -63,7 +64,13 @@ import {
   resourceGatherRate,
 } from "@opencok/rules/world-march-runtime";
 import { cityInteger, cityAmount, citySpeedGold } from "@opencok/rules/city-progression";
-import { resourceRawArmyLoad, resourceArmyLoad } from "@opencok/rules/world-resource-detail";
+import {
+  resourceRawArmyLoad,
+  resourceArmyLoad,
+  resourceOwnerDetail,
+  resourceSavedCollection,
+  resourceRemaining,
+} from "@opencok/rules/world-resource-detail";
 import { reconnectMarchBase } from "@opencok/mappings/reconnect-marches";
 import { serverFeature } from "@opencok/rules/power-context";
 import type { CityDomain, CityProgressionContext } from "./city-progression";
@@ -566,6 +573,33 @@ export function runtimeMarchView(context: CityProgressionContext, row: Row) {
       treasureMapFinishTime: long(map, "finishTime"),
     };
   const army = row.armyInfo ? decodeWorldMarchArmy(row.armyInfo as Buffer) : null;
+  let collection: Fields = {};
+  if (num(row, "targetType") === 3 && num(row, "state") === 1) {
+    const id = text(row, "uuid"),
+      record =
+        context.write.worldMutation?.checkpoints?.find((entry) => entry.id === id) ??
+        context.state.worldMutation?.checkpoints.find((entry) => entry.id === id);
+    if (!record) worldMutationFailure();
+    const state = restore(record),
+      target = point(context, num(row, "targetId"));
+    if (
+      state.owner !== context.owner ||
+      state.id !== id ||
+      state.phase !== "gathering" ||
+      state.targetType !== 3 ||
+      state.target !== num(target, "id") ||
+      target.ownerId !== context.owner ||
+      target.ownerMarchUUid !== id
+    )
+      worldMutationFailure();
+    collection = worldResourceOwner(
+      resourceOwnerDetail(
+        3,
+        resourceRemaining(num(target, "resInitValue"), num(target, "resCostValue")),
+        { ...resourceSavedCollection(row), armyLoad: state.capacity, maxCollectTime: 0n },
+      ),
+    );
+  }
   return {
     ...reconnectMarchBase(row, army, context.rules, {
       serverId: context.rules.kingdomId,
@@ -575,6 +609,7 @@ export function runtimeMarchView(context: CityProgressionContext, row: Row) {
       siege: false,
     }),
     ...marchCompanionFields(context, army),
+    ...collection,
     ...(num(row, "targetType") === 37 && num(row, "state") === 1
       ? sharedResourceView(
           restore(sharedCheckpoint(context, row)),
@@ -1198,6 +1233,7 @@ export const worldMutationCommands = [
   "world.march.retreat",
   "world.march.spd",
   "world.user.march",
+  "common.res.syn",
   "world.get.march",
   "world.mv",
   "world.mv.gold",
@@ -1271,6 +1307,32 @@ export function createWorldMarchDomain(size: number): CityDomain {
         event: event || Boolean(context.write.worldMutation) ? encode(push()) : null,
       });
       if (command === "world.tick") return reply({}, Boolean(context.write.worldMutation));
+      if (command === "common.res.syn") {
+        const id = str(params, "uuid"),
+          row = marchRows(context).find((entry) => entry.uuid === id);
+        if (
+          !row ||
+          row.ownerUid !== context.owner ||
+          num(row, "type") !== 0 ||
+          ![3, 37].includes(num(row, "targetType"))
+        )
+          worldMutationFailure();
+        return reply(
+          {
+            ...runtimeMarchView(context, row),
+            soldiers: sfs.array(
+              (context.write.armies ?? context.state.armies).map((unit) =>
+                sfs.object({
+                  id: sfs.string(text(unit, "armyId")),
+                  free: sfs.int(num(unit, "free")),
+                  march: sfs.int(num(unit, "march")),
+                }),
+              ),
+            ),
+          },
+          false,
+        );
+      }
       if (command === "resource.new.detail") {
         const target = point(context, cityInteger(int(params, "point"), 1, size * size));
         if (num(target, "pointType") !== 37) worldMutationFailure();

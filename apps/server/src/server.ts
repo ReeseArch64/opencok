@@ -1635,6 +1635,7 @@ export const RealmDependenciesLive = Layer.effect(
         "world.march.retreat",
         "world.march.check",
         "world.user.march",
+        "common.res.syn",
         "world.get.march",
         "civilizationCastle",
         "totem",

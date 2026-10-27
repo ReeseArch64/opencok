@@ -68,7 +68,7 @@ async function fixture() {
       timeStamp: sfs.int(1),
     });
     const section = (reply.points!.value as Value[])[0]!;
-    return JSON.parse(JSON.parse(String(section.value))[0]!);
+    return JSON.parse(String(section.value))[0]!;
   };
   const send = (owner = "owner", target = "other", operationId = randomUUID()) =>
     h.command(

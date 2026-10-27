@@ -10,6 +10,14 @@ realm or specialized actor variant is available. Historical feature switches and
 periods remain intact; a closed catalogue is not a reason to omit its ordinary
 backend.
 
+The adjacent `SynchronizeCityResource` handler uses `common.res.syn` and is outside
+this directory's 50-entry inventory. Its maintained ordinary/shared gathering
+path reads owned march state through the fenced mutation boundary and returns
+collection fields and current troop balances. Unsupported target variants remain
+explicitly unavailable. The [Samsung record](../evidence/native-521/README.md)
+distinguishes the observed native request from the corrected response's integration
+coverage.
+
 ## Ordinary handlers and factual readers
 
 | Source handler                  | Native command        | Maintained behavior                                                                                                |

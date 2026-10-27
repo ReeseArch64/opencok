@@ -48,3 +48,12 @@ jobs:
       - run: bun run --cwd apps/api test
       - run: bun run --cwd packages/env test
       - run: bun run test:stack
+      - uses: actions/upload-artifact@v7
+        if: failure()
+        with:
+          name: stack-diagnostics
+          path: |
+            /tmp/opencok-stack-*/compose-failure.log
+            /tmp/opencok-stack-*/service-failure.log
+          if-no-files-found: ignore
+          retention-days: 3

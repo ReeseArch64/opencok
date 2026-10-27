@@ -122,6 +122,40 @@ test("marches reserve once, recover late through gathering and return, and credi
   }
 }, 120000);
 
+test("native gathering synchronization preserves saved collection and troop ownership", async () => {
+  const h = await worldHarness();
+  try {
+    const started = await h.start(),
+      id = started.body.uuid!,
+      [outbound] = await h.db.db.select().from(world_march_checkpoint);
+    h.clock.now = Number(outbound!.dueAt) + 1000;
+    await h.tick();
+    const [march] = await h.db.db.select().from(world_march),
+      request = { uuid: id, operationId: sfs.string(randomUUID()) },
+      first = await h.command("common.res.syn", request);
+    expect(first.body.q).toEqual(sfs.int(80));
+    expect(first.body.tq).toEqual(sfs.int(1000));
+    expect(first.body.spd).toEqual({ type: Type.Float, value: Math.fround(march!.collectSpd!) });
+    expect(first.body.sdt).toEqual(sfs.long(march!.marchArrivalTime!));
+    expect(first.body.soldiers).toEqual(
+      sfs.array([sfs.object({ id: sfs.string("107000"), free: sfs.int(90), march: sfs.int(10) })]),
+    );
+    expect((await h.command("common.res.syn", request)).body).toEqual(first.body);
+    await expect(h.command("common.res.syn", { uuid: id }, "other")).rejects.toThrow();
+    const [after] = await h.db.db.select().from(world_march);
+    expect(after).toEqual(march);
+    const [checkpoint] = await h.db.db.select().from(world_march_checkpoint);
+    h.clock.now = Number(checkpoint!.dueAt) + 3600000;
+    await h.tick();
+    const [army] = await h.db.db.select().from(user_army);
+    expect(army).toMatchObject({ free: 100, march: 0 });
+    await expect(h.command("common.res.syn", { uuid: id })).rejects.toThrow();
+    expect((await h.db.db.select().from(user_army))[0]).toEqual(army);
+  } finally {
+    await h.close();
+  }
+}, 120000);
+
 test("march acceleration, recall and teleport enforce ownership, costs and occupied destinations", async () => {
   const h = await worldHarness();
   try {

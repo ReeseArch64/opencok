@@ -211,6 +211,7 @@ export function createCityProgressionStore(
         command?.startsWith("treasuremap.") ||
         command === "buy.citydef" ||
         command === "resource.new.detail" ||
+        command === "common.res.syn" ||
         command === "totem" ||
         command === "civilizationCastle"
           ? await readWorldMutationState(tx, owner, request, mapSize, command)

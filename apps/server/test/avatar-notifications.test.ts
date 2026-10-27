@@ -132,11 +132,11 @@ function fixture() {
   };
 }
 
-test("native login receives hero bundle metadata before the init extension", async () => {
+test("native login receives hero, world and dragon bundle metadata before init", async () => {
   const f = fixture();
   const socket = f.connect();
   await f.login(socket);
-  expect(socket.packets[1]).toEqual(
+  expect(socket.packets[1]).toMatchObject(
     envelope(0, 1, {
       id: sfs.int(1),
       zn: sfs.string("COK1"),
@@ -148,6 +148,10 @@ test("native login receives hero bundle metadata before the init extension", asy
         use: sfs.int(0),
         newHeroVersion: sfs.string("1.0.94"),
         newHeroMd5Android: sfs.string("cf7be0a136aebb4dd22b40ae320bcd13"),
+        world_cityVersion: sfs.string("1.0.12"),
+        world_cityMd5Android: sfs.string("8948a969a6e6080080db4814ec84288b"),
+        dragonCaveVersion: sfs.string("1.0.48"),
+        dragonCaveMd5Android: sfs.string("8f3faa43ce53a522c1870f3dd6afd96c"),
       }),
     }),
   );
