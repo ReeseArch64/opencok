@@ -321,6 +321,19 @@ test("PostgreSQL SFS login, city and map preserve state and isolate both realms"
       expect(costInfo._cok_).toEqual(sfs.long(9007199254740993n));
       expect(costInfo.costPoint).toBeUndefined();
       expect((await client.command("continuedcost.apply", {})).errorCode?.value).toBe("102192");
+      const groupInfo = await client.command("groupbuys.info", {
+        _cok_: sfs.long(9007199254740993n),
+      });
+      expect(groupInfo._cok_).toEqual(sfs.long(9007199254740993n));
+      expect(groupInfo.totalBuy).toBeUndefined();
+      for (const command of [
+        "groupbuys.paid",
+        "groupbuys.reserve",
+        "groupbuys.cancel",
+        "groupbuys.close",
+        "groupbuys.settle",
+      ])
+        expect((await client.command(command, {})).errorCode?.value).toBe("102192");
       const specialInfo = await client.command("special.ui.state", {
         _cok_: sfs.long(9007199254740993n),
       });

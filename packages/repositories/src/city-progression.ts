@@ -1,3 +1,4 @@
+import { readGroupBuy, writeGroupBuy } from "./groupbuy";
 import { writeSpecialEventPurchase } from "./special-event";
 import { readContinuedCost, writeContinuedCost, writeContinuedCostHide } from "./continued-cost";
 import { readTrouble, writeTrouble } from "./trouble";
@@ -156,6 +157,7 @@ export function createCityProgressionStore(
           command === "get.trouble.list" || command?.startsWith("trouble.")
             ? await readTrouble(tx, owner, command === "get.trouble.list")
             : undefined,
+        groupBuy: command?.startsWith("groupbuys.") ? await readGroupBuy(tx, owner) : undefined,
         continuedCost: command?.startsWith("continuedcost.")
           ? readContinuedCost(tx, owner)
           : undefined,
@@ -308,6 +310,7 @@ export function createCityProgressionStore(
         }
         if (write.cosmeticTarget)
           await writeCosmeticTarget(tx, owner, cosmeticTarget?.uid, write.cosmeticTarget);
+        if (write.groupBuy) await writeGroupBuy(tx, owner, write.groupBuy);
         if (write.specialEventPurchase)
           await writeSpecialEventPurchase(tx, owner, write.specialEventPurchase);
         if (write.continuedCostHide !== undefined)
