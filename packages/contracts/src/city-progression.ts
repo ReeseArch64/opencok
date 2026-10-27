@@ -109,6 +109,7 @@ export interface CityProgressionState {
   redPackets?: import("./paid-gifts").RedPacketReader;
   militaryAward?: import("./military-rank-awards").MilitaryRankAwardReader;
   rechargeFeedback?: import("./recharge-feedback").RechargeFeedbackReader;
+  goldEggs?: import("./gold-eggs").GoldEggsReader;
   normalRecharge?: import("./normal-recharge").NormalRechargeState;
   rechargeActivity?: import("./recharge-activity").RechargeActivityState;
   ordinaryBoxServer?: { openedAt: bigint };
@@ -186,6 +187,7 @@ export interface CityProgressionWrite {
   rechargeActivity?: import("./recharge-activity").RechargeActivityWrite;
   ordinaryBox?: import("./ordinary-box").OrdinaryBoxWrite;
   sevenDayCycle?: import("./seven-day-cycle").SevenDayCycleWrite;
+  goldEggs?: import("./gold-eggs").GoldEggsWrite;
   normalRecharge?: import("./normal-recharge").NormalRechargeWrite;
   shippingInvestment?: import("./shipping-investment").ShippingInvestmentWrite;
   dailyInvestment?: Row;

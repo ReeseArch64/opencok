@@ -572,6 +572,13 @@ export class GameService {
         break;
       }
       case "activity.accept.reward":
+      case "goldeggs.info":
+      case "goldeggs.smashing":
+      case "goldeggs.smashingall":
+      case "goldeggs.flush":
+      case "goldeggs.scorereward":
+      case "goldeggs.rank":
+      case "goldeggs.rankAll":
       case "comeback.info":
       case "comeback.reward":
       case "hot.item.v2.get":
