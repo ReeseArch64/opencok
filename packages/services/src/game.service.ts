@@ -1,5 +1,6 @@
 import { activityDirectory } from "@opencok/mappings/activity-directory";
 import { activityDirectoryEntries } from "@opencok/rules/activity-directory";
+import { worldRecreationCommands } from "./world-recreation";
 import { worldUseCommands } from "./world-use";
 import { treasureMapCommands } from "./treasure-map";
 import { cityDefenseCommands } from "./city-defense";
@@ -492,7 +493,8 @@ export class GameService {
       worldMutationCommands.includes(command) ||
       cityDefenseCommands.includes(command) ||
       treasureMapCommands.includes(command) ||
-      worldUseCommands.includes(command)
+      worldUseCommands.includes(command) ||
+      worldRecreationCommands.includes(command)
     ) {
       if (
         command === "world.tick" ||
