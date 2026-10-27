@@ -2239,3 +2239,42 @@ fencing, realm authority and atomic ledger or receipt failure. Five rule and
 service cases passed with 34 assertions; package boundaries, required lint and
 formatting, and 25 workspace type checks passed. The activity command composition
 requires its consumer's integration verification.
+
+### Imported activity entitlement boundary
+
+The reference `activity.accept.reward` handler consumes an already owned
+`user_activity` row and looks up its reward definition by the matching
+`server_push.uid`. The authorized gameplay source provides persistence methods
+for those rows, but does not provide an activity entitlement issuer. Its
+`UserActivityService.insert` and `selectUserActivities` methods have no callers in
+the authorized gameplay modules. `UserActivityMapper.selectGCMAct` selects owned
+rows with type 0 and status 0; that query alone does not establish admission rules,
+publication semantics or a client announcement format. These records represent an
+import or external backoffice boundary rather than a missing demonstrated runtime
+producer. The external administrative admission protocol is not present in the
+provided source.
+
+`UserActivity.getLoginInfo(uid, outData)` is empty. Inspection of that method in
+the original extension JAR confirms a single return instruction, so its silence
+is not a decompilation omission. A scan of original class method references finds
+only `UserProfile` calling this login hook and `AcceptActivityReward` consuming
+the saved row. No original class calls the activity batch insert, single-row save
+or pending activity selector. No native activity announcement field, field order
+or reconnect payload can be inferred from these unused persistence methods.
+
+The live `server_push` path is a separate mail pipeline. `GameScheduler` selects
+type 0, state 0 publications whose start time has arrived, calls
+`UserActivityService.noticeUser` and changes publication state to 1. Mail reconnect
+reads type 0, state 1 publications and persists mail plus server and device mail
+records. Its registration, level, last-online, platform, country, castle level,
+HD login, binding and device filters govern mail delivery; they do not demonstrate
+permission to insert an activity entitlement or grant the same reward again.
+Neither that scheduler nor the mail reconnect path inserts `user_activity`.
+
+Keep factual activity entitlements and their claim receipts when importing or
+restoring existing server data. Claim ownership, supported reward effects and
+transactional replay protection remain enforced by the maintained consumer.
+Do not synthesize activity entitlement rows, mark mail delivery as an activity
+claim, reuse publication state as claim status, or add a reconnect announcement
+without a separately specified authoritative producer and native protocol.
+This audit adds no runtime, migration, dependency or environment setting.
