@@ -1,14 +1,15 @@
+import { HttpStatus } from "@opencok/enums/http-status";
 import { randomUUID } from "node:crypto";
 import type { IncomingMessage } from "node:http";
 import type { AsyncHttpHandler, Log } from "@opencok/contracts/chat";
 
-export abstract class SignedChatController<T extends object> {
+export abstract class SignedChatController<T extends object, Result> {
   private readonly timeoutMs: number;
   private readonly now: () => number;
   private readonly log: Log;
 
   protected constructor(
-    protected readonly signingSecret: string,
+    signingSecret: string,
     options: { now?: () => number; timeoutMs?: number; log?: Log },
     configured: boolean,
     configurationError: string,
@@ -33,9 +34,9 @@ export abstract class SignedChatController<T extends object> {
 
   protected abstract decode(body: string): T;
 
-  protected abstract apply(update: Readonly<T>): Promise<unknown>;
+  protected abstract apply(update: Readonly<T>): Promise<Result>;
 
-  protected abstract response(update: T, result: unknown): object;
+  protected abstract response(update: T, result: Result): object;
 
   public readonly handle: AsyncHttpHandler = async (request, response) => {
     const correlationId = randomUUID();
@@ -45,7 +46,7 @@ export abstract class SignedChatController<T extends object> {
         "cache-control": "no-store",
         "x-request-id": correlationId,
       });
-      response.end(JSON.stringify({ code: status === 200 ? 1 : 0, data }));
+      response.end(JSON.stringify({ code: status === HttpStatus.Ok ? 1 : 0, data }));
     };
     const fail = (status: number, category: string) => {
       this.log({ correlationId, operation: this.operation, category });
@@ -53,7 +54,7 @@ export abstract class SignedChatController<T extends object> {
     };
 
     if (!/^application\/json(?:\s*;|$)/i.test(String(request.headers["content-type"] ?? ""))) {
-      fail(415, "bad_request");
+      fail(HttpStatus.UnsupportedMediaType, "bad_request");
       return;
     }
 
@@ -62,7 +63,7 @@ export abstract class SignedChatController<T extends object> {
       length !== undefined &&
       (typeof length !== "string" || !/^\d+$/.test(length) || Number(length) > 4096)
     ) {
-      fail(413, "bad_request");
+      fail(HttpStatus.PayloadTooLarge, "bad_request");
       return;
     }
 
@@ -76,7 +77,8 @@ export abstract class SignedChatController<T extends object> {
         if (expired) throw new Error();
         const bytes = Buffer.from(chunk);
         size += bytes.length;
-        if (size > 4096) return { status: 413, category: "bad_request" } as const;
+        if (size > 4096)
+          return { status: HttpStatus.PayloadTooLarge, category: "bad_request" } as const;
         chunks.push(bytes);
       }
 
@@ -87,21 +89,21 @@ export abstract class SignedChatController<T extends object> {
           Buffer.concat(chunks),
         );
       } catch {
-        return { status: 400, category: "bad_request" } as const;
+        return { status: HttpStatus.BadRequest, category: "bad_request" } as const;
       }
 
       if (!this.verify(body, request, this.now()))
-        return { status: 403, category: "unauthorized" } as const;
+        return { status: HttpStatus.Forbidden, category: "unauthorized" } as const;
 
       let update: T;
       try {
         update = this.decode(body);
       } catch {
-        return { status: 400, category: "bad_request" } as const;
+        return { status: HttpStatus.BadRequest, category: "bad_request" } as const;
       }
 
       const result = await this.apply(Object.freeze(update));
-      return { status: 200, data: this.response(update, result) } as const;
+      return { status: HttpStatus.Ok, data: this.response(update, result) } as const;
     };
 
     try {
@@ -114,10 +116,10 @@ export abstract class SignedChatController<T extends object> {
           }, this.timeoutMs);
         }),
       ]);
-      if (result.status === 200) reply(200, result.data);
+      if (result.status === HttpStatus.Ok) reply(HttpStatus.Ok, result.data);
       else fail(result.status, result.category);
     } catch {
-      fail(503, "storage_unavailable");
+      fail(HttpStatus.ServiceUnavailable, "storage_unavailable");
     } finally {
       expired = true;
       clearTimeout(timer);

@@ -1,11 +1,18 @@
-import type { CommandHandler, Room, RoomAuthorizer } from "@opencok/contracts/chat";
+import type { CommandContext, CommandHandler, Room, RoomAuthorizer } from "@opencok/contracts/chat";
 import { isRecord } from "@opencok/contracts/chat";
-import { ChatCommandError } from "@opencok/controllers/chat-rooms";
+import { ChatCommand } from "@opencok/enums/chat-command";
+import { ChatRoomGroup } from "@opencok/enums/chat-room-group";
+import { ChatCommandError } from "@opencok/errors/chat";
+import { ChatCommandController } from "./chat-command.controller.ts";
 
-const supportedGroups = new Set(["original", "country", "alliance", "global", "local", "private"]);
+export class ChatJoinController extends ChatCommandController {
+  public readonly command = ChatCommand.JoinRooms;
 
-export function createJoinHandler(authorizeRoom: RoomAuthorizer): CommandHandler {
-  return async ({ uid, params, connection }) => {
+  public constructor(private readonly authorizeRoom: RoomAuthorizer) {
+    super();
+  }
+
+  public async execute({ uid, params, connection }: CommandContext) {
     if (!Array.isArray(params.rooms) || params.rooms.length > 16)
       throw new ChatCommandError("invalid_room");
     const accepted: Room[] = [];
@@ -13,8 +20,8 @@ export function createJoinHandler(authorizeRoom: RoomAuthorizer): CommandHandler
       if (!isRecord(item) || typeof item.group !== "string" || typeof item.id !== "string") {
         throw new ChatCommandError("invalid_room");
       }
-      if (!supportedGroups.has(item.group)) continue;
-      const room = await authorizeRoom(uid, item.id);
+      if (!Object.values(ChatRoomGroup).some((group) => group === item.group)) continue;
+      const room = await this.authorizeRoom(uid, item.id);
       if (!room || room.group !== item.group) throw new ChatCommandError("invalid_room");
       accepted.push(room);
     }
@@ -23,9 +30,13 @@ export function createJoinHandler(authorizeRoom: RoomAuthorizer): CommandHandler
     return {
       status: true,
       id: accepted
-        .filter((room) => room.group === "global" || room.group === "local")
+        .filter((room) => room.group === ChatRoomGroup.Global || room.group === ChatRoomGroup.Local)
         .map((room) => room.roomId),
       ids: [],
     };
-  };
+  }
+}
+
+export function createJoinHandler(authorizeRoom: RoomAuthorizer): CommandHandler {
+  return new ChatJoinController(authorizeRoom).handle;
 }

@@ -1,47 +1,12 @@
+import type { ChatSocialAction } from "@opencok/enums/chat-social-action";
+
 export interface ChatLegacyRelations {
   realm: number;
   contacts: { other: string; state: number; description: string }[];
   blocks: { other: string; id: string }[];
 }
-export type ChatSocialCommand =
-  | "chat.feed.send"
-  | "chat.feed.del"
-  | "chat.feed.notice.del"
-  | "chat.feed.get"
-  | "chat.room.invitee"
-  | "fb.friend.get"
-  | "fb.friend.favo"
-  | "contact.apply"
-  | "contact.accept"
-  | "contact.delete"
-  | "contact.favo"
-  | "contact.favo.cancel"
-  | "contact.desc"
-  | "contact.get"
-  | "contact.get.server.current"
-  | "contact.audit"
-  | "chat.lock"
-  | "chat.unlock"
-  | "chat.unlock.batch"
-  | "chat.shield.list"
-  | "chat.report"
-  | "chat.private"
-  | "chat.ban"
-  | "chat.unban"
-  | "notice.ban"
-  | "notice.unban"
-  | "chat.message.delete"
-  | "chat.room.mk"
-  | "chat.room.members"
-  | "chat.room.user.rooms"
-  | "chat.room.member.invite"
-  | "chat.room.member.kick"
-  | "chat.room.name"
-  | "chat.room.member.quit"
-  | "chat.room.member.quitmult"
-  | "chat.room.send"
-  | "chat.room.msg"
-  | "chat.set.status";
+export type ChatSocialCommand = `${ChatSocialAction}`;
+
 export interface ChatSocialOperation {
   owner: string;
   operationId: string;

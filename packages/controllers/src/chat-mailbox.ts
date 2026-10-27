@@ -1,10 +1,12 @@
 import type { IncomingMessage } from "node:http";
 import type { AsyncHttpHandler, Log } from "@opencok/contracts/chat";
 import { decodeChatMailbox, type ChatMailboxStore } from "@opencok/contracts/chat-mailbox";
-import { verifyChatMailbox } from "@opencok/identity/chat-mailbox";
+import { ChatMailboxSignature } from "@opencok/identity/chat-mailbox";
 import { SignedChatController } from "./signed-chat.controller.ts";
 
 type Update = ReturnType<typeof decodeChatMailbox>;
+
+type Result = Awaited<ReturnType<ChatMailboxStore["apply"]>>;
 
 type MailboxControllerOptions = {
   mailboxes: ChatMailboxStore;
@@ -14,9 +16,10 @@ type MailboxControllerOptions = {
   log?: Log;
 };
 
-export class ChatMailboxController extends SignedChatController<Update> {
+export class ChatMailboxController extends SignedChatController<Update, Result> {
   protected readonly operation = "mailbox.apply";
   private readonly mailboxes: ChatMailboxStore;
+  private readonly signature: ChatMailboxSignature;
 
   public constructor(options: MailboxControllerOptions) {
     super(
@@ -26,14 +29,14 @@ export class ChatMailboxController extends SignedChatController<Update> {
       "Invalid chat mailbox configuration",
     );
     this.mailboxes = options.mailboxes;
+    this.signature = new ChatMailboxSignature(options.signingSecret);
   }
 
   protected verify(body: string, request: IncomingMessage, now: number): boolean {
-    return verifyChatMailbox(
+    return this.signature.verify(
       body,
       request.headers["x-opencok-timestamp"],
       request.headers["x-opencok-signature"],
-      this.signingSecret,
       now,
     );
   }
@@ -42,13 +45,13 @@ export class ChatMailboxController extends SignedChatController<Update> {
     return decodeChatMailbox(body);
   }
 
-  protected async apply(update: Readonly<Update>): Promise<unknown> {
+  protected async apply(update: Readonly<Update>): Promise<Result> {
     const result = await this.mailboxes.apply(update);
     if (!["applied", "unchanged"].includes(result)) throw new Error();
     return result;
   }
 
-  protected response(update: Update, result: unknown): object {
+  protected response(update: Update, result: Result): object {
     return {
       owner: update.owner,
       kingdomId: update.kingdomId,

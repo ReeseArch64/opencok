@@ -2,7 +2,7 @@ import { realmChatDeliveries } from "@opencok/services/realm-chat-delivery";
 import { initializeLogging, logEvent } from "@opencok/core/logging";
 import { loadChatEnvironment } from "@opencok/env/chat";
 import { createChatRepository } from "@opencok/repositories/chat";
-import { createChatApp } from "./app";
+import { ChatApplication } from "./chat-application.ts";
 
 import { createChatArchiveStore } from "@opencok/mongoose/chat-archive";
 
@@ -20,9 +20,9 @@ const repository: ReturnType<typeof createChatRepository> = createChatRepository
     kingdoms: config.CHAT_KINGDOM_DATABASES,
   },
 });
-let app: ReturnType<typeof createChatApp> | undefined;
+let app: ChatApplication | undefined;
 try {
-  app = createChatApp({
+  app = new ChatApplication({
     repository,
     instanceId: config.CHAT_INSTANCE_ID,
     signingSecret: config.CHAT_SIGNING_SECRET,
