@@ -7,12 +7,12 @@ API/server, MinIO readiness for API, and PostgreSQL setup ordering for API/serve
 login secret, shared `REDIS_URL` and `DATABASE_URL`, and optional endpoint overrides
 are substituted from the root `.env`.
 
-Use both files for local development. The `dev` profile starts the application stack;
-`all` also includes pgAdmin, Redis Insight and Portainer. The `devops` profile selects
+Use both files for local development. The `dev` profile starts the application stack
+and Mongo Express; `all` also includes pgAdmin, Redis Insight and Portainer. The `devops` profile selects
 these three administration tools together with PostgreSQL, PostgreSQL setup and Redis.
 The `redis` profile selects Redis and Redis Insight; `database` selects PostgreSQL,
-PostgreSQL setup and pgAdmin. The `observability` profile selects only Maple, without
-application startup dependencies. The `prod` profile selects Maple and ZooKeeper.
+PostgreSQL setup, pgAdmin, MongoDB and Mongo Express. The `observability` profile selects only Maple, without
+application startup dependencies. The `prod` profile omits database inspection tools.
 Combine `--profile dev --profile devops` to start
 the development stack with administration tools.
 Chat runs as its own service. Media runs inside the API using the five S3 settings
@@ -95,10 +95,11 @@ The one-shot jobs exit with code zero after completion.
 | MinIO object endpoint                    | 9000           |
 | MinIO console                            | 9001           |
 | pgAdmin                                  | 5050           |
+| Mongo Express                            | 8081           |
 | Redis Insight                            | 5540           |
 | Portainer HTTP (host to container)       | 9443 → 9000    |
 
-Maple and the other development port mappings have no host-IP prefix. Internal connections use service DNS:
+Development port mappings have no host-IP prefix. Internal connections use service DNS:
 `postgres:5432`, `redis:6379`, `zookeeper:2181`, `api:8080`, `server:9933`,
 `minio:9000` and `chat:8083`. The API and game server have no directly published host
 ports. API and server join the external network for outbound access, including
@@ -272,7 +273,7 @@ Application and package suites remain alongside their respective implementations
 ## Social chat archive
 
 Topic 24 adds authenticated `mongo:8.0.34` on the internal network with the
-`mongodb-data` volume and no host port. Chat uses `MONGODB_URI`; local initialization
+`mongodb-data` volume and no host port. Chat uses `MONGO_URI`; local initialization
 uses `MONGODB_USER` and `MONGODB_PASSWORD`. Configure a unique stable `CHAT_INSTANCE_ID`
 for every additional Chat instance. The development default identifies the single
 Compose Chat consumer. Read the [social chat deployment guide](../../docs/social-chat-migration.md)
@@ -377,3 +378,17 @@ bun run --cwd packages/core test:maple
 This checks every required signal, trace/log correlation, private-field filtering,
 query authentication and clean-restart persistence against the real Maple image.
 Production capacity and representative load remain separate admission work.
+
+## Mongo Express
+
+Mongo Express `1.0.2` is available in `all`, `dev` and `database`, after MongoDB is
+healthy. Open `http://localhost:8081` and use the local development login
+`admin` / `admin`. Port 8081 is published without a host-IP restriction, following
+the other local inspection services. These are development credentials.
+
+The UI and Chat both receive `MONGO_URI` from the root `.env`; the URI selects the
+database and authentication settings. The example selects local `opencok_chat`
+with `authSource=admin`. Admin-wide database browsing is disabled. Inspect `chat_archive` for archived messages; UI changes are
+local diagnostic actions and must not replace versioned repair or migration scripts.
+The service has no application dependents or gateway route and is omitted from `prod`.
+See [ADR-0003](../../docs/decisions/0003-adopt-mongo-express-for-development.md).

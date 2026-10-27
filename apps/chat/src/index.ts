@@ -12,7 +12,7 @@ logEvent("starting", { service: "chat" });
 
 const config = loadChatEnvironment();
 
-const archive = config.MONGODB_URI ? createChatArchiveStore(config.MONGODB_URI) : undefined;
+const archive = config.MONGO_URI ? createChatArchiveStore(config.MONGO_URI) : undefined;
 
 const repository: ReturnType<typeof createChatRepository> = createChatRepository({
   renderRealmEvents: (realm, owners, events) =>

@@ -344,11 +344,11 @@ services:
   mongodb:
     image: mongo:8.0.34
     restart: unless-stopped
-    profiles: [all, dev]
+    profiles: [all, dev, database]
     networks: [opencok-internal-network]
     environment:
-      MONGO_INITDB_ROOT_USERNAME: ${MONGODB_USER:-opencok}
-      MONGO_INITDB_ROOT_PASSWORD: ${MONGODB_PASSWORD:-opencok-development}
+      MONGO_INITDB_ROOT_USERNAME: mongo
+      MONGO_INITDB_ROOT_PASSWORD: mongo
     volumes:
       - mongodb-data:/data/db
     healthcheck:
@@ -356,6 +356,23 @@ services:
       interval: 5s
       timeout: 3s
       retries: 12
+
+  mongo-express:
+    image: mongo-express:1.0.2
+    restart: unless-stopped
+    profiles: [all, dev, database]
+    networks: [opencok-internal-network, opencok-external-network]
+    environment:
+      ME_CONFIG_MONGODB_URL: ${MONGO_URI:?Set MONGO_URI for Mongo Express}
+      ME_CONFIG_MONGODB_ENABLE_ADMIN: "false"
+      ME_CONFIG_BASICAUTH: "true"
+      ME_CONFIG_BASICAUTH_USERNAME: admin
+      ME_CONFIG_BASICAUTH_PASSWORD: admin
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    ports:
+      - 8081:8081
 
   chat:
     build:
@@ -375,7 +392,7 @@ services:
       CHAT_HOST: 0.0.0.0
       CHAT_PORT: 8083
       CHAT_INSTANCE_ID: ${CHAT_INSTANCE_ID:-chat-local}
-      MONGODB_URI: ${MONGODB_URI:-mongodb://${MONGODB_USER:-opencok}:${MONGODB_PASSWORD:-opencok-development}@mongodb:27017/opencok_chat?authSource=admin}
+      MONGO_URI: ${MONGO_URI}
       CHAT_SECRET: ${CHAT_SECRET:-opencok-chat-development}
       CHAT_WEBSOCKET_URL: ${CHAT_WEBSOCKET_URL:-ws://192.168.1.104:8083/chat/ws}
     ports:

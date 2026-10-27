@@ -24,7 +24,7 @@ the Compose Chat service, configure the root `.env` or process environment, and 
 | `DATABASE_URL`           | Required PostgreSQL connection URL; topology selects physical databases                 |
 | `CHAT_SECRET`            | Required shared secret for trusted backend session, avatar and nickname requests        |
 | `CHAT_WEBSOCKET_URL`     | Required public `ws(s)://host/chat/ws`, without credentials/query/fragment              |
-| `MONGODB_URI`            | Authenticated MongoDB archive URI; PostgreSQL fallback remains available during outages |
+| `MONGO_URI`              | Authenticated MongoDB archive URI; PostgreSQL fallback remains available during outages |
 | `CHAT_INSTANCE_ID`       | Stable unique consumer identity; defaults to a process UUID outside Compose             |
 | `CHAT_HOST`, `CHAT_PORT` | Listen address, default `127.0.0.1:8083`                                                |
 | `GLOBAL_DATABASE_NAME`   | Default `opencok_global`                                                                |

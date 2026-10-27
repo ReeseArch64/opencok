@@ -6,7 +6,7 @@ import { blankToUndefined, validateEnvironment } from "./validation";
 
 export const chatSchema = z.object({
   DATABASE_URL: postgresUrl,
-  MONGODB_URI: z.preprocess(
+  MONGO_URI: z.preprocess(
     blankToUndefined,
     z
       .url({ protocol: /^mongodb(?:\+srv)?$/ })

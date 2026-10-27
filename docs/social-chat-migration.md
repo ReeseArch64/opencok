@@ -129,7 +129,7 @@ upgrade; do not mix older chat retention code with the new writers. No player re
 inventory reset or queue reset is part of deployment. PostgreSQL remains the authority.
 Back up global and realm databases consistently before applying migrations.
 
-Configure `MONGODB_URI` with a database name and authentication. Local Compose supplies
+Configure `MONGO_URI` with a database name and authentication. Local Compose supplies
 an authenticated MongoDB service, an internal network and a named data volume, with no
 host port. `MONGODB_USER`/`MONGODB_PASSWORD` configure local initialization; use URI-safe
 credentials or an explicitly encoded URI. `CHAT_INSTANCE_ID` must be stable and unique
