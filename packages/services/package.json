@@ -148,7 +148,8 @@
     "./world-use": "./src/world-use.ts",
     "./world-recreation": "./src/world-recreation.ts",
     "./world-march-inspection": "./src/world-march-inspection.ts",
-    "./world-scout": "./src/world-scout.ts"
+    "./world-scout": "./src/world-scout.ts",
+    "./world-bulletins": "./src/world-bulletins.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",

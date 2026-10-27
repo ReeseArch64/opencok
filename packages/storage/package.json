@@ -28,7 +28,8 @@
     "./military-ranking": "./src/military-ranking.ts",
     "./battle-ranking": "./src/battle-ranking.ts",
     "./shared-user": "./src/shared-user.ts",
-    "./general-draws": "./src/general-draws.ts"
+    "./general-draws": "./src/general-draws.ts",
+    "./world-bulletins": "./src/world-bulletins.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",

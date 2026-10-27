@@ -1,3 +1,4 @@
+import { worldFightBulletins } from "./world-bulletins";
 import { worldScoutQuotation } from "./world-scout";
 import { inspectWorldMarch } from "./world-march-inspection";
 import { worldRecreationCommands } from "./world-recreation";
@@ -466,6 +467,19 @@ export class GameService {
     if ([...chatSocialCommands, ...nativeChatCommands].includes(command)) {
       if (!this.services.social) throw new GameError(errors.unsupported);
       return { body: await this.services.social(uid, command, params), pushes: [] };
+    }
+    if (command === "al.fight.bulletin") {
+      if (!this.services.worldFightBulletins) throw new GameError(errors.unsupported);
+      return {
+        body: await worldFightBulletins(
+          this.services.worldFightBulletins,
+          uid,
+          params,
+          this.config.kingdomId,
+          this.now(),
+        ),
+        pushes: [],
+      };
     }
     if (command === "world.scout.detail") {
       if (!this.services.worldScout) throw new GameError(errors.unsupported);

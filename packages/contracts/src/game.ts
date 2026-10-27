@@ -331,6 +331,7 @@ export interface GameServices {
   filterBadWords?(text: string): string;
   worldPointDetail?: WorldPointDetailStore;
   worldScout?: import("./world-scout").WorldScoutStore;
+  worldFightBulletins?: import("./world-bulletins").WorldBulletinArchive;
   worldMarchInspection?: import("./world-march-inspection").WorldMarchInspectionStore;
   playerSearch?: PlayerSearchStore;
   worldSearch?: WorldSearchStore;
