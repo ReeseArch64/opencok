@@ -2598,3 +2598,37 @@ by the original Type5 base purchase body. Its provider delivery and commercial
 claim remain outside this minigame migration; no card activation or paid grant is
 inferred from campaign payment observations. This section does not establish
 acceptance of unrelated combat modes or native-device execution.
+
+## Topic26 local noncombat inventory
+
+The final Source command audit cross-checks all53 top-level request identities in
+`handlers/requesthandlers/activity`, all six in `egg` and all five in `lottery`
+against implemented service paths. Their backend acceptance is recorded in the
+focused sections above. Multihandler selectors, actual costs and rewards,
+period ownership, trusted producers and recovery require those corresponding
+sections and tests; command registration alone remains insufficient evidence.
+
+| Backend family             | Concrete native surface and persisted behavior                                                                                                                                                                                                                          |
+| -------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Local minigames            | Minstrel, alchemist, Olympic and European Cup betting, lottery, seven-day draws, GoldEggs and legacy egg activity own their declared random outcomes, costs and claim state.                                                                                            |
+| Progress and local rewards | Castle upgrade, target and recall tasks, regional return, comeback, continued cost, exchange, ordinary/VIP boxes and daily/shipping investments use their actual counters, timing and owned claims.                                                                     |
+| Social and paid campaigns  | Heart and item gifts, alliance group purchases, special-sale stock, normal/newcomer recharge and feedback use authoritative membership, inventory, payment evidence and accepted-delivery receipts.                                                                     |
+| Activity navigation        | Native operators project backed recharge, return, upgrade, sale, shipping, target, recall, group-buy and specific custom pages. GoldEggs panel47 belongs to this score-panel family; the AbstractActivity directory has its own separate enum and factory.              |
+| Trusted campaign producers | Real item grants/uses, shop purchases, mail claims, verified delivered gifts, hot-item purchases, prayer outcomes and post-merge timers reach their corresponding internal planners. Login, retry and historical scans cannot substitute for original economic actions. |
+
+The maintained activity backend inventory also includes the generic activity
+directory and reward-dispatch work tracked separately in this stack, plus the
+shared party and expedition lifecycle work. Their final combined acceptance must
+use the integrated branch. The Halloween activity helper delegates boss creation
+to combat. Resource-battle, world-boss, arena and matched cross-server combat
+outcomes still require their corresponding validated engines; enum48/49 or a
+configured panel does not establish a new independent local noncombat service.
+The title/talisman subsystem belongs to adjacent progression rather than this
+local activity inventory and needs its own scope and acceptance audit.
+
+Historical closures and disabled controls remain effective after implementation.
+Monthly commercial cards retain their separate Type5 primary delivery and claim
+boundary. External providers remain responsible for actual commercial delivery;
+campaign observers only consume attested completed delivery. Native APK execution
+and other client compatibility tracks remain unverified. This inventory records
+concrete backend coverage and boundaries without changing those production facts.
