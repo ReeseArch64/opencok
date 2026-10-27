@@ -23,7 +23,14 @@ export async function publishWorldMutation(
   ].filter((id) => id > 0);
   for (const push of (body.ownerPushes?.value ?? []) as { value: Fields }[]) {
     const name = str(push.value, "command");
-    if (!["push.petdragon.march", "push.general.info", "push.item.del"].includes(name))
+    if (
+      ![
+        "push.petdragon.march",
+        "push.general.info",
+        "push.item.del",
+        "push.world.march.win",
+      ].includes(name)
+    )
       throw new Error("Invalid world owner notification");
     await publish(owner, name, fields(push.value.body));
   }

@@ -28,7 +28,12 @@ export async function insertSystemMail(
     message.createTime !== createdAt ||
     typeof message.createTime !== "bigint" ||
     message.createTime < 0n ||
-    ![2, 15].includes(message.type) ||
+    ![2, 9, 15].includes(message.type) ||
+    (message.type === 9 &&
+      (message.rewardId !== null ||
+        message.rewardStatus !== 1 ||
+        itemIdFlag !== 0 ||
+        message.extra !== null)) ||
     ![0, 1].includes(message.rewardStatus) ||
     !Number.isInteger(message.reply) ||
     message.reply < -2147483648 ||

@@ -1,6 +1,8 @@
 import type { Row } from "./rows";
 import type { MarchLifecycle } from "./world-march-lifecycle";
 export interface RuntimeMarch extends MarchLifecycle {
+  treasureUUID?: string;
+  treasureReward?: string;
   troubleItem?: string;
   capacity: number;
   gatheredBefore?: number;

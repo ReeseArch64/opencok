@@ -1,4 +1,5 @@
-import { readTreasureMaps, writeTreasureMaps } from "./treasure-map";
+import { readTreasureMaps, writeTreasureMaps, withTreasureMarchTimes } from "./treasure-map";
+import { treasure_map } from "@opencok/drizzle/schema/opencok_kingdom/treasure_map";
 import { t_worldboss } from "@opencok/drizzle/schema/opencok_kingdom/t_worldboss";
 import { and, asc, eq, inArray, lte, sql, or, isNull } from "drizzle-orm";
 import { totem_activation } from "@opencok/drizzle/schema/opencok_kingdom/totem_activation";
@@ -327,7 +328,7 @@ export function createWorldInterest(
     },
     async marches(ids: readonly number[]) {
       if (!ids.length) return [];
-      return db
+      const rows = await db
         .select()
         .from(world_march)
         .where(
@@ -338,6 +339,7 @@ export function createWorldInterest(
         )
         .orderBy(asc(world_march.uuid))
         .limit(1025);
+      return withTreasureMarchTimes(db, rows);
     },
   };
 }
@@ -351,7 +353,14 @@ export async function unregisteredWorldMarches(db: Database["kingdom"]["db"], af
       and(
         eq(world_march.worldId, 0),
         eq(world_march.type, 0),
-        eq(world_march.targetType, 3),
+        or(
+          eq(world_march.targetType, 3),
+          and(
+            eq(world_march.targetType, 2),
+            eq(world_march.state, 1),
+            sql`exists (select 1 from ${treasure_map} where ${treasure_map.currentOwner}=${world_march.ownerUid} and ${treasure_map.marchId}=${world_march.uuid} and ${treasure_map.targetId}=${world_march.targetId} and ${treasure_map.state}=1)`,
+          ),
+        ),
         isNull(world_march_checkpoint.id),
         after ? sql`${world_march.uuid}>${after}` : undefined,
       ),

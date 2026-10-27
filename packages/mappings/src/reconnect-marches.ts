@@ -177,6 +177,16 @@ function serializereconnectMarchBase(
     fields.monsterLevel = sfs.int(integer(row.monsterLevel));
   }
   if (context.resourceBattle) fields.occupyEndTime = sfs.long(long(row.occupyResourceEndTime));
+  if (
+    type === 0 &&
+    state === 1 &&
+    integer(row.targetType) === 2 &&
+    row.treasureMapTime != null &&
+    row.treasureMapFinishTime != null
+  ) {
+    fields.treasureMapTime = sfs.int(integer(row.treasureMapTime));
+    fields.treasureMapFinishTime = sfs.long(long(row.treasureMapFinishTime));
+  }
   return fields;
 }
 

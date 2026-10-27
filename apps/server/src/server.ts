@@ -1420,6 +1420,7 @@ export const RealmDependenciesLive = Layer.effect(
         }
       }
       for (const command of [
+        "treasuremap.spd",
         "world.resources",
         "buy.citydef",
         "world.user.rcd",

@@ -43,6 +43,8 @@ export interface ReconnectMarchResponse {
   readonly territoryStartTime?: bigint;
   readonly territoryUpdateTime?: bigint;
   readonly occupyEndTime?: bigint;
+  readonly treasureMapTime?: number;
+  readonly treasureMapFinishTime?: bigint;
   readonly tct?: bigint;
   readonly exploreSt?: bigint;
   readonly exploreTime?: bigint;
