@@ -128,7 +128,8 @@
     "./daily-investment": "./src/daily-investment.ts",
     "./shipping-investment": "./src/shipping-investment.ts",
     "./seven-day-cycle": "./src/seven-day-cycle.ts",
-    "./ordinary-box": "./src/ordinary-box.ts"
+    "./ordinary-box": "./src/ordinary-box.ts",
+    "./recharge-activity": "./src/recharge-activity.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",

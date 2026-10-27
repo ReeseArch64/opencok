@@ -450,3 +450,24 @@ and reset by login or a new preview. Login resets only that mode without parsing
 or rewriting unrelated mixed-info data. Back up mixed-info rows, inventory,
 receipts and ledger before deployment. Rollback must retain cached pools and
 counters; older binaries can ignore the additive mode field, whose default is zero.
+
+New-server cumulative recharge uses the existing lord total and owned threshold
+claim rows. Native UI projects raw threshold fields and maintained reward previews;
+login preserves the total as a long and projects either an inclusive dated window
+or a realm-age deadline. Qualified thresholds grant once with their claim markers.
+Explicit claims retain the reference's saved-total eligibility rather than
+discarding earned rewards when the window closes.
+
+An internal accepted-event consumer requires a validated gateway, an immutable
+server-provided amount and occurrence timestamp, and the canonical owner/event
+operation ID. Client amount fields never contribute to qualification. An accepted
+event from the active window can arrive late without being credited twice. This
+consumer updates the qualifying total only; purchased game currency belongs to
+the payment pipeline. The default composition has no payment gateway and cannot
+accept this internal producer from a public client.
+
+After the event closes, login recovers each eligible unclaimed threshold into one
+funded system mail and records the same claim marker atomically. Reconnect and
+receipt replay cannot duplicate mail or direct claims, and failed receipts roll
+back totals, markers and mail together. Existing saved totals and other lord
+fields are preserved. No new migration, provider connection or dependency is added.
