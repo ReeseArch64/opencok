@@ -158,7 +158,8 @@
     "./world-recreation": "./src/world-recreation.ts",
     "./world-resource-new": "./src/world-resource-new.ts",
     "./gold-eggs": "./src/gold-eggs.ts",
-    "./gold-eggs-runtime": "./src/gold-eggs-runtime.ts"
+    "./gold-eggs-runtime": "./src/gold-eggs-runtime.ts",
+    "./egg-activity": "./src/egg-activity.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",
