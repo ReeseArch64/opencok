@@ -1,5 +1,7 @@
 # Experimental realm server
 
+For local multiplayer test data, see the [synthetic player seed](SYNTHETIC-PLAYERS.md).
+
 Current topic 7 behavior and operator procedures are documented in
 [Avatar integration](AVATAR_INTEGRATION.md). Its version/restoration and moderation
 acceptance supersedes the historical pending-work notes in the avatar sections below.

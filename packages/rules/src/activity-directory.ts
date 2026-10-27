@@ -1,10 +1,10 @@
 import { long, num, type Row } from "@opencok/contracts/rows";
 import type { ActivityDirectoryEntryResponse } from "@opencok/contracts/responses/activity-directory";
-import { legacyIntegerOrder } from "@opencok/messages/legacy-object-order";
 const supported = new Set([0, 1, 2, 3, 4, 5, 7, 8, 9]);
 export function activityDirectoryEntries(
   rows: readonly Row[],
   now: number,
+  orderIds: (ids: readonly number[]) => readonly number[],
 ): ActivityDirectoryEntryResponse[] {
   if (!Number.isSafeInteger(now) || now < 0 || rows.length > 4096)
     throw new Error("Invalid activity directory snapshot");
@@ -28,5 +28,5 @@ export function activityDirectoryEntries(
     }
     entries.set(id | 0, entry);
   }
-  return legacyIntegerOrder([...entries.keys()]).map((id) => entries.get(id)!);
+  return orderIds([...entries.keys()]).map((id) => entries.get(id)!);
 }

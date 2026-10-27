@@ -81,9 +81,22 @@ export function shopLimit(rule: Rule, state: ShopState, count: number) {
     throw new GameError(errors.invalid);
   return counters;
 }
-export function shopWindow(rule: Rule) {
+export function shopWindow(rule: Rule, now = Date.now()) {
+  if (rule.onsale_type === "2") {
+    if (rule.buy_times_refresh === "2" || !rule.begin_time) throw new GameError(errors.unsupported);
+    const days = rule.begin_time.split(",").map((value) => shopInteger(value));
+    if (!days.length || days.some((day) => day < 1 || day > 7))
+      throw new GameError(errors.unsupported);
+    const date = new Date(now);
+    if (!Number.isFinite(date.getTime())) throw new GameError(errors.unsupported);
+    if (!days.includes(date.getUTCDay() + 1)) return { begin: 0, end: 0, closed: true };
+    const begin = Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate());
+    const end = begin + shopInteger(rule.sale_life) * 3600000;
+    if (!Number.isSafeInteger(end)) throw new GameError(errors.unsupported);
+    return { begin, end, closed: false };
+  }
   if (!rule.begin_time || rule.begin_time === "0" || rule.buy_times_refresh === "2")
-    return { begin: 0, end: 0 };
+    return { begin: 0, end: 0, closed: false };
   if (!/^\d{12}$/.test(rule.begin_time)) throw new GameError(errors.unsupported);
   const raw = rule.begin_time;
   const begin = Date.UTC(
@@ -96,7 +109,7 @@ export function shopWindow(rule: Rule) {
   const end = begin + shopInteger(rule.sale_life) * 3600000;
   if (!Number.isSafeInteger(begin) || !Number.isSafeInteger(end))
     throw new GameError(errors.unsupported);
-  return { begin, end };
+  return { begin, end, closed: false };
 }
 export function shopAvailable(rule: Rule, state: ShopState, rules: Rules): boolean {
   if (rule.onsale !== "1") return false;
@@ -147,8 +160,9 @@ export function shopAvailable(rule: Rule, state: ShopState, rules: Rules): boole
     return false;
   if (state.now < Number(long(profile, "regTime")) + shopInteger(rule.register) * 3600000)
     return false;
-  const { begin, end } = shopWindow(rule);
-  if (begin && (state.now < begin || state.now >= end)) return false;
+  const { begin, end, closed } = shopWindow(rule, state.now);
+  if (closed || ((begin || rule.onsale_type === "2") && (state.now < begin || state.now >= end)))
+    return false;
   shopPrice(rule, 0, 1);
   return true;
 }
