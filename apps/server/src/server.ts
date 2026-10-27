@@ -1,3 +1,4 @@
+import { regionalRecallDomain } from "@opencok/services/regional-recall";
 import { initializeRealmOpeningClock } from "@opencok/repositories/realm-opening-clock";
 import {
   createAllianceHeartDomain,
@@ -464,6 +465,7 @@ export const RealmDependenciesLive = Layer.effect(
         createRechargeActivityDomain(),
         createRechargeFeedbackDomain(),
         createAllianceHeartDomain((uid) => notifications.owners().includes(uid)),
+        regionalRecallDomain,
         playerItemGiftDomain,
         createSeasonalExchangeDomain(),
         createVipBoxDomain(),
