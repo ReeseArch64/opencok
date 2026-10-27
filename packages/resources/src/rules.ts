@@ -328,6 +328,7 @@ export async function loadRules(directory?: string, kingdomId = 1) {
     },
     { ranks: await optional(GameplayCatalog.Rank), gifts: await optional(GameplayCatalog.Gift) },
     {
+      dailyInvestments: await optional(GameplayCatalog.Bank),
       castleLevels: await optional(GameplayCatalog.NewsCastleLV),
       payRewards: await optional(GameplayCatalog.PayReward),
       castleExchanges: new Map([
