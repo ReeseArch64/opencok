@@ -42,31 +42,46 @@ export function newGeneralBuildingEffect<T extends NewGeneralEffectState>(
 ): number {
   try {
     const { orderedGenerals, building } = read();
+
     if (building.buildingUuid === undefined) return 0;
+
     if (orderedGenerals.length > 4096) throw new Error("Too many new-generals");
+
     const ids = new Set<number>();
+
     for (const general of orderedGenerals) {
       const id = generalSavedInteger(general.id);
+
       if (ids.has(id)) throw new Error("Duplicate new-general traversal entry");
+
       ids.add(id);
       validateNewGeneralContent(general);
     }
+
     let result = 0;
+
     for (const general of orderedGenerals) {
       const rate = newGeneralBuildingMultiplier(general, building, rules, context, effect);
+
       if (rate === undefined) continue;
+
       let value = newGeneralStatusEffect(general.statuses, rules, effect, clock());
       const skills = newGeneralSkillEffects(general, rules);
+
       if (skills.skills.has(effect)) value = Math.fround(value + skills.skills.get(effect)!);
+
       value = Math.fround(value + Math.fround(0 + (skills.talents.get(effect) ?? 0)));
       const equipped = equipment(general, effect);
+
       if (typeof equipped !== "number") throw new Error("Invalid new-general equipment effect");
+
       value = Math.fround(value + Math.fround(0 + Math.fround(equipped)));
       value = Math.fround(
         value + newGeneralRefinementEffect(general.refinement, rules, context, effect),
       );
       result = Math.fround(result + Math.fround(value * rate()));
     }
+
     return result;
   } catch {
     return 0;

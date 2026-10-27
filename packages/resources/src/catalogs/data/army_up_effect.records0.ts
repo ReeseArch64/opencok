@@ -1,4 +1,5 @@
 import type { ArmyUpEffectDefinition } from "../types/army_up_effect.ts";
+
 export const records: readonly ArmyUpEffectDefinition[] = [
   { "id": 30391001, "armyType": 0, "level": 1, "effect": [1010, 0.5] },
   { "id": 30391002, "armyType": 0, "level": 2, "effect": [1010, 1] },

@@ -19,17 +19,22 @@ export function createWorldResourceRefreshExecutor(
   captureTime = Date.now,
 ): WorldResourceRefreshExecutor {
   let nextExpiry = 0n;
+
   return {
     async execute(at, work) {
       const next = await db.transaction(async (tx) => {
         await fenceRealmTransaction(tx, authority);
         await tx.execute(sql`select pg_advisory_xact_lock(728214, 0)`);
         const now = at ?? BigInt(captureTime());
+
         if (now < 0n || now > BigInt(Number.MAX_SAFE_INTEGER))
           throw new Error("Invalid resource clock");
+
         const [info] = await tx.select().from(server_info).where(eq(server_info.uid, "server"));
         const ready = Boolean(info?.activityTime && info.activityTime <= now);
+
         if (!ready && now < nextExpiry) return;
+
         const [clock] = await tx
           .select()
           .from(world_resource_runtime)
@@ -44,6 +49,7 @@ export function createWorldResourceRefreshExecutor(
           clock,
           expired: async () => {
             const candidates: { id: number; flushTime: bigint | null }[] = [];
+
             for (let type = 0; type < 6; type++)
               candidates.push(
                 ...(await tx
@@ -60,6 +66,7 @@ export function createWorldResourceRefreshExecutor(
                   .orderBy(asc(worldpoint.flushTime))
                   .limit(64)),
               );
+
             const selected = candidates
               .sort((a, b) =>
                 a.flushTime! < b.flushTime! ? -1 : a.flushTime! > b.flushTime! ? 1 : a.id - b.id,
@@ -75,6 +82,7 @@ export function createWorldResourceRefreshExecutor(
                   .for("update")
               : [];
             expiredCount = rows.length;
+
             return rows;
           },
           async pending() {
@@ -92,6 +100,7 @@ export function createWorldResourceRefreshExecutor(
               .orderBy(asc(black_land_res_dead.deadFinishTime), asc(black_land_res_dead.id))
               .limit(64)
               .for("update");
+
             return [...normal, ...black.map((row) => ({ ...row, areaId: 0, blackLand: 1 }))]
               .sort((a, b) =>
                 long(a, "deadFinishTime") < long(b, "deadFinishTime")
@@ -107,11 +116,14 @@ export function createWorldResourceRefreshExecutor(
               const result = await tx.execute<{ count: string }>(
                 sql`SELECT (SELECT count(*) FROM opencok_kingdom.worldpoint WHERE "worldId"=0 AND "pointType"=3 AND "pointItem" IN ('0','1','2','3','4','5') AND coalesce("flushFlag",0)=0 AND x BETWEEN 575 AND 625 AND y BETWEEN 575 AND 625) + (SELECT count(*) FROM opencok_kingdom.black_land_res_dead) AS count`,
               );
+
               return Number(result.rows[0]!.count);
             }
+
             const result = await tx.execute<{ count: string }>(
               sql`SELECT (SELECT count(*) FROM opencok_kingdom.worldpoint WHERE "worldId"=0 AND "areaId"=${area} AND "pointType"=3 AND "pointItem" IN ('0','1','2','3','4','5') AND coalesce("flushFlag",0)=0 AND NOT (x BETWEEN 575 AND 625 AND y BETWEEN 575 AND 625)) + (SELECT count(*) FROM opencok_kingdom.world_res_dead WHERE "areaId"=${area}) AS count`,
             );
+
             return Number(result.rows[0]!.count);
           },
           async free(area) {
@@ -125,8 +137,10 @@ export function createWorldResourceRefreshExecutor(
                 .orderBy(sql`random()`)
                 .limit(1)
                 .for("update");
+
               return point;
             }
+
             const [point] = await tx
               .select()
               .from(worldpoint)
@@ -136,6 +150,7 @@ export function createWorldResourceRefreshExecutor(
               .orderBy(sql`random()`)
               .limit(1)
               .for("update");
+
             return point;
           },
           async postpone(point, deadline) {
@@ -175,8 +190,10 @@ export function createWorldResourceRefreshExecutor(
                 level,
                 deadFinishTime: deadline,
               });
+
               return;
             }
+
             await tx.insert(world_res_dead).values({
               id: randomUUID().replaceAll("-", ""),
               areaId: area,
@@ -191,8 +208,10 @@ export function createWorldResourceRefreshExecutor(
                 .update(black_land_res_dead)
                 .set({ deadFinishTime: deadline })
                 .where(eq(black_land_res_dead.id, text(ticket, "id")));
+
               return;
             }
+
             await tx
               .update(world_res_dead)
               .set({ deadFinishTime: deadline })
@@ -203,8 +222,10 @@ export function createWorldResourceRefreshExecutor(
               await tx
                 .delete(black_land_res_dead)
                 .where(eq(black_land_res_dead.id, text(ticket, "id")));
+
               return;
             }
+
             await tx.delete(world_res_dead).where(eq(world_res_dead.id, text(ticket, "id")));
           },
           async spawn(point, type, level, amount, deadline) {
@@ -230,6 +251,7 @@ export function createWorldResourceRefreshExecutor(
               .onConflictDoUpdate({ target: world_resource_runtime.worldId, set: value });
           },
         });
+
         if (changed.length) {
           const id = randomUUID().replaceAll("-", "");
           await tx.insert(mutation_outbox).values({
@@ -251,8 +273,10 @@ export function createWorldResourceRefreshExecutor(
             publishedAt: 0n,
           });
         }
+
         return ready ? undefined : expiredCount === 64 ? now : now + 1800000n;
       });
+
       if (next !== undefined) nextExpiry = next;
     },
   };

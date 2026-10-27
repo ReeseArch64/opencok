@@ -1,4 +1,5 @@
 import type { Row } from "./rows";
+
 export interface ExpeditionMatchStats {
   topAlliancePower: number;
   topUserPower: string;
@@ -9,11 +10,13 @@ export interface ExpeditionMatchStats {
   victories: number;
   failures: number;
 }
+
 export interface ExpeditionMatchRealm {
   kingdomId: number;
   stats: ExpeditionMatchStats;
   previousMatch: number;
 }
+
 export interface ExpeditionMatchConfiguration {
   powerClose: number;
   powerFar: number;
@@ -27,15 +30,18 @@ export interface ExpeditionMatchConfiguration {
   failures: number;
   weights: readonly number[];
 }
+
 export interface ExpeditionMatchResult {
   kingdomId: number;
   opponent: number;
   matchedAt: bigint;
 }
+
 export interface ExpeditionMatchingRealmStore {
   admit(period: Row, allowNew?: boolean): Promise<Row | undefined>;
   apply(period: Row, result: ExpeditionMatchResult): Promise<void>;
 }
+
 export interface ExpeditionMatchingRegistry {
   register(
     period: Row,

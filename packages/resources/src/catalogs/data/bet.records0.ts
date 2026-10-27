@@ -1,4 +1,5 @@
 import type { BetDefinition } from "../types/bet.ts";
+
 export const records: readonly BetDefinition[] = [
   {
     "id": 7501001,

@@ -1,4 +1,5 @@
 import type { AllianceQuestDefinition } from "../types/alliance_quest.ts";
+
 export const records: readonly AllianceQuestDefinition[] = [
   {
     "id": 2910006,

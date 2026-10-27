@@ -1,4 +1,5 @@
 import type { DeepLinkDefinition } from "../types/deep_link.ts";
+
 export const records: readonly DeepLinkDefinition[] = [
   { "id": 45900, "type": 1, "name": "coupon_KR01", "mailId": 11748, "number": 0 },
   { "id": 45901, "type": 1, "name": "coupon_KR02", "mailId": 11749, "number": 0 },

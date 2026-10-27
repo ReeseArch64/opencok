@@ -1,4 +1,5 @@
 import type { ResponseValue } from "./value";
+
 export interface TargetTaskRowResponse {
   reward: readonly ResponseValue[];
   num: number;
@@ -8,6 +9,7 @@ export interface TargetTaskRowResponse {
   taskid: string;
   rewardDouble: number;
 }
+
 export interface TargetTaskResponse {
   targetList: readonly TargetTaskRowResponse[];
   exchangeid: string;

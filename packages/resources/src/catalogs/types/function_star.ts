@@ -10,4 +10,5 @@ export interface FunctionStarDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type FunctionStarDefinitionCatalog = CatalogTable<FunctionStarDefinition>;

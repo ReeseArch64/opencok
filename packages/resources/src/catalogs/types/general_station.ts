@@ -10,4 +10,5 @@ export interface GeneralStationDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type GeneralStationDefinitionCatalog = CatalogTable<GeneralStationDefinition>;

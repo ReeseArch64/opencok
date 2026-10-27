@@ -1,6 +1,7 @@
 import { sfs, encode, decode, fields, int, str, Type, type Fields } from "@opencok/messages/sfs";
 import type { ContinuedCostSpending } from "@opencok/contracts/continued-cost";
 import { cityInteger, cityAmount } from "@opencok/rules/city-progression";
+
 export function continuedCostSpending(value: ContinuedCostSpending) {
   return encode({
     owner: sfs.string(value.owner),
@@ -22,13 +23,16 @@ export function continuedCostSpending(value: ContinuedCostSpending) {
     ),
   });
 }
+
 export function readContinuedCostSpending(payload: Uint8Array): ContinuedCostSpending {
   const body = decode(Buffer.from(payload)),
     entries = body.tiers;
   const amount = (key: string) => {
     if (body[key]?.type !== Type.Long) throw new Error("Invalid continued-cost long field");
+
     return cityAmount(body[key]!.value);
   };
+
   if (
     entries?.type !== Type.Array ||
     !Array.isArray(entries.value) ||
@@ -36,9 +40,12 @@ export function readContinuedCostSpending(payload: Uint8Array): ContinuedCostSpe
     entries.value.length > 128
   )
     throw new Error("Invalid continued-cost tiers");
+
   const tiers = entries.value.map((value) => {
     const tier = fields(value);
+
     if (tier.point?.type !== Type.Long) throw new Error("Invalid continued-cost threshold");
+
     return {
       level: cityInteger(int(tier, "level"), 1),
       point: cityAmount(tier.point.value),
@@ -46,6 +53,7 @@ export function readContinuedCostSpending(payload: Uint8Array): ContinuedCostSpe
       important: "",
     };
   });
+
   if (
     tiers.some(
       (tier, index) =>
@@ -55,6 +63,7 @@ export function readContinuedCostSpending(payload: Uint8Array): ContinuedCostSpe
     )
   )
     throw new Error("Invalid continued-cost tier order");
+
   const result = {
     owner: str(body, "owner"),
     at: amount("at"),
@@ -67,6 +76,7 @@ export function readContinuedCostSpending(payload: Uint8Array): ContinuedCostSpe
     face: "",
     tiers,
   };
+
   if (
     result.start <= 0n ||
     result.start >= result.end ||
@@ -76,8 +86,10 @@ export function readContinuedCostSpending(payload: Uint8Array): ContinuedCostSpe
     (result.type === 1 && result.paid + result.free !== result.amount)
   )
     throw new Error("Invalid continued-cost evidence");
+
   return result;
 }
+
 export function continuedCostInfo(
   type: number,
   face: string,

@@ -14,34 +14,47 @@ export function avatarSequence(version: unknown): number {
     version % 1000000 === 999999
   )
     throw new GameError(errors.invalid, "avatar_rule");
+
   return Math.max(0, version % 1000000) + 1;
 }
+
 export function avatarMinimumLevel(rules: Rules): number | undefined {
   const settings = rules.items.get("function_on5");
+
   if (!settings) throw new GameError(errors.unsupported, "avatar_rule");
+
   if (settings.k2 === "0") return undefined;
+
   try {
     return Number(javaDecimal(rules.items.get("hero")?.k9, 32));
   } catch {
     throw new GameError(errors.unsupported, "avatar_rule");
   }
 }
+
 export function checkAvatarLevel(level: number, minimum: number): void {
   if (!Number.isInteger(level) || level < -2147483648 || level > 2147483647)
     throw new GameError(errors.invalid, "avatar_rule");
+
   if (level < minimum) throw new GameError(errors.avatarLevel);
 }
+
 export function checkAvatarRecord(rules: Rules, record: Row | undefined, now: number): void {
   if (!Number.isSafeInteger(now) || now < 0) throw new GameError(errors.invalid, "avatar_rule");
+
   if (!record) return;
+
   let interval: bigint;
+
   try {
     interval = BigInt.asIntN(64, javaDecimal(rules.items.get("hero")?.k7, 64) * 1000n);
   } catch {
     throw new GameError(errors.unsupported, "avatar_rule");
   }
+
   const updated = record.updateTime ?? 0n;
   const banned = record.banTime ?? 0n;
+
   if (
     typeof updated !== "bigint" ||
     typeof banned !== "bigint" ||
@@ -49,8 +62,10 @@ export function checkAvatarRecord(rules: Rules, record: Row | undefined, now: nu
     BigInt.asIntN(64, banned) !== banned
   )
     throw new GameError(errors.invalid, "avatar_rule");
+
   if (BigInt.asIntN(64, BigInt(now) - updated) < interval)
     throw new GameError(errors.avatarCooldown);
+
   if (banned > BigInt(now)) throw new GameError(errors.avatarReported);
 }
 
@@ -62,14 +77,19 @@ export function avatarFinishQuery(receipt: string, now: number): AvatarFinishQue
     now < 0
   )
     throw new GameError(errors.invalid, "avatar_rule");
+
   const [sequence, hash] = receipt.split(":");
+
   return { sequence: Number(sequence), hash: hash!, now };
 }
+
 export function avatarFinishMinimumLevel(rules: Rules): number | undefined {
   if (typeof rules.items.get("function_on5")?.k2 !== "string")
     throw new GameError(errors.unsupported, "avatar_rule");
+
   return avatarMinimumLevel(rules);
 }
+
 export function avatarFinishInterval(rules: Rules): bigint {
   try {
     return BigInt.asIntN(64, javaDecimal(rules.items.get("hero")?.k7, 64) * 1000n);
@@ -77,6 +97,7 @@ export function avatarFinishInterval(rules: Rules): bigint {
     throw new GameError(errors.unsupported, "avatar_rule");
   }
 }
+
 export function avatarFinishPlan(
   profile: Row,
   query: AvatarFinishQuery,
@@ -84,8 +105,11 @@ export function avatarFinishPlan(
   mailTemplate: Rule | undefined,
 ): AvatarFinishPlan {
   const sequence = avatarSequence(profile.picVer);
+
   if (sequence !== query.sequence) throw new GameError(errors.invalid, "avatar_rule");
+
   const metadata = [profile.name, profile.pf];
+
   if (
     metadata.some(
       (value) =>
@@ -96,8 +120,10 @@ export function avatarFinishPlan(
     )
   )
     throw new GameError(errors.invalid, "avatar_rule");
+
   const template =
     moderated && mailTemplate && Object.keys(mailTemplate).length ? { ...mailTemplate } : null;
+
   if (
     template &&
     (Object.keys(template).length > 100 ||
@@ -113,6 +139,7 @@ export function avatarFinishPlan(
       ))
   )
     throw new GameError(errors.unsupported, "avatar_rule");
+
   const effects = JSON.stringify({
     version: 1,
     mail: template,
@@ -122,8 +149,10 @@ export function avatarFinishPlan(
       updatedAt: String(Math.floor(query.now / 1000)),
     },
   });
+
   if (new TextEncoder().encode(effects).length > 65535)
     throw new GameError(errors.unsupported, "avatar_rule");
+
   return {
     picVer: sequence + (moderated ? 0 : 2000000),
     moderated,

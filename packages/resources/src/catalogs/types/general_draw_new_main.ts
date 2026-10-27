@@ -15,4 +15,5 @@ export interface GeneralDrawNewMainDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type GeneralDrawNewMainDefinitionCatalog = CatalogTable<GeneralDrawNewMainDefinition>;

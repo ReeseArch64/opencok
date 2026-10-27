@@ -8,5 +8,6 @@ export interface DragonCrystalConditionDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type DragonCrystalConditionDefinitionCatalog =
   CatalogTable<DragonCrystalConditionDefinition>;

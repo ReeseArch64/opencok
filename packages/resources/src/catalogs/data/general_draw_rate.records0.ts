@@ -1,4 +1,5 @@
 import type { GeneralDrawRateDefinition } from "../types/general_draw_rate.ts";
+
 export const records: readonly GeneralDrawRateDefinition[] = [
   {
     "id": 89680,

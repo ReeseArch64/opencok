@@ -5,4 +5,5 @@ export interface CargoDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type CargoDefinitionCatalog = CatalogTable<CargoDefinition>;

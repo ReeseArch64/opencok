@@ -4,6 +4,7 @@ import type {
   CampaignTriggerResponse,
 } from "@opencok/contracts/responses/anniversary";
 import { field } from "./response";
+
 export const anniversarySchema = z.strictObject({
   anniversary_array: z.array(
     z.strictObject({

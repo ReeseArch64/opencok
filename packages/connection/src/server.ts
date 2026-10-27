@@ -21,6 +21,7 @@ export function listenServer(config: ConnectionConfig, dependencies: ServerDepen
     const check = fromPromise("realm.health", async () => {
       const results = await Promise.allSettled([db.health(), cache.command("PING")]);
       const next = results.every((result) => result.status === "fulfilled") && coordination.ready;
+
       if (!checked || next !== healthy)
         logEvent(
           "readiness_changed",
@@ -34,11 +35,13 @@ export function listenServer(config: ConnectionConfig, dependencies: ServerDepen
           },
           next ? "info" : "warn",
         );
+
       checked = true;
       healthy = next;
     }).pipe(Effect.uninterruptible);
     const ready = () => healthy && coordination.ready && !stopping;
     yield* check;
+
     if (!ready()) return yield* Effect.fail(new ResourceError({ operation: "realm.readiness" }));
 
     const listener = yield* acquireResource(
@@ -51,8 +54,11 @@ export function listenServer(config: ConnectionConfig, dependencies: ServerDepen
         stopping = true;
         logEvent("connections_draining", { kingdom: config.kingdomId, connections: sockets.size });
         const closed = new Promise<void>((resolve) => listener.close(() => resolve()));
+
         for (const socket of sockets) socket.destroy();
+
         await closed;
+
         while (inFlight.size) await Promise.allSettled(inFlight);
       },
     );
@@ -71,12 +77,15 @@ export function listenServer(config: ConnectionConfig, dependencies: ServerDepen
 
     const health = yield* serveHttp({ host: config.host, port: config.healthPort }, (request) => {
       const path = new URL(request.url).pathname;
+
       if (path === provisionPath)
         return ready() && dependencies.provisioning
           ? dependencies.provisioning(request)
           : new Response(null, { status: 503 });
+
       if (path !== "/healthz" && path !== "/readyz")
         return new Response("Not found", { status: 404 });
+
       return Response.json(
         {
           status: ready() ? "ready" : "unavailable",
@@ -107,6 +116,7 @@ export function listenServer(config: ConnectionConfig, dependencies: ServerDepen
       }),
     );
     const address = listener.address();
+
     return {
       port: typeof address === "object" && address ? address.port : config.port,
       healthPort: health.port,

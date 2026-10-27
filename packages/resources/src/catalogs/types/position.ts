@@ -8,4 +8,5 @@ export interface PositionDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type PositionDefinitionCatalog = CatalogTable<PositionDefinition>;

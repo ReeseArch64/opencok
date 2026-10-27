@@ -11,4 +11,5 @@ export interface SoldiersDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type SoldiersDefinitionCatalog = CatalogTable<SoldiersDefinition>;

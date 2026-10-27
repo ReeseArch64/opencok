@@ -1,4 +1,5 @@
 import type { ActivityDefinition } from "../types/activity.ts";
+
 export const records: readonly ActivityDefinition[] = [
   {
     "id": 49000,

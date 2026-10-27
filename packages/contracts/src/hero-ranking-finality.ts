@@ -1,5 +1,6 @@
 import type { Row } from "./rows";
 import type { HeroRankSourceRow } from "./hero-rank-publication";
+
 export interface HeroRankPeriod {
   id: string;
   type: number;
@@ -8,6 +9,7 @@ export interface HeroRankPeriod {
   group: string;
   expectedRealms: readonly number[];
 }
+
 export interface HeroRankFinalityRealm {
   candidates(now: bigint): Promise<{ events: readonly Row[]; closures: readonly Row[] }>;
   closeUnmatched(actId: string, now: bigint): Promise<void>;
@@ -18,6 +20,7 @@ export interface HeroRankFinalityRealm {
   completed(periodId: string): Promise<void>;
   finished(periodId: string, kingdomRank: string | null): Promise<void>;
 }
+
 export interface HeroRankFinalityRegistry {
   register(period: HeroRankPeriod, now: bigint): Promise<void>;
   get(periodId: string): Promise<HeroRankPeriod | undefined>;

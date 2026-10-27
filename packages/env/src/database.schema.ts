@@ -4,6 +4,7 @@ import { blankToUndefined, validateEnvironment } from "./validation";
 export const postgresUrl = z.url({ protocol: /^postgres(ql)?$/ }).refine((value) => {
   try {
     const parsed = new URL(value);
+
     return !!parsed.hostname && parsed.pathname.length > 1;
   } catch {
     return false;
@@ -24,5 +25,6 @@ export const databaseSchema = z
   .readonly();
 
 export type DatabaseEnvironment = z.infer<typeof databaseSchema>;
+
 export const parseDatabaseEnvironment = (source: Readonly<Record<string, string | undefined>>) =>
   validateEnvironment(databaseSchema, source);

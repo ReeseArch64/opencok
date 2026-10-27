@@ -1,4 +1,5 @@
 import type { SvipShopBuildingDefinition } from "../types/svip_shop_building.ts";
+
 export const records: readonly SvipShopBuildingDefinition[] = [
   { "id": 9021101, "level": 1, "experience": 46700, "nextExp": 46700 },
   { "id": 9021102, "level": 2, "experience": 84000, "nextExp": 130700 },

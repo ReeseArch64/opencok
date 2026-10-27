@@ -31,11 +31,14 @@ export const chatSchema = z.object({
     .transform((value) =>
       value.split(",").map((entry) => {
         const [id, database] = entry.split(":");
+
         return { id: Number(id), database };
       }),
     )
     .pipe(z.array(z.object({ id: z.number().int().positive(), database: databaseName })).min(1)),
 });
+
 export const parseChatEnvironment = (source: Readonly<Record<string, string | undefined>>) =>
   validateEnvironment(chatSchema, source);
+
 export const loadChatEnvironment = () => parseChatEnvironment(loadEnvironment(process.env));

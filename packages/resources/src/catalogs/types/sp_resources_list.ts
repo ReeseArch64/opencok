@@ -10,4 +10,5 @@ export interface SpResourcesListDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type SpResourcesListDefinitionCatalog = CatalogTable<SpResourcesListDefinition>;

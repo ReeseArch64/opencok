@@ -1,4 +1,5 @@
 import type { AllianceBuildingDefinition } from "../types/alliance_building.ts";
+
 export const records: readonly AllianceBuildingDefinition[] = [
   { "id": 460000, "level": 0, "type": 0, "outpost": 0, "outpost1": 0 },
   {

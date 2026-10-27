@@ -1,4 +1,5 @@
 import type { FragmentDefinition } from "../types/fragment.ts";
+
 export const records: readonly FragmentDefinition[] = [
   {
     "id": 52000,

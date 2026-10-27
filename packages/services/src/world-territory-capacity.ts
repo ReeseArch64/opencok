@@ -24,6 +24,7 @@ export async function territorySoldierCapacity(
   services: Pick<GameServices, "worldPowerEffects" | "emperorVersion" | "expeditionStage">,
 ): Promise<number> {
   if (!services.worldPowerEffects) throw new Error("Missing territory effect reader");
+
   const context = resourceOwnerRuleContext(snapshot, { kingdomId, now });
   const state = snapshot.effects;
   const world = worldPowerEffects(
@@ -38,10 +39,12 @@ export async function territorySoldierCapacity(
   const memo = new Map<number, number>();
   const effect = (id: Parameters<typeof playerGameEffect>[6]): number => {
     let result = memo.get(id);
+
     if (result === undefined) {
       result = playerGameEffect(state, rules, context, abilities, world, emperor, id);
       memo.set(id, result);
     }
+
     return result;
   };
   const general = (id: number, building: number) =>
@@ -55,10 +58,12 @@ export async function territorySoldierCapacity(
       building,
     );
   let phase: number | undefined;
+
   try {
     if (resourceExpeditionConfigured(rules, context, () => resourceMergeServer(rules, kingdomId)))
       phase = await services.expeditionStage?.(kingdomId);
   } catch {}
+
   const origin = ownerInteger(state.profile.crossFightSrcServerId);
   const home = origin === -1 ? ownerInteger(state.profile.serverId) : origin;
   const conditional = (id: 909 | 910 | 911 | 912 | 913 | 2600): number => {
@@ -69,6 +74,7 @@ export async function territorySoldierCapacity(
         ([910, 913].includes(id) && home === kingdomId)
       )
         return 0;
+
       return effect(id);
     } catch {
       return 0;
@@ -86,7 +92,9 @@ export async function territorySoldierCapacity(
       row.itemId === 427000
         ? definition.effects?.reinforcementCapacity
         : definition.effects?.rallyCapacity;
+
     if (value === undefined) throw new Error("Missing building capacity");
+
     return ownerInteger(value);
   };
   const school = ordered
@@ -113,6 +121,7 @@ export async function territorySoldierCapacity(
   const ratio = Math.fround(Math.fround(Math.fround(100 + effect(8)) + civ) / 100);
   maximum = (narrow(Math.fround(Math.fround(maximum) * ratio)) + extra) | 0;
   const warCapacity = war ? parameter(war) : -1;
+
   if (warCapacity !== -1) {
     maximum = (maximum + warCapacity) | 0;
     maximum = add(maximum, effect(144));
@@ -120,5 +129,6 @@ export async function territorySoldierCapacity(
     maximum = add(maximum, conditional(912));
     maximum = add(maximum, conditional(913));
   }
+
   return maximum;
 }

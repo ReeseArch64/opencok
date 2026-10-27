@@ -25,4 +25,5 @@ export interface GeneralTalentDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type GeneralTalentDefinitionCatalog = CatalogTable<GeneralTalentDefinition>;

@@ -6,4 +6,5 @@ export interface WrSeverDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type WrSeverDefinitionCatalog = CatalogTable<WrSeverDefinition>;

@@ -2,6 +2,7 @@ import { and, asc, eq, like, or } from "drizzle-orm";
 import { trigger_var } from "@opencok/drizzle/schema/opencok_kingdom/trigger_var";
 import { text, num, long, type Row } from "@opencok/contracts/rows";
 import type { MutationTransaction } from "./mutation";
+
 export async function readCampaignVariables(
   tx: MutationTransaction,
   owner: string,
@@ -21,9 +22,12 @@ export async function readCampaignVariables(
     )
     .orderBy(asc(trigger_var.type), asc(trigger_var.key))
     .limit(2049);
+
   if (rows.length > 2048) throw new Error("Campaign variable bound exceeded");
+
   return rows;
 }
+
 export async function writeCampaignVariables(
   tx: MutationTransaction,
   owner: string,
@@ -31,6 +35,7 @@ export async function writeCampaignVariables(
   now: bigint,
 ) {
   const at = new Date(Number(now)).toISOString().slice(0, 19).replace("T", " ");
+
   for (const row of rows) {
     if (
       row.uid !== owner ||
@@ -42,6 +47,7 @@ export async function writeCampaignVariables(
       BigInt(text(row, "value")) > 9223372036854775807n
     )
       throw new Error("Invalid campaign variable write");
+
     const value = {
       type: 1,
       uid: owner,

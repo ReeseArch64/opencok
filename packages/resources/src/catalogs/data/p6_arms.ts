@@ -12,6 +12,7 @@ import { records as records7 } from "./p6_arms.records7.ts";
 import { records as records8 } from "./p6_arms.records8.ts";
 import { records as records9 } from "./p6_arms.records9.ts";
 import { records as records10 } from "./p6_arms.records10.ts";
+
 export const catalog: CatalogTable<P6ArmsDefinition> = {
   "kind": CatalogKind.Table,
   "records": [

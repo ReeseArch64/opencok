@@ -1,4 +1,5 @@
 import type { WorldbossDefinition } from "../types/worldboss.ts";
+
 export const records: readonly WorldbossDefinition[] = [
   {
     "id": 910001,

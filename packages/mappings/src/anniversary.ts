@@ -7,6 +7,7 @@ import {
   campaignTriggerSchema,
 } from "@opencok/validations/anniversary";
 import { validateFields } from "./validation";
+
 export function anniversaryView(response: AnniversaryResponse): Fields {
   return validateFields(anniversarySchema, {
     anniversary_array: sfs.array(
@@ -50,14 +51,20 @@ export function anniversaryStatisticsView(
 ): Fields {
   const row = state.statistics,
     when = new Date(Number(long(profile, "regTime")));
+
   if (!Number.isFinite(when.getTime())) throw new Error("Invalid anniversary registration date");
+
   const result: Fields = {};
+
   if (long(state.times, "attack") && text(state.times, "name").trim()) {
     result.atkTime = sfs.long(long(state.times, "attack"));
     result.atkName = sfs.string(text(state.times, "name"));
   }
+
   if (long(state.times, "defend")) result.defTime = sfs.long(long(state.times, "defend"));
+
   if (long(state.times, "team")) result.teamAtkTime = sfs.long(long(state.times, "team"));
+
   result.regTime = sfs.string(when.toISOString().slice(0, 10).replaceAll("-", "/"));
   result.regTop = sfs.long(long(row, "regtop"));
   result.power = sfs.long(long(row, "power"));
@@ -77,6 +84,7 @@ export function anniversaryStatisticsView(
   result.killPercent = sfs.string(num(row, "killpercent").toFixed(2));
   result.allianceAllNum = sfs.int(num(state.alliance, "allnum"));
   result.allianceNum = sfs.int(num(state.alliance, "num"));
+
   return validateFields(anniversaryStatisticsSchema, result);
 }
 

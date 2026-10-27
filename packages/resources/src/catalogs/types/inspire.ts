@@ -6,4 +6,5 @@ export interface InspireDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type InspireDefinitionCatalog = CatalogTable<InspireDefinition>;

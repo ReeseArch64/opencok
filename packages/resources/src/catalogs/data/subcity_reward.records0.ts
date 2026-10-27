@@ -1,4 +1,5 @@
 import type { SubcityRewardDefinition } from "../types/subcity_reward.ts";
+
 export const records: readonly SubcityRewardDefinition[] = [
   {
     "id": 510100,

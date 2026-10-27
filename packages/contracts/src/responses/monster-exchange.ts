@@ -1,4 +1,5 @@
 import type { ResponseValue } from "./value";
+
 export interface MonsterExchangeResponse {
   level: number;
   refreshTime: bigint;

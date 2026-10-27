@@ -1,4 +1,5 @@
 import type { WonderDefinition } from "../types/wonder.ts";
+
 export const records: readonly WonderDefinition[] = [
   {
     "id": 2944000,

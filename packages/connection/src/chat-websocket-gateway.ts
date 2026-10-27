@@ -28,30 +28,42 @@ export class ChatWebSocketGateway implements WebSocketGateway {
     server.on("upgrade", async (request, socket, head) => {
       if (request.url !== "/chat/ws") {
         this.rejectUpgrade(socket, 404);
+
         return;
       }
+
       let ready = false;
+
       try {
         ready = (this.options.isReady ?? (() => true))() === true;
       } catch {
         ready = false;
       }
+
       if (!ready) {
         this.rejectUpgrade(socket, 503);
+
         return;
       }
+
       const token = request.headers.session;
       const claimedUid = request.headers.uid;
+
       if (typeof token !== "string" || typeof claimedUid !== "string") {
         this.rejectUpgrade(socket, 401);
+
         return;
       }
+
       try {
         const identity = await this.deadline.run(() => this.options.verifyToken(token, claimedUid));
+
         if (!identity) {
           this.rejectUpgrade(socket, 401);
+
           return;
         }
+
         if (!socket.destroyed)
           this.wss.handleUpgrade(request, socket, head, (ws) =>
             this.wss.emit("connection", ws, request, identity.uid),

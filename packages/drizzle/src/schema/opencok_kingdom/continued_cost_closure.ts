@@ -1,6 +1,7 @@
 import { sql } from "drizzle-orm";
 import { bigint, check, integer, primaryKey, text, varchar } from "drizzle-orm/pg-core";
 import { opencok_kingdom } from "../namespaces";
+
 export const continued_cost_closure = opencok_kingdom.table(
   "continued_cost_closure",
   {

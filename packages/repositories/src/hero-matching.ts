@@ -12,13 +12,16 @@ import type {
   HeroMatchingRealmStore,
 } from "@opencok/contracts/hero-matching";
 import type { Database } from "./game";
+
 type Global = Database["databases"]["global"]["db"];
+
 export function createHeroMatchingRegistry(db: Global): HeroMatchingRegistry {
   const lock = async (tx: Parameters<Parameters<Global["transaction"]>[0]>[0], id: string) => {
     await tx.execute(sql`set local lock_timeout='1s'`);
     await tx.execute(sql`set local statement_timeout='3s'`);
     await tx.execute(sql`select pg_advisory_xact_lock(728222,hashtext(${id}))`);
   };
+
   return {
     async register(value) {
       cityInteger(value.kingdomId, 1);
@@ -29,6 +32,7 @@ export function createHeroMatchingRegistry(db: Global): HeroMatchingRegistry {
       cityInteger(value.groupSize, 1, 128);
       cityInteger(value.matchSize, 1, Math.min(16, value.groupSize));
       cityInteger(value.shuffle, 0, value.groupSize * 10 - 1);
+
       if (
         !value.definition ||
         value.definition.length > 100 ||
@@ -38,6 +42,7 @@ export function createHeroMatchingRegistry(db: Global): HeroMatchingRegistry {
         value.registeredAt >= value.endTime
       )
         throw new Error("Invalid hero realm registration");
+
       await db.transaction(async (tx) => {
         await lock(tx, value.periodId);
         let [period] = await tx
@@ -45,8 +50,10 @@ export function createHeroMatchingRegistry(db: Global): HeroMatchingRegistry {
           .from(hero_match_period)
           .where(eq(hero_match_period.id, value.periodId))
           .for("update");
+
         if (!period) {
           if (value.registeredAt + 240000n >= value.endTime) return;
+
           [period] = await tx
             .insert(hero_match_period)
             .values({
@@ -62,6 +69,7 @@ export function createHeroMatchingRegistry(db: Global): HeroMatchingRegistry {
             })
             .returning();
         }
+
         if (
           !period ||
           period.startTime !== value.startTime ||
@@ -70,6 +78,7 @@ export function createHeroMatchingRegistry(db: Global): HeroMatchingRegistry {
           value.registeredAt < period.createdAt
         )
           throw new Error("Conflicting hero matching period");
+
         const [existing] = await tx
           .select()
           .from(hero_match_realm)
@@ -80,13 +89,17 @@ export function createHeroMatchingRegistry(db: Global): HeroMatchingRegistry {
             ),
           )
           .limit(1);
+
         if (existing || period.matchedAt > 0n || value.registeredAt >= period.admissionEnd) return;
+
         const [count] = await tx
           .select({ total: sql<string>`count(*)::text` })
           .from(hero_match_realm)
           .where(eq(hero_match_realm.periodId, value.periodId));
+
         if (Number(count?.total ?? 0) >= 4096)
           throw new Error("Hero matching registry bound exceeded");
+
         await tx.insert(hero_match_realm).values({
           periodId: value.periodId,
           kingdomId: value.kingdomId,
@@ -107,15 +120,19 @@ export function createHeroMatchingRegistry(db: Global): HeroMatchingRegistry {
           .from(hero_match_period)
           .where(eq(hero_match_period.id, periodId))
           .for("update");
+
         if (!period || period.matchedAt > 0n || now < period.admissionEnd || now >= period.endTime)
           return;
+
         const realms = await tx
           .select()
           .from(hero_match_realm)
           .where(eq(hero_match_realm.periodId, periodId))
           .limit(4097);
         const groups = heroMatchGroups(realms, period.groupSize, period.matchSize);
+
         if (!groups.length) return;
+
         await tx.execute(
           sql`update opencok_global.hero_match_realm r set "serverGroup"=v."serverGroup", "matchedAt"=${now} from jsonb_to_recordset(${JSON.stringify(groups)}::jsonb) as v("kingdomId" integer,"serverGroup" text) where r."periodId"=${periodId} and r."kingdomId"=v."kingdomId"`,
         );
@@ -137,12 +154,14 @@ export function createHeroMatchingRegistry(db: Global): HeroMatchingRegistry {
           ),
         )
         .limit(1);
+
       return row?.serverGroup
         ? { periodId, serverGroup: row.serverGroup, matchedAt: row.matchedAt }
         : undefined;
     },
   };
 }
+
 export function createHeroMatchingRealmStore(
   db: Database["kingdom"]["db"],
   authority: RealmAuthority,
@@ -166,13 +185,17 @@ export function createHeroMatchingRealmStore(
             )
             .orderBy(asc(hero_activity.startTime), asc(hero_activity.uuid))
             .limit(2);
+
         if (periods.length > 1) throw new Error("Hero matching local period bound exceeded");
+
         if (!periods.length) return [];
+
         const [power] = await tx
           .select({
             total: sql<string>`coalesce(sum(coalesce(${playerinfo.power},0)+coalesce(${playerinfo.buildingPower},0)),0)::text`,
           })
           .from(playerinfo);
+
         return periods.map((period) => ({
           id: period.uuid,
           definition: period.activityId,
@@ -192,8 +215,11 @@ export function createHeroMatchingRealmStore(
           .from(hero_activity)
           .where(eq(hero_activity.uuid, id))
           .for("update");
+
         if (!period || period.finish !== 0 || (period.endTime ?? 0n) <= BigInt(now())) return;
+
         const members = result.serverGroup.split("|").map((raw) => cityInteger(raw, 1));
+
         if (
           period.activityType !== 3 ||
           result.periodId !== heroMatchIdentity(period.activityId, period.startTime ?? 0n) ||
@@ -207,6 +233,7 @@ export function createHeroMatchingRealmStore(
           (period.serverGroup && period.serverGroup !== result.serverGroup)
         )
           throw new Error("Invalid owned hero match result");
+
         await tx
           .update(hero_activity)
           .set({ serverGroup: result.serverGroup })

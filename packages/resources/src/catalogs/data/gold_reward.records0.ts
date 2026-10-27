@@ -1,4 +1,5 @@
 import type { GoldRewardDefinition } from "../types/gold_reward.ts";
+
 export const records: readonly GoldRewardDefinition[] = [
   {
     "id": 9014501,

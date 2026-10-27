@@ -9,11 +9,13 @@ export interface ThroneRankingEntryResponse {
   readonly abbr: string;
   readonly kingdomName: string;
 }
+
 export interface ThroneRankingBoardResponse {
   readonly list: ThroneRankingEntryResponse[];
   readonly selfRank: number;
   readonly serverId: number;
 }
+
 export interface ThroneRankingResponse {
   readonly rank: ThroneRankingBoardResponse[];
 }

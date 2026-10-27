@@ -17,21 +17,28 @@ export async function readCivilizationCastle(
     .for("update");
   const params = request ? decode(Buffer.from(request)) : {};
   const target = str(params, "targetUid", owner);
+
   if (str(params, "M__REQUEST_ID__H", "") !== "info" || target === owner || !target)
     return { civilizationCastle: castle };
+
   const [profile] = await tx.select().from(userprofile).where(eq(userprofile.uid, target));
+
   if (!profile) throw new Error("Missing civilization castle owner");
+
   const [foreign] = await tx
     .select()
     .from(civilization_castle)
     .where(eq(civilization_castle.uid, target));
+
   return {
     civilizationCastle: castle,
     civilizationCastleTarget: { castle: foreign ?? { uid: target, level: 1 }, profile },
   };
 }
+
 export async function writeCivilizationCastle(tx: MutationTransaction, owner: string, row: Row) {
   if (row.uid !== owner) throw new Error("Foreign civilization castle write");
+
   const value = {
     uid: owner,
     level: num(row, "level"),
@@ -46,12 +53,14 @@ export async function writeCivilizationCastle(tx: MutationTransaction, owner: st
     status: num(row, "status"),
     buildTime: long(row, "buildTime"),
   };
+
   if (
     !Number.isFinite(value.resourceNum) ||
     value.resourceNum < 0 ||
     ![0, 1, 2].includes(value.status)
   )
     throw new Error("Invalid civilization castle");
+
   await tx
     .insert(civilization_castle)
     .values(value)

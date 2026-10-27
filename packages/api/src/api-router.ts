@@ -22,6 +22,7 @@ export class ApiRouter {
   public async route(request: Request): Promise<Response> {
     const { accounts, redis, files, provisioning, chatDiscovery } = this.options;
     const rawPath = new URL(request.url).pathname;
+
     if (rawPath === characterPath)
       return provisioning
         ? provisioning(request)
@@ -29,6 +30,7 @@ export class ApiRouter {
             { state: "unavailable" },
             { status: 503, headers: { "Cache-Control": "no-store" } },
           );
+
     if (
       files &&
       (rawPath === UPLOAD_PATH ||
@@ -36,7 +38,9 @@ export class ApiRouter {
         /^\/_internal\/avatars\/[0-9]{1,20}\/[1-9][0-9]{0,5}(\/url)?$/.test(rawPath))
     )
       return files(request);
+
     const path = new URL(request.url).pathname.replace(/\/{2,}/g, "/");
+
     if (
       chatDiscovery &&
       request.method === "GET" &&
@@ -53,15 +57,20 @@ export class ApiRouter {
         );
       }
     }
+
     if (["/healthz", "/_health.php"].includes(path) && ["GET", "HEAD"].includes(request.method))
       return this.text("ok\n");
+
     if (path === "/readyz" && ["GET", "HEAD"].includes(request.method)) {
       await accounts.health();
       await redis.health();
+
       return Response.json({ status: "ready" });
     }
+
     if (this.discoveryPaths.has(path) && this.methods.has(request.method))
       return this.legacy(await this.discovery.run(await requestParameters(request)));
+
     if (
       path === "/gameservice/api/query_userinfo_by_name.php" &&
       this.methods.has(request.method)
@@ -70,10 +79,12 @@ export class ApiRouter {
       const account = !phpEmpty(params.name)
         ? (await accounts.getAll("name", phpUrlDecode(params.name!), false))[0]
         : undefined;
+
       return this.legacy(
         account ? { found: 1, gameUid: account.gameUid, server: account.server } : { found: 0 },
       );
     }
+
     return this.text("Not Found", 404);
   }
 

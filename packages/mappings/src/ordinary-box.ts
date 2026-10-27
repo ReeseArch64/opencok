@@ -2,6 +2,7 @@ import { sfs, type Fields } from "@opencok/messages/sfs";
 import type { OrdinaryBoxPreviewResponse } from "@opencok/contracts/responses/ordinary-box";
 import { ordinaryBoxPreviewSchema } from "@opencok/validations/ordinary-box";
 import { validateFields } from "./validation";
+
 export function ordinaryBoxPreview(row: OrdinaryBoxPreviewResponse): Fields {
   return validateFields(ordinaryBoxPreviewSchema, {
     reward_info: sfs.array(

@@ -5,4 +5,5 @@ export interface PfCheckDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type PfCheckDefinitionCatalog = CatalogTable<PfCheckDefinition>;

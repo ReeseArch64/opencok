@@ -25,6 +25,7 @@ export type ActivityDomain = (
   now: bigint,
   economy: ActivityEconomy,
 ) => Promise<Uint8Array>;
+
 export interface ActivityPreparation {
   accelerate?(
     tx: MutationTransaction,
@@ -54,6 +55,7 @@ export interface ActivityPreparation {
     economy: ActivityEconomy,
   ): Promise<PreparedActivity>;
 }
+
 export function createActivityExecutor(
   db: Database["kingdom"]["db"],
   authority: RealmAuthority,
@@ -62,13 +64,16 @@ export function createActivityExecutor(
   preparation?: ActivityPreparation,
 ): ActivityExecutor {
   const execute = createMutationExecutor(db, authority, now);
+
   return (command, plan) =>
     execute(command, async (tx) => {
       const captured = BigInt(now());
       const preparedAt = await preparation?.before?.(tx, command.owner, captured, command);
       const domainInstant = typeof preparedAt === "bigint" ? preparedAt : captured;
+
       if (domainInstant < 0n || domainInstant > captured)
         throw new Error("Invalid activity domain clock");
+
       return executeInventoryTransaction(
         tx,
         command.owner,
@@ -87,8 +92,10 @@ export function createActivityExecutor(
             .orderBy(asc(timed_activity.id))
             .limit(257)
             .for("update");
+
           if (queues.length > 256 || activities.length > 256)
             throw new Error("Activity aggregate exceeds bound");
+
           const result = await plan({
             ...inventory,
             now: captured,
@@ -107,11 +114,14 @@ export function createActivityExecutor(
               : undefined,
             apply: async (action, activity, economy) => {
               const domain = domains.get(activity.type);
+
               if (!domain || activity.ownerId !== command.owner)
                 throw new Error("Activity domain unavailable");
+
               return domain(tx, action, activity, domainInstant, economy);
             },
           });
+
           if (
             result.queues.length > 256 ||
             result.activities.length > 256 ||
@@ -119,24 +129,29 @@ export function createActivityExecutor(
             new Set(result.queues.map((row) => row.uuid)).size !== result.queues.length
           )
             throw new Error("Invalid activity write set");
+
           if (result.guideStep !== undefined) {
             if (
               !["queue.ccd", "army.add", "army.complete", "army.cd"].includes(command.command) ||
               result.guideStep.length > 255
             )
               throw new Error("Invalid activity guide step");
+
             await tx
               .update(userprofile)
               .set({ guideStep: result.guideStep })
               .where(eq(userprofile.uid, command.owner));
           }
+
           for (const activity of result.activities) {
             if (
               activity.ownerId !== command.owner ||
               !queues.some((row) => row.uuid === activity.queueId && row.type === activity.type)
             )
               throw new Error("Invalid activity owner");
+
             const before = activities.find((row) => row.id === activity.id);
+
             if (before) {
               if (
                 before.queueId !== activity.queueId ||
@@ -145,6 +160,7 @@ export function createActivityExecutor(
                 activity.version !== before.version + 1
               )
                 throw new Error("Invalid activity transition");
+
               const changed = await tx
                 .update(timed_activity)
                 .set(activity)
@@ -156,15 +172,19 @@ export function createActivityExecutor(
                   ),
                 )
                 .returning({ id: timed_activity.id });
+
               if (changed.length !== 1) throw new Error("Stale activity transition");
             } else {
               if (activity.version !== 1 || activity.status !== 0)
                 throw new Error("Invalid activity creation");
+
               await tx.insert(timed_activity).values(activity);
             }
           }
+
           for (const row of result.queues) {
             const before = queues.find((value) => value.uuid === row.uuid);
+
             if (
               !before &&
               command.command === "queue.open" &&
@@ -189,6 +209,7 @@ export function createActivityExecutor(
               });
               continue;
             }
+
             if (
               !before ||
               text(row, "ownerId") !== command.owner ||
@@ -196,6 +217,7 @@ export function createActivityExecutor(
               num(row, "qid") !== before.qid
             )
               throw new Error("Queue identity changed");
+
             await tx
               .update(queue)
               .set({
@@ -209,12 +231,14 @@ export function createActivityExecutor(
               })
               .where(and(eq(queue.uuid, before.uuid), eq(queue.ownerId, command.owner)));
           }
+
           return result;
         },
         command.command,
       );
     });
 }
+
 export async function dueActivities(
   db: Database["kingdom"]["db"],
   types: readonly number[],
@@ -225,7 +249,9 @@ export async function dueActivities(
 ) {
   if (!Number.isInteger(limit) || limit < 1 || limit > 256)
     throw new Error("Invalid recovery limit");
+
   if (!types.length) return [];
+
   return db
     .select()
     .from(timed_activity)
@@ -256,7 +282,9 @@ export async function unregisteredActivities(
 ) {
   if (!Number.isInteger(limit) || limit < 1 || limit > 256)
     throw new Error("Invalid activity import limit");
+
   if (!types.length) return [];
+
   return db
     .select({
       uuid: queue.uuid,
@@ -291,6 +319,7 @@ export async function activityTransitionInstant(
   now: bigint,
 ): Promise<bigint> {
   if (!queueId) return now;
+
   const [active] = await tx
     .select({ dueAt: timed_activity.dueAt })
     .from(timed_activity)
@@ -301,7 +330,9 @@ export async function activityTransitionInstant(
         eq(timed_activity.status, 0),
       ),
     );
+
   if (!active || active.dueAt >= now) return now;
+
   const [resource] = await tx
     .select({ at: user_resource.lastUpdateTime })
     .from(user_resource)
@@ -321,11 +352,16 @@ export async function activityTransitionInstant(
       ),
     )
     .limit(257);
+
   if (checkpoints.length > 256 || buildings.length > 256)
     throw new Error("Activity checkpoint aggregate exceeds bound");
+
   let at = active.dueAt;
+
   for (const row of [...checkpoints, ...buildings, { at: resource?.at ?? 0n }])
     if ((row.at ?? 0n) > at) at = row.at!;
+
   if (at > now) throw new Error("Activity clock moved backwards");
+
   return at;
 }

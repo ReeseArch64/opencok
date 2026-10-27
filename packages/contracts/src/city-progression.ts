@@ -13,6 +13,7 @@ export interface QuestState {
   daily: readonly Row[];
   alliance: Row;
 }
+
 export interface QuestWrite {
   mail?: readonly import("./files").AvatarSystemMail[];
   legacy?: readonly Row[];
@@ -30,12 +31,14 @@ export interface QuestWrite {
   allianceTasks?: number;
   allianceBox?: { threshold: number; period: bigint };
 }
+
 export interface GeneralRankingWeights {
   normal: number;
   silver: number;
   gold: number;
   periodStart?: bigint;
 }
+
 export interface GeneralRoster {
   wheel?: Row;
   wheelRanks?: readonly Row[];
@@ -49,6 +52,7 @@ export interface GeneralRoster {
   skills: readonly Row[];
   statuses: readonly Row[];
 }
+
 export interface GeneralWrite {
   wheel?: Row;
   tavern?: Row;
@@ -66,6 +70,7 @@ export interface GeneralWrite {
   skills?: readonly Row[];
   statuses?: readonly Row[];
 }
+
 export interface DragonProgressionState {
   talents: readonly Row[];
   dragons: readonly Row[];
@@ -73,12 +78,14 @@ export interface DragonProgressionState {
   marches: readonly Row[];
   switchedAt: bigint;
 }
+
 export interface DragonProgressionWrite {
   talents?: readonly Row[];
   dragons?: readonly Row[];
   skills?: readonly Row[];
   deletedSkills?: readonly string[];
 }
+
 export interface CityProgressionState {
   activityReward?: import("./activity-reward").ActivityRewardReader;
   comeback?: import("./comeback").ComebackState;

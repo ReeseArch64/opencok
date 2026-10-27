@@ -6,4 +6,5 @@ export interface AllianceQuestColorranDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type AllianceQuestColorranDefinitionCatalog = CatalogTable<AllianceQuestColorranDefinition>;

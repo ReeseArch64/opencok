@@ -15,6 +15,7 @@ import { records as records10 } from "./saga_tower_science_up.records10.ts";
 import { records as records11 } from "./saga_tower_science_up.records11.ts";
 import { records as records12 } from "./saga_tower_science_up.records12.ts";
 import { records as records13 } from "./saga_tower_science_up.records13.ts";
+
 export const catalog: CatalogTable<SagaTowerScienceUpDefinition> = {
   "kind": CatalogKind.Table,
   "records": [

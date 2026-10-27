@@ -1,4 +1,5 @@
 import type { MarketDefinition } from "../types/market.ts";
+
 export const records: readonly MarketDefinition[] = [
   {
     "id": 8150,

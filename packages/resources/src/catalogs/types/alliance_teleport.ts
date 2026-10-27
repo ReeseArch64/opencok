@@ -7,4 +7,5 @@ export interface AllianceTeleportDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type AllianceTeleportDefinitionCatalog = CatalogTable<AllianceTeleportDefinition>;

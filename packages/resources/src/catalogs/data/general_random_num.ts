@@ -16,6 +16,7 @@ import { records as records11 } from "./general_random_num.records11.ts";
 import { records as records12 } from "./general_random_num.records12.ts";
 import { records as records13 } from "./general_random_num.records13.ts";
 import { records as records14 } from "./general_random_num.records14.ts";
+
 export const catalog: CatalogTable<GeneralRandomNumDefinition> = {
   "kind": CatalogKind.Table,
   "records": [

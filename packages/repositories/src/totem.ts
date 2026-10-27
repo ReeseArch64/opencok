@@ -32,10 +32,13 @@ export async function readTotems(tx: MutationTransaction, owner: string) {
     .where(eq(totem_activation.status, 0))
     .orderBy(asc(totem_activation.id))
     .limit(4097);
+
   if (history.length > 1024 || active.length > 4096)
     throw new Error("Totem aggregate exceeds bound");
+
   return { history, active };
 }
+
 export async function writeTotems(
   tx: MutationTransaction,
   owner: string,
@@ -43,16 +46,19 @@ export async function writeTotems(
 ) {
   for (const row of write.history ?? []) {
     if (row.uid !== owner) throw new Error("Foreign totem history");
+
     const value = { uid: owner, totemId: num(row, "totemId"), putTime: long(row, "putTime") };
     await tx
       .insert(user_totem)
       .values(value)
       .onConflictDoUpdate({ target: [user_totem.uid, user_totem.totemId], set: value });
   }
+
   for (const row of write.activations ?? []) {
     if (row.expectedDueAt === undefined) {
       if (row.ownerUid !== owner || num(row, "status") !== 0)
         throw new Error("Foreign totem activation");
+
       restoreTotemConfiguration(row.payload as Buffer);
       await tx.insert(totem_activation).values({
         id: text(row, "id"),
@@ -68,12 +74,14 @@ export async function writeTotems(
     } else {
       const status = num(row, "status"),
         dueAt = long(row, "dueAt");
+
       if (
         ![0, 2].includes(status) ||
         (status === 2 && row.ownerUid !== owner) ||
         dueAt > long(row, "expectedDueAt")
       )
         throw new Error("Invalid totem transition");
+
       const saved = await tx
         .update(totem_activation)
         .set({ dueAt, status })
@@ -86,10 +94,12 @@ export async function writeTotems(
           ),
         )
         .returning({ id: totem_activation.id });
+
       if (saved.length !== 1) throw new Error("Stale totem activation");
     }
   }
 }
+
 const untouchedEconomy: ActivityEconomy = {
   gold() {
     throw new Error("Unexpected totem currency write");
@@ -101,6 +111,7 @@ const untouchedEconomy: ActivityEconomy = {
     throw new Error("Unexpected totem item write");
   },
 };
+
 export function createTotemEffectStore(
   tx: MutationTransaction,
   owner: string,
@@ -116,7 +127,9 @@ export function createTotemEffectStore(
         .from(totem_activation)
         .where(and(eq(totem_activation.status, 0), lte(totem_activation.dueAt, now)))
         .limit(1);
+
       if (!candidate) return [];
+
       await tx.execute(sql`select pg_advisory_xact_lock(728214, 0)`);
       const rows = await tx
         .select()
@@ -126,6 +139,7 @@ export function createTotemEffectStore(
         .limit(64)
         .for("update");
       const result = [];
+
       for (const activation of rows) {
         const config = restoreTotemConfiguration(activation.payload);
         const x = (activation.pointId - 1) % size,
@@ -144,9 +158,12 @@ export function createTotemEffectStore(
             ),
           )
           .limit(2049);
+
         if (cities.length > 2048) throw new Error("Totem recipient bound exceeded");
+
         result.push({ activation, cities });
       }
+
       return result;
     },
     async expire(activation, deliveries, points) {
@@ -161,7 +178,9 @@ export function createTotemEffectStore(
           ),
         )
         .returning({ id: totem_activation.id });
+
       if (saved.length !== 1) throw new Error("Stale totem expiry");
+
       const changed = await tx
         .update(worldpoint)
         .set({
@@ -182,7 +201,9 @@ export function createTotemEffectStore(
           ),
         )
         .returning({ id: worldpoint.id });
+
       if (changed.length !== points.length) throw new Error("Missing totem footprint");
+
       for (const delivery of deliveries)
         await tx.insert(totem_delivery).values({
           activationId: text(activation, "id"),
@@ -190,6 +211,7 @@ export function createTotemEffectStore(
           stateId: delivery.stateId,
           appliedAt: 0n,
         });
+
       await tx.insert(mutation_outbox).values({
         kingdomId,
         ownerUid: text(activation, "ownerUid"),
@@ -228,6 +250,7 @@ export function createTotemEffectStore(
         .orderBy(asc(totem_activation.dueAt), asc(totem_activation.id))
         .limit(64)
         .for("update", { of: deliveryTable });
+
       return rows.map((row) => ({
         activation: { ...row.activation, targetUid: owner },
         stateId: row.delivery.stateId,
@@ -239,8 +262,11 @@ export function createTotemEffectStore(
     async apply(delivery, states, deleted, mail, push) {
       if (delivery.activation.targetUid !== owner || mail.owner !== owner)
         throw new Error("Foreign totem delivery");
+
       const at = long(delivery.activation, "dueAt");
+
       if (at > now) throw new Error("Early totem delivery");
+
       if (states.length || deleted.length)
         await boundary(
           tx,
@@ -250,6 +276,7 @@ export function createTotemEffectStore(
           [],
           untouchedEconomy,
         );
+
       await insertSystemMail(tx, mail, owner, mail.uid.slice(0, 32), at);
       const changed = await tx
         .update(totem_delivery)
@@ -262,7 +289,9 @@ export function createTotemEffectStore(
           ),
         )
         .returning({ id: totem_delivery.activationId });
+
       if (changed.length !== 1) throw new Error("Duplicate totem effect");
+
       if (states.length)
         await tx.insert(mutation_outbox).values({
           kingdomId,
@@ -277,6 +306,7 @@ export function createTotemEffectStore(
     },
   };
 }
+
 export async function pendingTotemOwners(db: Database["kingdom"]["db"], now: bigint) {
   const due = await db
     .select({ owner: totem_activation.ownerUid })
@@ -296,5 +326,6 @@ export async function pendingTotemOwners(db: Database["kingdom"]["db"], now: big
       ),
     )
     .limit(64);
+
   return [...new Set([...due, ...deliveries].map((row) => row.owner))];
 }

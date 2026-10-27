@@ -1,4 +1,5 @@
 import type { AddUserGoodsDefinition } from "../types/add_user_goods.ts";
+
 export const records: readonly AddUserGoodsDefinition[] = [
   { "id": 200305, "count": 2000000000 },
   { "id": 200335, "count": 2000000000 },

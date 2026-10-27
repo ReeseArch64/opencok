@@ -1,4 +1,5 @@
 import type { NewDailyTaskDefinition } from "../types/new_daily_task.ts";
+
 export const records: readonly NewDailyTaskDefinition[] = [
   {
     "id": 170000,

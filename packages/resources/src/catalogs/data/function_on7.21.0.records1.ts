@@ -1,4 +1,5 @@
 import type { FunctionOn7210Definition } from "../types/function_on7.21.0.ts";
+
 export const records: readonly FunctionOn7210Definition[] = [
   {
     "id": "2018_christmas_transition",

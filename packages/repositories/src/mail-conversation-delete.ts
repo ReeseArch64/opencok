@@ -8,6 +8,7 @@ import type {
 } from "@opencok/contracts/mail";
 import { enqueueMailChat } from "./mail-chat-intents.ts";
 import type { Database } from "./game.ts";
+
 export async function deleteMailConversations(
   db: Database["kingdom"]["db"],
   kingdomId: number,
@@ -35,7 +36,9 @@ export async function deleteMailConversations(
     )
   )
     throw new Error("Invalid conversation deletion");
+
   query = { ...query, senders: [...query.senders] };
+
   return db.transaction(
     async (tx) => {
       const [profile] = await tx
@@ -49,6 +52,7 @@ export async function deleteMailConversations(
         .where(eq(userprofile.uid, owner))
         .limit(1)
         .for("update");
+
       if (
         !profile ||
         profile.uid !== owner ||
@@ -57,6 +61,7 @@ export async function deleteMailConversations(
         (profile.banTime ?? 0n) > BigInt(query.now)
       )
         return { profile };
+
       const senders = [...new Set(query.senders)];
       const chatTypes = query.moderation ? [2] : query.bottle ? [3] : [1, 20];
       await enqueueMailChat(
@@ -69,6 +74,7 @@ export async function deleteMailConversations(
           types: chatTypes,
         })),
       );
+
       for (const sender of senders) {
         await tx
           .delete(mail)
@@ -82,6 +88,7 @@ export async function deleteMailConversations(
               ),
             ),
           );
+
         if (!query.bottle)
           await tx
             .delete(mail_group)
@@ -95,6 +102,7 @@ export async function deleteMailConversations(
               ),
             );
       }
+
       return { profile };
     },
     { isolationLevel: "read committed", accessMode: "read write" },

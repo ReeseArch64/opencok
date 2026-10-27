@@ -42,6 +42,7 @@ export const ApiDependenciesLive = Layer.effect(
           (value) => value.close(),
         )
       : undefined;
+
     return {
       provisioning:
         identity && config.provisioning
@@ -78,6 +79,7 @@ export const ApiDependenciesLive = Layer.effect(
 
 export const createApp = Effect.gen(function* () {
   const { accounts, directory, redis, chatDiscovery, files, provisioning } = yield* ApiDependencies;
+
   return new ApiRequestHandler(
     new ApiRouter({ accounts, directory, redis, chatDiscovery, files, provisioning }),
   );
@@ -91,5 +93,6 @@ export const serveApi = Effect.gen(function* () {
     app.fetch,
   );
   logEvent("listening", { host: config.host, port: server.port, outcome: "success" });
+
   return server;
 });

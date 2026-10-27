@@ -1,13 +1,16 @@
 import type { Row } from "./rows";
+
 export interface HeroRankCursor {
   actId: string;
   member: string;
 }
+
 export interface HeroRankSourceRow {
   event: Row;
   score: Row;
   metadata: string | null;
 }
+
 export interface HeroRankScore {
   rankKey: string;
   member: string;
@@ -20,14 +23,17 @@ export interface HeroRankScore {
   score: number;
   metadata: string | null;
 }
+
 export interface HeroRankVersionedScore extends HeroRankScore {
   ownerEpoch: bigint;
   sequence: bigint;
   observedAt: bigint;
 }
+
 export interface HeroRankSource {
   page(cursor: HeroRankCursor | undefined, now: bigint): Promise<readonly HeroRankSourceRow[]>;
 }
+
 export interface HeroRankProjection {
   write(
     rows: readonly HeroRankScore[],

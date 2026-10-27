@@ -2,6 +2,7 @@ import { sfs, type Fields } from "@opencok/messages/sfs";
 import { num, type Row } from "@opencok/contracts/rows";
 import { prayerSchema, prayerLoginSchema, prayerItemSchema } from "@opencok/validations/prayer";
 import { validateFields } from "./validation";
+
 export function prayerView(
   row: Row,
   free: number,
@@ -10,6 +11,7 @@ export function prayerView(
   steel: number,
 ): Fields {
   const body: Fields = {};
+
   for (const key of [
     "prayCount",
     "itemPrayCount",
@@ -26,6 +28,7 @@ export function prayerView(
     "goldsteel",
   ])
     body[key] = sfs.int(key === "steel" ? steel : num(row, key));
+
   Object.assign(body, {
     isFirstFree: sfs.bool(num(row, "isFirstFree") === 1),
     isFirstPay: sfs.bool(num(row, "isFirstPay") === 1),
@@ -33,8 +36,10 @@ export function prayerView(
     prayCountMax: sfs.int(maximum - num(row, "itemPrayCount")),
     isSteelOpen: sfs.int(steelOpen),
   });
+
   return validateFields(prayerSchema, body);
 }
+
 export function prayerLogin(row: Row, free: number, maximum: number) {
   return validateFields(prayerLoginSchema, {
     pray: sfs.object({
@@ -45,6 +50,7 @@ export function prayerLogin(row: Row, free: number, maximum: number) {
     }),
   });
 }
+
 export function prayerResult(body: Fields) {
   return validateFields(prayerSchema, body);
 }

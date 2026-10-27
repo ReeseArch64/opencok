@@ -3,8 +3,10 @@ import { fetchChatJson } from "./chat-http.ts";
 
 function websocket(value: unknown): value is string {
   if (typeof value !== "string") return false;
+
   try {
     const url = new URL(value);
+
     return (
       ["ws:", "wss:"].includes(url.protocol) &&
       !!url.hostname &&
@@ -27,11 +29,13 @@ export function createChatDiscovery(options: {
   fetch?: (url: string, options: RequestInit) => Promise<Response>;
 }): ChatDiscovery {
   let origin: URL;
+
   try {
     origin = new URL(options.origin);
   } catch {
     throw new Error("Invalid chat discovery configuration");
   }
+
   if (
     !["http:", "https:"].includes(origin.protocol) ||
     !origin.hostname ||
@@ -47,20 +51,26 @@ export function createChatDiscovery(options: {
     options.timeoutMs > 30000
   )
     throw new Error("Invalid chat discovery configuration");
+
   const base = origin.origin;
   const timeoutMs = options.timeoutMs;
   const request = options.fetch ?? fetch;
+
   return async (path) => {
     try {
       if (!(chatDiscoveryPaths as readonly string[]).includes(path)) throw new Error();
+
       const value = await fetchChatJson(
         new URL(path, base).toString(),
         { method: "GET", headers: { accept: "application/json" } },
         timeoutMs,
         request,
       );
+
       if (!isRecord(value) || value.code !== 1) throw new Error();
+
       const data = value.data;
+
       if (path === "/api/v1global_config") {
         if (
           !isRecord(data) ||
@@ -76,6 +86,7 @@ export function createChatDiscovery(options: {
           !isRecord(data.normalMessageTypes)
         )
           throw new Error();
+
         return {
           code: 1,
           data: {
@@ -86,6 +97,7 @@ export function createChatDiscovery(options: {
           },
         };
       }
+
       if (
         !Array.isArray(data) ||
         data.length < 1 ||
@@ -106,6 +118,7 @@ export function createChatDiscovery(options: {
         value.message.length > 255
       )
         throw new Error();
+
       return {
         code: 1,
         data: data.map(({ ip, port, protocol }) => ({ ip, port, protocol })),

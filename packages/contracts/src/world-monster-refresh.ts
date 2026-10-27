@@ -1,5 +1,7 @@
 import type { Row } from "./rows";
+
 export type WorldMonsterFamily = "field" | "black" | "exploration" | "barbarian" | "expiry";
+
 export interface WorldMonsterSupplyClock {
   version: 1;
   stage: "idle" | "reset" | "fill" | "seed";
@@ -11,6 +13,7 @@ export interface WorldMonsterSupplyClock {
   pool: number[];
   attempts: number;
 }
+
 export interface WorldMonsterRefreshStore {
   readonly now: bigint;
   readonly opening: bigint;
@@ -44,6 +47,7 @@ export interface WorldMonsterRefreshStore {
   retry(ticket: Row, deadline: bigint): Promise<void>;
   remove(ticket: Row): Promise<void>;
 }
+
 export interface WorldMonsterRefreshExecutor {
   execute(
     at: bigint | undefined,

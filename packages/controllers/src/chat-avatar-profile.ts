@@ -50,7 +50,9 @@ export class ChatAvatarProfileController extends SignedChatController<Update, Re
 
   protected async apply(update: Readonly<Update>): Promise<Result> {
     const result = await this.profiles.publish(update);
+
     if (!["applied", "unchanged", "superseded"].includes(result)) throw new Error();
+
     return result;
   }
 

@@ -1,4 +1,5 @@
 import type { DailyRewardDefinition } from "../types/daily_reward.ts";
+
 export const records: readonly DailyRewardDefinition[] = [
   {
     "id": 5000100,

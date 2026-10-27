@@ -1,4 +1,5 @@
 import type { DragonDetailDefinition } from "../types/dragon_detail.ts";
+
 export const records: readonly DragonDetailDefinition[] = [
   { "id": 512000, "name": 164644, "effect": 481, "show": 1, "buff": 2 },
   { "id": 512001, "name": 164645, "effect": 482, "show": 1, "buff": 2 },

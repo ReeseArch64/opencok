@@ -10,4 +10,5 @@ export interface GeneralRankDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type GeneralRankDefinitionCatalog = CatalogTable<GeneralRankDefinition>;

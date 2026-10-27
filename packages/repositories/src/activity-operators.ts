@@ -9,6 +9,7 @@ import { user_comeback_record } from "@opencok/drizzle/schema/opencok_kingdom/us
 import { stat_reg } from "@opencok/drizzle/schema/opencok_kingdom/stat_reg";
 import type { ActivityOperatorsSnapshot } from "@opencok/contracts/activity-operators";
 import type { Database } from "./game";
+
 export async function readActivityOperators(
   db: Database["kingdom"]["db"],
   owner: string,
@@ -16,6 +17,7 @@ export async function readActivityOperators(
 ): Promise<ActivityOperatorsSnapshot> {
   if (!owner || owner.length > 40 || !Number.isSafeInteger(now) || now < 0)
     throw new Error("Invalid activity operators selection");
+
   return db.transaction(
     async (tx) => {
       const [profile] = await tx
@@ -28,7 +30,9 @@ export async function readActivityOperators(
         })
         .from(userprofile)
         .where(eq(userprofile.uid, owner));
+
       if (!profile) return { server: {}, buildings: [], country: "", groupBuys: [] };
+
       const [server] = await tx
         .select({
           activityTime: server_info.activityTime,
@@ -95,12 +99,14 @@ export async function readActivityOperators(
         .where(gte(activity_group_buys.endTime, BigInt(now)))
         .orderBy(asc(activity_group_buys.startTime))
         .limit(3);
+
       if (
         buildings.length > 256 ||
         groupBuys.length > 2 ||
         groupBuys.some((row) => (row.roundInfo?.length ?? 0) > 32768)
       )
         throw new Error("Activity operator aggregate exceeds bound");
+
       return {
         profile,
         server: server ?? {},

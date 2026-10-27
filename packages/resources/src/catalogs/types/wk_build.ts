@@ -5,4 +5,5 @@ export interface WkBuildDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type WkBuildDefinitionCatalog = CatalogTable<WkBuildDefinition>;

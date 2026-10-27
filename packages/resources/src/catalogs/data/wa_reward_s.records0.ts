@@ -1,4 +1,5 @@
 import type { WaRewardSDefinition } from "../types/wa_reward_s.ts";
+
 export const records: readonly WaRewardSDefinition[] = [
   { "id": 7100001, "min": 1, "max": 1, "reward": 239909 },
   { "id": 7100002, "min": 2, "max": 2, "reward": 239910 },

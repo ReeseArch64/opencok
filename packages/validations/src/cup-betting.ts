@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { field } from "./response";
 import type { CupMatchResponse, CupBetResponse } from "@opencok/contracts/responses/cup-betting";
+
 export const cupMatchSchema = z.strictObject({
   id: field.string,
   startBetTime: field.long,
@@ -10,6 +11,7 @@ export const cupMatchSchema = z.strictObject({
   timeFormat: field.string,
   betCount: field.int,
 }) satisfies z.ZodType<CupMatchResponse>;
+
 export const cupBetSchema = z.strictObject({
   uuid: field.string,
   uid: field.string,

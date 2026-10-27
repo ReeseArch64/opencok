@@ -1,4 +1,5 @@
 import type { GeneralRepeatDefinition } from "../types/general_repeat.ts";
+
 export const records: readonly GeneralRepeatDefinition[] = [
   { "id": 221000, "generalId": 53500, "consume": [0, 400000], "quantity": 0 },
   { "id": 221001, "generalId": 53500, "consume": [400001, 1000000], "quantity": 1 },

@@ -16,6 +16,7 @@ import { records as records11 } from "./reward.records11.ts";
 import { records as records12 } from "./reward.records12.ts";
 import { records as records13 } from "./reward.records13.ts";
 import { records as records14 } from "./reward.records14.ts";
+
 export const catalog: CatalogTable<RewardDefinition> = {
   "kind": CatalogKind.Table,
   "records": [

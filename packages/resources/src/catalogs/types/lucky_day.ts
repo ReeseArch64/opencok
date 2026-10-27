@@ -11,4 +11,5 @@ export interface LuckyDayDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type LuckyDayDefinitionCatalog = CatalogTable<LuckyDayDefinition>;

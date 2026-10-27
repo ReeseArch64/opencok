@@ -3,6 +3,7 @@ import { planChatSocial } from "./chat-social-plan.ts";
 import type { ChatSocialCommand, ChatSocialStore } from "@opencok/contracts/chat-social";
 import { chatSocialParams } from "@opencok/validations/chat-social";
 import { ChatCommandError } from "@opencok/errors/chat";
+
 export const chatSocialCommands: readonly ChatSocialCommand[] = Object.values(ChatSocialAction);
 
 export class ChatSocialService {
@@ -10,11 +11,15 @@ export class ChatSocialService {
 
   public async execute(owner: string, command: ChatSocialCommand, params: unknown, key: unknown) {
     const parsed = chatSocialParams.safeParse(params);
+
     if (!parsed.success || typeof key !== "string" || !/^[a-zA-Z0-9_:-]{1,128}$/.test(key))
       throw new ChatCommandError("invalid_request");
+
     const value = parsed.data;
     const sequence = Number(value.seqId ?? value.seqid ?? 0);
+
     if (!Number.isSafeInteger(sequence)) throw new ChatCommandError("invalid_cursor");
+
     const operation = {
       owner,
       operationId: key,
@@ -46,6 +51,7 @@ export class ChatSocialService {
       notices: value.notices?.split(",").filter(Boolean) ?? [],
       localId: value.localid ?? "",
     };
+
     return this.store.execute(operation, (tx) => planChatSocial(operation, tx));
   }
 }

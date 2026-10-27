@@ -6,4 +6,5 @@ export interface WaRewardSDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type WaRewardSDefinitionCatalog = CatalogTable<WaRewardSDefinition>;

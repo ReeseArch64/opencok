@@ -1,4 +1,5 @@
 import type { WrSkillDefinition } from "../types/wr_skill.ts";
+
 export const records: readonly WrSkillDefinition[] = [
   {
     "id": 20020001,

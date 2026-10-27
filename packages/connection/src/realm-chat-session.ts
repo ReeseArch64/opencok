@@ -12,11 +12,13 @@ export function createRealmChatSessionIssuer(options: {
   now?: () => number;
 }): ChatSessionIssuer {
   let url: URL;
+
   try {
     url = new URL(options.url);
   } catch {
     throw new Error("Invalid chat session configuration");
   }
+
   if (
     !["http:", "https:"].includes(url.protocol) ||
     !url.hostname ||
@@ -34,11 +36,13 @@ export function createRealmChatSessionIssuer(options: {
     options.timeoutMs > 30000
   )
     throw new Error("Invalid chat session configuration");
+
   const endpoint = url.toString();
   const signingSecret = options.signingSecret;
   const timeoutMs = options.timeoutMs;
   const request = options.fetch ?? fetch;
   const now = options.now ?? Date.now;
+
   return async (input) => {
     try {
       if (
@@ -54,6 +58,7 @@ export function createRealmChatSessionIssuer(options: {
         )
       )
         throw new Error();
+
       const form = new URLSearchParams({
         appid: "100001",
         ttl: "86400",
@@ -68,7 +73,9 @@ export function createRealmChatSessionIssuer(options: {
           .digest("hex"),
       );
       const body = form.toString();
+
       if (Buffer.byteLength(body) > 16384) throw new Error();
+
       const value = await fetchChatJson(
         endpoint,
         {
@@ -79,8 +86,10 @@ export function createRealmChatSessionIssuer(options: {
         timeoutMs,
         request,
       );
+
       if (!isRecord(value) || value.code !== 1 || !isChatSessionTicket(value.data, now()))
         throw new Error();
+
       return { session: value.data.session, expire: value.data.expire };
     } catch {
       throw new Error("Chat session unavailable");

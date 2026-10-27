@@ -25,21 +25,28 @@ export async function finishAvatar(
   mailTemplate: Rule | undefined = rules.mail.get("10111"),
 ): Promise<AvatarFinishSnapshot> {
   const query = avatarFinishQuery(receipt, now);
+
   if (!/^[0-9]{1,20}$/.test(owner)) throw new GameError(errors.invalid, "avatar_rule");
+
   const template = mailTemplate ? { ...mailTemplate } : undefined;
+
   return store.commit(
     owner,
     query,
     (uid, sequence) => files.find(uid, sequence),
     async (profile, readers) => {
       const minimum = avatarFinishMinimumLevel(rules);
+
       if (minimum !== undefined) {
         checkAvatarLevel(await readers.castleLevel(), minimum);
         avatarFinishInterval(rules);
         const record = await readers.uploadRecord();
+
         if (record && record.uid !== owner) throw new GameError(errors.invalid, "avatar_rule");
+
         checkAvatarRecord(rules, record, now);
       }
+
       return avatarFinishPlan(profile, query, minimum !== undefined, template);
     },
   );

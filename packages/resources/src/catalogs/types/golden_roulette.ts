@@ -19,4 +19,5 @@ export interface GoldenRouletteDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type GoldenRouletteDefinitionCatalog = CatalogTable<GoldenRouletteDefinition>;

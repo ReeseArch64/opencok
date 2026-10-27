@@ -30,4 +30,5 @@ export interface GoodsDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type GoodsDefinitionCatalog = CatalogTable<GoodsDefinition>;

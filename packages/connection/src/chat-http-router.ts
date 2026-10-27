@@ -22,6 +22,7 @@ export class ChatHttpRouter {
       configHandler,
       serverListHandler,
     } = this.options;
+
     if (request.method === "GET" && request.url?.split("?", 1)[0] === "/api/v1global_config") {
       if (configHandler) {
         configHandler(request, response);
@@ -29,6 +30,7 @@ export class ChatHttpRouter {
         response.writeHead(503, { "content-type": "application/json; charset=utf-8" });
         response.end('{"code":0,"data":{}}');
       }
+
       return;
     }
 
@@ -41,6 +43,7 @@ export class ChatHttpRouter {
         response.writeHead(503, { "content-type": "application/json; charset=utf-8" });
         response.end('{"code":0,"data":[]}');
       }
+
       return;
     }
 
@@ -51,6 +54,7 @@ export class ChatHttpRouter {
         response.writeHead(503, { "content-type": "application/json; charset=utf-8" });
         response.end('{"code":0,"data":{}}');
       }
+
       return;
     }
 
@@ -60,6 +64,7 @@ export class ChatHttpRouter {
         response.writeHead(503, { "content-type": "application/json; charset=utf-8" });
         response.end('{"code":0,"data":{}}');
       }
+
       return;
     }
 
@@ -69,6 +74,7 @@ export class ChatHttpRouter {
         response.writeHead(503, { "content-type": "application/json; charset=utf-8" });
         response.end('{"code":0,"data":{}}');
       }
+
       return;
     }
 
@@ -78,6 +84,7 @@ export class ChatHttpRouter {
         response.writeHead(503);
         response.end();
       }
+
       return;
     }
 
@@ -87,19 +94,24 @@ export class ChatHttpRouter {
         response.writeHead(503, { "content-type": "application/json; charset=utf-8" });
         response.end('{"code":0,"data":{}}');
       }
+
       return;
     }
+
     response.setHeader("Content-Type", "text/plain; charset=utf-8");
 
     if (request.method === "GET" && request.url === "/_health") {
       let ready = false;
+
       try {
         ready = isReady() === true;
       } catch {
         ready = false;
       }
+
       response.writeHead(ready ? 200 : 503);
       response.end(ready ? "ok\n" : "unavailable\n");
+
       return;
     }
 

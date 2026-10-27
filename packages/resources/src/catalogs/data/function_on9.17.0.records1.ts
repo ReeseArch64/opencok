@@ -1,4 +1,5 @@
 import type { FunctionOn9170Definition } from "../types/function_on9.17.0.ts";
+
 export const records: readonly FunctionOn9170Definition[] = [
   {
     "id": "equipment_streng_move",

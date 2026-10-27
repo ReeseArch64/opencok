@@ -14,6 +14,7 @@ function integer(value: unknown): value is number {
     value <= 2147483647
   );
 }
+
 function validate(owner: string, now: number) {
   if (
     typeof owner !== "string" ||
@@ -26,12 +27,14 @@ function validate(owner: string, now: number) {
   )
     throw new Error("Invalid world favorite query");
 }
+
 export function createWorldFavoriteStore(
   db: Database["kingdom"]["db"],
   global: Database["databases"]["global"]["db"],
   kingdomId: number,
 ): WorldFavoriteStore {
   if (!integer(kingdomId) || kingdomId < 1) throw new Error("Invalid world favorite realm");
+
   const authorized = (profile: Row | undefined, owner: string, now: number) =>
     profile?.uid === owner &&
     profile.serverId === kingdomId &&
@@ -43,6 +46,7 @@ export function createWorldFavoriteStore(
     banTime: userprofile.banTime,
     banFlag: userprofile.banFlag,
   };
+
   return {
     async list(owner, now) {
       validate(owner, now);
@@ -54,7 +58,9 @@ export function createWorldFavoriteStore(
             .where(eq(userprofile.uid, owner))
             .limit(1)
             .for("share");
+
           if (!authorized(profile, owner, now)) return { profile, rows: [] };
+
           const rows = await tx
             .select()
             .from(world_favorite)
@@ -65,8 +71,10 @@ export function createWorldFavoriteStore(
               asc(world_favorite.point),
             )
             .limit(32768);
+
           if (rows.length > 32767 || rows.some((row) => row.uid !== owner))
             throw new Error("World favorites exceed transport or ownership bounds");
+
           return { profile, rows };
         },
         { isolationLevel: "repeatable read", accessMode: "read write" },
@@ -78,16 +86,19 @@ export function createWorldFavoriteStore(
             .from(server_info)
             .where(inArray(server_info.id, servers))
         : [];
+
       if (
         types.some((row) => !servers.includes(row.id) || !integer(row.type)) ||
         new Set(types.map((row) => row.id)).size !== types.length
       )
         throw new Error("Invalid favorite server metadata");
+
       return { ...snapshot, serverTypes: new Map(types.map((row) => [row.id, row.type])) };
     },
     async add(owner, input) {
       const query = Object.freeze({ ...input });
       validate(owner, query.now);
+
       if (
         ![query.point, query.server, query.type, query.cityType, query.resType].every(integer) ||
         typeof query.name !== "string" ||
@@ -96,6 +107,7 @@ export function createWorldFavoriteStore(
         !query.name.isWellFormed()
       )
         throw new Error("Invalid world favorite mutation");
+
       return db.transaction(
         async (tx) => {
           const [profile] = await tx
@@ -104,7 +116,9 @@ export function createWorldFavoriteStore(
             .where(eq(userprofile.uid, owner))
             .limit(1)
             .for("update");
+
           if (!authorized(profile, owner, query.now)) return { profile };
+
           const values = {
             uid: owner,
             point: query.point,
@@ -123,8 +137,10 @@ export function createWorldFavoriteStore(
               set: values,
             })
             .returning({ uid: world_favorite.uid });
+
           if (changed.length !== 1 || changed[0]!.uid !== owner)
             throw new Error("World favorite replacement failed");
+
           return { profile };
         },
         { isolationLevel: "read committed", accessMode: "read write" },
@@ -132,12 +148,15 @@ export function createWorldFavoriteStore(
     },
     async remove(owner, input, now) {
       validate(owner, now);
+
       if (input.length > 32767 || input.some((key) => !integer(key.point) || !integer(key.server)))
         throw new Error("Invalid world favorite selection");
+
       const keys = [
         ...new Map(input.map((key) => [`${key.point}:${key.server}`, { ...key }])).values(),
       ];
       let owned: Row | undefined;
+
       try {
         return await db.transaction(
           async (tx) => {
@@ -147,8 +166,11 @@ export function createWorldFavoriteStore(
               .where(eq(userprofile.uid, owner))
               .limit(1)
               .for("update");
+
             if (!authorized(profile, owner, now)) return { profile, success: false };
+
             owned = profile;
+
             for (let index = 0; index < keys.length; index += 500)
               await tx
                 .delete(world_favorite)
@@ -167,17 +189,20 @@ export function createWorldFavoriteStore(
                     ),
                   ),
                 );
+
             return { profile, success: true };
           },
           { isolationLevel: "read committed", accessMode: "read write" },
         );
       } catch {
         if (!owned) throw new Error("World favorite deletion unavailable");
+
         return { profile: owned, success: false };
       }
     },
   };
 }
+
 export async function checkWorldFavoriteStore(
   db: Database["kingdom"]["db"],
   global: Database["databases"]["global"]["db"],

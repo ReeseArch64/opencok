@@ -6,6 +6,7 @@ import { cityInteger } from "@opencok/rules/city-progression";
 import { generalFailure, generalPairs } from "@opencok/rules/general-progression";
 import { generalRoster, ownedGeneral, writeGeneral, generalChanges } from "./generals";
 import type { CityProgressionContext } from "./city-progression";
+
 export function releasedGeneral(row: Row): Row {
   return {
     ...row,
@@ -20,17 +21,23 @@ export function releasedGeneral(row: Row): Row {
     optime: "",
   };
 }
+
 export function recoverGenerals(context: CityProgressionContext, reconnect: boolean) {
   const marching = new Set<number>();
+
   if (reconnect)
     for (const march of generalRoster(context).marches ?? []) {
       if (!Buffer.isBuffer(march.armyInfo)) continue;
+
       const general = decodeWorldMarchArmy(march.armyInfo)?.general;
+
       if (general) {
         if (general.owner !== context.owner) generalFailure();
+
         marching.add(general.id);
       }
     }
+
   for (const row of generalRoster(context).generals) {
     if (
       [4, 5].includes(num(row, "state")) &&
@@ -47,8 +54,10 @@ export function recoverGenerals(context: CityProgressionContext, reconnect: bool
       writeGeneral(context, releasedGeneral(row));
   }
 }
+
 function prisoner(row: Row): Fields {
   const times = generalMap(text(row, "optime"), (value) => BigInt(value), 200);
+
   return {
     alliancename: sfs.string(text(row, "alliancename")),
     owneruid: sfs.string(text(row, "uid")),
@@ -61,6 +70,7 @@ function prisoner(row: Row): Fields {
     ),
   };
 }
+
 export function generalPrison(context: CityProgressionContext, params: Fields): Fields {
   if (
     !generalFeatureAvailable(context.rules, "hero_rob", {
@@ -70,29 +80,37 @@ export function generalPrison(context: CityProgressionContext, params: Fields): 
     })
   )
     generalFailure();
+
   const action = str(params, "M__REQUEST_ID__H");
+
   if (num(context.state.profile, "crossFightSrcServerId") > 0) generalFailure();
+
   const prisoners = generalRoster(context).prisoners ?? [],
     expired = (row: Row) =>
       (long(row, "gethomttime") > 0n && long(row, "gethomttime") <= context.now) ||
       (long(row, "relivetime") > 0n && long(row, "relivetime") <= context.now);
+
   if (action === "openprison") {
     const stale = prisoners.filter(expired);
+
     if (stale.length)
       (context.write.generalRoster ??= {}).prisoners = stale.map((row) => ({
         ...releasedGeneral(row),
         actor: context.owner,
       }));
+
     return {
       prisonlist: sfs.array(
         prisoners.filter((row) => !expired(row)).map((row) => sfs.object(prisoner(row))),
       ),
     };
   }
+
   if (["checkrelive", "quickrelive", "suicide"].includes(action)) {
     const id = cityInteger(str(params, action === "suicide" ? "id" : "generalid"), 1),
       row = ownedGeneral(context, id);
     let next: Row = row;
+
     if (action === "quickrelive") {
       if (
         num(row, "state") !== 5 ||
@@ -104,8 +122,11 @@ export function generalPrison(context: CityProgressionContext, params: Fields): 
         })
       )
         generalFailure();
+
       const item = context.rules.items.get("hero_revival")?.k1;
+
       if (!item) generalFailure();
+
       context.spendItem(item, 1);
       next = releasedGeneral(row);
     } else if (action === "suicide") {
@@ -113,6 +134,7 @@ export function generalPrison(context: CityProgressionContext, params: Fields): 
           (building) => building.itemId === 435000 && num(building, "level") > 0,
         ),
         item = context.rules.items.get("hero_rob")?.k9;
+
       if (
         num(row, "state") !== 4 ||
         long(row, "relivetime") > context.now ||
@@ -121,6 +143,7 @@ export function generalPrison(context: CityProgressionContext, params: Fields): 
         !item
       )
         generalFailure();
+
       context.spendItem(item, 1);
       const duration = cityInteger(
         context.rules.building(
@@ -139,13 +162,17 @@ export function generalPrison(context: CityProgressionContext, params: Fields): 
         relivetime: context.now + BigInt(duration) * 1000n,
       };
     }
+
     if (next !== row) writeGeneral(context, next);
+
     return generalChanges(context, [next]);
   }
+
   const uid = str(params, "owneruid"),
     idString = str(params, "generalid"),
     id = cityInteger(idString, 1),
     row = generalRoster(context).prisoners?.find((row) => row.uid === uid && row.id === id);
+
   if (
     !row ||
     expired(row) ||
@@ -154,10 +181,13 @@ export function generalPrison(context: CityProgressionContext, params: Fields): 
     uid === context.owner
   )
     generalFailure();
+
   let next: Row;
+
   if (action === "free") next = releasedGeneral(row);
   else if (action === "kill") {
     if (long(row, "killtime") > context.now) generalFailure();
+
     const duration = cityInteger(
       context.rules.building(
         "435000",
@@ -178,11 +208,15 @@ export function generalPrison(context: CityProgressionContext, params: Fields): 
     const type = cityInteger(str(params, "type"), 1, 4),
       times = generalMap(text(row, "optime"), (value) => BigInt(value), 200),
       duration = generalPairs(context.rules.items.get("hero_rob")?.k12).get(type);
+
     if (!duration || (times.get(type) ?? 0n) > context.now) generalFailure();
+
     times.set(type, context.now + BigInt(duration) * 1000n);
     next = { ...row, optime: [...times].map(([type, at]) => `${type};${at}`).join("|") };
   } else generalFailure();
+
   (context.write.generalRoster ??= {}).prisoners = [{ ...next, actor: context.owner }];
+
   return action === "insult"
     ? { prisonlist: sfs.array([sfs.object(prisoner(next))]) }
     : { owneruid: sfs.string(uid), generalid: sfs.string(idString) };

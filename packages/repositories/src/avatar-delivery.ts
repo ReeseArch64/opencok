@@ -11,6 +11,7 @@ export async function checkAvatarCompletionStore(db: Database["kingdom"]["db"]):
   for (const table of [avatar_completion, mail, mail_contents, mail_group])
     await db.select().from(table).limit(0);
 }
+
 export async function nextAvatarDelivery(
   db: Database["kingdom"]["db"],
   kingdomId: number,
@@ -28,6 +29,7 @@ export async function nextAvatarDelivery(
         cursor.sequence > 999999))
   )
     throw new Error("Invalid avatar delivery cursor");
+
   const [entry] = await db
     .select({ owner: avatar_completion.ownerUid, sequence: avatar_completion.sequence })
     .from(avatar_completion)
@@ -49,6 +51,7 @@ export async function nextAvatarDelivery(
     )
     .orderBy(asc(avatar_completion.ownerUid), asc(avatar_completion.sequence))
     .limit(1);
+
   if (
     entry &&
     (!/^[0-9]{1,20}$/.test(entry.owner) ||
@@ -57,5 +60,6 @@ export async function nextAvatarDelivery(
       entry.sequence > 999999)
   )
     throw new Error("Invalid avatar delivery key");
+
   return entry;
 }

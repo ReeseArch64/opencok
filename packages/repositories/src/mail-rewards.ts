@@ -36,6 +36,7 @@ function category(label: number) {
       throw new GameError(errors.invalid);
   }
 }
+
 export function createMailRewardExecutor(
   db: Database["kingdom"]["db"],
   authority: RealmAuthority,
@@ -50,11 +51,13 @@ export function createMailRewardExecutor(
   ) => Promise<MutationResult | undefined>,
 ): MailRewardExecutor {
   const execute = createMutationExecutor(db, authority, now);
+
   return async (input, selection, grant, combine) => {
     const command = { ...input, request: Buffer.from(input.request) };
     const ids = [...selection.ids],
       labels = [...selection.labels],
       batch = selection.batch;
+
     if (
       ids.length > 64 ||
       labels.length > 7 ||
@@ -63,7 +66,9 @@ export function createMailRewardExecutor(
       (!batch && (ids.length !== 1 || labels.length))
     )
       throw new GameError(errors.invalid);
+
     if (!(await allowed())) throw new GameError(errors.unsupported);
+
     return execute(command, async (tx) => {
       const owner = command.owner;
       const readClaim = async (id: string) => {
@@ -79,14 +84,19 @@ export function createMailRewardExecutor(
               ),
             )
         )[0];
+
         if (receipt && receipt.command !== "mail.reward.claim")
           throw new Error("Mail claim identity conflict");
+
         return receipt;
       };
+
       if (!batch) {
         const existing = await readClaim(ids[0]!);
+
         if (existing) return { response: existing.response };
       }
+
       const filters = [...(ids.length ? [inArray(mail.uid, ids)] : []), ...labels.map(category)];
       const entries = filters.length
         ? await tx
@@ -103,23 +113,31 @@ export function createMailRewardExecutor(
             .limit(65)
             .for("update")
         : [];
+
       if (
         entries.length > 64 ||
         entries.reduce((size, entry) => size + Buffer.byteLength(entry.rewardId ?? ""), 0) > 262144
       )
         throw new GameError(errors.invalid);
+
       if (!batch && !entries.length) throw new GameError(errors.missing);
+
       const responses: Buffer[] = [],
         claimed: string[] = [];
+
       for (const entry of entries) {
         if (entry.rewardStatus !== 0 || (await readClaim(entry.uid))) {
           if (!batch) throw new GameError("E100147");
+
           continue;
         }
+
         if (!entry.rewardId?.trim()) {
           if (!batch) throw new GameError(errors.invalid);
+
           continue;
         }
+
         if (
           entry.type === 16 &&
           (entry.fromUser === "2.0.8" ||
@@ -127,8 +145,10 @@ export function createMailRewardExecutor(
             !versionAtLeast(MOBILE_CLIENT_VERSION, entry.fromUser))
         ) {
           if (!batch) throw new GameError(errors.unsupported);
+
           continue;
         }
+
         const captured = now();
         const result = await executeInventoryTransaction(
           tx,
@@ -172,6 +192,7 @@ export function createMailRewardExecutor(
         responses.push(response);
         claimed.push(entry.uid);
       }
+
       return { response: batch ? combine(responses, claimed) : responses[0]! };
     });
   };
@@ -182,9 +203,11 @@ export async function mailRewardRealmAllowed(
   kingdomId: number,
 ): Promise<boolean> {
   if (kingdomId > 999999) return true;
+
   const [realm] = await db
     .select({ type: server_info.type })
     .from(server_info)
     .where(eq(server_info.id, kingdomId));
+
   return realm?.type !== 13 && realm?.type !== 14;
 }

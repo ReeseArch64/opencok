@@ -1,4 +1,5 @@
 import type { PayUserRewardDefinition } from "../types/pay_user_reward.ts";
+
 export const records: readonly PayUserRewardDefinition[] = [
   { "id": 9021601, "time": 0, "reward": 249764 },
   { "id": 9021602, "time": 1, "reward": 249765 },

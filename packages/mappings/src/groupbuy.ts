@@ -2,6 +2,7 @@ import { sfs, type Value } from "@opencok/messages/sfs";
 import { groupBuySchema } from "@opencok/validations/groupbuy";
 import { validateFields } from "./validation";
 import type { GroupBuyResponse } from "@opencok/contracts/responses/groupbuy";
+
 export function groupBuyInfo(
   input: Omit<GroupBuyResponse, "rewardArr"> & {
     rewardArr: readonly { level: number; reward: Value; rewardId: string }[];

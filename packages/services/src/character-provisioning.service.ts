@@ -8,8 +8,10 @@ export class CharacterProvisioningService {
     readonly execute: CharacterCreator,
     readonly rules: Rules,
   ) {}
+
   async create(input: CharacterReservation) {
     const reservation = reservationSchema.parse(input);
+
     return this.execute(reservation, (now) =>
       characterSeed({ ...reservation, createdAt: now }, this.rules),
     );

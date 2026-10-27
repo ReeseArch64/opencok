@@ -1,4 +1,5 @@
 import type { MaterialDefinition } from "../types/material.ts";
+
 export const records: readonly MaterialDefinition[] = [
   { "id": 2903000, "target": [[211498, 100000]], "material": [[211497, 4]] },
   { "id": 2903001, "target": [[211499, 100000]], "material": [[211498, 4]] },

@@ -9,6 +9,7 @@ export interface InventoryItem {
   value: number;
   vanishTime: bigint;
 }
+
 export interface InventoryState {
   assets?: Row;
   recordAction?(
@@ -29,6 +30,7 @@ export interface InventoryState {
   buildings: readonly Row[];
   effects(): Promise<PlayerEffectSnapshot>;
 }
+
 export interface InventoryPlan extends MutationResult {
   confirmedSpending?(postings: readonly EconomyPosting[]): MutationEvent | undefined;
   assets?: Readonly<Record<string, bigint>>;
@@ -38,6 +40,7 @@ export interface InventoryPlan extends MutationResult {
   resource: Readonly<Record<string, bigint>>;
   cooldowns: ReadonlyMap<string, bigint>;
 }
+
 export type InventoryExecutor = (
   command: MutationCommand,
   plan: (state: InventoryState) => Promise<InventoryPlan>,

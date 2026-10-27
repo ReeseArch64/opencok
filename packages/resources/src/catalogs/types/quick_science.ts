@@ -6,4 +6,5 @@ export interface QuickScienceDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type QuickScienceDefinitionCatalog = CatalogTable<QuickScienceDefinition>;

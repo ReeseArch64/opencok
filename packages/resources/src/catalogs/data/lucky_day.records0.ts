@@ -1,4 +1,5 @@
 import type { LuckyDayDefinition } from "../types/lucky_day.ts";
+
 export const records: readonly LuckyDayDefinition[] = [
   {
     "id": 16803001,

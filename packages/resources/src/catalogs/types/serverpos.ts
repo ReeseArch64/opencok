@@ -5,4 +5,5 @@ export interface ServerposDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type ServerposDefinitionCatalog = CatalogTable<ServerposDefinition>;

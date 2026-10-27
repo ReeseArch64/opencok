@@ -10,4 +10,5 @@ export interface NewWkRewardDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type NewWkRewardDefinitionCatalog = CatalogTable<NewWkRewardDefinition>;

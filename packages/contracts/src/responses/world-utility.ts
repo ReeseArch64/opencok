@@ -1,6 +1,7 @@
 export interface WorldNearestPointResponse {
   readonly point: number;
 }
+
 export interface WorldAlliancePointsResponse {
   readonly pointId: number;
   readonly territoryPointId?: readonly { readonly pointId: number }[];

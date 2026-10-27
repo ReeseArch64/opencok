@@ -73,7 +73,9 @@ export async function readProfileAlliance(
       .where(eq(alliance.uid, allianceId))
       .limit(1)
   )[0];
+
   if (!record) throw new Error("Missing public profile alliance");
+
   const leaders = await tx
     .select({ uid: userprofile.uid, name: userprofile.name })
     .from(alliance_member)
@@ -81,7 +83,9 @@ export async function readProfileAlliance(
     .where(and(eq(alliance_member.allianceId, allianceId), eq(alliance_member.rank, 5)))
     .orderBy(asc(alliance_member.uid))
     .limit(2);
+
   if (leaders.length !== 1) throw new Error("Ambiguous public alliance leader");
+
   const totals = (
     await tx
       .select({ member: sql<string>`count(*)::text`, fightpower: sum(playerinfo.power) })
@@ -89,7 +93,9 @@ export async function readProfileAlliance(
       .innerJoin(playerinfo, eq(playerinfo.uid, alliance_member.uid))
       .where(eq(alliance_member.allianceId, allianceId))
   )[0];
+
   if (!totals || totals.member === "0") throw new Error("Missing public alliance member totals");
+
   const sciences = withEffects
     ? await tx
         .select({ scienceId: alliance_science.scienceId, level: alliance_science.level })
@@ -98,7 +104,9 @@ export async function readProfileAlliance(
         .orderBy(asc(alliance_science.scienceId))
         .limit(32768)
     : [];
+
   if (sciences.length > 32767) throw new Error("Public alliance science collection exceeds limit");
+
   const video = (
     await tx
       .select({
@@ -115,5 +123,6 @@ export async function readProfileAlliance(
       .where(eq(alliance_vedio.allianceId, allianceId))
       .limit(1)
   )[0];
+
   return { alliance: record, leader: leaders[0]!, totals, sciences, video, withEffects };
 }

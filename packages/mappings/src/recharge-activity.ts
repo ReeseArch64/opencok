@@ -2,6 +2,7 @@ import { sfs, type Fields } from "@opencok/messages/sfs";
 import type { RechargeActivityLoginResponse } from "@opencok/contracts/responses/recharge-activity";
 import { rechargeActivityLoginSchema } from "@opencok/validations/recharge-activity";
 import { validateFields } from "./validation";
+
 export function rechargeActivityLogin(row: RechargeActivityLoginResponse): Fields {
   return validateFields(rechargeActivityLoginSchema, {
     ...(row.new_sercum_little_time === undefined

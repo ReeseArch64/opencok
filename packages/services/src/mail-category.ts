@@ -16,10 +16,13 @@ export function mailCategoryProjection(
 ): { body: Fields; invalidIds: string[] } {
   validateMailWindow(owner, window);
   const selected = selectMailCategory(query, window);
+
   if (mailCategoryWindow(query) === undefined) {
     encode(extension("mread.batch.category", { success: sfs.bool(true), ...envelope }));
+
     return { body: {}, invalidIds: [] };
   }
+
   return mailListProjection(
     owner,
     selected,

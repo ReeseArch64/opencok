@@ -27,6 +27,7 @@ export class RealmApplication {
       return { ...server, close: this.close };
     } catch (error) {
       await this.runtime.dispose();
+
       throw error;
     }
   }

@@ -1,4 +1,5 @@
 import type { PayServercontrolDefinition } from "../types/pay_servercontrol.ts";
+
 export const records: readonly PayServercontrolDefinition[] = [
   { "id": 69000, "k1": "2.0.10", "k2": 1 },
   { "id": 69001, "k1": "2.1.20", "k2": 5, "k3": 120, "k4": 0 },

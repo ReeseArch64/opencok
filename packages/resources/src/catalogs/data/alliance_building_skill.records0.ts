@@ -1,4 +1,5 @@
 import type { AllianceBuildingSkillDefinition } from "../types/alliance_building_skill.ts";
+
 export const records: readonly AllianceBuildingSkillDefinition[] = [
   {
     "id": 470000,

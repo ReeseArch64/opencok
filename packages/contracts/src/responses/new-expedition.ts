@@ -9,6 +9,7 @@ export interface ExpeditionActivityResponse {
   count: number;
   rewardlist?: readonly number[];
 }
+
 export interface ExpeditionPanelResponse extends ExpeditionActivityResponse {
   id: string;
   activityid?: string;

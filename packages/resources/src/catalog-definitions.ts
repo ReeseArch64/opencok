@@ -355,6 +355,7 @@ import type { WrRankDefinitionCatalog } from "./catalogs/types/wr_rank.ts";
 import type { WrSeverDefinitionCatalog } from "./catalogs/types/wr_sever.ts";
 import type { WrSkillDefinitionCatalog } from "./catalogs/types/wr_skill.ts";
 import type { WrTroopsPointDefinitionCatalog } from "./catalogs/types/wr_troops_point.ts";
+
 export interface GameplayCatalogDefinitions {
   [GameplayCatalog.Catalog3thAnniversary]: Catalog3thAnniversaryDefinitionCatalog;
   [GameplayCatalog.Catalog3thAnniversaryControl]: Catalog3thAnniversaryControlDefinitionCatalog;
@@ -737,6 +738,7 @@ export interface GameplayCatalogDefinitions {
   [GameplayCatalog.WrSkill]: WrSkillDefinitionCatalog;
   [GameplayCatalog.WrTroopsPoint]: WrTroopsPointDefinitionCatalog;
 }
+
 export const catalogDefinitions: {
   readonly [Id in keyof GameplayCatalogDefinitions]: () => Promise<GameplayCatalogDefinitions[Id]>;
 } = {
@@ -1340,6 +1342,7 @@ export const catalogDefinitions: {
   [GameplayCatalog.WrTroopsPoint]: async () =>
     (await import("./catalogs/data/wr_troops_point.ts")).catalog,
 };
+
 export async function loadCatalog<Id extends keyof GameplayCatalogDefinitions>(
   id: Id,
 ): Promise<GameplayCatalogDefinitions[Id]> {

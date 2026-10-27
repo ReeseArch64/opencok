@@ -32,7 +32,9 @@ export class ChatMaintenanceService {
 
       for (let batch = 0; batch < 5; batch++) {
         const removed = await repository.deleteExpired();
+
         if (removed.messages < 500 && removed.sessions < 500) break;
+
         if (batch === 4) log({ operation: "chat.retention", category: "retention_backlog" });
       }
 
@@ -44,6 +46,7 @@ export class ChatMaintenanceService {
 
           for (let batch = 0; batch < 10 && performance.now() < deadline; batch++) {
             pending = await repository.archivePending();
+
             if (pending < 100) break;
           }
 

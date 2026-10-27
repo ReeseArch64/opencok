@@ -40,13 +40,18 @@ const generalActions: Readonly<Record<string, readonly string[]>> = {
 
 export function generalRequest(command: string, params: Fields) {
   const separator = command.indexOf(".");
+
   if (separator < 0) return { command, params };
+
   const prefix = command.slice(0, separator);
   const action = command.slice(separator + 1);
+
   if (!Object.hasOwn(generalActions, prefix) || !generalActions[prefix]!.includes(action))
     return { command, params };
+
   if (params.M__REQUEST_ID__H && str(params, "M__REQUEST_ID__H") !== action)
     throw new GameError(errors.invalid, "city_progression");
+
   return { command: prefix, params: { ...params, M__REQUEST_ID__H: sfs.string(action) } };
 }
 
@@ -57,6 +62,7 @@ export function generalLevels(raw: string) {
     ),
   );
 }
+
 export function generalPurchase(row: Row): Fields {
   return {
     generalId: sfs.int(num(row, "generalId")),
@@ -65,6 +71,7 @@ export function generalPurchase(row: Row): Fields {
     ),
   };
 }
+
 export function generalSkill(row: Row): Fields {
   return {
     skillId: sfs.string(text(row, "skillId")),
@@ -73,6 +80,7 @@ export function generalSkill(row: Row): Fields {
     state: sfs.int(num(row, "stat")),
   };
 }
+
 export function generalOffice(row: Row): Fields {
   return {
     officeId: sfs.string(text(row, "officeId")),
@@ -80,6 +88,7 @@ export function generalOffice(row: Row): Fields {
     startTime: sfs.string(text(row, "startTime")),
   };
 }
+
 export function newGeneral(
   row: Row,
   buff: Fields[] = [],
@@ -133,14 +142,17 @@ export function generalRefinement(row: Row, rules: Rules): Fields {
       ),
     );
   let growth = 0;
+
   for (const [index, property] of current) {
     const next = proposed.get(index);
+
     if (next)
       growth += Math.trunc(
         ((next.value - property.value) / Number(generalPropertyRule(rules, property.id).max)) *
           10000,
       );
   }
+
   return {
     refinepropertylist: view(current, true),
     ...(proposed.size ? { canbackrefinepropertylist: view(proposed, false) } : {}),

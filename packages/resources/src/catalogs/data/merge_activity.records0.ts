@@ -1,4 +1,5 @@
 import type { MergeActivityDefinition } from "../types/merge_activity.ts";
+
 export const records: readonly MergeActivityDefinition[] = [
   { "id": 108900, "activityId": 57091, "mergeStart": 0, "mergeEnd": 1440, "para1": 16803004 },
   { "id": 108901, "activityId": 57091, "mergeStart": 1440, "mergeEnd": 2880, "para1": 16803001 },

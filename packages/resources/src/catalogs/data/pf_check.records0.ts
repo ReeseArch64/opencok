@@ -1,4 +1,5 @@
 import type { PfCheckDefinition } from "../types/pf_check.ts";
+
 export const records: readonly PfCheckDefinition[] = [
   { "id": 108550, "name": "tencent", "dialog": "E100232" },
   { "id": 108551, "name": "cn_mi", "dialog": "E100233" },

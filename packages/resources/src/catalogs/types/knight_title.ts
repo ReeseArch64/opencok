@@ -41,4 +41,5 @@ export interface KnightTitleDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type KnightTitleDefinitionCatalog = CatalogTable<KnightTitleDefinition>;

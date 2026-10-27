@@ -12,4 +12,5 @@ export interface ExchangeCycleDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type ExchangeCycleDefinitionCatalog = CatalogTable<ExchangeCycleDefinition>;

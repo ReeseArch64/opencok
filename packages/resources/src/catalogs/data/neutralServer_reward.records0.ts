@@ -1,4 +1,5 @@
 import type { NeutralServerRewardDefinition } from "../types/neutralServer_reward.ts";
+
 export const records: readonly NeutralServerRewardDefinition[] = [
   { "id": 523400, "min": 1, "max": 1, "score": [100, 5000], "reward": 248956 },
   { "id": 523401, "min": 2, "max": 2, "score": [100, 5000], "reward": 248957 },

@@ -7,4 +7,5 @@ export interface Catalog3thAnniversaryDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type Catalog3thAnniversaryDefinitionCatalog = CatalogTable<Catalog3thAnniversaryDefinition>;

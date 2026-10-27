@@ -1,4 +1,5 @@
 import type { ShopNew926Definition } from "../types/shop_new_9.26.ts";
+
 export const records: readonly ShopNew926Definition[] = [
   {
     "id": 2800008,

@@ -23,6 +23,7 @@ export async function productionContext(
   services: Pick<GameServices, "worldPowerEffects" | "emperorVersion">,
 ) {
   if (!services.worldPowerEffects) throw new Error("Missing production world effects");
+
   const world = decodeWorldPowerEffects(await services.worldPowerEffects(rules.kingdomId));
   const emperor = state.effects.throneRewards.length
     ? await services.emperorVersion?.(rules.kingdomId)
@@ -38,12 +39,16 @@ export async function productionContext(
           const pending = state.allianceResearch?.find(
             (queue) => num(queue, "scienceId") === num(row, "scienceId"),
           );
+
           if (!pending || at < long(pending, "startTime") + long(pending, "needTime")) return row;
+
           allianceScienceRule(rules, num(row, "scienceId"), num(row, "level") + 1);
+
           return { ...row, level: num(row, "level") + 1 };
         }),
       };
     const effects = worldPowerEffects(world, rules, current);
+
     return (id: Parameters<typeof playerGameEffect>[6]) =>
       playerGameEffect(snapshot, rules, current, abilities, effects, emperor, id);
   };
@@ -54,6 +59,7 @@ export async function productionContext(
     weaknessTime = long(state.glory ?? {}, "weaknessTime"),
     starvingMillis = 0n;
   const losses = new Map<string, { weakened: number; dead: number }>();
+
   for (let index = 1; index < times.length; index++) {
     const at = times[index - 1]!,
       resolve = resolveAt(at);
@@ -86,6 +92,7 @@ export async function productionContext(
       lastUpdateTime: settled.lastUpdateTime,
     };
     starvingMillis += settled.starvingMillis;
+
     if (upkeep.weakness && settled.starvingMillis > 0n) {
       const result = reconnectWeaknessPlan(
         armies,
@@ -98,6 +105,7 @@ export async function productionContext(
       armies = result.armies;
       weakness = result.weakness;
       weaknessTime = result.weaknessTime;
+
       for (const loss of result.losses) {
         const previous = losses.get(loss.armyId) ?? { weakened: 0, dead: 0 };
         losses.set(loss.armyId, {
@@ -107,8 +115,10 @@ export async function productionContext(
       }
     }
   }
+
   const changed = armies.filter((row) => {
     const before = state.armies.find((original) => original.armyId === row.armyId)!;
+
     return (
       num(row, "free") !== num(before, "free") || num(row, "defence") !== num(before, "defence")
     );
@@ -128,6 +138,7 @@ export async function productionContext(
     weakness: weakness
       .filter((row) => {
         const old = state.weakness.find((value) => value.armyId === row.armyId);
+
         return (
           !old ||
           num(row, "weakness") !== num(old, "weakness") ||
@@ -145,6 +156,7 @@ export async function productionContext(
       weaknessTime !== long(state.glory ?? {}, "weaknessTime") ? weaknessTime : undefined,
     troopChanges: changed.map((row) => {
       const old = state.armies.find((value) => value.armyId === row.armyId)!;
+
       return {
         armyId: String(row.armyId),
         freeBefore: num(old, "free"),
@@ -171,8 +183,10 @@ export async function productionContext(
     const resourceId = definition.effects?.productionResourceId,
       base = definition.effects?.productionPerHour,
       capacity = definition.effects?.productionCapacity ?? 4000;
+
     if (resourceId === undefined || resourceId < 0 || resourceId > 3 || base === undefined)
       throw new Error("Missing production definition");
+
     const horizon = BigInt(Number.MAX_SAFE_INTEGER - 1);
     const cuts = new Set(
       reconnectSettlementTimes(
@@ -184,8 +198,11 @@ export async function productionContext(
     );
     cuts.delete(horizon);
     const boostEnd = long(building, "effectTime");
+
     if (boostEnd > from) cuts.add(boostEnd);
+
     const result: ProductionRate[] = [];
+
     for (const at of [...cuts].sort((a, b) => (a < b ? -1 : a > b ? 1 : 0))) {
       const resolve = resolveAt(at),
         instant = { ...context, now: Number(at) },
@@ -202,26 +219,34 @@ export async function productionContext(
             String(building.uuid),
           );
       const bonus = boostEnd > at ? Number(rules.items.get("building_base")?.k7) : 0;
+
       if (!Number.isFinite(effect) || !Number.isFinite(bonus))
         throw new Error("Invalid production effect");
+
       const rate = base * Math.max(0, 1 + effect / 100) * Math.max(0, 1 + bonus / 100);
       const cap = capacity * (1 + Math.max(0, effect) / 100) * (1 + Math.max(0, bonus) / 100);
+
       if (
         !Number.isSafeInteger(Math.round(rate * Number(productionScale))) ||
         !Number.isSafeInteger(Math.floor(cap))
       )
         throw new Error("Production rate overflow");
+
       const next = {
         at,
         perHour: BigInt(Math.round(rate * Number(productionScale))),
         capacity: BigInt(Math.floor(cap)),
       };
       const previous = result.at(-1);
+
       if (!previous || previous.perHour !== next.perHour || previous.capacity !== next.capacity)
         result.push(next);
     }
+
     if (result.length > 256) throw new Error("Production rate schedule exceeds bound");
+
     return result;
   };
+
   return { write, rates };
 }

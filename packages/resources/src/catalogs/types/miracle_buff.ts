@@ -7,4 +7,5 @@ export interface MiracleBuffDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type MiracleBuffDefinitionCatalog = CatalogTable<MiracleBuffDefinition>;

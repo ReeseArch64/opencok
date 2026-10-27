@@ -13,6 +13,7 @@ export function scoutWatchtowerValues(rules: Rules, tower: Row | undefined, cont
     num(tower, "progress") < 0
   )
     return { speed: 0, cooldown: undefined, ready: false };
+
   const definition = rules.building(
     "417000",
     num(tower, "level"),
@@ -25,6 +26,7 @@ export function scoutWatchtowerValues(rules: Rules, tower: Row | undefined, cont
   const values = step?.value.split("_");
   const speed = values?.[0] === undefined ? 0 : cityInteger(values[0]);
   const cooldown = values?.[1] === undefined ? undefined : cityInteger(values[1]);
+
   return {
     speed,
     cooldown,

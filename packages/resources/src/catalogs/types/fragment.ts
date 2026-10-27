@@ -12,4 +12,5 @@ export interface FragmentDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type FragmentDefinitionCatalog = CatalogTable<FragmentDefinition>;

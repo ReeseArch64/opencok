@@ -12,6 +12,7 @@ export function createTradeExecutor(
   now = Date.now,
 ): TradeExecutor {
   const execute = createMutationExecutor(db, authority, now);
+
   return (input, plan) =>
     execute(input, async (tx) => {
       const [row] = await tx
@@ -29,11 +30,13 @@ export function createTradeExecutor(
               superValue: row.superValue ?? 0,
             }
           : { trade: "", time: BigInt(timestamp), num: 0, superValue: 0 };
+
       return executeInventoryTransaction(
         tx,
         input.owner,
         async (inventory) => {
           const result = await plan(inventory, trade, timestamp);
+
           if (
             result.trade.trade.length > 100 ||
             !Number.isInteger(result.trade.num) ||
@@ -42,10 +45,12 @@ export function createTradeExecutor(
             ![0, 1].includes(result.trade.superValue)
           )
             throw new Error("Invalid trade state");
+
           await tx
             .insert(npc_trade)
             .values({ uid: input.owner, ...result.trade })
             .onConflictDoUpdate({ target: npc_trade.uid, set: result.trade });
+
           return result.inventory;
         },
         input.command,

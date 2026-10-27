@@ -15,6 +15,7 @@ export async function loadNicknameServices(
   >
 > {
   const filter = await loadNicknameWordFilter(wordsFile, readForbidden);
+
   return {
     nicknameForbidden: (name) => containsReservedNickname(name, filter.reservedNamePatterns()),
     nicknameBadWords: (name) => filter.contains(name),

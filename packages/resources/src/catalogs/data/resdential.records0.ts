@@ -1,4 +1,5 @@
 import type { ResdentialDefinition } from "../types/resdential.ts";
+
 export const records: readonly ResdentialDefinition[] = [
   { "id": 43000, "areaId": [67, 68, 69, 70] },
   { "id": 43001, "areaId": [71, 72, 73, 74] },

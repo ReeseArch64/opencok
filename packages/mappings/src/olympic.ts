@@ -2,6 +2,7 @@ import { sfs, type Fields } from "@opencok/messages/sfs";
 import { num, long, text, type Row } from "@opencok/contracts/rows";
 import { olympicQuestionSchema, olympicBetSchema } from "@opencok/validations/olympic";
 import { validateFields } from "./validation";
+
 export function olympicQuestionView(row: Row, count: bigint, type: number, amount: bigint): Fields {
   return validateFields(olympicQuestionSchema, {
     id: sfs.string(text(row, "id")),
@@ -12,9 +13,11 @@ export function olympicQuestionView(row: Row, count: bigint, type: number, amoun
     resourceNum: sfs.long(amount),
   });
 }
+
 export function olympicBetView(row: Row, question?: Row, count?: bigint): Fields {
   const result = text(row, "result"),
     winner = !result || result === text(row, "betCountry");
+
   return validateFields(olympicBetSchema, {
     uid: sfs.string(text(row, "uid")),
     questionId: sfs.string(text(row, "questionId")),

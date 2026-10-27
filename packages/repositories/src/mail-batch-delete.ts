@@ -19,6 +19,7 @@ import { and, eq, gt, gte, inArray, isNull, lt, lte, ne, or, sql, type SQL } fro
 import type { Database } from "./game.ts";
 
 type RealmDatabase = Database["kingdom"]["db"];
+
 type Transaction = Parameters<Parameters<RealmDatabase["transaction"]>[0]>[0];
 
 function identity(owner: string, kingdomId: number, now: number) {
@@ -55,6 +56,7 @@ async function owned(tx: Transaction, owner: string, kingdomId: number, now: num
     profile.serverId === kingdomId &&
     (profile.banFlag ?? 0) === 0 &&
     (profile.banTime ?? 0n) <= BigInt(now);
+
   return { profile, authorized };
 }
 
@@ -89,7 +91,9 @@ async function deleteExplicit(
   chatEnabled: boolean,
 ) {
   if (!query.ids?.length) return;
+
   if (typeof invitations !== "function") throw new Error("Missing invitation deletion planner");
+
   const ids = [...query.ids];
   const extraOwner = or(
     eq(mail_contents.toUser, owner),
@@ -109,6 +113,7 @@ async function deleteExplicit(
     .from(mail)
     .leftJoin(mail_contents, and(eq(mail_contents.uid, mail.uid), extraOwner))
     .where(selection);
+
   if (
     selected.length > ids.length ||
     selected.some(
@@ -121,11 +126,14 @@ async function deleteExplicit(
       8 * 1024 * 1024
   )
     throw new Error("Mailbox deletion contents exceed limit");
+
   const affected = selected.filter((entry) => entry.rewardStatus !== 0);
   const chatTypes = new Set([20, 21, 22, 23, 24, 37, 38, 39, 40, 45, 46]);
   const chats = affected.filter((entry) => chatTypes.has(entry.type));
+
   if (chats.length) {
     if (!chatEnabled) throw new GameError(errors.unsupported, "mail");
+
     const moderator = chats.some((entry) => [23, 24, 39, 40].includes(entry.type));
     const personal = chats.some((entry) => ![23, 24, 39, 40].includes(entry.type));
     const types = moderator && personal ? [1, 2, 20] : moderator ? [2] : [1, 20];
@@ -146,6 +154,7 @@ async function deleteExplicit(
           entry,
         ]),
     );
+
     for (const entry of selections.values()) {
       const types = [23, 24, 39, 40].includes(entry.type) ? [23, 24] : [20, 21, 22];
       await tx
@@ -161,6 +170,7 @@ async function deleteExplicit(
         );
     }
   }
+
   const invitationIds = affected.filter((entry) => entry.type === 26).map((entry) => entry.uid);
   const invitationEntries = invitationIds.length
     ? await tx
@@ -175,9 +185,12 @@ async function deleteExplicit(
         .leftJoin(mail_contents, and(eq(mail_contents.uid, mail.uid), extraOwner))
         .where(and(eq(mail.toUser, owner), inArray(mail.uid, invitationIds)))
     : [];
+
   if (invitationEntries.length !== invitationIds.length)
     throw new Error("Mailbox selection changed during deletion");
+
   const repairs = invitations(invitationEntries);
+
   if (
     repairs.length > invitationEntries.length ||
     new Set(repairs.map((repair) => repair.uid)).size !== repairs.length ||
@@ -193,10 +206,13 @@ async function deleteExplicit(
     )
   )
     throw new Error("Invalid invitation deletion plan");
+
   await tx.delete(mail).where(and(selection, eq(mail.saveFlag, 0), ne(mail.rewardStatus, 0)));
   const ownedIds = selected.map((entry) => entry.uid);
+
   if (ownedIds.length)
     await tx.delete(mail_contents).where(and(inArray(mail_contents.uid, ownedIds), extraOwner));
+
   await tx
     .insert(mail_update)
     .values(ids.map((mailUid) => ({ toUser: owner, mailUid, updateTime: BigInt(query.now) })))
@@ -207,16 +223,19 @@ async function deleteExplicit(
   const expandedTypes = [...new Set(affected.map((entry) => entry.type))].filter(
     (type) => type === 5 || type === 10 || type === 18,
   );
+
   if (expandedTypes.length)
     await tx
       .delete(mail)
       .where(
         and(eq(mail.toUser, owner), inArray(mail.type, expandedTypes), ne(mail.rewardStatus, 0)),
       );
+
   const grouped = new Set([
     2, 5, 10, 11, 12, 17, 18, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 33, 34, 39, 40,
   ]);
   const pointers = affected.filter((entry) => grouped.has(entry.type));
+
   for (let offset = 0; offset < pointers.length; offset += 200)
     await tx
       .delete(mail_group)
@@ -232,12 +251,15 @@ async function deleteExplicit(
           ),
         ),
       );
+
   for (const repair of repairs)
     await tx
       .update(mail)
       .set({ contents: repair.contents })
       .where(and(eq(mail.toUser, owner), eq(mail.uid, repair.uid), eq(mail.type, 26)));
+
   const inviters = [...new Set(repairs.map((repair) => repair.inviter))];
+
   if (inviters.length)
     await tx
       .delete(alliance_invite_move)
@@ -259,6 +281,7 @@ export function deleteMailCategories(
   chatEnabled = false,
 ): Promise<MailCategoryDeleteSnapshot> {
   identity(owner, kingdomId, input.now);
+
   if (
     !Array.isArray(input.labels) ||
     input.labels.length > 1000 ||
@@ -269,11 +292,13 @@ export function deleteMailCategories(
         input.ids.some((id) => typeof id !== "string" || !id.length || id.includes(","))))
   )
     throw new Error("Invalid mailbox category deletion");
+
   const query = mailCategoryDeleteQuery(
     input.ids?.join(","),
     input.labels.map((label) => label.raw).join(","),
     input.now,
   );
+
   if (
     (input.ids !== undefined &&
       ((query.ids ?? []).length !== input.ids.length ||
@@ -285,12 +310,16 @@ export function deleteMailCategories(
     )
   )
     throw new Error("Invalid mailbox category deletion");
+
   return db.transaction(
     async (tx) => {
       const { profile, authorized } = await owned(tx, owner, kingdomId, query.now);
+
       if (!authorized) return { profile };
+
       await deleteExplicit(tx, owner, query, invitations, chatEnabled);
       const counts = new Map<number, { total: number; unread: number }>();
+
       for (const key of new Set(query.labels.map((label) => categoryKey(label.category)))) {
         const [row] = await tx
           .select({
@@ -299,6 +328,7 @@ export function deleteMailCategories(
           })
           .from(mail)
           .where(and(eq(mail.toUser, owner), categoryPredicate(key)));
+
         if (
           !row ||
           !/^(0|[1-9]\d*)$/.test(row.total) ||
@@ -306,18 +336,22 @@ export function deleteMailCategories(
           BigInt(row.unread) > BigInt(row.total)
         )
           throw new Error("Invalid mailbox category counts");
+
         counts.set(key, {
           total: Number(BigInt.asIntN(32, BigInt(row.total))),
           unread: Number(BigInt.asIntN(32, BigInt(row.unread))),
         });
       }
+
       inspect(
         query.labels.map((label) => ({
           raw: label.raw,
           ...counts.get(categoryKey(label.category))!,
         })),
       );
+
       if (!counts.size) return { profile };
+
       const selection = and(
         eq(mail.toUser, owner),
         or(...[...counts.keys()].map(categoryPredicate)),
@@ -336,6 +370,7 @@ export function deleteMailCategories(
           ),
         );
       await tx.delete(mail).where(and(selection, eq(mail.saveFlag, 0), ne(mail.rewardStatus, 0)));
+
       return { profile };
     },
     { isolationLevel: "read committed", accessMode: "read write" },
@@ -350,20 +385,25 @@ export function deleteMailType(
 ): Promise<MailCategoryDeleteSnapshot> {
   identity(owner, kingdomId, input.now);
   const query = { ...input };
+
   if (
     query.type !== undefined &&
     (!Number.isInteger(query.type) || query.type < -2147483648 || query.type > 2147483647)
   )
     throw new Error("Invalid mailbox deletion type");
+
   return db.transaction(
     async (tx) => {
       const { profile, authorized } = await owned(tx, owner, kingdomId, query.now);
+
       if (!authorized || query.type === undefined) return { profile };
+
       await tx
         .delete(mail)
         .where(and(eq(mail.toUser, owner), eq(mail.type, query.type), ne(mail.rewardStatus, 0)));
       const group =
         query.type === 5 ? 200 : query.type === 10 ? 400 : query.type === 18 ? 300 : undefined;
+
       if (group !== undefined)
         await tx
           .delete(mail_group)
@@ -374,6 +414,7 @@ export function deleteMailType(
               eq(mail_group.groupIndex, ""),
             ),
           );
+
       return { profile };
     },
     { isolationLevel: "read committed", accessMode: "read write" },

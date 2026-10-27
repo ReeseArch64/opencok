@@ -7,6 +7,7 @@ import { queue } from "@opencok/drizzle/schema/opencok_kingdom/queue";
 import { text, num, long } from "@opencok/contracts/rows";
 import type { CityProgressionWrite } from "@opencok/contracts/city-progression";
 import type { MutationTransaction } from "./mutation";
+
 export async function readSuitDecompositions(tx: MutationTransaction, owner: string) {
   return tx
     .select()
@@ -14,6 +15,7 @@ export async function readSuitDecompositions(tx: MutationTransaction, owner: str
     .where(eq(suit_decompose_effect.owner, owner))
     .limit(257);
 }
+
 export async function writeEquipment(
   tx: MutationTransaction,
   owner: string,
@@ -27,11 +29,14 @@ export async function writeEquipment(
       num(row, "strengthLevel") > 10
     )
       throw new Error("Invalid equipment write");
+
     const [before] = await tx
       .select()
       .from(user_equip)
       .where(eq(user_equip.uuid, text(row, "uuid")));
+
     if (before && before.uid !== owner) throw new Error("Foreign equipment write");
+
     const value = {
       uid: owner,
       uuid: text(row, "uuid"),
@@ -58,16 +63,20 @@ export async function writeEquipment(
         setWhere: eq(user_equip.uid, owner),
       });
   }
+
   if (write.deletedEquipment?.length) {
     const removed = await tx
       .delete(user_equip)
       .where(and(eq(user_equip.uid, owner), inArray(user_equip.uuid, [...write.deletedEquipment])))
       .returning({ id: user_equip.uuid });
+
     if (removed.length !== new Set(write.deletedEquipment).size)
       throw new Error("Foreign equipment removal");
   }
+
   for (const row of write.suitDecompositions ?? []) {
     if (row.owner !== owner) throw new Error("Foreign suit decomposition");
+
     const value = {
       owner,
       suitid: text(row, "suitid"),
@@ -86,16 +95,19 @@ export async function writeEquipment(
         set: value,
       });
   }
+
   if (write.equipmentSelection !== undefined)
     await tx
       .update(userprofile)
       .set({ decomposesuiteffect: write.equipmentSelection })
       .where(eq(userprofile.uid, owner));
+
   if (write.materialAcceleration)
     await tx
       .insert(user_mixed_info)
       .values({ uid: owner, mdata: "", ...write.materialAcceleration })
       .onConflictDoUpdate({ target: user_mixed_info.uid, set: write.materialAcceleration });
+
   if (write.materialBackup !== undefined)
     await tx
       .insert(user_mixed_info)
@@ -104,9 +116,11 @@ export async function writeEquipment(
         target: user_mixed_info.uid,
         set: { materialBackup: write.materialBackup },
       });
+
   for (const row of write.queueUpdates ?? []) {
     if (row.ownerId !== owner || num(row, "type") !== 12 || text(row, "itemId").length > 255)
       throw new Error("Invalid material queue update");
+
     const result = await tx
       .update(queue)
       .set({
@@ -116,6 +130,7 @@ export async function writeEquipment(
       })
       .where(and(eq(queue.ownerId, owner), eq(queue.uuid, text(row, "uuid")), eq(queue.type, 12)))
       .returning({ id: queue.uuid });
+
     if (result.length !== 1) throw new Error("Missing material queue");
   }
 }

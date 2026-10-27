@@ -13,6 +13,7 @@ export const serverSchema = z
         .refine((value) => {
           try {
             const url = new URL(value);
+
             return (
               url.pathname === "/" && !url.username && !url.password && !url.search && !url.hash
             );
@@ -29,6 +30,7 @@ export const serverSchema = z
         .refine((value) => {
           try {
             const url = new URL(value);
+
             return (
               url.pathname === "/_internal/avatar-profile" &&
               !url.username &&
@@ -51,6 +53,7 @@ export const serverSchema = z
         .refine((value) => {
           try {
             const url = new URL(value);
+
             return (
               url.pathname === "/_internal/nickname" &&
               !url.username &&
@@ -73,6 +76,7 @@ export const serverSchema = z
         .refine((value) => {
           try {
             const url = new URL(value);
+
             return (
               url.pathname === "/_internal/mailbox" &&
               !url.username &&
@@ -95,6 +99,7 @@ export const serverSchema = z
         .refine((value) => {
           try {
             const url = new URL(value);
+
             return (
               url.pathname === "/external/session" &&
               !url.username &&
@@ -136,6 +141,7 @@ export const serverSchema = z
         .transform((value) =>
           value.split(",").map((entry) => {
             const parts = entry.split(":");
+
             return { id: Number(parts[0]), database: parts.length === 2 ? parts[1] : undefined };
           }),
         )
@@ -183,5 +189,6 @@ export const serverSchema = z
   .readonly();
 
 export type ServerEnvironment = z.infer<typeof serverSchema>;
+
 export const parseServerEnvironment = (source: Readonly<Record<string, string | undefined>>) =>
   validateEnvironment(serverSchema, source);

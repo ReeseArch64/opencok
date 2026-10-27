@@ -3,7 +3,9 @@ import { randomUUID } from "node:crypto";
 import { createLogger, initLogger } from "evlog";
 
 type Level = "info" | "warn" | "error";
+
 type Fields = Record<string, string | number | boolean | undefined>;
+
 const context = new AsyncLocalStorage<Fields>();
 
 export function initializeLogging(service: string) {
@@ -34,14 +36,18 @@ export async function logHttpRequest(
   fetch: (request: Request) => Promise<Response> | Response,
 ) {
   if (logContext().requestId) return fetch(request);
+
   const requestId = `req_${randomUUID().replaceAll("-", "")}`;
   const started = performance.now();
+
   return withLogContext({ requestId, component: "http" }, async () => {
     let status = 500;
+
     try {
       const response = await fetch(request);
       status = response.status;
       response.headers.set("X-Request-ID", requestId);
+
       return response;
     } finally {
       logEvent(
@@ -79,15 +85,20 @@ export function httpOperation(path: string) {
     "/external/session",
     "/gameservice/www/gateway/json.php",
   ]);
+
   if (known.has(path)) return path;
+
   if (/^\/_internal\/avatars\/[0-9]{1,20}\/[1-9][0-9]{0,5}$/.test(path))
     return "avatar.confirmation";
+
   if (/^\/cok\/img\/[0-9]{1,6}\/[a-f0-9]{32}\.jpg$/.test(path)) return "avatar.download";
+
   return "unknown";
 }
 
 export function errorReason(error: unknown): string {
   if (!(error instanceof Error)) return "unexpected_failure";
+
   const code = "code" in error ? error.code : undefined;
   const reasons: Record<string, string> = {
     ECONNREFUSED: "connection_refused",
@@ -106,7 +117,10 @@ export function errorReason(error: unknown): string {
     "40001": "database_serialization",
     "40P01": "database_deadlock",
   };
+
   if (typeof code === "string" && Object.hasOwn(reasons, code)) return reasons[code]!;
+
   if (error.name === "TimeoutError" || error.name === "AbortError") return "dependency_timeout";
+
   return "unexpected_failure";
 }

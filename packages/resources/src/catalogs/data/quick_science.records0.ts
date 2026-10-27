@@ -1,4 +1,5 @@
 import type { QuickScienceDefinition } from "../types/quick_science.ts";
+
 export const records: readonly QuickScienceDefinition[] = [
   { "id": 5857101, "groupid": 1, "scienceid": 700100, "Targetlv": 5 },
   { "id": 5857102, "groupid": 1, "scienceid": 700200, "Targetlv": 5 },

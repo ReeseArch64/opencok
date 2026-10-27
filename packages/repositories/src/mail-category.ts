@@ -29,10 +29,12 @@ export function readMailCategory(
     typeof inspect !== "function"
   )
     throw new Error("Invalid mail category query");
+
   const limit =
     query.category < 1 || query.category > 8 || query.begin > 0
       ? 0
       : Math.max(0, (query.begin + query.offset) | 0);
+
   return readOwnedMailWindow(
     databases,
     kingdomId,

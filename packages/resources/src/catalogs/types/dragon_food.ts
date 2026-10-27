@@ -39,4 +39,5 @@ export interface DragonFoodDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type DragonFoodDefinitionCatalog = CatalogTable<DragonFoodDefinition>;

@@ -1,4 +1,5 @@
 import type { Row } from "./rows";
+
 export interface WorldMonsterReader {
   nearestBoss(origin: number): Promise<number>;
   claimed(points: readonly number[]): Promise<boolean>;
@@ -6,6 +7,7 @@ export interface WorldMonsterReader {
   nearby(origin: number, radius: number): Promise<readonly Row[]>;
   area(area: number, side: number): Promise<readonly Row[]>;
 }
+
 export interface WorldBarbarianActorWrite {
   points: readonly number[];
   configId: string;

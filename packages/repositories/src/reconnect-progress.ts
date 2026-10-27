@@ -38,6 +38,7 @@ export async function readReconnectProgress(
 ): Promise<ReconnectProgressState> {
   if (!uid.trim() || uid.length > 40 || !uid.isWellFormed() || uid.includes("\0"))
     throw new GameError(errors.invalid);
+
   const profile = (
     await tx
       .select({
@@ -85,7 +86,9 @@ export async function readReconnectProgress(
       .limit(1)
       .for("update")
   )[0];
+
   if (!profile) throw new GameError(errors.missing);
+
   if (
     profile.uid !== uid ||
     profile.serverId !== kingdomId ||
@@ -93,11 +96,15 @@ export async function readReconnectProgress(
     (profile.banTime ?? 0n) > now
   )
     throw new GameError(errors.invalid);
+
   const resource = (
     await tx.select().from(user_resource).where(eq(user_resource.uid, uid)).limit(1).for("update")
   )[0];
+
   if (!resource) throw new GameError(errors.missing);
+
   if (resource.uid !== uid) throw new GameError(errors.invalid);
+
   const world = (
     await tx
       .select({
@@ -120,7 +127,9 @@ export async function readReconnectProgress(
       .where(eq(user_world.uid, uid))
       .limit(1)
   )[0];
+
   if (world && world.uid !== uid) throw new GameError(errors.invalid);
+
   const effects = await readPlayerEffects(tx, profile, true);
   const newGenerals = await readResourceNewGenerals(tx, uid, false);
   const marches = await readReconnectMarches(tx, uid);
@@ -210,7 +219,9 @@ export async function readReconnectProgress(
     .where(eq(user_hospital.uid, uid))
     .orderBy(asc(user_hospital.armyId))
     .limit(1025);
+
   if (hospital.length > 1024) throw new Error("Hospital aggregate exceeds bound");
+
   const walls = await tx
     .select()
     .from(user_wall)
@@ -226,6 +237,7 @@ export async function readReconnectProgress(
     .where(eq(user_item.ownerId, uid))
     .orderBy(asc(user_item.itemId))
     .limit(32768);
+
   if (
     [
       armies,
@@ -242,6 +254,7 @@ export async function readReconnectProgress(
     ].some((rows) => rows.length > 32767)
   )
     throw new GameError(errors.unsupported, "reconnect");
+
   return {
     allianceResearch: profile.allianceId
       ? await tx

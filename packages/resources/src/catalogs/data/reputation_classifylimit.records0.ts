@@ -1,4 +1,5 @@
 import type { ReputationClassifylimitDefinition } from "../types/reputation_classifylimit.ts";
+
 export const records: readonly ReputationClassifylimitDefinition[] = [
   {
     "id": 5533000,

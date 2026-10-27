@@ -1,4 +1,5 @@
 import type { CivilizationDefinition } from "../types/civilization.ts";
+
 export const records: readonly CivilizationDefinition[] = [
   { "id": 5531000, "type": 1 },
   { "id": 5531001, "type": 3 },

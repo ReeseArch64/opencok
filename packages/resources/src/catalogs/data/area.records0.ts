@@ -1,4 +1,5 @@
 import type { AreaDefinition } from "../types/area.ts";
+
 export const records: readonly AreaDefinition[] = [
   {
     "id": 3000,

@@ -11,4 +11,5 @@ export interface PositionUnlockDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type PositionUnlockDefinitionCatalog = CatalogTable<PositionUnlockDefinition>;

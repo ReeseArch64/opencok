@@ -14,14 +14,17 @@ function identity(value: string) {
   if (!value || value.length > 40 || !value.isWellFormed() || value.includes("\0"))
     throw new Error("Invalid world march inspection identity");
 }
+
 export function createWorldMarchInspectionStore(
   db: Database["kingdom"]["db"],
 ): WorldMarchInspectionStore {
   return {
     async read(observer, owner, id, kingdomId, now) {
       for (const value of [observer, owner, id]) identity(value);
+
       if (!Number.isInteger(kingdomId) || kingdomId < 1 || !Number.isSafeInteger(now) || now < 0)
         throw new Error("Invalid world march inspection realm");
+
       return db.transaction(
         async (tx) => {
           const [self] = await tx
@@ -46,6 +49,7 @@ export function createWorldMarchInspectionStore(
               .select({ uid: ob_user.uid })
               .from(ob_user)
               .where(eq(ob_user.uid, observer));
+
           if (
             !self ||
             !target ||
@@ -58,6 +62,7 @@ export function createWorldMarchInspectionStore(
               (!self.alliance || self.alliance !== target.alliance))
           )
             return undefined;
+
           const [march] = await tx
             .select()
             .from(world_march)
@@ -68,13 +73,17 @@ export function createWorldMarchInspectionStore(
                 eq(world_march.worldId, 0),
               ),
             );
+
           if (!march) return undefined;
+
           const [point] = await tx
             .select()
             .from(worldpoint)
             .where(and(eq(worldpoint.worldId, 0), eq(worldpoint.id, march.targetId!)));
           const ownerState = await readWorldResourceOwner(tx, owner);
+
           if (!point || !ownerState) return undefined;
+
           const armies = await tx
               .select()
               .from(user_army)
@@ -90,8 +99,10 @@ export function createWorldMarchInspectionStore(
               .from(new_general_skill)
               .where(eq(new_general_skill.uid, owner))
               .limit(4097);
+
           if ([armies, dragons, skills].some((rows) => rows.length > 4096))
             throw new Error("World march inspection bound exceeded");
+
           return { march, point, owner: ownerState, armies, dragons, skills };
         },
         { isolationLevel: "repeatable read", accessMode: "read only" },

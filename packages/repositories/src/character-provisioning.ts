@@ -30,10 +30,12 @@ export function createCharacterCreator(
 ): CharacterCreator {
   if (!Number.isInteger(mapSize) || mapSize < 2 || mapSize > 32767)
     throw new Error("Invalid realm map size");
+
   return (reservation, plan) =>
     db.transaction(async (tx) => {
       if (reservation.kingdomId !== authority.kingdomId)
         throw new Error("Wrong provisioning realm");
+
       await fenceRealmTransaction(tx, authority);
       const uid = reservation.gameUid,
         requestHash = provisionHash(reservation);
@@ -50,12 +52,16 @@ export function createCharacterCreator(
             eq(command_receipt.requestId, "character.create"),
           ),
         );
+
       if (receipt) {
         if (receipt.command !== "character.create" || receipt.request.toString() !== requestHash)
           throw new Error("Character creation conflict");
+
         authority.assertReady();
+
         return JSON.parse(receipt.response.toString()) as ProvisionReceipt;
       }
+
       if (
         (
           await tx
@@ -65,6 +71,7 @@ export function createCharacterCreator(
         ).length
       )
         throw new Error("Existing character cannot be initialized");
+
       await tx.execute(sql`select pg_advisory_xact_lock(728214, 0)`);
       const [ownedCity] = await tx
         .select({ id: worldpoint.id })
@@ -74,10 +81,14 @@ export function createCharacterCreator(
         )
         .limit(1)
         .for("update");
+
       if (ownedCity) throw new Error("Existing city cannot be initialized");
+
       const captured = now();
+
       if (!Number.isSafeInteger(captured) || captured < reservation.createdAt)
         throw new Error("Invalid provisioning clock");
+
       const seed = plan(captured);
       const { point } = await allocateWorldBirth(
         tx,
@@ -97,10 +108,13 @@ export function createCharacterCreator(
       await tx.insert(user_lord).values(seed.lord as typeof user_lord.$inferInsert);
       await tx.insert(user_vip).values(seed.vip as typeof user_vip.$inferInsert);
       await tx.insert(user_state).values(seed.shield as typeof user_state.$inferInsert);
+
       if (seed.tasks.length)
         await tx.insert(user_task).values(seed.tasks as (typeof user_task.$inferInsert)[]);
+
       if (seed.generals.length)
         await tx.insert(user_general).values(seed.generals as (typeof user_general.$inferInsert)[]);
+
       await tx.insert(playerinfo).values(seed.player as typeof playerinfo.$inferInsert);
       await tx.insert(user_assets).values({ uid, lastUpdateTime: BigInt(captured) });
       await tx.insert(user_reg).values({
@@ -194,6 +208,7 @@ export function createCharacterCreator(
         BigInt(captured),
       );
       authority.assertReady();
+
       return response;
     });
 }

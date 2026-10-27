@@ -10,4 +10,5 @@ export interface CsmodSettingsDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type CsmodSettingsDefinitionCatalog = CatalogTable<CsmodSettingsDefinition>;

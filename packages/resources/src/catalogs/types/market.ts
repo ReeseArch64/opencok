@@ -11,4 +11,5 @@ export interface MarketDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type MarketDefinitionCatalog = CatalogTable<MarketDefinition>;

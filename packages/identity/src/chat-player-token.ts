@@ -12,6 +12,7 @@ export class ChatPlayerTokenVerifier {
 
   public readonly verify: TokenVerifier = async (token, claimedUid) => {
     const identity = await this.tokens.verify(token, claimedUid);
+
     if (!identity || !this.repository.access) return identity;
 
     const state = await this.repository.getPlayerStateById(identity.uid);

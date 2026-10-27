@@ -1,13 +1,16 @@
 import type { Row } from "./rows";
+
 export interface CostRankMail {
   sender: string;
   title: string;
   contents: string;
   reward: string | null;
 }
+
 export interface CostRankAwardReader {
   load(id: string): Promise<Row | undefined>;
 }
+
 export interface CostRankAwardStore {
   candidates(): Promise<readonly Row[]>;
   plan(

@@ -98,6 +98,7 @@ export class AllianceService {
     readonly effects: InventoryEffects,
     readonly forbidden: (value: string) => boolean | Promise<boolean> = () => false,
   ) {}
+
   async publishGift(owner: string, eventId: string, type: number) {
     allianceText(eventId, 1, 128);
     cityInteger(type, 30000, 30500);
@@ -121,6 +122,7 @@ export class AllianceService {
         context.member();
         const body = publishAllianceGift(context, giftEvent, type),
           inventory = context.ledger.result(body);
+
         if (context.write.publishedGift)
           inventory.events = [
             ...(inventory.events ?? []),
@@ -134,11 +136,14 @@ export class AllianceService {
               }),
             },
           ];
+
         return { inventory, write: context.write };
       },
     );
+
     return inventoryReplay(response, requestId);
   }
+
   async command(owner: string, command: string, params: Fields) {
     if (
       command !== "alliance.tick" &&
@@ -146,9 +151,12 @@ export class AllianceService {
       !(allianceCommands as readonly string[]).includes(command)
     )
       throw new GameError(errors.unsupported);
+
     if (command !== "alliance.tick") await this.command(owner, "alliance.tick", {});
+
     for (const [key, field] of Object.entries(params)) {
       if (key === "_cok_") continue;
+
       if (
         [
           "rank",
@@ -164,11 +172,13 @@ export class AllianceService {
         field.type !== Type.Int
       )
         allianceFailure();
+
       if (
         key === "scienceId" &&
         field.type !== (command === "al.targetscience.set" ? Type.String : Type.Int)
       )
         allianceFailure();
+
       if (
         [
           "operationId",
@@ -219,6 +229,7 @@ export class AllianceService {
       )
         allianceFailure();
     }
+
     for (const key of [
       "name",
       "abbr",
@@ -231,18 +242,23 @@ export class AllianceService {
       "rankFive",
     ])
       if (params[key] && (await this.forbidden(str(params, key)))) allianceFailure();
+
     const requestId = params.operationId
       ? allianceText(str(params, "operationId"), 1, 128)
       : randomUUID();
+
     if (
       command !== "alliance.tick" &&
       command !== "alliance.init" &&
       !/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(requestId)
     )
       allianceFailure();
+
     const request: Fields = {};
+
     for (const key of Object.keys(params).sort())
       if (key !== "operationId" && key !== "_cok_") request[key] = params[key]!;
+
     const selection = {
       allianceId:
         str(params, "allianceId", "") ||
@@ -268,8 +284,10 @@ export class AllianceService {
       pageSize: command === "al.search" && int(params, "type", 0) === 2 ? 5 : 10,
       page: Math.max(1, cityInteger(int(params, "page", 1), 0, 1000)),
     };
+
     for (const id of [selection.allianceId, selection.playerId, selection.mailId])
       if (id) allianceText(id, 1, 40);
+
     const response = await this.repository.execute(
       { owner, command, requestId, request: encode(request) },
       selection,
@@ -282,6 +300,7 @@ export class AllianceService {
         );
         const body = await context.command(command, params);
         const inventory = context.ledger.result(body);
+
         if (Object.keys(context.write).length)
           inventory.events = [
             ...(inventory.events ?? []),
@@ -304,6 +323,7 @@ export class AllianceService {
               }),
             },
           ];
+
         return {
           inventory,
           write: context.write,
@@ -312,6 +332,7 @@ export class AllianceService {
         };
       },
     );
+
     return inventoryReplay(response, requestId);
   }
 }
@@ -321,6 +342,7 @@ export class AllianceContext {
   readonly productionOwners = new Set<string>();
   productionAt?: bigint;
   readonly allianceId: string;
+
   constructor(
     readonly owner: string,
     readonly state: AllianceState,
@@ -329,6 +351,7 @@ export class AllianceContext {
   ) {
     this.allianceId = text(state.inventory.profile, "allianceId");
   }
+
   async effect(id: number) {
     const state = await this.state.inventory.effects();
     const value = playerGameEffect(
@@ -340,14 +363,19 @@ export class AllianceContext {
       await this.ledger.effects.emperor(),
       id as Parameters<typeof playerGameEffect>[6],
     );
+
     if (!Number.isFinite(value)) allianceFailure();
+
     return value;
   }
+
   get now() {
     return this.state.now;
   }
+
   member(uid = this.owner, id = this.allianceId) {
     if (!id || text(this.profile(uid), "allianceId") !== id) allianceFailure(errors.locked);
+
     return allianceMember(
       [
         ...(this.write.members ?? []),
@@ -359,50 +387,64 @@ export class AllianceContext {
       id,
     );
   }
+
   alliance(id = this.allianceId) {
     const row =
       (this.write.alliances ?? []).find((row) => row.uid === id) ??
       this.state.alliances.find((row) => row.uid === id);
+
     if (!row) allianceFailure();
+
     return row;
   }
+
   profile(uid = this.owner) {
     const row = this.state.profiles.find((row) => row.uid === uid);
+
     if (!row) allianceFailure();
+
     return row;
   }
+
   castle(uid: string) {
     return num(
       this.state.cities.find((row) => row.uid === uid && num(row, "itemId") === 400000) ?? {},
       "level",
     );
   }
+
   power(uid: string) {
     return long(this.state.powers.find((row) => row.uid === uid) ?? {}, "power");
   }
+
   right(key: string) {
     allianceRight(this.member(), this.rules, key);
   }
+
   setAlliance(row: Row) {
     this.write.alliances = [
       ...(this.write.alliances ?? []).filter((value) => value.uid !== row.uid),
       row,
     ];
   }
+
   setMember(row: Row) {
     this.write.members = [
       ...(this.write.members ?? []).filter((value) => value.uid !== row.uid),
       row,
     ];
   }
+
   cost(key: string) {
     activityEconomy(this.ledger).gold(
       -BigInt(cityInteger(this.rules.items.get("alliance_cost")?.[key])),
     );
   }
+
   list(id = this.allianceId) {
     return this.state.members.filter((row) => row.allianceId === id);
   }
+
   scienceEffect(effect: number, id = this.allianceId) {
     return this.state.sciences
       .filter((row) => row.allianceId === id)
@@ -410,9 +452,11 @@ export class AllianceContext {
         const rule = this.rules.power.allianceSciences?.get(
           String(num(row, "scienceId") + num(row, "level")),
         );
+
         return total + (rule?.para1?.split(";").includes(String(effect)) ? Number(rule.para2) : 0);
       }, 0);
   }
+
   snapshot(
     alliance = this.alliance(),
     member = [...(this.write.members ?? []), ...this.state.members].find(
@@ -423,14 +467,19 @@ export class AllianceContext {
       members = this.list(id).filter(
         (row) => !(this.write.removedMembers ?? []).includes(text(row, "uid")),
       );
+
     for (const row of this.write.members ?? [])
       if (row.allianceId === id) {
         const index = members.findIndex((value) => value.uid === row.uid);
+
         if (index >= 0) members[index] = row;
         else members.push(row);
       }
+
     const leaders = members.filter((row) => num(row, "rank") === 5);
+
     if (leaders.length !== 1) allianceFailure();
+
     const leader = this.profile(text(leaders[0]!, "uid"));
     const result = allianceSnapshot({
       uid: id,
@@ -449,6 +498,7 @@ export class AllianceContext {
       leaderName: text(leader, "name"),
       fightpower: members.reduce((sum, row) => sum + this.power(text(row, "uid")), 0n),
     });
+
     return {
       ...result,
       alliancename: result.name!,
@@ -479,6 +529,7 @@ export class AllianceContext {
       targetScience: sfs.string(allianceTargets(text(alliance, "targetScience")).join(";")),
     };
   }
+
   checkMarch(uid: string) {
     if (
       this.state.marches.some(
@@ -490,10 +541,12 @@ export class AllianceContext {
     )
       allianceFailure(errors.locked);
   }
+
   join(uid: string, alliance: Row, rank = 1) {
     const profile = this.profile(uid),
       id = text(alliance, "uid");
     this.checkMarch(uid);
+
     if (
       this.state.marches.length > 8192 ||
       this.state.marches.some(
@@ -508,6 +561,7 @@ export class AllianceContext {
       )
     )
       allianceFailure(errors.locked);
+
     allianceJoinAllowed(
       profile,
       alliance,
@@ -527,8 +581,10 @@ export class AllianceContext {
     this.write.actions = [{ uid, kind: "alliance.join", count: 1 }];
     this.write.memberships = [{ uid, allianceId: id }];
     this.setAlliance({ ...alliance, curMember: this.list(id).length + 1 });
+
     if (Number(this.state.lords.find((row) => row.uid === uid)?.firstJoinAllianceFlag ?? 1) === 1) {
       const template = this.rules.mail.get("10011");
+
       if (template) {
         const rewards = previewRewards(
           template.reward,
@@ -539,7 +595,9 @@ export class AllianceContext {
         const rewardId = rewards
           .map((reward) => {
             if (reward.kind === "item") return `goods,${reward.id},${reward.count}`;
+
             if (reward.kind !== "count") allianceFailure();
+
             const category: Record<number, string> = {
               0: "wood",
               1: "stone",
@@ -549,12 +607,16 @@ export class AllianceContext {
               5: "gold",
               19: "crystal",
             };
+
             if (!category[reward.type]) allianceFailure();
+
             return `${category[reward.type]},0,${reward.value}`;
           })
           .join("|");
         const contents = javaMailBytes(template.message);
+
         if (!contents) allianceFailure();
+
         this.write.mails = [
           ...(this.write.mails ?? []),
           {
@@ -573,7 +635,9 @@ export class AllianceContext {
         ];
       }
     }
+
     this.productionOwners.add(uid);
+
     return {
       alliance: sfs.object(this.snapshot(alliance, row)),
       join: sfs.bool(true),
@@ -584,17 +648,22 @@ export class AllianceContext {
       ),
     };
   }
+
   remove(uid: string) {
     this.checkMarch(uid);
     const profile = this.profile(uid);
+
     if (num(profile, "crossFightSrcServerId") > 0) allianceFailure(errors.locked);
+
     this.write.memberships = [{ uid, allianceId: "" }];
     this.write.removedMembers = [uid];
     this.write.firstJoin = [uid];
     this.setAlliance({ ...this.alliance(), curMember: this.list().length - 1 });
     this.productionOwners.add(uid);
+
     return { uid: sfs.string(uid), allianceId: sfs.string(this.allianceId) };
   }
+
   application(type: number, uid = this.owner, id = this.allianceId) {
     return this.state.applications.find(
       (row) =>
@@ -604,6 +673,7 @@ export class AllianceContext {
         long(row, "applyTime") + 28800000n > this.now,
     );
   }
+
   mail(type: number, to: string, id: string, contents: Record<string, string | number>) {
     const template = this.rules.mail.get(type === 17 ? "10009" : "10010");
     this.write.mails = [
@@ -621,15 +691,19 @@ export class AllianceContext {
       },
     ];
   }
+
   async command(command: string, params: Fields): Promise<Fields> {
     if (command === "alliance.tick") return new AllianceScienceContext(this).complete();
+
     if (command === "alliance.init") {
       const present =
         this.state.alliances.some((row) => row.uid === this.allianceId) &&
         this.list().some((row) => row.uid === this.owner) &&
         this.list().filter((row) => num(row, "rank") === 5).length === 1;
+
       return { alliance: sfs.object(present ? this.snapshot() : {}) };
     }
+
     if (command === "al.create") {
       const input: CreateAllianceDto = {
         name: str(params, "name").trim(),
@@ -637,16 +711,20 @@ export class AllianceContext {
         language: str(params, "language", ""),
       };
       const parsed = createAllianceSchema.safeParse(input);
+
       if (!parsed.success) allianceFailure();
+
       const { name, intro, language } = parsed.data;
       allianceText(name, 3, 20);
       allianceText(intro, 0, 200);
+
       if (
         this.allianceId ||
         this.state.members.some((row) => row.uid === this.owner && text(row, "allianceId")) ||
         num(this.profile(), "crossFightSrcServerId") > 0
       )
         allianceFailure(errors.locked);
+
       activityEconomy(this.ledger).gold(-allianceCreationCost(this.rules, this.castle(this.owner)));
       const proposed = [...name].slice(0, 3).join(""),
         abbr = this.state.directory.some(
@@ -676,8 +754,10 @@ export class AllianceContext {
           castleRestriction: 0,
         };
       this.setAlliance(row);
+
       return this.join(this.owner, row, 5);
     }
+
     if (command === "al.check")
       return {
         allianceId: sfs.string(
@@ -687,6 +767,7 @@ export class AllianceContext {
           ),
         ),
       };
+
     if (command === "al.name" || command === "al.abbr") {
       const key = command === "al.name" ? "alliancename" : "abbr",
         value = this.state.selection.key ?? "";
@@ -694,8 +775,10 @@ export class AllianceContext {
         value.length < 3 ||
         value.length > (command === "al.name" ? 20 : 3) ||
         this.state.directory.some((row) => text(row, key).toLowerCase() === value.toLowerCase());
+
       return { result: sfs.bool(invalid) };
     }
+
     if (command === "al.searchuser") {
       this.right("invite");
       const eligible = this.state.candidates.filter(
@@ -733,6 +816,7 @@ export class AllianceContext {
         page: sfs.int(this.state.selection.page ?? 1),
       };
     }
+
     if (command === "al.search" || command === "al.checkname")
       return command === "al.checkname"
         ? {
@@ -761,6 +845,7 @@ export class AllianceContext {
             page: sfs.int(this.state.selection.page ?? 1),
             total: sfs.long(this.state.directoryTotal),
           };
+
     if (command === "al.get.firstjoin")
       return {
         firstJoin: sfs.int(
@@ -769,15 +854,18 @@ export class AllianceContext {
           ),
         ),
       };
+
     if (command === "al.view")
       return {
         alliance: sfs.object(
           this.snapshot(this.alliance(this.state.selection.allianceId ?? this.allianceId)),
         ),
       };
+
     if (command === "al.rank") {
       const id = this.state.selection.allianceId ?? this.allianceId;
       this.alliance(id);
+
       return {
         list: sfs.array(
           this.list(id)
@@ -787,6 +875,7 @@ export class AllianceContext {
             )
             .map((row) => {
               const profile = this.profile(text(row, "uid"));
+
               return sfs.object({
                 uid: sfs.string(text(row, "uid")),
                 name: sfs.string(text(profile, "name")),
@@ -800,6 +889,7 @@ export class AllianceContext {
         ),
       };
     }
+
     if (
       [
         "al.apply",
@@ -813,6 +903,7 @@ export class AllianceContext {
       ].includes(command)
     )
       return this.membership(command, params);
+
     if (
       [
         "al.applylist",
@@ -824,14 +915,20 @@ export class AllianceContext {
       ].includes(command)
     )
       return this.applications(command, params);
+
     this.member();
+
     if (command.startsWith("al.science.") || command === "al.targetscience.set")
       return new AllianceScienceContext(this).command(command, params);
+
     if (["al.callhelp", "al.renderhelp", "al.helpall", "al.showhelp"].includes(command))
       return new AllianceHelpContext(this).command(command, params);
+
     if (["al.showgift", "al.opengift", "al.cleargift"].includes(command))
       return allianceGift(this, command, params);
+
     if (command === "al.permission.get") return { permission: this.snapshot().permission! };
+
     if (command === "al.permission.modify") {
       const values = changeAlliancePermissions(
         this.member(),
@@ -839,56 +936,75 @@ export class AllianceContext {
         str(params, "rankData"),
       );
       this.setAlliance({ ...this.alliance(), permission: JSON.stringify(values) });
+
       return {
         permission: sfs.object(
           Object.fromEntries(Object.entries(values).map(([key, value]) => [key, sfs.int(value)])),
         ),
       };
     }
+
     if (command === "al.leave" || command === "al.leave.v2") {
       this.right("quit");
+
       return this.remove(this.owner);
     }
+
     if (command === "al.dismiss") {
       this.right("dissolve");
+
       if (this.list().length !== 1) allianceFailure(errors.locked);
+
       const body = this.remove(this.owner);
       this.write.alliances = [];
       this.write.deletedAlliances = [this.allianceId];
+
       return body;
     }
+
     if (command === "al.kick") {
       this.right("kick");
       const target = this.member(str(params, "playerId"));
+
       if (num(target, "rank") === 5 || target.uid === this.owner) allianceFailure(errors.locked);
+
       return this.remove(text(target, "uid"));
     }
+
     if (command === "al.setrank") {
       const target = this.member(str(params, "playerId")),
         rank = cityInteger(int(params, "rank"), 1, 4),
         own = this.member();
       this.right(rank > num(target, "rank") ? "rankup" : "rankdown");
+
       if (
         target.uid === this.owner ||
         rank >= num(own, "rank") ||
         num(target, "rank") > num(own, "rank")
       )
         allianceFailure(errors.locked);
+
       this.setMember({ ...target, rank });
+
       return { uid: sfs.string(text(target, "uid")), rank: sfs.int(rank) };
     }
+
     if (command === "al.leader.trans" || command === "al.leader.replace") {
       const leader = this.list().find((row) => num(row, "rank") === 5);
+
       if (!leader || this.list().filter((row) => num(row, "rank") === 5).length !== 1)
         allianceFailure();
+
       const target =
         command === "al.leader.trans" ? this.member(str(params, "playerId")) : this.member();
+
       if (
         target.uid === leader.uid ||
         num(this.profile(text(leader, "uid")), "crossFightSrcServerId") > 0 ||
         num(this.profile(text(target, "uid")), "crossFightSrcServerId") > 0
       )
         allianceFailure(errors.locked);
+
       if (command === "al.leader.trans") this.right("transfer");
       else {
         const days = cityInteger(
@@ -896,13 +1012,17 @@ export class AllianceContext {
             1,
           ),
           offline = long(this.profile(text(leader, "uid")), "offLineTime");
+
         if (!offline || this.now - offline < BigInt(days) * 86400000n)
           allianceFailure(errors.locked);
+
         this.cost("k7");
       }
+
       this.setMember({ ...leader, rank: 4 });
       this.setMember({ ...target, rank: 5 });
       this.setAlliance({ ...this.alliance(), rallyPoint: 0 });
+
       return {
         alliance: sfs.object(this.snapshot()),
         oldLeaderId: sfs.string(text(leader, "uid")),
@@ -910,20 +1030,25 @@ export class AllianceContext {
         gold: sfs.long(this.ledger.total()),
       };
     }
+
     return this.attributes(command, params);
   }
+
   membership(command: string, params: Fields): Fields {
     if (command === "al.apply" || command === "al.cancelapply") {
       const id = str(params, "allianceId"),
         alliance = this.alliance(id);
+
       if (command === "al.cancelapply") {
         this.write.deletedApplications = this.state.applications
           .filter(
             (row) => row.userId === this.owner && row.allianceId === id && num(row, "type") === 1,
           )
           .map((row) => text(row, "uid"));
+
         return {};
       }
+
       allianceJoinAllowed(
         this.profile(),
         alliance,
@@ -932,9 +1057,12 @@ export class AllianceContext {
         this.castle(this.owner),
         num(alliance, "maxMember") + Math.trunc(this.scienceEffect(500, id)),
       );
+
       if (num(alliance, "recruit") === 1) return this.join(this.owner, alliance);
+
       if (this.application(1, this.owner, id))
         return { join: sfs.bool(false), joinBool: sfs.bool(false) };
+
       const applications = this.state.applications
         .filter((row) => row.userId === this.owner && num(row, "type") === 1)
         .sort((a, b) => Number(long(a, "applyTime") - long(b, "applyTime")));
@@ -953,6 +1081,7 @@ export class AllianceContext {
         },
       ];
       const leader = this.list(id).find((row) => num(row, "rank") === 5);
+
       if (leader)
         this.mail(25, text(leader, "uid"), uid, {
           applicantId: this.owner,
@@ -960,20 +1089,27 @@ export class AllianceContext {
           contents: "115001|" + text(this.profile(), "name"),
           deal: 0,
         });
+
       return { join: sfs.bool(false), joinBool: sfs.bool(false), mailId: sfs.string(uid) };
     }
+
     if (command === "al.invite" || command === "al.cancelinvite") {
       this.right("invite");
       const uid = str(params, "playerId"),
         target = this.profile(uid);
+
       if (text(target, "allianceId") || num(target, "crossFightSrcServerId") > 0)
         allianceFailure(errors.locked);
+
       if (command === "al.cancelinvite") {
         const row = this.application(2, uid);
         this.write.deletedApplications = row ? [text(row, "uid")] : [];
+
         return {};
       }
+
       if ([1, 2, 3].some((type) => this.application(type, uid))) allianceFailure(errors.locked);
+
       const id = randomUUID(),
         alliance = this.alliance();
       this.write.applications = [
@@ -993,6 +1129,7 @@ export class AllianceContext {
         contents: "115000|" + text(alliance, "alliancename"),
         deal: 0,
       });
+
       return {
         allianceId: sfs.string(this.allianceId),
         inviteSenderId: sfs.string(this.owner),
@@ -1000,19 +1137,25 @@ export class AllianceContext {
         mailId: sfs.string(id),
       };
     }
+
     const invite = command.endsWith("invite");
     let application: Row | undefined;
     let selectedMail: Row | undefined;
+
     if (params.mailId) {
       const id = str(params, "mailId"),
         mail = this.state.mails.find((row) => row.uid === id);
+
       if (!mail || mail.toUser !== this.owner || num(mail, "type") !== (invite ? 17 : 25))
         allianceFailure(errors.locked);
+
       selectedMail = mail;
       const data = allianceMailData(
         Buffer.isBuffer(mail.contents) ? mail.contents : Buffer.alloc(0),
       );
+
       if (Number(data.deal ?? 0) !== 0) allianceFailure(errors.locked);
+
       application = this.state.applications.find(
         (row) =>
           num(row, "type") === (invite ? 2 : 1) &&
@@ -1022,13 +1165,17 @@ export class AllianceContext {
             (!invite && row.userId === data.applicantId && row.allianceId === this.allianceId)),
       );
     } else if (!invite) application = this.application(1, str(params, "playerId"));
+
     if (!application) allianceFailure(errors.locked);
+
     if (
       (invite && application.userId !== this.owner) ||
       (!invite && application.allianceId !== this.allianceId)
     )
       allianceFailure(errors.locked);
+
     if (!invite) this.right("invite");
+
     if (selectedMail)
       this.write.mailUpdates = [
         {
@@ -1038,41 +1185,55 @@ export class AllianceContext {
           ),
         },
       ];
+
     if (command.startsWith("al.refuse")) {
       if (invite) this.write.applications = [{ ...application, type: 3 }];
       else this.write.deletedApplications = [text(application, "uid")];
+
       return { result: sfs.int(1) };
     }
+
     const result = this.join(
       text(application, "userId"),
       this.alliance(text(application, "allianceId")),
     );
+
     return invite ? { result: sfs.int(1), allianceInfo: sfs.object(result) } : result;
   }
+
   applications(command: string, params: Fields): Fields {
     if (command === "al.apply.message" || command === "al.apply.message.get") {
       const id = str(params, "allianceId"),
         uid = command.endsWith(".get") ? str(params, "uid") : this.owner;
+
       if (uid !== this.owner) {
         this.member(this.owner, id);
         this.right("invite");
       }
+
       const row = this.application(1, uid, id);
+
       if (!row) allianceFailure();
+
       if (command.endsWith(".get"))
         return {
           message: sfs.string(Buffer.isBuffer(row.message) ? row.message.toString("utf8") : ""),
         };
+
       const message = allianceText(str(params, "message", ""), 0, 200);
       this.write.applications = [{ ...row, message: Buffer.from(message) }];
+
       return {};
     }
+
     const own = command.startsWith("al.user"),
       type = command.includes("invite") ? 2 : 1;
+
     if (!own) {
       this.member();
       this.right("invite");
     }
+
     const rows = this.state.applications
       .filter(
         (row) =>
@@ -1085,6 +1246,7 @@ export class AllianceContext {
         ((this.state.selection.page ?? 1) - 1) * 10,
         ((this.state.selection.page ?? 1) - 1) * 10 + 10,
       );
+
     return {
       list: sfs.array(
         rows.map((row) =>
@@ -1100,9 +1262,11 @@ export class AllianceContext {
       page: sfs.int(this.state.selection.page ?? 0),
     };
   }
+
   attributes(command: string, params: Fields): Fields {
     const alliance = this.alliance(),
       next = { ...alliance };
+
     if (command === "al.changeattr" || command === "al.attr") {
       const changes: readonly [string, string, string, number, number, string?][] = [
         ["name", "alliancename", "name", 3, 20, "k1"],
@@ -1112,20 +1276,26 @@ export class AllianceContext {
         ["language", "language", "alliancelanguage", 0, 40],
         ["icon", "icon", "flag", 1, 40, "k3"],
       ];
+
       for (const [input, key, right, min, max, cost] of changes)
         if (params[input]) {
           this.right(right);
           next[key] = allianceText(str(params, input).trim(), min, max);
+
           if (cost) this.cost(cost);
+
           if (input === "abbr") {
             if (num(alliance, "abbrRename") > 0) this.cost("k2");
+
             next.abbrRename = num(alliance, "abbrRename") + 1;
           }
         }
+
       if (params.recruit) {
         this.right("recruitment");
         next.recruit = cityInteger(int(params, "recruit"), 0, 1);
       }
+
       for (const key of ["powerRestriction", "castleRestriction"])
         if (params[key]) {
           this.right("quest");
@@ -1139,6 +1309,7 @@ export class AllianceContext {
         }
     } else if (command === "al.rankname.set") {
       this.right("rankname");
+
       for (const [input, key] of [
         ["rankOne", "rankone"],
         ["rankTwo", "ranktwo"],
@@ -1152,6 +1323,7 @@ export class AllianceContext {
       next.bannerStyle = allianceText(str(params, "banner"), 1, 50);
     } else if (command === "al.diplo") {
       this.right("announcement");
+
       for (const key of ["ally", "enemy", "other"])
         next[key] = allianceText(str(params, key, ""), 0, 255);
     } else if (command === "al.blacklist.query" || command === "al.blacklist.modify") {
@@ -1160,27 +1332,39 @@ export class AllianceContext {
         black: "[]",
         white: "[]",
       };
+
       if (command.endsWith("modify")) {
         if (num(this.member(), "rank") !== 5) allianceFailure(errors.locked);
+
         const field = cityInteger(int(params, "isBlack"), 0, 1) ? "black" : "white",
           id = allianceText(str(params, "allianceId"), 1, 40);
         let values: string[];
+
         try {
           values = JSON.parse(text(row, field) || "[]");
         } catch {
           allianceFailure();
         }
+
         if (!Array.isArray(values) || values.some((value) => typeof value !== "string"))
           allianceFailure();
+
         values = values.filter((value) => value !== id);
+
         if (cityInteger(int(params, "isAdd"), 0, 1)) values.push(id);
+
         if (JSON.stringify(values).length > 500) allianceFailure(errors.full);
+
         this.write.blacklist = [{ ...row, [field]: JSON.stringify(values) }];
       }
+
       const value = this.write.blacklist?.[0] ?? row;
+
       return { black: sfs.string(text(value, "black")), white: sfs.string(text(value, "white")) };
     } else throw new GameError(errors.unsupported);
+
     this.setAlliance(next);
+
     return { alliance: sfs.object(this.snapshot(next)), gold: sfs.long(this.ledger.total()) };
   }
 }

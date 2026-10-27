@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { field, responseValueSchema } from "./response";
 import type { MonsterExchangeResponse } from "@opencok/contracts/responses/monster-exchange";
+
 export const monsterExchangeSchema = z.strictObject({
   level: field.int,
   refreshTime: field.long,

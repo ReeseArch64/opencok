@@ -11,6 +11,7 @@ import { alliance_member } from "@opencok/drizzle/schema/opencok_kingdom/allianc
 import { playerinfo } from "@opencok/drizzle/schema/opencok_kingdom/playerinfo";
 import type { HeroEventSelection, HeroEventSnapshot } from "@opencok/contracts/hero-event";
 import type { Database } from "./game";
+
 export async function readHeroEvents(
   db: Database["kingdom"]["db"],
   owner: string,
@@ -26,6 +27,7 @@ export async function readHeroEvents(
     )
   )
     throw new Error("Invalid hero event selection");
+
   return db.transaction(
     async (tx) => {
       const [profile] = await tx
@@ -50,7 +52,9 @@ export async function readHeroEvents(
           scoreManagerRunning: false,
           lastMergeMillis: 0n,
         };
+
       if (!profile) return empty;
+
       const [lord] = await tx
           .select()
           .from(server_activity)
@@ -67,6 +71,7 @@ export async function readHeroEvents(
         (lord.endTime === null || long(lord, "endTime") > BigInt(now));
       empty.lastMergeMillis = long(server ?? {}, "lastMergeMillis");
       let activityId = selection.activityId;
+
       if (selection.eventId) {
         const [event] = await tx
           .select({ activity: hero_activity.activityId })
@@ -81,9 +86,12 @@ export async function readHeroEvents(
             ),
           )
           .limit(1);
+
         if (!event) return empty;
+
         activityId = event.activity;
       }
+
       const activities = await tx
         .select()
         .from(hero_activity)
@@ -96,12 +104,15 @@ export async function readHeroEvents(
         )
         .orderBy(asc(hero_activity.startTime), asc(hero_activity.uuid))
         .limit(257);
+
       if (
         activities.length > 256 ||
         new Set(activities.map((row) => row.activityId)).size !== activities.length
       )
         throw new Error("Ambiguous hero activity");
+
       if (!activities.length || selection.panels) return { ...empty, activities };
+
       const events = await tx
         .select()
         .from(hero_event)
@@ -117,7 +128,9 @@ export async function readHeroEvents(
         )
         .orderBy(asc(hero_event.readyTime), asc(hero_event.uuid))
         .limit(257);
+
       if (events.length > 256) throw new Error("Hero event bound exceeded");
+
       const scores = events.length
         ? await tx
             .select()
@@ -136,7 +149,9 @@ export async function readHeroEvents(
             )
             .limit(513)
         : [];
+
       if (scores.length > 512) throw new Error("Hero owned score bound exceeded");
+
       const [castle] = await tx
         .select({ level: user_building.level })
         .from(user_building)
@@ -149,6 +164,7 @@ export async function readHeroEvents(
             .innerJoin(playerinfo, eq(playerinfo.uid, alliance_member.uid))
             .where(eq(alliance_member.allianceId, profile.allianceId))
         : [];
+
       return {
         ...empty,
         activities,

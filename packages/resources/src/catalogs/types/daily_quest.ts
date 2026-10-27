@@ -9,4 +9,5 @@ export interface DailyQuestDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type DailyQuestDefinitionCatalog = CatalogTable<DailyQuestDefinition>;

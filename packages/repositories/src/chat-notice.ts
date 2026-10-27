@@ -6,6 +6,7 @@ import { command_receipt } from "@opencok/drizzle/schema/opencok_kingdom/command
 import { decode, str } from "@opencok/messages/sfs";
 import type { ChatRepository } from "@opencok/contracts/chat";
 import type { Database } from "./game.ts";
+
 export function createChatNoticePublisher(
   databases: Database["databases"],
   repository: ChatRepository,
@@ -18,7 +19,9 @@ export function createChatNoticePublisher(
   ): Promise<Record<string, unknown>> => {
     const kingdom = databases.kingdoms.get(realm);
     const state = await repository.getPlayerStateById(owner);
+
     if (!kingdom || state?.serverId !== realm) throw new Error("Notice owner unavailable");
+
     const [event] = await kingdom.db
       .select()
       .from(mutation_outbox)
@@ -43,16 +46,21 @@ export function createChatNoticePublisher(
         ),
       )
       .limit(1);
+
     if (!event || !receipt || !["chat.notice", "chat.original.notice"].includes(receipt.command))
       throw new Error("Notice receipt missing");
+
     if (event.payload.length === 0) throw new Error("Notice payload unavailable");
+
     const data = decode(event.payload);
     const createdAt = Number(receipt.createdAt);
+
     if (!Number.isSafeInteger(createdAt) || createdAt > now().getTime() + 60_000)
       throw new Error("Invalid notice receipt time");
 
     const key = `notice-${realm}-${operationId}`;
     const messageKey = key.length <= 64 ? key : createHash("sha256").update(key).digest("hex");
+
     if (createdAt + 86_400_000 <= now().getTime()) {
       const [message] = await databases.global.db
         .select({ id: chat_message.sequence_id })
@@ -65,10 +73,13 @@ export function createChatNoticePublisher(
           ),
         )
         .limit(1);
+
       return { expired: true, delivered: !!message };
     }
+
     if (repository.access && !(await repository.access.canSend(owner, true)))
       throw new Error("Notice sender muted");
+
     const saved = await repository.messages.create({
       roomId: str(data, "roomId"),
       senderUid: owner,
@@ -77,6 +88,7 @@ export function createChatNoticePublisher(
       now: new Date(createdAt),
       post: 6,
     });
+
     return { seqId: saved.sequenceId };
   };
 }

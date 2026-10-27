@@ -3,6 +3,7 @@ export interface ArenaInfoResponse {
   rankScore: number;
   time: bigint;
 }
+
 export interface ArenaArmyResponse {
   armyArray: readonly { armyId: string; count: number }[];
 }

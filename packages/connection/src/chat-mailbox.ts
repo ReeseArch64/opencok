@@ -15,11 +15,13 @@ export function createChatMailboxPublisher(options: {
   now?: () => number;
 }): ChatMailboxPublisher {
   let url: URL;
+
   try {
     url = new URL(options.url);
   } catch {
     throw new Error("Invalid chat mailbox configuration");
   }
+
   if (
     !["http:", "https:"].includes(url.protocol) ||
     !url.hostname ||
@@ -37,16 +39,21 @@ export function createChatMailboxPublisher(options: {
     options.timeoutMs > 30000
   )
     throw new Error("Invalid chat mailbox configuration");
+
   const endpoint = url.toString();
   const { signingSecret, timeoutMs, now = Date.now, fetch: request = fetch } = options;
+
   return async (input, signal) => {
     const update = Object.freeze({ ...input });
+
     try {
       signal.throwIfAborted();
       const body = encodeChatMailbox(update),
         time = now();
+
       if (!Number.isSafeInteger(time) || time < 0 || Buffer.byteLength(body) > 4096)
         throw new Error();
+
       const timestamp = String(time);
       const value = await fetchChatJson(
         endpoint,
@@ -64,6 +71,7 @@ export function createChatMailboxPublisher(options: {
         request,
       );
       signal.throwIfAborted();
+
       if (
         !isRecord(value) ||
         value.code !== 1 ||

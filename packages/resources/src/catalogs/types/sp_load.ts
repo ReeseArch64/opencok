@@ -4,4 +4,5 @@ export interface SpLoadDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type SpLoadDefinitionCatalog = CatalogTable<SpLoadDefinition>;

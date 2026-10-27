@@ -16,6 +16,7 @@ function serializeRewardPreviewArray(rewards: readonly RewardPreview[]): Value {
                 isCurrentCivilization: sfs.bool(reward.currentCivilization),
                 value: sfs.int(reward.value),
               });
+
       return sfs.object({ type: sfs.int(reward.type), value });
     }),
   );

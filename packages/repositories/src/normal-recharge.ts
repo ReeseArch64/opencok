@@ -7,10 +7,12 @@ import type { NormalRechargeState, NormalRechargeWrite } from "@opencok/contract
 import { long } from "@opencok/contracts/rows";
 import { cityAmount, cityInteger } from "@opencok/rules/city-progression";
 import type { MutationTransaction } from "./mutation";
+
 function marker(key: string) {
   if (!/^normal\.recharge\.order\.v1\.[a-f0-9]{64}$/.test(key))
     throw new Error("Invalid recharge receipt key");
 }
+
 export async function readNormalRecharge(
   tx: MutationTransaction,
   owner: string,
@@ -25,6 +27,7 @@ export async function readNormalRecharge(
     })
     .from(server_info)
     .where(eq(server_info.uid, "server"));
+
   if (
     initialize &&
     server &&
@@ -42,19 +45,23 @@ export async function readNormalRecharge(
       .where(eq(server_info.uid, "server"))
       .for("update");
   }
+
   const totals = await tx
     .select()
     .from(pay_total)
     .where(and(eq(pay_total.uid, owner), inArray(pay_total.type, [1, 2, 3, 4])))
     .limit(5)
     .for("update");
+
   if (totals.length > 4) throw new Error("Recharge total bound exceeded");
+
   return {
     server: server ?? {},
     totals,
     async payment(orderId, platform) {
       if (!orderId || orderId.length > 200 || !platform || platform.length > 20)
         throw new Error("Invalid recharge order selection");
+
       return (
         await tx
           .select({
@@ -75,12 +82,15 @@ export async function readNormalRecharge(
         .select({ value: sql<string>`left(${trigger_var.value},65)` })
         .from(trigger_var)
         .where(and(eq(trigger_var.type, 1), eq(trigger_var.uid, owner), eq(trigger_var.key, key)));
+
       if (row && !/^[a-f0-9]{64}$/.test(row.value))
         throw new Error("Invalid recharge order receipt");
+
       return row?.value;
     },
   };
 }
+
 export async function writeNormalRecharge(
   tx: MutationTransaction,
   owner: string,
@@ -98,8 +108,10 @@ export async function writeNormalRecharge(
         ),
       )
       .returning({ uid: server_info.uid });
+
     if (rows.length !== 1) throw new Error("Recharge merge anchor changed");
   }
+
   if (write.total) {
     const total = {
       uid: owner,
@@ -108,16 +120,21 @@ export async function writeNormalRecharge(
       getLv: cityInteger(write.total.getLv, 0, 128),
       updateTime: cityAmount(write.total.updateTime),
     };
+
     if (total.updateTime > now) throw new Error("Future recharge total");
+
     await tx
       .insert(pay_total)
       .values(total)
       .onConflictDoUpdate({ target: [pay_total.uid, pay_total.type], set: total });
   }
+
   if (write.receipt) {
     marker(write.receipt.key);
+
     if (!/^[a-f0-9]{64}$/.test(write.receipt.fingerprint))
       throw new Error("Invalid recharge receipt fingerprint");
+
     await tx.insert(trigger_var).values({
       type: 1,
       uid: owner,

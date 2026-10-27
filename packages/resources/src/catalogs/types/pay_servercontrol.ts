@@ -15,4 +15,5 @@ export interface PayServercontrolDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type PayServercontrolDefinitionCatalog = CatalogTable<PayServercontrolDefinition>;

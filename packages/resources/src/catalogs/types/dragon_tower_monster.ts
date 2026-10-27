@@ -6,4 +6,5 @@ export interface DragonTowerMonsterDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type DragonTowerMonsterDefinitionCatalog = CatalogTable<DragonTowerMonsterDefinition>;

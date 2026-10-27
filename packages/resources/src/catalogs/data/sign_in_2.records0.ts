@@ -1,4 +1,5 @@
 import type { SignIn2Definition } from "../types/sign_in_2.ts";
+
 export const records: readonly SignIn2Definition[] = [
   { "id": 46500, "day": 1, "reward": 250723 },
   { "id": 46501, "day": 2, "reward": 250724 },

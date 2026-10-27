@@ -1,4 +1,5 @@
 import type { CharactersDefinition } from "../types/characters.ts";
+
 export const records: readonly CharactersDefinition[] = [
   { "id": 44000, "name": "g044" },
   { "id": 44001, "name": "g041" },

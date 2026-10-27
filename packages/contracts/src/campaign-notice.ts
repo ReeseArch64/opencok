@@ -1,4 +1,5 @@
 import type { CampaignNoticeResponse } from "./responses/campaign-notice";
+
 export interface CampaignNotice {
   owner: string;
   at: bigint;
@@ -6,6 +7,7 @@ export interface CampaignNotice {
   allianceId: string;
   message: CampaignNoticeResponse;
 }
+
 export interface CampaignAudience {
   select(
     owners: readonly string[],

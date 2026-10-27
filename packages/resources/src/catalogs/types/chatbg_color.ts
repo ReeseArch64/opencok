@@ -5,4 +5,5 @@ export interface ChatbgColorDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type ChatbgColorDefinitionCatalog = CatalogTable<ChatbgColorDefinition>;

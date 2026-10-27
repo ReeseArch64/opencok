@@ -8,6 +8,7 @@ import { cityInteger } from "@opencok/rules/city-progression";
 import { num, text } from "@opencok/contracts/rows";
 import type { HeroScoreReader, HeroScoreWrite } from "@opencok/contracts/hero-score";
 import type { MutationTransaction } from "./mutation";
+
 export function heroScoreReader(
   tx: MutationTransaction,
   owner: string,
@@ -27,15 +28,19 @@ export function heroScoreReader(
         )
         .orderBy(asc(hero_event.uuid))
         .limit(5);
+
       if (events.length > 4 || new Set(events.map((event) => event.type)).size !== events.length)
         throw new Error("Ambiguous hero scoring events");
+
       if (!events.length)
         return { events, scores: [], contributions: [], members: [], alliancePower: 0n };
+
       for (const event of events)
         if (alliance && [2, 4].includes(event.type ?? 0))
           await tx.execute(
             sql`select pg_advisory_xact_lock(728221,hashtext(${event.uuid + ":" + alliance}))`,
           );
+
       const ids = events.map((row) => row.uuid),
         scores = await tx
           .select()
@@ -61,8 +66,10 @@ export function heroScoreReader(
             .where(eq(alliance_member.allianceId, alliance))
             .limit(1025)
         : [];
+
       if (contributions.length > 4096 || members.length > 1024)
         throw new Error("Hero alliance scoring bound exceeded");
+
       const [power] = alliance
         ? await tx
             .select({ total: sql<string>`coalesce(sum(${playerinfo.power}),0)::text` })
@@ -70,6 +77,7 @@ export function heroScoreReader(
             .innerJoin(alliance_member, eq(alliance_member.uid, playerinfo.uid))
             .where(eq(alliance_member.allianceId, alliance))
         : [];
+
       return {
         events,
         scores,
@@ -80,6 +88,7 @@ export function heroScoreReader(
     },
   };
 }
+
 export async function writeHeroScore(
   tx: MutationTransaction,
   owner: string,
@@ -88,12 +97,16 @@ export async function writeHeroScore(
 ) {
   if (write.scores.length > 4 || write.contributions.length > 4)
     throw new Error("Hero score write bound exceeded");
+
   for (const row of write.scores) {
     if (row.uid !== owner && (!alliance || row.uid !== alliance))
       throw new Error("Foreign hero score write");
+
     const score = num(row, "score");
+
     if (!Number.isInteger(score) || score < -2147483648 || score > 2147483647)
       throw new Error("Invalid hero score");
+
     const value = {
       uid: text(row, "uid"),
       actId: text(row, "actId"),
@@ -107,17 +120,21 @@ export async function writeHeroScore(
       .values(value)
       .onConflictDoUpdate({ target: [score_act.uid, score_act.actId], set: value });
   }
+
   for (const row of write.contributions) {
     if (row.uid !== owner || !alliance || row.allianceId !== alliance)
       throw new Error("Foreign hero contribution write");
+
     const value = {
       uid: owner,
       allianceId: alliance,
       actId: text(row, "actId"),
       score: num(row, "score"),
     };
+
     if (!Number.isInteger(value.score) || value.score < -2147483648 || value.score > 2147483647)
       throw new Error("Invalid hero contribution");
+
     await tx
       .insert(score_act_in)
       .values(value)
@@ -127,6 +144,7 @@ export async function writeHeroScore(
       });
   }
 }
+
 export async function currentHeroScore(
   db: Pick<MutationTransaction, "select">,
   actId: string,
@@ -138,5 +156,6 @@ export async function currentHeroScore(
     .from(score_act)
     .where(and(eq(score_act.actId, actId), eq(score_act.uid, member)))
     .limit(1);
+
   return row?.score === score;
 }

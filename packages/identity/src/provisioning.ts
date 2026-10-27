@@ -13,6 +13,7 @@ export function signProvisioning(
     )
     .digest("hex");
 }
+
 export function verifyProvisioning(
   body: string,
   timestamp: string | null,
@@ -31,6 +32,7 @@ export function verifyProvisioning(
     !/^[a-f0-9]{64}$/.test(signature)
   )
     return false;
+
   return timingSafeEqual(
     Buffer.from(signature, "hex"),
     Buffer.from(signProvisioning(body, timestamp, secret, response), "hex"),

@@ -1,4 +1,5 @@
 import type { KingdomBuildingBuffDefinition } from "../types/kingdom_building_buff.ts";
+
 export const records: readonly KingdomBuildingBuffDefinition[] = [
   {
     "id": 517000,

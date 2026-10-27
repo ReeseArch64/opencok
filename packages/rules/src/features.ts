@@ -33,7 +33,9 @@ export function featureAnnouncementEnabled(
   context: FeatureContext,
 ): boolean {
   const key = rule.id;
+
   if (typeof key !== "string") throw new GameError(errors.unsupported, "config_string");
+
   switch (key) {
     case "worldboss":
     case "worldboss_elite":
@@ -47,17 +49,22 @@ export function featureAnnouncementEnabled(
         )
       );
   }
+
   const selector = context.testServer ? rule.test : rule.online;
   const open =
     !mailBlank(rule.version) &&
     !mailBlank(selector) &&
     featureRealmEnabled(selector, context.kingdomId);
+
   switch (key) {
     case "payelex":
     case "role_on": {
       const feature = key === "payelex" ? "cn_bind" : "role_on";
+
       if (!ruleAvailable(rules.features.get(feature), context)) return false;
+
       const binding = rules.items.get(key === "payelex" ? "cn_bind" : "role_info");
+
       return (
         listed(binding?.[key === "payelex" ? "k1" : "k4"], context.platform) &&
         listed(binding?.[key === "payelex" ? "k2" : "k5"], context.uid)
@@ -72,6 +79,7 @@ export function featureAnnouncementEnabled(
 
 export function accountVerificationEnabled(rules: Rules, context: RuleContext): boolean {
   const rule = rules.items.get("function_on7");
+
   return (
     !mailBlank(rule?.k5) &&
     !mailBlank(rule?.k6) &&
@@ -86,8 +94,11 @@ export function accountVerificationRequired(
   count: string | null,
 ): boolean {
   if (!accountVerificationEnabled(rules, context) || count === null) return false;
+
   const limit = rules.items.get("function_on7")?.k7;
+
   if (limit === undefined) return false;
+
   try {
     return javaDecimal(count, 32) >= javaDecimal(limit, 32);
   } catch {

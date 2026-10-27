@@ -40,6 +40,7 @@ import { building440000 } from "./440000.ts";
 import { building441000 } from "./441000.ts";
 import { building442000 } from "./442000.ts";
 import { building443000 } from "./443000.ts";
+
 export const BUILDING_LEVELS: readonly BuildingLevelDefinition[] = [
   ...building400000,
   ...building401000,
@@ -83,6 +84,7 @@ export const BUILDING_LEVELS: readonly BuildingLevelDefinition[] = [
   ...building442000,
   ...building443000,
 ];
+
 export function createBuildingCatalog(): Map<number, BuildingLevelDefinition> {
   return new Map(structuredClone(BUILDING_LEVELS).map((level) => [level.id, level]));
 }

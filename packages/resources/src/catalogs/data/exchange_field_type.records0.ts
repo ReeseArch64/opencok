@@ -1,4 +1,5 @@
 import type { ExchangeFieldTypeDefinition } from "../types/exchange_field_type.ts";
+
 export const records: readonly ExchangeFieldTypeDefinition[] = [
   { "cnName": "lbv4_BestChoice", "id": 1, "tid": 1, "type": 1 },
   { "cnName": "1-左下角时间礼包", "id": 2, "tid": 1, "type": 2 },

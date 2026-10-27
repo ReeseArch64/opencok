@@ -7,6 +7,7 @@ export type Config = ServerConfig;
 
 export const config = Effect.gen(function* () {
   const settings = yield* readEnvironment(serverSchema);
+
   return {
     provisioningSecret: settings.PROVISIONING_SIGNING_SECRET,
     avatarChat: settings.GAME_AVATAR_CHAT_URL
@@ -47,4 +48,5 @@ export const config = Effect.gen(function* () {
 });
 
 export class RealmConfig extends Context.Service<RealmConfig, Config>()("@opencok/server/Config") {}
+
 export const RealmConfigLive = Layer.effect(RealmConfig, config);

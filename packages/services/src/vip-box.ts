@@ -14,45 +14,59 @@ import { localActivityConditions, investmentDays } from "@opencok/rules/daily-in
 import { javaHashMapOrder } from "@opencok/rules/java-hash-map-order";
 import { vipBoxView, vipBoxNotice } from "@opencok/mappings/vip-box";
 import type { CityDomain } from "./city-progression";
+
 export function createVipBoxDomain(random: (maximum: number) => number = randomInt): CityDomain {
   return {
     commands: ["vip.box.init", "vip.box.turntable.ui", "vip.box.turntable.reward"],
     types: [],
     async prepare(context, command, params) {
       const state = context.state.vipBox;
+
       if (!state) vipBoxFailure();
+
       const enabled = serverFeature(context.rules, "box_vip", {
         kingdomId: context.rules.kingdomId,
         version: "12.06.0",
         now: Number(context.now),
       });
+
       if (!enabled) {
         if (command === "vip.box.init") return { response: encode({}), event: null };
+
         vipBoxFailure();
       }
+
       const tables = [...(context.rules.advanced.vipBoxes?.values() ?? [])];
+
       if (!tables.length || tables.length > 4096) vipBoxFailure();
+
       const vip = context.state.effects.vip ?? {};
       let scoreLevel = 0;
+
       for (const rule of context.rules.power.vip?.values() ?? [])
         if (cityInteger(rule.point) <= num(vip, "score"))
           scoreLevel = (cityInteger(rule.id) % 100) + 1;
+
       const baseLevel = num(vip, "level") >= 0 ? num(vip, "level") : scoreLevel,
         level = baseLevel + (baseLevel >= 10 ? cityInteger(num(vip, "sLevel")) : 0),
         ownBand = vipBoxBand(tables, level);
+
       if (command === "vip.box.init") {
         const row = state.records.find((row) => num(row, "vip") === ownBand);
+
         return {
           response: encode(row ? { box_vip_free: sfs.bool(num(row, "free") > 0) } : {}),
           event: null,
         };
       }
+
       const band =
         command === "vip.box.turntable.ui"
           ? vipBoxBand(tables, cityInteger(int(params, "vip"), 0, 255))
           : ownBand;
       let row: Row | undefined = state.records.find((row) => num(row, "vip") === band);
       row = row ? { ...row } : undefined;
+
       if (
         command === "vip.box.turntable.ui" &&
         (!row || long(row, "refreshTime") / 86400000n !== context.now / 86400000n)
@@ -69,7 +83,9 @@ export function createVipBoxDomain(random: (maximum: number) => number = randomI
                 investmentDays(context.now, state.openedAt),
               ),
           );
+
         if (!eligible.length) vipBoxFailure();
+
         const table =
           eligible[
             vipBoxWeighted(
@@ -91,17 +107,24 @@ export function createVipBoxDomain(random: (maximum: number) => number = randomI
         };
         context.write.vipBox = { record: row };
       }
+
       if (!row) vipBoxFailure();
+
       const table = context.rules.advanced.vipBoxes?.get(String(num(row, "tableid")));
+
       if (!table || cityInteger(table.vip) !== band) vipBoxFailure();
+
       const contents = vipBoxContents(table),
         indices = vipBoxIndices(text(row, "itemidlist"), contents.items.length);
+
       if (indices.length !== num(row, "stepNum") || indices.length > 0 !== num(row, "free") > 0)
         vipBoxFailure();
+
       if (command === "vip.box.turntable.ui") {
         const tableInfo = Object.fromEntries(
           javaHashMapOrder(Object.keys(table)).map((key) => [key, sfs.string(table[key] ?? "")]),
         );
+
         return {
           response: encode(
             vipBoxView(
@@ -122,21 +145,26 @@ export function createVipBoxDomain(random: (maximum: number) => number = randomI
           event: null,
         };
       }
+
       if (
         band > level ||
         long(row, "refreshTime") / 86400000n !== context.now / 86400000n ||
         indices.length >= contents.items.length
       )
         vipBoxFailure();
+
       if (num(row, "free") > 0)
         context.economy.item(table.deplete!, -contents.costs[Math.max(0, indices.length - 1)]!);
+
       const index = vipBoxWeighted(
           contents.weights.map((weight, index) => (indices.includes(index) ? 0 : weight)),
           random,
         ),
         itemId = contents.items[index]!,
         count = contents.counts[index]!;
+
       if (!context.rules.goods.has(itemId)) vipBoxFailure();
+
       context.economy.item(itemId, count);
       const notable = (table.notice_item ?? "").split(";").includes(String(index + 1)),
         notice = {
@@ -165,6 +193,7 @@ export function createVipBoxDomain(random: (maximum: number) => number = randomI
             }
           : {}),
       };
+
       return {
         response: encode({
           item: sfs.string(itemId),

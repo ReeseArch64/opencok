@@ -3,11 +3,14 @@ import type { Rule, Rules } from "./game.ts";
 import { javaDecimal } from "./java-integer.ts";
 
 const integer = (value: unknown) => Number(javaDecimal(String(value ?? 0), 32));
+
 const parts = (value: string | undefined) => value?.split("|").filter(Boolean) ?? [];
+
 const narrow = (value: unknown) => Number(BigInt.asIntN(32, javaDecimal(String(value ?? 0), 64)));
 
 function matches(building: Row, requirement: string): boolean {
   const id = integer(requirement);
+
   return (
     String(building.itemId) === `${Math.trunc(id / 100)}00` && integer(building.level) >= id % 100
   );
@@ -47,18 +50,23 @@ export function reconnectResourceOutput(
     ["455000", 211508],
   ]);
   const result = new Map<number, number>();
+
   for (const row of buildings) {
     const type = types.get(String(row.itemId));
+
     if (type === undefined) continue;
+
     const rule = rules.building(
       String(row.itemId),
       integer(row.level),
       integer(row.star),
       integer(row.progress),
     );
+
     if (rule.effects?.productionPerHour !== undefined)
       result.set(type, ((result.get(type) ?? 0) + integer(rule.effects.productionPerHour)) | 0);
   }
+
   return result;
 }
 
@@ -68,6 +76,7 @@ export function reconnectTaskInitialCount(
   rules: Rules,
 ): number {
   const kind = integer(rule.type2);
+
   switch (kind) {
     case 0:
       return state.buildings.reduce(
@@ -85,14 +94,17 @@ export function reconnectTaskInitialCount(
       const requirements = parts(rule.para1);
       const limits = parts(rule.para2);
       const counts = requirements.map(() => 0);
+
       for (const building of state.buildings)
         for (const requirement of requirements)
           if (matches(building, requirement)) {
             const index = requirements.indexOf(requirement);
             counts[index] = (counts[index]! + 1) | 0;
           }
+
       return counts.reduce((total, count, index) => {
         if (limits[index] === undefined) throw new Error("Missing task building threshold");
+
         return (total + Math.min(count, integer(limits[index]))) | 0;
       }, 0);
     }
@@ -125,10 +137,12 @@ export function reconnectTaskInitialCount(
         "sciencePower",
         "fortPower",
       ][integer(rule.para1)];
+
       return key === undefined ? 0 : narrow(state.playerInfo?.[key]);
     }
     case 33: {
       const count = narrow(state.profile.payTotal);
+
       return count < 0 ? 2147483647 : count;
     }
     case 34:
@@ -136,8 +150,11 @@ export function reconnectTaskInitialCount(
     case 39:
       return state.equipment.filter((row) => {
         if (integer(row.on) !== 1) return false;
+
         const color = Number(String(integer(row.itemId)).slice(-1));
+
         if (color < 0 || color > 5) throw new Error("Invalid task equipment color");
+
         return true;
       }).length;
     case 58:
@@ -146,6 +163,7 @@ export function reconnectTaskInitialCount(
       return [1, 2].includes(integer(state.civilizationCastle?.status)) ? 1 : 0;
     default:
       if (kind < 0 || kind > 65) throw new Error("Unknown task trigger");
+
       return 0;
   }
 }

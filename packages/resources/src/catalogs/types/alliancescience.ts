@@ -16,4 +16,5 @@ export interface AlliancescienceDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type AlliancescienceDefinitionCatalog = CatalogTable<AlliancescienceDefinition>;

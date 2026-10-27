@@ -1,4 +1,5 @@
 import type { WrTroopsPointDefinition } from "../types/wr_troops_point.ts";
+
 export const records: readonly WrTroopsPointDefinition[] = [
   { "id": 20022001, "level": 20, "militaryRank": 50, "honor": 250 },
   { "id": 20022002, "level": 19, "militaryRank": 46, "honor": 230 },

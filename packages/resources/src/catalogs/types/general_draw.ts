@@ -23,4 +23,5 @@ export interface GeneralDrawDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type GeneralDrawDefinitionCatalog = CatalogTable<GeneralDrawDefinition>;

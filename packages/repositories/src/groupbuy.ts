@@ -8,8 +8,10 @@ import { long, text } from "@opencok/contracts/rows";
 import type { GroupBuyState, GroupBuyWrite } from "@opencok/contracts/groupbuy";
 import type { MutationTransaction } from "./mutation";
 import type { Database } from "./game";
+
 export async function readGroupBuy(tx: MutationTransaction, owner: string): Promise<GroupBuyState> {
   const [server] = await tx.select().from(server_info).where(eq(server_info.uid, "server"));
+
   return {
     openedAt: long(server ?? {}, "activityTime"),
     async load(period, round) {
@@ -29,8 +31,11 @@ export async function readGroupBuy(tx: MutationTransaction, owner: string): Prom
         )
         .limit(2)
         .for("update");
+
       if (activities.length > 1) throw new Error("Ambiguous group-buy period");
+
       let activity = activities[0];
+
       if (!activity && !("id" in period)) {
         [activity] = await tx
           .insert(activity_group_buys)
@@ -43,9 +48,13 @@ export async function readGroupBuy(tx: MutationTransaction, owner: string): Prom
           })
           .returning();
       }
+
       if (!activity) throw new Error("Missing group-buy activity");
+
       const rounds = groupBuyRounds(activity.roundInfo);
+
       if (!rounds[round - 1]) throw new Error("Missing group-buy round");
+
       const selection = and(
         eq(alliance_group_buys.id, activity.id),
         eq(alliance_group_buys.round, round),
@@ -68,6 +77,7 @@ export async function readGroupBuy(tx: MutationTransaction, owner: string): Prom
         .where(and(selection, gt(alliance_group_buys.point, 0)))
         .orderBy(asc(alliance_group_buys.buyTime), asc(alliance_group_buys.uid))
         .limit(11);
+
       return {
         activity,
         rounds,
@@ -79,11 +89,14 @@ export async function readGroupBuy(tx: MutationTransaction, owner: string): Prom
     },
   };
 }
+
 export async function writeGroupBuy(tx: MutationTransaction, owner: string, write: GroupBuyWrite) {
   const activity = write.activity,
     id = text(activity, "id"),
     rounds = groupBuyRounds(activity.roundInfo);
+
   if (!id || id.length > 40) throw new Error("Invalid group-buy identity");
+
   await tx
     .update(activity_group_buys)
     .set({
@@ -91,8 +104,11 @@ export async function writeGroupBuy(tx: MutationTransaction, owner: string, writ
       roundInfo: JSON.stringify(rounds),
     })
     .where(eq(activity_group_buys.id, id));
+
   if (!write.record) return;
+
   const row = write.record;
+
   if (
     row.uid !== owner ||
     row.id !== id ||
@@ -101,6 +117,7 @@ export async function writeGroupBuy(tx: MutationTransaction, owner: string, writ
     text(row, "info").length > 1000
   )
     throw new Error("Invalid group-buy owner");
+
   const value = {
     id,
     uid: owner,
@@ -120,6 +137,7 @@ export async function writeGroupBuy(tx: MutationTransaction, owner: string, writ
       set: value,
     });
 }
+
 export async function pendingGroupBuys(
   db: Database["kingdom"]["db"],
   after?: { id: string; round: number; owner: string },
@@ -150,5 +168,6 @@ export async function pendingGroupBuys(
       asc(alliance_group_buys.uid),
     )
     .limit(64);
+
   return rows;
 }

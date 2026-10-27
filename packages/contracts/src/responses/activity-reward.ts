@@ -1,6 +1,7 @@
 import type { GeneralInfoResponse } from "./profile";
 import type { InventoryItemResponse } from "./bootstrap";
 import type { PublicEquipmentResponse } from "./profile";
+
 export interface ActivityRewardAmounts {
   wood?: bigint;
   wood_bind?: bigint;
@@ -28,6 +29,7 @@ export interface ActivityRewardAmounts {
   exp?: number;
   expDelta?: number;
 }
+
 export interface ActivityRewardResponse extends ActivityRewardAmounts {
   goods?: readonly InventoryItemResponse[];
   equip?: readonly PublicEquipmentResponse[];

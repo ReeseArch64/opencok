@@ -8,4 +8,5 @@ export interface DrconfigDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type DrconfigDefinitionCatalog = CatalogTable<DrconfigDefinition>;

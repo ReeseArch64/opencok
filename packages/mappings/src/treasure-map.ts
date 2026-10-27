@@ -17,6 +17,7 @@ export function treasureMapView(row: Row): Fields {
     colour: num(row, "colour"),
     state: num(row, "state"),
   };
+
   return {
     uuid: sfs.string(response.uuid),
     treasureId: sfs.string(response.treasureId),
@@ -28,6 +29,7 @@ export function treasureMapView(row: Row): Fields {
     state: sfs.int(response.state),
   };
 }
+
 export function treasureMapOccupation(response: TreasureMapOccupationResponse): Fields {
   return {
     time: sfs.int(response.time),
@@ -36,6 +38,7 @@ export function treasureMapOccupation(response: TreasureMapOccupationResponse): 
     treasureuuid: sfs.string(response.treasureuuid),
   };
 }
+
 export function treasureMapSpeed(response: TreasureMapSpeedResponse): Fields {
   return { gold: sfs.long(response.gold) };
 }

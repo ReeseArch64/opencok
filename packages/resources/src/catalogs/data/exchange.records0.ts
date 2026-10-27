@@ -1,4 +1,5 @@
 import type { ExchangeDefinition } from "../types/exchange.ts";
+
 export const records: readonly ExchangeDefinition[] = [
   {
     "id": 9000,

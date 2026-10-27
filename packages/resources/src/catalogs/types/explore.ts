@@ -10,4 +10,5 @@ export interface ExploreDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type ExploreDefinitionCatalog = CatalogTable<ExploreDefinition>;

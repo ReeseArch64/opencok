@@ -3,6 +3,7 @@ import { field } from "./response";
 import { inventoryItemSchema } from "./bootstrap";
 import { publicEquipmentSchema, generalInfoSchema } from "./profile";
 import type { ActivityRewardResponse } from "@opencok/contracts/responses/activity-reward";
+
 export const activityRewardSchema = z.strictObject({
   wood: field.long.optional(),
   wood_bind: field.long.optional(),

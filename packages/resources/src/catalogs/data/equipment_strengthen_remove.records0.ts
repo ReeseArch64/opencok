@@ -1,4 +1,5 @@
 import type { EquipmentStrengthenRemoveDefinition } from "../types/equipment_strengthen_remove.ts";
+
 export const records: readonly EquipmentStrengthenRemoveDefinition[] = [
   { "id": 41749101, "equipmentId": 10010205 },
   { "id": 41749102, "equipmentId": 10010215 },

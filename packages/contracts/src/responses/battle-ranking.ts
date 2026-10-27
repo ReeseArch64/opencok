@@ -11,6 +11,7 @@ export interface FightRankingMemberResponse {
   readonly holdNum: number;
   readonly campType: number;
 }
+
 export interface PlayoffRankingTeamResponse {
   readonly kingId: number;
   readonly kingName: string;
@@ -27,6 +28,7 @@ export interface PlayoffRankingTeamResponse {
   readonly groupId: number;
   readonly ticketPayed: boolean;
 }
+
 export interface PlayoffRankingResponse {
   readonly battleState?: number;
   readonly endTime?: bigint;
@@ -37,6 +39,7 @@ export interface PlayoffRankingResponse {
   readonly turns: number;
   readonly groups: PlayoffRankingTeamResponse[];
 }
+
 export interface FightRankingResponse {
   readonly rank?: FightRankingMemberResponse[];
 }

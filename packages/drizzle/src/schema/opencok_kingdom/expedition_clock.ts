@@ -1,6 +1,7 @@
 import { sql } from "drizzle-orm";
 import { bigint, check, integer, primaryKey, varchar } from "drizzle-orm/pg-core";
 import { opencok_kingdom } from "../namespaces";
+
 export const expedition_clock = opencok_kingdom.table(
   "expedition_clock",
   {

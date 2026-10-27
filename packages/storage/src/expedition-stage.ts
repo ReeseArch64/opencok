@@ -18,21 +18,32 @@ export async function loadExpeditionStage(
 ): Promise<number | undefined> {
   if (!Number.isInteger(kingdomId) || kingdomId < 1 || kingdomId > 2147483647)
     throw new DependencyError("redis");
+
   const raw = await command("GET", `opencok:global:expedition-match:${kingdomId}`);
+
   if (raw === null) return undefined;
+
   if (typeof raw !== "string" || Buffer.byteLength(raw) > 65535) throw new DependencyError("redis");
+
   let parsed: unknown;
+
   try {
     parsed = JSON.parse(raw);
   } catch {
     throw new DependencyError("redis");
   }
+
   if (!parsed || typeof parsed !== "object" || Array.isArray(parsed))
     throw new DependencyError("redis");
+
   const record = parsed as Record<string, unknown>;
+
   if (record.serverId !== kingdomId) throw new DependencyError("redis");
+
   if (record.status === undefined) return undefined;
+
   if (typeof record.status !== "string" || !stages.has(record.status))
     throw new DependencyError("redis");
+
   return stages.get(record.status)!;
 }

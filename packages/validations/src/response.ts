@@ -2,6 +2,7 @@ import { z } from "zod";
 import type { ResponseValue } from "@opencok/contracts/responses/value";
 
 const numeric = z.custom<number>((value) => typeof value === "number");
+
 const key = z.string().refine((value) => Buffer.byteLength(value, "utf8") <= 255);
 
 export const field = {

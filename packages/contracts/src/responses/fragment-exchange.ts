@@ -1,4 +1,5 @@
 import type { ResponseValue } from "./value";
+
 export interface FragmentExchangeOfferResponse {
   id: readonly string[];
   type: number;
@@ -7,6 +8,7 @@ export interface FragmentExchangeOfferResponse {
   multiple: number;
   allReward?: readonly (readonly ResponseValue[])[];
 }
+
 export interface FragmentExchangeResponse {
   info: readonly FragmentExchangeOfferResponse[];
   exchangeId: string;

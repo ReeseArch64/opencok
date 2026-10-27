@@ -27,4 +27,5 @@ export interface BuildingStarDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type BuildingStarDefinitionCatalog = CatalogTable<BuildingStarDefinition>;

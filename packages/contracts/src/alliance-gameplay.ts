@@ -1,6 +1,7 @@
 import type { Row } from "./rows";
 import type { InventoryPlan, InventoryState } from "./inventory";
 import type { MutationCommand } from "./mutation";
+
 export interface AllianceSelection {
   allianceId?: string;
   playerId?: string;
@@ -13,6 +14,7 @@ export interface AllianceSelection {
   pageSize?: number;
   page?: number;
 }
+
 export interface AllianceState {
   now: bigint;
   inventory: InventoryState;
@@ -41,6 +43,7 @@ export interface AllianceState {
   sharedGifts: readonly Row[];
   mails: readonly Row[];
 }
+
 export interface AllianceWrite {
   actions?: readonly {
     uid: string;
@@ -71,12 +74,14 @@ export interface AllianceWrite {
   mails?: readonly Row[];
   mailUpdates?: readonly Row[];
 }
+
 export interface AlliancePlan {
   inventory: InventoryPlan;
   write: AllianceWrite;
   productionAt?: bigint;
   productionOwners?: readonly string[];
 }
+
 export interface AllianceRepository {
   execute(
     input: MutationCommand,

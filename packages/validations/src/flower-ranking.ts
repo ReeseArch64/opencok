@@ -4,6 +4,7 @@ import type {
   FlowerRankingMemberResponse,
 } from "@opencok/contracts/responses/flower-ranking";
 import { field, responseFieldsSchema } from "./response.ts";
+
 export const flowerRankingMemberSchema = z.strictObject({
   uid: field.string,
   name: field.string,
@@ -12,6 +13,7 @@ export const flowerRankingMemberSchema = z.strictObject({
   picfraId: field.int,
   flowerVal: field.int,
 }) satisfies z.ZodType<FlowerRankingMemberResponse>;
+
 export const flowerRankingSchema = z.strictObject({
   selfRanking: field.int,
   flowerRanking: z.array(flowerRankingMemberSchema).max(32767),

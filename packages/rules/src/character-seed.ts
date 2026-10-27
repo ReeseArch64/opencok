@@ -18,12 +18,15 @@ const basics = new Set([
   "413000",
   "411000",
 ]);
+
 const queueTypes = new Map([
   [423000, 1],
   [424000, 8],
   [411000, 3],
 ]);
+
 const forever = 9223372036854775807n;
+
 function integer(value: string | number | undefined): number {
   if (
     value === undefined ||
@@ -32,22 +35,28 @@ function integer(value: string | number | undefined): number {
     Number(value) > 2147483647
   )
     throw new Error("Invalid initial character rule");
+
   return Number(value);
 }
+
 export function characterSeed(input: CharacterReservation, rules: Rules): CharacterSeed {
   if (input.preset !== starterVersion || input.kingdomId !== rules.kingdomId)
     throw new Error("Invalid character preset");
+
   if (!rules.profile.characters?.get("44000")?.name) throw new Error("Missing initial portrait");
+
   const uid = input.gameUid,
     now = BigInt(input.createdAt);
   const positions = [...rules.positions.values()].filter(
     (row) => row.default === "1" && basics.has(row.building!),
   );
+
   if (
     new Set(positions.map((row) => row.building)).size !== basics.size ||
     new Set(positions.map((row) => row.position)).size !== positions.length
   )
     throw new Error("Incomplete initial city catalog");
+
   const definitions = positions.map((row) => rules.building(row.building!, 1));
   const buildings = positions.map((row) => ({
     uuid: randomUUID(),
@@ -76,6 +85,7 @@ export function characterSeed(input: CharacterReservation, rules: Rules): Charac
     para: 0,
     isHelped: 0,
   }));
+
   for (const type of new Set([
     19,
     ...buildings.map((row) => queueTypes.get(row.itemId)).filter((type) => type !== undefined),
@@ -92,8 +102,11 @@ export function characterSeed(input: CharacterReservation, rules: Rules): Charac
       para: 0,
       isHelped: 0,
     });
+
   const role = rules.roles.get("100101");
+
   if (!role) throw new Error("Missing initial role rule");
+
   const shieldEnd = now + BigInt(integer(rules.power.statuses?.get("500009")?.time)) * 1000n;
   const buildingPower = definitions.reduce((sum, row) => sum + integer(row.power), 0);
   const power = buildingPower + integer(role.power);
@@ -102,6 +115,7 @@ export function characterSeed(input: CharacterReservation, rules: Rules): Charac
     .map((row) => {
       let count = 0;
       const matching = buildings.filter((entry) => String(entry.itemId) === row.para1);
+
       if (row.type2 === "0") count = matching.length ? 1 : 0;
       else if (row.type2 === "8") count = matching.length;
       else if (row.type2 === "5") count = 1;
@@ -109,7 +123,9 @@ export function characterSeed(input: CharacterReservation, rules: Rules): Charac
         count = definitions
           .filter((entry) => String(entry.effects?.productionResourceId) === row.para1)
           .reduce((sum, entry) => sum + (entry.effects?.productionPerHour ?? 0), 0);
+
       const target = integer(row.para2);
+
       return { uid, id: row.id!, type: 1, num: count, state: count >= target ? 1 : 0 };
     });
   const generals = (rules.items.get("hero")?.k1 ?? "")
@@ -117,7 +133,9 @@ export function characterSeed(input: CharacterReservation, rules: Rules): Charac
     .filter(Boolean)
     .map((id, index) => {
       const rule = rules.power.generals?.get(id);
+
       if (!rule) throw new Error("Missing initial general rule");
+
       return {
         uuid: randomUUID(),
         uid,

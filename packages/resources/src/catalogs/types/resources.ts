@@ -8,4 +8,5 @@ export interface ResourcesDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type ResourcesDefinitionCatalog = CatalogTable<ResourcesDefinition>;

@@ -1,4 +1,5 @@
 import type { NewbieItemsDefinition } from "../types/newbie_items.ts";
+
 export const records: readonly NewbieItemsDefinition[] = [
   { "id": 200305, "count": 2000000000 },
   { "id": 200335, "count": 2000000000 },

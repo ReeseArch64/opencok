@@ -5,6 +5,7 @@ export interface CampaignClause {
   readonly parameters?: string;
   readonly conditions?: readonly CampaignClause[];
 }
+
 export interface CampaignAction extends CampaignClause {
   readonly actions?: readonly CampaignAction[];
   readonly branch?: {
@@ -13,6 +14,7 @@ export interface CampaignAction extends CampaignClause {
     readonly otherwise: readonly CampaignAction[];
   };
 }
+
 export interface CampaignRule {
   readonly name?: string;
   readonly id: number | string;
@@ -22,6 +24,7 @@ export interface CampaignRule {
   readonly conditions: readonly CampaignClause[];
   readonly actions: readonly CampaignAction[];
 }
+
 export interface CampaignVariable {
   readonly scope: string;
   readonly id: string;

@@ -29,14 +29,20 @@ import { decodeLegacyJsonArray } from "@opencok/messages/legacy-json";
 import { resourceGeneralBuildingEffect } from "./world-resource-owner-context";
 import { generalSkillPoints } from "./power";
 import { encodeScoutReport, scoutMailPush } from "@opencok/mappings/world-scout-report";
+
 const cast = (value: number) =>
   Number.isNaN(value) ? 0 : Math.max(-2147483648, Math.min(2147483647, Math.trunc(value)));
+
 const wrap = (value: number) => value | 0;
+
 function ordered<T>(rows: readonly T[], key: (row: T) => string) {
   const indexed = new Map(rows.map((row) => [key(row), row]));
+
   if (indexed.size !== rows.length) worldMutationFailure();
+
   return javaHashMapOrder(indexed.keys()).map((id) => indexed.get(id)!);
 }
+
 function effect(
   context: CityProgressionContext,
   who: ScoutParticipant,
@@ -44,8 +50,10 @@ function effect(
   at = context.now,
 ) {
   if (!context.foreignEffect) worldMutationFailure();
+
   return context.foreignEffect(who.effects, id, at);
 }
+
 function units(
   rows: readonly { id: string; count: number; star: number }[],
   approximate: boolean,
@@ -56,10 +64,14 @@ function units(
 ): Fields {
   let total = 0;
   const arms: Value[] = [];
+
   for (const unit of rows) {
     cityInteger(unit.count);
+
     if (unit.count < 1) continue;
+
     const chosen = detail ? unit.count : scoutApproximate(unit.count, random);
+
     if (!approximate && !detail) total = wrap(total + chosen);
     else {
       const count = cast(Math.fround(Math.fround(chosen) * Math.fround(1 + straw)));
@@ -73,17 +85,24 @@ function units(
       );
     }
   }
+
   if (!approximate && !detail)
     total = cast(Math.fround(Math.fround(total) * Math.fround(1 + straw)));
+
   return { total: sfs.int(total), arms: sfs.array(arms), about: sfs.bool(!detail) };
 }
+
 function marchArmy(row: Row) {
   if (!Buffer.isBuffer(row.armyInfo)) worldMutationFailure();
+
   const army = decodeWorldMarchArmy(row.armyInfo as Buffer);
+
   if (!army || army.owner !== row.ownerUid || !army.soldiers || army.soldiers.length > 256)
     worldMutationFailure();
+
   return army;
 }
+
 function defendingArmy(
   context: CityProgressionContext,
   target: WorldScoutTarget,
@@ -103,6 +122,7 @@ function defendingArmy(
     : target.occupyingMarch
       ? marchArmy(target.occupyingMarch)
       : undefined;
+
   if (
     !city &&
     (!army ||
@@ -111,12 +131,14 @@ function defendingArmy(
       num(target.occupyingMarch!, "targetId") !== num(target.point, "id"))
   )
     worldMutationFailure();
+
   const rows = city
     ? ordered(person.armies, (row) => text(row, "armyId")).map((row) => {
         const trainingId = context.rules.arms.get(text(row, "armyId"))?.building;
         const training = ordered(person.buildings, (row) => text(row, "uuid")).find(
           (building) => String(building.itemId) === trainingId,
         );
+
         return {
           id: text(row, "armyId"),
           count: num(row, "free"),
@@ -129,16 +151,21 @@ function defendingArmy(
         star: row.level ?? 0,
       }));
   const result = units(rows, approximate, detail, straw, stars, random);
+
   if (companions) {
     if (city) {
       const inMarch = new Set<string>();
+
       for (const march of person.marches) {
         if (!march.armyInfo) continue;
+
         for (const row of marchArmy(march).dragons ?? []) {
           if (row.owner !== person.profile.uid || !row.uuid) worldMutationFailure();
+
           inMarch.add(row.uuid);
         }
       }
+
       const environment = {
           kingdomId: context.rules.kingdomId,
           version: "",
@@ -155,7 +182,9 @@ function defendingArmy(
                 !inMarch.has(text(row, "uuid")),
             )
           : undefined;
+
       if (selected) result.defDrag = sfs.array([sfs.object(dragon(context, selected, friendship))]);
+
       const indexed = new Map(person.newGenerals.map((row) => [num(row, "id"), row])),
         general = javaIntHashMapOrder(indexed.keys())
           .map((id) => indexed.get(id)!)
@@ -176,6 +205,7 @@ function defendingArmy(
                     long(office, "startTime") !== 0n,
                 )),
           );
+
       if (general)
         result.generalInfo = sfs.array([
           sfs.object({
@@ -186,16 +216,20 @@ function defendingArmy(
         ]);
     } else appendSavedCompanions(context, result, army!, person.dragons, friendship, levels);
   }
+
   return result;
 }
+
 function dragon(context: CityProgressionContext, row: Row, friendship: boolean): Fields {
   const definition = dragonDefinition(context.rules, row);
+
   return {
     dragonId: sfs.int(cityInteger(definition.level.id, 1)),
     level: sfs.int(cityInteger(row.lv, 1)),
     ...(friendship ? { friendly: sfs.int(cityInteger(row.friendly)) } : {}),
   };
 }
+
 function appendSavedCompanions(
   context: CityProgressionContext,
   result: Fields,
@@ -208,12 +242,16 @@ function appendSavedCompanions(
     result.defDrag = sfs.array(
       army.dragons.flatMap((saved) => {
         if (saved.owner !== army.owner || !saved.uuid) worldMutationFailure();
+
         const row = dragons.find((row) => row.uid === saved.owner && row.uuid === saved.uuid);
+
         return row ? [sfs.object(dragon(context, row, friendship))] : [];
       }),
     );
+
   if (army.general) {
     if (army.general.owner !== army.owner) worldMutationFailure();
+
     result.generalInfo = sfs.array([
       sfs.object({
         userId: sfs.string(army.general.owner!),
@@ -222,12 +260,16 @@ function appendSavedCompanions(
       }),
     ]);
   }
+
   return result;
 }
+
 function fortView(view: Fields) {
   for (const item of view.arms!.value as Value[]) delete fields(item).star;
+
   return { total: view.total!, forts: view.arms!, about: view.about! };
 }
+
 function soldierInfo(
   army: SavedMarchArmy,
   about: boolean,
@@ -247,6 +289,7 @@ function soldierInfo(
     ),
   );
 }
+
 function resources(
   context: CityProgressionContext,
   person: ScoutParticipant,
@@ -284,6 +327,7 @@ function resources(
     ),
     foodState = settleReconnectFood(person.resources, context.now, upkeep.rates, upkeep.options),
     balances = { ...person.resources, food: foodState.food, foodbind: foodState.foodbind };
+
   for (const building of ordered(person.buildings, (row) => text(row, "uuid"))) {
     const config = context.rules.building(
         String(building.itemId),
@@ -292,8 +336,10 @@ function resources(
         num(building, "progress"),
       ),
       id = config.effects?.productionResourceId;
+
     if (id === undefined || id < 0 || id > 3 || config.effects?.productionPerHour === undefined)
       continue;
+
     const asset = ["wood", "stone", "iron", "food"][id]!,
       from = long(building, "refreshTime") > 0n ? long(building, "refreshTime") : context.now,
       until = long(building, "effectTime"),
@@ -304,8 +350,11 @@ function resources(
           Math.max(0, f(f(100 + Number(context.rules.items.get("building_base")?.k7 ?? 0)) / 100)),
       ),
       capacity = cityInteger(config.effects.productionCapacity ?? 4000);
+
     if (from >= context.now) continue;
+
     let output: number;
+
     if (until <= from) output = cast(f(Number(BigInt.asIntN(32, context.now - from)) * ordinary));
     else if (until < context.now)
       output = cast(
@@ -315,11 +364,15 @@ function resources(
         ),
       );
     else output = cast(f(Number(context.now - from) * bonus));
+
     if (output < 0 || output > capacity) output = capacity;
+
     totals.set(asset, wrap((totals.get(asset) ?? 0) + cast(output * 0.5)));
   }
+
   const bound = upkeep.options.separateBound,
     exposed = new Map<string, bigint>();
+
   for (const asset of ["wood", "stone", "iron", "food"] as const)
     exposed.set(
       asset,
@@ -329,6 +382,7 @@ function resources(
           : 0n
         : BigInt.asIntN(64, long(balances, asset) + long(balances, `${asset}bind`)),
     );
+
   if (
     bound &&
     ruleAvailable(context.rules.features.get("glory_warehouse"), {
@@ -349,6 +403,7 @@ function resources(
         : undefined,
       parts = config?.clientParameters?.[4]?.value?.split("_"),
       attackerMixed = context.state.quests?.mixed;
+
     if (parts?.length === 3 && attackerMixed?.uid) {
       const rate = cityInteger(parts[0]),
         once = cityInteger(parts[1]),
@@ -369,15 +424,19 @@ function resources(
         obtained = [0, 0, 0, 0];
       let limit = Math.min(once, wrap(day - used)),
         steps = 0;
+
       while (limit > 0 && obtained.some((n, i) => n !== target[i])) {
         if (++steps > 4096) worldMutationFailure();
+
         const quarter = Math.ceil(limit / 4),
           adds = [quarter, Math.ceil(quarter / 24), Math.ceil(quarter / 6), quarter];
+
         for (let i = 0; i < 4; i++)
           obtained[i] =
             obtained[i] !== target[i] && target[i]! > adds[i]! + obtained[i]!
               ? wrap(obtained[i]! + adds[i]!)
               : target[i]!;
+
         limit = wrap(
           limit -
             wrap(
@@ -388,13 +447,16 @@ function resources(
             ),
         );
       }
+
       for (const [i, asset] of ["wood", "stone", "iron", "food"].entries())
         exposed.set(asset, BigInt.asIntN(64, long(balances, asset) + BigInt(obtained[i]!)));
     }
   }
+
   const castle = ordered(context.state.buildings, (row) => text(row, "uuid")).find(
     (row) => num(row, "itemId") === 400000,
   );
+
   for (const asset of ["wood", "food", "stone", "iron"] as const) {
     if (
       (asset === "stone" || asset === "iron") &&
@@ -402,11 +464,15 @@ function resources(
         Number(context.rules.items.get("building_base")?.[asset === "stone" ? "k4" : "k3"])
     )
       continue;
+
     result[asset] = sfs.long(exposed.get(asset)!);
     result[`${asset}_not_collected`] = sfs.int(totals.get(asset) ?? 0);
   }
+
   const wall = person.buildings.find((row) => num(row, "itemId") === 419000);
+
   if (!wall) worldMutationFailure();
+
   const maximum = Math.trunc(
     Number(
       context.rules.building("419000", num(wall, "level"), num(wall, "star"), num(wall, "progress"))
@@ -431,8 +497,10 @@ function resources(
     logged = repair
       ? person.kingSkillLogs?.find((row) => num(row, "skillId") === Number(repair.id))
       : undefined;
+
   if (activation && (!logged || long(logged, "logTime") <= long(activation, "startTime")))
     result.cityDefValue = sfs.int(cityInteger(maximum));
+
   result.isResourceShieldState = sfs.bool(
     person.effects.effects.states.some(
       (row) =>
@@ -441,17 +509,22 @@ function resources(
         long(row, "startTime") <= context.now,
     ),
   );
+
   return result;
 }
+
 function rallyReport(target: WorldScoutTarget, level: number, towerLevel: number): Fields {
   if (target.rallies.length && !target.rallyDetails) worldMutationFailure();
+
   const result: Fields = { total: sfs.int(0) };
   const person = target.participant!;
   const merge = (before: Value, after: Value) => {
     const entries = before.value as Value[];
+
     for (const item of after.value as Value[]) {
       const id = fields(item).armyId?.value,
         old = entries.find((entry) => fields(entry).armyId?.value === id);
+
       if (old)
         fields(old).count = sfs.int(
           wrap(Number(fields(old).count!.value) + Number(fields(item).count!.value)),
@@ -459,8 +532,10 @@ function rallyReport(target: WorldScoutTarget, level: number, towerLevel: number
       else entries.push(item);
     }
   };
+
   for (const entry of target.rallyDetails ?? []) {
     if (!entry.team || entry.team.leaderUid !== entry.march.ownerUid) continue;
+
     const army = marchArmy(entry.march),
       count = (army.soldiers ?? []).reduce((sum, row) => wrap(sum + row.total - row.dead), 0),
       originator: Fields = {
@@ -472,9 +547,12 @@ function rallyReport(target: WorldScoutTarget, level: number, towerLevel: number
         picVer: sfs.int(num(person.profile, "picVer")),
         picfraId: sfs.int(num(person.profile, "picfraId")),
       };
+
     if (level > 1) originator.armys = soldierInfo(army, false, towerLevel >= 10, () => 0);
+
     let total = count;
     const members: Value[] = [];
+
     if (level > 2)
       for (const member of entry.members) {
         const saved = marchArmy(member.march),
@@ -489,16 +567,22 @@ function rallyReport(target: WorldScoutTarget, level: number, towerLevel: number
             picfraId: sfs.int(num(member.profile, "picfraId")),
           };
         total = wrap(total + amount);
+
         if (level > 3) view.armys = soldierInfo(saved, false, towerLevel >= 10, () => 0);
+
         members.push(sfs.object(view));
       }
+
     result.total = sfs.int(wrap(Number(result.total!.value) + total));
+
     if (!result.originator) result.originator = sfs.object(originator);
     else {
       const before = fields(result.originator);
       before.total = sfs.int(wrap(Number(before.total!.value) + count));
+
       if (before.armys && originator.armys) merge(before.armys, originator.armys);
     }
+
     if (level > 2) {
       if (!result.members) result.members = sfs.array(members);
       else
@@ -506,19 +590,24 @@ function rallyReport(target: WorldScoutTarget, level: number, towerLevel: number
           const list = result.members.value as Value[],
             view = fields(member),
             before = list.find((entry) => fields(entry).name?.value === view.name?.value);
+
           if (!before) list.push(member);
           else {
             fields(before).total = sfs.int(
               wrap(Number(fields(before).total!.value) + Number(view.total!.value)),
             );
+
             if (fields(before).armys && view.armys) merge(fields(before).armys!, view.armys);
           }
         }
     }
   }
+
   result.bLevel = sfs.int(towerLevel);
+
   return result;
 }
+
 export function scoutDetectReport(
   context: CityProgressionContext,
   target: WorldScoutTarget,
@@ -527,10 +616,13 @@ export function scoutDetectReport(
   random: (maximum: number) => number = randomInt,
 ): Fields {
   const person = target.participant;
+
   if (!person) worldMutationFailure();
+
   const city = num(person.world, "pointId") === num(target.point, "id"),
     straw = effect(context, person, 63),
     report: Fields = {};
+
   for (const selector of selectors) {
     if (selector === 1 && city) report.resource = sfs.object(resources(context, person, target));
     else if ([2, 5, 9].includes(selector))
@@ -567,11 +659,13 @@ export function scoutDetectReport(
       );
     else if (selector === 4 && city) {
       let total = 0;
+
       for (const entry of target.reinforcements)
         total += (marchArmy(entry.march).soldiers ?? []).reduce(
           (sum, row) => sum + row.total - row.dead,
           0,
         );
+
       report.rein_about = sfs.object({
         total: sfs.int(scoutApproximate(total, random)),
         about: sfs.bool(true),
@@ -596,6 +690,7 @@ export function scoutDetectReport(
       const rows: Value[] = [],
         dragons: Value[] = [],
         generals: Value[] = [];
+
       for (const entry of target.reinforcements) {
         const army = marchArmy(entry.march);
         rows.push(soldierInfo(army, selector === 8, towerLevel >= 10, random));
@@ -619,6 +714,7 @@ export function scoutDetectReport(
             : sfs.object({}),
         );
       }
+
       report.rein_about_detail = sfs.array(rows);
       report.rein_about_detail_pet_dragon = sfs.array(dragons);
       report.generalList = sfs.array(generals);
@@ -654,8 +750,10 @@ export function scoutDetectReport(
           .map((row) => {
             const view = { ...fields(row) };
             delete view["620700"];
+
             if (!legacyPlayerVersionAtLeast(text(person.profile, "appVersion"), "1.1.2"))
               for (const id of ["622300", "622200", "622100", "622000"]) delete view[id];
+
             return sfs.object(view);
           }),
       );
@@ -687,6 +785,7 @@ export function scoutDetectReport(
       });
     }
   }
+
   report.user = sfs.object({
     pointId: sfs.int(num(target.point, "id")),
     serverId: sfs.int(context.rules.kingdomId),
@@ -707,19 +806,27 @@ export function scoutDetectReport(
   report.name = sfs.string(text(person.profile, "name"));
   report.pointId = sfs.int(num(person.world, "pointId"));
   report.pointType = sfs.int(num(target.point, "pointType"));
+
   return report;
 }
+
 export function scoutBarbarianReport(
   context: CityProgressionContext,
   target: WorldScoutTarget,
 ): Fields {
   const actor = target.barbarian;
+
   if (!actor || actor.configId !== target.point.pointItem) worldMutationFailure();
+
   const rule = context.rules.world.barbarians?.get(text(actor, "configId"));
+
   if (!rule) worldMutationFailure();
+
   const savedArmy = actor.lastArmyMapByteArray,
     savedRewards = actor.lastAwardArmyMapByteArray;
+
   if (!Buffer.isBuffer(savedArmy) || !Buffer.isBuffer(savedRewards)) worldMutationFailure();
+
   const army = scoutBarbarianArmy(actor, context.rules, context.now, decodeJavaIntMap(savedArmy)),
     rewards = scoutBarbarianArmy(
       actor,
@@ -730,6 +837,7 @@ export function scoutBarbarianReport(
     ),
     base = scoutPairs(context.rules.world.armies?.get(rule.army ?? "")?.arm),
     count = [...army.values()].reduce((a, b) => a + b, 0);
+
   return {
     barbarionReward: sfs.array(
       [...rewards].map(([id, count]) => sfs.object({ t: sfs.string(id), v: sfs.int(count) })),
@@ -754,6 +862,7 @@ export function scoutBarbarianReport(
     }),
   };
 }
+
 export function planScoutMail(
   context: CityProgressionContext,
   march: string,
@@ -788,11 +897,14 @@ export function planScoutMail(
     };
   const write = (context.write.worldMutation ??= {});
   write.scoutMails = [...(write.scoutMails ?? []), value];
+
   if (!context.economy.event) worldMutationFailure();
+
   context.economy.event({
     id: `scout.${id}`,
     type: "world.scout.mail",
     payload: encode({ owner: sfs.string(recipient), mail: sfs.object(scoutMailPush(value)) }),
   });
+
   return id;
 }

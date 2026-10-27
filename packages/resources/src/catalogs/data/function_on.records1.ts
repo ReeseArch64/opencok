@@ -1,4 +1,5 @@
 import type { FunctionOnDefinition } from "../types/function_on.ts";
+
 export const records: readonly FunctionOnDefinition[] = [
   {
     "id": "add_special_activity",

@@ -10,17 +10,22 @@ import { rechargeFeedbackView } from "@opencok/mappings/recharge-feedback";
 import { pinProgressionReward } from "./progression-rewards";
 import type { RechargeFeedbackGateway } from "@opencok/contracts/recharge-feedback";
 import type { CityDomain } from "./city-progression";
+
 export function rechargeFeedbackOperationId(owner: string, eventId: string): string {
   if (!/^[A-Za-z0-9:._-]{1,128}$/.test(eventId)) feedbackFailure();
+
   return `feedback:${createHash("sha256").update(`${owner}\0${eventId}`).digest("hex")}`;
 }
+
 export function createRechargeFeedbackDomain(gateway?: RechargeFeedbackGateway): CityDomain {
   return {
     commands: ["pay.recharge.ui.state", "feedback.paid"],
     types: [],
     async prepare(context, command, params) {
       const reader = context.state.rechargeFeedback;
+
       if (!reader) feedbackFailure();
+
       const ruleContext = {
           kingdomId: context.rules.kingdomId,
           version: "12.06.0",
@@ -29,9 +34,12 @@ export function createRechargeFeedbackDomain(gateway?: RechargeFeedbackGateway):
         window = feedbackWindow(context.rules, ruleContext);
       const empty = () => ({ response: encode({}), event: null });
       const rules = [...(context.rules.advanced.rechargeFeedback?.values() ?? [])];
+
       if (rules.length > 1024) feedbackFailure();
+
       if (command === "pay.recharge.ui.state") {
         if (!window?.active) return empty();
+
         const prices = rules.map((rule) => feedbackPrice(context.rules, rule.product_id ?? "")),
           counts = await reader.counts(
             window.start,
@@ -55,18 +63,25 @@ export function createRechargeFeedbackDomain(gateway?: RechargeFeedbackGateway):
             prices[i] !== undefined &&
             (counts.get(prices[i]!) ?? 0n) >= BigInt(cityInteger(rule.number, 1)),
         );
+
         return { response: encode(rechargeFeedbackView(tables, flags)), event: null };
       }
+
       const eventId = str(params, "eventId");
+
       if (
         !gateway ||
         str(params, "operationId") !== rechargeFeedbackOperationId(context.owner, eventId)
       )
         feedbackFailure();
+
       const proof = await gateway.accepted({ owner: context.owner, eventId });
+
       if (!proof) feedbackFailure();
+
       const payment = await reader.payment(proof.orderId, proof.platform),
         price = feedbackPrice(context.rules, proof.productId);
+
       if (
         !payment ||
         payment.productId !== proof.productId ||
@@ -77,12 +92,16 @@ export function createRechargeFeedbackDomain(gateway?: RechargeFeedbackGateway):
         (price !== undefined && Math.round(payment.spend * 100) !== price)
       )
         feedbackFailure();
+
       if (price === undefined) return empty();
+
       const paidWindow = feedbackWindow(context.rules, {
         ...ruleContext,
         now: Number(payment.time),
       });
+
       if (!paidWindow?.active) return empty();
+
       const counts = await reader.counts(paidWindow.start, paidWindow.end, [price]),
         claimed = new Set(
           (await reader.claims(paidWindow.start, paidWindow.end)).map((row) => row.id),
@@ -93,10 +112,13 @@ export function createRechargeFeedbackDomain(gateway?: RechargeFeedbackGateway):
           !claimed.has(rule.id!) &&
           (counts.get(price) ?? 0n) >= BigInt(cityInteger(rule.number, 1)),
       );
+
       for (const rule of eligible) {
         const template = context.rules.mail.get("11809"),
           contents = javaMailBytes(template?.message);
+
         if (!template || !contents) feedbackFailure();
+
         const quests = (context.write.quests ??= {});
         quests.mail = [
           ...(quests.mail ?? []),
@@ -115,12 +137,14 @@ export function createRechargeFeedbackDomain(gateway?: RechargeFeedbackGateway):
           },
         ];
       }
+
       if (eligible.length)
         context.write.rechargeFeedback = eligible.map((rule) => ({
           id: rule.id!,
           startTime: paidWindow.start,
           endTime: paidWindow.end,
         }));
+
       return empty();
     },
     async apply() {

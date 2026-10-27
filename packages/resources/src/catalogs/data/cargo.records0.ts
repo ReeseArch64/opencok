@@ -1,4 +1,5 @@
 import type { CargoDefinition } from "../types/cargo.ts";
+
 export const records: readonly CargoDefinition[] = [
   { "id": 46031, "castleLV": 1, "rewardID": 250817 },
   { "id": 46032, "castleLV": 2, "rewardID": 250818 },

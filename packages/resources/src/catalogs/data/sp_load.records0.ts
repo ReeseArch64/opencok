@@ -1,4 +1,5 @@
 import type { SpLoadDefinition } from "../types/sp_load.ts";
+
 export const records: readonly SpLoadDefinition[] = [
   { "id": 89501, "load": 500000 },
   { "id": 89502, "load": 1000000 },

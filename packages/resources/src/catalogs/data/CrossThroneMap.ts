@@ -2,6 +2,7 @@ import { CatalogKind } from "@opencok/enums/catalog-kind";
 import type { TileMapDefinition } from "../../catalog-model.ts";
 import { tiles as layer0tiles0 } from "./CrossThroneMap.layer0.tiles0.ts";
 import { tiles as layer1tiles0 } from "./CrossThroneMap.layer1.tiles0.ts";
+
 export const catalog: TileMapDefinition = {
   "kind": CatalogKind.TileMap,
   "orientation": "isometric",

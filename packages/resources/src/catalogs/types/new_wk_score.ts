@@ -7,4 +7,5 @@ export interface NewWkScoreDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type NewWkScoreDefinitionCatalog = CatalogTable<NewWkScoreDefinition>;

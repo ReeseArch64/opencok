@@ -1,4 +1,5 @@
 import type { GeneralRandomNumDefinition } from "../types/general_random_num.ts";
+
 export const records: readonly GeneralRandomNumDefinition[] = [
   {
     "id": 5505868,

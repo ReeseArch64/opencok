@@ -1,4 +1,5 @@
 import type { RecallDefinition } from "../types/recall.ts";
+
 export const records: readonly RecallDefinition[] = [
   {
     "id": 9030001,

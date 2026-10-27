@@ -19,6 +19,7 @@ import type {
 import { fenceRealmTransaction, type RealmAuthority } from "./realm-authority";
 import type { MutationTransaction } from "./mutation";
 import type { Database } from "./game";
+
 export function heroRankAwardReader(tx: MutationTransaction, owner: string): HeroRankAwardReader {
   return {
     async load(id) {
@@ -27,7 +28,9 @@ export function heroRankAwardReader(tx: MutationTransaction, owner: string): Her
         .from(hero_rank_award)
         .where(and(eq(hero_rank_award.id, id), eq(hero_rank_award.ownerUid, owner)))
         .for("update");
+
       if (!award) return;
+
       const [record] =
         award.rewardId !== null
           ? await tx
@@ -47,10 +50,12 @@ export function heroRankAwardReader(tx: MutationTransaction, owner: string): Her
               )
               .limit(1)
           : [];
+
       return { award, recorded: !!record };
     },
   };
 }
+
 export async function writeHeroRankAward(
   tx: MutationTransaction,
   owner: string,
@@ -68,10 +73,13 @@ export async function writeHeroRankAward(
       ),
     )
     .for("update");
+
   if (!award || award.createdAt > now)
     throw new Error("Invalid owned hero rank award acknowledgement");
+
   if (write.history) {
     const row = write.history;
+
     if (
       row.uid !== owner ||
       row.allianceId !== award.member ||
@@ -82,6 +90,7 @@ export async function writeHeroRankAward(
       long(row, "time") !== now
     )
       throw new Error("Foreign hero rank reward history");
+
     const inserted = await tx
       .insert(hero_event_reward_record)
       .values({
@@ -95,18 +104,22 @@ export async function writeHeroRankAward(
       })
       .onConflictDoNothing()
       .returning({ uid: hero_event_reward_record.uid });
+
     if (inserted.length !== 1) throw new Error("Hero rank reward already recorded");
   }
+
   await tx
     .update(hero_rank_award)
     .set({ deliveredAt: now, nextAttemptAt: 0n })
     .where(eq(hero_rank_award.id, write.id));
 }
+
 export function createHeroRankRewardStore(
   db: Database["kingdom"]["db"],
   authority: RealmAuthority,
 ): HeroRankRewardStore {
   let cursor: { end: bigint; id: string } | undefined;
+
   return {
     candidates() {
       return db.transaction(async (tx) => {
@@ -127,6 +140,7 @@ export function createHeroRankRewardStore(
           .limit(8);
         const last = rows.at(-1);
         cursor = rows.length === 8 && last ? { end: last.endTime, id: last.periodId } : undefined;
+
         return rows;
       });
     },
@@ -139,6 +153,7 @@ export function createHeroRankRewardStore(
           .where(eq(hero_rank_closure.periodId, text(closure, "periodId")))
           .for("update");
         const member = text(standing, "member");
+
         if (
           !current ||
           current.phase !== 2 ||
@@ -152,9 +167,11 @@ export function createHeroRankRewardStore(
           now < current.endTime
         )
           throw new Error("Invalid owned hero ranking award plan");
+
         const rank = cityInteger(standing.rank, 1, 5000),
           level = cityInteger(standing.level, 0, 4095);
         let owners: string[] = [];
+
         if (create) {
           const rows = [2, 4].includes(current.type)
             ? await tx
@@ -178,14 +195,18 @@ export function createHeroRankRewardStore(
                   and(eq(userprofile.uid, member), eq(userprofile.serverId, authority.kingdomId)),
                 )
                 .limit(1);
+
           if (rows.length > 1024) throw new Error("Hero ranking recipient bound exceeded");
+
           owners = rows.map((row) => row.uid);
           const drafts = create(owners);
+
           if (
             drafts.length !== owners.length ||
             new Set(drafts.map((row) => row.ownerUid)).size !== drafts.length
           )
             throw new Error("Invalid hero ranking entitlement count");
+
           for (const draft of drafts)
             if (
               !owners.includes(draft.ownerUid) ||
@@ -194,6 +215,7 @@ export function createHeroRankRewardStore(
               draft.contents.length > 40000
             )
               throw new Error("Foreign hero ranking entitlement");
+
           if (drafts.length)
             await tx
               .insert(hero_rank_award)
@@ -214,11 +236,13 @@ export function createHeroRankRewardStore(
               )
               .onConflictDoNothing();
         }
+
         await tx
           .update(hero_rank_closure)
           .set({ awardCursor: member })
           .where(eq(hero_rank_closure.periodId, current.periodId));
         authority.assertReady();
+
         return owners.length;
       });
     },
@@ -236,6 +260,7 @@ export function createHeroRankRewardStore(
             ),
           )
           .returning({ id: hero_rank_closure.periodId });
+
         if (updated.length !== 1) throw new Error("Stale hero ranking award cursor");
       });
     },
@@ -262,6 +287,7 @@ export function createHeroRankRewardStore(
     },
   };
 }
+
 export function createHeroRankRewardStandings(
   db: Database["databases"]["global"]["db"],
   kingdomId: number,
@@ -275,8 +301,11 @@ export function createHeroRankRewardStandings(
           and(eq(hero_rank_period.id, text(closure, "periodId")), eq(hero_rank_period.state, 1)),
         )
         .limit(1);
+
       if (!period) return;
+
       const realms = period.expectedRealms.split("|").map((raw) => cityInteger(raw, 1));
+
       if (
         !realms.includes(kingdomId) ||
         period.type !== num(closure, "type") ||
@@ -285,6 +314,7 @@ export function createHeroRankRewardStandings(
         period.group !== text(closure, "group")
       )
         throw new Error("Foreign hero final ranking cohort");
+
       const [own] = await db
         .select()
         .from(hero_rank_watermark)
@@ -296,6 +326,7 @@ export function createHeroRankRewardStandings(
           ),
         )
         .limit(1);
+
       if (
         !own ||
         own.eligible !== 1 ||
@@ -304,6 +335,7 @@ export function createHeroRankRewardStandings(
         own.scoreCount !== long(closure, "scoreCount")
       )
         return;
+
       const suffix = `_${period.group}_${BigInt.asIntN(32, period.endTime / 1000n)}`;
       const result = await db.execute<{
         member: string;
@@ -320,6 +352,7 @@ export function createHeroRankRewardStandings(
           sql`, `,
         )})) ranked where ranked."kingdomId"=${kingdomId} and ranked.rank<=5000 and ranked.member collate "C">${text(closure, "awardCursor")} collate "C" order by ranked.member collate "C" limit 64`,
       );
+
       return result.rows;
     },
   };

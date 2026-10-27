@@ -5,4 +5,5 @@ export interface WishDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type WishDefinitionCatalog = CatalogTable<WishDefinition>;

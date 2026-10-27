@@ -5,6 +5,7 @@ import {
 } from "@opencok/validations/fragment-exchange";
 import { sfs, type Fields, type Value } from "@opencok/messages/sfs";
 import type { FragmentExchangeOffer } from "@opencok/contracts/fragment-exchange";
+
 export function fragmentExchangeOfferView(
   offer: FragmentExchangeOffer,
   reward: Value,
@@ -19,6 +20,7 @@ export function fragmentExchangeOfferView(
     ...(allReward ? { allReward: sfs.array([...allReward]) } : {}),
   });
 }
+
 export function fragmentExchangeView(
   id: string,
   offers: readonly Fields[],

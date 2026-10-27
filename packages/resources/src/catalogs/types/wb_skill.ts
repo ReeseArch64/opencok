@@ -8,4 +8,5 @@ export interface WbSkillDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type WbSkillDefinitionCatalog = CatalogTable<WbSkillDefinition>;

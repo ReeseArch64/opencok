@@ -20,4 +20,5 @@ export interface GeneralAwakeDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type GeneralAwakeDefinitionCatalog = CatalogTable<GeneralAwakeDefinition>;

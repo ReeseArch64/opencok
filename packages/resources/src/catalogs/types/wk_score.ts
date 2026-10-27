@@ -5,4 +5,5 @@ export interface WkScoreDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type WkScoreDefinitionCatalog = CatalogTable<WkScoreDefinition>;

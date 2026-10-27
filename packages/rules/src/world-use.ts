@@ -8,10 +8,14 @@ import { worldResourceDuration } from "./world-resource-refresh";
 export function worldItemTarget(rule: Rule, random: (maximum: number) => number) {
   const ids = rule.para1?.split(";") ?? [],
     weights = rule.para2?.split(";") ?? [];
+
   if (!ids.length || ids.length > 256 || !ids.every((id) => /^\d{1,12}$/.test(id)))
     worldMutationFailure();
+
   if (weights.length <= 1) return ids[0]!;
+
   if (ids.length !== weights.length) worldMutationFailure();
+
   return ids[
     chooseWeight(
       weights.map((weight) => cityInteger(weight)),
@@ -19,6 +23,7 @@ export function worldItemTarget(rule: Rule, random: (maximum: number) => number)
     )
   ]!;
 }
+
 export function worldItemFree(point: Row) {
   return (
     num(point, "worldId") === 0 &&
@@ -27,14 +32,18 @@ export function worldItemFree(point: Row) {
     !text(point, "ownerId")
   );
 }
+
 export function worldItemResource(rules: Rules, id: string) {
   const resource = rules.world.resources?.get("resources")?.find((row) => row.id === id);
+
   if (!resource) worldMutationFailure();
+
   const type = cityInteger(resource.res_type, 0, 5),
     level = cityInteger(resource.res_level, 1, 10),
     key = ["world_wood", "world_stone", "world_iron", "world_food", "world_fineiron", "world_gold"][
       type
     ]!;
+
   return {
     type,
     level,

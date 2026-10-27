@@ -1,4 +1,5 @@
 import type { StatusDefinition } from "../types/status.ts";
+
 export const records: readonly StatusDefinition[] = [
   { "id": 22604510, "type2": 100, "time": 259200, "overlap": 2, "group": 500500, "subgroup": 1164 },
   { "id": 22604511, "type2": 100, "time": 604800, "overlap": 2, "group": 500500, "subgroup": 1164 },

@@ -13,4 +13,5 @@ export interface AreaDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type AreaDefinitionCatalog = CatalogTable<AreaDefinition>;

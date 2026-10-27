@@ -41,6 +41,7 @@ export function createSessionHandler(
   const { db, cache, game, world } = dependencies;
   const { sockets, inFlight, metrics, ready } = state;
   const sessions = new Map<string, { socket: Socket; token: string }>();
+
   return (socket: Socket) => {
     const connectionId = randomUUID();
     const connected = performance.now();
@@ -56,6 +57,7 @@ export function createSessionHandler(
         { component: "tcp", kingdom: config.kingdomId, connectionId, ...fields },
         level,
       );
+
     if (sockets.size >= MAX_CONNECTIONS || !ready()) {
       report(
         "connection_rejected",
@@ -63,8 +65,10 @@ export function createSessionHandler(
         "warn",
       );
       socket.destroy();
+
       return;
     }
+
     sockets.add(socket);
     report("connection_opened", { connections: sockets.size });
     socket.setTimeout(SOCKET_TIMEOUT_MS);
@@ -79,13 +83,17 @@ export function createSessionHandler(
     let chain = Promise.resolve();
     const send = (packet: Fields) => {
       if (socket.destroyed) return;
+
       const bytes = frame(packet);
+
       if (socket.writableLength + bytes.length > 4 * MAX_FRAME) {
         closeReason = "write_backpressure";
         report("connection_backpressure", { reason: closeReason }, "warn");
         socket.destroy();
+
         return;
       }
+
       socket.write(bytes);
     };
     const handle = async (packet: Fields) => {
@@ -93,15 +101,20 @@ export function createSessionHandler(
         closeReason = "not_ready";
         report("connection_unavailable", { reason: closeReason }, "warn");
         socket.destroy();
+
         return;
       }
+
       if (packet.c?.type !== Type.Byte || packet.a?.type !== Type.Short) throw new ProtocolError();
+
       const controller = packet.c.value;
       const action = packet.a.value;
       const body = fields(packet.p);
+
       if (controller === 0 && action === 0) {
         if (handshake || str(body, "api").length > 64 || str(body, "cl", "").length > 512)
           throw new ProtocolError();
+
         handshake = true;
         report("handshake_completed", { outcome: "success" });
         send(
@@ -111,37 +124,49 @@ export function createSessionHandler(
             ms: sfs.int(MAX_FRAME),
           }),
         );
+
         return;
       }
+
       if (!handshake) throw new ProtocolError();
+
       if (controller === 0 && action === 1) {
         if (uid) throw new ProtocolError();
+
         const started = performance.now();
         let claimed: string | undefined;
         let stage = "authentication";
+
         try {
           const profile = await authenticate(body, db, config);
           claimed = text(profile, "uid");
           stage = "session";
           const previous = sessions.get(claimed);
+
           if (previous) {
             report("session_replaced");
             previous.socket.destroy();
             await cache.release(claimed, previous.token);
           }
+
           if (!(await cache.claim(claimed, token))) throw new LoginError();
+
           sessions.set(claimed, { socket, token });
           stage = "initialization";
           const details = fields(body.p);
           await dependencies.profileSessions?.open(claimed, connectionId, Date.now());
           const initializedState = await game.initialize(claimed, details);
           const initial = initializedState.body;
+
           if (socket.destroyed || !ready()) {
             if (sessions.get(claimed)?.socket === socket) sessions.delete(claimed);
+
             await dependencies.profileSessions?.close(claimed, connectionId, Date.now());
             await cache.release(claimed, token);
+
             return;
           }
+
           uid = claimed;
           send(
             envelope(0, 1, {
@@ -154,9 +179,13 @@ export function createSessionHandler(
               p: sfs.object({ use: sfs.int(0), ...dynamicResourceConfig() }),
             }),
           );
+
           if (details._cok_) initial._cok_ = details._cok_;
+
           send(extension("init", initial));
+
           for (const push of initializedState.pushes) send(extension(push.command, push.body));
+
           if (!socket.destroyed)
             unsubscribe = dependencies.notifications?.subscribe(
               uid,
@@ -169,6 +198,7 @@ export function createSessionHandler(
                   !(await cache.refresh(claimed!, token))
                 )
                   return false;
+
                 if (
                   signal?.aborted ||
                   socket.destroyed ||
@@ -176,10 +206,13 @@ export function createSessionHandler(
                   sessions.get(claimed!)?.socket !== socket
                 )
                   return false;
+
                 send(extension(command, body));
+
                 return !socket.destroyed;
               },
             );
+
           report("login_accepted", {
             initialization: "partial",
             outcome: "success",
@@ -207,17 +240,21 @@ export function createSessionHandler(
               ? "warn"
               : "error",
           );
+
           if (claimed) {
             await dependencies.profileSessions
               ?.close(claimed, connectionId, Date.now())
               .catch(() =>
                 report("session_cleanup_failed", { reason: "profile_session" }, "error"),
               );
+
             if (sessions.get(claimed)?.socket === socket) sessions.delete(claimed);
+
             await cache
               .release(claimed, token)
               .catch(() => report("session_cleanup_failed", { reason: "cache_release" }, "error"));
           }
+
           metrics.rejected++;
           send(
             envelope(0, 1, {
@@ -226,16 +263,22 @@ export function createSessionHandler(
             }),
           );
         }
+
         return;
       }
+
       if (!uid) throw new ProtocolError();
+
       if (!(await cache.refresh(uid, token))) {
         closeReason = "session_expired";
         report("session_expired", { reason: closeReason }, "warn");
         socket.destroy();
+
         return;
       }
+
       const observed = Date.now();
+
       if (dependencies.profileSessions?.observe && observed - lastProfileObservation >= 60000) {
         await dependencies.profileSessions.observe(uid, connectionId, observed);
         lastProfileObservation = observed;
@@ -243,12 +286,17 @@ export function createSessionHandler(
 
       if (controller === 0 && action === 29) {
         send(envelope(0, 29, {}));
+
         return;
       }
+
       if (controller !== 1 || action !== 13) throw new ProtocolError();
+
       const command = str(body, "c");
       const params = fields(body.p);
+
       if (command.length > 128) throw new ProtocolError();
+
       metrics.commands++;
       const started = performance.now();
       const commandHash = createHash("sha256").update(command).digest("hex").slice(0, 16);
@@ -271,6 +319,7 @@ export function createSessionHandler(
       };
       let outcome = "success";
       let reason: string | undefined;
+
       try {
         if (command === "cmd.finishinit") {
           if (!initialized)
@@ -279,14 +328,20 @@ export function createSessionHandler(
               outcome: "success",
               durationMs: Math.round(performance.now() - started),
             });
+
           initialized = true;
           const result: Fields = {};
+
           if (params._cok_) result._cok_ = params._cok_;
+
           if (params.cmdBaseTime) result.cmdBaseTime = params.cmdBaseTime;
+
           send(extension(command, result));
         } else if (command === "world.get") {
           const result = await world.get(uid, params);
+
           if (params._cok_) result._cok_ = params._cok_;
+
           send(extension(command, result));
         } else {
           if (
@@ -320,6 +375,7 @@ export function createSessionHandler(
               )
             )
               throw new ProtocolError();
+
             const identity = createHash("sha256")
               .update(connectionId)
               .update(command)
@@ -329,8 +385,11 @@ export function createSessionHandler(
               `${identity.slice(0, 8)}-${identity.slice(8, 12)}-4${identity.slice(13, 16)}-8${identity.slice(17, 20)}-${identity.slice(20, 32)}`,
             );
           }
+
           const result = await game.execute(uid, command, params);
+
           for (const push of result.pushes) send(extension(push.command, push.body));
+
           send(extension(command, result.body));
         }
       } catch (error) {
@@ -346,8 +405,11 @@ export function createSessionHandler(
         const result: Fields = {
           errorCode: sfs.string(error instanceof GameError ? error.code : "E100179"),
         };
+
         if (params._cok_) result._cok_ = params._cok_;
+
         if (params.cmdBaseTime) result.cmdBaseTime = params.cmdBaseTime;
+
         send(extension(command, result));
       } finally {
         report(
@@ -366,6 +428,7 @@ export function createSessionHandler(
       try {
         for (const packet of reader.feed(Buffer.isBuffer(data) ? data : Buffer.from(data))) {
           if (++pending > MAX_PENDING_PACKETS) throw new ProtocolError();
+
           const operationId = randomUUID();
           chain = chain
             .then(async () => {
@@ -390,9 +453,12 @@ export function createSessionHandler(
               socket.destroy();
             });
         }
+
         if (pending >= PAUSE_PENDING_PACKETS) socket.pause();
+
         const task = chain.finally(() => {
           inFlight.delete(task);
+
           if (!socket.destroyed && pending < PAUSE_PENDING_PACKETS) socket.resume();
         });
         inFlight.add(task);
@@ -422,6 +488,7 @@ export function createSessionHandler(
         connections: sockets.size,
         durationMs: Math.round(performance.now() - connected),
       });
+
       if (uid) {
         const closingUid = uid;
         const cleanup = chain
@@ -436,6 +503,7 @@ export function createSessionHandler(
           .catch(() => report("session_cleanup_failed", { reason: "cache_release" }, "error"))
           .finally(() => {
             if (sessions.get(closingUid)?.socket === socket) sessions.delete(closingUid);
+
             inFlight.delete(cleanup);
           });
         inFlight.add(cleanup);

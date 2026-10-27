@@ -13,6 +13,7 @@ export interface DonationMemberResponse {
   readonly allianceId?: string;
   readonly score?: number;
 }
+
 export interface CemeteryMemberResponse {
   readonly uid: string;
   readonly name: string;
@@ -25,14 +26,17 @@ export interface CemeteryMemberResponse {
   readonly useItemSum: number;
   readonly deadSum: bigint;
 }
+
 export interface DonationRankingResponse {
   readonly donateRank: DonationMemberResponse[];
   readonly refreshTime?: bigint;
 }
+
 export interface ResourceDonationRankingResponse {
   readonly ranks: DonationMemberResponse[];
   readonly weekendTime?: bigint;
 }
+
 export interface CemeteryRankingResponse {
   readonly myRanking: number;
   readonly serverRanking: CemeteryMemberResponse[];

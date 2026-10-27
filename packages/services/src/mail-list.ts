@@ -21,12 +21,16 @@ export function mailSenderFields(entry: MailListEntry, sender: MailSender | unde
     fromName: sfs.string(fromName ?? ""),
     oldName: sfs.string(mailBlank(oldName) ? "" : oldName!),
   };
+
   if (info) {
     if (typeof info.pic !== "string") throw new ProtocolError();
+
     result.pic = sfs.string(info.pic);
     result.picVer = sfs.string(info.picVer ?? "0");
+
     if (!mailBlank(info.abbr)) result.alliance = sfs.string(info.abbr!);
   }
+
   return result;
 }
 
@@ -44,6 +48,7 @@ function fightPreview(contents: string, owner: string): Value | undefined {
         : { defName: sfs.string(str(defender, "name")) }),
       win: sfs.int(mailBlank(winner) ? 2 : winner === owner ? 0 : 1),
     };
+
     return sfs.object(preview);
   } catch {
     return undefined;
@@ -71,10 +76,13 @@ export function mailEnvelope(entry: MailListEntry, contents: string): Fields {
     like: sfs.int((entry.reply & 4) === 4 ? 1 : 0),
     donate: sfs.int((entry.reply & 8) === 8 ? 1 : 0),
   };
+
   if (entry.type === 7) {
     const preview = fightPreview(contents, entry.toUser);
+
     if (preview) result.contents = preview;
   }
+
   return result;
 }
 
@@ -91,18 +99,23 @@ export function mailListProjection(
   const invalidIds: string[] = [];
   const result: Value[] = [];
   const chat = mode !== "ordinary";
+
   for (const entry of entries) {
     const sender = entry.fromUser === null ? undefined : presentation.senders.get(entry.fromUser);
     const identity =
       mode !== "conversation" || entry.type === 10 ? mailSenderFields(entry, sender) : {};
     const decoded = decodeMailContent(entry);
+
     if (!decoded) {
       if (mode === "conversation") throw new ProtocolError();
+
       invalidIds.push(entry.uid);
       continue;
     }
+
     const { body: detail, contents } = decoded;
     let message: Fields;
+
     if (chat) {
       message = {
         ...detail,
@@ -118,6 +131,7 @@ export function mailListProjection(
             }
           : {}),
       };
+
       if (
         presentation.translationEnabled &&
         [22, 24].includes(entry.type) &&
@@ -127,6 +141,7 @@ export function mailListProjection(
         message.translationId = sfs.string(entry.translationId!);
         const request = mailTranslationRequest(entry.translationId, sender ? sender.lang : "");
         const translation = request ? presentation.translations.get(entry.uid) : undefined;
+
         if (translation) {
           message.originalLang = sfs.string(translation.originalLang);
           message.translationMsg = sfs.string(translation.translationMsg);
@@ -135,10 +150,13 @@ export function mailListProjection(
     } else {
       message = { ...mailEnvelope(entry, contents), ...identity, detail: sfs.object(detail) };
     }
+
     result.push(sfs.object(message));
   }
+
   const body: Fields = { result: sfs.array(result) };
   encode(extension(command, { ...body, ...envelope }));
+
   return { body, invalidIds };
 }
 
@@ -158,5 +176,6 @@ export function validateMailWindow(owner: string, window: readonly MailListEntry
       4 * 1024 * 1024
   )
     throw new ProtocolError();
+
   if (window.length > 1000) throw new ProtocolError();
 }

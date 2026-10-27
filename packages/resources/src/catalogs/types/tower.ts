@@ -9,4 +9,5 @@ export interface TowerDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type TowerDefinitionCatalog = CatalogTable<TowerDefinition>;

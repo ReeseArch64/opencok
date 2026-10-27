@@ -1,4 +1,5 @@
 import type { ForeignCivilizationBaseDefinition } from "../types/foreign_civilization_base.ts";
+
 export const records: readonly ForeignCivilizationBaseDefinition[] = [
   {
     "id": 52752200,

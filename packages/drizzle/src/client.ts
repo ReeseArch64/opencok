@@ -14,8 +14,10 @@ const schemas = { global: globalSchema, kingdom: kingdomSchema };
 
 export function createDatabase<T extends DatabaseRole>(role: T, config: PoolConfig) {
   if (role !== "global" && role !== "kingdom") throw new Error("Unknown database role");
+
   const pool = new Pool({ ...config, options: `${config.options ?? ""} -c timezone=UTC` });
   const db = drizzle(pool, { schema: schemas[role] });
+
   return { role, db, pool, close: () => pool.end() };
 }
 
@@ -34,13 +36,16 @@ export function createDatabases(
   const kingdoms = new Map(
     kingdomConfigs.map((kingdom) => [kingdom.id, createDatabase("kingdom", kingdom.config)]),
   );
+
   return {
     topology: resolved,
     global,
     kingdoms: kingdoms as ReadonlyMap<number, ReturnType<typeof createDatabase<"kingdom">>>,
     getKingdom(id: number) {
       const kingdom = kingdoms.get(id);
+
       if (!kingdom) throw new Error("Kingdom is not configured");
+
       return kingdom;
     },
     close: () =>

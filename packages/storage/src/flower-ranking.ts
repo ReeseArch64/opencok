@@ -29,23 +29,30 @@ export async function loadFlowerRanking(
     limit > 32767
   )
     throw new DependencyError("flower ranking input");
+
   const keys = [
     `flower_ranking_${realm}`,
     `flower_ranking_self_${realm}`,
     ...(global ? Array.from({ length: limit }, (_, i) => `flower_global_rank_${i + 1}`) : []),
   ];
   const result = await command("EVAL", script, String(keys.length), ...keys, uid, String(limit));
+
   if (!Array.isArray(result) || result.length !== 3 || typeof result[1] !== "string")
     throw new DependencyError("flower ranking snapshot");
+
   let bytes = 0;
   const entries = (values: unknown): string[] => {
     if (!Array.isArray(values) || values.length > limit)
       throw new DependencyError("flower ranking board");
+
     return values.map((value) => {
       if (typeof value !== "string" || !value.isWellFormed())
         throw new DependencyError("flower ranking value");
+
       bytes += Buffer.byteLength(value);
+
       if (bytes > 4 * 1024 * 1024) throw new DependencyError("flower ranking size");
+
       return value;
     });
   };
@@ -53,11 +60,13 @@ export async function loadFlowerRanking(
   const globalEntries = entries(result[2]);
   const end = globalEntries.findIndex((value) => /^\s*$/.test(value));
   const own = result[1];
+
   if (
     !/^\s*$/.test(own) &&
     (!/^[+-]?\d+$/.test(own) || BigInt(own) < -2147483648n || BigInt(own) > 2147483647n)
   )
     throw new DependencyError("flower ranking position");
+
   return {
     local,
     selfRank: /^\s*$/.test(result[1]) ? 5001 : Number(own),

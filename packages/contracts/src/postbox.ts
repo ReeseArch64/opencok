@@ -1,6 +1,7 @@
 import type { Row } from "./rows.ts";
 import type { InventoryState, InventoryPlan } from "./inventory.ts";
 import type { MutationCommand } from "./mutation.ts";
+
 export interface PostboxTransaction {
   mixed: Row;
   takeBox(): Promise<Row | null>;
@@ -15,6 +16,7 @@ export interface PostboxTransaction {
   updateMixed(values: Row): Promise<void>;
   grantSeal(id: string, expiresAt: bigint): Promise<void>;
 }
+
 export type PostboxExecutor = (
   command: MutationCommand,
   plan: (inventory: InventoryState, store: PostboxTransaction) => Promise<InventoryPlan>,

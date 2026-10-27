@@ -160,6 +160,7 @@ export const dataConfigObjectKeys = [
   "red_envelopes",
   "overlord_random",
 ] as const;
+
 const configStrings = responseRecord(z.string(), field.string);
 
 export const dataConfigSchema = z.strictObject({

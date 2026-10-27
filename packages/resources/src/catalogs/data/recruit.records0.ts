@@ -1,4 +1,5 @@
 import type { RecruitDefinition } from "../types/recruit.ts";
+
 export const records: readonly RecruitDefinition[] = [
   { "id": 41000, "cost": 0, "white": 35, "green": 30, "blue": 25, "violet": 10, "safety1": 2 },
   {

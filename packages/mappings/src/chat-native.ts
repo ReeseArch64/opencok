@@ -1,11 +1,13 @@
 import type { ChatMessage, PlayerState } from "@opencok/contracts/chat";
 import type { ChatPrivateRoomInfo } from "@opencok/contracts/chat-delivery";
+
 export function nativePrivateMessage(
   item: ChatMessage,
   room: ChatPrivateRoomInfo,
   sender?: PlayerState | null,
 ) {
   const type = item.post !== undefined && item.post >= 100 ? item.post - 100 : 4;
+
   return {
     seqId: String(item.sequenceId),
     roomId: room.id.replace(/^private_/, ""),
@@ -29,6 +31,7 @@ export function nativePrivateMessage(
       : {}),
   };
 }
+
 export function nativePrivateRoom(room: ChatPrivateRoomInfo) {
   return {
     id: room.id.replace(/^private_/, ""),

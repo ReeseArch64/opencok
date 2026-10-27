@@ -26,6 +26,7 @@ export async function readResourceRawArmyLoad(
   clock: () => bigint,
 ): Promise<number> {
   const { ownerUid, residentOwner } = identity;
+
   if (
     typeof ownerUid !== "string" ||
     ownerUid.length > 40 ||
@@ -40,17 +41,25 @@ export async function readResourceRawArmyLoad(
     army.cachedLoad > 2147483647
   )
     return invalid();
+
   if (!residentOwner && army.cachedLoad > 0) return army.cachedLoad;
+
   if (!Array.isArray(army.soldiers) || army.soldiers.length > 4096) return invalid();
+
   let result = 0;
+
   for (const soldier of army.soldiers) {
     const base = resourceSoldierLoadBase(soldier, rules);
+
     if (base === undefined) continue;
+
     if (owner ? owner.effects.profile.uid !== ownerUid : residentOwner) return invalid();
+
     const effects = owner
       ? await readResourceOwnerLoadEffects(owner, rules, environment, services, clock)
       : undefined;
     result = (result + resourceModifiedTroopLoad(base, soldier.loadEffect, effects)) | 0;
   }
+
   return result;
 }

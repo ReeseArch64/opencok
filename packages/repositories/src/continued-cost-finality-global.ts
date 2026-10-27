@@ -10,20 +10,25 @@ import type { CostFinalityShared } from "@opencok/contracts/continued-cost-final
 import type { CostRankingPeriod } from "@opencok/contracts/continued-cost-ranking";
 import type { RealmAuthority } from "./realm-authority";
 import type { Database } from "./game";
+
 function read(row: typeof periods.$inferSelect): CostRankingPeriod {
   const period = {
     ...row,
     expectedRealms: row.expectedRealms.split("|").map((id) => cityInteger(id, 1)),
   };
+
   if (
     period.id !== costRankingPeriodId(period.startTime, period.endTime, period.type) ||
     period.expectedRealms.length > 128 ||
     [...new Set(period.expectedRealms)].toSorted((a, b) => a - b).join("|") !== row.expectedRealms
   )
     throw new Error("Invalid final consumption cohort");
+
   costRankingBands(period.rewards);
+
   return period;
 }
+
 export function createCostFinalityShared(
   db: Database["databases"]["global"]["db"],
   authority: RealmAuthority,
@@ -43,6 +48,7 @@ export function createCostFinalityShared(
         )
         .orderBy(sql`${periods.id} collate "C"`)
         .limit(8);
+
       return rows.map(read);
     },
     async prove(period, seal, now) {
@@ -52,9 +58,12 @@ export function createCostFinalityShared(
         seal.createdAt > now
       )
         throw new Error("Foreign or premature consumption proof");
+
       const rows = readCostScoreSnapshot(seal.snapshot);
+
       if (rows.length !== seal.scoreCount || costScoreDigest(rows) !== seal.digest)
         throw new Error("Corrupt owned consumption closure");
+
       await writeCostRankingSnapshot(db, authority, period, rows, now, {
         digest: seal.digest,
         scoreCount: seal.scoreCount,
@@ -62,6 +71,7 @@ export function createCostFinalityShared(
     },
     async finalize(period, now) {
       authority.assertReady();
+
       return db.transaction(async (tx) => {
         await tx.execute(sql`set local lock_timeout='1s'`);
         const [saved] = await tx
@@ -69,6 +79,7 @@ export function createCostFinalityShared(
           .from(periods)
           .where(eq(periods.id, period.id))
           .for("update");
+
         if (
           !saved ||
           saved.expectedRealms !== period.expectedRealms.join("|") ||
@@ -77,31 +88,39 @@ export function createCostFinalityShared(
           now < saved.endTime + 300000n
         )
           throw new Error("Invalid consumption finality cohort");
+
         if (saved.state === 1) return saved.finalizedAt;
+
         const proofs = await tx.select().from(marks).where(eq(marks.periodId, period.id));
+
         if (
           proofs.length !== period.expectedRealms.length ||
           !period.expectedRealms.every((id) => proofs.some((row) => row.kingdomId === id))
         )
           return;
+
         for (const proof of proofs) {
           const rows = await tx
             .select()
             .from(scores)
             .where(and(eq(scores.periodId, period.id), eq(scores.kingdomId, proof.kingdomId)));
+
           if (rows.length !== proof.scoreCount || costScoreDigest(rows) !== proof.digest)
             throw new Error("Consumption cohort proof no longer matches shared scores");
         }
+
         await tx
           .update(periods)
           .set({ state: 1, finalizedAt: now })
           .where(eq(periods.id, period.id));
         authority.assertReady();
+
         return now;
       });
     },
     standings(id) {
       authority.assertReady();
+
       return db.transaction(
         async (tx) => {
           const [period] = await tx
@@ -109,14 +128,19 @@ export function createCostFinalityShared(
             .from(periods)
             .where(and(eq(periods.id, id), eq(periods.state, 1)))
             .limit(1);
+
           if (!period) return;
+
           const definition = read(period);
+
           if (
             !definition.expectedRealms.includes(authority.kingdomId) ||
             period.finalizedAt < period.endTime + 300000n
           )
             throw new Error("Invalid finalized consumption standings");
+
           const proofs = await tx.select().from(marks).where(eq(marks.periodId, id));
+
           if (
             proofs.length !== definition.expectedRealms.length ||
             !definition.expectedRealms.every((realm) =>
@@ -124,6 +148,7 @@ export function createCostFinalityShared(
             )
           )
             throw new Error("Missing finalized consumption cohort proofs");
+
           const economic = await tx
             .select({
               uid: scores.uid,
@@ -136,16 +161,20 @@ export function createCostFinalityShared(
             .from(scores)
             .where(eq(scores.periodId, id))
             .limit(12801);
+
           if (
             economic.length > 100 * definition.expectedRealms.length ||
             economic.some((row) => !definition.expectedRealms.includes(row.kingdomId))
           )
             throw new Error("Invalid finalized consumption population");
+
           for (const proof of proofs) {
             const rows = economic.filter((row) => row.kingdomId === proof.kingdomId);
+
             if (rows.length !== proof.scoreCount || costScoreDigest(rows) !== proof.digest)
               throw new Error("Final consumption standings differ from their verified proof");
           }
+
           return tx
             .select()
             .from(scores)

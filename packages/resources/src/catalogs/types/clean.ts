@@ -5,4 +5,5 @@ export interface CleanDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type CleanDefinitionCatalog = CatalogTable<CleanDefinition>;

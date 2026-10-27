@@ -8,4 +8,5 @@ export interface GeoTreasureTaskDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type GeoTreasureTaskDefinitionCatalog = CatalogTable<GeoTreasureTaskDefinition>;

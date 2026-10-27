@@ -24,6 +24,7 @@ export function deliverAvatarMail(
     sequence > 999999
   )
     throw new Error("Invalid avatar mail query");
+
   return db.transaction(
     async (tx) => {
       const profile = (
@@ -34,7 +35,9 @@ export function deliverAvatarMail(
           .limit(1)
           .for("update")
       )[0];
+
       if (!profile || profile.uid !== owner || profile.serverId !== kingdomId) return { profile };
+
       const key = and(
         eq(avatar_completion.ownerUid, owner),
         eq(avatar_completion.sequence, sequence),
@@ -42,7 +45,9 @@ export function deliverAvatarMail(
       const entry = (
         await tx.select().from(avatar_completion).where(key).limit(1).for("update")
       )[0];
+
       if (!entry) return { profile };
+
       if (
         entry.ownerUid !== owner ||
         entry.sequence !== sequence ||
@@ -52,7 +57,9 @@ export function deliverAvatarMail(
         entry.pendingEffects > 7
       )
         throw new Error("Invalid avatar mail state");
+
       if (!(entry.pendingEffects & 1)) return { profile };
+
       const stem = createHash("sha256")
         .update(`avatar-mail\n${owner}\n${sequence}\n${entry.hash}`)
         .digest("hex")
@@ -69,8 +76,10 @@ export function deliverAvatarMail(
         .set({ pendingEffects: entry.pendingEffects & ~1 })
         .where(and(key, eq(avatar_completion.pendingEffects, entry.pendingEffects)))
         .returning({ ownerUid: avatar_completion.ownerUid });
+
       if (updated.length !== 1 || updated[0]!.ownerUid !== owner)
         throw new Error("Avatar mail acknowledgment failed");
+
       return { profile, mail: message };
     },
     { isolationLevel: "read committed", accessMode: "read write" },

@@ -19,5 +19,6 @@ export interface GeneralAwakenChallengeRewardDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type GeneralAwakenChallengeRewardDefinitionCatalog =
   CatalogTable<GeneralAwakenChallengeRewardDefinition>;

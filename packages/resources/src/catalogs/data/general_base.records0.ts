@@ -1,4 +1,5 @@
 import type { GeneralBaseDefinition } from "../types/general_base.ts";
+
 export const records: readonly GeneralBaseDefinition[] = [
   {
     "id": 53500,

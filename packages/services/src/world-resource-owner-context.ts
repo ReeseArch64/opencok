@@ -25,12 +25,16 @@ export function restoredResourceBuilding(
   integer(buildingItemId);
   const keys: string[] = [];
   const selected = new Map<string, { itemId: number; level: unknown; star: unknown }>();
+
   for (const row of bounded(snapshot.buildings)) {
     const uuid = text(row.uuid, 40);
+
     if (uuid === null) throw new Error("Missing saved building UUID");
+
     keys.push(uuid);
     selected.set(uuid, { itemId: integer(row.itemId), level: row.level, star: row.star });
   }
+
   const ordered = legacyObjectOrder(keys);
   const buildingUuid = ordered.find(
     (uuid) =>
@@ -38,11 +42,13 @@ export function restoredResourceBuilding(
       (selectedBuildingUuid === undefined || uuid === selectedBuildingUuid),
   );
   const mainUuid = ordered.find((uuid) => selected.get(uuid)!.itemId === 400000);
+
   return {
     buildingUuid,
     buildingUuids: new Set(ordered),
     get mainBuildingLevel() {
       const main = mainUuid === undefined ? undefined : selected.get(mainUuid);
+
       return main ? (integer(main.level) + integer(main.star)) | 0 : 0;
     },
     get playerLevel() {
@@ -95,6 +101,7 @@ export function resourceGeneralBuildingEffect(
   selectedBuildingUuid?: string,
 ): number {
   const ownerContext = resourceOwnerRuleContext(snapshot, context);
+
   return equippedGeneralBuildingEffect(
     () => {
       const building = restoredResourceBuilding(
@@ -103,6 +110,7 @@ export function resourceGeneralBuildingEffect(
         buildingItemId,
         selectedBuildingUuid,
       );
+
       return {
         building,
         orderedGenerals:

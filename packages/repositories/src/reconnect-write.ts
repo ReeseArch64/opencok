@@ -19,8 +19,11 @@ import { readFriendshipMine } from "./reconnect-mine.ts";
 import type { FriendshipMine } from "@opencok/contracts/reconnect";
 
 type Transaction = Parameters<Parameters<Database["kingdom"]["db"]["transaction"]>[0]>[0];
+
 const integer = (value: unknown) => Number(javaDecimal(String(value ?? 0), 32));
+
 const long = (value: unknown) => javaDecimal(String(value ?? 0), 64);
+
 const unique = (ids: readonly string[]) => {
   if (
     new Set(ids).size !== ids.length ||
@@ -28,6 +31,7 @@ const unique = (ids: readonly string[]) => {
   )
     throw new Error("Invalid reconnect changes");
 };
+
 const updated = (rows: readonly unknown[]) => {
   if (rows.length !== 1) throw new Error("Reconnect state changed");
 };
@@ -40,19 +44,24 @@ export async function persistReconnectProgress(
   now: bigint,
 ): Promise<void> {
   await fenceRealmTransaction(tx, authority);
+
   if (state.profile.serverId !== authority.kingdomId) throw new Error("Invalid reconnect realm");
+
   const uid = String(state.profile.uid);
   const resource = write.resource;
   const from = long(state.resource.lastUpdateTime);
   const until = now < from ? from : now;
+
   if (
     long(resource.lastUpdateTime) !== until ||
     resource.starvingMillis < 0n ||
     resource.starvingMillis > until - from
   )
     throw new Error("Invalid reconnect checkpoint");
+
   const foodBefore = long(state.resource.food),
     boundBefore = long(state.resource.foodbind);
+
   if (
     long(resource.food) < 0n ||
     long(resource.foodbind) < 0n ||
@@ -60,6 +69,7 @@ export async function persistReconnectProgress(
     resource.foodbind > boundBefore
   )
     throw new Error("Invalid reconnect resource debit");
+
   for (const ids of [
     write.armies.map((row) => row.armyId),
     write.weakness.map((row) => row.armyId),
@@ -71,9 +81,12 @@ export async function persistReconnectProgress(
     write.mail.map((row) => row.uid),
   ])
     unique(ids);
+
   const originalArmies = new Map(state.armies.map((row) => [String(row.armyId), row]));
+
   for (const army of write.armies) {
     const before = originalArmies.get(army.armyId);
+
     if (
       !before ||
       integer(army.free) < 0 ||
@@ -82,7 +95,9 @@ export async function persistReconnectProgress(
       army.defence > integer(before.defence)
     )
       throw new Error("Invalid reconnect troop debit");
+
     const ledger = write.troopChanges.find((entry) => entry.armyId === army.armyId);
+
     if (
       !ledger ||
       ledger.freeBefore !== integer(before.free) ||
@@ -96,14 +111,18 @@ export async function persistReconnectProgress(
     )
       throw new Error("Inconsistent reconnect troop ledger");
   }
+
   if (write.troopChanges.length !== write.armies.length)
     throw new Error("Unexpected reconnect troop ledger");
+
   if (
     until === from &&
     (write.armies.length || resource.food !== foodBefore || resource.foodbind !== boundBefore)
   )
     throw new Error("Reconnect interval already settled");
+
   authority.assertReady();
+
   if (until > from) {
     await appendMutationRecords(
       tx,
@@ -155,6 +174,7 @@ export async function persistReconnectProgress(
         .returning({ uid: user_resource.uid }),
     );
   }
+
   for (const army of write.armies)
     updated(
       await tx
@@ -163,24 +183,30 @@ export async function persistReconnectProgress(
         .where(and(eq(user_army.uid, uid), eq(user_army.armyId, army.armyId)))
         .returning({ id: user_army.armyId }),
     );
+
   for (const row of write.weakness) {
     if (
       !originalArmies.has(row.armyId) ||
       [row.weakness, row.marchWeakness, row.heal].some((value) => integer(value) < 0)
     )
       throw new Error("Invalid reconnect weakness");
+
     long(row.finishTime);
     const previous = state.weakness.find((entry) => entry.armyId === row.armyId);
     const loss = write.troopChanges.find((entry) => entry.armyId === row.armyId);
+
     if (row.weakness !== integer(previous?.weakness) + (loss?.weakened ?? 0))
       throw new Error("Inconsistent weakness ledger");
+
     if (
       previous &&
       (integer(previous.heal) !== row.heal || long(previous.finishTime) !== row.finishTime)
     )
       throw new Error("Reconnect cannot finish healing");
+
     if (!previous && (row.heal !== 0 || row.finishTime !== 0n))
       throw new Error("Reconnect cannot start healing");
+
     if (previous)
       updated(
         await tx
@@ -193,15 +219,19 @@ export async function persistReconnectProgress(
       );
     else await tx.insert(user_weakness_building).values({ uid, ...row });
   }
+
   if (
     write.troopChanges.some(
       (entry) => entry.weakened > 0 && !write.weakness.some((row) => row.armyId === entry.armyId),
     )
   )
     throw new Error("Missing weakness ledger state");
+
   if (write.weaknessTime !== undefined) {
     if (write.weaknessTime < 0n) throw new Error("Invalid weakness checkpoint");
+
     long(write.weaknessTime);
+
     if (state.glory)
       updated(
         await tx
@@ -215,25 +245,33 @@ export async function persistReconnectProgress(
         .insert(user_glory_info)
         .values({ uid, strengthenCount: 0, strengthenTime: 0n, weaknessTime: write.weaknessTime });
   }
+
   unique(write.tasks.inserts.map((task) => task.id));
   unique(write.tasks.updates.map((task) => task.id));
   const inserted = new Set(write.tasks.inserts.map((task) => task.id));
+
   for (const task of [...write.tasks.inserts, ...write.tasks.updates]) {
     if (![0, 1].includes(integer(task.state))) throw new Error("Reconnect cannot claim tasks");
+
     integer(task.num);
     integer(task.type);
   }
+
   for (const task of write.tasks.inserts) {
     if (state.tasks.some((row) => row.id === task.id))
       throw new Error("Reconnect task already exists");
+
     await tx
       .insert(user_task)
       .values({ uid, id: task.id, num: task.num, state: task.state, type: task.type });
   }
+
   for (const task of write.tasks.updates) {
     if (inserted.has(task.id)) continue;
+
     if (!state.tasks.some((row) => row.id === task.id && integer(row.state) === 0))
       throw new Error("Invalid reconnect task transition");
+
     updated(
       await tx
         .update(user_task)
@@ -242,9 +280,11 @@ export async function persistReconnectProgress(
         .returning({ id: user_task.id }),
     );
   }
+
   for (const uuid of write.generalResets) {
     if (!state.generals.some((row) => row.uuid === uuid))
       throw new Error("Unknown reconnect general");
+
     updated(
       await tx
         .update(user_general)
@@ -253,9 +293,11 @@ export async function persistReconnectProgress(
         .returning({ uuid: user_general.uuid }),
     );
   }
+
   for (const uuid of write.skillResets) {
     if (!state.skills.some((row) => row.uuid === uuid && integer(row.stat) === 2))
       throw new Error("Invalid reconnect skill transition");
+
     updated(
       await tx
         .update(user_skill)
@@ -264,10 +306,13 @@ export async function persistReconnectProgress(
         .returning({ uuid: user_skill.uuid }),
     );
   }
+
   for (const uuid of write.skillCooldownResets) {
     const skill = state.skills.find((row) => row.uuid === uuid);
+
     if (!skill || long(skill.endTime) > BigInt.asIntN(64, now + 5000n))
       throw new Error("Reconnect skill cooldown is not due");
+
     updated(
       await tx
         .update(user_skill)
@@ -276,9 +321,11 @@ export async function persistReconnectProgress(
         .returning({ uuid: user_skill.uuid }),
     );
   }
+
   for (const building of write.buildingRefreshes) {
     if (!state.buildings.some((row) => row.uuid === building.uuid))
       throw new Error("Unknown reconnect building");
+
     updated(
       await tx
         .update(user_building)
@@ -287,8 +334,10 @@ export async function persistReconnectProgress(
         .returning({ uuid: user_building.uuid }),
     );
   }
+
   for (const message of write.mail)
     await insertSystemMail(tx, message, uid, message.uid.slice(0, 32), now, message.itemIdFlag);
+
   authority.assertReady();
 }
 
@@ -305,33 +354,43 @@ export async function executeReconnectProgress<T>(
       async (tx) => {
         await fenceRealmTransaction(tx, authority);
         const state = await readReconnectProgress(tx, uid, authority.kingdomId, now);
+
         if (mine) state.mine = await readFriendshipMine(tx, uid, mine.binding, mine.initial);
+
         const freeze = (value: unknown): void => {
           if (!value || typeof value !== "object" || Buffer.isBuffer(value)) return;
+
           for (const child of Object.values(value)) freeze(child);
+
           Object.freeze(value);
         };
         freeze(state);
         const planned = await plan(state);
         await persistReconnectProgress(tx, state, planned.write, authority, now);
+
         return planned.result;
       },
       { isolationLevel: "repeatable read" },
     );
+
   for (let attempt = 0; ; attempt++) {
     try {
       return await execute();
     } catch (error) {
       let cause: unknown = error;
       let retryable = false;
+
       for (let depth = 0; depth < 4 && cause && typeof cause === "object"; depth++) {
         if ("code" in cause && (cause.code === "40001" || cause.code === "40P01")) {
           retryable = true;
           break;
         }
+
         cause = "cause" in cause ? cause.cause : undefined;
       }
+
       if (!retryable || attempt >= 2) throw error;
+
       authority.assertReady();
     }
   }

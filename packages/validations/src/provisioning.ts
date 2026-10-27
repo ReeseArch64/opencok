@@ -4,6 +4,7 @@ const text = z
   .string()
   .min(1)
   .refine((value) => value.isWellFormed() && !value.includes("\0"));
+
 export const createCharacterSchema = z
   .object({
     kingdomId: z.int().min(1).max(2147483647),
@@ -12,6 +13,7 @@ export const createCharacterSchema = z
     language: z.string().regex(/^[a-z]{2}(?:[-_][A-Za-z]{2,4})?$/),
   })
   .strict();
+
 export const reservationSchema = createCharacterSchema
   .extend({
     identityId: z.uuid(),
@@ -21,6 +23,7 @@ export const reservationSchema = createCharacterSchema
     preset: z.literal("normal-v1"),
   })
   .strict();
+
 export const provisionReceiptSchema = z
   .object({
     gameUid: z.string().regex(/^[1-9][0-9]{0,19}$/),

@@ -8,4 +8,5 @@ export interface SettingDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type SettingDefinitionCatalog = CatalogTable<SettingDefinition>;

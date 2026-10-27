@@ -47,7 +47,9 @@ const balanceKeys = [
   "dmmPaidGold",
   "dmmPaidSpecialGold",
 ] as const;
+
 type BalanceKey = (typeof balanceKeys)[number];
+
 type ItemPayment = {
   version: 1;
   kind: "item";
@@ -58,6 +60,7 @@ type ItemPayment = {
   after: number;
   refund?: { before: number | null; after: number };
 };
+
 type GoldPayment = {
   pendingEvent?: { id: string; type: string; payload: string };
   version: 1;
@@ -74,14 +77,19 @@ type GoldPayment = {
     after: Record<BalanceKey, string>;
   };
 };
+
 type Payment = ItemPayment | GoldPayment;
+
 type Databases = ReturnType<typeof createDatabases>;
+
 type Realm = ReturnType<Databases["getKingdom"]>["db"];
+
 type Transaction = Parameters<Parameters<Realm["transaction"]>[0]>[0];
 
 function invalid(): never {
   throw new DependencyError("nickname change state");
 }
+
 function integer(value: unknown): value is number {
   return (
     typeof value === "number" &&
@@ -90,6 +98,7 @@ function integer(value: unknown): value is number {
     value <= 2147483647
   );
 }
+
 function identifier(value: unknown, limit: number): value is string {
   return (
     typeof value === "string" &&
@@ -99,6 +108,7 @@ function identifier(value: unknown, limit: number): value is string {
     value.isWellFormed()
   );
 }
+
 function key(owner: string, operationId: string): void {
   if (
     !identifier(owner, 40) ||
@@ -106,40 +116,56 @@ function key(owner: string, operationId: string): void {
     !/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/.test(operationId)
   )
     return invalid();
+
   mysqlUtf8UnicodeKey(owner);
 }
+
 function time(now: number): bigint {
   if (!Number.isSafeInteger(now) || now < 0) return invalid();
+
   return BigInt(now);
 }
+
 function balances(profile: Row): NicknameGoldBalances {
   return Object.fromEntries(
     balanceKeys.map((name) => {
       const value = profile[name] ?? 0n;
+
       if (typeof value !== "bigint" || BigInt.asIntN(64, value) !== value) return invalid();
+
       return [name, value];
     }),
   ) as unknown as NicknameGoldBalances;
 }
+
 const serializeBalances = (value: NicknameGoldBalances) =>
   Object.fromEntries(balanceKeys.map((name) => [name, String(value[name])])) as Record<
     BalanceKey,
     string
   >;
+
 function restoredBalances(value: unknown): NicknameGoldBalances {
   if (!value || typeof value !== "object" || Array.isArray(value)) return invalid();
+
   const values = value as Record<string, unknown>;
+
   return Object.fromEntries(
     balanceKeys.map((name) => [name, javaDecimal(values[name], 64)]),
   ) as unknown as NicknameGoldBalances;
 }
+
 export function nicknameChangePayment(record: NicknameChangeRecord): Payment {
   if (typeof record.payment !== "string" || Buffer.byteLength(record.payment) > 8192)
     return invalid();
+
   const data: unknown = JSON.parse(record.payment);
+
   if (!data || typeof data !== "object" || Array.isArray(data)) return invalid();
+
   const value = data as Record<string, unknown>;
+
   if (value.version !== 1) return invalid();
+
   if (value.kind === "item") {
     if (
       !identifier(value.uuid, 40) ||
@@ -151,12 +177,17 @@ export function nicknameChangePayment(record: NicknameChangeRecord): Payment {
       (value.vanishTime !== null && typeof value.vanishTime !== "string")
     )
       return invalid();
+
     if (value.vanishTime !== null) javaDecimal(value.vanishTime, 64);
+
     if (record.responseGold !== null) return invalid();
+
     if (value.refund !== undefined) {
       if (record.state !== "refunded" || !value.refund || typeof value.refund !== "object")
         return invalid();
+
       const refund = value.refund as Record<string, unknown>;
+
       if (
         (refund.before !== null && !integer(refund.before)) ||
         !integer(refund.after) ||
@@ -164,8 +195,10 @@ export function nicknameChangePayment(record: NicknameChangeRecord): Payment {
       )
         return invalid();
     }
+
     return value as ItemPayment;
   }
+
   if (
     value.kind !== "gold" ||
     (value.platform !== null &&
@@ -173,8 +206,10 @@ export function nicknameChangePayment(record: NicknameChangeRecord): Payment {
     typeof value.price !== "string"
   )
     return invalid();
+
   if (value.pendingEvent !== undefined) {
     const event = value.pendingEvent as GoldPayment["pendingEvent"];
+
     if (
       !event ||
       typeof event !== "object" ||
@@ -186,21 +221,29 @@ export function nicknameChangePayment(record: NicknameChangeRecord): Payment {
     )
       return invalid();
   }
+
   const before = restoredBalances(value.before),
     after = restoredBalances(value.after);
   const expected = nicknameGoldDebit(before, value.platform as string | null, value.price);
+
   if (
     record.responseGold !== expected.gold ||
     balanceKeys.some((name) => after[name] !== expected.balances[name])
   )
     return invalid();
+
   if (value.refund !== undefined) {
     if (record.state !== "refunded" || !value.refund || typeof value.refund !== "object")
       return invalid();
+
     const refund = value.refund as Record<string, unknown>;
+
     if (typeof refund.ratio !== "string" || typeof refund.price !== "string") return invalid();
+
     const ratio = Number(refund.ratio);
+
     if (String(ratio) !== refund.ratio) return invalid();
+
     const refunded = nicknameGoldRefund(
       restoredBalances(refund.before),
       value.platform as string | null,
@@ -208,14 +251,17 @@ export function nicknameChangePayment(record: NicknameChangeRecord): Payment {
       () => ratio,
     );
     const final = restoredBalances(refund.after);
+
     if (
       String(refunded.delta) !== refund.delta ||
       balanceKeys.some((name) => final[name] !== refunded.balances[name])
     )
       return invalid();
   } else if (record.state === "refunded") return invalid();
+
   return value as GoldPayment;
 }
+
 function validateRecord(record: NicknameChangeRecord, owner: string, operationId: string): void {
   if (
     record.ownerUid !== owner ||
@@ -238,8 +284,10 @@ function validateRecord(record: NicknameChangeRecord, owner: string, operationId
     (record.state === "prepared" && record.pendingEffects !== 0)
   )
     return invalid();
+
   nicknameChangePayment(record);
 }
+
 async function owner(tx: Transaction, uid: string) {
   const [profile] = await tx
     .select({
@@ -264,8 +312,10 @@ async function owner(tx: Transaction, uid: string) {
     .where(eq(userprofile.uid, uid))
     .limit(1)
     .for("update");
+
   return profile;
 }
+
 async function operation(tx: Transaction, uid: string, operationId: string) {
   const [record] = await tx
     .select()
@@ -273,7 +323,9 @@ async function operation(tx: Transaction, uid: string, operationId: string) {
     .where(eq(nickname_change.operationId, operationId))
     .limit(1)
     .for("update");
+
   if (record) validateRecord(record, uid, operationId);
+
   return record;
 }
 
@@ -291,6 +343,7 @@ export function createNicknameChangeStore(
     typeof configuration.refundRatio !== "function"
   )
     return invalid();
+
   if (
     notifications &&
     (typeof notifications.publish !== "function" ||
@@ -300,14 +353,19 @@ export function createNicknameChangeStore(
       notifications.timeoutMs > 30000)
   )
     return invalid();
+
   const db = databases.getKingdom(kingdomId).db;
   const find = async (uid: string, operationId: string) => {
     key(uid, operationId);
+
     return db.transaction(
       async (tx) => {
         const profile = await owner(tx, uid);
+
         if (!profile) return undefined;
+
         if (profile.serverId !== kingdomId) return invalid();
+
         return operation(tx, uid, operationId);
       },
       { isolationLevel: "read committed", accessMode: "read write" },
@@ -320,6 +378,7 @@ export function createNicknameChangeStore(
     timeoutMs: number,
   ): Promise<boolean> => {
     key(uid, operationId);
+
     if (
       typeof publish !== "function" ||
       !integer(timeoutMs) ||
@@ -327,16 +386,24 @@ export function createNicknameChangeStore(
       timeoutMs > 30000
     )
       return invalid();
+
     return db.transaction(
       async (tx) => {
         const profile = await owner(tx, uid);
+
         if (!profile || profile.uid !== uid || profile.serverId !== kingdomId) return invalid();
+
         const record = await operation(tx, uid, operationId);
+
         if (!record) return false;
+
         const stage = record.state === "refunded" ? 2 : 1;
+
         if (record.notificationStage >= stage) return false;
+
         const payment = nicknameChangePayment(record);
         let snapshot: NicknameNotification;
+
         if (payment.kind === "gold")
           snapshot = {
             kind: "gold",
@@ -351,7 +418,9 @@ export function createNicknameChangeStore(
             .where(eq(user_item.uuid, payment.uuid))
             .limit(1)
             .for("update");
+
           if (item && (item.ownerId !== uid || item.itemId !== "200021")) return invalid();
+
           snapshot = {
             kind: "item",
             stage: stage === 2 ? "refund" : "debit",
@@ -362,9 +431,11 @@ export function createNicknameChangeStore(
             },
           };
         }
+
         const controller = new AbortController();
         let timer: ReturnType<typeof setTimeout> | undefined;
         let delivered: boolean;
+
         try {
           delivered = await Promise.race([
             Promise.resolve().then(() => publish(uid, Object.freeze(snapshot), controller.signal)),
@@ -380,8 +451,11 @@ export function createNicknameChangeStore(
           clearTimeout(timer);
           controller.abort();
         }
+
         if (typeof delivered !== "boolean") return invalid();
+
         if (!delivered) return false;
+
         const changed = await tx
           .update(nickname_change)
           .set({ notificationStage: stage, pendingEffects: record.pendingEffects & ~16 })
@@ -393,7 +467,9 @@ export function createNicknameChangeStore(
             ),
           )
           .returning({ id: nickname_change.operationId });
+
         if (changed.length !== 1 || changed[0]!.id !== operationId) return invalid();
+
         return true;
       },
       { isolationLevel: "read committed", accessMode: "read write" },
@@ -401,6 +477,7 @@ export function createNicknameChangeStore(
   };
   const notify = async (uid: string, operationId: string) => {
     if (!notifications) return;
+
     try {
       await deliverNotifications(uid, operationId, notifications.publish, notifications.timeoutMs);
     } catch {
@@ -411,17 +488,23 @@ export function createNicknameChangeStore(
   };
   const deliveredResult = async (record: NicknameChangeRecord) => {
     if (!notifications) return record;
+
     await notify(record.ownerUid, record.operationId);
     const current = await find(record.ownerUid, record.operationId);
+
     if (!current) return invalid();
+
     return current;
   };
   const prepare = async (uid: string, operationId: string, name: string, now: number) => {
     const requestedAt = time(now);
+
     return db.transaction(
       async (tx) => {
         const profile = await owner(tx, uid);
+
         if (!profile) throw new GameError(errors.missing);
+
         if (
           profile.uid !== uid ||
           profile.serverId !== kingdomId ||
@@ -429,29 +512,37 @@ export function createNicknameChangeStore(
           (profile.banTime ?? 0n) > requestedAt
         )
           throw new GameError(errors.invalid);
+
         const prior = await operation(tx, uid, operationId);
+
         if (prior) {
           if (prior.newName !== name) return invalid();
+
           throw new DependencyError("nickname operation already prepared");
         }
+
         const pending = await tx
           .select({ id: nickname_change.operationId })
           .from(nickname_change)
           .where(and(eq(nickname_change.ownerUid, uid), eq(nickname_change.state, "prepared")))
           .limit(1);
+
         if (pending.length) throw new DependencyError("nickname owner operation pending");
+
         const backlog = await tx
           .select({ count: sql<string>`count(*)::text` })
           .from(nickname_change)
           .where(
             and(eq(nickname_change.ownerUid, uid), sql`${nickname_change.pendingEffects} > 0`),
           );
+
         if (
           backlog.length !== 1 ||
           !/^(0|[1-9]\d*)$/.test(backlog[0]!.count) ||
           BigInt(backlog[0]!.count) >= 1000n
         )
           throw new DependencyError("nickname effect capacity");
+
         const [item] = await tx
           .select()
           .from(user_item)
@@ -463,10 +554,12 @@ export function createNicknameChangeStore(
           responseGold: bigint | null = null;
         let goldChange: Partial<NicknameGoldBalances> = {};
         let count: number;
+
         try {
           count = nicknameItemDebit(item?.count, configuration.itemType());
         } catch (error) {
           if (!(error instanceof GameError)) throw error;
+
           const before = balances(profile);
           const price = configuration.price();
           const change = nicknameGoldDebit(before, profile.pf, price);
@@ -483,8 +576,10 @@ export function createNicknameChangeStore(
           responseGold = change.gold;
           count = -1;
         }
+
         if (count >= 0) {
           if (!item || item.ownerId !== uid || item.itemId !== "200021") return invalid();
+
           payment = {
             version: 1,
             kind: "item",
@@ -505,15 +600,19 @@ export function createNicknameChangeStore(
               ),
             )
             .returning({ id: user_item.uuid });
+
           if (changed.length !== 1 || changed[0]!.id !== item.uuid) return invalid();
         }
+
         const counter = Number(javaDecimal(profile.chNameCount ?? "0", 32));
         const updated = await tx
           .update(userprofile)
           .set({ ...goldChange, chNameCount: String((counter + 1) | 0) })
           .where(eq(userprofile.uid, uid))
           .returning({ uid: userprofile.uid });
+
         if (updated.length !== 1 || updated[0]!.uid !== uid) return invalid();
+
         if (payment!.kind === "gold" && configuration.confirmedSpending) {
           const paid = payment! as GoldPayment;
           const buildings = await tx
@@ -521,7 +620,9 @@ export function createNicknameChangeStore(
             .from(user_building)
             .where(eq(user_building.uid, uid))
             .limit(257);
+
           if (buildings.length > 256) return invalid();
+
           const postings = balanceKeys
             .filter((key) => paid.before[key] !== paid.after[key])
             .map((key) => ({
@@ -537,6 +638,7 @@ export function createNicknameChangeStore(
             postings,
             Number(requestedAt),
           );
+
           if (event)
             paid.pendingEvent = {
               id: event.id,
@@ -544,6 +646,7 @@ export function createNicknameChangeStore(
               payload: Buffer.from(event.payload).toString("base64"),
             };
         }
+
         const record: NicknameChangeRecord = {
           operationId,
           ownerUid: uid,
@@ -560,6 +663,7 @@ export function createNicknameChangeStore(
         };
         validateRecord(record, uid, operationId);
         await tx.insert(nickname_change).values(record);
+
         return record;
       },
       { isolationLevel: "read committed", accessMode: "read write" },
@@ -575,12 +679,18 @@ export function createNicknameChangeStore(
     db.transaction(
       async (tx) => {
         const profile = await owner(tx, uid);
+
         if (!profile || profile.uid !== uid || profile.serverId !== kingdomId) return invalid();
+
         const record = await operation(tx, uid, operationId);
+
         if (!record) return invalid();
+
         if (record.state !== "prepared") return record;
+
         const payment = nicknameChangePayment(record);
         let nextPayment: Payment = payment;
+
         if (committed) {
           await tx
             .update(userprofile)
@@ -597,11 +707,14 @@ export function createNicknameChangeStore(
             .where(eq(user_item.uuid, payment.uuid))
             .limit(1)
             .for("update");
+
           if (item && (item.ownerId !== uid || item.itemId !== "200021")) return invalid();
+
           nextPayment = {
             ...payment,
             refund: { before: item?.count ?? null, after: item ? (item.count + 1) | 0 : 1 },
           };
+
           if (item)
             await tx
               .update(user_item)
@@ -619,7 +732,9 @@ export function createNicknameChangeStore(
         } else {
           const price = String(javaDecimal(configuration.price(), 32));
           let ratio = 1;
+
           if (payment.platform === "cn1") ratio = await configuration.refundRatio(profile);
+
           const before = balances(profile);
           const change = nicknameGoldRefund(before, payment.platform, price, () => ratio);
           const free = change.pool === "dmm" ? "dmmGold" : "gold";
@@ -638,6 +753,7 @@ export function createNicknameChangeStore(
             },
           };
         }
+
         const timestamp = time(now);
         const values = {
           state: committed ? "committed" : "refunded",
@@ -656,8 +772,11 @@ export function createNicknameChangeStore(
             ),
           )
           .returning();
+
         if (!updated) return invalid();
+
         validateRecord(updated, uid, operationId);
+
         if (committed && payment.kind === "gold" && payment.pendingEvent) {
           const event = payment.pendingEvent;
           await tx.insert(mutation_outbox).values({
@@ -670,6 +789,7 @@ export function createNicknameChangeStore(
             createdAt: record.createdAt,
             publishedAt: 0n,
           });
+
           if (event.type === "continuedcost.spend")
             await captureCostFact(
               tx,
@@ -691,6 +811,7 @@ export function createNicknameChangeStore(
                 })),
             );
         }
+
         return updated;
       },
       { isolationLevel: "read committed", accessMode: "read write" },
@@ -704,9 +825,13 @@ export function createNicknameChangeStore(
     key(uid, operationId);
     time(now);
     const record = await find(uid, operationId);
+
     if (!record) return invalid();
+
     if (record.state !== "prepared") return deliveredResult(record);
+
     let terminal: NicknameChangeRecord;
+
     try {
       terminal = await withNicknameLock(databases.global.db, record.newName, async (tx) => {
         const [receipt] = await tx
@@ -714,6 +839,7 @@ export function createNicknameChangeStore(
           .from(nickname_change_receipt)
           .where(eq(nickname_change_receipt.operationId, operationId))
           .limit(1);
+
         if (
           receipt &&
           (receipt.ownerUid !== uid ||
@@ -721,15 +847,19 @@ export function createNicknameChangeStore(
             receipt.newName !== record.newName)
         )
           return invalid();
+
         return finish(uid, operationId, now, Boolean(receipt), failureCode);
       });
     } catch (error) {
       const completed = await find(uid, operationId);
+
       if (completed && completed.state !== "prepared") terminal = completed;
       else throw error;
     }
+
     return deliveredResult(terminal);
   };
+
   return {
     find,
     recover,
@@ -737,13 +867,19 @@ export function createNicknameChangeStore(
     async deliverAlliance(uid, operationId, now, plan) {
       key(uid, operationId);
       const createdAt = time(now);
+
       if (typeof plan !== "function") return invalid();
+
       return db.transaction(
         async (tx) => {
           const profile = await owner(tx, uid);
+
           if (!profile || profile.uid !== uid || profile.serverId !== kingdomId) return invalid();
+
           const record = await operation(tx, uid, operationId);
+
           if (!record || record.state !== "committed" || !(record.pendingEffects & 1)) return false;
+
           const tasks = await tx
             .select()
             .from(user_alliance_task)
@@ -755,6 +891,7 @@ export function createNicknameChangeStore(
             .digest("hex")
             .slice(0, 32);
           const result = plan(Object.freeze(tasks.map((row) => Object.freeze({ ...row }))), stem);
+
           if (
             !Array.isArray(result.updates) ||
             result.updates.length > 3 ||
@@ -762,13 +899,18 @@ export function createNicknameChangeStore(
             (result.mail !== null && !result.complete)
           )
             return invalid();
+
           const seen = new Set<string>();
+
           for (const update of result.updates) {
             const before = tasks.find((task) => task.id === update.id);
+
             if (!before || seen.has(update.id) || !["46608", "46609", "00000"].includes(update.id))
               return invalid();
+
             seen.add(update.id);
             const timer = update.id === "46609";
+
             if (
               timer
                 ? update.state !== (before.state ?? 0) ||
@@ -777,15 +919,20 @@ export function createNicknameChangeStore(
                 : update.state !== 1 || update.num !== (before.num ?? 0n)
             )
               return invalid();
+
             const changed = await tx
               .update(user_alliance_task)
               .set({ state: update.state, num: update.num })
               .where(and(eq(user_alliance_task.uid, uid), eq(user_alliance_task.id, update.id)))
               .returning({ id: user_alliance_task.id });
+
             if (changed.length !== 1 || changed[0]!.id !== update.id) return invalid();
           }
+
           if (result.complete !== seen.has("00000")) return invalid();
+
           if (result.mail !== null) await insertSystemMail(tx, result.mail, uid, stem, createdAt);
+
           const changed = await tx
             .update(nickname_change)
             .set({ pendingEffects: record.pendingEffects & ~1 })
@@ -796,7 +943,9 @@ export function createNicknameChangeStore(
               ),
             )
             .returning({ id: nickname_change.operationId });
+
           if (changed.length !== 1 || changed[0]!.id !== operationId) return invalid();
+
           return true;
         },
         { isolationLevel: "read committed", accessMode: "read write" },
@@ -816,18 +965,24 @@ export function createNicknameChangeStore(
         )
         .orderBy(asc(nickname_change.ownerUid), asc(nickname_change.operationId))
         .limit(1);
+
       return rows[0];
     },
     async deliverThrone(uid, operationId, now) {
       key(uid, operationId);
       time(now);
       const connection = await databases.global.db.$client.connect();
+
       try {
         return await db.transaction(async (tx) => {
           const profile = await owner(tx, uid);
+
           if (!profile || profile.serverId !== kingdomId) return invalid();
+
           const record = await operation(tx, uid, operationId);
+
           if (!record || record.state !== "committed" || !(record.pendingEffects & 4)) return false;
+
           const updated = await drizzle(connection).transaction(async (global) => {
             const canonical = await nicknameAccountUid(
               global as Parameters<typeof nicknameAccountUid>[0],
@@ -836,12 +991,14 @@ export function createNicknameChangeStore(
             const account = await global.execute<{ name: string; server: string }>(
               sql`select "gameUserName" as name, server from opencok_global.account_new where "gameUid"=${canonical}`,
             );
+
             if (
               account.rows.length !== 1 ||
               account.rows[0]!.name !== profile.name ||
               account.rows[0]!.server !== String(kingdomId)
             )
               return invalid();
+
             const result = await global.execute<{
               version: number;
               king_type: number;
@@ -852,9 +1009,12 @@ export function createNicknameChangeStore(
               where k.uid=${uid} and k.king_type in (1,2)
               and not exists (select 1 from opencok_global.cross_throne_king_info later where later.config_type=k.config_type and later.king_type=k.king_type and later.version>k.version)
               returning version, king_type, config_type`);
+
             if (result.rows.length > 1000) return invalid();
+
             return result.rows;
           });
+
           for (const row of updated)
             await tx
               .update(throne)
@@ -867,10 +1027,12 @@ export function createNicknameChangeStore(
                   eq(throne.config_type, row.config_type),
                 ),
               );
+
           await tx
             .update(nickname_change)
             .set({ pendingEffects: record.pendingEffects & ~4 })
             .where(eq(nickname_change.operationId, operationId));
+
           return true;
         });
       } finally {
@@ -880,6 +1042,7 @@ export function createNicknameChangeStore(
     async deliverSharedUser(uid, operationId, now, project, publish, timeoutMs) {
       key(uid, operationId);
       time(now);
+
       if (
         typeof project !== "function" ||
         typeof publish !== "function" ||
@@ -888,16 +1051,21 @@ export function createNicknameChangeStore(
         timeoutMs > 30000
       )
         return invalid();
+
       return databases.global.db.transaction(
         async (global) =>
           db.transaction(
             async (tx) => {
               const profile = await owner(tx, uid);
+
               if (!profile || profile.uid !== uid || profile.serverId !== kingdomId)
                 return invalid();
+
               const record = await operation(tx, uid, operationId);
+
               if (!record || record.state !== "committed" || !(record.pendingEffects & 8))
                 return false;
+
               const row = await readSharedUserProfile(tx, uid, kingdomId);
               const canonical = await nicknameAccountUid(global, uid);
               const [account] = await global
@@ -905,21 +1073,28 @@ export function createNicknameChangeStore(
                 .from(account_new)
                 .where(eq(account_new.gameUid, canonical))
                 .limit(1);
+
               if (!account || account.server !== String(kingdomId) || account.name !== row.name)
                 return invalid();
+
               const allocation = await global.execute<{ version: string }>(
                 sql`select nextval('opencok_global.shared_user_publication_seq'::regclass)::text as version`,
               );
+
               if (
                 allocation.rows.length !== 1 ||
                 !/^[1-9]\d{0,18}$/.test(allocation.rows[0]!.version)
               )
                 return invalid();
+
               const version = BigInt(allocation.rows[0]!.version);
+
               if (version > 9223372036854775807n) return invalid();
+
               const update = Object.freeze({
                 ...project(Object.freeze(row), kingdomId, version, now),
               });
+
               if (
                 update.owner !== uid ||
                 update.kingdomId !== kingdomId ||
@@ -930,8 +1105,10 @@ export function createNicknameChangeStore(
                 !update.body.isWellFormed()
               )
                 return invalid();
+
               const controller = new AbortController();
               let timer: ReturnType<typeof setTimeout> | undefined;
+
               try {
                 await Promise.race([
                   Promise.resolve().then(() => publish(update, controller.signal)),
@@ -947,6 +1124,7 @@ export function createNicknameChangeStore(
                 clearTimeout(timer);
                 controller.abort();
               }
+
               const changed = await tx
                 .update(nickname_change)
                 .set({ pendingEffects: record.pendingEffects & ~8 })
@@ -957,7 +1135,9 @@ export function createNicknameChangeStore(
                   ),
                 )
                 .returning({ id: nickname_change.operationId });
+
               if (changed.length !== 1 || changed[0]!.id !== operationId) return invalid();
+
               return true;
             },
             { isolationLevel: "read committed", accessMode: "read write" },
@@ -967,6 +1147,7 @@ export function createNicknameChangeStore(
     },
     async deliverChat(uid, operationId, publish, timeoutMs) {
       key(uid, operationId);
+
       if (
         typeof publish !== "function" ||
         !integer(timeoutMs) ||
@@ -974,14 +1155,20 @@ export function createNicknameChangeStore(
         timeoutMs > 30000
       )
         return invalid();
+
       return db.transaction(
         async (tx) => {
           const profile = await owner(tx, uid);
+
           if (!profile || profile.uid !== uid || profile.serverId !== kingdomId) return invalid();
+
           const record = await operation(tx, uid, operationId);
+
           if (!record || record.state !== "committed" || !(record.pendingEffects & 2)) return false;
+
           const controller = new AbortController();
           let timer: ReturnType<typeof setTimeout> | undefined;
+
           try {
             await Promise.race([
               Promise.resolve().then(() =>
@@ -999,6 +1186,7 @@ export function createNicknameChangeStore(
             clearTimeout(timer);
             controller.abort();
           }
+
           const changed = await tx
             .update(nickname_change)
             .set({ pendingEffects: record.pendingEffects & ~2 })
@@ -1009,7 +1197,9 @@ export function createNicknameChangeStore(
               ),
             )
             .returning({ id: nickname_change.operationId });
+
           if (changed.length !== 1 || changed[0]!.id !== operationId) return invalid();
+
           return true;
         },
         { isolationLevel: "read committed", accessMode: "read write" },
@@ -1018,18 +1208,24 @@ export function createNicknameChangeStore(
     async change(uid, operationId, name, now) {
       key(uid, operationId);
       time(now);
+
       if (!identifier(name, 200) || nicknameTrim(name) !== name) return invalid();
+
       mysqlUtf8UnicodeKey(name);
       const prior = await find(uid, operationId);
+
       if (prior) {
         if (prior.newName !== name) return invalid();
+
         return recover(uid, operationId, now);
       }
+
       try {
         await withAvailableNickname(databases.global.db, name, async (tx) => {
           await prepare(uid, operationId, name, now);
           await notify(uid, operationId);
           await writeNicknameGlobal(tx, uid, name);
+
           try {
             await tx.insert(nickname_change_receipt).values({
               operationId,
@@ -1044,10 +1240,14 @@ export function createNicknameChangeStore(
         });
       } catch (error) {
         const pending = await find(uid, operationId);
+
         if (!pending) throw error;
+
         if (pending.newName !== name) return invalid();
+
         return recover(uid, operationId, now, error instanceof GameError ? error.code : "E100179");
       }
+
       return recover(uid, operationId, now);
     },
   };

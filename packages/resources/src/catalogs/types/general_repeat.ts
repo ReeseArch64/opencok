@@ -6,4 +6,5 @@ export interface GeneralRepeatDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type GeneralRepeatDefinitionCatalog = CatalogTable<GeneralRepeatDefinition>;

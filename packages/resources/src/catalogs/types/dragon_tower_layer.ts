@@ -21,4 +21,5 @@ export interface DragonTowerLayerDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type DragonTowerLayerDefinitionCatalog = CatalogTable<DragonTowerLayerDefinition>;

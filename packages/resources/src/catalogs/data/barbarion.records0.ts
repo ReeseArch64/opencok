@@ -1,4 +1,5 @@
 import type { BarbarionDefinition } from "../types/barbarion.ts";
+
 export const records: readonly BarbarionDefinition[] = [
   {
     "id": 4800000,

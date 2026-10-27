@@ -5,6 +5,7 @@ import { alliancePermissions, allianceTargets } from "@opencok/rules/alliance";
 import { allianceScienceEffects } from "@opencok/rules/power-memberships";
 import type { Rules } from "@opencok/rules/game";
 import { allianceScienceRule, allianceScienceStage } from "@opencok/rules/alliance-science";
+
 export async function publishAllianceMutation(
   read: (id: string, players?: readonly string[]) => Promise<AlliancePublicationSnapshot>,
   payload: Buffer,
@@ -19,8 +20,10 @@ export async function publishAllianceMutation(
     id,
     changed.map((entry) => str(entry.value, "uid")),
   );
+
   for (const entry of changed) {
     const row = fields(sfs.object(entry.value));
+
     if (
       !str(row, "allianceId") &&
       snapshot.profiles.some(
@@ -29,16 +32,21 @@ export async function publishAllianceMutation(
     )
       await publish(str(row, "uid"), "push.al.leave", { allianceId: sfs.string(id) });
   }
+
   if (!snapshot.record) return;
+
   if (command === "activity.accept.reward") {
     const actor = str(data, "actor");
+
     for (const member of snapshot.members)
       if (text(member, "uid") !== actor)
         await publish(text(member, "uid"), "al.point.push", {
           alliancePoint: sfs.long(long(snapshot.record, "alliancepoint")),
         });
+
     return;
   }
+
   const record = snapshot.record,
     leader = snapshot.members.find((row) => row.rank === 5),
     effects = allianceScienceEffects(snapshot.sciences, rules);
@@ -46,6 +54,7 @@ export async function publishAllianceMutation(
     const rule = allianceScienceRule(rules, num(science, "scienceId"), num(science, "level")),
       stage = allianceScienceStage(rule, num(science, "donateprogress")),
       research = snapshot.research.find((row) => row.scienceId === science.scienceId);
+
     return {
       scienceId: sfs.int(num(science, "scienceId")),
       level: sfs.int(num(science, "level")),
@@ -69,6 +78,7 @@ export async function publishAllianceMutation(
         : {}),
     };
   };
+
   for (const member of snapshot.members) {
     const info = {
       uid: sfs.string(id),
@@ -106,6 +116,7 @@ export async function publishAllianceMutation(
       learderName: sfs.string(leader ? text(leader, "name") : ""),
     };
     await publish(text(member, "uid"), "push.al.update", { alliance: sfs.object(info) });
+
     if (
       command === "al.acceptapply" &&
       changed.some(
@@ -132,14 +143,18 @@ export async function publishAllianceMutation(
           ),
         }),
       });
+
     if (command.startsWith("al.leader."))
       await publish(text(member, "uid"), "push.al.leader.trans", { alliance: sfs.object(info) });
+
     if (command === "al.callhelp" || command === "al.renderhelp" || command === "al.helpall")
       for (const help of snapshot.helps) {
         const active = snapshot.queues.find(
           (queue) => queue.uuid === help.content && queue.ownerId === help.senderId,
         );
+
         if (!active) continue;
+
         await publish(
           text(member, "uid"),
           command === "al.callhelp" ? "push.al.help.new" : "push.al.help.update",
@@ -160,6 +175,7 @@ export async function publishAllianceMutation(
           },
         );
       }
+
     if (command.startsWith("al.science.") || command === "alliance.tick")
       for (const science of snapshot.sciences)
         await publish(text(member, "uid"), "push.al.science", {

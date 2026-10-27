@@ -1,4 +1,5 @@
 import type { WaMonsterDefinition } from "../types/wa_monster.ts";
+
 export const records: readonly WaMonsterDefinition[] = [
   { "id": 7300001, "monster": 900173, "randomRate": 50 },
   { "id": 7300002, "monster": 900174, "randomRate": 30 },

@@ -5,4 +5,5 @@ export interface NewbeeCastleRewardDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type NewbeeCastleRewardDefinitionCatalog = CatalogTable<NewbeeCastleRewardDefinition>;

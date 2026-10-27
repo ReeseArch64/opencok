@@ -11,8 +11,10 @@ export interface AccountStoreConfig {
   databaseUrl: string;
   timeoutMs: number;
 }
+
 export class AccountStore implements AccountReader {
   private readonly database;
+
   constructor(config: AccountStoreConfig) {
     this.database = createDatabase("global", {
       connectionString: config.databaseUrl,
@@ -23,6 +25,7 @@ export class AccountStore implements AccountReader {
     });
     this.database.pool.on("error", () => {});
   }
+
   private async guarded<T>(operation: () => Promise<T>): Promise<T> {
     try {
       return await operation();
@@ -30,6 +33,7 @@ export class AccountStore implements AccountReader {
       throw new DependencyError("database");
     }
   }
+
   async start() {
     await this.guarded(async () => {
       await this.database.db.select().from(account_new).limit(0);
@@ -37,9 +41,11 @@ export class AccountStore implements AccountReader {
       await this.database.db.select().from(userbindmapping).limit(0);
     });
   }
+
   async health() {
     await this.guarded(() => this.database.db.execute(sql`SELECT 1`));
   }
+
   async getAll(type: string, value: string, bound: boolean): Promise<Account[]> {
     return this.guarded(async () => {
       const mapping = bound ? userbindmapping : usermapping;
@@ -66,6 +72,7 @@ export class AccountStore implements AccountReader {
         .orderBy(asc(account_new.gameUid));
 
       const byTime = new Map(rows.map((row) => [row.lastTime.toString(), row]));
+
       return [...byTime.values()]
         .sort((a, b) => (a.lastTime > b.lastTime ? -1 : a.lastTime < b.lastTime ? 1 : 0))
         .map((row) => ({
@@ -76,9 +83,11 @@ export class AccountStore implements AccountReader {
         }));
     });
   }
+
   provisioning() {
     return createProvisioningStore(this.database.db);
   }
+
   close() {
     return this.database.close();
   }

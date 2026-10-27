@@ -18,6 +18,7 @@ import {
 } from "@opencok/mappings/player-effects";
 import { decodeGeneralAbilities } from "./profile";
 import type { CityDomain, CityProgressionContext } from "./city-progression";
+
 const commands = [
   "effects.init",
   "effect.item",
@@ -31,9 +32,11 @@ const commands = [
   "show.status.item",
   "collect.svip.switch",
 ];
+
 const invalid = () => {
   throw new GameError(errors.locked, "city_progression");
 };
+
 export function applyProgressionStatus(context: CityProgressionContext, id: string, count = 1) {
   const plan = temporaryEffect(
     context.state.effects.states,
@@ -47,7 +50,9 @@ export function applyProgressionStatus(context: CityProgressionContext, id: stri
   context.write.states = plan.states;
   context.write.deletedStates = plan.deleted;
   const state = plan.states[0];
+
   if (!state) return {};
+
   const declaration = context.rules.power.statuses?.get(String(state.stateId));
   const effects =
     declaration?.random === "1"
@@ -75,20 +80,28 @@ export function applyProgressionStatus(context: CityProgressionContext, id: stri
       ),
     ),
   };
+
   if (plan.deleted[0] !== undefined) body.oldStatus = sfs.string(String(plan.deleted[0]));
+
   return body;
 }
+
 function general(context: CityProgressionContext, id: string) {
   const row = context.state.effects.generals.find((row) => row.uuid === id);
+
   if (!row) throw new GameError(errors.missing, "city_progression");
+
   return row;
 }
+
 async function prepare(context: CityProgressionContext, command: string, params: Fields) {
   let body: Fields = {};
+
   if (command === "effects.init") {
     const previous = context.state.effects.vip;
     const last = long(previous ?? {}, "lastLoginTime") / 86400000n,
       today = context.now / 86400000n;
+
     if ((!previous || last < today) && num(previous ?? {}, "sLevel") <= 0) {
       const config = context.rules.items.get("vip");
       const days = last === today - 1n ? num(previous ?? {}, "loginDays") : 0;
@@ -108,6 +121,7 @@ async function prepare(context: CityProgressionContext, command: string, params:
       row.lastLoginTime = context.now;
       context.write.vip = row;
     }
+
     context.write.deletedStates = context.state.effects.states
       .filter((row) => long(row, "endTime") <= context.now)
       .map((row) => num(row, "stateId"));
@@ -116,7 +130,9 @@ async function prepare(context: CityProgressionContext, command: string, params:
     const id = str(params, "itemId"),
       count = cityInteger(int(params, "count"), 1),
       rule = context.rules.goods.get(id);
+
     if (!rule) invalid();
+
     if (rule!.type === "4") body = applyProgressionStatus(context, rule!.para1!, count);
     else if (rule!.type === "3" && ["70", "110", "249", "250"].includes(rule!.para1 ?? "")) {
       context.write.vip = vipMutation(
@@ -131,14 +147,19 @@ async function prepare(context: CityProgressionContext, command: string, params:
     } else invalid();
   } else if (command === "collect.svip.switch") {
     const value = int(params, "switch");
+
     if (![0, 1].includes(value) || !context.state.effects.vip) invalid();
+
     context.write.vip = { ...context.state.effects.vip!, vip_switch: value };
     body.switch = sfs.int(value);
   } else if (command === "status.remove") {
     const id = int(params, "statusId"),
       row = context.state.effects.states.find((row) => num(row, "stateId") === id);
+
     if (!row) throw new GameError(errors.missing, "city_progression");
+
     const rule = context.rules.power.statuses?.get(String(id));
+
     if (
       ![
         "100",
@@ -156,6 +177,7 @@ async function prepare(context: CityProgressionContext, command: string, params:
       ].includes(rule?.type2 ?? "")
     )
       invalid();
+
     context.write.deletedStates = [id];
   } else if (command === "show.status.item") {
     body.statusItems = sfs.array(
@@ -176,17 +198,24 @@ async function prepare(context: CityProgressionContext, command: string, params:
     const maximum =
       cityInteger(context.rules.role(num(context.state.profile, "level")).endowment ?? 0) +
       cityInteger(num(context.state.effects.generals[0] ?? {}, "plusSkillPoint"));
+
     if (command === "skill.save") {
       const root = str(params, "abilityId"),
         input = fields(params.skill);
       const tree: TalentTree = { id: root };
+
       for (const [id, value] of Object.entries(input)) {
         if (id === "id") continue;
+
         if (value.type !== Type.Int) invalid();
+
         const points = cityInteger(value.value);
+
         if (points > 0) tree[id] = points;
       }
+
       const old = trees.find((tree) => tree.id === root);
+
       if (
         old &&
         Object.entries(old).some(
@@ -195,6 +224,7 @@ async function prepare(context: CityProgressionContext, command: string, params:
         )
       )
         invalid();
+
       trees = [...trees.filter((tree) => tree.id !== root), tree];
       body = {
         pointRemain: sfs.int(validateTalentTrees(trees, context.rules, maximum)),
@@ -208,17 +238,21 @@ async function prepare(context: CityProgressionContext, command: string, params:
         context.spendItem(id, 1);
       } else
         context.economy.gold(-BigInt(cityInteger(context.rules.items.get("ability_cost")?.k3, 1)));
+
       trees = trees.filter((tree) => tree.ids !== undefined);
       body = { gold: sfs.long(context.balance("gold")), pointRemain: sfs.int(maximum) };
     } else if (command === "skill.switch") {
       if (page === currentPage)
         return { response: encode({ gold: sfs.long(context.balance("gold")) }) };
+
       const control = context.rules.configuration.payControl?.get("69009");
+
       if (
         !stored ||
         num(context.state.effects.vip ?? {}, "sLevel") < Number(control?.k2 ?? 2147483647)
       )
         invalid();
+
       validateTalentTrees(trees, context.rules, maximum);
       context.economy.gold(-BigInt(cityInteger(control?.k1, 1)));
       context.write.abilityPages = [
@@ -231,16 +265,22 @@ async function prepare(context: CityProgressionContext, command: string, params:
       context.write.generals = [
         { ...row, abilityIndex: page, ability: Buffer.from(JSON.stringify(trees)) },
       ];
+
       return { response: encode({ gold: sfs.long(context.balance("gold")) }) };
     } else {
       const id = str(params, "skillId"),
         rule = context.rules.power.generalSkills?.get(id),
         subcommand = command === "skill" ? str(params, "M__REQUEST_ID__H") : command.slice(6);
+
       if (!rule || !trees.some((tree) => Number(tree[id] ?? 0) > 0) || rule.type === "0") invalid();
+
       const skill = context.state.skills.find((row) => row.skillId === id);
+
       if (!["use", "del"].includes(subcommand)) invalid();
+
       if (subcommand === "del") {
         if (!skill) invalid();
+
         context.write.deletedStates = [Number(rule!.para1)];
         context.write.skills = [{ ...skill!, actTime: context.now }];
       } else {
@@ -250,8 +290,10 @@ async function prepare(context: CityProgressionContext, command: string, params:
           long(skill, "endTime") > context.now
         )
           invalid();
+
         if (id === "610700") {
           const hours = cityInteger(rule!.para1, 1);
+
           for (const building of context.state.buildings) {
             const definition = context.rules.building(
                 String(building.itemId),
@@ -261,6 +303,7 @@ async function prepare(context: CityProgressionContext, command: string, params:
               ),
               resourceId = definition.effects?.productionResourceId,
               base = definition.effects?.productionPerHour;
+
             if (
               num(building, "level") < 1 ||
               resourceId === undefined ||
@@ -269,23 +312,29 @@ async function prepare(context: CityProgressionContext, command: string, params:
               base === undefined
             )
               continue;
+
             const asset = (["wood", "stone", "iron", "food"] as const)[resourceId]!;
             const amount = cityAmount(
               Math.trunc(base * hours * Math.max(0, 1 + context.effect(50 + resourceId) / 100)),
             );
+
             if (amount > 0n) context.economy.resource(asset, amount);
           }
+
           body.resource = sfs.object(context.resource());
         } else {
           if (!context.rules.power.statuses?.has(rule!.para1 ?? ""))
             throw new GameError(errors.unsupported, "city_progression");
+
           body = applyProgressionStatus(context, rule!.para1!);
         }
+
         if (rule!.duration)
           context.write.states = context.write.states?.map((state) => ({
             ...state,
             endTime: context.now + BigInt(cityInteger(rule!.duration)) * 1000n,
           }));
+
         const end = context.write.states?.[0]?.endTime ?? context.now;
         context.write.skills = [
           {
@@ -308,15 +357,19 @@ async function prepare(context: CityProgressionContext, command: string, params:
           },
         ];
       }
+
       const cooldown = context.write.skills?.[0];
+
       if (cooldown)
         body = {
           ...activeSkill(cooldown),
           ...body,
           ...(context.write.states?.length ? { itemEffectObj: sfs.object(body) } : {}),
         };
+
       return { response: encode(body) };
     }
+
     if (page === currentPage)
       context.write.generals = [
         { ...row, abilityIndex: page, ability: Buffer.from(JSON.stringify(trees)) },
@@ -326,8 +379,10 @@ async function prepare(context: CityProgressionContext, command: string, params:
         { uid: context.owner, page, ability: Buffer.from(JSON.stringify(trees)) },
       ];
   }
+
   return { response: encode(body), event: null };
 }
+
 export const playerEffectsDomain: CityDomain = {
   commands,
   types: [],

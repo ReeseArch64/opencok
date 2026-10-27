@@ -1,4 +1,5 @@
 import type { AuctionDefinition } from "../types/auction.ts";
+
 export const records: readonly AuctionDefinition[] = [
   {
     "id": 20024000,

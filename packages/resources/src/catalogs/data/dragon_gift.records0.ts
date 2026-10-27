@@ -1,4 +1,5 @@
 import type { DragonGiftDefinition } from "../types/dragon_gift.ts";
+
 export const records: readonly DragonGiftDefinition[] = [
   {
     "id": 35365001,

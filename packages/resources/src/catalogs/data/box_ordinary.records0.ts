@@ -1,4 +1,5 @@
 import type { BoxOrdinaryDefinition } from "../types/box_ordinary.ts";
+
 export const records: readonly BoxOrdinaryDefinition[] = [
   {
     "id": 270000,

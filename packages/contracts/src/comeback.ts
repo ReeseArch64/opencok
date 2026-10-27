@@ -1,5 +1,6 @@
 import type { Row } from "./rows";
 import type { AvatarSystemMail } from "./files";
+
 export interface ComebackSession {
   sessionId: string;
   openedAt: bigint;
@@ -8,6 +9,7 @@ export interface ComebackSession {
   observedAt: bigint;
   closedAt: bigint;
 }
+
 export interface ComebackState {
   records: readonly Row[];
   deviceRecord?: Row;
@@ -15,12 +17,14 @@ export interface ComebackState {
   viewedAt: bigint;
   totalCharge: number;
 }
+
 export interface ComebackWrite {
   record?: Row;
   viewedAt?: bigint;
   clearBackFlags?: boolean;
   mail?: AvatarSystemMail;
 }
+
 export type ComebackActivity =
   | {
       type: 1;

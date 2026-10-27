@@ -6,6 +6,7 @@ import { user_arena_army } from "@opencok/drizzle/schema/opencok_kingdom/user_ar
 import { num, long, text } from "@opencok/contracts/rows";
 import type { ArenaWrite } from "@opencok/contracts/arena";
 import type { MutationTransaction } from "./mutation";
+
 export async function readArena(tx: MutationTransaction, owner: string) {
   const [registration] = await tx
     .select()
@@ -21,15 +22,21 @@ export async function readArena(tx: MutationTransaction, owner: string) {
     .where(eq(user_arena_army.uid, owner))
     .orderBy(asc(user_arena_army.armyId))
     .limit(129);
+
   if (legacy.length > 1 || armies.length > 128)
     throw new Error("Ambiguous or oversized arena owner");
+
   const [world] = await tx.select().from(user_world).where(eq(user_world.uid, owner));
+
   return { registration, legacy: legacy[0], armies, world };
 }
+
 export async function writeArena(tx: MutationTransaction, owner: string, write: ArenaWrite) {
   if (write.registration) {
     const row = write.registration;
+
     if (row.uid !== owner) throw new Error("Foreign arena registration");
+
     const value = {
       uid: owner,
       rankScore: num(row, "rankScore"),
@@ -48,8 +55,10 @@ export async function writeArena(tx: MutationTransaction, owner: string, write: 
       .values(value)
       .onConflictDoUpdate({ target: arena_registration.uid, set: value });
   }
+
   for (const row of write.armies ?? []) {
     if (row.uid !== owner) throw new Error("Foreign virtual arena army");
+
     const value = { uid: owner, armyId: text(row, "armyId"), free: num(row, "free") };
     await tx
       .insert(user_arena_army)

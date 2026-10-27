@@ -8,4 +8,5 @@ export interface HeapDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type HeapDefinitionCatalog = CatalogTable<HeapDefinition>;

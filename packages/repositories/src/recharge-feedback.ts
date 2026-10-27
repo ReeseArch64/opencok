@@ -7,6 +7,7 @@ import type {
   RechargeFeedbackClaim,
 } from "@opencok/contracts/recharge-feedback";
 import type { MutationTransaction } from "./mutation";
+
 export function rechargeFeedbackReader(
   tx: MutationTransaction,
   owner: string,
@@ -14,7 +15,9 @@ export function rechargeFeedbackReader(
   return {
     async counts(start, end, prices) {
       if (!prices.length) return new Map();
+
       if (prices.length > 1024) throw new Error("Too many feedback price classes");
+
       const rows = await tx
         .select({ spend: paylog.spend, count: sql<string>`count(*)` })
         .from(paylog)
@@ -31,6 +34,7 @@ export function rechargeFeedbackReader(
           ),
         )
         .groupBy(paylog.spend);
+
       return new Map(rows.map((row) => [Math.round(row.spend * 100), BigInt(row.count)]));
     },
     async claims(start, end) {
@@ -49,12 +53,15 @@ export function rechargeFeedbackReader(
           ),
         )
         .limit(1025);
+
       if (rows.length > 1024) throw new Error("Too many feedback claims");
+
       return rows;
     },
     async payment(orderId, platform) {
       if (!orderId || orderId.length > 200 || !platform || platform.length > 20)
         throw new Error("Invalid feedback order selection");
+
       return (
         await tx
           .select({ productId: paylog.productId, time: paylog.time, spend: paylog.spend })
@@ -64,6 +71,7 @@ export function rechargeFeedbackReader(
     },
   };
 }
+
 export async function writeRechargeFeedback(
   tx: MutationTransaction,
   owner: string,
@@ -71,9 +79,11 @@ export async function writeRechargeFeedback(
   now: bigint,
 ) {
   if (claims.length > 1024) throw new Error("Too many feedback claim writes");
+
   for (const claim of claims) {
     if (!claim.id || claim.id.length > 40 || claim.endTime < claim.startTime)
       throw new Error("Invalid feedback claim");
+
     await tx.insert(recharge_feedback_claim).values({
       uid: owner,
       id: claim.id,

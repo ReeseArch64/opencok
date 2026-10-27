@@ -1,4 +1,5 @@
 import type { HeroChallengeMonsterDefinition } from "../types/hero_challenge_monster.ts";
+
 export const records: readonly HeroChallengeMonsterDefinition[] = [
   {
     "id": 513000,

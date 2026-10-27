@@ -11,4 +11,5 @@ export interface AllianceQuestDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type AllianceQuestDefinitionCatalog = CatalogTable<AllianceQuestDefinition>;

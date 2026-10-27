@@ -1,4 +1,5 @@
 import type { ResponseValue } from "./value";
+
 export interface DragonTowerArmyResponse {
   army: readonly { id: number; num: number; star: number }[];
   deadarmy: readonly { id: number; num: number; star: number }[];
@@ -6,6 +7,7 @@ export interface DragonTowerArmyResponse {
   armyrevivenum: number;
   armyrevivecd: bigint;
 }
+
 export interface DragonTowerUserResponse extends DragonTowerArmyResponse {
   currentlayer: number;
   weeklymaxlayer: number;
@@ -23,6 +25,7 @@ export interface DragonTowerUserResponse extends DragonTowerArmyResponse {
   limitlayer: number;
   sharetimes: number;
 }
+
 export interface DragonTowerLayerResponse {
   layer: number;
   layerindex: number;

@@ -11,4 +11,5 @@ export interface KingdomBuildingDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type KingdomBuildingDefinitionCatalog = CatalogTable<KingdomBuildingDefinition>;

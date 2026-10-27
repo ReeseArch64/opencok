@@ -29,10 +29,13 @@ import { cityInteger } from "@opencok/rules/city-progression";
 import { fenceRealmTransaction, type RealmAuthority } from "./realm-authority";
 import { installExpeditionPeriod } from "./new-expedition";
 import type { Database } from "./game";
+
 export function expeditionMatchingWindow(period: Row) {
   return expeditionCalendarPhases(period).find((row) => row.stage === 1);
 }
+
 type Global = Database["databases"]["global"]["db"];
+
 export function createExpeditionMatchingRegistry(db: Global): ExpeditionMatchingRegistry {
   const lock = async (tx: Parameters<Parameters<Global["transaction"]>[0]>[0], id: string) => {
     await tx.execute(sql`set local lock_timeout='1s'`);
@@ -50,6 +53,7 @@ export function createExpeditionMatchingRegistry(db: Global): ExpeditionMatching
       .from(expedition_calendar)
       .where(eq(expedition_calendar.id, text(period, "id")))
       .limit(1);
+
     if (
       !saved ||
       saved.schedule !== text(period, "schedule") ||
@@ -57,14 +61,19 @@ export function createExpeditionMatchingRegistry(db: Global): ExpeditionMatching
       saved.expectedRealms !== text(period, "expectedRealms")
     )
       throw new Error("Foreign expedition calendar cohort");
+
     const window = expeditionMatchingWindow(saved);
+
     if (!window || now < window.startTime || now >= saved.endTime) return;
+
     let [batch] = await tx
       .select()
       .from(expedition_match_batch)
       .where(eq(expedition_match_batch.periodId, saved.id))
       .for("update");
+
     if (!batch && !config) return;
+
     if (!batch)
       [batch] = await tx
         .insert(expedition_match_batch)
@@ -78,16 +87,21 @@ export function createExpeditionMatchingRegistry(db: Global): ExpeditionMatching
           matchedAt: 0n,
         })
         .returning();
+
     return { saved, batch: batch! };
   };
+
   return {
     async register(period, admission, configuration, now) {
       await db.transaction(async (tx) => {
         await lock(tx, text(period, "id"));
         const state = await header(tx, period, configuration, now);
+
         if (!state || state.batch.matchedAt > 0n) return;
+
         const kingdomId = cityInteger(admission.kingdomId, 1),
           registeredAt = long(admission, "createdAt");
+
         if (
           admission.periodId !== state.saved.id ||
           !state.saved.expectedRealms.split("|").includes(String(kingdomId)) ||
@@ -99,11 +113,14 @@ export function createExpeditionMatchingRegistry(db: Global): ExpeditionMatching
           long(admission, "activityEnd") !== state.saved.endTime
         )
           throw new Error("Foreign expedition registration");
+
         const statistics = JSON.stringify(
             decodeExpeditionMatchStats(text(admission, "statistics")),
           ),
           previousMatch = cityInteger(admission.previousMatch);
+
         if (previousMatch === kingdomId) throw new Error("Self expedition previous opponent");
+
         await tx
           .insert(expedition_match_realm)
           .values({
@@ -122,7 +139,9 @@ export function createExpeditionMatchingRegistry(db: Global): ExpeditionMatching
       await db.transaction(async (tx) => {
         await lock(tx, text(period, "id"));
         const state = await header(tx, period, configuration, now);
+
         if (!state || state.batch.matchedAt > 0n || now < state.batch.admissionEnd) return;
+
         const participants = await tx
           .select()
           .from(expedition_match_realm)
@@ -137,6 +156,7 @@ export function createExpeditionMatchingRegistry(db: Global): ExpeditionMatching
           JSON.parse(state.batch.configuration),
           state.batch.seed,
         );
+
         for (const result of pairs)
           await tx
             .update(expedition_match_realm)
@@ -147,6 +167,7 @@ export function createExpeditionMatchingRegistry(db: Global): ExpeditionMatching
                 eq(expedition_match_realm.kingdomId, result.kingdomId),
               ),
             );
+
         await tx
           .update(expedition_match_batch)
           .set({ matchedAt: now })
@@ -155,8 +176,10 @@ export function createExpeditionMatchingRegistry(db: Global): ExpeditionMatching
     },
     async result(period, kingdomId) {
       cityInteger(kingdomId, 1);
+
       if (!text(period, "expectedRealms").split("|").includes(String(kingdomId)))
         throw new Error("Foreign expedition result realm");
+
       return db.transaction(
         async (tx) => {
           const [batch] = await tx
@@ -164,12 +187,15 @@ export function createExpeditionMatchingRegistry(db: Global): ExpeditionMatching
             .from(expedition_match_batch)
             .where(eq(expedition_match_batch.periodId, text(period, "id")))
             .limit(1);
+
           if (!batch || batch.matchedAt === 0n) return;
+
           const rows = await tx
               .select()
               .from(expedition_match_realm)
               .where(eq(expedition_match_realm.periodId, batch.periodId)),
             own = rows.find((row) => row.kingdomId === kingdomId);
+
           if (
             own &&
             (own.matchedAt !== batch.matchedAt ||
@@ -182,6 +208,7 @@ export function createExpeditionMatchingRegistry(db: Global): ExpeditionMatching
                 )))
           )
             throw new Error("Invalid reciprocal expedition result");
+
           return { kingdomId, opponent: own?.opponent ?? 0, matchedAt: batch.matchedAt };
         },
         { isolationLevel: "repeatable read", accessMode: "read only" },
@@ -189,6 +216,7 @@ export function createExpeditionMatchingRegistry(db: Global): ExpeditionMatching
     },
   };
 }
+
 export function createExpeditionMatchingRealmStore(
   db: Database["kingdom"]["db"],
   authority: RealmAuthority,
@@ -204,7 +232,9 @@ export function createExpeditionMatchingRealmStore(
         await tx.execute(sql`select pg_advisory_xact_lock(728220,1)`);
         const at = BigInt(now()),
           window = expeditionMatchingWindow(period);
+
         if (!window) return;
+
         await tx.execute(
           sql`update ${expedition_admission} set "appliedAt"=${at} where "periodId" in (select "periodId" from ${expedition_admission} where "appliedAt"=0 and "activityEnd"<=${at} order by "activityEnd" limit 64)`,
         );
@@ -213,10 +243,14 @@ export function createExpeditionMatchingRealmStore(
           .from(expedition_admission)
           .where(eq(expedition_admission.periodId, text(period, "id")))
           .for("update");
+
         if (prior) return { ...prior, kingdomId: authority.kingdomId };
+
         if (!allowNew || at < window.startTime || at >= window.endTime) return;
+
         if (!text(period, "expectedRealms").split("|").includes(String(authority.kingdomId)))
           return;
+
         const [hero] = await tx
             .select({ id: hero_activity.uuid })
             .from(hero_activity)
@@ -236,8 +270,10 @@ export function createExpeditionMatchingRealmStore(
             .from(expedition_period)
             .where(eq(expedition_period.serverId, authority.kingdomId))
             .limit(1);
+
         if (hero || lord || (old && old.endTime > at && old.periodId !== text(period, "id")))
           return;
+
         const [counts] = await tx
           .execute<{
             topUserPower: string;
@@ -277,6 +313,7 @@ export function createExpeditionMatchingRealmStore(
             appliedAt: 0n,
           })
           .returning();
+
         return { ...admission!, kingdomId: authority.kingdomId };
       });
     },
@@ -291,7 +328,9 @@ export function createExpeditionMatchingRealmStore(
             .from(expedition_admission)
             .where(eq(expedition_admission.periodId, text(period, "id")))
             .for("update");
+
         if (!admission || admission.appliedAt > 0n) return;
+
         if (
           result.kingdomId !== authority.kingdomId ||
           result.matchedAt < admission.endTime ||
@@ -303,7 +342,9 @@ export function createExpeditionMatchingRealmStore(
             !text(period, "expectedRealms").split("|").includes(String(result.opponent)))
         )
           throw new Error("Foreign owned expedition match");
+
         const window = expeditionMatchingWindow(period);
+
         if (
           !window ||
           window.startTime !== admission.startTime ||
@@ -311,6 +352,7 @@ export function createExpeditionMatchingRealmStore(
           long(period, "endTime") !== admission.activityEnd
         )
           throw new Error("Conflicting owned expedition schedule");
+
         if (result.opponent > 0 && at < admission.activityEnd) {
           const phases = expeditionCalendarPhases(period).filter(
               (row) => row.stage !== 0 && row.stage !== 1,
@@ -336,6 +378,7 @@ export function createExpeditionMatchingRealmStore(
               result.matchedAt >= admission.endTime,
           );
         }
+
         await tx
           .update(expedition_admission)
           .set({ appliedAt: at })

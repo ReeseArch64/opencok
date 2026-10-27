@@ -6,4 +6,5 @@ export interface MarkDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type MarkDefinitionCatalog = CatalogTable<MarkDefinition>;

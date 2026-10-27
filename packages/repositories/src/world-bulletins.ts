@@ -3,6 +3,7 @@ import { userprofile } from "@opencok/drizzle/schema/opencok_kingdom/userprofile
 import { mailBlank } from "@opencok/rules/mail";
 import type { WorldBulletinStore } from "@opencok/contracts/world-bulletins";
 import type { Database } from "./game";
+
 export function createWorldBulletinStore(db: Database["kingdom"]["db"]): WorldBulletinStore {
   return {
     alliance(observer, kingdomId, now) {
@@ -15,6 +16,7 @@ export function createWorldBulletinStore(db: Database["kingdom"]["db"]): WorldBu
         now < 0
       )
         throw new Error("Invalid world bulletin principal");
+
       return db.transaction(
         async (tx) => {
           const [profile] = await tx
@@ -27,6 +29,7 @@ export function createWorldBulletinStore(db: Database["kingdom"]["db"]): WorldBu
             })
             .from(userprofile)
             .where(eq(userprofile.uid, observer));
+
           if (
             !profile ||
             profile.uid !== observer ||
@@ -36,6 +39,7 @@ export function createWorldBulletinStore(db: Database["kingdom"]["db"]): WorldBu
             mailBlank(profile.alliance)
           )
             return undefined;
+
           return profile.alliance!;
         },
         { isolationLevel: "repeatable read", accessMode: "read only" },

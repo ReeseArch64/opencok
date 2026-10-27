@@ -1,4 +1,5 @@
 import type { ServersConfigDefinition } from "../types/servers_config.ts";
+
 export const records: readonly ServersConfigDefinition[] = [
   { "id": "castle_upgrade", "level": 30, "prestige": 6, "enabled": 1 },
   { "id": "auto_science", "enabled": 1 },

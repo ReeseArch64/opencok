@@ -21,9 +21,11 @@ export function serveHttp(
         const response = yield* Effect.tryPromise(() => logHttpRequest(request, fetch)).pipe(
           Effect.uninterruptible,
         );
+
         return HttpServerResponse.fromWeb(response);
       }).pipe(Effect.catchCause(() => Effect.succeed(HttpServerResponse.empty({ status: 500 })))),
     );
+
     return { port: "port" in server.address ? server.address.port : config.port };
   });
 }

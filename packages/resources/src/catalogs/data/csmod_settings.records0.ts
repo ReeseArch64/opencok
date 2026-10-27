@@ -1,4 +1,5 @@
 import type { CsmodSettingsDefinition } from "../types/csmod_settings.ts";
+
 export const records: readonly CsmodSettingsDefinition[] = [
   {
     "id": "global_rank",

@@ -1,4 +1,5 @@
 import type { DragonTowerBuffDefinition } from "../types/dragon_tower_buff.ts";
+
 export const records: readonly DragonTowerBuffDefinition[] = [
   {
     "id": 83100,

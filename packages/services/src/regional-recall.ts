@@ -21,13 +21,16 @@ import { rewardPreviewArray } from "@opencok/mappings/rewards";
 import { grantNativeProgressionReward, pinProgressionReward } from "./progression-rewards";
 import { temporaryEffect } from "@opencok/rules/player-effects";
 import type { CityDomain } from "./city-progression";
+
 export const regionalRecallDomain: CityDomain = {
   commands: ["region.recall.init", "region.recall.open.ui", "region.recall.receive"],
   types: [],
   async prepare(context, command) {
     const empty = () => ({ response: encode({}), event: null });
     const state = context.state.regionalRecall;
+
     if (!state) regionalRecallFailure();
+
     if (
       !serverFeature(context.rules, "recall", {
         kingdomId: context.rules.kingdomId,
@@ -36,16 +39,22 @@ export const regionalRecallDomain: CityDomain = {
       })
     )
       return empty();
+
     const rule = regionalRecallRule(context.rules, state.country);
+
     if (!rule) return empty();
+
     let record: Row | undefined = state.record ? { ...state.record } : undefined;
+
     if (command === "region.recall.init") {
       if (!record) {
         const castle = context.state.buildings.find((row) => num(row, "itemId") === 400000),
           level = num(castle ?? {}, "level"),
           ladder = regionalRecallBand(rule, level);
+
         if (ladder < 0 || !regionalRecallEligible(rule, context.state.profile, level, context.now))
           return empty();
+
         record = {
           uid: context.owner,
           level,
@@ -62,6 +71,7 @@ export const regionalRecallDomain: CityDomain = {
         context.write.regionalRecall = { record };
         let statuses: Row[] = [];
         const deleted = new Set<number>();
+
         for (const id of [rule.k8, rule.k9].filter((id): id is string =>
           Boolean(id && id !== "0"),
         )) {
@@ -82,7 +92,9 @@ export const regionalRecallDomain: CityDomain = {
             1,
             randomInt,
           );
+
           for (const id of plan.deleted) deleted.add(id);
+
           statuses = [
             ...statuses.filter(
               (row) =>
@@ -92,16 +104,20 @@ export const regionalRecallDomain: CityDomain = {
             ...plan.states.map((row) => ({ ...row, endTime: record!.endtime! })),
           ];
         }
+
         if (statuses.length || deleted.size) {
           context.write.states = statuses;
           context.write.deletedStates = [...deleted];
         }
+
         if (rule.k12 && rule.k12 !== "0" && state.members.length) {
           const template = context.rules.mail.get(rule.k12),
             contents = javaMailBytes(
               `${template?.message ?? ""}|${text(context.state.profile, "name")}|${text(context.state.profile, "name")}`,
             );
+
           if (!template || !contents) regionalRecallFailure();
+
           context.write.regionalRecall.mail = state.members.map((owner) => ({
             uid: randomUUID().replaceAll("-", "") + "00",
             owner,
@@ -117,7 +133,9 @@ export const regionalRecallDomain: CityDomain = {
           }));
         }
       }
+
       if (context.now > long(record, "endtime")) return empty();
+
       return {
         response: encode(
           regionalRecallLogin(
@@ -128,9 +146,12 @@ export const regionalRecallDomain: CityDomain = {
         event: null,
       };
     }
+
     if (!record || record.uid !== context.owner) return empty();
+
     const rewards = regionalRecallRewards(rule, num(record, "ladder")),
       claimed = cityInteger(record.receivedaynum, 0, rewards.length);
+
     if (command === "region.recall.open.ui")
       return {
         response: encode(
@@ -155,9 +176,12 @@ export const regionalRecallDomain: CityDomain = {
         ),
         event: null,
       };
+
     const previous = long(record, "receivetime");
+
     if (previous / 86400000n === context.now / 86400000n || claimed >= rewards.length)
       return empty();
+
     const reward: Value = sfs.array(
       grantNativeProgressionReward(context, pinProgressionReward(context, rewards[claimed]!)),
     );
@@ -165,6 +189,7 @@ export const regionalRecallDomain: CityDomain = {
     record.receivedaynum = claimed + 1;
     record.reward = `${text(record, "reward")};${rewards[claimed]!}`;
     context.write.regionalRecall = { record };
+
     return { response: encode(regionalRecallClaim(rule.id!, reward, previous)), event: null };
   },
   async apply() {

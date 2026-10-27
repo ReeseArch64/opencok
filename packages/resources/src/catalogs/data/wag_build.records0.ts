@@ -1,4 +1,5 @@
 import type { WagBuildDefinition } from "../types/wag_build.ts";
+
 export const records: readonly WagBuildDefinition[] = [
   {
     "id": 20013001,

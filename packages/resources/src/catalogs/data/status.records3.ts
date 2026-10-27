@@ -1,4 +1,5 @@
 import type { StatusDefinition } from "../types/status.ts";
+
 export const records: readonly StatusDefinition[] = [
   {
     "id": 509720,

@@ -1,4 +1,5 @@
 import type { EquipmentBagSuitFilterDefinition } from "../types/equipment_bag_suit_filter.ts";
+
 export const records: readonly EquipmentBagSuitFilterDefinition[] = [
   { "id": 52039901, "suitGroup": 12, "groupName": 226004 },
   { "id": 52039902, "suitGroup": 6, "groupName": 190132 },

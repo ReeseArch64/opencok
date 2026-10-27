@@ -1,4 +1,5 @@
 import type { HotstoreDefinition } from "../types/hotstore.ts";
+
 export const records: readonly HotstoreDefinition[] = [
   {
     "id": 55000,

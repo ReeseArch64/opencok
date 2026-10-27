@@ -1,4 +1,5 @@
 import type { BuildingStarDefinition } from "../types/building_star.ts";
+
 export const records: readonly BuildingStarDefinition[] = [
   {
     "id": 425008,

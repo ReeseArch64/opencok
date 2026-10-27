@@ -1,4 +1,5 @@
 import type { SpResourcesRoundDefinition } from "../types/sp_resources_round.ts";
+
 export const records: readonly SpResourcesRoundDefinition[] = [
   {
     "id": 6530001,

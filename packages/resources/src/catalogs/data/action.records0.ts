@@ -1,4 +1,5 @@
 import type { ActionDefinition } from "../types/action.ts";
+
 export const records: readonly ActionDefinition[] = [
   { "id": "AcceptTaskReward", "lvLimit1": 16, "count1": 350, "count": 500 },
   { "id": "RentQueue", "lvLimit1": 16, "count1": 100, "count": 100 },

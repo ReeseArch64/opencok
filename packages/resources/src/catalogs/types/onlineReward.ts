@@ -10,4 +10,5 @@ export interface OnlineRewardDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type OnlineRewardDefinitionCatalog = CatalogTable<OnlineRewardDefinition>;

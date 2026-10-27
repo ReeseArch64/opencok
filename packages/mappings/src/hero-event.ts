@@ -8,6 +8,7 @@ import {
   heroPanelSchema,
 } from "@opencok/validations/hero-event";
 import { validateFields } from "./validation";
+
 export function heroEventEntry(
   event: Row,
   rule: { score: string; value: string; targets: readonly number[] },
@@ -38,12 +39,14 @@ export function heroEventEntry(
     ),
   });
 }
+
 export function heroEventInfo(
   events: Fields[],
   type: number,
   ranked: readonly { type: number; ranking: number; countries: readonly Row[] }[],
 ): Fields {
   const info: Fields = {};
+
   for (const entry of ranked) {
     info.vsCountry = sfs.array(
       entry.countries.map((row) =>
@@ -57,12 +60,14 @@ export function heroEventInfo(
     );
     info[entry.type === 4 ? "rankingAlliance" : "ranking"] = sfs.int(entry.ranking);
   }
+
   return validateFields(heroEventInfoSchema, {
     ...info,
     eventList: sfs.array(events.map(sfs.object)),
     type: sfs.int(type),
   });
 }
+
 export function heroEventReward(
   rewards: Value[],
   ids?: readonly string[],
@@ -75,6 +80,7 @@ export function heroEventReward(
       : {}),
   });
 }
+
 export function heroPanelView(
   activity: Row,
   panel: Record<string, string>,
@@ -86,14 +92,21 @@ export function heroPanelView(
     activityid: sfs.string(text(activity, "activityId")),
     startTime: sfs.long(long(activity, "startTime")),
   };
+
   if (activity.endTime !== undefined && activity.endTime !== null)
     result.endTime = sfs.long(long(activity, "endTime"));
+
   if (merge) result.merge = sfs.bool(true);
+
   result.id = sfs.string(panel.id!);
+
   if (panel.activityid !== undefined) result.activityid = sfs.string(panel.activityid);
+
   if (reward) result.reward = reward;
+
   for (const key of ["exchange", "res_andmd5", "res_iosmd5"])
     if (panel[key] !== undefined) result[key] = sfs.string(panel[key]!);
+
   result.popup = sfs.string(
     now >= long(activity, "startTime") &&
       (activity.endTime === undefined ||
@@ -102,7 +115,9 @@ export function heroPanelView(
       ? (panel.popup ?? "0")
       : "0",
   );
+
   for (const key of ["androidmd5", "iosmd5"])
     if (panel[key] !== undefined) result[key] = sfs.string(panel[key]!);
+
   return validateFields(heroPanelSchema, result);
 }

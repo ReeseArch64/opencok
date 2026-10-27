@@ -8,4 +8,5 @@ export interface DragonTalentExpDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type DragonTalentExpDefinitionCatalog = CatalogTable<DragonTalentExpDefinition>;

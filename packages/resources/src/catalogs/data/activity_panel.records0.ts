@@ -1,4 +1,5 @@
 import type { ActivityPanelDefinition } from "../types/activity_panel.ts";
+
 export const records: readonly ActivityPanelDefinition[] = [
   {
     "id": 57000,

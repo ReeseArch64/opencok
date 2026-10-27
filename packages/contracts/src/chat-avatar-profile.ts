@@ -2,13 +2,17 @@ import type { AvatarProfileUpdate } from "./files.ts";
 import { isRecord } from "./chat.ts";
 
 export const chatAvatarProfilePath = "/_internal/avatar-profile";
+
 export type ChatAvatarProfileResult = "applied" | "unchanged" | "superseded";
+
 export interface ChatAvatarProfileStore {
   publish(update: AvatarProfileUpdate): Promise<ChatAvatarProfileResult>;
   find(owner: string, kingdomId: number): Promise<AvatarProfileUpdate | null>;
 }
+
 export function validAvatarProfile(value: unknown): value is AvatarProfileUpdate {
   if (!isRecord(value)) return false;
+
   return (
     typeof value.owner === "string" &&
     /^[0-9]{1,20}$/.test(value.owner) &&
@@ -40,8 +44,10 @@ export function validAvatarProfile(value: unknown): value is AvatarProfileUpdate
     )
   );
 }
+
 export function encodeAvatarProfile(update: AvatarProfileUpdate): string {
   if (!validAvatarProfile(update)) throw new Error("Invalid chat avatar profile");
+
   return JSON.stringify({
     owner: update.owner,
     kingdomId: update.kingdomId,
@@ -54,6 +60,7 @@ export function encodeAvatarProfile(update: AvatarProfileUpdate): string {
     ...(update.revision === undefined ? {} : { revision: String(update.revision) }),
   });
 }
+
 export function decodeAvatarProfile(body: string): AvatarProfileUpdate {
   const value: unknown = JSON.parse(body);
   const keys = [
@@ -66,6 +73,7 @@ export function decodeAvatarProfile(body: string): AvatarProfileUpdate {
     "userName",
     "platform",
   ];
+
   if (
     !isRecord(value) ||
     Object.keys(value).length !== keys.length + (Object.hasOwn(value, "revision") ? 1 : 0) ||
@@ -74,16 +82,20 @@ export function decodeAvatarProfile(body: string): AvatarProfileUpdate {
     !/^(0|[1-9][0-9]{0,15})$/.test(value.committedAt)
   )
     throw new Error("Invalid chat avatar profile");
+
   if (
     value.revision !== undefined &&
     (typeof value.revision !== "string" || !/^[1-9][0-9]{0,18}$/.test(value.revision))
   )
     throw new Error("Invalid chat avatar revision");
+
   const update = {
     ...value,
     committedAt: BigInt(value.committedAt),
     ...(typeof value.revision === "string" ? { revision: BigInt(value.revision) } : {}),
   };
+
   if (!validAvatarProfile(update)) throw new Error("Invalid chat avatar profile");
+
   return update;
 }

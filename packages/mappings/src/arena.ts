@@ -2,6 +2,7 @@ import { num, long, text, type Row } from "@opencok/contracts/rows";
 import { sfs, type Fields } from "@opencok/messages/sfs";
 import { arenaInfoSchema, arenaArmySchema } from "@opencok/validations/arena";
 import { validateFields } from "./validation";
+
 export function arenaInfo(row: Row): Fields {
   return validateFields(arenaInfoSchema, {
     state: sfs.int(num(row, "state")),
@@ -9,6 +10,7 @@ export function arenaInfo(row: Row): Fields {
     time: sfs.long(long(row, "time")),
   });
 }
+
 export function arenaArmy(rows: readonly Row[]): Fields {
   return validateFields(arenaArmySchema, {
     armyArray: sfs.array(

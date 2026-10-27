@@ -4,5 +4,6 @@ export interface EquipmentStrengthenRemoveDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type EquipmentStrengthenRemoveDefinitionCatalog =
   CatalogTable<EquipmentStrengthenRemoveDefinition>;

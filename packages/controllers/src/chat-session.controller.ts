@@ -28,15 +28,18 @@ export class ChatSessionController {
 
     if (!this.sessions.isConfigured() || !this.signingSecret) {
       fail(HttpStatus.ServiceUnavailable, "not_configured");
+
       return;
     }
 
     const contentType = request.headers["content-type"];
+
     if (
       typeof contentType !== "string" ||
       !contentType.startsWith("application/x-www-form-urlencoded")
     ) {
       fail(HttpStatus.UnsupportedMediaType, "bad_request");
+
       return;
     }
 
@@ -46,8 +49,10 @@ export class ChatSessionController {
 
       for await (const chunk of request) {
         size += chunk.length;
+
         if (size > 16_384) {
           fail(HttpStatus.PayloadTooLarge, "bad_request");
+
           return;
         }
 
@@ -56,11 +61,13 @@ export class ChatSessionController {
 
       const form = new URLSearchParams(Buffer.concat(chunks).toString("utf8"));
       const formError = this.verifier.verify(form);
+
       if (formError) {
         fail(
           formError === "unauthorized" ? HttpStatus.Forbidden : HttpStatus.BadRequest,
           formError,
         );
+
         return;
       }
 

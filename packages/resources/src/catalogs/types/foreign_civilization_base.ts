@@ -16,5 +16,6 @@ export interface ForeignCivilizationBaseDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type ForeignCivilizationBaseDefinitionCatalog =
   CatalogTable<ForeignCivilizationBaseDefinition>;

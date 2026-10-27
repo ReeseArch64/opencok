@@ -70,7 +70,9 @@ export function createAvatarRuntime(options: {
               },
               true,
             );
+
             if (recovered.picVer === undefined) throw error;
+
             return recovered;
           } catch {
             throw error;
@@ -134,7 +136,9 @@ export function createAvatarRuntime(options: {
             inspect,
             true,
           );
+
           if (!recovered.intent) throw error;
+
           return recovered;
         } catch {
           throw error;
@@ -191,6 +195,7 @@ export function createAvatarRuntime(options: {
       await notifications.publish(owner, command, body);
     },
   });
+
   return {
     service,
     versionService,

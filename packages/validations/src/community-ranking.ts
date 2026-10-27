@@ -7,6 +7,7 @@ import type {
   ResourceDonationRankingResponse,
   CemeteryRankingResponse,
 } from "@opencok/contracts/responses/community-ranking";
+
 export const donationMemberSchema = z.strictObject({
   uid: field.string,
   name: field.string,
@@ -22,6 +23,7 @@ export const donationMemberSchema = z.strictObject({
   allianceId: field.string.optional(),
   score: field.double.optional(),
 }) satisfies z.ZodType<DonationMemberResponse>;
+
 export const cemeteryMemberSchema = z.strictObject({
   uid: field.string,
   name: field.string,
@@ -34,14 +36,17 @@ export const cemeteryMemberSchema = z.strictObject({
   useItemSum: field.int,
   deadSum: field.long,
 }) satisfies z.ZodType<CemeteryMemberResponse>;
+
 export const donationRankingSchema = z.strictObject({
   donateRank: z.array(donationMemberSchema).max(32767),
   refreshTime: field.long.optional(),
 }) satisfies z.ZodType<DonationRankingResponse>;
+
 export const resourceDonationRankingSchema = z.strictObject({
   ranks: z.array(donationMemberSchema).max(32767),
   weekendTime: field.long.optional(),
 }) satisfies z.ZodType<ResourceDonationRankingResponse>;
+
 export const cemeteryRankingSchema = z.strictObject({
   myRanking: field.int,
   serverRanking: z.array(cemeteryMemberSchema).max(49),

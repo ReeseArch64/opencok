@@ -5,6 +5,7 @@ import { chat_mailbox_message } from "@opencok/drizzle/schema/opencok_chat/chat_
 import { chat_mailbox_receipt } from "@opencok/drizzle/schema/opencok_chat/chat_mailbox_receipt";
 import { encodeChatMailbox, type ChatMailboxStore } from "@opencok/contracts/chat-mailbox";
 import type { Database } from "./game.ts";
+
 export function createChatMailboxStore(
   db: Database["databases"]["global"]["db"],
   now = Date.now,
@@ -14,6 +15,7 @@ export function createChatMailboxStore(
       const encoded = encodeChatMailbox(input);
       const update = JSON.parse(encoded) as typeof input;
       const hash = createHash("sha256").update(encoded).digest("hex");
+
       return db.transaction(
         async (tx) => {
           await tx.execute(sql`select pg_advisory_xact_lock(hashtextextended('chat:append',0))`);
@@ -31,11 +33,14 @@ export function createChatMailboxStore(
               ),
             )
             .limit(1);
+
           if (receipt) {
             if (receipt.owner_uid !== update.owner || receipt.payload_hash !== hash)
               throw new Error("Conflicting chat mailbox replay");
+
             return "unchanged";
           }
+
           const selection = and(
             eq(chat_mailbox_message.kingdom_id, update.kingdomId),
             eq(chat_mailbox_message.owner_uid, update.owner),
@@ -43,9 +48,11 @@ export function createChatMailboxStore(
             inArray(chat_mailbox_message.chat_type, [...update.types]),
             lte(chat_mailbox_message.created_at, BigInt(update.requestedAt)),
           );
+
           if (update.action === "read")
             await tx.update(chat_mailbox_message).set({ read: true }).where(selection);
           else await tx.delete(chat_mailbox_message).where(selection);
+
           for (const type of update.types)
             await tx
               .insert(chat_mailbox_intent)
@@ -60,6 +67,7 @@ export function createChatMailboxStore(
                 cutoff: BigInt(update.requestedAt),
               })
               .onConflictDoNothing();
+
           await tx.insert(chat_mailbox_receipt).values({
             kingdom_id: update.kingdomId,
             operation_id: update.operationId,
@@ -68,6 +76,7 @@ export function createChatMailboxStore(
             payload_hash: hash,
             requested_at: BigInt(update.requestedAt),
           });
+
           return "applied";
         },
         { isolationLevel: "read committed", accessMode: "read write" },
@@ -86,6 +95,7 @@ export function createChatMailboxStore(
         limit > 1000
       )
         throw new Error("Invalid chat mailbox query");
+
       return db
         .select({
           id: chat_mailbox_message.message_id,

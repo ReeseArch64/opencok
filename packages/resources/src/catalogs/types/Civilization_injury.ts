@@ -7,4 +7,5 @@ export interface CivilizationInjuryDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type CivilizationInjuryDefinitionCatalog = CatalogTable<CivilizationInjuryDefinition>;

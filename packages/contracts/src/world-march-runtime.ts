@@ -1,5 +1,6 @@
 import type { Row } from "./rows";
 import type { MarchLifecycle } from "./world-march-lifecycle";
+
 export interface RuntimeMarch extends MarchLifecycle {
   scoutHonour?: boolean;
   scoutTargetOwner?: string;
@@ -18,6 +19,7 @@ export interface RuntimeMarch extends MarchLifecycle {
   targetResource: number;
   troopIds: Readonly<Record<string, string>>;
 }
+
 export interface WorldMutationState {
   mapSize?: number;
   placementClaims?: readonly number[];
@@ -38,6 +40,7 @@ export interface WorldMutationState {
   marches: readonly Row[];
   checkpoints: readonly Row[];
 }
+
 export interface WorldMutationWrite {
   scoutMails?: readonly import("./world-scout-report").WorldScoutMail[];
   sharedTimings?: readonly {

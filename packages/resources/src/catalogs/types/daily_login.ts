@@ -20,4 +20,5 @@ export interface DailyLoginDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type DailyLoginDefinitionCatalog = CatalogTable<DailyLoginDefinition>;

@@ -6,4 +6,5 @@ export interface WrTroopsPointDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type WrTroopsPointDefinitionCatalog = CatalogTable<WrTroopsPointDefinition>;

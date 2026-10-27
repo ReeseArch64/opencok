@@ -10,34 +10,47 @@ import { luckyFailure, luckyChoice } from "@opencok/rules/lucky-day";
 import { cityInteger } from "@opencok/rules/city-progression";
 import { luckyDayView } from "@opencok/mappings/lucky-day";
 import type { CityDomain } from "./city-progression";
+
 export function createLuckyDayDomain(random: (maximum: number) => number = randomInt): CityDomain {
   return {
     commands: ["luckyday.effect", "luckyday.init"],
     types: [],
     async prepare(context, command) {
       const state = context.state.luckyDay;
+
       if (!state) luckyFailure();
+
       const ruleContext = {
         kingdomId: context.rules.kingdomId,
         version: "12.06.0",
         now: Number(context.now),
       };
       const empty = () => ({ response: encode({}), event: null });
+
       if (!luckyDayFeatureOpen(context.state.profile, context.rules, ruleContext) || !state.server)
         return empty();
+
       const panel = luckyDayPanel(state.server, context.rules, ruleContext);
+
       if (!panel) return empty();
+
       const ids = (panel.para1 ?? "").split(";").filter(Boolean);
+
       if (!ids.length || ids.length > 128) return empty();
+
       const id = ids[cityInteger(random(ids.length), 0, ids.length - 1)]!,
         rule = context.rules.advanced.luckyDays?.get(id);
+
       if (!rule) luckyFailure();
+
       const castle = context.state.buildings.find((row) => num(row, "itemId") === 400000);
+
       if (
         command !== "luckyday.init" &&
         num(castle ?? {}, "level") < cityInteger(rule.open_level, 1)
       )
         return empty();
+
       const row: Row = state.day
         ? { ...state.day }
         : {
@@ -52,12 +65,16 @@ export function createLuckyDayDomain(random: (maximum: number) => number = rando
       const sameDay = (at: bigint) => at / 86400000n === context.now / 86400000n;
       const active =
         num(row, "status") === 1 && context.now < long(row, "time") && num(row, "lucky_id") > 0;
+
       if (command === "luckyday.init") {
         if (!state.day) context.write.luckyDay = row;
+
         const activeRule = active
           ? context.rules.advanced.luckyDays?.get(text(row, "lucky_id"))
           : rule;
+
         if (!activeRule) luckyFailure();
+
         return {
           response: encode({
             luckyday: sfs.object(
@@ -73,17 +90,24 @@ export function createLuckyDayDomain(random: (maximum: number) => number = rando
           event: null,
         };
       }
+
       if (active) return empty();
+
       if (!sameDay(long(row, "time"))) row.luckyCount = 0;
+
       const maximum = cityInteger(rule.times_24hr, 1);
+
       if (num(row, "luckyCount") >= maximum) return empty();
+
       if (
         num(row, "status") !== 1 &&
         context.now < long(row, "time") + BigInt(cityInteger(rule.open_time)) * 60000n
       )
         return empty();
+
       const draw = cityInteger(random(100), 0, 99) + 1;
       let effect = "-1";
+
       if (
         num(row, "unluckyCount") < cityInteger(rule.rnd_times) &&
         draw > cityInteger(rule.open_rate, 0, 100)
@@ -106,7 +130,9 @@ export function createLuckyDayDomain(random: (maximum: number) => number = rando
         });
         luckyDayEffects(context.state.profile, row, state.server, context.rules, ruleContext);
       }
+
       context.write.luckyDay = row;
+
       return {
         response: encode(
           luckyDayView({

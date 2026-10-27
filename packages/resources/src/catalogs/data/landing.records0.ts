@@ -1,4 +1,5 @@
 import type { LandingDefinition } from "../types/landing.ts";
+
 export const records: readonly LandingDefinition[] = [
   { "id": 7900, "type": 1, "gold": 2n, "rate": 200, "rate3": 50, "rate7": 50 },
   { "id": 7901, "type": 1, "gold": 4n, "rate": 500, "rate3": 50, "rate7": 50 },

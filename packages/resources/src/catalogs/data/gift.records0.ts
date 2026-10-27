@@ -1,4 +1,5 @@
 import type { GiftDefinition } from "../types/gift.ts";
+
 export const records: readonly GiftDefinition[] = [
   {
     "id": 30000,

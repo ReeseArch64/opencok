@@ -6,4 +6,5 @@ export interface ArmyUpEffectDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type ArmyUpEffectDefinitionCatalog = CatalogTable<ArmyUpEffectDefinition>;

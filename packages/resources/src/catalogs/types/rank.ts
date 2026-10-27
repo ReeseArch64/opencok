@@ -28,4 +28,5 @@ export interface RankDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type RankDefinitionCatalog = CatalogTable<RankDefinition>;

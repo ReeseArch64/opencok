@@ -32,7 +32,9 @@ export function createProvisioningStore(
             ),
           )
           .for("update");
+
         if (!account || account.disabled) throw new HttpError(403, "Identity unavailable");
+
         const [existing] = await tx
           .select()
           .from(character_provisioning)
@@ -42,16 +44,20 @@ export function createProvisioningStore(
               eq(character_provisioning.kingdomId, input.kingdomId),
             ),
           );
+
         if (existing)
           return {
             reservation: JSON.parse(existing.payload) as CharacterReservation,
             ready: existing.state === 1,
           };
+
         const characters = await tx
           .select({ realm: character_provisioning.kingdomId })
           .from(character_provisioning)
           .where(eq(character_provisioning.identityId, account.id));
+
         if (characters.length >= 2) throw new HttpError(409, "Character limit reached");
+
         await tx.execute(
           sql`select pg_advisory_xact_lock(hashtextextended(${`character-device:${input.kingdomId}:${input.deviceUuid}`}, 0))`,
         );
@@ -73,11 +79,15 @@ export function createProvisioningStore(
               eq(character_provisioning.kingdomId, input.kingdomId),
             ),
           );
+
         if (owned.length || pending.length)
           throw new HttpError(409, "Device already bound in this realm");
+
         let uid = "";
+
         for (let attempt = 0; attempt < 8; attempt++) {
           const candidate = (randomBytes(8).readBigUInt64BE() || 1n).toString();
+
           if (
             !(
               await tx
@@ -90,7 +100,9 @@ export function createProvisioningStore(
             break;
           }
         }
+
         if (!uid) throw new Error("Character identity unavailable");
+
         const reservation: CharacterReservation = {
           kingdomId: input.kingdomId,
           deviceUuid: input.deviceUuid,
@@ -110,6 +122,7 @@ export function createProvisioningStore(
           payload: JSON.stringify(reservation),
           createdAt: BigInt(timestamp),
         });
+
         return { reservation, ready: false };
       });
     },
@@ -125,8 +138,10 @@ export function createProvisioningStore(
             ),
           )
           .for("update");
+
         if (!account || account.disabled || account.id !== reservation.identityId)
           throw new HttpError(403, "Identity unavailable");
+
         const [row] = await tx
           .select()
           .from(character_provisioning)
@@ -137,8 +152,11 @@ export function createProvisioningStore(
             ),
           )
           .for("update");
+
         if (!row) throw new Error("Missing character reservation");
+
         const stored = JSON.parse(row.payload) as CharacterReservation;
+
         if (
           receipt.gameUid !== row.gameUid ||
           receipt.kingdomId !== row.kingdomId ||
@@ -146,8 +164,10 @@ export function createProvisioningStore(
           provisionHash(reservation) !== receipt.requestHash
         )
           throw new Error("Character receipt mismatch");
+
         if (row.state === 1)
           return { gameUid: row.gameUid, kingdomId: row.kingdomId, state: "ready" };
+
         const timestamp = BigInt(now());
         await tx.insert(account_new).values({
           gameUid: row.gameUid,
@@ -185,6 +205,7 @@ export function createProvisioningStore(
               eq(character_provisioning.kingdomId, row.kingdomId),
             ),
           );
+
         return { gameUid: row.gameUid, kingdomId: row.kingdomId, state: "ready" };
       });
     },

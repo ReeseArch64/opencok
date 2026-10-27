@@ -10,6 +10,7 @@ export function relayMailGiftOpenings(
 ): Promise<number> {
   if (!Number.isInteger(limit) || limit < 1 || limit > 1000)
     throw new Error("Invalid gift relay limit");
+
   return kingdom.transaction(
     async (tx) => {
       const pending = await tx
@@ -22,7 +23,9 @@ export function relayMailGiftOpenings(
         )
         .limit(limit)
         .for("update", { skipLocked: true });
+
       if (!pending.length) return 0;
+
       await global.transaction(
         async (log) => {
           for (const entry of pending)
@@ -56,6 +59,7 @@ export function relayMailGiftOpenings(
             ),
           ),
         );
+
       return pending.length;
     },
     { isolationLevel: "read committed", accessMode: "read write" },

@@ -13,6 +13,7 @@ export interface TimedActivity {
   status: number;
   data?: unknown;
 }
+
 export interface PreparedActivity {
   pushes?: readonly { command: string; body: Uint8Array }[];
   queueItemId?: string;
@@ -27,7 +28,9 @@ export interface PreparedActivity {
   event?: Uint8Array | null;
   responseKind?: "queue" | "nested";
 }
+
 export type ActivityAction = "start" | "restore" | "finish" | "cancel" | "reschedule";
+
 import type { InventoryState, InventoryPlan } from "./inventory";
 
 export interface ActivityEconomy {
@@ -67,6 +70,7 @@ export interface ActivityEconomy {
   ): void;
   item(itemId: string, delta: number): void;
 }
+
 export interface ActivityState extends InventoryState {
   accelerate?(activity: TimedActivity, remaining: bigint, economy: ActivityEconomy): Promise<void>;
   now: bigint;
@@ -84,20 +88,24 @@ export interface ActivityState extends InventoryState {
     economy: ActivityEconomy,
   ): Promise<Uint8Array>;
 }
+
 export interface ActivityPlan extends InventoryPlan {
   guideStep?: string;
   queues: readonly Row[];
   activities: readonly TimedActivity[];
 }
+
 export type ActivityExecutor = (
   command: MutationCommand,
   plan: (state: ActivityState) => Promise<ActivityPlan>,
 ) => Promise<Buffer>;
+
 export interface ProductionRate {
   at: bigint;
   perHour: bigint;
   capacity: bigint;
 }
+
 export interface ProductionAccount {
   buildingId: string;
   ownerId: string;
@@ -107,15 +115,18 @@ export interface ProductionAccount {
   remainder: bigint;
   rates: readonly ProductionRate[];
 }
+
 export interface ProductionState extends InventoryState {
   now: bigint;
   accounts: readonly ProductionAccount[];
   rates(building: Row, from: bigint): Promise<readonly ProductionRate[]>;
 }
+
 export interface ProductionPlan extends InventoryPlan {
   accounts: readonly ProductionAccount[];
   buildings: readonly Row[];
 }
+
 export type ProductionExecutor = (
   command: MutationCommand,
   plan: (state: ProductionState) => Promise<ProductionPlan>,

@@ -1,4 +1,5 @@
 import type { WapMatchDefinition } from "../types/wap_match.ts";
+
 export const records: readonly WapMatchDefinition[] = [
   {
     "id": "wap_3",

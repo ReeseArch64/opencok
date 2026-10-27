@@ -5,6 +5,7 @@ import { queue } from "@opencok/drizzle/schema/opencok_kingdom/queue";
 import { world_march_checkpoint } from "@opencok/drizzle/schema/opencok_kingdom/world_march_checkpoint";
 import { world_march } from "@opencok/drizzle/schema/opencok_kingdom/world_march";
 import type { MutationTransaction } from "./mutation";
+
 export async function pendingOwnedProgression(
   tx: MutationTransaction,
   kingdomId: number,
@@ -52,5 +53,6 @@ export async function pendingOwnedProgression(
         ),
       )
       .limit(1);
+
   return !!(pending || legacy || march || unregistered);
 }

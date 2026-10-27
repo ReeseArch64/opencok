@@ -29,4 +29,5 @@ export interface SuitequipmentDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type SuitequipmentDefinitionCatalog = CatalogTable<SuitequipmentDefinition>;

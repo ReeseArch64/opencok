@@ -13,19 +13,24 @@ import { cityInteger } from "@opencok/rules/city-progression";
 import type { CostRankingFacts } from "@opencok/contracts/continued-cost-ranking";
 import { fenceRealmTransaction, type RealmAuthority } from "./realm-authority";
 import type { Database } from "./game";
+
 export { createCostRankingRegistry } from "./continued-cost-ranking-global";
+
 export function createCostRankingFacts(
   db: Database["kingdom"]["db"],
   authority: RealmAuthority,
 ): CostRankingFacts {
   let caughtUp = false;
+
   return {
     ingest(now) {
       return db
         .transaction(async (tx) => {
           await tx.execute(sql`set local lock_timeout='1s'`);
           await fenceRealmTransaction(tx, authority);
+
           if (caughtUp) return 0;
+
           await tx.execute(sql`select pg_advisory_xact_lock(728229,${authority.kingdomId})`);
           const pending = await tx
             .select({
@@ -73,11 +78,14 @@ export function createCostRankingFacts(
               sql`${mutation_outbox.eventId} collate "C"`,
             )
             .limit(64);
+
           for (const { event, nickname, receipt } of pending) {
             if (receipt) await captureCostFact(tx, event, now);
             else {
               if (!nickname) throw new Error("Missing confirmed nickname consumption witness");
+
               const payment = nicknameChangePayment(nickname);
+
               if (
                 payment.kind !== "gold" ||
                 !payment.pendingEvent ||
@@ -86,6 +94,7 @@ export function createCostRankingFacts(
                 !Buffer.from(payment.pendingEvent.payload, "base64").equals(event.payload)
               )
                 throw new Error("Conflicting confirmed nickname consumption witness");
+
               await captureCostFact(
                 tx,
                 event,
@@ -103,17 +112,21 @@ export function createCostRankingFacts(
               );
             }
           }
+
           authority.assertReady();
+
           return pending.length;
         })
         .then((count) => {
           if (count < 64) caughtUp = true;
+
           return count;
         });
     },
     periods(cursor) {
       return db.transaction(async (tx) => {
         await fenceRealmTransaction(tx, authority);
+
         return tx
           .select()
           .from(periods)
@@ -139,6 +152,7 @@ export function createCostRankingFacts(
           )
           .orderBy(sql`${scores.total} desc`, sql`${scores.uid} collate "C"`)
           .limit(100);
+
         return rows.map((row) => ({
           uid: row.score.uid,
           score: row.score.total,

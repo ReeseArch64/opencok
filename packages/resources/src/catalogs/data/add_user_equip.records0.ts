@@ -1,4 +1,5 @@
 import type { AddUserEquipDefinition } from "../types/add_user_equip.ts";
+
 export const records: readonly AddUserEquipDefinition[] = [
   { "id": 10011305, "strengthLevel": 10, "count": 2 },
   { "id": 10011315, "strengthLevel": 10, "count": 2 },

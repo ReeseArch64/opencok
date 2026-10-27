@@ -1,4 +1,5 @@
 import type { TerritoryDefinition } from "../types/territory.ts";
+
 export const records: readonly TerritoryDefinition[] = [
   { "id": 6001, "condition1": 1, "condition2": 50, "towermunberAdd": 4 },
   { "id": 6002, "condition1": 50, "condition2": 5000000, "towermunberAdd": 3 },

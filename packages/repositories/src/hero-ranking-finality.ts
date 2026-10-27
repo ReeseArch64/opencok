@@ -9,7 +9,9 @@ import { long, num, text } from "@opencok/contracts/rows";
 import type { HeroRankFinalityRealm } from "@opencok/contracts/hero-ranking-finality";
 import { fenceRealmTransaction, type RealmAuthority } from "./realm-authority";
 import type { Database } from "./game";
+
 export { createHeroRankFinalityRegistry } from "./hero-ranking-finality-global";
+
 export function createHeroRankFinalityRealm(
   db: Database["kingdom"]["db"],
   authority: RealmAuthority,
@@ -24,9 +26,12 @@ export function createHeroRankFinalityRealm(
       .from(hero_rank_closure)
       .where(eq(hero_rank_closure.periodId, periodId))
       .for("update");
+
     if (!row) throw new Error("Missing owned hero rank closure");
+
     return row;
   };
+
   return {
     async candidates(now) {
       return db.transaction(async (tx) => {
@@ -59,6 +64,7 @@ export function createHeroRankFinalityRealm(
         const last = closures.at(-1);
         closureCursor =
           closures.length === 8 && last ? { end: last.endTime, id: last.periodId } : undefined;
+
         return { closures, events };
       });
     },
@@ -85,13 +91,16 @@ export function createHeroRankFinalityRealm(
         await tx.execute(sql`set local lock_timeout='1s'`);
         await fenceRealmTransaction(tx, authority, "update");
         await tx.execute(sql`select pg_advisory_xact_lock(728220,1)`);
+
         if (now < period.endTime + 300000n || !period.expectedRealms.includes(authority.kingdomId))
           throw new Error("Premature hero rank closure");
+
         const [prior] = await tx
           .select()
           .from(hero_rank_closure)
           .where(eq(hero_rank_closure.periodId, period.id))
           .for("update");
+
         if (prior) {
           if (
             prior.type !== period.type ||
@@ -100,8 +109,10 @@ export function createHeroRankFinalityRealm(
             prior.eventId !== period.eventId
           )
             throw new Error("Conflicting owned hero rank closure");
+
           return prior;
         }
+
         const events = await tx
           .select()
           .from(hero_event)
@@ -114,20 +125,28 @@ export function createHeroRankFinalityRealm(
           )
           .limit(2)
           .for("update");
+
         if (events.length > 1) throw new Error("Ambiguous owned hero rank event");
+
         const event = events[0];
+
         if (event && period.type >= 3 && event.serverGroup !== period.group)
           throw new Error("Unmatched hero rank closure");
+
         if (await pendingOwnedProgression(tx, authority.kingdomId, period.endTime, now)) return;
+
         let digest = heroEmptyDigest,
           scoreCount = 0n;
+
         if (event) {
           const [count] = await tx
             .select({ count: sql<string>`count(*)::text` })
             .from(score_act)
             .where(eq(score_act.actId, event.uuid));
           scoreCount = BigInt(count?.count ?? "0");
+
           if (scoreCount > 1000000n) throw new Error("Hero ranking seal population bound exceeded");
+
           const [proof] = await tx
             .select({
               digest: sql<string>`md5(coalesce(string_agg(length(${score_act.uid})::text||':'||${score_act.uid}||':'||coalesce(${score_act.level},0)::text||':'||${score_act.score}::text,'|' order by ${score_act.uid} collate "C"),''))`,
@@ -140,6 +159,7 @@ export function createHeroRankFinalityRealm(
             .set({ rewardStatus: 1 })
             .where(eq(hero_event.uuid, event.uuid));
         }
+
         const [closure] = await tx
           .insert(hero_rank_closure)
           .values({
@@ -159,15 +179,20 @@ export function createHeroRankFinalityRealm(
             kingdomRank: null,
           })
           .returning();
+
         if (!closure) throw new Error("Hero ranking closure was not persisted");
+
         authority.assertReady();
+
         return closure;
       });
     },
     page(closure) {
       return db.transaction(async (tx) => {
         await fenceRealmTransaction(tx, authority);
+
         if (!closure.actId || num(closure, "phase") !== 0) return [];
+
         const scores = await tx
           .select()
           .from(score_act)
@@ -179,6 +204,7 @@ export function createHeroRankFinalityRealm(
           )
           .orderBy(sql`${score_act.uid} collate "C"`)
           .limit(64);
+
         return scores.map((score) => ({
           event: {
             uuid: closure.actId!,
@@ -196,6 +222,7 @@ export function createHeroRankFinalityRealm(
       await db.transaction(async (tx) => {
         await fenceRealmTransaction(tx, authority);
         const row = await owned(tx, text(closure, "periodId"));
+
         if (
           row.phase !== 0 ||
           row.cursor !== text(closure, "cursor") ||
@@ -205,6 +232,7 @@ export function createHeroRankFinalityRealm(
           Buffer.compare(Buffer.from(cursor), Buffer.from(row.cursor)) < 0
         )
           throw new Error("Stale hero rank upload cursor");
+
         await tx
           .update(hero_rank_closure)
           .set({ cursor, processed })
@@ -215,6 +243,7 @@ export function createHeroRankFinalityRealm(
       await db.transaction(async (tx) => {
         await fenceRealmTransaction(tx, authority);
         const row = await owned(tx, text(closure, "periodId"));
+
         if (row.phase === 0)
           await tx
             .update(hero_rank_closure)
@@ -226,7 +255,9 @@ export function createHeroRankFinalityRealm(
       await db.transaction(async (tx) => {
         await fenceRealmTransaction(tx, authority);
         const row = await owned(tx, periodId);
+
         if (row.processed !== row.scoreCount) throw new Error("Incomplete owned hero rank upload");
+
         if (row.phase === 0)
           await tx
             .update(hero_rank_closure)
@@ -238,10 +269,14 @@ export function createHeroRankFinalityRealm(
       await db.transaction(async (tx) => {
         await fenceRealmTransaction(tx, authority);
         const row = await owned(tx, periodId);
+
         if (row.phase < 1) throw new Error("Unsealed hero ranking result");
+
         if (row.actId && kingdomRank && row.type >= 3) {
           const [event] = await tx.select().from(hero_event).where(eq(hero_event.uuid, row.actId));
+
           if (!event) throw new Error("Missing hero kingdom result event");
+
           await tx
             .update(hero_event)
             .set({ kingdomRank })
@@ -251,6 +286,7 @@ export function createHeroRankFinalityRealm(
             .set({ kingdomRank })
             .where(eq(hero_activity.uuid, event.activityId));
         }
+
         await tx
           .update(hero_rank_closure)
           .set({ phase: 2, kingdomRank })

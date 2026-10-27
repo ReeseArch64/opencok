@@ -37,4 +37,5 @@ export interface ShopNew926Definition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type ShopNew926DefinitionCatalog = CatalogTable<ShopNew926Definition>;

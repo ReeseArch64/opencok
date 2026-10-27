@@ -8,4 +8,5 @@ export interface TrainDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type TrainDefinitionCatalog = CatalogTable<TrainDefinition>;

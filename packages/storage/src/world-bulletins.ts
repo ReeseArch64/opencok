@@ -1,5 +1,7 @@
 import { DependencyError } from "@opencok/errors/dependency";
+
 type Command = (name: string, ...args: string[]) => Promise<unknown>;
+
 const script = `local length = redis.call('LLEN', KEYS[1])
 local first = tonumber(ARGV[1])
 local last = tonumber(ARGV[2])
@@ -16,6 +18,7 @@ for _, row in ipairs(rows) do
   if string.len(row) > 32767 or bytes > 1048576 then return redis.error_reply('world bulletin byte bound exceeded') end
 end
 return rows`;
+
 export async function loadWorldFightBulletins(
   command: Command,
   kingdomId: number,
@@ -36,6 +39,7 @@ export async function loadWorldFightBulletins(
     )
   )
     throw new DependencyError("world bulletin identity");
+
   const result = await command(
     "EVAL",
     script,
@@ -44,11 +48,13 @@ export async function loadWorldFightBulletins(
     String(start),
     String(end),
   );
+
   if (
     !Array.isArray(result) ||
     result.length > 4096 ||
     result.some((value) => typeof value !== "string")
   )
     throw new DependencyError("world bulletin archive");
+
   return result;
 }

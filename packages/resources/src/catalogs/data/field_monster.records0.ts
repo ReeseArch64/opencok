@@ -1,4 +1,5 @@
 import type { FieldMonsterDefinition } from "../types/field_monster.ts";
+
 export const records: readonly FieldMonsterDefinition[] = [
   {
     "id": 9400,

@@ -16,15 +16,19 @@ import { appendMutationRecords, type MutationTransaction } from "./mutation";
 import { fenceRealmTransaction, type RealmAuthority } from "./realm-authority";
 
 const snapshotKey = "realm.merge.effects";
+
 export const mergeCampaignActor = "realm.merge.campaign";
+
 export function createMergeCampaignStore(
   db: Database["kingdom"]["db"],
   authority: RealmAuthority,
   rules: readonly CampaignRule[],
 ) {
   const timers = mergeTimers(rules);
+
   if (new Set(timers.map((timer) => timer.name)).size !== timers.length)
     throw new Error("Duplicate merge campaign timer");
+
   const where = and(
     eq(trigger_var.type, 2),
     eq(trigger_var.uid, String(authority.kingdomId)),
@@ -43,33 +47,43 @@ export function createMergeCampaignStore(
       .for("share");
     const snapshot = decodeMergeEffects(row?.value);
     const source = server?.mergeAt ?? 0n;
+
     return {
       snapshot,
       mergeAt: source > 0n && source <= BigInt(Number.MAX_SAFE_INTEGER) ? Number(source) : 0,
     };
   };
+
   return {
     async refresh(at?: number) {
       return db.transaction(async (tx) => {
         await fenceRealmTransaction(tx, authority);
         await tx.execute(sql`select pg_advisory_xact_lock(728216, ${authority.kingdomId})`);
         const now = at ?? Date.now();
+
         if (!Number.isSafeInteger(now) || now <= 0 || now > Number.MAX_SAFE_INTEGER - 600000)
           throw new Error("Invalid merge campaign clock");
+
         const { snapshot, mergeAt } = await read(tx);
         const before = JSON.stringify(snapshot);
+
         for (const timer of timers) {
           if (!mergeTimerEligible(timer, mergeAt, now)) continue;
+
           const [saved] = await tx
             .select()
             .from(trigger_timmer)
             .where(eq(trigger_timmer.timmer_name, timer.name))
             .for("update");
+
           if (saved && saved.last_exec_millis < 0n)
             throw new Error("Invalid merge campaign timer clock");
+
           if (saved && BigInt(now) - saved.last_exec_millis < BigInt(timer.interval)) continue;
+
           if (saved && (saved.count < 0 || saved.count >= 2147483647))
             throw new Error("Invalid merge campaign timer count");
+
           for (const effect of timer.effects) {
             snapshot.effects = snapshot.effects.filter((existing) => existing.id !== effect.id);
             snapshot.effects.push({
@@ -80,6 +94,7 @@ export function createMergeCampaignStore(
               value: effect.value,
             });
           }
+
           await tx
             .insert(trigger_timmer)
             .values({
@@ -92,10 +107,13 @@ export function createMergeCampaignStore(
               set: { count: (saved?.count ?? 0) + 1, last_exec_millis: BigInt(now) },
             });
         }
+
         snapshot.effects.sort((a, b) => a.id - b.id);
         snapshot.notified = currentMergeEffects(snapshot, mergeAt, now).map((effect) => effect.id);
         const value = JSON.stringify(snapshot);
+
         if (before === value) return false;
+
         decodeMergeEffects(value);
         await tx
           .insert(trigger_var)
@@ -126,6 +144,7 @@ export function createMergeCampaignStore(
           BigInt(now),
         );
         authority.assertReady();
+
         return true;
       });
     },
@@ -134,8 +153,10 @@ export function createMergeCampaignStore(
         await fenceRealmTransaction(tx, authority);
         const { snapshot, mergeAt } = await read(tx);
         authority.assertReady();
+
         return currentMergeEffects(snapshot, mergeAt, now ?? Date.now());
       };
+
       return transaction ? current(transaction) : db.transaction(current);
     },
     async overlay(

@@ -1,4 +1,5 @@
 import type { SagaTowerScienceUpDefinition } from "../types/saga_tower_science_up.ts";
+
 export const records: readonly SagaTowerScienceUpDefinition[] = [
   {
     "id": 5429403,

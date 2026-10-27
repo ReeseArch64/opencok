@@ -9,6 +9,7 @@ import { cityAmount, cityInteger } from "@opencok/rules/city-progression";
 import { continuedCostClaims } from "@opencok/rules/continued-cost";
 import { long, text, type Row } from "@opencok/contracts/rows";
 import type { MutationTransaction } from "./mutation";
+
 export function readContinuedCost(tx: MutationTransaction, owner: string) {
   return {
     async load(type: number, start: bigint) {
@@ -27,22 +28,26 @@ export function readContinuedCost(tx: MutationTransaction, owner: string) {
         .orderBy(desc(activity_cost.periodStart))
         .limit(2)
         .for("update");
+
       return rows[0];
     },
   };
 }
+
 export async function writeContinuedCost(
   tx: MutationTransaction,
   owner: string,
   write: { row: Row; logs: readonly number[] },
 ) {
   const row = write.row;
+
   if (
     row.uid !== owner ||
     write.logs.length > 128 ||
     new Set(write.logs).size !== write.logs.length
   )
     throw new Error("Invalid continued-cost owner or logs");
+
   continuedCostClaims(row.getLv);
   const value = {
     uid: owner,
@@ -55,8 +60,10 @@ export async function writeContinuedCost(
     getLv: text(row, "getLv"),
     periodStart: cityAmount(row.periodStart),
   };
+
   if (value.periodStart <= 0n || value.updateTime < value.periodStart)
     throw new Error("Invalid continued-cost period");
+
   await tx
     .insert(activity_cost)
     .values(value)
@@ -64,6 +71,7 @@ export async function writeContinuedCost(
       target: [activity_cost.uid, activity_cost.type, activity_cost.periodStart],
       set: value,
     });
+
   for (const level of write.logs)
     await tx.insert(activity_cost_log).values({
       uid: randomUUID(),
@@ -104,10 +112,12 @@ export async function writeContinuedCostHide(
   value: number,
 ) {
   if (![0, 1].includes(value)) throw new Error("Invalid continued-cost privacy flag");
+
   const changed = await tx
     .update(user_mixed_info)
     .set({ costHide: value })
     .where(eq(user_mixed_info.uid, owner))
     .returning({ uid: user_mixed_info.uid });
+
   if (changed.length !== 1) throw new Error("Missing continued-cost privacy owner");
 }

@@ -34,6 +34,7 @@ export class ChatRoomAuthorizer {
       { group: ChatRoomGroup.Global, roomId: "global_public" },
       { group: ChatRoomGroup.Local, roomId: `local_${state.language}` },
     ];
+
     if (
       typeof state.allianceId === "string" &&
       /^[a-zA-Z0-9_-]{1,40}$/.test(state.allianceId) &&
@@ -44,6 +45,7 @@ export class ChatRoomAuthorizer {
         roomId: `alliance_${state.originalServerId}_${state.allianceId}`,
       });
     }
+
     return rooms;
   }
 }

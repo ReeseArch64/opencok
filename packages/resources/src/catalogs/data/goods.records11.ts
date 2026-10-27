@@ -1,4 +1,5 @@
 import type { GoodsDefinition } from "../types/goods.ts";
+
 export const records: readonly GoodsDefinition[] = [
   { "id": 36006884, "type": 4, "levelLimit": 1, "para1": 22606419, "color": 2, "isGift": 0 },
   { "id": 36006885, "type": 4, "levelLimit": 1, "para1": 22606420, "color": 2, "isGift": 0 },

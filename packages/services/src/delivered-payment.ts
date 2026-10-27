@@ -3,6 +3,7 @@ import { num, text, long, type Row } from "@opencok/contracts/rows";
 import type { Rules } from "@opencok/rules/game";
 import { normalRechargeFailure } from "@opencok/rules/normal-recharge";
 import { cityInteger } from "@opencok/rules/city-progression";
+
 export async function deliveredPayment(
   gateway: PaidGiftGateway | undefined,
   owner: string,
@@ -13,9 +14,11 @@ export async function deliveredPayment(
   read: (orderId: string, platform: string) => Promise<Row | undefined>,
 ) {
   if (!gateway) normalRechargeFailure();
+
   const proof = await gateway.delivered({ owner, kingdomId: rules.kingdomId, orderId, platform }),
     catalog = rules.advanced.castleExchanges?.get(proof?.exchangeId ?? ""),
     payment = await read(orderId, platform);
+
   if (
     !proof ||
     proof.owner !== owner ||
@@ -40,9 +43,12 @@ export async function deliveredPayment(
     Math.round(num(payment, "spend") * 100) !== proof.priceCents
   )
     normalRechargeFailure();
+
   const base = BigInt(cityInteger(catalog.gold_doller, 0));
   const gold = proof.rechargeGold ?? base;
+
   if (typeof gold !== "bigint" || gold < 0n || gold > base || gold > 2147483647n)
     normalRechargeFailure();
+
   return { proof, gold, payment };
 }

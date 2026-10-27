@@ -13,6 +13,7 @@ import { Rules } from "@opencok/rules/game";
 import { createHash } from "node:crypto";
 
 export const FOREVER = 9223372036854775807n;
+
 function serializeBuilding(row: Row, rules: Rules, next = false, now = Date.now()): Fields {
   const itemId = text(row, "itemId");
   const rule = next
@@ -43,38 +44,53 @@ function serializeBuilding(row: Row, rules: Rules, next = false, now = Date.now(
   );
   out.unlock_type = sfs.string(unlock.types);
   out.unlock_value = sfs.string(unlock.values);
+
   for (const key of ["wood", "stone", "iron", "food", "silver"] as const)
     out[key] = sfs.long(rules.cost(rule, key));
+
   out.time = sfs.int(rule.constructionSeconds ?? 0);
   out.exp = sfs.int(rule.experience ?? 0);
   out.civilization_level = sfs.int(rule.civilizationLevel ?? 0);
   out.resource = sfs.int(0);
   out.ban_luckyday = sfs.int(0);
   out.destroy_time = sfs.int(rule.demolitionSeconds ?? 0);
+
   if (rule.power !== undefined) out.power = sfs.int(rule.power);
+
   if (rule.unlockPayment !== undefined) {
     out.unlock_costType = sfs.int(rule.unlockPayment.paymentId);
     out.unlock_costValue = sfs.int(Number(rule.unlockPayment.amount));
   }
+
   const item = buildingItemCosts(rule);
+
   if (item !== undefined) out.item = sfs.string(item);
+
   const parameters = buildingDisplayParameters(rule);
+
   for (let index = 0; index < 5; index++) {
     const parameter = parameters[index];
+
     if (parameter !== undefined) out["para" + (index + 1)] = sfs.string(parameter);
   }
+
   const nextRule = rules.nextBuilding(itemId, level, rule.starLevel, rule.starProgress, now);
   const paras = buildingDisplayParameters(nextRule)
     .slice(0, 5)
     .filter((value) => value !== undefined);
+
   if (paras.length) out.nextLevelParas = sfs.string(paras.join(","));
+
   if (long(row, "refreshTime")) out.refreshTime = sfs.long(long(row, "refreshTime"));
+
   if (long(row, "effectTime")) {
     if (text(row, "itemId") === "417000") out.cdTime = sfs.long(long(row, "effectTime") / 1000n);
     else out.effectTime = sfs.long(long(row, "effectTime"));
   }
+
   return out;
 }
+
 function serializeQueue(row: Row, item: Fields = {}, helped = true): Fields {
   const timestamp = (key: string) => sfs.long(long(row, key) === FOREVER ? 0n : long(row, key));
   const result: Fields = {
@@ -87,15 +103,20 @@ function serializeQueue(row: Row, item: Fields = {}, helped = true): Fields {
     updateTime: timestamp("updateTime"),
     totalTime: sfs.long(long(row, "totalTime") || long(row, "updateTime") - long(row, "startTime")),
   };
+
   if (helped) result.isHelped = sfs.int(num(row, "isHelped"));
+
   return result;
 }
+
 function serializeResource(row: Row): Fields {
   const result: Fields = {};
+
   for (const key of ["wood", "stone", "iron", "food"]) {
     result[key] = sfs.long(long(row, key) < 0n ? 0n : long(row, key));
     result[`${key}_bind`] = sfs.long(long(row, `${key}bind`));
   }
+
   for (const key of [
     "silver",
     "chip",
@@ -107,13 +128,17 @@ function serializeResource(row: Row): Fields {
     "limestone",
   ])
     result[key] = sfs.int(Math.max(0, num(row, key)));
+
   result.dragonFood = sfs.int(num(row, "dragon_food"));
   result.dragonGold = sfs.int(num(row, "dragon_gold"));
+
   return result;
 }
+
 export function gold(profile: Row) {
   return long(profile, "gold") + long(profile, "paidGold") + long(profile, "paidSpecialGold");
 }
+
 function serializeUser(
   profile: Row,
   rules: Rules,
@@ -138,8 +163,10 @@ function serializeUser(
     material: sfs.long(long(profile, "skillMaterial")),
     allBuildScore: sfs.long(long(profile, "allianceBuildScore")),
   };
+
   for (const key of ["uid", "name", "allianceId", "openedPos", "pic", "guideStep"])
     result[key] = sfs.string(text(profile, key));
+
   for (const key of [
     "level",
     "exp",
@@ -150,6 +177,7 @@ function serializeUser(
     "crossFightSrcServerId",
   ])
     result[key] = sfs.int(num(profile, key));
+
   for (const key of [
     "paidGold",
     "paidSpecialGold",
@@ -164,6 +192,7 @@ function serializeUser(
     "csmodBalance",
   ])
     result[key] = sfs.long(long(profile, key));
+
   return result;
 }
 

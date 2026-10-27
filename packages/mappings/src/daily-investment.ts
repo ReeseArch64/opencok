@@ -2,6 +2,7 @@ import type { DailyInvestmentResponse } from "@opencok/contracts/responses/daily
 import { sfs, type Fields } from "@opencok/messages/sfs";
 import { dailyInvestmentSchema } from "@opencok/validations/daily-investment";
 import { validateFields } from "./validation";
+
 export function dailyInvestmentView(row: DailyInvestmentResponse): Fields {
   return validateFields(dailyInvestmentSchema, {
     id_table: sfs.int(row.id_table),

@@ -1,4 +1,5 @@
 import type { GeneralMaxNumDefinition } from "../types/general_max_num.ts";
+
 export const records: readonly GeneralMaxNumDefinition[] = [
   { "id": 221100, "generalId": 53500, "consume": [0, 30000], "maxNum": 0 },
   { "id": 221101, "generalId": 53500, "consume": [30001, 75000], "maxNum": 1 },

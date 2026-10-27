@@ -14,4 +14,5 @@ export interface ScienceRaceTypeDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type ScienceRaceTypeDefinitionCatalog = CatalogTable<ScienceRaceTypeDefinition>;

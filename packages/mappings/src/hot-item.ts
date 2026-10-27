@@ -2,8 +2,10 @@ import { sfs, type Fields } from "@opencok/messages/sfs";
 import { hotItemOffer, hotItemType, hotBusinessMan } from "@opencok/rules/hot-item";
 import { num, text, type Row } from "@opencok/contracts/rows";
 import type { Rules } from "@opencok/rules/game";
+
 export function hotItemView(row: Row, version: 2 | 3): Fields {
   const offer = hotItemOffer(row);
+
   return {
     itemNum: sfs.int(offer.itemNum),
     itemId: sfs.string(offer.itemId),
@@ -16,6 +18,7 @@ export function hotItemView(row: Row, version: 2 | 3): Fields {
     ...(version === 3 ? { kind: sfs.int(offer.kind) } : {}),
   };
 }
+
 export function hotBestItemView(row: Row): Fields {
   const id = text(row, "goodsId");
   hotItemOffer({
@@ -28,6 +31,7 @@ export function hotBestItemView(row: Row): Fields {
     para1: row.color ?? 0,
     refreshTime: 0n,
   });
+
   return {
     goodsId: sfs.string(id),
     color: sfs.int(num(row, "color")),
@@ -37,8 +41,10 @@ export function hotBestItemView(row: Row): Fields {
     type: sfs.int(hotItemType(id.split(";")[0]!)),
   };
 }
+
 export function hotBusinessManView(rules: Rules, now: bigint): Fields {
   const state = hotBusinessMan(rules, now);
+
   return {
     startTime: sfs.long(state.start),
     endTime: sfs.long(state.end),

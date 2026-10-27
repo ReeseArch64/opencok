@@ -1,4 +1,5 @@
 import type { NewSprRoundDefinition } from "../types/new_spr_round.ts";
+
 export const records: readonly NewSprRoundDefinition[] = [
   {
     "id": 2904000,

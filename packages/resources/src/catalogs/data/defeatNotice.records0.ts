@@ -1,4 +1,5 @@
 import type { DefeatNoticeDefinition } from "../types/defeatNotice.ts";
+
 export const records: readonly DefeatNoticeDefinition[] = [
   { "id": 102000, "type": 0, "object": 1, "mp": 50 },
   { "id": 102001, "type": 0, "object": 1, "effect": [10, 100] },

@@ -12,6 +12,7 @@ export function reconnectMail(
   resolveReward: (rewardId: string, owner: string) => string | null,
 ): ReconnectProgressWrite["mail"] {
   const result: ReconnectProgressWrite["mail"][number][] = [];
+
   for (const _uuid of generalResets) {
     result.push({
       ...avatarMailFromTemplate(
@@ -28,8 +29,10 @@ export function reconnectMail(
       itemIdFlag: 0,
     });
   }
+
   if (losses.weakened > 0 || losses.dead > 0) {
     const template = rules.mail.get(losses.dead > 0 ? "12083" : "12082");
+
     if (template) {
       const parameters =
         losses.dead > 0
@@ -51,5 +54,6 @@ export function reconnectMail(
       });
     }
   }
+
   return result;
 }

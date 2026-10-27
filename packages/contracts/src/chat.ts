@@ -45,12 +45,14 @@ export interface PlayerState {
 }
 
 export type RoomGroup = `${ChatRoomGroup}`;
+
 export interface Room {
   group: RoomGroup;
   roomId: string;
 }
 
 export type PlayerStateLoader = (uid: string) => Promise<PlayerState | null>;
+
 export type RoomAuthorizer = (uid: string, roomId: string) => Promise<Room | null>;
 
 export interface MessageInput {
@@ -86,6 +88,7 @@ export interface Connection {
 }
 
 export type Frame = Record<string, unknown>;
+
 export interface Peer {
   uid: string;
   connection: Connection;
@@ -100,13 +103,18 @@ export interface CommandContext extends Peer {
 }
 
 export type CommandHandler = (context: CommandContext) => Promise<unknown>;
+
 export type CommandHandlers = Record<string, CommandHandler>;
+
 export type Log = (event: { correlationId?: string; operation: string; category: string }) => void;
+
 export type HttpHandler = (request: IncomingMessage, response: ServerResponse) => void;
+
 export type AsyncHttpHandler = (
   request: IncomingMessage,
   response: ServerResponse,
 ) => Promise<void>;
+
 export type TokenVerifier = (
   token: unknown,
   claimedUid?: unknown,
@@ -191,7 +199,9 @@ export function isChatSessionTicket(value: unknown, now: number): value is ChatS
     !/^[A-Za-z0-9_-]{43}$/.test(value.session)
   )
     return false;
+
   const token = Buffer.from(value.session, "base64url");
+
   return (
     token.length === 32 &&
     token.toString("base64url") === value.session &&
@@ -207,10 +217,13 @@ export const chatDiscoveryPaths = [
   "/chat/server/links",
   "/chat/server/all",
 ] as const;
+
 export type ChatDiscoveryPath = (typeof chatDiscoveryPaths)[number];
+
 export interface ChatDiscoveryReply {
   code: 1;
   data: unknown;
   message?: string;
 }
+
 export type ChatDiscovery = (path: ChatDiscoveryPath) => Promise<ChatDiscoveryReply>;

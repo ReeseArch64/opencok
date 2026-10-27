@@ -27,7 +27,9 @@ function totemMail(
   params: readonly (string | number)[],
 ): AvatarSystemMail {
   const contents = javaMailBytes(`${template.message}|${params.join("|")}`);
+
   if (!template.message || !contents) totemFailure();
+
   return {
     uid: randomUUID().replaceAll("-", "") + "00",
     owner,
@@ -42,6 +44,7 @@ function totemMail(
     createTime: now,
   };
 }
+
 function mail(
   context: CityProgressionContext,
   rule: Rule,
@@ -49,13 +52,17 @@ function mail(
   params: readonly (string | number)[],
 ) {
   const template = context.rules.mail.get(rule[field] ?? "");
+
   if (!template) totemFailure();
+
   const write = (context.write.quests ??= {});
   write.mail = [...(write.mail ?? []), totemMail(template, context.owner, context.now, params)];
 }
+
 export async function expireTotems(store: TotemEffectStore, size: number) {
   for (;;) {
     const due = await store.due();
+
     for (const { activation, cities } of due) {
       const config = restoreTotemConfiguration(activation.payload as Buffer);
       const deliveries = cities.flatMap((city) => {
@@ -63,6 +70,7 @@ export async function expireTotems(store: TotemEffectStore, size: number) {
           ? text(activation, "allianceId") === text(city, "allianceId")
           : text(activation, "ownerUid") === text(city, "uid");
         const stateId = friendly ? config.friendlyStateId : config.enemyStateId;
+
         return stateId ? [{ owner: text(city, "uid"), stateId }] : [];
       });
       await store.expire(
@@ -71,17 +79,22 @@ export async function expireTotems(store: TotemEffectStore, size: number) {
         totemFootprint(num(activation, "pointId"), config.width, size),
       );
     }
+
     if (due.length < 64) break;
   }
 }
+
 export async function settleTotemEffects(store: TotemEffectStore, rules: Rules, size: number) {
   await expireTotems(store, size);
+
   for (;;) {
     const pending = await store.pending();
+
     for (const delivery of pending) {
       const at = long(delivery.activation, "dueAt");
       const config = restoreTotemConfiguration(delivery.activation.payload as Buffer);
       let plan;
+
       try {
         plan = temporaryEffect(
           await store.states(),
@@ -94,8 +107,10 @@ export async function settleTotemEffects(store: TotemEffectStore, rules: Rules, 
         );
       } catch (error) {
         if (!(error instanceof GameError) || error.code !== errors.locked) throw error;
+
         plan = { states: [], deleted: [] };
       }
+
       const state = plan.states[0];
       const push: Fields = state
         ? {
@@ -111,6 +126,7 @@ export async function settleTotemEffects(store: TotemEffectStore, rules: Rules, 
                 .filter(Boolean)
                 .map((pair) => {
                   const [id, value] = pair.split(";").map(Number);
+
                   return sfs.object({
                     effNum: sfs.int(id!),
                     effVal: sfs.int(value!),
@@ -128,15 +144,18 @@ export async function settleTotemEffects(store: TotemEffectStore, rules: Rules, 
       ]);
       await store.apply(delivery, plan.states, plan.deleted, message, encode(push));
     }
+
     if (pending.length < 64) break;
   }
 }
+
 export function createTotemDomain(size: number): CityDomain {
   return {
     commands: ["totem", "totem.tick", "totem.init"],
     types: [],
     async prepare(context, command, params) {
       if (command === "totem.tick") return { response: encode({}), event: null };
+
       if (command === "totem.init")
         return {
           response: encode({
@@ -151,6 +170,7 @@ export function createTotemDomain(size: number): CityDomain {
           }),
           event: null,
         };
+
       if (
         !serverFeature(context.rules, "totem_on", {
           kingdomId: context.rules.kingdomId,
@@ -159,10 +179,14 @@ export function createTotemDomain(size: number): CityDomain {
         })
       )
         totemFailure();
+
       const state = context.state.totems,
         world = context.state.worldMutation;
+
       if (!state || !world) totemFailure();
+
       const action = str(params, "M__REQUEST_ID__H");
+
       if (action === "info")
         return {
           response: encode({
@@ -177,33 +201,44 @@ export function createTotemDomain(size: number): CityDomain {
           }),
           event: null,
         };
+
       const pointId = int(params, "pointId"),
         points: Row[] = [],
         activations: Row[] = [];
       let totemId = 0,
         status = 0;
       const body: Fields = {};
+
       if (action === "put") {
         const item = context.economy.ownedItem?.(str(params, "itemUUid"));
         const goods = item ? context.rules.goods.get(item.itemId) : undefined;
+
         if (!item || item.count < 1 || goods?.type !== "47") totemFailure();
+
         const rule = context.rules.advanced.totems?.get(goods.para1 ?? "");
+
         if (!rule) totemFailure();
+
         totemId = cityInteger(rule.id, 1);
         const history = state.history.find((row) => num(row, "totemId") === totemId);
+
         if (
           history &&
           long(history, "putTime") + BigInt(cityInteger(rule.cd_time)) * 60000n > context.now
         )
           totemFailure();
+
         if (
           state.active.filter((row) => row.ownerUid === context.owner).length >=
           cityInteger(context.rules.items.get("totem")?.k1 ?? 1, 1)
         )
           totemFailure();
+
         const footprint = totemFootprint(pointId, cityInteger(rule.cover_area, 1), size);
+
         for (const id of footprint) {
           const point = world.points.find((row) => num(row, "id") === id);
+
           if (
             !point ||
             text(point, "ownerId") ||
@@ -216,6 +251,7 @@ export function createTotemDomain(size: number): CityDomain {
             num(point, "resInitValue") > 0
           )
             totemFailure();
+
           points.push({
             ...point,
             pointType: id === pointId ? 64 : 65,
@@ -227,6 +263,7 @@ export function createTotemDomain(size: number): CityDomain {
             startTime: context.now,
           });
         }
+
         const alliance = text(context.state.profile, "allianceId");
         const nearby = state.active.filter(
           (row) =>
@@ -245,14 +282,19 @@ export function createTotemDomain(size: number): CityDomain {
           context.now,
           size,
         );
+
         for (const point of points) point.fireTime = dueAt;
+
         for (const row of nearby)
           if (long(row, "dueAt") > dueAt) {
             activations.push({ ...row, dueAt, expectedDueAt: long(row, "dueAt") });
             const point = world.points.find((p) => num(p, "id") === num(row, "pointId"));
+
             if (!point) totemFailure();
+
             points.push({ ...point, fireTime: dueAt });
           }
+
         activations.push({
           id: randomUUID().replaceAll("-", ""),
           ownerUid: context.owner,
@@ -264,7 +306,9 @@ export function createTotemDomain(size: number): CityDomain {
           status: 0,
           payload: pinTotemConfiguration(context.rules, rule),
         });
+
         if (goods.permanent_props !== "1") context.economy.item(item.itemId, -1);
+
         context.write.totems = { history: [{ uid: context.owner, totemId, putTime: context.now }] };
         mail(context, rule, "place_mail", [
           context.rules.kingdomId,
@@ -279,17 +323,22 @@ export function createTotemDomain(size: number): CityDomain {
         const activation = state.active.find(
           (row) => num(row, "pointId") === pointId && row.ownerUid === context.owner,
         );
+
         if (!activation) totemFailure();
+
         totemId = num(activation, "totemId");
         const config = restoreTotemConfiguration(activation.payload as Buffer);
+
         for (const id of totemFootprint(pointId, config.width, size)) {
           const point = world.points.find((row) => num(row, "id") === id);
+
           if (
             !point ||
             text(point, "ownerId") !== context.owner ||
             ![64, 65].includes(num(point, "pointType"))
           )
             totemFailure();
+
           points.push({
             ...point,
             pointType: 0,
@@ -301,14 +350,19 @@ export function createTotemDomain(size: number): CityDomain {
             fireTime: 0n,
           });
         }
+
         activations.push({ ...activation, status: 2, expectedDueAt: long(activation, "dueAt") });
         const rule = context.rules.advanced.totems?.get(String(totemId));
+
         if (!rule) totemFailure();
+
         mail(context, rule, "recycle_mail", [context.rules.kingdomId, pointId]);
         status = 2;
       } else totemFailure();
+
       context.write.totems = { ...context.write.totems, activations };
       context.write.worldMutation = { points };
+
       return {
         response: encode(body),
         event: encode({

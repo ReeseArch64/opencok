@@ -33,7 +33,9 @@ export function createNicknameChangeRuntime(options: {
 }) {
   const goods = () => {
     const row = options.rules.goods.get("200021");
+
     if (!row) throw new Error("Nickname goods unavailable");
+
     return row;
   };
   const publish = async (
@@ -50,6 +52,7 @@ export function createNicknameChangeRuntime(options: {
       signal,
     );
     signal.throwIfAborted();
+
     return delivered;
   };
   const store = createNicknameChangeStore(
@@ -69,20 +72,26 @@ export function createNicknameChangeRuntime(options: {
   const deliver = async (owner: string, operationId: string, now: number) => {
     await options.prepareRefund?.(owner, now);
     const record = await store.recover(owner, operationId, now);
+
     if (record.state !== "committed") return;
+
     for (const effect of [
       () => {
         if (!deliverAlliance) throw new Error("Alliance delivery unavailable");
+
         return deliverAlliance(owner, operationId, now);
       },
       () => {
         if (!options.chat) throw new Error("Chat delivery unavailable");
+
         return store.deliverChat(owner, operationId, options.chat, options.timeoutMs);
       },
       () => store.deliverThrone(owner, operationId, now),
       () => {
         const shared = options.sharedUser;
+
         if (!shared) throw new Error("Shared user delivery unavailable");
+
         return store.deliverSharedUser(
           owner,
           operationId,
@@ -104,6 +113,7 @@ export function createNicknameChangeRuntime(options: {
       }
     }
   };
+
   return {
     store,
     deliver,
@@ -111,32 +121,40 @@ export function createNicknameChangeRuntime(options: {
     async command(owner: string, operationId: string, validatedName: string, now: number) {
       if (!deliverAlliance || !options.chat || !options.sharedUser)
         throw new Error("Nickname runtime incomplete");
+
       await options.prepareRefund?.(owner, now);
       const record = await store.change(owner, operationId, validatedName, now);
+
       try {
         await deliver(owner, operationId, now);
       } catch {
         options.report();
       }
+
       return record;
     },
     async change(owner: string, operationId: string, validatedName: string, now: number) {
       await options.prepareRefund?.(owner, now);
+
       return nicknameChangeReply(await store.change(owner, operationId, validatedName, now));
     },
     async recover(owner: string, operationId: string, now: number) {
       await options.prepareRefund?.(owner, now);
+
       return nicknameChangeReply(await store.recover(owner, operationId, now));
     },
     deliverNotifications: (owner: string, operationId: string) =>
       store.deliverNotifications(owner, operationId, publish, options.timeoutMs),
     async deliverAlliance(owner: string, operationId: string, now: number) {
       if (!deliverAlliance) throw new Error("Alliance task runtime unavailable");
+
       return deliverAlliance(owner, operationId, now);
     },
     async deliverSharedUser(owner: string, operationId: string, now: number) {
       const shared = options.sharedUser;
+
       if (!shared) throw new Error("Shared user runtime unavailable");
+
       return store.deliverSharedUser(
         owner,
         operationId,

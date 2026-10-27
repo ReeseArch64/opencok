@@ -2,6 +2,7 @@ import { sfs } from "@opencok/messages/sfs";
 import { rewardPreviewArray } from "./rewards";
 import type { NormalRechargePeriod } from "@opencok/contracts/normal-recharge";
 import type { RewardPreview } from "@opencok/contracts/rewards";
+
 export function normalRechargeView(
   period: NormalRechargePeriod,
   points: bigint,
@@ -9,6 +10,7 @@ export function normalRechargeView(
   rewards: readonly { point: number; rewards: readonly RewardPreview[]; important?: string }[],
 ) {
   if (rewards.length > 128) throw new Error("Recharge projection bound exceeded");
+
   return {
     repayinfo: sfs.object({
       faceInfo: sfs.string(face),

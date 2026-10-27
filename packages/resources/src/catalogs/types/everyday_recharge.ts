@@ -7,4 +7,5 @@ export interface EverydayRechargeDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type EverydayRechargeDefinitionCatalog = CatalogTable<EverydayRechargeDefinition>;

@@ -1,4 +1,5 @@
 import type { DianjiRewardDefinition } from "../types/dianji_reward.ts";
+
 export const records: readonly DianjiRewardDefinition[] = [
   {
     "id": 20000,

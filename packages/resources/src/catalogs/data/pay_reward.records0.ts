@@ -1,4 +1,5 @@
 import type { PayRewardDefinition } from "../types/pay_reward.ts";
+
 export const records: readonly PayRewardDefinition[] = [
   {
     "id": 9011001,

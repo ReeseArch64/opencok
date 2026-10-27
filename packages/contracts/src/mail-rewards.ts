@@ -7,12 +7,14 @@ export interface MailRewardSelection {
   labels: readonly number[];
   batch: boolean;
 }
+
 export type MailRewardExecutor = (
   input: MutationCommand,
   selection: MailRewardSelection,
   grant: (state: InventoryState, entry: Row, now: number) => Promise<InventoryPlan>,
   combine: (responses: readonly Buffer[], ids: readonly string[]) => Buffer,
 ) => Promise<Buffer>;
+
 export interface MailRewardEntry {
   category: string;
   itemId: string;

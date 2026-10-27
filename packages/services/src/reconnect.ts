@@ -10,12 +10,14 @@ import { decodeGeneralAbilities } from "./profile.ts";
 
 export function reconnectOwnGenerals(state: ReconnectBaseState, rules: Rules, now: number) {
   if (!state.profile) throw new GameError(errors.unsupported, "reconnect");
+
   const abilities = new Map(
     state.generals.map((general) => [
       text(general, "uuid"),
       decodeGeneralAbilities(general.ability, false),
     ]),
   );
+
   return reconnectGenerals(
     ownGeneralSnapshots(
       state.generals,
@@ -34,6 +36,8 @@ export async function reconnectFriendshipMine(
   rules: Rules,
 ) {
   if (!uid.trim() || uid.length > 40) throw new GameError(errors.unsupported, "reconnect");
+
   const mine = await store.friendshipMine(uid, () => initialFriendshipMine(rules));
+
   return reconnectMine(friendshipMineView(mine, rules));
 }

@@ -14,4 +14,5 @@ export interface ReforgeRandomDefinition {
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
+
 export type ReforgeRandomDefinitionCatalog = CatalogTable<ReforgeRandomDefinition>;

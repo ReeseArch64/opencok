@@ -1,6 +1,7 @@
 import { sfs, type Fields } from "@opencok/messages/sfs";
 import { long, num, text, type Row } from "@opencok/contracts/rows";
 import type { DeliveredGiftProof } from "@opencok/contracts/paid-gifts";
+
 export function paidGiftEvidence(proof: DeliveredGiftProof): Fields {
   return {
     owner: sfs.string(proof.owner),
@@ -13,6 +14,7 @@ export function paidGiftEvidence(proof: DeliveredGiftProof): Fields {
     occurredAt: sfs.long(proof.occurredAt),
   };
 }
+
 export function redPacketInfo(packet: Row): Fields {
   return {
     uid: sfs.string(text(packet, "uid")),
@@ -26,6 +28,7 @@ export function redPacketInfo(packet: Row): Fields {
     sendTime: sfs.long(long(packet, "sendTime")),
   };
 }
+
 export function redPacketRecord(record: Row): Fields {
   return {
     player: sfs.string(text(record, "player")),

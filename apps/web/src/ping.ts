@@ -1,4 +1,5 @@
 export const HEALTH_URL = "http://192.168.1.104/_health.php";
+
 const TIMEOUT_MS = 3_000;
 
 export interface PingResult {
@@ -14,6 +15,7 @@ export async function probeHttp(
 ): Promise<PingResult> {
   const started = performance.now();
   let online = false;
+
   try {
     const response = await request(url, {
       method: "GET",
@@ -25,6 +27,7 @@ export async function probeHttp(
   } catch {
     online = false;
   }
+
   return {
     online,
     latencyMs: online ? Math.round(performance.now() - started) : null,
@@ -37,6 +40,7 @@ export function createPingHandler(probe: () => Promise<PingResult> = probeHttp) 
   let pending: Promise<PingResult> | undefined;
   let last: PingResult | undefined;
   let lastAt = 0;
+
   return async () => {
     if (!last || Date.now() - lastAt >= 1_000) {
       pending ??= probe().finally(() => {
@@ -45,6 +49,7 @@ export function createPingHandler(probe: () => Promise<PingResult> = probeHttp) 
       last = await pending;
       lastAt = Date.now();
     }
+
     return Response.json(last, { headers: { "Cache-Control": "no-store" } });
   };
 }

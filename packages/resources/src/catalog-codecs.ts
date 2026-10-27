@@ -1,4 +1,5 @@
 import type { CatalogCodec } from "./catalog-model.ts";
+
 export const catalogCodecs: Readonly<Record<string, CatalogCodec>> = {
   "3th_anniversary": {
     "id": { "field": "id" },

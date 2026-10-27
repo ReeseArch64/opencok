@@ -15,6 +15,7 @@ import { cityInteger } from "@opencok/rules/city-progression";
 import { packetStatus, packetDistribution } from "@opencok/rules/red-packets";
 import { CampaignPlanner } from "./local-campaign";
 import type { CityDomain, CityProgressionContext } from "./city-progression";
+
 export function paidGiftOperation(owner: string, orderId: string, platform: string) {
   if (
     !orderId ||
@@ -25,8 +26,10 @@ export function paidGiftOperation(owner: string, orderId: string, platform: stri
     platform.includes("\0")
   )
     campaignFailure();
+
   return `paid-gift:${createHash("sha256").update(`${owner}\0${platform}\0${orderId}`).digest("hex")}`;
 }
+
 export function paidGiftParameters(owner: string, orderId: string, platform: string): Fields {
   return {
     orderId: sfs.string(orderId),
@@ -34,9 +37,12 @@ export function paidGiftParameters(owner: string, orderId: string, platform: str
     operationId: sfs.string(paidGiftOperation(owner, orderId, platform)),
   };
 }
+
 export function createSystemPacket(context: CityProgressionContext, parameters: string) {
   const parts = parameters.split(";");
+
   if (parts.length !== 8 || !parts[5]) campaignFailure();
+
   const range = cityInteger(parts[0], 0, 1),
     type = cityInteger(parts[1], 0, 1),
     ceiling = cityInteger(parts[2], 1),
@@ -49,7 +55,9 @@ export function createSystemPacket(context: CityProgressionContext, parameters: 
       range === 0
         ? String(context.rules.kingdomId)
         : text(context.state.campaignProfile ?? {}, "allianceId");
+
   if (!rangeId || total < people || !context.economy.event) campaignFailure();
+
   const packet: Row = {
     uid: randomUUID().replaceAll("-", ""),
     range,
@@ -93,11 +101,14 @@ export function createSystemPacket(context: CityProgressionContext, parameters: 
     }),
   });
 }
+
 function goldTotal(context: CityProgressionContext) {
   return context.balance("gold");
 }
+
 function profileEligible(context: CityProgressionContext) {
   const profile = context.state.profile;
+
   return (
     num(profile, "serverId") === context.rules.kingdomId &&
     num(profile, "crossFightSrcServerId") <= 0 &&
@@ -105,16 +116,20 @@ function profileEligible(context: CityProgressionContext) {
     long(profile, "banTime") <= context.now
   );
 }
+
 function packetAudience(context: CityProgressionContext, packet: Row) {
   if (!profileEligible(context)) return false;
+
   if (num(packet, "range") === 0)
     return text(packet, "rangeId") === String(context.rules.kingdomId);
+
   return (
     num(packet, "range") === 1 &&
     text(packet, "rangeId") !== "" &&
     text(packet, "rangeId") === text(context.state.campaignProfile ?? {}, "allianceId")
   );
 }
+
 function castle(context: CityProgressionContext, withStar = true) {
   return context.state.buildings.reduce(
     (level, row) =>
@@ -124,6 +139,7 @@ function castle(context: CityProgressionContext, withStar = true) {
     0,
   );
 }
+
 export function createRedPacketDomain(gateway?: PaidGiftGateway): CityDomain {
   return {
     commands: [
@@ -136,15 +152,19 @@ export function createRedPacketDomain(gateway?: PaidGiftGateway): CityDomain {
     types: [],
     async prepare(context, command, params) {
       const reader = context.state.redPackets;
+
       if (!reader || !profileEligible(context)) campaignFailure();
+
       if (command === "campaign.paid.gift") {
         const orderId = str(params, "orderId"),
           platform = str(params, "platform");
+
         if (
           !gateway ||
           str(params, "operationId") !== paidGiftOperation(context.owner, orderId, platform)
         )
           campaignFailure();
+
         const proof = await gateway.delivered({
             owner: context.owner,
             kingdomId: context.rules.kingdomId,
@@ -153,6 +173,7 @@ export function createRedPacketDomain(gateway?: PaidGiftGateway): CityDomain {
           }),
           payment = await reader.payment(orderId, platform),
           catalog = context.rules.advanced.castleExchanges?.get(proof?.exchangeId ?? "");
+
         if (
           !proof ||
           proof.owner !== context.owner ||
@@ -176,18 +197,22 @@ export function createRedPacketDomain(gateway?: PaidGiftGateway): CityDomain {
           Math.round(num(payment, "spend") * 100) !== proof.priceCents
         )
           campaignFailure();
+
         new CampaignPlanner(
           Object.assign(Object.create(context) as CityProgressionContext, {
             now: proof.occurredAt,
           }),
           { exchange_id: proof.exchangeId, gift_product_id: proof.productId },
         ).event(56, proof.exchangeId);
+
         return { response: encode({ evidence: sfs.object(paidGiftEvidence(proof)) }), event: null };
       }
+
       if (command === "redPackets.sd") {
         const message = [...str(params, "msg")]
             .filter((value) => {
               const code = value.codePointAt(0)!;
+
               return code >= 32 && (code < 127 || code > 159);
             })
             .join(""),
@@ -202,6 +227,7 @@ export function createRedPacketDomain(gateway?: PaidGiftGateway): CityDomain {
             range === 0
               ? String(context.rules.kingdomId)
               : text(context.state.campaignProfile ?? {}, "allianceId");
+
         if (
           !message.trim() ||
           [...message].length > 500 ||
@@ -222,6 +248,7 @@ export function createRedPacketDomain(gateway?: PaidGiftGateway): CityDomain {
           !context.economy.event
         )
           campaignFailure();
+
         const duration = BigInt(cityInteger(rule.para2, 1)) * 3600000n;
         context.economy.consumeItem(uuid, 1);
         context.economy.gold(-BigInt(total));
@@ -266,6 +293,7 @@ export function createRedPacketDomain(gateway?: PaidGiftGateway): CityDomain {
             }),
           }),
         });
+
         return {
           response: encode({
             uid: sfs.string(text(packet, "uid")),
@@ -279,6 +307,7 @@ export function createRedPacketDomain(gateway?: PaidGiftGateway): CityDomain {
           event: null,
         };
       }
+
       if (command === "redPackets.rvd.id")
         return {
           response: encode({
@@ -294,9 +323,12 @@ export function createRedPacketDomain(gateway?: PaidGiftGateway): CityDomain {
           }),
           event: null,
         };
+
       if (int(params, "serverId") !== context.rules.kingdomId) campaignFailure();
+
       const uid = str(params, "uid"),
         loaded = await reader.packet(uid);
+
       if (!loaded)
         return {
           response: encode(
@@ -306,26 +338,33 @@ export function createRedPacketDomain(gateway?: PaidGiftGateway): CityDomain {
           ),
           event: null,
         };
+
       const packet = { ...loaded.packet },
         records = [...loaded.records];
+
       if (!packetAudience(context, packet)) campaignFailure();
+
       const system = text(packet, "sender") === "3000002",
         prior = records.find((row) => text(row, "player") === context.owner),
         eligible =
           !system ||
           castle(context) >= cityInteger(context.rules.items.get("red_envelopes")?.k1, 1);
       let status = eligible ? packetStatus(packet, Boolean(prior), context.now) : 4;
+
       if (command === "redPackets.status")
         return {
           response: encode({ server: sfs.int(context.rules.kingdomId), status: sfs.int(status) }),
           event: null,
         };
+
       if (!eligible)
         return {
           response: encode({ key_goldSum: sfs.string(uid), status: sfs.int(4) }),
           event: null,
         };
+
       let add = 0;
+
       if (
         status === 1 &&
         !prior &&
@@ -335,6 +374,7 @@ export function createRedPacketDomain(gateway?: PaidGiftGateway): CityDomain {
         const total = cityInteger(num(packet, "total"), 1),
           remain = cityInteger(num(packet, "remain"), 1, total),
           people = cityInteger(num(packet, "totalPeople"), 1, 4096);
+
         if (
           num(packet, "curPeople") !== records.length ||
           records.length >= people ||
@@ -342,6 +382,7 @@ export function createRedPacketDomain(gateway?: PaidGiftGateway): CityDomain {
           records.reduce((sum, record) => sum + num(record, "value"), remain) !== total
         )
           campaignFailure();
+
         add = packetDistribution(
           packet,
           context.rules.items.get("redenvelope")?.k1 ?? "",
@@ -367,6 +408,7 @@ export function createRedPacketDomain(gateway?: PaidGiftGateway): CityDomain {
         );
         status = 0;
       }
+
       return {
         response: encode({
           ...(add > 0 ? { add: sfs.int(add), gold: sfs.long(goldTotal(context)) } : {}),
@@ -384,6 +426,7 @@ export function createRedPacketDomain(gateway?: PaidGiftGateway): CityDomain {
     },
   };
 }
+
 export async function publishRedPacketAnnouncement(
   payload: Uint8Array,
   owner: string,
@@ -396,6 +439,7 @@ export async function publishRedPacketAnnouncement(
     body = fields(data.body),
     end = data.endTime?.value,
     allianceId = str(data, "allianceId");
+
   if (
     str(data, "owner") !== owner ||
     typeof end !== "bigint" ||
@@ -403,14 +447,18 @@ export async function publishRedPacketAnnouncement(
     !str(body, "redPackets")
   )
     throw new Error("Invalid red packet announcement");
+
   if (BigInt(now) >= end) return;
+
   const owners = [...new Set(online)];
+
   for (let start = 0; start < owners.length; start += 500) {
     const recipients = await audience.select(
       owners.slice(start, start + 500),
       allianceId || undefined,
       BigInt(now),
     );
+
     for (let offset = 0; offset < recipients.length; offset += 32)
       await Promise.all(
         recipients
@@ -423,9 +471,12 @@ export async function publishRedPacketAnnouncement(
 export function settleRedPacketExpiry(store: RedPacketExpiryStore, rules: Rules, now: bigint) {
   return store.settle(now, (packet) => {
     if (text(packet, "sender") === "3000002" || num(packet, "remain") <= 0) return null;
+
     const template = rules.mail.get("11636"),
       contents = javaMailBytes(template?.message);
+
     if (!template || !contents || num(packet, "remain") > num(packet, "total")) campaignFailure();
+
     const uid =
       createHash("sha256")
         .update(`red-packet-refund:${text(packet, "uid")}`)
@@ -444,6 +495,7 @@ export function settleRedPacketExpiry(store: RedPacketExpiryStore, rules: Rules,
       reply: 0,
       createTime: long(packet, "endTime"),
     };
+
     return {
       mail,
       event: {

@@ -1,4 +1,5 @@
 import type { KnightTitleDefinition } from "../types/knight_title.ts";
+
 export const records: readonly KnightTitleDefinition[] = [
   {
     "id": 4300001,

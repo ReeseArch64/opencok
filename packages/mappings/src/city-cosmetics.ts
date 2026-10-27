@@ -4,12 +4,17 @@ import { sfs, type Fields } from "@opencok/messages/sfs";
 import type { CityCosmeticResponse } from "@opencok/contracts/responses/city-cosmetics";
 import { cityCosmeticSchema, cityCosmeticUpdateSchema } from "@opencok/validations/city-cosmetics";
 import { validateFields } from "./validation";
+
 export function cityCosmeticFields(value: CityCosmeticResponse): Fields {
   const body: Fields = {};
+
   if (value.sid !== undefined) body.sid = sfs.int(value.sid);
+
   if (value.set !== undefined) body.set = sfs.int(value.set);
+
   for (const key of ["bubble", "overlap"] as const) {
     const status = value[key];
+
     if (status)
       body[key] = sfs.object({
         sid: sfs.int(status.sid),
@@ -17,8 +22,10 @@ export function cityCosmeticFields(value: CityCosmeticResponse): Fields {
         ...(status.count === undefined ? {} : { count: sfs.int(status.count) }),
       });
   }
+
   return validateFields(cityCosmeticSchema, body);
 }
+
 export function cityCosmeticUpdate(
   value: CityCosmeticResponse,
   uid: string,
@@ -30,6 +37,7 @@ export function cityCosmeticUpdate(
     worldpointid: sfs.int(point),
   });
 }
+
 export function avatarActivationResponse(row: Row, rules: Rules, previous?: number): Fields {
   const rule = rules.power.statuses?.get(String(row.stateId)),
     end = row.endTime === 9223372036854775807n ? 2147000000000n : BigInt(String(row.endTime)),
@@ -40,6 +48,7 @@ export function avatarActivationResponse(row: Row, rules: Rules, previous?: numb
             .split("|")
             .filter(Boolean)
             .map((pair) => pair.split(";").map(Number));
+
   return {
     effectState: sfs.object({
       [String(row.stateId)]: sfs.long(end),

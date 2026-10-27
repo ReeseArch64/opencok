@@ -3,28 +3,37 @@ import { num, text, type Row } from "@opencok/contracts/rows";
 import { cityInteger } from "./city-progression";
 import { expeditionRankingLimit } from "./expedition-ranking";
 import type { Rules } from "./game";
+
 export function expeditionAwardId(periodId: string, stage: number, owner: string, kind = "bundle") {
   return createHash("sha256")
     .update(JSON.stringify([periodId, stage, owner, kind]))
     .digest("hex")
     .slice(0, 32);
 }
+
 export function expeditionAwardOperation(id: string) {
   return `expedition-award:${id}`;
 }
+
 function rangeReward(value: string, rank: number) {
   let found: string | undefined;
+
   for (const entry of value.split("|").filter(Boolean)) {
     const match = /^(\d+)-(\d+);(\d+)$/.exec(entry);
+
     if (!match || Number(match[1]) > Number(match[2]))
       throw new Error("Invalid expedition reward range");
+
     if (rank >= Number(match[1]) && rank <= Number(match[2])) {
       if (found) throw new Error("Ambiguous expedition reward range");
+
       found = match[3];
     }
   }
+
   return found;
 }
+
 export function expeditionStagePrizes(
   closure: Row,
   member: Row,
@@ -35,11 +44,16 @@ export function expeditionStagePrizes(
     definition = [...(rules.advanced.expeditionStages?.values() ?? [])].find(
       (row) => Number(row.stage) === stage,
     );
+
   if (!definition) throw new Error("Missing expedition stage reward definition");
+
   const plans: { kind: string; reward: string; template: string; parameters: string[] }[] = [],
     claims: number[] = [];
+
   if (!member.eligibility) return { plans, claims };
+
   const eligibility: unknown = JSON.parse(text(member, "eligibility"));
+
   if (
     !eligibility ||
     typeof eligibility !== "object" ||
@@ -52,11 +66,14 @@ export function expeditionStagePrizes(
     eligibility.sciences.some((id) => typeof id !== "string" || id.length > 20)
   )
     throw new Error("Invalid expedition reward eligibility");
+
   if (!eligibility.home) return { plans, claims };
+
   const level = cityInteger(eligibility.level, 0, 4095),
     sciences = new Set(eligibility.sciences as string[]),
     score = num(member, "score"),
     taken = new Set(text(member, "takeReward").split("|").filter(Boolean).map(Number));
+
   if (
     text(member, "takeReward")
       .split("|")
@@ -64,9 +81,12 @@ export function expeditionStagePrizes(
       .some((id) => !/^\d{1,9}$/.test(id))
   )
     throw new Error("Invalid sealed expedition claim flags");
+
   if (!Number.isFinite(score) || score < 0)
     throw new Error("Invalid sealed expedition reward score");
+
   const rank = num(standing ?? {}, "rank");
+
   if (
     !Number.isInteger(rank) ||
     rank < 0 ||
@@ -74,8 +94,10 @@ export function expeditionStagePrizes(
     num(standing ?? {}, "allianceScore") < 0
   )
     throw new Error("Invalid sealed expedition standing");
+
   if (score > 0 && rank > 0 && rank <= expeditionRankingLimit(rules) + 1) {
     const reward = rangeReward(definition.rankreward ?? "", rank);
+
     if (reward)
       plans.push({
         kind: "rank",
@@ -84,13 +106,17 @@ export function expeditionStagePrizes(
         parameters: [String(Math.min(2147483647, Math.floor(score))), String(rank)],
       });
   }
+
   const threshold = cityInteger(rules.items.get("17_wk")?.k1),
     kingdomThreshold = Number(rules.items.get("17_wk")?.k2);
+
   if (!Number.isFinite(kingdomThreshold) || kingdomThreshold < 0)
     throw new Error("Invalid expedition kingdom reward threshold");
+
   for (const rule of rules.advanced.expeditionRewards?.values() ?? []) {
     const id = cityInteger(rule.id, 1),
       type = cityInteger(rule.type, 1, 2);
+
     if (
       Number(rule.stage) !== stage ||
       taken.has(id) ||
@@ -102,7 +128,9 @@ export function expeditionStagePrizes(
       (rule.science_quest && !sciences.has(rule.science_quest))
     )
       continue;
+
     if (!rule.reward) throw new Error("Missing expedition target reward");
+
     claims.push(id);
     plans.push({
       kind: `target:${id}`,
@@ -111,11 +139,14 @@ export function expeditionStagePrizes(
       parameters: [],
     });
     const double = rules.items.get("17_wk")?.k12;
+
     if (type === 1 && double && sciences.has(double))
       plans.push({ kind: `double:${id}`, reward: rule.reward, template: "12076", parameters: [] });
   }
+
   if (num(closure, "winner") === rules.kingdomId && score >= kingdomThreshold) {
     const reward = rangeReward(definition.statereward ?? "", level);
+
     if (reward)
       plans.push({
         kind: "kingdom",
@@ -124,7 +155,9 @@ export function expeditionStagePrizes(
         parameters: [String(stage), String(kingdomThreshold)],
       });
   }
+
   if (plans.length > 128 || [...taken, ...claims].join("|").length > 500)
     throw new Error("Expedition reward population bound exceeded");
+
   return { plans, claims };
 }
