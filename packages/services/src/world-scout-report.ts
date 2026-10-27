@@ -1,3 +1,4 @@
+import { decodeJavaIntMap } from "@opencok/messages/java-int-map";
 import { MOBILE_CLIENT_VERSION } from "@opencok/constants/game";
 import { dragonDefinition } from "@opencok/rules/dragon-progression";
 import { reconnectUpkeep } from "@opencok/rules/reconnect-upkeep";
@@ -716,8 +717,17 @@ export function scoutBarbarianReport(
   if (!actor || actor.configId !== target.point.pointItem) worldMutationFailure();
   const rule = context.rules.world.barbarians?.get(text(actor, "configId"));
   if (!rule) worldMutationFailure();
-  const army = scoutBarbarianArmy(actor, context.rules, context.now),
-    rewards = scoutBarbarianArmy(actor, context.rules, context.now, true),
+  const savedArmy = actor.lastArmyMapByteArray,
+    savedRewards = actor.lastAwardArmyMapByteArray;
+  if (!Buffer.isBuffer(savedArmy) || !Buffer.isBuffer(savedRewards)) worldMutationFailure();
+  const army = scoutBarbarianArmy(actor, context.rules, context.now, decodeJavaIntMap(savedArmy)),
+    rewards = scoutBarbarianArmy(
+      actor,
+      context.rules,
+      context.now,
+      decodeJavaIntMap(savedRewards),
+      true,
+    ),
     base = scoutPairs(context.rules.world.armies?.get(rule.army ?? "")?.arm),
     count = [...army.values()].reduce((a, b) => a + b, 0);
   return {

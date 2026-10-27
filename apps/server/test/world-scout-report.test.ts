@@ -6,7 +6,7 @@ import { scoutDetectReport, scoutBarbarianReport } from "@opencok/services/world
 import { scoutApproximate, scoutBarbarianArmy } from "@opencok/rules/world-scout-report";
 import { encodeScoutReport } from "@opencok/mappings/world-scout-report";
 import { decodeLegacyJsonObject } from "@opencok/messages/legacy-json";
-import { encodeJavaIntMap } from "@opencok/messages/java-int-map";
+import { decodeJavaIntMap, encodeJavaIntMap } from "@opencok/messages/java-int-map";
 import { encodeWorldMarchArmy } from "@opencok/messages/world-resource-army";
 import { sfs, fields, Type, type Fields, type Value } from "@opencok/messages/sfs";
 const rules = await loadRules();
@@ -320,7 +320,9 @@ test("barbarian report derives real army and award regeneration without mutating
     fireTime: 0n,
   };
   h.target.barbarian = actor;
-  expect(scoutBarbarianArmy(actor, rules, at)).toEqual(
+  expect(
+    scoutBarbarianArmy(actor, rules, at, decodeJavaIntMap(actor.lastArmyMapByteArray)),
+  ).toEqual(
     new Map([
       ["107100", 10],
       ["107000", 20],

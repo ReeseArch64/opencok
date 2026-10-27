@@ -1,5 +1,4 @@
 import { num, long, text, type Row } from "@opencok/contracts/rows";
-import { decodeJavaIntMap } from "@opencok/messages/java-int-map";
 import type { Rules } from "./game";
 import { cityInteger } from "./city-progression";
 import { worldMutationFailure } from "./world-march-runtime";
@@ -25,7 +24,13 @@ export function scoutPairs(raw: string | undefined) {
   if (result.size > 256) worldMutationFailure();
   return result;
 }
-export function scoutBarbarianArmy(actor: Row, rules: Rules, now: bigint, award = false) {
+export function scoutBarbarianArmy(
+  actor: Row,
+  rules: Rules,
+  now: bigint,
+  previous: ReadonlyMap<string | null, number | null> | null,
+  award = false,
+) {
   const rule = rules.world.barbarians?.get(text(actor, "configId"));
   if (!rule) worldMutationFailure();
   const base = award
@@ -34,9 +39,6 @@ export function scoutBarbarianArmy(actor: Row, rules: Rules, now: bigint, award 
     period = Number(rule.para3),
     at = long(actor, "lastBeAttackedTime");
   if (!Number.isFinite(period) || period <= 0 || at < 0n || at > now) worldMutationFailure();
-  const encoded = actor[award ? "lastAwardArmyMapByteArray" : "lastArmyMapByteArray"];
-  if (!Buffer.isBuffer(encoded)) worldMutationFailure();
-  const previous = decodeJavaIntMap(encoded);
   if (!previous || previous.size > 256) worldMutationFailure();
   const factor = Math.min(1, Number(now - at) / 1000 / period / 100),
     result = new Map<string, number>();
