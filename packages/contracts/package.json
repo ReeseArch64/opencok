@@ -143,7 +143,8 @@
     "./prayer": "./src/prayer.ts",
     "./responses/prayer": "./src/responses/prayer.ts",
     "./city-cosmetics": "./src/city-cosmetics.ts",
-    "./responses/city-cosmetics": "./src/responses/city-cosmetics.ts"
+    "./responses/city-cosmetics": "./src/responses/city-cosmetics.ts",
+    "./trouble": "./src/trouble.ts"
   },
   "dependencies": {
     "@opencok/enums": "workspace:*",

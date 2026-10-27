@@ -29,6 +29,7 @@ export function ordinaryMarchRoute(
   sourceFour = true,
   targetFour = false,
   blackEffect = 0,
+  scout = false,
 ) {
   const rule = rules.items.get("world_marchtime");
   if (
@@ -93,7 +94,8 @@ export function ordinaryMarchRoute(
       Math.fround(100 + Math.fround(effect)) + (black ? Math.fround(blackEffect) : 0),
     );
     const seconds = Math.trunc(
-      ((Math.pow(length, Math.fround(Number(rule.k1))) * cityInteger(rule.k2, 1)) /
+      ((Math.pow(length, Math.fround(Number(rule.k1))) *
+        cityInteger(scout ? rule.k3 : rule.k2, 1)) /
         (Math.fround(speed) * Math.max(bonus / 100, 0.001))) *
         (black ? Number(rule.k5) : 1),
     );

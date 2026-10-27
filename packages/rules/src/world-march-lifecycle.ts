@@ -25,9 +25,9 @@ function duration(value: bigint) {
   if (value < 1n || value > BigInt(limit)) invalid();
   return value;
 }
-function troops(values: readonly MarchTroops[]) {
+function troops(values: readonly MarchTroops[], empty = false) {
   if (
-    !values.length ||
+    (!values.length && !empty) ||
     values.length > 256 ||
     new Set(values.map((row) => row.armyId)).size !== values.length
   )
@@ -58,7 +58,10 @@ function validate(state: MarchLifecycle, owner: string, version: number, now: bi
     const elapsed = state.dueAt - state.startedAt;
     if (elapsed > BigInt(limit)) invalid();
   }
-  troops(state.troops);
+  if (state.purpose !== undefined && state.purpose !== "trouble") invalid();
+  if (state.purpose === "trouble" && (state.phase === "gathering" || state.cargo !== null))
+    invalid();
+  troops(state.troops, state.purpose === "trouble");
   cargo(state.cargo);
   if (!["outbound", "gathering", "returning", "completed"].includes(state.phase)) invalid();
 }
@@ -136,7 +139,13 @@ export function arriveForGathering(
 ): MarchTransition {
   validate(state, owner, version, now);
   duration(gatheringDuration);
-  if (state.phase !== "outbound" || now < state.dueAt || state.cargo !== null) invalid();
+  if (
+    state.purpose === "trouble" ||
+    state.phase !== "outbound" ||
+    now < state.dueAt ||
+    state.cargo !== null
+  )
+    invalid();
   return transition(state, {
     phase: "gathering",
     startedAt: state.dueAt,

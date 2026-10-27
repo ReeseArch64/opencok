@@ -197,6 +197,13 @@
       "when": 1793018858616,
       "tag": "0027_recall_login_clock",
       "breakpoints": false
+    },
+    {
+      "idx": 28,
+      "version": "7",
+      "when": 1793023278701,
+      "tag": "0028_trouble_history",
+      "breakpoints": false
     }
   ]
 }

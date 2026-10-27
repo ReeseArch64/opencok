@@ -1,3 +1,4 @@
+import { readTrouble, writeTrouble } from "./trouble";
 import { readCosmeticTarget, writeCosmeticTarget } from "./city-cosmetics";
 import { readPrayer, writePrayer } from "./prayer";
 import { readRecallTasks, writeRecallTasks } from "./recall-task";
@@ -149,6 +150,10 @@ export function createCityProgressionStore(
           command === "trigger.activity"
             ? (cosmeticTarget = await readCosmeticTarget(tx, request))
             : undefined,
+        trouble:
+          command === "get.trouble.list" || command?.startsWith("trouble.")
+            ? await readTrouble(tx, owner, command === "get.trouble.list")
+            : undefined,
         prayer: await readPrayer(tx, owner),
         recallTask: await readRecallTasks(tx, owner, command?.startsWith("recall.task.") ?? false),
         regionalRecall: command?.startsWith("region.recall.")
@@ -298,6 +303,7 @@ export function createCityProgressionStore(
         }
         if (write.cosmeticTarget)
           await writeCosmeticTarget(tx, owner, cosmeticTarget?.uid, write.cosmeticTarget);
+        if (write.troubleHistory) await writeTrouble(tx, owner, write.troubleHistory);
         if (write.prayer) await writePrayer(tx, owner, write.prayer);
         if (write.recallTask) await writeRecallTasks(tx, owner, write.recallTask);
         if (write.regionalRecall) await writeRegionalRecall(tx, owner, write.regionalRecall);
