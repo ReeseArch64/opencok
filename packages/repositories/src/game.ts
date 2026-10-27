@@ -1,3 +1,4 @@
+import { readActivityDirectory } from "./activity-directory";
 import { readHeroEvents } from "./hero-event";
 import type { HeroEventSelection } from "@opencok/contracts/hero-event";
 import { user_state } from "@opencok/drizzle/schema/opencok_kingdom/user_state";
@@ -157,6 +158,9 @@ export class Database implements GameStore, FriendshipMineStore {
       this.config.kingdomId,
       now,
     );
+  }
+  activityDirectory(uid: string) {
+    return readActivityDirectory(this.kingdom.db, uid);
   }
   heroEvents(uid: string, kingdomId: number, selection: HeroEventSelection, now: number) {
     if (!Number.isInteger(kingdomId) || kingdomId < 1 || !this.databases.kingdoms.has(kingdomId))

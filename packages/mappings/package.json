@@ -101,7 +101,8 @@
     "./fragment-exchange": "./src/fragment-exchange.ts",
     "./monster-exchange": "./src/monster-exchange.ts",
     "./merge-campaign": "./src/merge-campaign.ts",
-    "./red-packets": "./src/red-packets.ts"
+    "./red-packets": "./src/red-packets.ts",
+    "./activity-directory": "./src/activity-directory.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",
