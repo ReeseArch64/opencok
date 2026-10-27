@@ -1,3 +1,4 @@
+import { configureEggActivity } from "../test/fixtures/egg-activity";
 import { configureGoldEggs } from "../test/fixtures/gold-eggs";
 import type { DeliveredGiftProof } from "@opencok/contracts/paid-gifts";
 import { paylog } from "@opencok/drizzle/schema/opencok_kingdom/paylog";
@@ -855,6 +856,38 @@ test("PostgreSQL SFS login, city and map preserve state and isolate both realms"
         global: sfs.bool(false),
       });
       expect(privateAward.errorCode).toEqual(sfs.string("102192"));
+      expect((await paidLogin.command("egg.act.info", {})).opened).toEqual(sfs.bool(false));
+      configureEggActivity(runtimeRules);
+      const eggControl = runtimeRules.configuration.payControl!.get("69007")!;
+      runtimeRules.configuration.payControl!.set("69007", {
+        ...eggControl,
+        k8: "2020-01-01-00-00",
+        k9: "2099-01-01-00-00",
+        k7: "999999",
+      });
+      for (const [key, rule] of runtimeRules.advanced.eggs!)
+        runtimeRules.advanced.eggs!.set(key, { ...rule, time: "30" });
+      for (const key of ["990011", "990015"])
+        runtimeRules.reconnect.rewards!.set(key, {
+          ...runtimeRules.reconnect.rewards!.get(key)!,
+          gold: "1",
+        });
+      const legacyEgg = await paidLogin.command("egg.act.info", {});
+      expect(legacyEgg.opened).toEqual(sfs.bool(true));
+      expect(fields(legacyEgg.eggAct).eggCd).toEqual(sfs.long(-1));
+      const legacyOpened = await paidLogin.command("egg.act.open", {
+        eggId: fields(legacyEgg.eggAct).curEgg!,
+      });
+      expect(fields(legacyOpened.eggAct).eggCd?.type).toBe(Type.Long);
+      const legacyClear = await paidLogin.command("egg.act.cd", {});
+      expect(legacyClear.gold).toEqual(sfs.long(9007199254740892n));
+      const legacyReward = await paidLogin.command("egg.act.reward", {});
+      expect(fields(legacyReward.eggAct).exp).toEqual(sfs.int(3));
+      expect(legacyReward.reward?.type).toBe(Type.Array);
+      expect((await adapter.getProfileById(paidOwner))!.gold).toBe(9007199254740893n);
+      expect((await paidLogin.command("egg.activity.init", {})).errorCode).toEqual(
+        sfs.string("102192"),
+      );
     }
     const otherCache = new Cache({ ...base, kingdomId: 2 });
     expect(await cache.claim("synthetic-shared-uid", "synthetic-token-1")).toBe(true);

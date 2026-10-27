@@ -150,7 +150,8 @@
     "./delivered-payment": "./src/delivered-payment.ts",
     "./payment-observers": "./src/payment-observers.ts",
     "./gold-eggs": "./src/gold-eggs.ts",
-    "./gold-eggs-runtime": "./src/gold-eggs-runtime.ts"
+    "./gold-eggs-runtime": "./src/gold-eggs-runtime.ts",
+    "./egg-activity": "./src/egg-activity.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",

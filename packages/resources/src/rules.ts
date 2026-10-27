@@ -343,6 +343,7 @@ export async function loadRules(directory?: string, kingdomId = 1) {
       rechargeFeedback: rechargeFeedbackRecords.length
         ? indexRules(rechargeFeedbackRecords, GameplayCatalog.DailyRecharge)
         : new Map<string, Rule>(),
+      eggs: await optional(GameplayCatalog.Egg),
       goldenEggs: await optional(GameplayCatalog.GoldenEgg),
       goldenEggSteps: await optional(GameplayCatalog.GoldenEggStep),
       normalRechargeThresholds: await optional(GameplayCatalog.Heap),

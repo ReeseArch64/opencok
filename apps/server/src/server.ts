@@ -1,3 +1,4 @@
+import { createEggActivityDomain } from "@opencok/services/egg-activity";
 import { createGoldEggsRanks, createGoldEggsRuntimeStore } from "@opencok/repositories/gold-eggs";
 import { createGoldEggsDomain, goldEggsAwardParameters } from "@opencok/services/gold-eggs";
 import { GoldEggsRuntime } from "@opencok/services/gold-eggs-runtime";
@@ -677,6 +678,7 @@ export const RealmDependenciesLive = Layer.effect(
         createOrdinaryBoxDomain(),
         createNormalRechargeDomain(config.paidGiftGateway),
         createGoldEggsDomain(undefined, goldEggsRanks),
+        createEggActivityDomain(),
         createRechargeActivityDomain(paymentObservers.newcomer),
         createRechargeFeedbackDomain(paymentObservers.feedback),
         createRedPacketDomain(config.paidGiftGateway),
@@ -1848,6 +1850,7 @@ export const RealmDependenciesLive = Layer.effect(
         for (const type of [
           "hero.rank.mail",
           "gold.eggs.mail",
+          "egg.activity.mail",
           "hero.target.mail",
           "campaign.mail",
           "redPackets.mail",

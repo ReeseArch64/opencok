@@ -185,7 +185,8 @@
     "./comeback": "./src/comeback.ts",
     "./paid-gifts": "./src/paid-gifts.ts",
     "./normal-recharge": "./src/normal-recharge.ts",
-    "./gold-eggs": "./src/gold-eggs.ts"
+    "./gold-eggs": "./src/gold-eggs.ts",
+    "./egg-activity": "./src/egg-activity.ts"
   },
   "dependencies": {
     "@opencok/enums": "workspace:*",
