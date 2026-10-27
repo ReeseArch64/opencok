@@ -1,3 +1,4 @@
+import { goldEggsReader, writeGoldEggs } from "./gold-eggs";
 import { readNormalRecharge, writeNormalRecharge } from "./normal-recharge";
 import { readComeback, writeComeback } from "./comeback";
 import { readHotItems, writeHotItems } from "./hot-item";
@@ -167,6 +168,7 @@ export function createCityProgressionStore(
             ? redPacketReader(tx, owner)
             : undefined,
         campaignProfile:
+          command?.startsWith("goldeggs.") ||
           command?.startsWith("normal.recharge.") ||
           command?.startsWith("campaign.") ||
           command?.startsWith("redPackets.") ||
@@ -240,6 +242,9 @@ export function createCityProgressionStore(
           command === "pay.recharge.ui.state" || command === "feedback.paid"
             ? rechargeFeedbackReader(tx, owner)
             : undefined,
+        goldEggs: command?.startsWith("goldeggs.")
+          ? goldEggsReader(tx, owner, num(profile, "serverId"), now)
+          : undefined,
         normalRecharge: command?.startsWith("normal.recharge.")
           ? await readNormalRecharge(tx, owner, now, true)
           : undefined,
@@ -396,6 +401,7 @@ export function createCityProgressionStore(
         if (write.redPackets) await writeRedPackets(tx, owner, write.redPackets);
         if (write.rechargeFeedback)
           await writeRechargeFeedback(tx, owner, write.rechargeFeedback, now);
+        if (write.goldEggs) await writeGoldEggs(tx, owner, write.goldEggs, now);
         if (write.normalRecharge) await writeNormalRecharge(tx, owner, write.normalRecharge, now);
         if (write.rechargeActivity) await writeRechargeActivity(tx, owner, write.rechargeActivity);
         if (write.ordinaryBox) await writeOrdinaryBox(tx, owner, write.ordinaryBox);

@@ -148,7 +148,9 @@
     "./red-packets": "./src/red-packets.ts",
     "./normal-recharge": "./src/normal-recharge.ts",
     "./delivered-payment": "./src/delivered-payment.ts",
-    "./payment-observers": "./src/payment-observers.ts"
+    "./payment-observers": "./src/payment-observers.ts",
+    "./gold-eggs": "./src/gold-eggs.ts",
+    "./gold-eggs-runtime": "./src/gold-eggs-runtime.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",

@@ -184,7 +184,8 @@
     "./responses/activity-operators": "./src/responses/activity-operators.ts",
     "./comeback": "./src/comeback.ts",
     "./paid-gifts": "./src/paid-gifts.ts",
-    "./normal-recharge": "./src/normal-recharge.ts"
+    "./normal-recharge": "./src/normal-recharge.ts",
+    "./gold-eggs": "./src/gold-eggs.ts"
   },
   "dependencies": {
     "@opencok/enums": "workspace:*",

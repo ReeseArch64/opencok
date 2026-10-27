@@ -147,7 +147,8 @@
     "./comeback": "./src/comeback.ts",
     "./comeback-session": "./src/comeback-session.ts",
     "./red-packets": "./src/red-packets.ts",
-    "./normal-recharge": "./src/normal-recharge.ts"
+    "./normal-recharge": "./src/normal-recharge.ts",
+    "./gold-eggs": "./src/gold-eggs.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",
