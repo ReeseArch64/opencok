@@ -219,6 +219,7 @@ export const RealmDependenciesLive = Layer.effect(
     const authority = yield* fromPromise("realm.authority", () =>
       acquireRealmAuthority(db.kingdom.db, config.kingdomId, () => coordination.ready),
     );
+    cache.bindRealmOwner(authority.epoch);
     yield* fromPromise("realm.mutations", () => checkMutationStore(db.kingdom.db));
     fenceRealmDatabase(db.kingdom.db, authority);
     yield* acquireResource(

@@ -5,6 +5,7 @@ import { envelope, extension, fields, sfs, str, type Fields } from "@opencok/mes
 
 export class Client {
   readonly socket: Socket;
+  readonly received: Fields[] = [];
   private packets: Fields[] = [];
   private waiting?: { resolve: (packet: Fields) => void; reject: (error: Error) => void };
   constructor(
@@ -15,6 +16,7 @@ export class Client {
     const reader = new FrameReader();
     this.socket.on("data", (data) => {
       for (const packet of reader.feed(Buffer.from(data))) {
+        this.received.push(packet);
         if (this.waiting) {
           const waiting = this.waiting;
           this.waiting = undefined;

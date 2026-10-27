@@ -105,6 +105,12 @@ expired or there is a gap, it sends a new authorized snapshot and restarts the
 synchronization sequence. Pushes lost after a commit must be recoverable by outbox or
 status query; the connection is not the only record of a change.
 
+Realm-owned native session keys include the acquired PostgreSQL authority epoch.
+A restarted owner can accept reconnects while the previous generation's Redis
+tokens expire. Claim, refresh and token-checked release use the same generation;
+an old owner cannot release a successor's session. This changes no client fields
+and retains the existing session TTL.
+
 Output queues per socket have a limit. Slow client receives controlled backpressure,
 resynchronization, or disconnection; cannot cause unlimited memory growth. Obsolete
 presence events can be aggregated/discarded; economic responses and durable events
