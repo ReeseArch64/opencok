@@ -22,6 +22,7 @@ export interface WorldCatalogs {
   barbarians?: Map<string, Rule>;
 }
 export interface AdvancedCatalogs {
+  ordinaryBoxes?: Map<string, Rule>;
   exchangeCycles?: Map<string, Rule>;
   cycleDraws?: Map<string, Rule>;
   shippingInvestments?: Map<string, Rule>;

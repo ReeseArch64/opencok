@@ -1,3 +1,4 @@
+import { readOrdinaryBoxServer, writeOrdinaryBox } from "./ordinary-box";
 import { readSevenDayCycle, writeSevenDayCycle } from "./seven-day-cycle";
 import { writeShippingInvestment } from "./shipping-investment";
 import { readDailyInvestment, writeDailyInvestment } from "./daily-investment";
@@ -132,6 +133,10 @@ export function createCityProgressionStore(
       return {
         profile,
         resource,
+        ordinaryBoxServer:
+          command === "get.table.value" || command?.startsWith("ordinary.box.")
+            ? await readOrdinaryBoxServer(tx)
+            : undefined,
         sevenDayCycle: command?.startsWith("sevenday.")
           ? await readSevenDayCycle(tx, owner)
           : undefined,
@@ -245,6 +250,7 @@ export function createCityProgressionStore(
               set: value,
             });
         }
+        if (write.ordinaryBox) await writeOrdinaryBox(tx, owner, write.ordinaryBox);
         if (write.sevenDayCycle) await writeSevenDayCycle(tx, owner, write.sevenDayCycle);
         if (write.shippingInvestment)
           await writeShippingInvestment(tx, owner, write.shippingInvestment);

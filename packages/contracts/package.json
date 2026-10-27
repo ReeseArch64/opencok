@@ -119,7 +119,9 @@
     "./shipping-investment": "./src/shipping-investment.ts",
     "./responses/shipping-investment": "./src/responses/shipping-investment.ts",
     "./seven-day-cycle": "./src/seven-day-cycle.ts",
-    "./responses/seven-day-cycle": "./src/responses/seven-day-cycle.ts"
+    "./responses/seven-day-cycle": "./src/responses/seven-day-cycle.ts",
+    "./ordinary-box": "./src/ordinary-box.ts",
+    "./responses/ordinary-box": "./src/responses/ordinary-box.ts"
   },
   "dependencies": {
     "@opencok/enums": "workspace:*",

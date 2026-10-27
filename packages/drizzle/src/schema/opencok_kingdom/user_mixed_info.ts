@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { bigint, index, integer, primaryKey, text, varchar } from "drizzle-orm/pg-core";
+import { bigint, check, index, integer, primaryKey, text, varchar } from "drizzle-orm/pg-core";
 import { opencok_kingdom } from "../namespaces";
 
 export const user_mixed_info = opencok_kingdom.table(
@@ -87,8 +87,10 @@ export const user_mixed_info = opencok_kingdom.table(
     "expeditionSuperArmyUseTimes": integer("expeditionSuperArmyUseTimes").default(sql.raw("0")),
     "neutralSuperArmyUseTimes": integer("neutralSuperArmyUseTimes").default(sql.raw("0")),
     "ancientSuperArmyUseTimes": integer("ancientSuperArmyUseTimes").default(sql.raw("0")),
+    "ordinaryBoxGold": integer("ordinaryBoxGold").notNull().default(sql.raw("0")),
   },
   (table) => [
+    check("user_mixed_info_box_gold_mode", sql.raw('"ordinaryBoxGold" IN (0, 1)')),
     primaryKey({ name: "user_mixed_info_PRIMARY", columns: [table["uid"]] }),
     index("user_mixed_info_protectEndTime").on(sql.raw('"protectEndTime"')),
     index("user_mixed_info_protectEndSendTimes").on(sql.raw('"protectEndSendTimes"')),
