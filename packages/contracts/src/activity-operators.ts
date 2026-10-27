@@ -5,6 +5,7 @@ export interface ActivityOperatorsSnapshot {
   buildings: readonly Row[];
   target?: Row;
   recall?: Row;
+  comeback?: Row;
   country: string;
   groupBuys: readonly Row[];
 }

@@ -2,6 +2,7 @@ import { militaryRankAwardReader, writeMilitaryRankAward } from "./military-rank
 import { activityRewardReader, writeActivityReward } from "./activity-reward";
 import { user_branch_city_info } from "@opencok/drizzle/schema/opencok_kingdom/user_branch_city_info";
 import { redPacketReader, writeRedPackets } from "./red-packets";
+import { readComeback, writeComeback } from "./comeback";
 import { readHotItems, writeHotItems } from "./hot-item";
 import { worldpoint } from "@opencok/drizzle/schema/opencok_kingdom/worldpoint";
 import { readMonsterExchanges, writeMonsterExchanges } from "./monster-exchange";
@@ -208,6 +209,9 @@ export function createCityProgressionStore(
           command === "expedition.award.deliver" ? expeditionAwardReader(tx, owner) : undefined,
         heroRankingAward:
           command === "hero.rank.deliver" ? heroRankAwardReader(tx, owner) : undefined,
+        comeback: command?.startsWith("comeback.")
+          ? await readComeback(tx, owner, profile)
+          : undefined,
         hotItem: command?.startsWith("hot.item.") ? await readHotItems(tx, owner, now) : undefined,
         heroScore: heroScoreReader(tx, owner, alliance),
         profile,
@@ -410,6 +414,7 @@ export function createCityProgressionStore(
           await writeContinuedCostHide(tx, owner, write.continuedCostHide);
         if (write.continuedCost) await writeContinuedCost(tx, owner, write.continuedCost);
         if (write.troubleHistory) await writeTrouble(tx, owner, write.troubleHistory);
+        if (write.comeback) await writeComeback(tx, owner, write.comeback);
         if (write.hotItem) await writeHotItems(tx, owner, write.hotItem);
         if (write.prayer) await writePrayer(tx, owner, write.prayer);
         if (write.recallTask) await writeRecallTasks(tx, owner, write.recallTask);

@@ -173,7 +173,8 @@
     "./military-rank-awards": "./src/military-rank-awards.ts",
     "./player-experience": "./src/player-experience.ts",
     "./activity-reward": "./src/activity-reward.ts",
-    "./activity-operators": "./src/activity-operators.ts"
+    "./activity-operators": "./src/activity-operators.ts",
+    "./comeback": "./src/comeback.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",

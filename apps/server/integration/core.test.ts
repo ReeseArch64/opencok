@@ -470,6 +470,13 @@ test("PostgreSQL SFS login, city and map preserve state and isolate both realms"
       }
       for (const command of ["Olympic.result", "Olympic.settle"])
         expect((await client.command(command, {})).errorCode?.value).toBe("102192");
+      const comebackInfo = await client.command("comeback.info", { _cok_: sfs.string("comeback") });
+      expect(comebackInfo.count).toEqual(sfs.int(0));
+      expect(comebackInfo._cok_).toEqual(sfs.string("comeback"));
+      expect(
+        (await client.command("comeback.reward", { type: sfs.string("1"), param: sfs.string("") }))
+          .errorCode?.value,
+      ).toBe("E000000");
       const cupInfo = await client.command("euro.cup.info", { _cok_: sfs.long(9007199254740993n) });
       expect(cupInfo._cok_).toEqual(sfs.long(9007199254740993n));
       expect(cupInfo.matchList).toBeUndefined();
@@ -623,9 +630,13 @@ test("PostgreSQL SFS login, city and map preserve state and isolate both realms"
       expect(dailyFlush).toBeGreaterThan(BigInt(String(before.lord?.dailyTaskFlushTime ?? 0)));
       expect(dailyFlush / 86400000n).toBe(checkpoint / 86400000n);
       expect(allianceFlush + 300000n).toBe(dailyFlush);
+      const onlineAt = BigInt(String(after.profile?.lastOnlineTime ?? 0));
+      expect(onlineAt).toBeGreaterThan(BigInt(String(before.profile?.lastOnlineTime ?? 0)));
+      expect(onlineAt).toBeLessThanOrEqual(checkpoint);
       expect(after.queues).toHaveLength(before.queues.length + 1);
       expect(after).toEqual({
         ...before,
+        profile: { ...before.profile, lastOnlineTime: onlineAt },
         lord: {
           ...before.lord,
           dailyTaskFlushTime: dailyFlush,
