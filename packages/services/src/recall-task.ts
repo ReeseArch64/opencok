@@ -1,3 +1,4 @@
+import { CityCommandDomain } from "./city-command-domain.ts";
 import { randomInt } from "node:crypto";
 import { sfs, encode, str, type Fields } from "@opencok/messages/sfs";
 import { text, num, long, type Row } from "@opencok/contracts/rows";
@@ -14,7 +15,8 @@ import { rewardPreviewArray } from "@opencok/mappings/rewards";
 import { recallTaskView, recallTaskClaim } from "@opencok/mappings/recall-task";
 import { pinProgressionReward, grantNativeProgressionReward } from "./progression-rewards";
 import { applyProgressionStatus } from "./player-effects";
-import type { CityDomain, CityProgressionContext } from "./city-progression";
+import type { CityDomain } from "./city-domain.ts";
+import type { CityProgressionContext } from "./city-progression-context.ts";
 
 function enabled(context: CityProgressionContext) {
   return serverFeature(context.rules, "recall_quest", {
@@ -88,10 +90,16 @@ export function recordRecallTask(
   if (changed) context.write.recallTask = { ...context.write.recallTask, tasks };
 }
 
-export const recallTaskDomain: CityDomain = {
-  commands: ["recall.task.init", "recall.task.ui", "recall.task.receive"],
-  types: [],
-  async prepare(context, command, params) {
+export class RecallTaskDomain extends CityCommandDomain {
+  public readonly commands: CityDomain["commands"] = [
+    "recall.task.init",
+    "recall.task.ui",
+    "recall.task.receive",
+  ];
+
+  public readonly types: CityDomain["types"] = [];
+
+  public readonly prepare: CityDomain["prepare"] = async (context, command, params) => {
     if (!enabled(context)) return { response: encode({}), event: null };
 
     let state = saved(context);
@@ -265,8 +273,11 @@ export const recallTaskDomain: CityDomain = {
     }
 
     return { response: encode(recallTaskClaim(body)), event: null };
-  },
-  async apply() {
+  };
+
+  public readonly apply: CityDomain["apply"] = async () => {
     regionalRecallFailure();
-  },
-};
+  };
+}
+
+export const recallTaskDomain: CityDomain = new RecallTaskDomain();

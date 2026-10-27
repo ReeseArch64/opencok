@@ -1,3 +1,4 @@
+import { CityCommandDomain } from "./city-command-domain.ts";
 import { randomUUID } from "node:crypto";
 import { javaMailBytes } from "@opencok/rules/avatar-mail";
 import { encode, sfs, str } from "@opencok/messages/sfs";
@@ -12,7 +13,8 @@ import {
   expeditionTaxRecord,
 } from "@opencok/mappings/new-expedition";
 import { pinProgressionReward, grantNativeProgressionReward } from "./progression-rewards";
-import type { CityDomain, CityProgressionContext } from "./city-progression";
+import type { CityDomain } from "./city-domain.ts";
+import type { CityProgressionContext } from "./city-progression-context.ts";
 
 function current(context: CityProgressionContext): Row {
   const state = context.state.expedition;
@@ -118,17 +120,19 @@ export async function flushExpeditionScores(context: CityProgressionContext) {
   }
 }
 
-export const expeditionDomain: CityDomain = {
-  commands: [
+export class ExpeditionDomain extends CityCommandDomain {
+  public readonly commands: CityDomain["commands"] = [
     "newexpidition.activityinfo",
     "newexpidition.takepersonreward",
     "newexpidition.takealliancereward",
     "expedition.show",
     "distribution.record.show",
     "tax.record.show",
-  ],
-  types: [],
-  async prepare(context, command, params) {
+  ];
+
+  public readonly types: CityDomain["types"] = [];
+
+  public readonly prepare: CityDomain["prepare"] = async (context, command, params) => {
     const state = context.state.expedition;
 
     if (!state) expeditionFailure();
@@ -257,8 +261,11 @@ export const expeditionDomain: CityDomain = {
         rewardlist: sfs.array(expeditionRewardList(saved)),
       }),
     };
-  },
-  async apply() {
+  };
+
+  public readonly apply: CityDomain["apply"] = async () => {
     expeditionFailure();
-  },
-};
+  };
+}
+
+export const expeditionDomain: CityDomain = new ExpeditionDomain();

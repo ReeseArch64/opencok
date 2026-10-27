@@ -2,7 +2,7 @@ import { sfs, encode } from "@opencok/messages/sfs";
 import { num, long, text } from "@opencok/contracts/rows";
 import type { RuntimeMarch } from "@opencok/contracts/world-march-runtime";
 import type { WorldScoutTarget } from "@opencok/contracts/world-scout-report";
-import type { CityProgressionContext } from "./city-progression";
+import type { CityProgressionContext } from "./city-progression-context.ts";
 import { cityInteger } from "@opencok/rules/city-progression";
 import { legacyPlayerVersionAtLeast } from "@opencok/rules/availability";
 import { scoutCost, barbarianCurrentHP } from "@opencok/rules/world-scout";

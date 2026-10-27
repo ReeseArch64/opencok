@@ -1,3 +1,4 @@
+import { CityCommandDomain } from "./city-command-domain.ts";
 import { sfs, encode, str } from "@opencok/messages/sfs";
 import { long, num, text } from "@opencok/contracts/rows";
 import {
@@ -15,7 +16,7 @@ import type {
 } from "@opencok/contracts/hero-ranking-rewards";
 import type { AvatarSystemMail } from "@opencok/contracts/files";
 import type { Rules } from "@opencok/rules/game";
-import type { CityDomain } from "./city-progression";
+import type { CityDomain } from "./city-domain.ts";
 
 export class HeroRankingRewardService {
   private running?: Promise<void>;
@@ -122,10 +123,12 @@ export class HeroRankingRewardService {
   }
 }
 
-export const heroRankingRewardDomain: CityDomain = {
-  commands: ["hero.rank.deliver"],
-  types: [],
-  async prepare(context, _command, params) {
+export class HeroRankingRewardDomain extends CityCommandDomain {
+  public readonly commands: CityDomain["commands"] = ["hero.rank.deliver"];
+
+  public readonly types: CityDomain["types"] = [];
+
+  public readonly prepare: CityDomain["prepare"] = async (context, _command, params) => {
     const id = str(params, "awardId");
 
     if (!/^[a-f0-9]{32}$/.test(id) || str(params, "operationId") !== heroRankAwardOperation(id))
@@ -192,8 +195,11 @@ export const heroRankingRewardDomain: CityDomain = {
     });
 
     return { response: encode({}), event: null };
-  },
-  async apply() {
+  };
+
+  public readonly apply: CityDomain["apply"] = async () => {
     throw new Error("Unsupported hero ranking reward activity");
-  },
-};
+  };
+}
+
+export const heroRankingRewardDomain: CityDomain = new HeroRankingRewardDomain();

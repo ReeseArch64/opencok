@@ -1,3 +1,4 @@
+import { CityCommandDomain } from "./city-command-domain.ts";
 import { serverFeature } from "@opencok/rules/power-context";
 import { randomUUID, createHash, randomInt } from "node:crypto";
 import { sfs, encode, int } from "@opencok/messages/sfs";
@@ -12,7 +13,8 @@ import { pinProgressionReward, grantNativeProgressionReward } from "./progressio
 import { GameError } from "@opencok/errors/game";
 import { errors } from "@opencok/constants/game";
 import type { ContinuedCostPeriod } from "@opencok/contracts/continued-cost";
-import type { CityDomain, CityProgressionContext } from "./city-progression";
+import type { CityDomain } from "./city-domain.ts";
+import type { CityProgressionContext } from "./city-progression-context.ts";
 
 function failure(): never {
   throw new GameError(errors.invalid, "city_progression");
@@ -55,16 +57,18 @@ function claimMail(context: CityProgressionContext, reward: string) {
   ];
 }
 
-export const continuedCostDomain: CityDomain = {
-  commands: [
+export class ContinuedCostDomain extends CityCommandDomain {
+  public readonly commands: CityDomain["commands"] = [
     "continuedcost.info",
     "continuedcost.reward",
     "continuedcost.apply",
     "continuedcost.hideking",
     "continuedcost.global.reward",
-  ],
-  types: [],
-  async prepare(context, command, params) {
+  ];
+
+  public readonly types: CityDomain["types"] = [];
+
+  public readonly prepare: CityDomain["prepare"] = async (context, command, params) => {
     if (!context.state.continuedCost) failure();
 
     if (command === "continuedcost.hideking" || command === "continuedcost.global.reward") {
@@ -245,11 +249,14 @@ export const continuedCostDomain: CityDomain = {
       response: encode({ rewardArray: sfs.array(granted), getLv: sfs.int(level) }),
       event: null,
     };
-  },
-  async apply() {
+  };
+
+  public readonly apply: CityDomain["apply"] = async () => {
     failure();
-  },
-};
+  };
+}
+
+export const continuedCostDomain: CityDomain = new ContinuedCostDomain();
 
 export function continuedCostOperation(owner: string, request: string, event: string) {
   return `cost:${createHash("sha256")

@@ -1,3 +1,5 @@
+import { TimedActivityAction } from "@opencok/enums/timed-activity-action";
+import { CityCommandDomain } from "./city-command-domain.ts";
 import { recordTargetTask } from "./target-task";
 import { GameError } from "@opencok/errors/game";
 import { errors } from "@opencok/constants/game";
@@ -25,7 +27,8 @@ import {
   reserveTroops,
   healingSelection,
 } from "@opencok/rules/military";
-import { CityProgressionContext, type CityDomain } from "./city-progression";
+import { CityProgressionContext } from "./city-progression-context.ts";
+import type { CityDomain } from "./city-domain.ts";
 
 export function hospitalCapacity(context: CityProgressionContext) {
   const base =
@@ -243,15 +246,15 @@ async function apply(
   )
     throw new GameError(errors.queue, "city_progression");
 
-  if (action === "start") throw new GameError(errors.invalid, "city_progression");
+  if (action === TimedActivityAction.Start) throw new GameError(errors.invalid, "city_progression");
 
-  if (action === "restore" || action === "reschedule") {
+  if (action === TimedActivityAction.Restore || action === TimedActivityAction.Reschedule) {
     context.write.hospital = rows.map((row) => ({ ...row, finishTime: activity.dueAt }));
 
     return { itemId: sfs.string("1") };
   }
 
-  if (action === "cancel") {
+  if (action === TimedActivityAction.Cancel) {
     context.refund(data);
     context.write.hospital = rows.map((row) => {
       const [, dead] = transferTroops(num(row, "heal"), num(row, "dead"), num(row, "heal"));
@@ -265,9 +268,18 @@ async function apply(
   return complete(context, rows);
 }
 
-export const hospitalDomain: CityDomain = {
-  commands: ["hospital.cure", "hospital.cd", "hospital.fire"],
-  types: [3],
-  prepare,
-  apply,
-};
+export class HospitalDomain extends CityCommandDomain {
+  public readonly commands: CityDomain["commands"] = [
+    "hospital.cure",
+    "hospital.cd",
+    "hospital.fire",
+  ];
+
+  public readonly types: CityDomain["types"] = [3];
+
+  public readonly prepare: CityDomain["prepare"] = prepare;
+
+  public readonly apply: CityDomain["apply"] = apply;
+}
+
+export const hospitalDomain: CityDomain = new HospitalDomain();

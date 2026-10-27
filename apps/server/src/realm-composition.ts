@@ -1,21 +1,21 @@
-import { activityRewardDomain } from "@opencok/services/activity-reward";
+import { ActivityRewardDomain } from "@opencok/services/activity-reward";
 import { createWorldMarchInspectionStore } from "@opencok/repositories/world-march-inspection";
 import { createWorldScoutStore } from "@opencok/repositories/world-scout";
 import { createWorldScoutMailReader } from "@opencok/repositories/world-scout-publication";
 import { publishWorldScoutMail } from "@opencok/services/world-scout-publication";
 import { createWorldBulletinStore } from "@opencok/repositories/world-bulletins";
-import { createEggActivityDomain } from "@opencok/services/egg-activity";
+import { EggActivityDomain } from "@opencok/services/egg-activity";
 import { createGoldEggsRanks, createGoldEggsRuntimeStore } from "@opencok/repositories/gold-eggs";
-import { createGoldEggsDomain, goldEggsAwardParameters } from "@opencok/services/gold-eggs";
+import { GoldEggsDomain, goldEggsAwardParameters } from "@opencok/services/gold-eggs";
 import { GoldEggsRuntime } from "@opencok/services/gold-eggs-runtime";
 import { goldEggsEnabled } from "@opencok/rules/gold-eggs";
 import { createPaymentObservers } from "@opencok/services/payment-observers";
-import { createNormalRechargeDomain } from "@opencok/services/normal-recharge";
+import { NormalRechargeDomain } from "@opencok/services/normal-recharge";
 import { createComebackSessions } from "@opencok/repositories/comeback-session";
-import { comebackDomain, planComebackLogin } from "@opencok/services/comeback";
-import { branchCityDomain } from "@opencok/services/branch-city";
+import { ComebackDomain, planComebackLogin } from "@opencok/services/comeback";
+import { BranchCityDomain } from "@opencok/services/branch-city";
 import {
-  createHotItemDomain,
+  HotItemDomain,
   createHotBusinessMan,
   publishHotBusinessMan,
 } from "@opencok/services/hot-item";
@@ -26,11 +26,11 @@ import { publishMergeEffectBoard } from "@opencok/services/merge-campaign";
 import { serverFeature } from "@opencok/rules/power-context";
 import { createWorldMonsterRefreshExecutor } from "@opencok/repositories/world-monster-refresh";
 import { refreshWorldMonsters } from "@opencok/services/world-monster-refresh";
-import { createWorldRecreationDomain } from "@opencok/services/world-recreation";
+import { WorldRecreationDomain } from "@opencok/services/world-recreation";
 import { assertWorldTerrain } from "@opencok/repositories/world-terrain";
-import { createWorldUseDomain } from "@opencok/services/world-use";
-import { createTreasureMapDomain } from "@opencok/services/treasure-map";
-import { cityDefenseDomain } from "@opencok/services/city-defense";
+import { WorldUseDomain } from "@opencok/services/world-use";
+import { TreasureMapDomain } from "@opencok/services/treasure-map";
+import { CityDefenseDomain } from "@opencok/services/city-defense";
 import { createWorldUtilityStore } from "@opencok/repositories/world-utility";
 import { createWorldResourceRefreshExecutor } from "@opencok/repositories/world-resource-refresh";
 import { refreshWorldResources } from "@opencok/services/world-resource-refresh";
@@ -39,12 +39,12 @@ import { refreshWorldResourceNew } from "@opencok/services/world-resource-new";
 import { worldResourceAreaCount } from "@opencok/rules/world-resource-refresh";
 import { createRedPacketExpiryStore, redPacketReader } from "@opencok/repositories/red-packets";
 import {
-  createRedPacketDomain,
+  RedPacketDomain,
   publishRedPacketAnnouncement,
   settleRedPacketExpiry,
 } from "@opencok/services/red-packets";
-import { createExchangeActivityDomain } from "@opencok/services/exchange-activity";
-import { avatarActivationDomain } from "@opencok/services/avatar-activation";
+import { ExchangeActivityDomain } from "@opencok/services/exchange-activity";
+import { AvatarActivationDomain } from "@opencok/services/avatar-activation";
 import {
   campaignInventoryObservations,
   campaignObservationNeeded,
@@ -56,7 +56,7 @@ import { createCampaignAudience } from "@opencok/repositories/campaign-notice";
 import { publishCampaignNotice } from "@opencok/services/campaign-notice";
 import {
   ContinuedCostRewardService,
-  continuedCostRewardDomain,
+  ContinuedCostRewardDomain,
 } from "@opencok/services/continued-cost-rewards";
 import { createCostRankAwardStore } from "@opencok/repositories/continued-cost-rewards";
 import { costRankAwardOperation } from "@opencok/rules/continued-cost-rewards";
@@ -72,7 +72,7 @@ import {
 } from "@opencok/repositories/continued-cost-ranking";
 import {
   ExpeditionStageRewardService,
-  expeditionStageRewardDomain,
+  ExpeditionStageRewardDomain,
   ExpeditionHistoryService,
 } from "@opencok/services/expedition-stage-rewards";
 import {
@@ -100,7 +100,7 @@ import { expeditionDiscovery } from "@opencok/rules/expedition-score-publication
 import {
   ExpeditionPhaseService,
   ExpeditionActivityService,
-  expeditionPhaseDomain,
+  ExpeditionPhaseDomain,
   publishExpeditionPhaseNotification,
 } from "@opencok/services/expedition-phase";
 import {
@@ -118,7 +118,7 @@ import { ExpeditionCalendarService } from "@opencok/services/expedition-calendar
 import { createExpeditionCalendarStore } from "@opencok/repositories/expedition-calendar";
 import {
   HeroRankingRewardService,
-  heroRankingRewardDomain,
+  HeroRankingRewardDomain,
 } from "@opencok/services/hero-ranking-rewards";
 import {
   createHeroRankRewardStore,
@@ -141,11 +141,11 @@ import {
   createHeroMatchingRegistry,
 } from "@opencok/repositories/hero-matching";
 import { currentHeroScore } from "@opencok/repositories/hero-score";
-import { heroTargetDomain, deliverHeroTargetBatch } from "@opencok/services/hero-score";
+import { HeroTargetDomain, deliverHeroTargetBatch } from "@opencok/services/hero-score";
 import { HeroCalendarService } from "@opencok/services/hero-calendar";
 import { createHeroCalendarStore } from "@opencok/repositories/hero-calendar";
 import {
-  olympicDomain,
+  OlympicDomain,
   OlympicScheduleService,
   olympicSettlementOperation,
 } from "@opencok/services/olympic";
@@ -155,18 +155,18 @@ import {
 } from "@opencok/repositories/olympic";
 import { olympicPeriod } from "@opencok/rules/olympic";
 import {
-  cupBettingDomain,
+  CupBettingDomain,
   CupScheduleService,
   cupSettlementOperation,
 } from "@opencok/services/cup-betting";
 import { createCupScheduleStore, pendingCupSettlements } from "@opencok/repositories/cup-betting";
 import { cupCalendar } from "@opencok/rules/cup-betting";
-import { createGroupBuyDomain, groupBuyOperation } from "@opencok/services/groupbuy";
+import { GroupBuyDomain, groupBuyOperation } from "@opencok/services/groupbuy";
 import { pendingGroupBuys } from "@opencok/repositories/groupbuy";
 import { createSpecialEventStock } from "@opencok/repositories/special-event";
-import { createSpecialEventDomain, specialEventOperation } from "@opencok/services/special-event";
+import { SpecialEventDomain, specialEventOperation } from "@opencok/services/special-event";
 import { confirmedNicknameCost } from "@opencok/services/continued-cost-spending";
-import { continuedCostDomain, continuedCostOperation } from "@opencok/services/continued-cost";
+import { ContinuedCostDomain, continuedCostOperation } from "@opencok/services/continued-cost";
 import { readContinuedCostSpending } from "@opencok/mappings/continued-cost";
 import { pendingContinuedCosts } from "@opencok/repositories/continued-cost";
 import {
@@ -174,61 +174,61 @@ import {
   publishCosmeticInteractionMutation,
 } from "@opencok/services/city-cosmetics";
 import {
-  troubleDomain,
+  TroubleDomain,
   deliverWorldTroubles,
   publishTroubleMutation,
 } from "@opencok/services/trouble";
-import { createPrayerDomain } from "@opencok/services/prayer";
-import { recallTaskDomain } from "@opencok/services/recall-task";
-import { regionalRecallDomain } from "@opencok/services/regional-recall";
+import { PrayerDomain } from "@opencok/services/prayer";
+import { RecallTaskDomain } from "@opencok/services/recall-task";
+import { RegionalRecallDomain } from "@opencok/services/regional-recall";
 import { initializeRealmOpeningClock } from "@opencok/repositories/realm-opening-clock";
 import {
-  createAllianceHeartDomain,
+  AllianceHeartDomain,
   publishAllianceHeartMutation,
 } from "@opencok/services/alliance-heart";
 import { pendingAllianceHeartOwners } from "@opencok/repositories/alliance-heart";
 import {
-  playerItemGiftDomain,
+  PlayerItemGiftDomain,
   publishPlayerItemGiftMutation,
 } from "@opencok/services/player-item-gifts";
 import { pendingPlayerItemGiftOwners } from "@opencok/repositories/player-item-gifts";
-import { createSeasonalExchangeDomain } from "@opencok/services/seasonal-exchange";
-import { createVipBoxDomain } from "@opencok/services/vip-box";
-import { createTargetTaskDomain, publishTargetTaskMutation } from "@opencok/services/target-task";
-import { createRechargeFeedbackDomain } from "@opencok/services/recharge-feedback";
-import { createRechargeActivityDomain } from "@opencok/services/recharge-activity";
-import { createOrdinaryBoxDomain } from "@opencok/services/ordinary-box";
-import { createSevenDayCycleDomain } from "@opencok/services/seven-day-cycle";
-import { createShippingInvestmentDomain } from "@opencok/services/shipping-investment";
-import { dailyInvestmentDomain } from "@opencok/services/daily-investment";
-import { alchemistDomain } from "@opencok/services/alchemist";
-import { castleLevelEventDomain } from "@opencok/services/castle-level-event";
-import { createLuckyDayDomain } from "@opencok/services/lucky-day";
-import { dragonTowerDomain, publishDragonTowerMutation } from "@opencok/services/dragon-tower";
+import { SeasonalExchangeDomain } from "@opencok/services/seasonal-exchange";
+import { VipBoxDomain } from "@opencok/services/vip-box";
+import { TargetTaskDomain, publishTargetTaskMutation } from "@opencok/services/target-task";
+import { RechargeFeedbackDomain } from "@opencok/services/recharge-feedback";
+import { RechargeActivityDomain } from "@opencok/services/recharge-activity";
+import { OrdinaryBoxDomain } from "@opencok/services/ordinary-box";
+import { SevenDayCycleDomain } from "@opencok/services/seven-day-cycle";
+import { ShippingInvestmentDomain } from "@opencok/services/shipping-investment";
+import { DailyInvestmentDomain } from "@opencok/services/daily-investment";
+import { AlchemistDomain } from "@opencok/services/alchemist";
+import { CastleLevelEventDomain } from "@opencok/services/castle-level-event";
+import { LuckyDayDomain } from "@opencok/services/lucky-day";
+import { DragonTowerDomain, publishDragonTowerMutation } from "@opencok/services/dragon-tower";
 import {
   ExpeditionTreasuryService,
   expeditionTreasuryCommands,
   publishExpeditionTreasuryMutation,
 } from "@opencok/services/expedition-treasury";
 import { createExpeditionTreasuryExecutor } from "@opencok/repositories/expedition-treasury";
-import { expeditionDomain } from "@opencok/services/new-expedition";
-import { createArenaDomain, publishArenaMutation } from "@opencok/services/arena";
-import { anniversaryDomain } from "@opencok/services/anniversary";
-import { lotteryDomain } from "@opencok/services/lottery";
+import { ExpeditionDomain } from "@opencok/services/new-expedition";
+import { ArenaDomain, publishArenaMutation } from "@opencok/services/arena";
+import { AnniversaryDomain } from "@opencok/services/anniversary";
+import { LotteryDomain } from "@opencok/services/lottery";
 import { createTotemEffectStore, pendingTotemOwners } from "@opencok/repositories/totem";
-import { createTotemDomain, expireTotems, settleTotemEffects } from "@opencok/services/totem";
+import { TotemDomain, expireTotems, settleTotemEffects } from "@opencok/services/totem";
 import { publishWorldMutation } from "@opencok/services/world-publication";
-import { createCivilizationCastleDomain } from "@opencok/services/civilization-castle";
-import { createWorldMarchDomain } from "@opencok/services/world-march-runtime";
+import { CivilizationCastleDomain } from "@opencok/services/civilization-castle";
+import { WorldMarchDomain } from "@opencok/services/world-march-runtime";
 import {
   dueWorldMarches,
   createWorldInterest,
   unregisteredWorldMarches,
 } from "@opencok/repositories/world-march-runtime";
-import { dragonTalentsDomain } from "@opencok/services/dragon-talents";
-import { dragonProgressionDomain } from "@opencok/services/dragon-progression";
-import { minstrelDomain } from "@opencok/services/minstrel";
-import { civilizationScienceDomain } from "@opencok/services/civilization-science";
+import { DragonTalentsDomain } from "@opencok/services/dragon-talents";
+import { DragonProgressionDomain } from "@opencok/services/dragon-progression";
+import { MinstrelDomain } from "@opencok/services/minstrel";
+import { CivilizationScienceDomain } from "@opencok/services/civilization-science";
 import { createChatNoticeCostReader } from "@opencok/repositories/chat-notice-cost";
 import { cleanupSocialRealm } from "@opencok/repositories/social-cleanup";
 import type { Fields } from "@opencok/messages/sfs";
@@ -239,27 +239,27 @@ import { PostboxService } from "@opencok/services/postbox";
 import { createPostboxExecutor } from "@opencok/repositories/postbox";
 import { createRealmSocialExecutor } from "@opencok/connection/realm-social";
 import { createAvatarTickets } from "@opencok/storage/avatar-tickets";
-import { createGeneralDrawDomain } from "@opencok/services/general-draws";
+import { GeneralDrawDomain } from "@opencok/services/general-draws";
 import { AllianceService, allianceStableId } from "@opencok/services/alliances";
 import { createAllianceRepository } from "@opencok/repositories/alliance-gameplay";
 import { dueAllianceResearch } from "@opencok/repositories/alliance-recovery";
 import { createAlliancePublicationReader } from "@opencok/repositories/alliance-publication";
 import { publishAllianceMutation } from "@opencok/services/alliance-publication";
 import { relayMutationEvent } from "@opencok/repositories/mutation";
-import { generalsDomain } from "@opencok/services/generals";
-import { equipmentDomain, workshopDomain } from "@opencok/services/equipment";
-import { playerEffectsDomain } from "@opencok/services/player-effects";
-import { questsDomain } from "@opencok/services/quests";
+import { GeneralsDomain } from "@opencok/services/generals";
+import { EquipmentDomain, WorkshopDomain } from "@opencok/services/equipment";
+import { PlayerEffectsDomain } from "@opencok/services/player-effects";
+import { QuestsDomain } from "@opencok/services/quests";
 import { cityQueueCommands } from "@opencok/rules/city-command";
-import { trainingDomain } from "@opencok/services/training";
-import { hospitalDomain } from "@opencok/services/hospital";
-import { fortificationDomain } from "@opencok/services/fortifications";
-import { researchDomain } from "@opencok/services/research";
+import { TrainingDomain } from "@opencok/services/training";
+import { HospitalDomain } from "@opencok/services/hospital";
+import { FortificationDomain } from "@opencok/services/fortifications";
+import { ResearchDomain } from "@opencok/services/research";
 import { createHash } from "node:crypto";
 import { createCityProgressionStore } from "@opencok/repositories/city-progression";
 import { createCityProductionBoundary } from "@opencok/repositories/city-production";
-import { createCityProgressionHandlers } from "@opencok/services/city-progression";
-import { constructionDomain } from "@opencok/services/construction";
+import { CityProgressionService } from "@opencok/services/city-progression.service";
+import { ConstructionDomain } from "@opencok/services/construction";
 import { num, text } from "@opencok/contracts/rows";
 import {
   createActivityExecutor,
@@ -692,75 +692,75 @@ export const RealmDependenciesLive = Layer.effect(
           goldEggsEnabled(rules, BigInt(Date.now()), true, kingdomId),
       })),
     );
-    const city = createCityProgressionHandlers(
+    const city = new CityProgressionService(
       (tx: Parameters<typeof readReconnectProgress>[0], owner, now) =>
         createCityProgressionStore(tx, owner, now, cityBoundary, config.mapSize, authority),
       [
-        generalsDomain,
-        createGeneralDrawDomain(() => cache.generalDrawRanking()),
-        equipmentDomain,
-        workshopDomain,
-        playerEffectsDomain,
-        questsDomain,
-        constructionDomain,
-        researchDomain,
-        civilizationScienceDomain,
-        dragonProgressionDomain,
-        dragonTowerDomain,
-        dragonTalentsDomain,
-        createWorldMarchDomain(config.mapSize),
-        cityDefenseDomain,
-        createTreasureMapDomain(config.mapSize),
-        createWorldUseDomain(config.mapSize),
-        createWorldRecreationDomain(config.mapSize),
-        createCivilizationCastleDomain(config.mapSize),
-        createTotemDomain(config.mapSize),
-        minstrelDomain,
-        alchemistDomain,
-        branchCityDomain,
-        dailyInvestmentDomain,
-        createShippingInvestmentDomain(),
-        createSevenDayCycleDomain(),
-        createOrdinaryBoxDomain(),
-        createNormalRechargeDomain(config.paidGiftGateway),
-        createGoldEggsDomain(undefined, goldEggsRanks),
-        createEggActivityDomain(),
-        createRechargeActivityDomain(paymentObservers.newcomer),
-        createRechargeFeedbackDomain(paymentObservers.feedback),
-        activityRewardDomain,
-        createRedPacketDomain(config.paidGiftGateway),
-        createAllianceHeartDomain((uid) => notifications.owners().includes(uid)),
-        createPrayerDomain(),
-        troubleDomain,
-        olympicDomain,
-        cupBettingDomain,
-        createGroupBuyDomain(),
-        continuedCostDomain,
-        heroTargetDomain,
-        heroRankingRewardDomain,
-        continuedCostRewardDomain,
-        expeditionStageRewardDomain,
-        createSpecialEventDomain(specialEventStock),
-        recallTaskDomain,
-        regionalRecallDomain,
-        playerItemGiftDomain,
-        createSeasonalExchangeDomain(),
-        createExchangeActivityDomain(),
-        comebackDomain,
-        createHotItemDomain(),
-        createVipBoxDomain(),
-        createTargetTaskDomain(),
-        createLuckyDayDomain(),
-        castleLevelEventDomain,
-        lotteryDomain,
-        expeditionDomain,
-        expeditionPhaseDomain,
-        anniversaryDomain,
-        avatarActivationDomain,
-        createArenaDomain(),
-        trainingDomain,
-        hospitalDomain,
-        fortificationDomain,
+        new GeneralsDomain(),
+        new GeneralDrawDomain(() => cache.generalDrawRanking()),
+        new EquipmentDomain(),
+        new WorkshopDomain(),
+        new PlayerEffectsDomain(),
+        new QuestsDomain(),
+        new ConstructionDomain(),
+        new ResearchDomain(),
+        new CivilizationScienceDomain(),
+        new DragonProgressionDomain(),
+        new DragonTowerDomain(),
+        new DragonTalentsDomain(),
+        new WorldMarchDomain(config.mapSize),
+        new CityDefenseDomain(),
+        new TreasureMapDomain(config.mapSize),
+        new WorldUseDomain(config.mapSize),
+        new WorldRecreationDomain(config.mapSize),
+        new CivilizationCastleDomain(config.mapSize),
+        new TotemDomain(config.mapSize),
+        new MinstrelDomain(),
+        new AlchemistDomain(),
+        new BranchCityDomain(),
+        new DailyInvestmentDomain(),
+        new ShippingInvestmentDomain(),
+        new SevenDayCycleDomain(),
+        new OrdinaryBoxDomain(),
+        new NormalRechargeDomain(config.paidGiftGateway),
+        new GoldEggsDomain(undefined, goldEggsRanks),
+        new EggActivityDomain(),
+        new RechargeActivityDomain(paymentObservers.newcomer),
+        new RechargeFeedbackDomain(paymentObservers.feedback),
+        new ActivityRewardDomain(),
+        new RedPacketDomain(config.paidGiftGateway),
+        new AllianceHeartDomain((uid) => notifications.owners().includes(uid)),
+        new PrayerDomain(),
+        new TroubleDomain(),
+        new OlympicDomain(),
+        new CupBettingDomain(),
+        new GroupBuyDomain(),
+        new ContinuedCostDomain(),
+        new HeroTargetDomain(),
+        new HeroRankingRewardDomain(),
+        new ContinuedCostRewardDomain(),
+        new ExpeditionStageRewardDomain(),
+        new SpecialEventDomain(specialEventStock),
+        new RecallTaskDomain(),
+        new RegionalRecallDomain(),
+        new PlayerItemGiftDomain(),
+        new SeasonalExchangeDomain(),
+        new ExchangeActivityDomain(),
+        new ComebackDomain(),
+        new HotItemDomain(),
+        new VipBoxDomain(),
+        new TargetTaskDomain(),
+        new LuckyDayDomain(),
+        new CastleLevelEventDomain(),
+        new LotteryDomain(),
+        new ExpeditionDomain(),
+        new ExpeditionPhaseDomain(),
+        new AnniversaryDomain(),
+        new AvatarActivationDomain(),
+        new ArenaDomain(),
+        new TrainingDomain(),
+        new HospitalDomain(),
+        new FortificationDomain(),
       ],
       rules,
       economyEffects,

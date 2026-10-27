@@ -1,3 +1,4 @@
+import { CityCommandDomain } from "./city-command-domain.ts";
 import { recordRecallTask } from "./recall-task";
 import { createHash, randomInt, randomUUID } from "node:crypto";
 import { num, long, text } from "@opencok/contracts/rows";
@@ -26,7 +27,8 @@ import { previewRewards } from "@opencok/rules/rewards";
 import { rewardPreviewArray } from "@opencok/mappings/rewards";
 import { targetTaskView } from "@opencok/mappings/target-task";
 import { pinProgressionReward, grantNativeProgressionReward } from "./progression-rewards";
-import type { CityDomain, CityProgressionContext } from "./city-progression";
+import type { CityDomain } from "./city-domain.ts";
+import type { CityProgressionContext } from "./city-progression-context.ts";
 import type { TargetTaskPaymentGateway } from "@opencok/contracts/target-task";
 
 function open(context: CityProgressionContext) {
@@ -249,20 +251,29 @@ export function targetTaskPurchaseOperationId(owner: string, eventId: string): s
   return `targetpaid:${createHash("sha256").update(`${owner}\0${eventId}`).digest("hex")}`;
 }
 
-export function createTargetTaskDomain(
-  gateway?: TargetTaskPaymentGateway,
-  random: (maximum: number) => number = randomInt,
-): CityDomain {
-  return {
-    commands: [
+export class TargetTaskDomain extends CityCommandDomain {
+  public readonly commands: CityDomain["commands"];
+  public readonly types: CityDomain["types"];
+  public readonly prepare: CityDomain["prepare"];
+  public readonly apply: CityDomain["apply"];
+
+  public constructor(
+    gateway?: TargetTaskPaymentGateway,
+    random: (maximum: number) => number = randomInt,
+  ) {
+    super();
+
+    this.commands = [
       "target.init",
       "target.task.ui",
       "target.task.item",
       "target.task.receive",
       "target.paid",
-    ],
-    types: [],
-    async prepare(context, command, params) {
+    ];
+
+    this.types = [];
+
+    this.prepare = async (context, command, params) => {
       const empty = () => ({ response: encode({}), event: null });
 
       if (!open(context)) {
@@ -421,11 +432,19 @@ export function createTargetTaskDomain(
         }),
         event: null,
       };
-    },
-    async apply() {
+    };
+
+    this.apply = async () => {
       targetFailure();
-    },
-  };
+    };
+  }
+}
+
+export function createTargetTaskDomain(
+  gateway?: TargetTaskPaymentGateway,
+  random: (maximum: number) => number = randomInt,
+): CityDomain {
+  return new TargetTaskDomain(gateway, random);
 }
 
 export async function publishTargetTaskMutation(

@@ -15,7 +15,7 @@ import { cityInteger } from "@opencok/rules/city-progression";
 import { generalFailure } from "@opencok/rules/general-progression";
 import { chooseWeight } from "@opencok/rules/equipment";
 import { generalFeatureAvailable } from "@opencok/rules/new-general-content";
-import type { CityProgressionContext } from "./city-progression";
+import type { CityProgressionContext } from "./city-progression-context.ts";
 
 export function generalTurntable(
   context: CityProgressionContext,

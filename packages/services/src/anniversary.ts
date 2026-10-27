@@ -1,3 +1,4 @@
+import { CityCommandDomain } from "./city-command-domain.ts";
 import { readCampaignObservations } from "@opencok/mappings/campaign-observation";
 import { cosmeticInteractionEvent } from "./city-cosmetics";
 import { campaignTriggerView } from "@opencok/mappings/anniversary";
@@ -7,7 +8,8 @@ import { cityInteger } from "@opencok/rules/city-progression";
 import { campaignFailure } from "@opencok/rules/local-campaign";
 import { anniversaryStatisticsView, anniversaryView } from "@opencok/mappings/anniversary";
 import { CampaignPlanner, campaignVariableFields, refreshCampaignGrants } from "./local-campaign";
-import type { CityDomain, CityProgressionContext } from "./city-progression";
+import type { CityDomain } from "./city-domain.ts";
+import type { CityProgressionContext } from "./city-progression-context.ts";
 import type { AnniversaryResponse } from "@opencok/contracts/responses/anniversary";
 
 function weeks(context: CityProgressionContext) {
@@ -59,8 +61,8 @@ function info(context: CityProgressionContext, planner: CampaignPlanner): Annive
   };
 }
 
-export const anniversaryDomain: CityDomain = {
-  commands: [
+export class AnniversaryDomain extends CityCommandDomain {
+  public readonly commands: CityDomain["commands"] = [
     "1year.info",
     "third.anniversary",
     "third.anniversary.reward",
@@ -70,9 +72,11 @@ export const anniversaryDomain: CityDomain = {
     "campaign.action",
     "campaign.record",
     "item.askFor",
-  ],
-  types: [],
-  async prepare(context, command, params) {
+  ];
+
+  public readonly types: CityDomain["types"] = [];
+
+  public readonly prepare: CityDomain["prepare"] = async (context, command, params) => {
     if (command === "1year.info") {
       if (!context.state.anniversaryStatistics) campaignFailure();
 
@@ -193,8 +197,11 @@ export const anniversaryDomain: CityDomain = {
     if (new CampaignPlanner(context).value(flag) !== 1n) campaignFailure();
 
     return { response: encode({ success: sfs.string("1") }) };
-  },
-  async apply() {
+  };
+
+  public readonly apply: CityDomain["apply"] = async () => {
     campaignFailure();
-  },
-};
+  };
+}
+
+export const anniversaryDomain: CityDomain = new AnniversaryDomain();

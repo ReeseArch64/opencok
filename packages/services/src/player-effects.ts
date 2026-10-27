@@ -1,3 +1,4 @@
+import { CityCommandDomain } from "./city-command-domain.ts";
 import { randomInt, randomUUID } from "node:crypto";
 import { GameError } from "@opencok/errors/game";
 import { errors } from "@opencok/constants/game";
@@ -17,7 +18,8 @@ import {
   activeSkill,
 } from "@opencok/mappings/player-effects";
 import { decodeGeneralAbilities } from "./profile";
-import type { CityDomain, CityProgressionContext } from "./city-progression";
+import type { CityDomain } from "./city-domain.ts";
+import type { CityProgressionContext } from "./city-progression-context.ts";
 
 const commands = [
   "effects.init",
@@ -383,11 +385,16 @@ async function prepare(context: CityProgressionContext, command: string, params:
   return { response: encode(body), event: null };
 }
 
-export const playerEffectsDomain: CityDomain = {
-  commands,
-  types: [],
-  prepare,
-  apply: async () => {
+export class PlayerEffectsDomain extends CityCommandDomain {
+  public readonly commands: CityDomain["commands"] = commands;
+
+  public readonly types: CityDomain["types"] = [];
+
+  public readonly prepare: CityDomain["prepare"] = prepare;
+
+  public readonly apply: CityDomain["apply"] = async () => {
     throw new GameError(errors.invalid, "city_progression");
-  },
-};
+  };
+}
+
+export const playerEffectsDomain: CityDomain = new PlayerEffectsDomain();

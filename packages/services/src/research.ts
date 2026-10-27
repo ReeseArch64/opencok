@@ -1,3 +1,5 @@
+import { TimedActivityAction } from "@opencok/enums/timed-activity-action";
+import { CityCommandDomain } from "./city-command-domain.ts";
 import { recordTargetTask } from "./target-task";
 import { recordExpeditionScore } from "./new-expedition";
 import { GameError } from "@opencok/errors/game";
@@ -24,7 +26,8 @@ import {
   progressionActivityData,
 } from "@opencok/rules/city-progression";
 import { idleDeadline } from "@opencok/rules/timed-activity";
-import { CityProgressionContext, type CityDomain } from "./city-progression";
+import { CityProgressionContext } from "./city-progression-context.ts";
+import type { CityDomain } from "./city-domain.ts";
 
 const commands = ["science.data.init", "science.research", "science.directly"];
 
@@ -260,15 +263,15 @@ async function apply(
 
   researchDefinition(context.rules, activity.itemId, num(row, "level") + 1);
 
-  if (action === "start") throw new GameError(errors.invalid, "city_progression");
+  if (action === TimedActivityAction.Start) throw new GameError(errors.invalid, "city_progression");
 
-  if (action === "restore" || action === "reschedule") {
+  if (action === TimedActivityAction.Restore || action === TimedActivityAction.Reschedule) {
     context.write.sciences = [{ ...row, cd: activity.dueAt }];
 
     return research(row, context.rules, activity.dueAt);
   }
 
-  if (action === "cancel") {
+  if (action === TimedActivityAction.Cancel) {
     context.refund(data);
     context.write.sciences = [{ ...row, cd: idleDeadline }];
 
@@ -278,4 +281,14 @@ async function apply(
   return complete(context, row, data);
 }
 
-export const researchDomain: CityDomain = { commands, types: [6], prepare, apply };
+export class ResearchDomain extends CityCommandDomain {
+  public readonly commands: CityDomain["commands"] = commands;
+
+  public readonly types: CityDomain["types"] = [6];
+
+  public readonly prepare: CityDomain["prepare"] = prepare;
+
+  public readonly apply: CityDomain["apply"] = apply;
+}
+
+export const researchDomain: CityDomain = new ResearchDomain();

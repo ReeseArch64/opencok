@@ -1,10 +1,12 @@
+import { CityCommandDomain } from "./city-command-domain.ts";
 import { num, long, text } from "@opencok/contracts/rows";
 import { encode, sfs, int } from "@opencok/messages/sfs";
 import { cityAmount, cityInteger } from "@opencok/rules/city-progression";
 import { cityFireSpeed, settleCityFire } from "@opencok/rules/city-defense";
 import { worldMutationFailure } from "@opencok/rules/world-march-runtime";
 import { extinguishedCity, repairedCity } from "@opencok/mappings/city-defense";
-import type { CityDomain, CityProgressionContext } from "./city-progression";
+import type { CityDomain } from "./city-domain.ts";
+import type { CityProgressionContext } from "./city-progression-context.ts";
 
 export function cityDefenseMaximum(context: CityProgressionContext) {
   const wall = context.state.buildings.find((building) => num(building, "itemId") === 419000);
@@ -25,10 +27,12 @@ export function cityDefenseMaximum(context: CityProgressionContext) {
 
 export const cityDefenseCommands = ["buy.citydef", "world.user.rcd"];
 
-export const cityDefenseDomain: CityDomain = {
-  commands: cityDefenseCommands,
-  types: [],
-  async prepare(context, command, params) {
+export class CityDefenseDomain extends CityCommandDomain {
+  public readonly commands: CityDomain["commands"] = cityDefenseCommands;
+
+  public readonly types: CityDomain["types"] = [];
+
+  public readonly prepare: CityDomain["prepare"] = async (context, command, params) => {
     const state = context.state.worldMutation;
 
     if (!state) worldMutationFailure();
@@ -109,8 +113,11 @@ export const cityDefenseDomain: CityDomain = {
         points: sfs.array([sfs.object({ id: sfs.int(num(row, "id")) })]),
       }),
     };
-  },
-  async apply() {
+  };
+
+  public readonly apply: CityDomain["apply"] = async () => {
     worldMutationFailure();
-  },
-};
+  };
+}
+
+export const cityDefenseDomain: CityDomain = new CityDefenseDomain();

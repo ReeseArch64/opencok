@@ -1,3 +1,4 @@
+import { CityCommandDomain } from "./city-command-domain.ts";
 import { randomInt } from "node:crypto";
 import { num, long, text, type Row } from "@opencok/contracts/rows";
 import { encode, sfs, str, type Fields, type Value } from "@opencok/messages/sfs";
@@ -17,7 +18,8 @@ import {
   progressionRewardPreview,
 } from "./progression-rewards";
 import { refreshQuests } from "./quests";
-import type { CityDomain, CityProgressionContext } from "./city-progression";
+import type { CityDomain } from "./city-domain.ts";
+import type { CityProgressionContext } from "./city-progression-context.ts";
 
 const resourceAssets = [
   "wood",
@@ -287,17 +289,19 @@ function outer(context: CityProgressionContext, row: Row, superMode: boolean) {
   return { id, result };
 }
 
-export const lotteryDomain: CityDomain = {
-  commands: [
+export class LotteryDomain extends CityCommandDomain {
+  public readonly commands: CityDomain["commands"] = [
     "lottery.init",
     "lottery.start",
     "lottery.buy",
     "lottery.batch",
     "lottery.b.use",
     "lottery.cancel",
-  ],
-  types: [],
-  async prepare(context, command, params) {
+  ];
+
+  public readonly types: CityDomain["types"] = [];
+
+  public readonly prepare: CityDomain["prepare"] = async (context, command, params) => {
     if (command === "lottery.init" && !context.rules.advanced.lotteries?.size)
       return { response: encode({}), event: null };
 
@@ -509,8 +513,11 @@ export const lotteryDomain: CityDomain = {
     } else lotteryFailure();
 
     return { response: encode(body) };
-  },
-  async apply() {
+  };
+
+  public readonly apply: CityDomain["apply"] = async () => {
     lotteryFailure();
-  },
-};
+  };
+}
+
+export const lotteryDomain: CityDomain = new LotteryDomain();

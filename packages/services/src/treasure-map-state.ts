@@ -1,5 +1,5 @@
 import { text, type Row } from "@opencok/contracts/rows";
-import type { CityProgressionContext } from "./city-progression";
+import type { CityProgressionContext } from "./city-progression-context.ts";
 
 export function treasureMapRoster(context: CityProgressionContext) {
   const rows = new Map(

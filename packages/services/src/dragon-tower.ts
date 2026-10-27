@@ -1,3 +1,4 @@
+import { CityCommandDomain } from "./city-command-domain.ts";
 import { randomInt } from "node:crypto";
 import {
   sfs,
@@ -32,7 +33,8 @@ import {
   towerRankingView,
 } from "@opencok/mappings/dragon-tower";
 import { militaryBoolean } from "./training";
-import type { CityDomain, CityProgressionContext } from "./city-progression";
+import type { CityDomain } from "./city-domain.ts";
+import type { CityProgressionContext } from "./city-progression-context.ts";
 
 function units(params: Fields) {
   if (params.armys?.type !== Type.Array) towerFailure();
@@ -174,10 +176,16 @@ function healDuration(
   return BigInt(duration);
 }
 
-export const dragonTowerDomain: CityDomain = {
-  commands: ["dragontower", "dragontower.init", "dragontower.tick"],
-  types: [],
-  async prepare(context, command, params) {
+export class DragonTowerDomain extends CityCommandDomain {
+  public readonly commands: CityDomain["commands"] = [
+    "dragontower",
+    "dragontower.init",
+    "dragontower.tick",
+  ];
+
+  public readonly types: CityDomain["types"] = [];
+
+  public readonly prepare: CityDomain["prepare"] = async (context, command, params) => {
     const state = context.state.dragonTower;
 
     if (!state) towerFailure();
@@ -636,11 +644,14 @@ export const dragonTowerDomain: CityDomain = {
     }
 
     return towerFailure();
-  },
-  async apply() {
+  };
+
+  public readonly apply: CityDomain["apply"] = async () => {
     towerFailure();
-  },
-};
+  };
+}
+
+export const dragonTowerDomain: CityDomain = new DragonTowerDomain();
 
 export async function publishDragonTowerMutation(
   payload: Buffer,

@@ -1,3 +1,4 @@
+import { CityCommandDomain } from "./city-command-domain.ts";
 import { randomInt, randomUUID } from "node:crypto";
 import { sfs, encode, type Value } from "@opencok/messages/sfs";
 import { num, long, text, type Row } from "@opencok/contracts/rows";
@@ -20,12 +21,18 @@ import { javaMailBytes } from "@opencok/rules/avatar-mail";
 import { rewardPreviewArray } from "@opencok/mappings/rewards";
 import { grantNativeProgressionReward, pinProgressionReward } from "./progression-rewards";
 import { temporaryEffect } from "@opencok/rules/player-effects";
-import type { CityDomain } from "./city-progression";
+import type { CityDomain } from "./city-domain.ts";
 
-export const regionalRecallDomain: CityDomain = {
-  commands: ["region.recall.init", "region.recall.open.ui", "region.recall.receive"],
-  types: [],
-  async prepare(context, command) {
+export class RegionalRecallDomain extends CityCommandDomain {
+  public readonly commands: CityDomain["commands"] = [
+    "region.recall.init",
+    "region.recall.open.ui",
+    "region.recall.receive",
+  ];
+
+  public readonly types: CityDomain["types"] = [];
+
+  public readonly prepare: CityDomain["prepare"] = async (context, command) => {
     const empty = () => ({ response: encode({}), event: null });
     const state = context.state.regionalRecall;
 
@@ -191,8 +198,11 @@ export const regionalRecallDomain: CityDomain = {
     context.write.regionalRecall = { record };
 
     return { response: encode(regionalRecallClaim(rule.id!, reward, previous)), event: null };
-  },
-  async apply() {
+  };
+
+  public readonly apply: CityDomain["apply"] = async () => {
     regionalRecallFailure();
-  },
-};
+  };
+}
+
+export const regionalRecallDomain: CityDomain = new RegionalRecallDomain();

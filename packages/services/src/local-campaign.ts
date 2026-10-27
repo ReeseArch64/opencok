@@ -25,7 +25,7 @@ import { cityInteger } from "@opencok/rules/city-progression";
 import { javaMailBytes } from "@opencok/rules/avatar-mail";
 import { temporaryEffect } from "@opencok/rules/player-effects";
 import { grantNativeProgressionReward, pinProgressionReward } from "./progression-rewards";
-import type { CityProgressionContext } from "./city-progression";
+import type { CityProgressionContext } from "./city-progression-context.ts";
 
 export class CampaignPlanner {
   private operations = 0;

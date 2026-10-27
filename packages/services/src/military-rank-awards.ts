@@ -12,7 +12,7 @@ import type {
   MilitaryRankAward,
   MilitaryRankAwardResponse,
 } from "@opencok/contracts/military-rank-awards";
-import type { CityProgressionContext } from "./city-progression";
+import type { CityProgressionContext } from "./city-progression-context.ts";
 
 export async function applyMilitaryRankAward(
   context: CityProgressionContext,

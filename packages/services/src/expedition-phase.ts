@@ -1,3 +1,4 @@
+import { CityCommandDomain } from "./city-command-domain.ts";
 import type { Row } from "@opencok/contracts/rows";
 import type { ExpeditionPhaseStore } from "@opencok/contracts/expedition-phase";
 import { expeditionPhaseView } from "@opencok/rules/expedition-phase";
@@ -6,7 +7,7 @@ import { long, num } from "@opencok/contracts/rows";
 import { expeditionPhaseOperation } from "@opencok/rules/expedition-phase";
 import { expeditionPanels } from "@opencok/mappings/new-expedition";
 import type { Rules } from "@opencok/rules/game";
-import type { CityDomain } from "./city-progression";
+import type { CityDomain } from "./city-domain.ts";
 import type { ExpeditionActivityReader } from "@opencok/contracts/expedition-phase";
 import { decode, fields, Type, type Fields } from "@opencok/messages/sfs";
 
@@ -43,10 +44,12 @@ export class ExpeditionActivityService {
   }
 }
 
-export const expeditionPhaseDomain: CityDomain = {
-  commands: ["expedition.notify"],
-  types: [],
-  async prepare(context, _command, params) {
+export class ExpeditionPhaseDomain extends CityCommandDomain {
+  public readonly commands: CityDomain["commands"] = ["expedition.notify"];
+
+  public readonly types: CityDomain["types"] = [];
+
+  public readonly prepare: CityDomain["prepare"] = async (context, _command, params) => {
     const raw = str(params, "revision"),
       state = context.state.expedition,
       clock = state?.clock;
@@ -86,11 +89,14 @@ export const expeditionPhaseDomain: CityDomain = {
     });
 
     return { response: encode({}), event: null };
-  },
-  async apply() {
+  };
+
+  public readonly apply: CityDomain["apply"] = async () => {
     throw new Error("Unsupported expedition notification activity");
-  },
-};
+  };
+}
+
+export const expeditionPhaseDomain: CityDomain = new ExpeditionPhaseDomain();
 
 export async function publishExpeditionPhaseNotification(
   payload: Uint8Array,

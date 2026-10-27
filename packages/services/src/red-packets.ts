@@ -1,3 +1,4 @@
+import { CityCommandDomain } from "./city-command-domain.ts";
 import { paidGiftEvidence, redPacketInfo, redPacketRecord } from "@opencok/mappings/red-packets";
 import { avatarMailPush } from "@opencok/mappings/avatar-mail";
 import type { AvatarSystemMail } from "@opencok/contracts/files";
@@ -14,7 +15,8 @@ import { campaignFailure } from "@opencok/rules/local-campaign";
 import { cityInteger } from "@opencok/rules/city-progression";
 import { packetStatus, packetDistribution } from "@opencok/rules/red-packets";
 import { CampaignPlanner } from "./local-campaign";
-import type { CityDomain, CityProgressionContext } from "./city-progression";
+import type { CityDomain } from "./city-domain.ts";
+import type { CityProgressionContext } from "./city-progression-context.ts";
 
 export function paidGiftOperation(owner: string, orderId: string, platform: string) {
   if (
@@ -140,17 +142,26 @@ function castle(context: CityProgressionContext, withStar = true) {
   );
 }
 
-export function createRedPacketDomain(gateway?: PaidGiftGateway): CityDomain {
-  return {
-    commands: [
+export class RedPacketDomain extends CityCommandDomain {
+  public readonly commands: CityDomain["commands"];
+  public readonly types: CityDomain["types"];
+  public readonly prepare: CityDomain["prepare"];
+  public readonly apply: CityDomain["apply"];
+
+  public constructor(gateway?: PaidGiftGateway) {
+    super();
+
+    this.commands = [
       "campaign.paid.gift",
       "redPackets.sd",
       "redPackets.rv",
       "redPackets.status",
       "redPackets.rvd.id",
-    ],
-    types: [],
-    async prepare(context, command, params) {
+    ];
+
+    this.types = [];
+
+    this.prepare = async (context, command, params) => {
       const reader = context.state.redPackets;
 
       if (!reader || !profileEligible(context)) campaignFailure();
@@ -420,11 +431,16 @@ export function createRedPacketDomain(gateway?: PaidGiftGateway): CityDomain {
         }),
         event: null,
       };
-    },
-    async apply() {
+    };
+
+    this.apply = async () => {
       campaignFailure();
-    },
-  };
+    };
+  }
+}
+
+export function createRedPacketDomain(gateway?: PaidGiftGateway): CityDomain {
+  return new RedPacketDomain(gateway);
 }
 
 export async function publishRedPacketAnnouncement(

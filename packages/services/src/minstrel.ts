@@ -1,3 +1,4 @@
+import { CityCommandDomain } from "./city-command-domain.ts";
 import { randomInt, randomUUID } from "node:crypto";
 import { GameError } from "@opencok/errors/game";
 import { errors } from "@opencok/constants/game";
@@ -9,7 +10,8 @@ import { previewRewards } from "@opencok/rules/rewards";
 import { javaMailBytes } from "@opencok/rules/avatar-mail";
 import { minstrelInfo } from "@opencok/mappings/minstrel";
 import { grantRewards } from "./quests";
-import type { CityDomain, CityProgressionContext } from "./city-progression";
+import type { CityDomain } from "./city-domain.ts";
+import type { CityProgressionContext } from "./city-progression-context.ts";
 
 function shareMail(
   context: CityProgressionContext,
@@ -63,10 +65,12 @@ function shareMail(
   ];
 }
 
-export const minstrelDomain: CityDomain = {
-  commands: ["minstrel"],
-  types: [],
-  async prepare(context, _command, params) {
+export class MinstrelDomain extends CityCommandDomain {
+  public readonly commands: CityDomain["commands"] = ["minstrel"];
+
+  public readonly types: CityDomain["types"] = [];
+
+  public readonly prepare: CityDomain["prepare"] = async (context, _command, params) => {
     if (!localEventWindow(context.rules.power.activityPanels?.get("57112"), context.now))
       throw new GameError(errors.unsupported, "city_progression");
 
@@ -127,8 +131,11 @@ export const minstrelDomain: CityDomain = {
     body.info = sfs.object(minstrelInfo(row, rule));
 
     return { response: encode(body), event: action === "info" ? null : undefined };
-  },
-  async apply() {
+  };
+
+  public readonly apply: CityDomain["apply"] = async () => {
     throw new GameError(errors.unsupported, "city_progression");
-  },
-};
+  };
+}
+
+export const minstrelDomain: CityDomain = new MinstrelDomain();

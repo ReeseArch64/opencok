@@ -1,3 +1,4 @@
+import { CityCommandDomain } from "./city-command-domain.ts";
 import { avatarMailPush } from "@opencok/mappings/avatar-mail";
 import type { AvatarSystemMail } from "@opencok/contracts/files";
 import { createHash, randomInt } from "node:crypto";
@@ -26,7 +27,8 @@ import { javaMailBytes } from "@opencok/rules/avatar-mail";
 import { goldEggsCellsView, goldEggsRankingView } from "@opencok/mappings/gold-eggs";
 import { pinProgressionReward, grantNativeProgressionReward } from "./progression-rewards";
 import { pinGoldEggRewards } from "./gold-eggs-rewards";
-import type { CityDomain, CityProgressionContext } from "./city-progression";
+import type { CityDomain } from "./city-domain.ts";
+import type { CityProgressionContext } from "./city-progression-context.ts";
 
 const nextDay = (now: bigint) => (now / 86400000n + 1n) * 86400000n;
 
@@ -94,12 +96,16 @@ export function goldEggsAwardParameters(
   };
 }
 
-export function createGoldEggsDomain(
-  random: (maximum: number) => number = randomInt,
-  globalRanks?: GoldEggsRanks,
-): CityDomain {
-  return {
-    commands: [
+export class GoldEggsDomain extends CityCommandDomain {
+  public readonly commands: CityDomain["commands"];
+  public readonly types: CityDomain["types"];
+  public readonly prepare: CityDomain["prepare"];
+  public readonly apply: CityDomain["apply"];
+
+  public constructor(random: (maximum: number) => number = randomInt, globalRanks?: GoldEggsRanks) {
+    super();
+
+    this.commands = [
       "goldeggs.info",
       "goldeggs.smashing",
       "goldeggs.smashingall",
@@ -108,9 +114,11 @@ export function createGoldEggsDomain(
       "goldeggs.rank",
       "goldeggs.rankAll",
       "goldeggs.award.deliver",
-    ],
-    types: [],
-    async prepare(context, command, params) {
+    ];
+
+    this.types = [];
+
+    this.prepare = async (context, command, params) => {
       const reader = context.state.goldEggs,
         period = goldEggsPeriod(context.rules);
 
@@ -380,9 +388,17 @@ export function createGoldEggsDomain(
       context.write.goldEggs = { record: row, period };
 
       return { response: encode(body), event: null };
-    },
-    async apply() {
+    };
+
+    this.apply = async () => {
       goldEggsFailure();
-    },
-  };
+    };
+  }
+}
+
+export function createGoldEggsDomain(
+  random: (maximum: number) => number = randomInt,
+  globalRanks?: GoldEggsRanks,
+): CityDomain {
+  return new GoldEggsDomain(random, globalRanks);
 }

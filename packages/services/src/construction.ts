@@ -1,3 +1,5 @@
+import { TimedActivityAction } from "@opencok/enums/timed-activity-action";
+import { CityCommandDomain } from "./city-command-domain.ts";
 import { refreshPrayerBuilding } from "./prayer";
 import { recordTargetTask } from "./target-task";
 import { enrollCastleLevel } from "./castle-level-event";
@@ -31,7 +33,8 @@ import {
 } from "@opencok/rules/city-progression";
 import { idleDeadline } from "@opencok/rules/timed-activity";
 import { cityCommands } from "@opencok/rules/city-command";
-import { CityProgressionContext, type CityDomain } from "./city-progression";
+import { CityProgressionContext } from "./city-progression-context.ts";
+import type { CityDomain } from "./city-domain.ts";
 
 function definition(context: CityProgressionContext, row: Row) {
   return context.rules.building(
@@ -502,12 +505,12 @@ async function apply(
   if (data && data.kind !== (num(row, "opType") === 1 ? "upgrade" : "destroy"))
     throw new GameError(errors.invalid, "city_progression");
 
-  if (action === "start") throw new GameError(errors.invalid, "city_progression");
+  if (action === TimedActivityAction.Start) throw new GameError(errors.invalid, "city_progression");
 
-  if (action === "restore" || action === "reschedule")
+  if (action === TimedActivityAction.Restore || action === TimedActivityAction.Reschedule)
     return building(row, context.rules, num(row, "opType") === 1, Number(context.now));
 
-  if (action === "cancel") {
+  if (action === TimedActivityAction.Cancel) {
     if (num(row, "opType") === 1) context.refund(data);
 
     if (num(row, "level") === 0) context.write.deletedBuildings = [text(row, "uuid")];
@@ -533,9 +536,14 @@ async function apply(
   return { uuid: sfs.string(text(row, "uuid")), opType: sfs.int(2) };
 }
 
-export const constructionDomain: CityDomain = {
-  commands: cityCommands,
-  types: [0],
-  prepare,
-  apply,
-};
+export class ConstructionDomain extends CityCommandDomain {
+  public readonly commands: CityDomain["commands"] = cityCommands;
+
+  public readonly types: CityDomain["types"] = [0];
+
+  public readonly prepare: CityDomain["prepare"] = prepare;
+
+  public readonly apply: CityDomain["apply"] = apply;
+}
+
+export const constructionDomain: CityDomain = new ConstructionDomain();

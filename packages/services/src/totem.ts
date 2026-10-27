@@ -1,3 +1,4 @@
+import { CityCommandDomain } from "./city-command-domain.ts";
 import { randomInt, randomUUID } from "node:crypto";
 import { GameError } from "@opencok/errors/game";
 import { errors } from "@opencok/constants/game";
@@ -18,7 +19,8 @@ import { javaMailBytes } from "@opencok/rules/avatar-mail";
 import { serverFeature } from "@opencok/rules/power-context";
 import { cityInteger } from "@opencok/rules/city-progression";
 import type { Rules, Rule } from "@opencok/rules/game";
-import type { CityDomain, CityProgressionContext } from "./city-progression";
+import type { CityDomain } from "./city-domain.ts";
+import type { CityProgressionContext } from "./city-progression-context.ts";
 
 function totemMail(
   template: { sender?: string; title?: string; message?: string },
@@ -149,11 +151,20 @@ export async function settleTotemEffects(store: TotemEffectStore, rules: Rules, 
   }
 }
 
-export function createTotemDomain(size: number): CityDomain {
-  return {
-    commands: ["totem", "totem.tick", "totem.init"],
-    types: [],
-    async prepare(context, command, params) {
+export class TotemDomain extends CityCommandDomain {
+  public readonly commands: CityDomain["commands"];
+  public readonly types: CityDomain["types"];
+  public readonly prepare: CityDomain["prepare"];
+  public readonly apply: CityDomain["apply"];
+
+  public constructor(size: number) {
+    super();
+
+    this.commands = ["totem", "totem.tick", "totem.init"];
+
+    this.types = [];
+
+    this.prepare = async (context, command, params) => {
       if (command === "totem.tick") return { response: encode({}), event: null };
 
       if (command === "totem.init")
@@ -378,9 +389,14 @@ export function createTotemDomain(size: number): CityDomain {
           ]),
         }),
       };
-    },
-    async apply() {
+    };
+
+    this.apply = async () => {
       totemFailure();
-    },
-  };
+    };
+  }
+}
+
+export function createTotemDomain(size: number): CityDomain {
+  return new TotemDomain(size);
 }

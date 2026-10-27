@@ -1,5 +1,6 @@
 import type { Row } from "./rows";
 import type { MutationCommand } from "./mutation";
+import type { TimedActivityAction } from "@opencok/enums/timed-activity-action";
 
 export interface TimedActivity {
   id: string;
@@ -29,7 +30,7 @@ export interface PreparedActivity {
   responseKind?: "queue" | "nested";
 }
 
-export type ActivityAction = "start" | "restore" | "finish" | "cancel" | "reschedule";
+export type ActivityAction = `${TimedActivityAction}`;
 
 import type { InventoryState, InventoryPlan } from "./inventory";
 

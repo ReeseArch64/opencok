@@ -1,3 +1,4 @@
+import { CityCommandDomain } from "./city-command-domain.ts";
 import { createHash, randomUUID } from "node:crypto";
 import { encode, sfs, str, int } from "@opencok/messages/sfs";
 import { num, long, text } from "@opencok/contracts/rows";
@@ -13,7 +14,7 @@ import { javaMailBytes } from "@opencok/rules/avatar-mail";
 import { olympicQuestionView, olympicBetView } from "@opencok/mappings/olympic";
 import { GameError } from "@opencok/errors/game";
 import { errors } from "@opencok/constants/game";
-import type { CityDomain } from "./city-progression";
+import type { CityDomain } from "./city-domain.ts";
 import type { OlympicScheduleStore } from "@opencok/contracts/olympic";
 import type { Rules } from "@opencok/rules/game";
 
@@ -50,16 +51,18 @@ export function olympicSettlementOperation(owner: string, ids: readonly string[]
     .digest("hex")}`;
 }
 
-export const olympicDomain: CityDomain = {
-  commands: [
+export class OlympicDomain extends CityCommandDomain {
+  public readonly commands: CityDomain["commands"] = [
     "Olympic.question.info",
     "Olympic.bet.info",
     "Olympic.bet",
     "Olympic.reward",
     "Olympic.settle",
-  ],
-  types: [],
-  async prepare(context, command, params) {
+  ];
+
+  public readonly types: CityDomain["types"] = [];
+
+  public readonly prepare: CityDomain["prepare"] = async (context, command, params) => {
     const state = context.state.olympic;
 
     if (!state) invalid();
@@ -272,8 +275,11 @@ export const olympicDomain: CityDomain = {
     }
 
     return { response: encode({ reward: sfs.array(rewards) }), event: null };
-  },
-  async apply() {
+  };
+
+  public readonly apply: CityDomain["apply"] = async () => {
     invalid();
-  },
-};
+  };
+}
+
+export const olympicDomain: CityDomain = new OlympicDomain();

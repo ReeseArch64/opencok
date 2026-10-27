@@ -1,3 +1,4 @@
+import { CityCommandDomain } from "./city-command-domain.ts";
 import { sfs, encode, str } from "@opencok/messages/sfs";
 import { num, text, long } from "@opencok/contracts/rows";
 import {
@@ -24,7 +25,7 @@ import type {
 } from "@opencok/contracts/expedition-stage-rewards";
 import type { AvatarSystemMail } from "@opencok/contracts/files";
 import type { Rules } from "@opencok/rules/game";
-import type { CityDomain } from "./city-progression";
+import type { CityDomain } from "./city-domain.ts";
 
 export class ExpeditionStageRewardService {
   private running?: Promise<void>;
@@ -233,10 +234,12 @@ function payload(value: string): ExpeditionAwardPayload {
   return parsed as ExpeditionAwardPayload;
 }
 
-export const expeditionStageRewardDomain: CityDomain = {
-  commands: ["expedition.award.deliver"],
-  types: [],
-  async prepare(context, _command, params) {
+export class ExpeditionStageRewardDomain extends CityCommandDomain {
+  public readonly commands: CityDomain["commands"] = ["expedition.award.deliver"];
+
+  public readonly types: CityDomain["types"] = [];
+
+  public readonly prepare: CityDomain["prepare"] = async (context, _command, params) => {
     const id = str(params, "awardId");
 
     if (!/^[a-f0-9]{32}$/.test(id) || str(params, "operationId") !== expeditionAwardOperation(id))
@@ -291,11 +294,14 @@ export const expeditionStageRewardDomain: CityDomain = {
     context.write.expeditionAward = id;
 
     return { response: encode({}), event: null };
-  },
-  async apply() {
+  };
+
+  public readonly apply: CityDomain["apply"] = async () => {
     throw new Error("Unsupported expedition reward activity");
-  },
-};
+  };
+}
+
+export const expeditionStageRewardDomain: CityDomain = new ExpeditionStageRewardDomain();
 
 export class ExpeditionHistoryService {
   constructor(

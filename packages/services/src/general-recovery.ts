@@ -5,7 +5,7 @@ import { generalMap, generalFeatureAvailable } from "@opencok/rules/new-general-
 import { cityInteger } from "@opencok/rules/city-progression";
 import { generalFailure, generalPairs } from "@opencok/rules/general-progression";
 import { generalRoster, ownedGeneral, writeGeneral, generalChanges } from "./generals";
-import type { CityProgressionContext } from "./city-progression";
+import type { CityProgressionContext } from "./city-progression-context.ts";
 
 export function releasedGeneral(row: Row): Row {
   return {

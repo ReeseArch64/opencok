@@ -1,3 +1,4 @@
+import { CityCommandDomain } from "./city-command-domain.ts";
 import { randomInt, createHash } from "node:crypto";
 import { sfs, encode, decode, str } from "@opencok/messages/sfs";
 import { num, long, text, type Row } from "@opencok/contracts/rows";
@@ -24,7 +25,8 @@ import { InventoryPlanner, type InventoryEffects } from "./inventory";
 import { activityEconomy } from "./timed-activity";
 import type { ActivityEconomy, PreparedActivity } from "@opencok/contracts/timed-activity";
 import type { Rules } from "@opencok/rules/game";
-import type { CityDomain, CityProgressionContext } from "./city-progression";
+import type { CityDomain } from "./city-domain.ts";
+import type { CityProgressionContext } from "./city-progression-context.ts";
 
 function rewards(context: CityProgressionContext, id: string) {
   const rule = context.rules.advanced.payRewards?.get(id);
@@ -150,10 +152,16 @@ function activities(
   });
 }
 
-export const comebackDomain: CityDomain = {
-  commands: ["comeback.init", "comeback.info", "comeback.reward"],
-  types: [],
-  async prepare(context, command, params) {
+export class ComebackDomain extends CityCommandDomain {
+  public readonly commands: CityDomain["commands"] = [
+    "comeback.init",
+    "comeback.info",
+    "comeback.reward",
+  ];
+
+  public readonly types: CityDomain["types"] = [];
+
+  public readonly prepare: CityDomain["prepare"] = async (context, command, params) => {
     const state = context.state.comeback;
 
     if (!state) comebackFailure();
@@ -261,11 +269,14 @@ export const comebackDomain: CityDomain = {
     );
 
     return { response: encode(comebackRewardView(type, granted)), event: null };
-  },
-  async apply() {
+  };
+
+  public readonly apply: CityDomain["apply"] = async () => {
     comebackFailure();
-  },
-};
+  };
+}
+
+export const comebackDomain: CityDomain = new ComebackDomain();
 
 export async function planComebackLogin(
   state: InventoryState,

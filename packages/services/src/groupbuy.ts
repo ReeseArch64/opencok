@@ -1,3 +1,4 @@
+import { CityCommandDomain } from "./city-command-domain.ts";
 import { groupBuyInfo } from "@opencok/mappings/groupbuy";
 import { createHash, randomInt, randomUUID } from "node:crypto";
 import { num, long, text, type Row } from "@opencok/contracts/rows";
@@ -12,7 +13,8 @@ import { GameError } from "@opencok/errors/game";
 import { errors } from "@opencok/constants/game";
 import { pinProgressionReward } from "./progression-rewards";
 import type { GroupBuyGateway } from "@opencok/contracts/groupbuy";
-import type { CityDomain, CityProgressionContext } from "./city-progression";
+import type { CityDomain } from "./city-domain.ts";
+import type { CityProgressionContext } from "./city-progression-context.ts";
 
 function invalid(): never {
   throw new GameError(errors.invalid, "city_progression");
@@ -55,18 +57,27 @@ function mail(context: CityProgressionContext, id: string) {
   ];
 }
 
-export function createGroupBuyDomain(gateway?: GroupBuyGateway): CityDomain {
-  return {
-    commands: [
+export class GroupBuyDomain extends CityCommandDomain {
+  public readonly commands: CityDomain["commands"];
+  public readonly types: CityDomain["types"];
+  public readonly prepare: CityDomain["prepare"];
+  public readonly apply: CityDomain["apply"];
+
+  public constructor(gateway?: GroupBuyGateway) {
+    super();
+
+    this.commands = [
       "groupbuys.info",
       "groupbuys.reserve",
       "groupbuys.cancel",
       "groupbuys.paid",
       "groupbuys.close",
       "groupbuys.settle",
-    ],
-    types: [],
-    async prepare(context, command, params) {
+    ];
+
+    this.types = [];
+
+    this.prepare = async (context, command, params) => {
       const state = context.state.groupBuy,
         config = context.rules.items.get("alliance_groupbuys"),
         empty = () => ({ response: encode({}), event: null });
@@ -416,9 +427,14 @@ export function createGroupBuyDomain(gateway?: GroupBuyGateway): CityDomain {
         ),
         event: null,
       };
-    },
-    async apply() {
+    };
+
+    this.apply = async () => {
       invalid();
-    },
-  };
+    };
+  }
+}
+
+export function createGroupBuyDomain(gateway?: GroupBuyGateway): CityDomain {
+  return new GroupBuyDomain(gateway);
 }

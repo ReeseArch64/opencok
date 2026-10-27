@@ -2,7 +2,7 @@ import { previewRewards } from "@opencok/rules/rewards";
 import { cityInteger } from "@opencok/rules/city-progression";
 import { goldEggsFailure } from "@opencok/rules/gold-eggs";
 import type { Rule } from "@opencok/rules/game";
-import type { CityProgressionContext } from "./city-progression";
+import type { CityProgressionContext } from "./city-progression-context.ts";
 
 const assets = [
   "wood",

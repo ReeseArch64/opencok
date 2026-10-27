@@ -1,3 +1,4 @@
+import { CityCommandDomain } from "./city-command-domain.ts";
 import { createHash, randomInt } from "node:crypto";
 import { sfs, encode, str, type Fields } from "@opencok/messages/sfs";
 import { long, num } from "@opencok/contracts/rows";
@@ -16,7 +17,8 @@ import { javaMailBytes } from "@opencok/rules/avatar-mail";
 import { normalRechargeView } from "@opencok/mappings/normal-recharge";
 import { pinProgressionReward } from "./progression-rewards";
 import { CampaignPlanner } from "./local-campaign";
-import type { CityProgressionContext, CityDomain } from "./city-progression";
+import type { CityProgressionContext } from "./city-progression-context.ts";
+import type { CityDomain } from "./city-domain.ts";
 
 export function normalRechargeOperation(owner: string, orderId: string, platform: string) {
   if (
@@ -59,11 +61,20 @@ function fingerprint(proof: DeliveredGiftProof) {
     .digest("hex");
 }
 
-export function createNormalRechargeDomain(gateway?: PaidGiftGateway): CityDomain {
-  return {
-    commands: ["normal.recharge.init", "normal.recharge.paid"],
-    types: [],
-    async prepare(context, command, params) {
+export class NormalRechargeDomain extends CityCommandDomain {
+  public readonly commands: CityDomain["commands"];
+  public readonly types: CityDomain["types"];
+  public readonly prepare: CityDomain["prepare"];
+  public readonly apply: CityDomain["apply"];
+
+  public constructor(gateway?: PaidGiftGateway) {
+    super();
+
+    this.commands = ["normal.recharge.init", "normal.recharge.paid"];
+
+    this.types = [];
+
+    this.prepare = async (context, command, params) => {
       const state = context.state.normalRecharge;
 
       if (!state) normalRechargeFailure();
@@ -224,9 +235,14 @@ export function createNormalRechargeDomain(gateway?: PaidGiftGateway): CityDomai
       };
 
       return { response: encode({ repay_add: sfs.long(total) }), event: null };
-    },
-    async apply() {
+    };
+
+    this.apply = async () => {
       normalRechargeFailure();
-    },
-  };
+    };
+  }
+}
+
+export function createNormalRechargeDomain(gateway?: PaidGiftGateway): CityDomain {
+  return new NormalRechargeDomain(gateway);
 }

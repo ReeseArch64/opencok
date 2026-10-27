@@ -1,3 +1,4 @@
+import { CityCommandDomain } from "./city-command-domain.ts";
 import { createHash, randomInt } from "node:crypto";
 import { num, long, text, type Row } from "@opencok/contracts/rows";
 import { encode, sfs, str, int, type Fields } from "@opencok/messages/sfs";
@@ -18,7 +19,8 @@ import { rewardPreviewArray } from "@opencok/mappings/rewards";
 import { sevenDayCycleView } from "@opencok/mappings/seven-day-cycle";
 import { pinProgressionReward, grantNativeProgressionReward } from "./progression-rewards";
 import { applyProgressionStatus } from "./player-effects";
-import type { CityDomain, CityProgressionContext } from "./city-progression";
+import type { CityDomain } from "./city-domain.ts";
+import type { CityProgressionContext } from "./city-progression-context.ts";
 
 export function sevenDayPurchaseOperationId(owner: string, eventId: string): string {
   if (!/^[A-Za-z0-9:._-]{1,128}$/.test(eventId)) cycleFailure();
@@ -49,21 +51,30 @@ function fresh(context: CityProgressionContext): Row {
   };
 }
 
-export function createSevenDayCycleDomain(
-  gateway?: SevenDayPaymentGateway,
-  random: (maximum: number) => number = randomInt,
-): CityDomain {
-  return {
-    commands: [
+export class SevenDayCycleDomain extends CityCommandDomain {
+  public readonly commands: CityDomain["commands"];
+  public readonly types: CityDomain["types"];
+  public readonly prepare: CityDomain["prepare"];
+  public readonly apply: CityDomain["apply"];
+
+  public constructor(
+    gateway?: SevenDayPaymentGateway,
+    random: (maximum: number) => number = randomInt,
+  ) {
+    super();
+
+    this.commands = [
       "sevenday.init",
       "sevenday.info",
       "sevenday.look.reward",
       "sevenday.reward",
       "sevenday.lucky.draw",
       "sevenday.purchase",
-    ],
-    types: [],
-    async prepare(context, command, params) {
+    ];
+
+    this.types = [];
+
+    this.prepare = async (context, command, params) => {
       const state = context.state.sevenDayCycle;
 
       if (!state) cycleFailure();
@@ -323,9 +334,17 @@ export function createSevenDayCycleDomain(
       body.drawcount = sfs.int(draw.count);
 
       return { response: encode(body), event: null };
-    },
-    async apply() {
+    };
+
+    this.apply = async () => {
       cycleFailure();
-    },
-  };
+    };
+  }
+}
+
+export function createSevenDayCycleDomain(
+  gateway?: SevenDayPaymentGateway,
+  random: (maximum: number) => number = randomInt,
+): CityDomain {
+  return new SevenDayCycleDomain(gateway, random);
 }

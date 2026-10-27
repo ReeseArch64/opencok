@@ -1,3 +1,4 @@
+import { CityCommandDomain } from "./city-command-domain.ts";
 import { worldMonsterMaximum } from "@opencok/rules/world-monster-detail";
 import { GameError } from "@opencok/errors/game";
 import { errors } from "@opencok/constants/game";
@@ -18,7 +19,7 @@ import {
   spawnWorldMonsterCells,
 } from "@opencok/rules/world-monsters";
 import { worldItemUsed } from "@opencok/mappings/world-use";
-import type { CityDomain } from "./city-progression";
+import type { CityDomain } from "./city-domain.ts";
 
 export const worldUseCommands = [
   "world.use",
@@ -28,11 +29,20 @@ export const worldUseCommands = [
   "get.act.boss.point",
 ];
 
-export function createWorldUseDomain(size: number, random = randomInt): CityDomain {
-  return {
-    commands: worldUseCommands,
-    types: [],
-    async prepare(context, command, params) {
+export class WorldUseDomain extends CityCommandDomain {
+  public readonly commands: CityDomain["commands"];
+  public readonly types: CityDomain["types"];
+  public readonly prepare: CityDomain["prepare"];
+  public readonly apply: CityDomain["apply"];
+
+  public constructor(size: number, random = randomInt) {
+    super();
+
+    this.commands = worldUseCommands;
+
+    this.types = [];
+
+    this.prepare = async (context, command, params) => {
       if (command === "get.act.boss.point") {
         const world = context.state.worldMutation?.world,
           reader = context.state.worldMonsters;
@@ -316,9 +326,14 @@ export function createWorldUseDomain(size: number, random = randomInt): CityDoma
           used: sfs.object(response),
         }),
       };
-    },
-    async apply() {
+    };
+
+    this.apply = async () => {
       worldMutationFailure();
-    },
-  };
+    };
+  }
+}
+
+export function createWorldUseDomain(size: number, random = randomInt): CityDomain {
+  return new WorldUseDomain(size, random);
 }

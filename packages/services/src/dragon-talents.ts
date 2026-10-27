@@ -1,10 +1,11 @@
+import { CityCommandDomain } from "./city-command-domain.ts";
 import { randomInt } from "node:crypto";
 import { encode, sfs, str, int, type Fields } from "@opencok/messages/sfs";
 import { num, long, text, type Row } from "@opencok/contracts/rows";
 import { cityInteger } from "@opencok/rules/city-progression";
 import { dragonFailure, dragonFeature } from "@opencok/rules/dragon-progression";
 import { temporaryEffect } from "@opencok/rules/player-effects";
-import type { CityDomain } from "./city-progression";
+import type { CityDomain } from "./city-domain.ts";
 
 function talentView(row: Row): Fields {
   return {
@@ -17,10 +18,12 @@ function talentView(row: Row): Fields {
   };
 }
 
-export const dragonTalentsDomain: CityDomain = {
-  commands: ["dragonskill"],
-  types: [],
-  async prepare(context, _command, params) {
+export class DragonTalentsDomain extends CityCommandDomain {
+  public readonly commands: CityDomain["commands"] = ["dragonskill"];
+
+  public readonly types: CityDomain["types"] = [];
+
+  public readonly prepare: CityDomain["prepare"] = async (context, _command, params) => {
     if (!dragonFeature(context.rules, "dragon_talentskill", context.now)) dragonFailure();
 
     const action = str(params, "M__REQUEST_ID__H"),
@@ -147,8 +150,11 @@ export const dragonTalentsDomain: CityDomain = {
           : { skillInfo: sfs.object(talentView(row)) },
       ),
     };
-  },
-  async apply() {
+  };
+
+  public readonly apply: CityDomain["apply"] = async () => {
     dragonFailure();
-  },
-};
+  };
+}
+
+export const dragonTalentsDomain: CityDomain = new DragonTalentsDomain();
