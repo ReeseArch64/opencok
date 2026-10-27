@@ -1,5 +1,10 @@
+import { GameError } from "@opencok/errors/game";
+import { errors } from "@opencok/constants/game";
+import { ruleAvailable } from "@opencok/rules/availability";
+import { barbarianCurrentHP } from "@opencok/rules/world-scout";
+import { worldBarbarianActor } from "@opencok/rules/world-monster-refresh";
 import { randomInt } from "node:crypto";
-import { num } from "@opencok/contracts/rows";
+import { num, text, long } from "@opencok/contracts/rows";
 import { encode, int, str, sfs } from "@opencok/messages/sfs";
 import { cityInteger } from "@opencok/rules/city-progression";
 import { worldMutationFailure } from "@opencok/rules/world-march-runtime";
@@ -14,8 +19,13 @@ import {
 import { worldItemUsed } from "@opencok/mappings/world-use";
 import type { CityDomain } from "./city-progression";
 
-export const worldUseCommands = ["world.use", "world.get.monster", "get.act.boss.point"];
-export function createWorldUseDomain(size: number): CityDomain {
+export const worldUseCommands = [
+  "world.use",
+  "world.get.monster",
+  "world.get.barbarion",
+  "get.act.boss.point",
+];
+export function createWorldUseDomain(size: number, random = randomInt): CityDomain {
   return {
     commands: worldUseCommands,
     types: [],
@@ -27,6 +37,73 @@ export function createWorldUseDomain(size: number): CityDomain {
         return {
           response: encode({ id: sfs.int(await reader.nearestBoss(num(world, "pointId"))) }),
           event: null,
+        };
+      }
+      if (command === "world.get.barbarion") {
+        const world = context.state.worldMutation?.world,
+          reader = context.state.worldMonsters;
+        if (
+          !world ||
+          !reader ||
+          num(world, "worldId") !== 0 ||
+          num(context.state.profile, "serverId") !== context.rules.kingdomId
+        )
+          worldMutationFailure();
+        if (
+          !ruleAvailable(context.rules.features.get("barbarion_switch"), {
+            kingdomId: context.rules.kingdomId,
+            version: text(context.state.profile, "appVersion"),
+            now: Number(context.now),
+          })
+        )
+          throw new GameError(errors.unsupported, "world_state");
+        const radius = cityInteger(context.rules.items.get("world_barbarion")?.k5, 1, 32),
+          minimum =
+            BigInt(cityInteger(context.rules.items.get("world_barbarion")?.k7 ?? 0)) * 60000n,
+          nearby = await reader.nearby(num(world, "pointId"), radius),
+          possible = nearby.filter(
+            (point) =>
+              num(point, "pointType") === 44 &&
+              text(point, "pointItem") === "4800000" &&
+              long(point, "flushTime") - context.now > minimum,
+          ),
+          actors = new Map(
+            (await reader.barbarians(possible.map((point) => num(point, "id")))).map((row) => [
+              num(row, "pointId"),
+              row,
+            ]),
+          ),
+          living = possible.filter(
+            (point) =>
+              barbarianCurrentHP(point, actors.get(num(point, "id")), context.rules, context.now) >
+              0,
+          );
+        if (living.length)
+          return {
+            response: encode({ pointId: sfs.int(num(living[random(living.length)]!, "id")) }),
+            event: null,
+          };
+        const chosen = chooseWorldMonsterCells(nearby.filter(worldItemFree), true, size, random);
+        if (!chosen.length) return { response: encode({ pointId: sfs.int(-1) }), event: null };
+        const actor = worldBarbarianActor(context.rules, "4800000"),
+          points = chosen.map((point, index) => ({
+            ...point,
+            pointType: index ? 45 : 44,
+            pointItem: actor.configId,
+            flushTime: context.now + actor.duration,
+          }));
+        (context.write.worldMutation ??= {}).points = points;
+        context.write.worldMutation.barbarianActors = {
+          ...actor,
+          points: points.map((point) => num(point, "id")),
+        };
+        return {
+          response: encode({ pointId: sfs.int(num(points[0]!, "id")) }),
+          event: encode({
+            owner: sfs.string(context.owner),
+            origin: sfs.int(num(world, "pointId")),
+            points: sfs.array(points.map((point) => sfs.object({ id: sfs.int(num(point, "id")) }))),
+          }),
         };
       }
       if (command === "world.get.monster") {
@@ -52,13 +129,13 @@ export function createWorldUseDomain(size: number): CityDomain {
         if (reusable.length)
           return {
             response: encode({
-              pointId: sfs.int(num(reusable[randomInt(reusable.length)]!, "id")),
+              pointId: sfs.int(num(reusable[random(reusable.length)]!, "id")),
             }),
             event: null,
           };
         const free = nearby.filter(worldItemFree);
         if (!free.length) return { response: encode({ pointId: sfs.int(-1) }), event: null };
-        const selected = free[randomInt(free.length)]!,
+        const selected = free[random(free.length)]!,
           primary = {
             ...selected,
             pointType: 9,
@@ -70,7 +147,7 @@ export function createWorldUseDomain(size: number): CityDomain {
             cityInteger(context.rules.items.get("monster")?.k1, 1, size),
           );
         const points = [primary],
-          chosen = chooseWorldMonsterCells(refill, targetConfig.four, size, randomInt);
+          chosen = chooseWorldMonsterCells(refill, targetConfig.four, size, random);
         if (chosen.length)
           for (const row of spawnWorldMonsterCells(
             context.rules,
@@ -101,7 +178,7 @@ export function createWorldUseDomain(size: number): CityDomain {
         rule = context.rules.goods.get(item.itemId);
       if (!row || !worldItemFree(row) || !["11", "12"].includes(rule?.type ?? ""))
         worldMutationFailure();
-      const target = worldItemTarget(rule!, randomInt);
+      const target = worldItemTarget(rule!, random);
       if (rule!.type === "12") {
         const points = worldMonsterProp(context.rules, state.points, id, target, size, context.now),
           response = worldItemUsed({ pointId: id, itemid: item.itemId });

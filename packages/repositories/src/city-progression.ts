@@ -223,7 +223,9 @@ export function createCityProgressionStore(
           command?.startsWith("redPackets.") || command === "campaign.paid.gift"
             ? redPacketReader(tx, owner)
             : undefined,
-        worldMonsters: ["world.get.monster", "get.act.boss.point"].includes(command ?? "")
+        worldMonsters: ["world.get.monster", "world.get.barbarion", "get.act.boss.point"].includes(
+          command ?? "",
+        )
           ? worldMonsterReader(tx, mapSize)
           : undefined,
         campaignProfile:

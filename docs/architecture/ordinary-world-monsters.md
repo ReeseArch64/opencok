@@ -129,3 +129,38 @@ clock, exploration replacement, configured actor maps, delayed ticket retry,
 fresh ticket reservations, black-land bosses, transaction rollback, ownership
 fencing and post-lock time capture. Five existing resource producer cases, five
 owned-monster cases, three monster rule cases and two Java map cases also passed.
+
+`world.get.barbarion` implements `GetWorldBarbarionPoint` independently of battle
+resolution. It checks the resident realm and `barbarion_switch` against the owned
+profile's actual client version. Within `world_barbarion.k5`, it reuses a factual
+main 44 with configuration `4800000` only while the remaining lifetime is strictly
+greater than k7 minutes and the actor's derived fire health is positive. A missing
+actor or zero derived health cannot become an invented living target. The shared
+`barbarianCurrentHP` calculation is read-only and preserves stored damage.
+
+Otherwise the handler selects a complete native SPACE footprint and creates main
+44, ranges 45 and four configured actor records with the reference life_time.
+The owned city's coordinates determine the search; request-supplied target IDs,
+counts and hit points cannot choose an actor or replace configured counters.
+Native replies contain only the integer `pointId`, including `-1` when the search
+cannot select a footprint. The reference candidate algorithm removes unsuccessful
+anchor candidates from its temporary lookup, so a random search can fail even
+when a differently ordered search could succeed; the maintained selection keeps
+that behavior. Production uses the existing cryptographic random source, with an
+injected deterministic source reserved for application fixtures.
+
+The actor writer revalidates the four saved free cells under the resident lock,
+refuses occupied footprints and existing actor evidence, and inserts exact Java
+army maps in the same transaction as map changes, command receipt and world
+notification. Receipt failure rolls everything back. Repeated or concurrent
+requests cannot heal or duplicate an actor. An orphaned actor, active march or
+boss record prevents free-cell reuse rather than being overwritten. The maintained
+catalog keeps `barbarion_switch` closed; this is an explicit feature gate with a
+working producer behind it, rather than a missing battle engine standing in for
+ordinary creation.
+
+Five PostgreSQL newcomer-barbarian cases passed with 44 assertions. Existing
+owned-monster and resource-prop regressions passed nine cases with 86 assertions;
+the periodic configured-barbarian actor case also passed after sharing its actor
+constructor with the native handler. Rule and health helpers, affected workspace
+types, lint and formatting remain checked.
