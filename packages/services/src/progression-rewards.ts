@@ -29,14 +29,18 @@ const assets = [
   "dragon_food",
   "dragon_gold",
 ] as const;
-export function pinProgressionReward(context: CityProgressionContext, id: string) {
-  if (!context.rules.reconnect.rewards?.has(id))
-    throw new GameError(errors.unsupported, "city_progression");
+export function pinProgressionReward(
+  context: CityProgressionContext,
+  id: string,
+  catalog = context.rules.reconnect.rewards,
+) {
+  if (!catalog?.has(id)) throw new GameError(errors.unsupported, "city_progression");
   return previewRewards(
     id,
     context.rules,
     { kingdomId: context.rules.kingdomId, version: "12.06.0", now: Number(context.now) },
     randomInt,
+    catalog.get(id),
   )
     .map((row) => {
       if (row.kind === "item")

@@ -97,7 +97,8 @@
     "./friendship-mine": "./src/friendship-mine.ts",
     "./social-cleanup": "./src/social-cleanup.ts",
     "./chat-notice-cost": "./src/chat-notice-cost.ts",
-    "./lucky-day": "./src/lucky-day.ts"
+    "./lucky-day": "./src/lucky-day.ts",
+    "./castle-level-event": "./src/castle-level-event.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",

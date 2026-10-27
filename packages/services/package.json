@@ -95,7 +95,8 @@
     "./friendship-mine": "./src/friendship-mine.ts",
     "./realm-chat-delivery": "./src/realm-chat-delivery.ts",
     "./realm-social": "./src/realm-social.ts",
-    "./lucky-day": "./src/lucky-day.ts"
+    "./lucky-day": "./src/lucky-day.ts",
+    "./castle-level-event": "./src/castle-level-event.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",

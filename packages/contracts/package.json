@@ -110,7 +110,9 @@
     "./postbox": "./src/postbox.ts",
     "./friendship-mine": "./src/friendship-mine.ts",
     "./responses/chat-social": "./src/responses/chat-social.ts",
-    "./responses/lucky-day": "./src/responses/lucky-day.ts"
+    "./responses/lucky-day": "./src/responses/lucky-day.ts",
+    "./castle-level-event": "./src/castle-level-event.ts",
+    "./responses/castle-level-event": "./src/responses/castle-level-event.ts"
   },
   "dependencies": {
     "@opencok/enums": "workspace:*",

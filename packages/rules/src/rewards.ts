@@ -90,9 +90,10 @@ export function previewRewards(
   rules: Rules,
   context: RuleContext,
   random: RewardRandom,
+  rewardRule?: Rule,
 ): readonly RewardPreview[] {
   if (context.kingdomId !== rules.kingdomId) return invalid();
-  const rule = rules.reconnect.rewards?.get(rewardId ?? "") ?? {};
+  const rule = rewardRule ?? rules.reconnect.rewards?.get(rewardId ?? "") ?? {};
   const result: RewardPreview[] = [];
   const add = (key: string, type: number) => {
     if (rule[key] === undefined) return;

@@ -1,3 +1,4 @@
+import { castleLevelEventDomain } from "@opencok/services/castle-level-event";
 import { createLuckyDayDomain } from "@opencok/services/lucky-day";
 import { dragonTowerDomain, publishDragonTowerMutation } from "@opencok/services/dragon-tower";
 import {
@@ -431,6 +432,7 @@ export const RealmDependenciesLive = Layer.effect(
         createTotemDomain(config.mapSize),
         minstrelDomain,
         createLuckyDayDomain(),
+        castleLevelEventDomain,
         lotteryDomain,
         expeditionDomain,
         anniversaryDomain,
