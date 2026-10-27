@@ -151,7 +151,8 @@
     "./activity-reward": "./src/activity-reward.ts",
     "./activity-operators": "./src/activity-operators.ts",
     "./comeback": "./src/comeback.ts",
-    "./comeback-session": "./src/comeback-session.ts"
+    "./comeback-session": "./src/comeback-session.ts",
+    "./normal-recharge": "./src/normal-recharge.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",

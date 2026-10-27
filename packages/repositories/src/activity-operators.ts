@@ -30,7 +30,12 @@ export async function readActivityOperators(
         .where(eq(userprofile.uid, owner));
       if (!profile) return { server: {}, buildings: [], country: "", groupBuys: [] };
       const [server] = await tx
-        .select({ activityTime: server_info.activityTime })
+        .select({
+          activityTime: server_info.activityTime,
+          payTotalTime: server_info.payTotalTime,
+          lastMergeMillis: server_info.lastMergeMillis,
+          mergeTiredRushBeginTime: server_info.mergeTiredRushBeginTime,
+        })
         .from(server_info)
         .where(eq(server_info.uid, "server"));
       const buildings = await tx

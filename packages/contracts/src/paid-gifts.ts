@@ -8,6 +8,8 @@ export interface DeliveredGiftProof {
   productId: string;
   priceCents: number;
   occurredAt: bigint;
+  rechargeGold?: bigint;
+  methodParam?: number;
 }
 export interface PaidGiftGateway {
   delivered(input: {

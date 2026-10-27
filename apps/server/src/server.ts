@@ -1,4 +1,8 @@
 import { activityRewardDomain } from "@opencok/services/activity-reward";
+import {
+  createNormalRechargeDomain,
+  normalRechargeParameters,
+} from "@opencok/services/normal-recharge";
 import { createComebackSessions } from "@opencok/repositories/comeback-session";
 import { comebackDomain, planComebackLogin } from "@opencok/services/comeback";
 import { branchCityDomain } from "@opencok/services/branch-city";
@@ -659,6 +663,7 @@ export const RealmDependenciesLive = Layer.effect(
         createShippingInvestmentDomain(),
         createSevenDayCycleDomain(),
         createOrdinaryBoxDomain(),
+        createNormalRechargeDomain(config.paidGiftGateway),
         createRechargeActivityDomain(),
         createRechargeFeedbackDomain(),
         activityRewardDomain,
@@ -2210,6 +2215,11 @@ export const RealmDependenciesLive = Layer.effect(
             owner,
             "campaign.paid.gift",
             paidGiftParameters(owner, orderId, platform),
+          );
+          await activities.domainCommand(
+            owner,
+            "normal.recharge.paid",
+            normalRechargeParameters(owner, orderId, platform),
           );
         },
       },

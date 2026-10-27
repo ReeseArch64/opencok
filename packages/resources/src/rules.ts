@@ -344,6 +344,7 @@ export async function loadRules(directory?: string, kingdomId = 1) {
       rechargeFeedback: rechargeFeedbackRecords.length
         ? indexRules(rechargeFeedbackRecords, GameplayCatalog.DailyRecharge)
         : new Map<string, Rule>(),
+      normalRechargeThresholds: await optional(GameplayCatalog.Heap),
       rechargeThresholds: await optional(GameplayCatalog.NewsHeap),
       ordinaryBoxes: await optional(GameplayCatalog.BoxOrdinary),
       exchangeCycles: await optional(GameplayCatalog.ExchangeCycle),

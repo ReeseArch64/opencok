@@ -151,7 +151,9 @@
     "./treasure-map": "./src/treasure-map.ts",
     "./military-rank-awards": "./src/military-rank-awards.ts",
     "./activity-reward": "./src/activity-reward.ts",
-    "./comeback": "./src/comeback.ts"
+    "./comeback": "./src/comeback.ts",
+    "./normal-recharge": "./src/normal-recharge.ts",
+    "./delivered-payment": "./src/delivered-payment.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",
