@@ -37,6 +37,8 @@ export interface AdvancedCatalogs {
   dragonTalent?: Map<string, Rule>;
   dragonTalentExp?: Map<string, Rule>;
   dragonTower?: Map<string, Rule>;
+  dragonTowerBuffs?: Map<string, Rule>;
+  dragonTowerMonsters?: Map<string, Rule>;
 }
 export interface AllianceCatalogs {
   gifts?: Map<string, Rule>;

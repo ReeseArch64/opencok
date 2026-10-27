@@ -101,6 +101,8 @@
     "./new-expedition": "./src/new-expedition.ts",
     "./responses/new-expedition": "./src/responses/new-expedition.ts",
     "./expedition-treasury": "./src/expedition-treasury.ts",
+    "./dragon-tower": "./src/dragon-tower.ts",
+    "./responses/dragon-tower": "./src/responses/dragon-tower.ts",
     "./chat-delivery": "./src/chat-delivery.ts",
     "./chat-social": "./src/chat-social.ts",
     "./realm-social": "./src/realm-social.ts",

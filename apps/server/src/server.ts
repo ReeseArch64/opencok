@@ -1,3 +1,4 @@
+import { dragonTowerDomain, publishDragonTowerMutation } from "@opencok/services/dragon-tower";
 import {
   ExpeditionTreasuryService,
   expeditionTreasuryCommands,
@@ -422,6 +423,7 @@ export const RealmDependenciesLive = Layer.effect(
         researchDomain,
         civilizationScienceDomain,
         dragonProgressionDomain,
+        dragonTowerDomain,
         dragonTalentsDomain,
         createWorldMarchDomain(config.mapSize),
         createCivilizationCastleDomain(config.mapSize),
@@ -626,6 +628,20 @@ export const RealmDependenciesLive = Layer.effect(
     let worldCursor: { dueAt: bigint; id: string } | undefined;
     let worldImportCursor: string | undefined;
     const recoverWorld = async () => {
+      for (const command of ["dragontower", "dragontower.init", "dragontower.tick"])
+        for (let index = 0; index < 64; index++) {
+          const delivered = await relayMutationEvent(
+            db.kingdom.db,
+            authority,
+            (event) =>
+              publishDragonTowerMutation(event.payload, (owner, name, body) =>
+                notifications.publish(owner, name, body),
+              ),
+            Date.now,
+            command,
+          );
+          if (!delivered) break;
+        }
       for (let index = 0; index < 64; index++) {
         const delivered = await relayMutationEvent(
           db.kingdom.db,

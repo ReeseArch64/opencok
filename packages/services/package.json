@@ -86,6 +86,7 @@
     "./world-publication": "./src/world-publication.ts",
     "./new-expedition": "./src/new-expedition.ts",
     "./expedition-treasury": "./src/expedition-treasury.ts",
+    "./dragon-tower": "./src/dragon-tower.ts",
     "./chat-delivery": "./src/chat-delivery.ts",
     "./chat-social": "./src/chat-social.ts",
     "./postbox": "./src/postbox.ts",

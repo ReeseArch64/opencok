@@ -343,6 +343,8 @@ export async function loadRules(directory?: string, kingdomId = 1) {
       dragonTalent: await optional(GameplayCatalog.DragonTalent),
       dragonTalentExp: await optional(GameplayCatalog.DragonTalentExp),
       dragonTower: await optional(GameplayCatalog.DragonTowerLayer),
+      dragonTowerBuffs: await optional(GameplayCatalog.DragonTowerBuff),
+      dragonTowerMonsters: await optional(GameplayCatalog.DragonTowerMonster),
     },
   );
 }
