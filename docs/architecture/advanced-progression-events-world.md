@@ -80,8 +80,8 @@ simulates a fight or grants its future combat rewards.
 ### Reported validation checkpoints
 
 These recorded checkpoints cover the integrated work. Cases overlap across
-groups and do not form a combined final-suite total. Later integration can
-append its exact command, branch and result without rewriting earlier evidence.
+groups and do not form a combined final-suite total. The final integrated checks
+below supplement these earlier checkpoints.
 
 | Checkpoint                                            | Cases | Assertions | Recorded scope                                                      |
 | ----------------------------------------------------- | ----- | ---------- | ------------------------------------------------------------------- |
@@ -94,8 +94,8 @@ append its exact command, branch and result without rewriting earlier evidence.
 | Ordinary monster actor acceptance                     | 5     | 35         | Owned props and factual temporary actor/discovery paths.            |
 | Integrated legacy egg and shared-resource regression  | 12    | 152        | Integrated regression checkpoint for egg and shared behavior.       |
 
-Final integrated-suite evidence is recorded after the remaining composition checks. Documentation consolidation is checked with
-the required lint and formatting commands.
+The [final integrated delivery evidence](#final-integrated-delivery-evidence)
+records the completed composition. Earlier checkpoints remain separate evidence.
 
 ## Local event timing and minstrel
 
@@ -2945,9 +2945,10 @@ the existing delayed replenishment behavior. PostgreSQL acceptance covers the
 owned stack, receipts, costs, actual stored capacity, terrain, notification,
 expiry and occupied-node preservation. No schema or dependency is added.
 
-Type-12 monster placement has a separate ordinary point creation and expiry
-recipe. That producer remains to be established independently of battle
-admission; this resource route does not charge a monster item.
+Type-12 monster placement uses its implemented ordinary actor creation and
+expiry recipe, separately from the type-11 resource debit. Temporary discovery,
+natural replenishment and DEFAULT boss items retain their own actor recipes.
+Attacking those actors requires the corresponding validated combat engine.
 
 ## Resident crash-city recreation
 
@@ -3155,9 +3156,9 @@ sections and tests; command registration alone remains insufficient evidence.
 
 The maintained activity backend inventory also includes the integrated generic
 activity directory, owned reward dispatch, shared parties and expedition
-lifecycles. The validation checkpoints above identify the tested combinations;
-new modules under integration retain their separate acceptance status. The
-Halloween activity helper delegates boss creation to combat. Resource-battle, world-boss, arena and matched cross-server combat
+lifecycles. The validation checkpoints above identify the tested combinations.
+The Halloween activity helper delegates its specialized boss behavior to its
+corresponding engine. Resource-battle, world-boss, arena and matched cross-server combat
 outcomes still require their corresponding validated engines; enum48/49 or a
 configured panel does not establish a new independent local noncombat service.
 The independent lord title/talisman equipment subsystem has separate ownership
@@ -3191,7 +3192,8 @@ actual available honour cooldown while that control is enabled. The departure
 pins the honour marker and cooldown. Arrival observes current target ownership,
 protection and anti-scout facts, writes its report and begins the return at the
 successful current time. A moved or unavailable target returns without invented
-intel. Reverse routes retain Source four-point selection and Java coordinate
+intel. Expired barbarians and actors whose actual fire/health state no longer
+admits scouting also return without intel. Reverse routes retain Source four-point selection and Java coordinate
 semantics at map edges. No scout path resolves combat, kills troops, removes
 resources from the target or grants forecast barbarian rewards.
 
@@ -3220,11 +3222,20 @@ Canonical owned march identities bind report mails to their actor, current targe
 and same-realm recipient. Mail rows, immutable report bytes, return checkpoint and
 `world.scout.mail` outbox headers persist in the same transaction. Failed writes
 roll them back together. Only the intended recipient receives the mail header;
-private report contents are absent from map broadcasts. Existing startup scans
+private report contents are absent from map broadcasts. Publication reloads the
+actual mail and resident recipient, validates its Source category and sender,
+and reconstructs its header from persisted fields. The mutation author may be
+the scouter while the intended notification recipient is the defender; the
+ordinary progression-mail owner guard remains intact for other event families.
+Existing startup scans
 adopt bounded legacy SCOUT rows from actual reservations and retain saved native
 speed effects. Returning legacy parties do not reissue reports, charge costs or
 repeat story progress. Returning parties skip foreign intel snapshots, so a target
-whose facts can no longer be projected cannot block the actor troop return. Replacement realm authority fences the former worker.
+whose facts can no longer be projected cannot block the actor troop return.
+An admissible explicit recall reads owned party, checkpoint and item facts
+without projecting its foreign target or settling another outbound scout.
+Source recall deadlines and actual costs still apply. Replacement realm authority
+fences the former worker.
 Back up march, army, companion, mail, receipt and outbox records together. No
 schema or external dependency is added.
 
@@ -3235,5 +3246,50 @@ with a new connection pool and realm epoch. Unit checks cover watchtower gates,
 Source float quotas and route geometry, report visibility, current companions,
 barbarian regeneration, signed 64-bit mail values and actual rally facts. Special
 territory targets and other battle modes still require their own mode-correct
-capabilities. Native TCP composition and native-device execution require their
-separate integrated acceptance evidence.
+capabilities. Native TCP composition is covered by the final integrated evidence
+below. Native-device execution remains independently unverified.
+
+### Final integrated delivery evidence
+
+The final runtime freeze is `3f225f24`, incorporating `origin/develop` at
+`fb48dccc`. The documentation integration changes product and architecture prose
+only relative to that runtime. All tests use synthetic actors and disposable
+PostgreSQL, Redis and ZooKeeper dependencies, preserving the operator's active
+checkout and original reference inputs.
+
+| Final check                              | Passed | Assertions | Scope                                                                                                                               |
+| ---------------------------------------- | ------ | ---------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| Complete server units                    | 1,609  | 277,416    | 299 files and one snapshot; zero failures.                                                                                          |
+| Integrated scout/shared PostgreSQL suite | 39     | 314        | Actual costs, owned reservations, visibility, mail publication, rollback, recall, target expiry, imported marches and collection.   |
+| Native TCP and killed-process suite      | 3      | 380        | Login and state isolation in two realms, scout/report/return and recovery with current-interest delivery after process termination. |
+
+The commands were:
+
+```sh
+bun --no-env-file test apps/server/test
+bun --no-env-file test \
+  apps/server/integration/world-scout-runtime.test.ts \
+  apps/server/integration/world-scout-report.test.ts \
+  apps/server/integration/world-scout-publication.test.ts \
+  apps/server/integration/world-scout.test.ts \
+  apps/server/integration/world-shared-resource.test.ts \
+  apps/server/integration/world-march-inspection.test.ts
+bun --no-env-file test \
+  apps/server/integration/world-scout-wire.test.ts \
+  apps/server/integration/core.test.ts \
+  apps/server/integration/world-process.test.ts
+```
+
+`bun run lint`, `bun run format:check`, `git diff --check` and all twelve
+applicable workspace type checks passed: server, contracts, repositories,
+services, rules, resources, messages, mappings, validations, connection, storage
+and drizzle. Review found no new comments, conflict markers or private inputs.
+The Source audit confirms exactly 50 world request identities, split into 31
+ordinary paths and 19 factual target/admission-engine dependencies, plus 53
+activity identities, six egg identities and five lottery identities.
+
+Native APK execution, other client compatibility tracks and specialized target
+or combat engines retain their documented acceptance boundaries. Historical
+calendars and disabled controls remain effective. The maintainer deferred the
+unrelated CI workflow authorization; that local correction is outside this
+runtime ancestry. No merge, deployment or player-data reset is performed.
