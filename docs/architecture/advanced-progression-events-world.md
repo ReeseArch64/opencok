@@ -2183,3 +2183,41 @@ equipment, profile/resource, score, campaign, receipt and outbox rows together.
 An older binary can retain those rows during rollback, but hot-item commands
 should be disabled until the owned executor is restored. Native device rendering
 remains unverified; the implementation does not activate combat-dependent events.
+
+## Native operator activity projection
+
+`activity.operators` now returns the Source `activityList` array with INT page
+identifiers and LONG end times in seconds. It reads `activity_page` and projects
+the maintained newcomer recharge, castle-level, target-task, recall-task,
+alliance group-buy and continued-cost modules. Enabled, current noncombat
+custom/Lua/UI/pack windows retain their configured page identifiers. Historical
+dates are preserved, and combat resource battles, battle-tagged panels and
+unsupported panel types remain absent.
+
+The read uses one repeatable-read, read-only writer transaction. It selects only
+the principal fields needed for ownership/bans, the real realm opening clock,
+owned castle levels and target/recall deadlines, registration country and bounded
+group-buy calendars. Existing personal deadlines survive configuration changes;
+relative newcomer/castle events require a positive, nonfuture opening fact.
+Fixed-date newcomer windows do not invent or require a relative opening clock.
+Target and recall periods retain their separate feature, country, castle and
+calendar rules. Group-buy projections check the persisted matching period and
+round when present, and can expose the configured current period before its
+first owned interaction without creating that interaction.
+
+Feature/version closure, personal expiry, insufficient castle level, foreign or
+banned principals and inconsistent saved clocks cannot produce a live entry.
+Continued-cost pages reuse the actual period and castle/realm eligibility rules.
+The reader bounds pages to 4096, buildings to 256, relevant group-buy rows to two
+and each saved calendar to 32768 characters. It never creates tasks, claims,
+periods, receipts, outbox records, inventory changes or rewards. Native correlation
+fields remain intact, and saved long clocks do not pass through JavaScript number
+conversion before the Source division by 1000.
+
+This projection does not substitute regional recall for the separate legacy
+`comeback` engine. Normal accumulated recharge (type 20), legacy comeback (21),
+today-sale (24) and overseas trade (26) remain outside this first projection until
+their Source backends and accepted-payment/reward paths are implemented. Combat
+resource battles (38) remain gated. Those remaining engines and native-device
+rendering are separate completion work; this section does not declare topics
+25–27 complete. No migration, dependency or environment variable is added.
