@@ -167,6 +167,43 @@ Reward blocks retain their configured order, including ownership checks between
 general grants and experience changes. Experience uses the shared earned bonus
 and factual level cap; retries cannot manufacture additional progression.
 
+### Resident placement and shared gathering
+
+Fresh terrain admission establishes a known birth allocation phase. Initial
+character placement, random relocation and lost-city recreation require that
+saved phase and a complete free native footprint. An imported legacy realm with
+unknown birth phase preserves its existing cities and blocks new allocations
+before charging the player. Operators can inspect the state read-only and then
+explicitly adopt a verified phase or declare a future placement policy. The
+system cannot infer an unknown historical phase from missing metadata or reset
+player progression to make placement succeed. Ownership replacement reconstructs
+current occupancy while retaining the known policy.
+
+Shared resource points support multiple owned gathering parties without an
+attack or exclusive ownership of the node. Each party reserves real troops and
+companions, respects the actual slot limit and carries only its earned share of
+remaining stock. Joining, recalling and depleting a point preserve other parties'
+owned cargo and checkpoints. Full or unavailable targets return their army;
+unknown legacy parties require factual recovery before admission can use their
+state.
+
+Resource cargo and extra rewards remain recoverable after disconnect or restart.
+Weighted extra outcomes are pinned before return funding, and the actual owned
+return credits them once. Retrying a request cannot reroll a reward, reserve the
+same troops twice or repeat cargo. Existing historical closures, dormant quotas
+and disabled catalog controls remain effective after their backend is migrated.
+
+### Ordinary scouting
+
+Scouting is an intelligence action. Its quotation does not charge or reserve an
+army. Actual departure consumes the configured resources and reserves only the
+troops and companions supplied by the player. Arrival records factual information
+at the allowed visibility level, respects protection, creates owned report mail
+and returns the party without inventing a victory, casualties or loot. Reports,
+notifications, costs and return checkpoints remain consistent through replay and
+restart. A special target requires its actual mode actor before intelligence can
+be produced; an unavailable actor cannot become an empty success report.
+
 ### Consumption competitions
 
 Consumption rankings use confirmed debits and exact signed 64-bit amounts.
