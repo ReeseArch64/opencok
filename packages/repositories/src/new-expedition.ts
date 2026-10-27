@@ -1,3 +1,5 @@
+import { expedition_clock } from "@opencok/drizzle/schema/opencok_kingdom/expedition_clock";
+import { server_info } from "@opencok/drizzle/schema/opencok_kingdom/server_info";
 import { and, asc, desc, eq, sql } from "drizzle-orm";
 import { expedition_period } from "@opencok/drizzle/schema/opencok_kingdom/expedition_period";
 import { expedition_progress } from "@opencok/drizzle/schema/opencok_kingdom/expedition_progress";
@@ -11,7 +13,7 @@ import {
   expeditionSchedule,
 } from "@opencok/rules/new-expedition";
 import { cityInteger } from "@opencok/rules/city-progression";
-import { text, num, type Row } from "@opencok/contracts/rows";
+import { text, num, long, type Row } from "@opencok/contracts/rows";
 import type { ExpeditionManifest, ExpeditionState } from "@opencok/contracts/new-expedition";
 import { decode, int } from "@opencok/messages/sfs";
 import type { MutationTransaction } from "./mutation";
@@ -70,12 +72,33 @@ export async function readExpedition(
 ): Promise<ExpeditionState> {
   const owner = text(profile, "uid"),
     realm = num(profile, "serverId");
-  const [period] = await tx
+  let [period] = await tx
     .select()
     .from(expedition_period)
     .where(eq(expedition_period.serverId, realm))
     .for("share");
-  const phase = expeditionPhase(period, now);
+  let phase = expeditionPhase(period, now);
+  const needsView = command === "newexpidition.activityinfo" || command === "expedition.notify";
+  const [clock] = needsView
+    ? await tx.select().from(expedition_clock).where(eq(expedition_clock.serverId, realm)).limit(1)
+    : [];
+  let projectionOnly = false;
+  if (!phase && clock) {
+    projectionOnly = true;
+    phase = { stage: clock.stage, startTime: clock.startTime, endTime: clock.endTime };
+    period = {
+      serverId: realm,
+      periodId: clock.periodId,
+      matchServerId: clock.opponent,
+      schedule: JSON.stringify([
+        { stage: clock.stage, startTime: String(clock.startTime), endTime: String(clock.endTime) },
+      ]),
+      startTime: clock.startTime,
+      endTime: clock.endTime,
+      victoryTimes: period?.victoryTimes ?? 0,
+      count: period?.count ?? 0,
+    };
+  }
   const progress = !period
     ? []
     : await tx
@@ -117,6 +140,17 @@ export async function readExpedition(
       : -1;
   }
   const state: ExpeditionState = { period, phase, progress, allianceScore, kingdomScore, rank };
+  if (needsView) {
+    state.clock = clock;
+    const [server] = await tx
+      .select({ lastMergeMillis: server_info.lastMergeMillis })
+      .from(server_info)
+      .where(eq(server_info.uid, "server"))
+      .limit(1);
+    state.lastMergeMillis = long(server ?? {}, "lastMergeMillis");
+  }
+  if (projectionOnly) state.projectionOnly = true;
+
   if (["expedition.show", "distribution.record.show", "tax.record.show"].includes(command ?? "")) {
     const params = request ? decode(Buffer.from(request)) : {};
     const offset = cityInteger(

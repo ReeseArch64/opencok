@@ -15127,3 +15127,21 @@ select "periodId", "startTime", "endTime", "activityEnd", "statistics", "previou
 update "opencok_kingdom"."expedition_admission" set "periodId" = $1, "startTime" = $2, "endTime" = $3, "activityEnd" = $4, "statistics" = $5, "previousMatch" = $6, "createdAt" = $7, "appliedAt" = $8 where "opencok_kingdom"."expedition_admission"."periodId" = $9
 delete from "opencok_kingdom"."expedition_admission" where "opencok_kingdom"."expedition_admission"."periodId" = $1"
 `;
+
+exports[`opencok_kingdom.expedition_clock: schema and CRUD SQL 1`] = `
+"schema opencok_kingdom
+column ["serverId","integer",true,null,null,null]
+column ["periodId","varchar(40)",true,null,null,null]
+column ["stage","integer",true,null,null,null]
+column ["startTime","bigint",true,null,null,null]
+column ["endTime","bigint",true,null,null,null]
+column ["opponent","integer",true,null,null,null]
+column ["revision","bigint",true,null,null,null]
+column ["updatedAt","bigint",true,null,null,null]
+primary ["expedition_clock_PRIMARY",["serverId"]]
+check ["expedition_clock_bounds","\\"serverId\\" > 0 AND \\"stage\\" BETWEEN 0 AND 8 AND \\"startTime\\" >= 0 AND \\"endTime\\" > \\"startTime\\" AND \\"opponent\\" >= 0 AND \\"opponent\\" <> \\"serverId\\" AND (\\"stage\\" < 2 OR \\"opponent\\" > 0) AND \\"revision\\" > 0 AND \\"updatedAt\\" >= 0"]
+insert into "opencok_kingdom"."expedition_clock" ("serverId", "periodId", "stage", "startTime", "endTime", "opponent", "revision", "updatedAt") values ($1, $2, $3, $4, $5, $6, $7, $8)
+select "serverId", "periodId", "stage", "startTime", "endTime", "opponent", "revision", "updatedAt" from "opencok_kingdom"."expedition_clock" where "opencok_kingdom"."expedition_clock"."serverId" = $1
+update "opencok_kingdom"."expedition_clock" set "serverId" = $1, "periodId" = $2, "stage" = $3, "startTime" = $4, "endTime" = $5, "opponent" = $6, "revision" = $7, "updatedAt" = $8 where "opencok_kingdom"."expedition_clock"."serverId" = $9
+delete from "opencok_kingdom"."expedition_clock" where "opencok_kingdom"."expedition_clock"."serverId" = $1"
+`;

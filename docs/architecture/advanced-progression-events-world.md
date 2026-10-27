@@ -1411,3 +1411,49 @@ contracts and snapshots passed 1,669 tests with 49,041 assertions; physical sche
 and upgrades passed 1,523 tests with 36,611 assertions. Lint, formatting, both
 migration-role consistency checks and server/nine package type checks passed.
 Native device execution remains unverified.
+
+## Owned expedition phase views and native activity updates
+
+Each realm now keeps a durable presentation clock for expedition waiting,
+matching and confirmed stages. A realm without an admitted opponent retains its
+matching view after the deadline, including the original end time. An existing
+validated manifest supplies active stages. Display-only phases cannot supply
+score events or authorize reward claims, and native queries omit the nonexistent
+opponent instead of adding realm zero.
+
+Login now reads the owned activity snapshot and sends the native expedition panel.
+Historical catalog windows and merge windows remain enforced; historical entries
+are not reopened. Login panels keep personal score and guild score at zero, omit
+personal rewards and retain the player's crossing count. Stage changes publish
+`push.activity.update` through an owned private command, its canonical receipt and
+the durable mutation outbox. Superseded revisions are discarded before publication,
+including revisions above Number precision. Notification delivery scans at most
+32 connected owners and relays 64 events per refresh; reconnect reads the current
+owned panel without depending on the shared database.
+
+Clock updates are fenced and serialized with calendar admission. Equal views keep
+the same revision across restart. A replaced authority retains that revision,
+backward clocks cannot regress it and signed-long exhaustion rejects advancement
+without wrapping. Clock or receipt failures roll back completely before retry.
+Owned reads reject missing, foreign-realm or banned profiles. Public clients
+cannot invoke the private notification command, and protocol bodies contain no
+internal revision or projection markers.
+
+Apply kingdom migration `0035_expedition_clock` before this binary. It adds the
+owned clock table, bringing inventory to 831 tables and 6,772 fields: 143 global
+and 688 kingdom tables. Back up clocks, manifests, admissions, stage progress,
+notification receipts and outbox together. Keep these records during binary
+rollback; resetting a revision independently can invalidate delivery recovery.
+No dependency, configuration or environment variable is added. Shared score
+publication and settlement remain subsequent work, and combat result producers
+retain their validated-engine gates.
+
+Six PostgreSQL acceptance tests passed with 44 assertions. Phase, panel,
+publication and reconnect unit acceptance passed twelve tests with 66 assertions.
+Ten existing expedition/matching PostgreSQL cases passed with 63 assertions.
+The server unit suite passed 1,475 tests with 244,980 assertions. Native TCP and
+process-kill recovery passed two tests with 237 assertions. Schema contracts and
+snapshots passed 1,671 tests with 49,099 assertions; physical schemas and upgrades
+passed 1,525 tests with 36,667 assertions. Lint, formatting, kingdom migration
+consistency and server/nine package type checks passed. Device execution remains
+unverified.
