@@ -85,6 +85,32 @@ test("alliance creation and concurrent joins preserve one membership and one lea
     h.allianceCommand("al.setrank", { playerId: sfs.string("other"), rank: sfs.int(5) }),
   ).rejects.toThrow();
 }, 30000);
+test("member ranking returns each player's selected avatar and frame", async () => {
+  const h = await harness(),
+    id = await h.create();
+  await h.allianceCommand("al.apply", { allianceId: sfs.string(id) }, "other");
+  await h.db.db
+    .update(userprofile)
+    .set({ pic: "g529", picVer: 3, picfraId: 17 })
+    .where(eq(userprofile.uid, "owner"));
+  await h.db.db
+    .update(userprofile)
+    .set({ pic: "g522", picVer: 5, picfraId: 19 })
+    .where(eq(userprofile.uid, "other"));
+  const result = await h.allianceCommand("al.rank");
+  const members = (result.body.list!.value as ReturnType<typeof sfs.object>[]).map(fields);
+  expect(
+    members.map((member) => [
+      str(member, "uid"),
+      str(member, "pic"),
+      int(member, "picVer"),
+      int(member, "picfraId"),
+    ]),
+  ).toEqual([
+    ["owner", "g529", 3, 17],
+    ["other", "g522", 5, 19],
+  ]);
+}, 30000);
 test("applications require current authority and invitations require their recipient", async () => {
   const h = await harness(),
     id = await h.create();

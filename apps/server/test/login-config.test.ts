@@ -4,6 +4,7 @@ import { GameService as Game } from "@opencok/services/game";
 import { featureConfig, loginConfiguration } from "@opencok/mappings/bootstrap";
 import { decode, encode, fields, sfs, type Value } from "@opencok/messages/sfs";
 import { Rules } from "@opencok/rules/game";
+import { emptyPowerState } from "./fixtures/power-state";
 import {
   accountVerificationEnabled,
   accountVerificationRequired,
@@ -369,7 +370,11 @@ test("initial and deferred login announce ordinary, account and subscription met
     hasMarches: false,
   };
   const game = new Game(
-    { ...store(persisted), getCityByPlayerId: async () => state },
+    {
+      ...store(persisted),
+      getCityByPlayerId: async () => state,
+      getPowerByPlayerId: async () => emptyPowerState(state.profile!),
+    },
     catalog,
     { kingdomId: 2 },
     () => now,
