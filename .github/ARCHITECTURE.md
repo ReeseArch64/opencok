@@ -143,6 +143,12 @@ composition instantiates these classes directly. Equipment and workshop have sep
 implementations. `TimedActivityAction` and
 `TimedActivityStatus` name the existing string actions and numeric persistence states.
 
+The experimental web scaffold composes `WebApplication` and `PingController` for
+its server, with `HttpGatewayProbe` owning the health request. Browser loading uses
+`LoadingApplication`, a `LoadingScreen` port implemented by `LoadingView`, and
+`GatewayPingClient`. The ping response lives in contracts and its runtime validator
+in validations; DOM rendering remains inside the web app.
+
 Feature-by-feature migration details belong in the [realm runbook](../apps/server/README.md),
 [API guide](../apps/api/README.md), [chat guide](../apps/chat/README.md),
 [media runbook](../apps/api/README.md#avatar-media) and [migration evidence](../docs/migration-validation.md).
