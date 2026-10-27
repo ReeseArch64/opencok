@@ -2060,3 +2060,28 @@ catalog, probability, legacy-format and clock units passed with 57 assertions.
 The complete server unit suite passed 1,500 tests with 245,953 assertions. Native
 TCP passed one test with 222 assertions, including real saved token offers in
 both realms. Required lint, formatting and server/nine package type checks passed.
+
+## Ordinary resource supply and dragon skill acceptance
+
+The source audit identified an absent ordinary world resource producer, despite
+existing gathering, return and search handlers. The maintained lifecycle and its
+precise remaining boundaries are recorded in
+[ordinary world resource creation and recovery](ordinary-world-resources.md).
+
+The audit also checked the source `PetDragonSkillService` material workflow.
+`petdragon.upgrade.skill` now validates the whole material selection and processes
+strengthening materials before ordinary experience materials, independent of
+client order. It retains unused ordinary materials when boosters already reach
+the cap and rejects an already capped target before consumption. Experience
+discarded at the final cap no longer inflates the skill's transferable total.
+Concurrent retries and reversed input order produce the same persisted result.
+
+The inspected public handler families include petdragon incubation, info,
+friendship, gifts, civilization unlock, active selection, feeding, level upgrades,
+travel, names and skills; dragon talents; civilization science; civilization
+castle placement, settlement, speed-up, movement and removal; and totem placement,
+recycling and status delivery. Existing tests establish those maintained slices,
+not full native acceptance. Tower battle outcomes, civilization garrison and
+robbery, battle-triggered talents and totem damage still require their validated
+combat integrations. Ordinary world refresh is a server-owned producer and adds
+no client command or alternate wire representation.
