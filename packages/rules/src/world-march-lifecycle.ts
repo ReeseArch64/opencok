@@ -58,12 +58,20 @@ function validate(state: MarchLifecycle, owner: string, version: number, now: bi
     const elapsed = state.dueAt - state.startedAt;
     if (elapsed > BigInt(limit)) invalid();
   }
-  if (state.purpose !== undefined && state.purpose !== "trouble" && state.purpose !== "treasure")
+  if (
+    state.purpose !== undefined &&
+    state.purpose !== "trouble" &&
+    state.purpose !== "treasure" &&
+    state.purpose !== "scout"
+  )
     invalid();
-  if (state.purpose === "trouble" && (state.phase === "gathering" || state.cargo !== null))
+  if (
+    (state.purpose === "trouble" || state.purpose === "scout") &&
+    (state.phase === "gathering" || state.cargo !== null)
+  )
     invalid();
   if (state.purpose === "treasure" && state.cargo !== null) invalid();
-  troops(state.troops, state.purpose === "trouble");
+  troops(state.troops, state.purpose === "trouble" || state.purpose === "scout");
   cargo(state.cargo);
   if (!["outbound", "gathering", "returning", "completed"].includes(state.phase)) invalid();
 }
@@ -143,6 +151,7 @@ export function arriveForGathering(
   duration(gatheringDuration);
   if (
     state.purpose === "trouble" ||
+    state.purpose === "scout" ||
     state.phase !== "outbound" ||
     now < state.dueAt ||
     state.cargo !== null
