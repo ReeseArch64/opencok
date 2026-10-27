@@ -34,8 +34,10 @@ export async function publishWorldMutation(
       throw new Error("Invalid world owner notification");
     await publish(owner, name, fields(push.value.body));
   }
-  const recipients = await interested(pointIds, owner, "");
+  const recipients = await interested(pointIds, command === "create.boss" ? "" : owner, "");
   for (const recipient of recipients.filter(Boolean)) {
+    if (command === "create.boss" && body.fieldCreated)
+      await publish(recipient, "push.fieldMonster.create", fields(body.fieldCreated));
     if (command === "world.use" && body.used && recipient !== owner)
       await publish(recipient, "push.world.use", fields(body.used));
     for (const totem of (body.totems?.value ?? []) as { value: Fields }[])

@@ -1,3 +1,4 @@
+import { worldMonsterMaximum } from "@opencok/rules/world-monster-detail";
 import { GameError } from "@opencok/errors/game";
 import { errors } from "@opencok/constants/game";
 import { ruleAvailable } from "@opencok/rules/availability";
@@ -21,6 +22,7 @@ import type { CityDomain } from "./city-progression";
 
 export const worldUseCommands = [
   "world.use",
+  "create.boss",
   "world.get.monster",
   "world.get.barbarion",
   "get.act.boss.point",
@@ -169,6 +171,54 @@ export function createWorldUseDomain(size: number, random = randomInt): CityDoma
           }),
         };
       }
+      if (command === "create.boss") {
+        const state = context.state.worldMutation,
+          reader = context.state.worldMonsters,
+          id = cityInteger(int(params, "pointIndex"), 1, size * size),
+          uuid = str(params, "uuid"),
+          item = context.economy.ownedItem?.(uuid);
+        if (!state || !reader || !item || item.count < 1 || !context.economy.consumeItem)
+          worldMutationFailure();
+        const rule = context.rules.goods.get(item.itemId),
+          source = state.points.find((point) => num(point, "id") === id);
+        if (
+          !source ||
+          !worldItemFree(source) ||
+          rule?.type !== "16" ||
+          (rule.type2 ?? "").length ||
+          !rule.para1
+        )
+          worldMutationFailure();
+        const config = worldMonsterConfiguration(context.rules, rule.para1),
+          points = worldMonsterProp(context.rules, state.points, id, rule.para1, size, context.now);
+        if (await reader.claimed(points.map((point) => num(point, "id")))) worldMutationFailure();
+        const main = points[0]!,
+          maximum = worldMonsterMaximum(num(main, "pointType"), rule.para1, context.rules),
+          created = {
+            pointIndex: sfs.int(id),
+            mmhp: sfs.int(maximum),
+            mchp: sfs.int(Math.max(0, maximum)),
+            monsterId: sfs.string(rule.para1),
+            rt: sfs.int(Number(BigInt.asIntN(32, long(main, "flushTime") / 1000n))),
+            st: sfs.int(Number(BigInt.asIntN(32, long(main, "startTime") / 1000n))),
+            isBoss: sfs.bool(config.boss),
+          };
+        context.economy.consumeItem(uuid, 1);
+        (context.write.worldMutation ??= {}).points = points;
+        return {
+          response: encode({
+            itemId: sfs.string(item.itemId),
+            count: sfs.int(item.count - 1),
+            itemEffectObj: sfs.object({}),
+          }),
+          event: encode({
+            owner: sfs.string(context.owner),
+            origin: sfs.int(id),
+            points: sfs.array(points.map((point) => sfs.object({ id: sfs.int(num(point, "id")) }))),
+            fieldCreated: sfs.object(created),
+          }),
+        };
+      }
       const state = context.state.worldMutation,
         id = cityInteger(int(params, "point"), 1, size * size),
         uuid = str(params, "itemUUid"),
@@ -180,8 +230,13 @@ export function createWorldUseDomain(size: number, random = randomInt): CityDoma
         worldMutationFailure();
       const target = worldItemTarget(rule!, random);
       if (rule!.type === "12") {
-        const points = worldMonsterProp(context.rules, state.points, id, target, size, context.now),
-          response = worldItemUsed({ pointId: id, itemid: item.itemId });
+        const points = worldMonsterProp(context.rules, state.points, id, target, size, context.now);
+        if (
+          !context.state.worldMonsters ||
+          (await context.state.worldMonsters.claimed(points.map((point) => num(point, "id"))))
+        )
+          worldMutationFailure();
+        const response = worldItemUsed({ pointId: id, itemid: item.itemId });
         context.economy.consumeItem(uuid, 1);
         (context.write.worldMutation ??= {}).points = points;
         return {
@@ -194,6 +249,8 @@ export function createWorldUseDomain(size: number, random = randomInt): CityDoma
           }),
         };
       }
+      if (!context.state.worldMonsters || (await context.state.worldMonsters.claimed([id])))
+        worldMutationFailure();
       const resource = worldItemResource(context.rules, target),
         point = {
           ...row,

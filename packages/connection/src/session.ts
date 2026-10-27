@@ -302,6 +302,7 @@ export function createSessionHandler(
               command === "redPackets.sd" ||
               command === "redPackets.rv" ||
               command === "world.use" ||
+              command === "create.boss" ||
               command === "world.get.monster" ||
               command === "world.get.barbarion" ||
               command === "trade.info" ||
