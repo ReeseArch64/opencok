@@ -255,6 +255,8 @@ export function scoutArrival(
     valid &&
     kind === 44 &&
     target.barbarian &&
+    long(target.point, "flushTime") > context.now &&
+    barbarianCurrentHP(target.point, target.barbarian, context.rules, context.now) > 0 &&
     serverFeature(context.rules, "barbarion_switch", {
       kingdomId: context.rules.kingdomId,
       version: "12.06.0",
