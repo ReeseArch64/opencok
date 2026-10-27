@@ -181,7 +181,8 @@
     "./world-terrain": "./src/world-terrain.ts",
     "./world-map-point": "./src/world-map-point.ts",
     "./world-resource-new": "./src/world-resource-new.ts",
-    "./world-monsters": "./src/world-monsters.ts"
+    "./world-monsters": "./src/world-monsters.ts",
+    "./gold-eggs": "./src/gold-eggs.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",

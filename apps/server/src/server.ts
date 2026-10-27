@@ -1,4 +1,8 @@
 import { activityRewardDomain } from "@opencok/services/activity-reward";
+import { createGoldEggsRanks, createGoldEggsRuntimeStore } from "@opencok/repositories/gold-eggs";
+import { createGoldEggsDomain, goldEggsAwardParameters } from "@opencok/services/gold-eggs";
+import { GoldEggsRuntime } from "@opencok/services/gold-eggs-runtime";
+import { goldEggsEnabled } from "@opencok/rules/gold-eggs";
 import { createPaymentObservers } from "@opencok/services/payment-observers";
 import { createNormalRechargeDomain } from "@opencok/services/normal-recharge";
 import { createComebackSessions } from "@opencok/repositories/comeback-session";
@@ -651,6 +655,15 @@ export const RealmDependenciesLive = Layer.effect(
       },
       (owner, command, params) => activities.domainCommand(owner, command, params),
     );
+    const goldEggsRanks = createGoldEggsRanks(
+      [...db.databases.kingdoms].map(([kingdomId, realm]) => ({
+        kingdomId,
+        db: realm.db,
+        eligible: () =>
+          goldEggsEnabled(rules, BigInt(Date.now()), false, kingdomId) &&
+          goldEggsEnabled(rules, BigInt(Date.now()), true, kingdomId),
+      })),
+    );
     const city = createCityProgressionHandlers(
       (tx: Parameters<typeof readReconnectProgress>[0], owner, now) =>
         createCityProgressionStore(tx, owner, now, cityBoundary, config.mapSize, authority),
@@ -682,6 +695,7 @@ export const RealmDependenciesLive = Layer.effect(
         createSevenDayCycleDomain(),
         createOrdinaryBoxDomain(),
         createNormalRechargeDomain(config.paidGiftGateway),
+        createGoldEggsDomain(undefined, goldEggsRanks),
         createRechargeActivityDomain(paymentObservers.newcomer),
         createRechargeFeedbackDomain(paymentObservers.feedback),
         activityRewardDomain,
@@ -1213,6 +1227,17 @@ export const RealmDependenciesLive = Layer.effect(
         }
       }
     };
+    const goldEggsRuntime = new GoldEggsRuntime(
+      createGoldEggsRuntimeStore(db.kingdom.db, authority),
+      goldEggsRanks,
+      rules,
+      (owner, period, global) =>
+        activities.domainCommand(
+          owner,
+          "goldeggs.award.deliver",
+          goldEggsAwardParameters(owner, period, global),
+        ),
+    );
     const recoverSpecialPurchases = async () => {
       const at = BigInt(Date.now());
       for (const record of await specialEventStock.pending(config.kingdomId, at)) {
@@ -1866,6 +1891,7 @@ export const RealmDependenciesLive = Layer.effect(
         await costRankRewards.refresh().catch(() => undefined);
         for (const type of [
           "hero.rank.mail",
+          "gold.eggs.mail",
           "hero.target.mail",
           "campaign.mail",
           "redPackets.mail",
@@ -1924,6 +1950,15 @@ export const RealmDependenciesLive = Layer.effect(
     yield* Effect.tryPromise({
       try: recoverGroupBuys,
       catch: () => new Error("Group-buy settlement unavailable"),
+    }).pipe(
+      Effect.catch(() => Effect.void),
+      Effect.andThen(Effect.sleep(1000)),
+      Effect.forever,
+      Effect.forkScoped,
+    );
+    yield* Effect.tryPromise({
+      try: () => goldEggsRuntime.refresh(),
+      catch: () => new Error("Gold eggs recovery unavailable"),
     }).pipe(
       Effect.catch(() => Effect.void),
       Effect.andThen(Effect.sleep(1000)),

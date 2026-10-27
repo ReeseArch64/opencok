@@ -1,3 +1,4 @@
+import { configureGoldEggs } from "../test/fixtures/gold-eggs";
 import type { DeliveredGiftProof } from "@opencok/contracts/paid-gifts";
 import { paylog } from "@opencok/drizzle/schema/opencok_kingdom/paylog";
 import { server_info } from "@opencok/drizzle/schema/opencok_kingdom/server_info";
@@ -860,6 +861,29 @@ test("PostgreSQL SFS login, city and map preserve state and isolate both realms"
       expect(fields(paidInit.repayinfo).payPoint).toEqual(sfs.long(1700));
       expect(paidInit.newSerCumRechargeTotal).toEqual(sfs.long(1700));
       expect(fields(paidInit.user).gold).toEqual(sfs.long(9007199254740893n));
+      configureGoldEggs(runtimeRules);
+      runtimeRules.power.activityPanels!.set("57175", {
+        ...runtimeRules.power.activityPanels!.get("57175")!,
+        start: "2020-01-01-00-00",
+        end: "2099-01-01-00-00",
+      });
+      const eggs = await paidLogin.command("goldeggs.info", {});
+      expect(eggs.freetimes).toEqual(sfs.int(2));
+      expect((eggs.list!.value as Value[]).map(fields)).toHaveLength(3);
+      const egg = await paidLogin.command("goldeggs.smashing", { pos: sfs.int(0) });
+      expect(egg.freetimes).toEqual(sfs.int(1));
+      expect(egg.allscore).toEqual(sfs.long(2));
+      expect(egg.reward!.value as Value[]).toHaveLength(1);
+      const eggRank = await paidLogin.command("goldeggs.rank", {});
+      expect(eggRank.selfRanking).toEqual(sfs.int(1));
+      const eggGlobal = await paidLogin.command("goldeggs.rankAll", {});
+      expect((eggGlobal.allRank!.value as Value[]).length).toBeGreaterThan(0);
+      const privateAward = await paidLogin.command("goldeggs.award.deliver", {
+        start: sfs.long(1),
+        end: sfs.long(2),
+        global: sfs.bool(false),
+      });
+      expect(privateAward.errorCode).toEqual(sfs.string("102192"));
     }
     const otherCache = new Cache({ ...base, kingdomId: 2 });
     expect(await cache.claim("synthetic-shared-uid", "synthetic-token-1")).toBe(true);

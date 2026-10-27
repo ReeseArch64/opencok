@@ -112,7 +112,8 @@
     "./comeback": "./src/comeback.ts",
     "./normal-recharge": "./src/normal-recharge.ts",
     "./world-use": "./src/world-use.ts",
-    "./world-recreation": "./src/world-recreation.ts"
+    "./world-recreation": "./src/world-recreation.ts",
+    "./gold-eggs": "./src/gold-eggs.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",
