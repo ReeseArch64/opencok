@@ -1,3 +1,6 @@
+import { unregisteredWorldMarches } from "@opencok/repositories/world-march-runtime";
+import nativeMarch from "../test/fixtures/reconnect-march-army.json";
+import { decodeWorldMarchArmy, encodeWorldMarchArmy } from "@opencok/messages/world-resource-army";
 import { createDatabase } from "@opencok/drizzle";
 import { createActivityExecutor } from "@opencok/repositories/timed-activity";
 import { TimedActivityService } from "@opencok/services/timed-activity";
@@ -319,6 +322,142 @@ test("owned imported shared parties recover native raw load into resource capaci
     expect(
       (await h.db.db.select().from(user_army).where(eq(user_army.uid, "owner")))[0]!.free,
     ).toBe(100);
+  } finally {
+    await h.close();
+  }
+}, 120000);
+
+test("native shared outbound parties with an empty load cache adopt actual troops and collection rules without a second reservation", async () => {
+  const h = await harness();
+  try {
+    await h.start();
+    const saved = (await h.checkpoints())[0]!,
+      before = decode(saved.payload),
+      [party] = await h.db.db.select().from(world_march);
+    const army = decodeWorldMarchArmy(party!.armyInfo!)!;
+    await h.db.db
+      .update(world_march)
+      .set({ armyInfo: encodeWorldMarchArmy({ ...army, cachedLoad: 0 }), collectSpd: 0 })
+      .where(eq(world_march.uuid, party!.uuid));
+    await h.db.db.delete(world_march_checkpoint).where(eq(world_march_checkpoint.id, saved.id));
+    expect((await unregisteredWorldMarches(h.db.db)).map((row) => row.id)).toContain(party!.uuid);
+    await h.tick();
+    const after = decode((await h.checkpoints())[0]!.payload);
+    expect(after.capacity).toEqual(before.capacity);
+    expect(after.collectRate).toEqual(before.collectRate);
+    expect(after.dueAt).toEqual(before.dueAt);
+    const [balance] = await h.db.db.select().from(user_army).where(eq(user_army.uid, "owner"));
+    expect(balance!.free).toBe(0);
+    expect(balance!.march).toBe(100);
+    h.clock.now = Number((await h.checkpoints())[0]!.dueAt);
+    await h.tick();
+    expect((await h.target()).monsterCurrHP).toBe(1);
+  } finally {
+    await h.close();
+  }
+}, 120000);
+test("native shared return cargo and queued rewards recover after target expiry and fund only their saved amounts once", async () => {
+  const h = await harness();
+  try {
+    h.rules.reconnect.rewards!.set("imported-shared", { id: "imported-shared", wood: "2" });
+    await h.start();
+    const [party] = await h.db.db.select().from(world_march),
+      before = (
+        await h.db.db.select().from(user_resource).where(eq(user_resource.uid, "owner"))
+      )[0]!;
+    await h.db.db
+      .update(world_march)
+      .set({
+        state: 2,
+        returnStartTime: BigInt(h.clock.now),
+        arrivalTime: BigInt(h.clock.now) + 1000n,
+        collectSpd: 0,
+        plunderRes: '[{"t":1,"v":20},{"r":"imported-shared","v":3}]',
+      })
+      .where(eq(world_march.uuid, party!.uuid));
+    await h.db.db.delete(world_march_checkpoint).where(eq(world_march_checkpoint.id, party!.uuid));
+    await h.db.db
+      .update(worldpoint)
+      .set({ pointType: 0, pointItem: null, resInitValue: 0, resCostValue: 0, monsterCurrHP: 0 })
+      .where(eq(worldpoint.id, 6005));
+    expect((await unregisteredWorldMarches(h.db.db)).map((row) => row.id)).toContain(party!.uuid);
+    await h.tick();
+    const adopted = (await h.checkpoints())[0]!,
+      saved = decode(adopted.payload);
+    expect(saved.targetResource).toEqual(sfs.int(1));
+    expect(saved.sharedReward).toEqual(sfs.string("wood,0,6"));
+    expect((await h.db.db.select().from(world_march))[0]!.plunderRes).toBe(
+      '[{"t":1,"v":20},{"r":"imported-shared","v":3}]',
+    );
+    h.clock.now += 2000;
+    await h.tick();
+    const after = (
+      await h.db.db.select().from(user_resource).where(eq(user_resource.uid, "owner"))
+    )[0]!;
+    expect(after.stone - before.stone).toBe(20n);
+    expect(after.wood - before.wood).toBe(6n);
+    expect(
+      (await h.db.db.select().from(user_army).where(eq(user_army.uid, "owner")))[0]!.free,
+    ).toBe(100);
+    expect((await h.target()).pointType).toBe(0);
+    await h.tick();
+    expect(
+      (await h.db.db.select().from(user_resource).where(eq(user_resource.uid, "owner")))[0],
+    ).toEqual(after);
+  } finally {
+    await h.close();
+  }
+}, 120000);
+
+test("native Java resource parties derive live troop load and apply resource weights instead of treating the raw cache as resource units", async () => {
+  const h = await harness();
+  try {
+    const source = Buffer.from(nativeMarch.companions, "base64"),
+      name = Buffer.concat([Buffer.from([0x74, 0, 15]), Buffer.from("synthetic-owner")]),
+      offset = source.indexOf(name);
+    expect(offset).toBeGreaterThan(0);
+    const army = Buffer.concat([
+      source.subarray(0, offset),
+      Buffer.from([0x74, 0, 5]),
+      Buffer.from("owner"),
+      source.subarray(offset + name.length),
+    ]);
+    expect(decodeWorldMarchArmy(army)!.owner).toBe("owner");
+    h.rules.arms.set("100001", { ...h.rules.arms.get("107000")!, id: "100001", arm: "3" });
+    await h.db.db
+      .insert(user_army)
+      .values({ uid: "owner", armyId: "100001", level: 1, free: 84, march: 16 });
+    await h.db.db
+      .update(worldpoint)
+      .set({ pointType: 3, pointItem: "1", resLevel: 1, monsterCurrHP: 0 })
+      .where(eq(worldpoint.id, 6005));
+    await h.db.db.insert(world_march).values({
+      uuid: "native-party",
+      ownerUid: "owner",
+      ownerId: 1202,
+      ownerName: "Synthetic",
+      type: 0,
+      targetId: 6005,
+      targetType: 3,
+      state: 0,
+      worldId: 0,
+      marchStartTime: BigInt(h.clock.now),
+      marchArrivalTime: BigInt(h.clock.now) + 1000n,
+      arrivalTime: BigInt(h.clock.now) + 1000n,
+      marchTime: 1000,
+      armyInfo: army,
+      collectSpd: 1,
+    });
+    await h.tick();
+    const saved = decode((await h.checkpoints())[0]!.payload);
+    expect(saved.capacity).toEqual(sfs.int(5));
+    expect(decodeWorldMarchArmy(army)!.cachedLoad).toBe(45);
+    h.clock.now += 100000;
+    await h.tick();
+    expect((await h.target()).resCostValue).toBe(5);
+    const [returned] = await h.db.db.select().from(user_army).where(eq(user_army.armyId, "100001"));
+    expect(returned!.free).toBe(100);
+    expect(returned!.march).toBe(0);
   } finally {
     await h.close();
   }
