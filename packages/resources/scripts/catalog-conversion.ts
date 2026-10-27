@@ -268,6 +268,9 @@ function action(node: SourceElement): AutomationAction {
     : tagged(content, "action");
   return {
     ...clause(node, "action"),
+    ...(Number(attributes(node).type) === 21
+      ? { actions: tagged(content, "action").map(action) }
+      : {}),
     ...(conditional || direct
       ? {
           branch: {

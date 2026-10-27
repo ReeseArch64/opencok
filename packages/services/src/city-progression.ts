@@ -1,3 +1,4 @@
+import { refreshCampaignGrants } from "./local-campaign";
 import { generalDrawPeriod } from "@opencok/rules/general-draws";
 import { refreshGeneralUnlocks } from "./general-assignments";
 import { refreshQuests } from "./quests";
@@ -143,6 +144,7 @@ export function createCityProgressionHandlers<T>(
         const { repository, plan } = await context(tx, activity.ownerId, now, economy);
         if (action === "finish") plan.completing = activity;
         const body = await domain.apply(plan, action, activity);
+        refreshCampaignGrants(plan);
         if (action === "finish" && activity.type === 0) refreshGeneralUnlocks(plan);
         if (action === "finish")
           refreshQuests(plan, {
@@ -221,6 +223,7 @@ export function createCityProgressionHandlers<T>(
       if (!domain) throw new GameError(errors.unsupported, "city_progression");
       const { repository, plan } = await context(tx, owner, now, economy, command, params);
       const result = await domain.prepare(plan, command, decode(Buffer.from(params)));
+      refreshCampaignGrants(plan);
       if (!domain.commands.includes("task.reward.get")) refreshQuests(plan);
       await repository.update(plan.write, economy);
       return result;

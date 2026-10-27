@@ -75,6 +75,7 @@ export interface AutomationClause {
 }
 
 export interface AutomationAction extends AutomationClause {
+  readonly actions?: readonly AutomationAction[];
   readonly branch?: {
     readonly conditions: readonly AutomationClause[];
     readonly onMatch: readonly AutomationAction[];

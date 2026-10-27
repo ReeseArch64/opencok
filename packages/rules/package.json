@@ -11,6 +11,7 @@
   },
   "type": "module",
   "exports": {
+    "./local-campaign": "./src/local-campaign.ts",
     "./lottery": "./src/lottery.ts",
     "./totem": "./src/totem.ts",
     "./avatar-profile": "./src/avatar-profile.ts",

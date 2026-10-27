@@ -1,3 +1,5 @@
+import { readAnniversaryStatistics } from "./anniversary";
+import { readCampaignVariables, writeCampaignVariables } from "./local-campaign";
 import { readLottery, writeLottery } from "./lottery";
 import { readTotems, writeTotems } from "./totem";
 import { readCivilizationCastle, writeCivilizationCastle } from "./civilization-castle";
@@ -122,6 +124,9 @@ export function createCityProgressionStore(
       return {
         profile,
         resource,
+        anniversaryStatistics:
+          command === "1year.info" ? await readAnniversaryStatistics(tx, owner) : undefined,
+        campaignVariables: await readCampaignVariables(tx, owner, Number(profile.serverId)),
         lottery: command?.startsWith("lottery.") ? await readLottery(tx, owner) : undefined,
         totems: ["totem", "totem.init"].includes(command ?? "")
           ? await readTotems(tx, owner)
@@ -209,6 +214,8 @@ export function createCityProgressionStore(
               set: value,
             });
         }
+        if (write.campaignVariables)
+          await writeCampaignVariables(tx, owner, write.campaignVariables, now);
         if (write.lottery) await writeLottery(tx, owner, write.lottery);
         if (write.totems) await writeTotems(tx, owner, write.totems);
         if (write.civilizationCastle)

@@ -31,6 +31,8 @@ export type ActivityAction = "start" | "restore" | "finish" | "cancel" | "resche
 import type { InventoryState, InventoryPlan } from "./inventory";
 
 export interface ActivityEconomy {
+  takeItemGrants?(): readonly { itemId: string; count: number }[];
+  push?(command: string, body: Uint8Array): void;
   gold(delta: bigint): void;
   winPoints?(delta: bigint): void;
   civilizationScore?(delta: bigint): void;

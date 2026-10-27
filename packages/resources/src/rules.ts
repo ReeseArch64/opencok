@@ -50,6 +50,28 @@ export async function loadRules(directory?: string, kingdomId = 1) {
   };
   const declared = async (name: GameplayCatalog) =>
     (await available(name)) ? parseDeclared(await read(name), name) : undefined;
+  const campaignSource = (await available(GameplayCatalog.TriggerActivity))
+    ? await read(GameplayCatalog.TriggerActivity)
+    : undefined;
+  const variableSource = (await available(GameplayCatalog.TriggerVar))
+    ? await read(GameplayCatalog.TriggerVar)
+    : undefined;
+  const campaignRules =
+    campaignSource &&
+    typeof campaignSource !== "string" &&
+    campaignSource.kind === CatalogKind.Automation
+      ? campaignSource.rules.filter((rule) => JSON.stringify(rule).includes("3th_"))
+      : [];
+  const campaignVariables =
+    variableSource &&
+    typeof variableSource !== "string" &&
+    variableSource.kind === CatalogKind.Automation
+      ? new Map(
+          variableSource.variables
+            .filter((v) => v.id.startsWith("long_3th_"))
+            .map((v) => [`${v.scope}$${v.id}`, v]),
+        )
+      : new Map();
   const buildings =
     directory === undefined
       ? createBuildingCatalog()
@@ -306,6 +328,10 @@ export async function loadRules(directory?: string, kingdomId = 1) {
     },
     { ranks: await optional(GameplayCatalog.Rank), gifts: await optional(GameplayCatalog.Gift) },
     {
+      campaignRules,
+      campaignVariables,
+      anniversaryWeeks: await optional(GameplayCatalog.Catalog3thAnniversaryControl),
+      anniversaryTasks: await optional(GameplayCatalog.Catalog3thAnniversary),
       lotteries: await optional(GameplayCatalog.Lottery),
       civilizationFortress: await optional(GameplayCatalog.CivilizationFortress),
       totems: await optional(GameplayCatalog.Totem),

@@ -1,3 +1,5 @@
+import { sfs, type Value } from "@opencok/messages/sfs";
+import { equipment as equipmentView, equipmentItem } from "@opencok/mappings/equipment";
 import { newEquipment } from "./equipment";
 import { randomInt } from "node:crypto";
 import { GameError } from "@opencok/errors/game";
@@ -91,4 +93,62 @@ export function grantPinnedProgressionReward(context: CityProgressionContext, ra
     }
   }
   return rewardPreviewArray(rows);
+}
+
+export function grantNativeProgressionReward(
+  context: CityProgressionContext,
+  raw: string,
+  innerTotals = false,
+): Value[] {
+  return progressionRewardPreview(raw).map((reward) => {
+    const before = context.write.equipment?.length ?? 0;
+    const encoded =
+      reward.kind === "item"
+        ? `${reward.type === 7 ? "goods" : "equip"},${reward.id},${reward.count}`
+        : reward.kind === "count" && assets[reward.type]
+          ? `${assets[reward.type]},0,${reward.value}`
+          : (() => {
+              throw new GameError(errors.unsupported, "city_progression");
+            })();
+    grantPinnedProgressionReward(context, encoded);
+    if (reward.kind === "item")
+      return sfs.object({
+        type: sfs.int(reward.type),
+        value:
+          reward.type === 7
+            ? sfs.object({
+                ...equipmentItem(
+                  reward.id,
+                  context.economy.quantity?.(reward.id) ?? 0,
+                  context.economy.itemState?.(reward.id),
+                  context.rules,
+                ),
+                rewardAdd: sfs.int(reward.count),
+              })
+            : sfs.array(
+                (context.write.equipment ?? [])
+                  .slice(before)
+                  .map((row) => sfs.object(equipmentView(row))),
+              ),
+      });
+    if (reward.kind !== "count") throw new GameError(errors.unsupported, "city_progression");
+    const asset = assets[reward.type];
+    const total =
+      asset && asset !== "exp"
+        ? context.balance(asset) +
+          (["wood", "stone", "iron", "food"].includes(asset) ? context.balance(`${asset}bind`) : 0n)
+        : undefined;
+    return sfs.object({
+      type: sfs.int(reward.type),
+      value: sfs.int(reward.value),
+      ...(total === undefined
+        ? {}
+        : {
+            total:
+              innerTotals || [12, 13].includes(reward.type)
+                ? sfs.int(Number(BigInt.asIntN(32, total)))
+                : sfs.long(total),
+          }),
+    });
+  });
 }
