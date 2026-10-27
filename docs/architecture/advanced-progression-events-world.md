@@ -2307,3 +2307,32 @@ civilization cases passed. Native provisioning passed with 65 assertions, the
 two-realm TCP regression with 222, and killed-process recovery with 47. Five
 geometry rule cases, required lint and formatting, and 19 implemented workspace
 type checks passed. Device execution remains unverified.
+
+## Resident crash-city recreation
+
+`RecreateWorld` and the resident `UserWorld.recreateWorld` path now route
+`world.user.rcr` through the owned city transaction. The saved resident point
+must be zero. Recreation consumes no teleport item or gold, restores the current
+wall maximum including effect 125 and the saved active shield, writes the native
+main/range footprint, and updates both the profile and world point identity.
+`lastCityDefTime` and `lastMoveCityTime` advance together with the placement.
+The native response retains `srcPoint`, `dstPoint`, `point`, `cityDefValue` and
+long `lastCityDefTime` order and types.
+
+Existing owned ordinary parties use the same recovered recall and return path as
+city relocation. Their reserved troops and saved companions return once; an
+active gathering or treasure camp is released according to its actual lifecycle.
+An unsupported party cannot be invented or resolved to make recreation succeed.
+No complete free native birth footprint leaves the lost city unchanged. Native
+move notifications and point invalidations commit through the existing outbox.
+This route remains available when new ordinary march admission is disabled.
+
+Source recreation uses the initial birth placement path on space grid type
+two. The saved birth priorities differ from ordinary random teleport selection. The initial implementation
+restores this placement and lifecycle; Source `WorldBornManager` phased
+`resdential` priorities and shared initial provisioning distribution are a
+separate persistence followup. Existing imported cities are not relocated by this
+command. PostgreSQL acceptance covers zero-point ownership, retry conservation,
+reserved terrain, wall and shield restoration, native fields, recovered troops
+and unavailable footprints. Cross-battle recreation retains its separate realm
+and target-engine dependencies. No schema or dependency is added.

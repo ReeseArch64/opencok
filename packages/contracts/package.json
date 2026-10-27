@@ -184,7 +184,8 @@
     "./responses/city-defense": "./src/responses/city-defense.ts",
     "./responses/treasure-map": "./src/responses/treasure-map.ts",
     "./responses/world-march-runtime": "./src/responses/world-march-runtime.ts",
-    "./responses/world-use": "./src/responses/world-use.ts"
+    "./responses/world-use": "./src/responses/world-use.ts",
+    "./responses/world-recreation": "./src/responses/world-recreation.ts"
   },
   "dependencies": {
     "@opencok/enums": "workspace:*",

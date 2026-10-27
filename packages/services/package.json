@@ -145,7 +145,8 @@
     "./world-utility": "./src/world-utility.ts",
     "./city-defense": "./src/city-defense.ts",
     "./treasure-map": "./src/treasure-map.ts",
-    "./world-use": "./src/world-use.ts"
+    "./world-use": "./src/world-use.ts",
+    "./world-recreation": "./src/world-recreation.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",

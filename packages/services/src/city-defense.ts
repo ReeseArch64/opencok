@@ -4,7 +4,21 @@ import { cityAmount, cityInteger } from "@opencok/rules/city-progression";
 import { cityFireSpeed, settleCityFire } from "@opencok/rules/city-defense";
 import { worldMutationFailure } from "@opencok/rules/world-march-runtime";
 import { extinguishedCity, repairedCity } from "@opencok/mappings/city-defense";
-import type { CityDomain } from "./city-progression";
+import type { CityDomain, CityProgressionContext } from "./city-progression";
+
+export function cityDefenseMaximum(context: CityProgressionContext) {
+  const wall = context.state.buildings.find((building) => num(building, "itemId") === 419000);
+  if (!wall) worldMutationFailure();
+  const definition = context.rules.building(
+    "419000",
+    num(wall, "level"),
+    num(wall, "star"),
+    num(wall, "progress"),
+  );
+  return cityInteger(
+    Math.trunc(Number(definition.clientParameters?.[1]?.value) + context.effect(125)),
+  );
+}
 
 export const cityDefenseCommands = ["buy.citydef", "world.user.rcd"];
 export const cityDefenseDomain: CityDomain = {
@@ -56,17 +70,7 @@ export const cityDefenseDomain: CityDomain = {
         cityDef: num(row, "cityDefValue"),
       });
     } else if (command === "world.user.rcd") {
-      const wall = context.state.buildings.find((building) => num(building, "itemId") === 419000);
-      if (!wall) worldMutationFailure();
-      const definition = context.rules.building(
-        "419000",
-        num(wall, "level"),
-        num(wall, "star"),
-        num(wall, "progress"),
-      );
-      const maximum = cityInteger(
-        Math.trunc(Number(definition.clientParameters?.[1]?.value) + context.effect(125)),
-      );
+      const maximum = cityDefenseMaximum(context);
       row.cityDefValue = Math.min(
         maximum,
         cityInteger(num(row, "cityDefValue") + cityInteger(rule.k3)),

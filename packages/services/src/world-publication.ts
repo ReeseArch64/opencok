@@ -55,7 +55,7 @@ export async function publishWorldMutation(
     for (const point of points) {
       await publish(recipient, "push.world.point", { id: point.value.id! });
       if (
-        (command === "world.mv" || command === "world.mv.gold") &&
+        (command === "world.mv" || command === "world.mv.gold" || command === "world.user.rcr") &&
         (int(point.value, "pointType") === 1 || int(point.value, "id") === int(body, "origin"))
       )
         await publish(recipient, "push.world.mv", {
