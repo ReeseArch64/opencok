@@ -1,3 +1,4 @@
+import { readWorldScoutTargets } from "@opencok/repositories/world-scout-report";
 import { alliance } from "@opencok/drizzle/schema/opencok_kingdom/alliance";
 import { alliance_territory } from "@opencok/drizzle/schema/opencok_kingdom/alliance_territory";
 import { alliance_skill } from "@opencok/drizzle/schema/opencok_kingdom/alliance_skill";
@@ -612,6 +613,39 @@ test("territory anti scout uses the nearest highest level allied turret and its 
     expect(failures.find((row) => row.toUser === "other")!.title).toBe(
       h.rules.mail.get("11747")!.title!,
     );
+  } finally {
+    await h.close();
+  }
+}, 120000);
+
+test("returning scouts restore their reservations independently of newly unprojectable foreign intel", async () => {
+  const h = await scoutHarness();
+  try {
+    await h.scout({ soldiers: sfs.object({ "107000": sfs.int(10) }) });
+    h.clock.now = Number((await checkpoint(h)).dueAt);
+    await h.tick();
+    const returning = await checkpoint(h);
+    expect(decode(returning.payload).phase!.value).toBe("returning");
+    await h.db.db.insert(user_building).values(
+      Array.from({ length: 257 }, (_, index) => ({
+        uuid: `unprojectable-${index}`,
+        uid: "other",
+        itemId: 411000,
+        level: 1,
+        pos: 50 + index,
+        refreshTime: BigInt(h.clock.now),
+      })),
+    );
+    await expect(
+      h.db.db.transaction((tx) => readWorldScoutTargets(tx, [1220], 1)),
+    ).rejects.toThrow();
+    h.clock.now = Number(returning.dueAt);
+    await h.tick();
+    expect((await h.db.db.select().from(world_march)).length).toBe(0);
+    expect(
+      (await h.db.db.select().from(user_army).where(eq(user_army.uid, "owner")))[0],
+    ).toMatchObject({ free: 100, march: 0 });
+    expect((await h.db.db.select().from(mail)).length).toBe(2);
   } finally {
     await h.close();
   }

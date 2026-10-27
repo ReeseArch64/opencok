@@ -3218,7 +3218,8 @@ roll them back together. Only the intended recipient receives the mail header;
 private report contents are absent from map broadcasts. Existing startup scans
 adopt bounded legacy SCOUT rows from actual reservations and retain saved native
 speed effects. Returning legacy parties do not reissue reports, charge costs or
-repeat story progress. Replacement realm authority fences the former worker.
+repeat story progress. Returning parties skip foreign intel snapshots, so a target
+whose facts can no longer be projected cannot block the actor troop return. Replacement realm authority fences the former worker.
 Back up march, army, companion, mail, receipt and outbox records together. No
 schema or external dependency is added.
 
