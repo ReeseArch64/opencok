@@ -568,6 +568,10 @@ export class GameService {
       case "dragontower":
       case "minstrel":
       case "alchemist":
+      case "continuedcost.hideking":
+      case "continuedcost.global.reward":
+      case "continuedcost.info":
+      case "continuedcost.reward":
       case "get.trouble.list":
       case "trouble.speed":
       case "trigger.activity":

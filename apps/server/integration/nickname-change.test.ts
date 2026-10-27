@@ -1383,3 +1383,100 @@ test("authenticated rename reaches real Chat and Redis, clears all effects and r
     await redis.stop();
   }
 }, 30000);
+
+test("continued-cost evidence is captured with the nickname debit and published only for committed changes", async () => {
+  const { loadRules } = await import("@opencok/resources/rules");
+  const { confirmedNicknameCost } = await import("@opencok/services/continued-cost-spending");
+  const { readContinuedCostSpending } = await import("@opencok/mappings/continued-cost");
+  const { user_building } = await import("@opencok/drizzle/schema/opencok_kingdom/user_building");
+  const { mutation_outbox } =
+    await import("@opencok/drizzle/schema/opencok_kingdom/mutation_outbox");
+  const rules = await loadRules();
+  rules.features.set("continued_cost", {
+    id: "continued_cost",
+    online: "all",
+    test: "all",
+    version: "1.0.0",
+  });
+  rules.power.activityPanels!.set("57159", {
+    ...rules.power.activityPanels!.get("57159")!,
+    start: "2026-10-01-00-00",
+    end: "2026-11-01-00-00",
+  });
+  const configured = { ...configuration, confirmedSpending: confirmedNicknameCost(rules) },
+    uid = await seed({ gold: 500n }),
+    rejected = await seed({ gold: 500n, account: false });
+  for (const owner of [uid, rejected])
+    await realm()
+      .db.insert(user_building)
+      .values({ uuid: `cost-${owner}`, uid: owner, itemId: 400000, pos: 0, level: 1 });
+  const operationId = randomUUID();
+  const result = await store(1, configured).change(uid, operationId, `Cost ${uid}`, now);
+  expect(result.state).toBe("committed");
+  const entries = () =>
+    realm().db.select().from(mutation_outbox).where(eq(mutation_outbox.ownerUid, uid));
+  const [event] = await entries();
+  expect(event!.eventType).toBe("continuedcost.spend");
+  expect(readContinuedCostSpending(event!.payload)).toMatchObject({
+    owner: uid,
+    amount: 100n,
+    free: 100n,
+    paid: 0n,
+    at: BigInt(now),
+  });
+  await store(1, configured).recover(uid, operationId, now + 1000);
+  expect(await entries()).toHaveLength(1);
+  const failure = await store(1, configured).change(
+    rejected,
+    randomUUID(),
+    `Cost ${rejected}`,
+    now,
+  );
+  expect(failure.state).toBe("refunded");
+  expect(
+    await realm().db.select().from(mutation_outbox).where(eq(mutation_outbox.ownerUid, rejected)),
+  ).toHaveLength(0);
+  const retryOwner = await seed({ gold: 500n }),
+    retryId = randomUUID();
+  await realm()
+    .db.insert(user_building)
+    .values({ uuid: `cost-${retryOwner}`, uid: retryOwner, itemId: 400000, pos: 0, level: 1 });
+  await realm().pool.query(
+    "CREATE TRIGGER reject_cost_outbox BEFORE INSERT ON opencok_kingdom.mutation_outbox FOR EACH ROW EXECUTE FUNCTION public.reject_nickname()",
+  );
+  try {
+    await expect(
+      store(1, configured).change(retryOwner, retryId, `Cost ${retryOwner}`, now),
+    ).rejects.toThrow();
+    expect((await store(1, configured).find(retryOwner, retryId))!.state).toBe("prepared");
+    expect(await receipt(retryId)).toBeDefined();
+    expect((await profile(retryOwner)).gold).toBe(400n);
+    expect(
+      await realm()
+        .db.select()
+        .from(mutation_outbox)
+        .where(eq(mutation_outbox.ownerUid, retryOwner)),
+    ).toHaveLength(0);
+  } finally {
+    await realm().pool.query("DROP TRIGGER reject_cost_outbox ON opencok_kingdom.mutation_outbox");
+  }
+  rules.features.set("continued_cost", {
+    id: "continued_cost",
+    online: "close",
+    test: "close",
+    version: "1.0.0",
+  });
+  expect((await store(1, configured).recover(retryOwner, retryId, now + 1000)).state).toBe(
+    "committed",
+  );
+  expect((await profile(retryOwner)).gold).toBe(400n);
+  const [recovered] = await realm()
+    .db.select()
+    .from(mutation_outbox)
+    .where(eq(mutation_outbox.ownerUid, retryOwner));
+  expect(readContinuedCostSpending(recovered!.payload)).toMatchObject({
+    owner: retryOwner,
+    amount: 100n,
+    at: BigInt(now),
+  });
+});

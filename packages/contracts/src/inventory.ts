@@ -1,4 +1,4 @@
-import type { MutationCommand, MutationResult, EconomyPosting } from "./mutation.ts";
+import type { MutationCommand, MutationResult, EconomyPosting, MutationEvent } from "./mutation.ts";
 import type { Row } from "./rows.ts";
 import type { PlayerEffectSnapshot } from "./power.ts";
 
@@ -30,6 +30,7 @@ export interface InventoryState {
   effects(): Promise<PlayerEffectSnapshot>;
 }
 export interface InventoryPlan extends MutationResult {
+  confirmedSpending?(postings: readonly EconomyPosting[]): MutationEvent | undefined;
   assets?: Readonly<Record<string, bigint>>;
   postings: readonly EconomyPosting[];
   items: readonly InventoryItem[];

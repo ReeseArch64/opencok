@@ -1,3 +1,7 @@
+import { confirmedNicknameCost } from "@opencok/services/continued-cost-spending";
+import { continuedCostDomain, continuedCostOperation } from "@opencok/services/continued-cost";
+import { readContinuedCostSpending } from "@opencok/mappings/continued-cost";
+import { pendingContinuedCosts } from "@opencok/repositories/continued-cost";
 import {
   cosmeticInteractionParticipants,
   publishCosmeticInteractionMutation,
@@ -297,6 +301,7 @@ export const RealmDependenciesLive = Layer.effect(
               JSON.stringify({ event: "nickname_delivery_failed", kingdom: config.kingdomId }),
             ),
           prepareRefund: (owner, now) => cn1.refresh(owner, now),
+          confirmedSpending: confirmedNicknameCost(rules),
           refundRatio: async (profile) => cn1.ratio(profile),
           chat: createChatNicknamePublisher({
             ...config.nicknameChat,
@@ -478,6 +483,7 @@ export const RealmDependenciesLive = Layer.effect(
         createAllianceHeartDomain((uid) => notifications.owners().includes(uid)),
         createPrayerDomain(),
         troubleDomain,
+        continuedCostDomain,
         recallTaskDomain,
         regionalRecallDomain,
         playerItemGiftDomain,
@@ -685,6 +691,36 @@ export const RealmDependenciesLive = Layer.effect(
     const worldInterest = createWorldInterest(db.kingdom.db, authority, config.mapSize);
     let worldCursor: { dueAt: bigint; id: string } | undefined;
     let worldImportCursor: string | undefined;
+    const recoverContinuedCosts = async (owner?: string) => {
+      for (let index = 0; index < 64; index++) {
+        try {
+          const delivered = await relayMutationEvent(
+            db.kingdom.db,
+            authority,
+            async (event) => {
+              const fact = readContinuedCostSpending(event.payload);
+              if (fact.owner !== event.owner)
+                throw new Error("Foreign continued-cost evidence owner");
+              await activities.domainCommand(event.owner, "continuedcost.apply", {
+                ...decode(event.payload),
+                operationId: sfs.string(
+                  continuedCostOperation(event.owner, event.requestId, event.id),
+                ),
+              });
+            },
+            Date.now,
+            "continuedcost.spend",
+            60000,
+            owner,
+          );
+          if (!delivered) break;
+        } catch (error) {
+          if (owner) throw error;
+        }
+      }
+      if (owner && (await pendingContinuedCosts(db.kingdom.db, config.kingdomId, owner)))
+        throw new Error("Continued-cost delivery pending");
+    };
     const recoverCosmeticInteractions = async () => {
       for (const command of ["trouble.deliver", "trouble.speed"])
         for (let index = 0; index < 64; index++) {
@@ -1053,6 +1089,15 @@ export const RealmDependenciesLive = Layer.effect(
       }
     };
     yield* Effect.tryPromise({
+      try: () => recoverContinuedCosts(),
+      catch: () => new Error("Continued-cost recovery unavailable"),
+    }).pipe(
+      Effect.catch(() => Effect.void),
+      Effect.andThen(Effect.sleep(1000)),
+      Effect.forever,
+      Effect.forkScoped,
+    );
+    yield* Effect.tryPromise({
       try: recoverCosmeticInteractions,
       catch: () => new Error("Cosmetic interaction recovery unavailable"),
     }).pipe(
@@ -1338,6 +1383,8 @@ export const RealmDependenciesLive = Layer.effect(
               ].includes(command)
             )
               await activities.domainCommand(owner, "world.tick", {});
+            if (command === "continuedcost.info" || command === "continuedcost.reward")
+              await recoverContinuedCosts(owner);
             const result = await activities.domainCommand(owner, command, params);
             if (command === "item.send") {
               const recipient = str(params, "uid");

@@ -315,6 +315,12 @@ test("PostgreSQL SFS login, city and map preserve state and isolate both realms"
       ).toBe("synthetic-init");
       expect((await client.command("cmd.ping")).serverNowTime?.type).toBe(Type.Long);
       expect((await client.command("get.trouble.list")).array).toEqual(sfs.array([]));
+      const costInfo = await client.command("continuedcost.info", {
+        _cok_: sfs.long(9007199254740993n),
+      });
+      expect(costInfo._cok_).toEqual(sfs.long(9007199254740993n));
+      expect(costInfo.costPoint).toBeUndefined();
+      expect((await client.command("continuedcost.apply", {})).errorCode?.value).toBe("102192");
       expect((await client.command("trouble.deliver", {})).errorCode?.value).toBe("102192");
       expect(
         fields(fields((await client.command("login.dataconfig")).dataConfig).player_max).k3?.value,
