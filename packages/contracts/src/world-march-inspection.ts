@@ -9,5 +9,11 @@ export interface WorldMarchInspection {
   owner: WorldResourceOwnerSnapshot;
 }
 export interface WorldMarchInspectionStore {
-  read(observer: string, owner: string, id: string): Promise<WorldMarchInspection | undefined>;
+  read(
+    observer: string,
+    owner: string,
+    id: string,
+    kingdomId: number,
+    now: number,
+  ): Promise<WorldMarchInspection | undefined>;
 }

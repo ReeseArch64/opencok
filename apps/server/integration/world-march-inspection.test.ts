@@ -72,6 +72,9 @@ async function harness() {
     const game = new GameService({} as GameStore, h.rules, { kingdomId: 1 }, () => h.clock.now, {
       worldMarchInspection: createWorldMarchInspectionStore(h.db.db),
       worldPowerEffects: async () => new Map(),
+      reconcileAlliance: async () => {
+        throw new Error("Inspection entered alliance mutation domain");
+      },
       cityProgression: async () => {
         throw new Error("Inspection entered owned mutation domain");
       },
@@ -131,6 +134,21 @@ test("native observer rows allow resident inspection while foreign alliances, em
     await expect(h.query({ uid: sfs.string("missing") })).rejects.toThrow();
     await expect(h.query({ uuid: sfs.string("missing") })).rejects.toThrow();
     await expect(h.query({ msFlag: sfs.int(1) })).rejects.toThrow();
+    await h.db.db.update(userprofile).set({ serverId: 2 }).where(eq(userprofile.uid, "owner"));
+    await expect(h.query()).rejects.toThrow();
+    await h.db.db
+      .update(userprofile)
+      .set({ serverId: 1, banFlag: 1 })
+      .where(eq(userprofile.uid, "owner"));
+    await expect(h.query()).rejects.toThrow();
+    await h.db.db
+      .update(userprofile)
+      .set({ banFlag: 0, banTime: BigInt(h.clock.now + 1) })
+      .where(eq(userprofile.uid, "owner"));
+    await expect(h.query()).rejects.toThrow();
+    await h.db.db.update(userprofile).set({ banTime: 0n }).where(eq(userprofile.uid, "owner"));
+    await h.db.db.update(userprofile).set({ serverId: 2 }).where(eq(userprofile.uid, "other"));
+    await expect(h.query()).rejects.toThrow();
     expect(await h.db.db.select().from(command_receipt)).toHaveLength(0);
   } finally {
     await h.close();

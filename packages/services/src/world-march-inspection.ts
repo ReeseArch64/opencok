@@ -25,7 +25,7 @@ export async function inspectWorldMarch(
   if (int(params, "msFlag", 0) !== 0 || !Number.isSafeInteger(now) || now < 0) unavailable();
   const owner = str(params, "uid", observer),
     id = str(params, "uuid"),
-    state = await store.read(observer, owner, id);
+    state = await store.read(observer, owner, id, kingdomId, now);
   if (!state) unavailable();
   const { march, point } = state,
     type = num(march, "type"),
