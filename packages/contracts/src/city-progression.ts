@@ -135,6 +135,7 @@ export interface CityProgressionState {
 }
 
 export interface CityProgressionWrite {
+  specialEventPurchase?: Row;
   continuedCostHide?: number;
   continuedCost?: { row: Row; logs: readonly number[] };
   troubleHistory?: import("./trouble").TroubleHistoryWrite;

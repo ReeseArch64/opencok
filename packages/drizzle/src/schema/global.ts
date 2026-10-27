@@ -1,3 +1,4 @@
+export { special_event_purchase as opencok_global_special_event_purchase } from "./opencok_global/special_event_purchase";
 export { opencok_global, opencok_pay, opencok_chat } from "./namespaces";
 export { nickname_change_receipt as opencok_global_nickname_change_receipt } from "./opencok_global/nickname_change_receipt";
 export { chatMessageSequence, sharedUserSequence } from "./sequences";
