@@ -1928,3 +1928,39 @@ and recipe regression tests passed with 67 assertions. The server unit suite
 passed 1,493 tests with 245,575 assertions. Native TCP passed one test with 214
 assertions, including item requests in both realms. Required lint, formatting and
 server/nine package type checks passed.
+
+## Saved campaign appearance activation
+
+Native appearance activation now validates the actor's stored city skin, bubble
+or overlay ownership before executing event 59. Exact stored identities take
+precedence; a matching type and cosmetic subgroup supplies the reference's
+family fallback. Missing, foreign, expired or feature-disabled ownership rejects
+without campaign progress, mail or a saved status. Activation does not extend the
+stored ownership deadline.
+
+The maintained cake appearance creates its informational mail and adds 150 points
+up to the configured two-activation quota. Replaying the same receipt cannot add
+mail or points. A new eligible activation follows the original rule, including
+its unconditional informational mail action. The saved status, ownership marker,
+mail, campaign counters, outbox and receipt commit atomically. Closed campaign
+dates do not prevent an otherwise valid appearance activation.
+
+Status responses retain native integer identity, exact long deadlines, optional
+effects and the indefinite wire sentinel. The production boundary checkpoints
+earned output before changing owned effects. Durable publication sends private
+status details only to the actor and map appearance updates to current interested
+players. Recovery uses the existing cosmetic and mail relays. This module covers
+the three campaign map appearance families; other avatar systems retain their
+existing boundaries.
+
+No migration, dependency, configuration or environment variable is added.
+Inventory remains 848 tables and 6,917 fields. Back up stored appearance ownership,
+player states, campaign variables, mail, receipts and outbox together. Preserve
+committed states and notification rows during rollback. Device execution remains
+unverified.
+
+Ten activation and existing cosmetic PostgreSQL tests passed with 77 assertions.
+The server unit suite passed 1,493 tests with 245,575 assertions. Native TCP
+passed one test with 216 assertions, including owned activation in both realms
+and reconnection after restart with the same declared status catalog. Required
+lint, formatting and server/nine package type checks passed.

@@ -84,7 +84,10 @@ export function cosmeticInteractionParticipants(owner: string, command: string, 
     return;
   return [...new Set([owner, playerItemGiftRecipient(str(params, "uid"))])];
 }
-export function cosmeticInteractionEvent(context: CityProgressionContext): Uint8Array | null {
+export function cosmeticInteractionEvent(
+  context: CityProgressionContext,
+  statusResponse?: Fields,
+): Uint8Array | null {
   const changed = context.write.cosmeticChanges;
   if (!changed?.length) return null;
   const target = context.state.cosmeticTarget;
@@ -118,7 +121,7 @@ export function cosmeticInteractionEvent(context: CityProgressionContext): Uint8
       status: sfs.array([]),
       ...(change.previous === undefined ? {} : { oldStatus: sfs.string(String(change.previous)) }),
     };
-    return sfs.object({ kind: sfs.int(type), body: sfs.object(body) });
+    return sfs.object({ kind: sfs.int(type), body: sfs.object(statusResponse ?? body) });
   });
   return encode({
     owner: sfs.string(context.owner),
@@ -160,15 +163,26 @@ export async function publishCosmeticInteractionMutation(
       body = fields(update.body),
       id = int(body, "statusId");
     if (![100, 105, 200].includes(kind)) throw new Error("Invalid cosmetic private status kind");
-    if (
-      id <= 0 ||
-      body.endTime?.type !== Type.Long ||
-      body.status?.type !== Type.Array ||
-      !Array.isArray(body.status.value) ||
-      body.status.value.length ||
-      body.effectState?.type !== Type.Object
-    )
+    if (id <= 0 || body.endTime?.type !== Type.Long || body.effectState?.type !== Type.Object)
       throw new Error("Invalid cosmetic status notification");
+    if (body.status) {
+      if (
+        body.status.type !== Type.Array ||
+        !Array.isArray(body.status.value) ||
+        body.status.value.length > 128
+      )
+        throw new Error("Invalid cosmetic status effects");
+      for (const effect of body.status.value) {
+        const value = fields(effect);
+        if (
+          value.effNum?.type !== Type.Int ||
+          value.effVal?.type !== Type.Int ||
+          value.stateId?.type !== Type.Int ||
+          int(value, "stateId") !== id
+        )
+          throw new Error("Invalid cosmetic status effect");
+      }
+    }
     await publish(uid, "status.push", body);
     if (kind === 100)
       await publish(uid, "push.server.action", { type: sfs.int(9), params: sfs.object(body) });

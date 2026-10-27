@@ -170,8 +170,12 @@ export function createCityProgressionStore(
         profile,
         resource,
         cosmeticTarget:
-          command === "trigger.activity"
-            ? (cosmeticTarget = await readCosmeticTarget(tx, request))
+          command === "trigger.activity" || command === "avatar.activate"
+            ? (cosmeticTarget = await readCosmeticTarget(
+                tx,
+                request,
+                command === "avatar.activate" ? owner : undefined,
+              ))
             : undefined,
         trouble:
           command === "get.trouble.list" || command?.startsWith("trouble.")
