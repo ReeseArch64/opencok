@@ -84,6 +84,7 @@ export interface CityProgressionState {
   comeback?: import("./comeback").ComebackState;
   branchCity?: Row | null;
   hotItem?: import("./hot-item").HotItemState;
+  worldMonsters?: import("./world-monsters").WorldMonsterReader;
   campaignProfile?: Row;
   costRankAward?: import("./continued-cost-rewards").CostRankAwardReader;
   expeditionAward?: import("./expedition-stage-rewards").ExpeditionAwardReader;
