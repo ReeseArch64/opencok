@@ -1,3 +1,4 @@
+import { scoutWatchtowerValues } from "@opencok/rules/world-scout-watchtower";
 import { worldBirthRules } from "@opencok/rules/world-birth";
 import {
   startTreasureExcavation,
@@ -13,7 +14,6 @@ import { treasureMapFree } from "@opencok/rules/treasure-map";
 import { GameError } from "@opencok/errors/game";
 import { errors } from "@opencok/constants/game";
 import { resolveWorldCityGeometry } from "@opencok/rules/world-city-geometry";
-import { buildingStep } from "@opencok/rules/building";
 import { troubleItem } from "@opencok/rules/trouble";
 import { recordTargetTask } from "./target-task";
 import {
@@ -58,23 +58,15 @@ import { serverFeature } from "@opencok/rules/power-context";
 import type { CityDomain, CityProgressionContext } from "./city-progression";
 
 function troubleDetectSpeed(context: CityProgressionContext) {
-  if (
-    !serverFeature(context.rules, "honour_watchtower", {
+  return scoutWatchtowerValues(
+    context.rules,
+    context.state.buildings.find((row) => num(row, "itemId") === 417000),
+    {
       kingdomId: context.rules.kingdomId,
-      version: "12.06.0",
+      version: text(context.state.profile, "appVersion"),
       now: Number(context.now),
-    })
-  )
-    return 0;
-  const tower = context.state.buildings.find((row) => num(row, "itemId") === 417000);
-  if (!tower) return 0;
-  const parameter = context.rules.building(
-    "417000",
-    num(tower, "level"),
-    num(tower, "star"),
-    num(tower, "progress"),
-  ).clientParameters?.[2];
-  return Number(buildingStep(parameter?.steps, num(tower, "progress"))?.value.split(";")[0] ?? 0);
+    },
+  ).speed;
 }
 function checkpoint(state: RuntimeMarch) {
   return encode({
@@ -1305,11 +1297,11 @@ export function createWorldMarchDomain(size: number): CityDomain {
           targetId,
           marchSpeed,
           trouble
-            ? context.effect(401) + troubleDetectSpeed(context)
+            ? context.effect(401) + troubleDetectSpeed(context) + context.effect(402)
             : context.effect(60) + context.effect(97) + context.effect(2193),
           true,
           trouble,
-          context.effect(402),
+          trouble ? 0 : context.effect(402),
           trouble,
           sourceFootprint,
           targetFootprint,

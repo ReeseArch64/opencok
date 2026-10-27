@@ -21,6 +21,13 @@ placement.
 for this route; ordinary march speed does not change the scout estimate. The
 Source black-ground speed modifier applies to scout speed even outside black
 land, with the usual terrain time multiplier still applied to black segments.
+Watchtower values use the actual `glory_watchtower` switch and Source caller
+version check, including blank-version compatibility. The honour progress must
+match a configured key exactly; its speed is the first underscore-separated
+integer. The shared helper also exposes the cooldown to actual scout execution.
+A quotation does not consume that cooldown. The existing trouble route uses the
+same speed helper and the Source scout-style black-ground modifier.
+
 The quotation uses the Source target footprint list rather than treating every
 four-cell reservation as a four-cell travel destination. Shared type 37 targets
 its main anchor, and the throne has its native nine-cell destination.
