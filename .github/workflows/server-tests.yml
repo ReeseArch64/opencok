@@ -1,17 +1,8 @@
 name: PostgreSQL realm server
 
 on:
-  pull_request:
-    paths:
-      - "apps/server/**"
-      - "packages/**"
-      - "package.json"
-      - "bun.lock"
-      - "bunfig.toml"
-      - ".env.example"
-      - ".github/workflows/server-tests.yml"
   push:
-    branches: [develop]
+    branches: [main]
     paths:
       - "apps/server/**"
       - "packages/**"

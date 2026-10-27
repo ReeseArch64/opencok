@@ -3,6 +3,7 @@ import { activityDirectoryEntries } from "@opencok/rules/activity-directory";
 import { treasureMapCommands } from "./treasure-map";
 import { cityDefenseCommands } from "./city-defense";
 import { worldUtility } from "./world-utility";
+import { legacyIntegerOrder } from "@opencok/messages/legacy-object-order";
 import { rewardPreviewArray } from "@opencok/mappings/rewards";
 import { heroEventBand, heroEventRewards, nextHeroPanel } from "@opencok/rules/hero-event";
 import {
@@ -142,6 +143,7 @@ import type { CityState, GameServices, GameStore } from "@opencok/contracts/game
 import { long, num, text, type Row } from "@opencok/contracts/rows";
 import {
   sfs,
+  fields,
   Type,
   int as wireInt,
   str as wireString,
@@ -329,7 +331,9 @@ export class GameService {
     if (!world || num(world, "worldId") !== 0 || (state.hasMarches && !this.services.reconnect))
       throw new GameError(errors.unsupported, "world_state");
     const expeditionActivity = await this.services.expeditionActivity?.(uid);
+    const playerInfo = await this.power(uid, true);
     const body: Fields = {
+      playerInfo: sfs.object(playerInfo),
       equip: sfs.array(
         (state.equipment ?? [])
           .filter((row) => num(row, "on") !== 2)
@@ -343,7 +347,7 @@ export class GameService {
       ...gifts?.body,
       ...treasureMaps?.body,
       ...equipment?.body,
-      ...generals?.body,
+      ...(generals?.body.data ? fields(generals.body.data) : {}),
       ...dragons?.body,
       ...dragonTower?.body,
       ...vipBox?.body,
@@ -2085,7 +2089,9 @@ export class GameService {
       profile = this.checkProfile(state.profile, now);
     if (profile.uid !== uid || num(profile, "serverId") !== this.config.kingdomId)
       throw new GameError(errors.invalid);
-    const body = activityDirectory(activityDirectoryEntries(state.activities, now));
+    const body = activityDirectory(
+      activityDirectoryEntries(state.activities, now, legacyIntegerOrder),
+    );
     if (encode(extension("act.ls", body)).length > MAX_FRAME)
       throw new GameError(errors.unsupported, "activity_directory");
     return body;
@@ -2524,7 +2530,7 @@ export class GameService {
     body.lastUpdateTime = sfs.string(updates?.get(target.value) ?? "");
     return body;
   }
-  private async power(uid: string): Promise<Fields> {
+  private async power(uid: string, login = false): Promise<Fields> {
     const now = this.now();
     const state = await this.db.getPowerByPlayerId(uid, now);
     const profile = this.checkProfile(state.profile, now);
@@ -2559,7 +2565,15 @@ export class GameService {
       );
     }
     const power = calculatePlayerPower({ ...state, profile }, this.rules, context);
-    return powerInfo(state.statistics, power, state.upload, this.rules);
+    const result = powerInfo(state.statistics, power, login ? undefined : state.upload, this.rules);
+    if (login) {
+      delete result.nextUpdateTime;
+      delete result.banTime;
+      delete result.banCount;
+      result.skillPoint = sfs.int(num(state.generals[0] ?? {}, "plusSkillPoint"));
+      result.isPayFlag = sfs.bool(long(profile, "payTotal") > 0n);
+    }
+    return result;
   }
   private async playerSummaries(params: Fields): Promise<Fields> {
     const value = params.uids;
