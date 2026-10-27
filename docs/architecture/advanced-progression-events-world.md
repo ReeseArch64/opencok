@@ -3013,3 +3013,74 @@ Native map clock fields retain signed Java integer seconds. Unit acceptance
 covers every added point type, stored and derived health, malformed counters,
 NPC overflow and signed clock conversion. Unsupported specialized actors and
 territory overlays keep their separate state requirements.
+
+## GoldEggs boards and ranking settlement
+
+The seven native `goldeggs.info`, `goldeggs.smashing`, `goldeggs.smashingall`,
+`goldeggs.flush`, `goldeggs.scorereward`, `goldeggs.rank` and `goldeggs.rankAll`
+commands now use the existing owned `gold_eggs` row and fenced economic mutation.
+The maintained `golden_egg` and `golden_egg_step` catalogs supply weighted cells,
+per-board limits and fallback cells, initial free turns, reroll tiers, permutation,
+prices and score prizes. Private inputs are not runtime dependencies. Native
+correlation receipts pin successful random outcomes, debits, grants and cells;
+competing requests cannot smash a cell or claim a score prize twice.
+
+Single smashes consume an initial free turn or actual gold. Reward cells perform
+independent weighted reward loops under the current multiplier, then reset it;
+booster cells add the declared amount. A complete board creates a fresh board.
+Paid bulk play requires an untouched board, preserves free turns and follows its
+chosen complete permutation. It preserves the Source trailing-multiplier behavior:
+the final multiplier scales the merged rewards again and remains stored for the
+next operation. Rerolls preserve that multiplier and consume a free reroll before
+charging the persisted escalating paid tier. The Source daily-free code never
+accrues its advertised daily addition; this implementation preserves initial
+allowances without inventing missed daily turns. Guaranteed item counts and
+weighted loop counts use their separate Source float scaling rules. Actual gold
+spend and positive goods continue through the common trusted campaign observers;
+GoldEggs does not invent a hero action501.
+
+Score prizes require the owned current period and reached threshold, then grant
+real resources, goods or equipment together with the claim. Period identities
+include both catalog timestamps; a new period resets score, claims, budgets and
+board only when its owner opens the native info command. Before replacement,
+existing admitted expired standings are frozen under the realm lock. Old captured
+commands cannot write after finalization. Unadmitted historical rows never create
+ranking entitlements or missed score prizes. Feature/version, visitor, actor,
+clock, position, saved-cell and declared catalog bounds fail before committing
+benefits. The historical panel57175 window remains unchanged, ending in May2025;
+production does not become active merely because its engine now exists. The
+specific backed CUSTOM operator page9012519 retains its original panel dates.
+It is separate from the AbstractActivity directory exposed by `act.ls`.
+
+Local standings read actual local profiles and period-bound scores, excluding
+orphaned, banned, visiting, foreign-realm and future-created records. Global
+standings combine the two configured realms. Both native boards retain exact LONG
+scores and the Source `socre` field; stable ties use owner and realm identity.
+Version-one bounded private `trigger_var` snapshots capture admitted calendars,
+prizes and frozen boards. The existing `trigger_timmer` preserves the hourly
+settlement cadence. Local closure freezes actual standings first; global closure
+requires every eligible realm's local certificate and the following hourly phase.
+An expired never-admitted realm records an empty certificate without prizes.
+Missing eligible realm evidence leaves global settlement pending.
+
+The worker pages eight period headers and at most32 pending deliveries per pass.
+Reserved-server receipts fence timer and snapshot mutations. Each actual owned
+rank entitlement creates one pinned claimable system mail, its permanent award
+marker, actor receipt and native `gold.eggs.mail` outbox event atomically. Failed
+mail transactions remain pending for retry; successful callbacks and restarts
+cannot repeat mail. No public native command exposes the internal delivery port.
+Back up owned rows, period and award variables, timers, permanent receipts, mail,
+inventory, wallets and outbox together. Rollback must retain those records for a
+supporting binary. No schema, dependency or environment setting is added.
+
+PostgreSQL acceptance covers real costs and weighted inventory, canonical retries,
+concurrency, multiplier and bulk semantics, rollback, authority replacement,
+period reset, exact claim isolation, actual local/global ranks and mail recovery.
+Pure tests cover maintained catalogs, unchanged dates, native scalar types,
+weighted versus guaranteed scaling and bounded malformed inputs. Native TCP
+acceptance exercises active synthetic boards, real free-turn rewards, both rank
+commands and private-delivery denial in both realms. Native-device execution
+remains unverified. The separate `egg.act.*`/`egg.exp.reward`/`egg.rec.reward`
+EggActivityService and MonthlyCardService `mCard.reward` are concrete independent
+noncombat engines still requiring their own implementation and acceptance; this
+section does not declare topic26 complete from enum or panel coverage.

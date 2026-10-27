@@ -161,7 +161,8 @@ function endTime(
       const panel = rules.power.activityPanels?.get(call);
       if (
         !panel ||
-        ![6, 30, 31, 35].includes(cityInteger(panel.type)) ||
+        (![6, 30, 31, 35].includes(cityInteger(panel.type)) &&
+          !(call === "57175" && cityInteger(panel.type) === 47)) ||
         cityInteger(panel.battle_type ?? 0) !== 0
       )
         return;

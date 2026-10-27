@@ -157,7 +157,9 @@
     "./payment-observers": "./src/payment-observers.ts",
     "./world-use": "./src/world-use.ts",
     "./world-recreation": "./src/world-recreation.ts",
-    "./world-resource-new": "./src/world-resource-new.ts"
+    "./world-resource-new": "./src/world-resource-new.ts",
+    "./gold-eggs": "./src/gold-eggs.ts",
+    "./gold-eggs-runtime": "./src/gold-eggs-runtime.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",
