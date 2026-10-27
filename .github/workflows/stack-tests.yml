@@ -9,7 +9,8 @@ on:
       - "packages/**"
       - "infra/**"
       - "tests/stack/**"
-      - "docker-compose.yml"
+      - "docker-compose*.yml"
+      - "tests/compose/**"
       - ".dockerignore"
       - ".env.example"
       - "package.json"
@@ -34,6 +35,7 @@ jobs:
       - run: bunx --no-install tsc --noEmit -p tests/stack/tsconfig.json
       - run: bun run --cwd apps/api test
       - run: bun run --cwd packages/env test
+      - run: bun --no-env-file test tests/compose
       - run: bun run test:stack
       - uses: actions/upload-artifact@v7
         if: failure()

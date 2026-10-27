@@ -21,10 +21,10 @@ test("invalid API endpoints and private values report only variable names", () =
   }
   expect(() => parseApiEnvironment({ API_GAME_PORT: "0" })).toThrow("API_GAME_PORT");
   expect(() =>
-    parseApiEnvironment({ API_REDIS_URL: "https://synthetic-secret@example.invalid" }),
-  ).toThrow("API_REDIS_URL");
+    parseApiEnvironment({ REDIS_URL: "https://synthetic-secret@example.invalid" }),
+  ).toThrow("REDIS_URL");
   try {
-    parseApiEnvironment({ API_REDIS_URL: "synthetic-secret" });
+    parseApiEnvironment({ REDIS_URL: "synthetic-secret" });
   } catch (error) {
     expect(String(error)).not.toContain("synthetic-secret");
   }

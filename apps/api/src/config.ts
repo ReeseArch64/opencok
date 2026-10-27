@@ -23,7 +23,7 @@ export const readConfig = Effect.gen(function* () {
     host: settings.API_HOST,
     port: settings.API_PORT,
     databaseUrl: url.href,
-    redisUrl: settings.API_REDIS_URL,
+    redisUrl: settings.REDIS_URL,
     timeoutMs: settings.API_DEPENDENCY_TIMEOUT_MS,
     serversFile: settings.API_SERVERS_FILE
       ? resolve(workspaceRoot, settings.API_SERVERS_FILE)

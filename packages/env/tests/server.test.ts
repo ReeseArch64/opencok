@@ -34,8 +34,8 @@ test("server settings validate realm routing and require a login secret", () => 
   expect(() => parseServerEnvironment({ ...base, KINGDOM_DATABASE_NAME: "db;drop" })).toThrow(
     "KINGDOM_DATABASE_NAME",
   );
-  expect(() => parseServerEnvironment({ ...base, GAME_REDIS_URL: "https://localhost" })).toThrow(
-    "GAME_REDIS_URL",
+  expect(() => parseServerEnvironment({ ...base, REDIS_URL: "https://localhost" })).toThrow(
+    "REDIS_URL",
   );
   expect(() => parseServerEnvironment({ ...base, GAME_PORT: "65536" })).toThrow("GAME_PORT");
 });

@@ -39,6 +39,7 @@ async function createStack() {
   const env = {
     ...process.env,
     COMPOSE_PROFILES: "",
+    REDIS_URL: "redis://redis:6379/0",
     GAME_LOGIN_SECRET: "synthetic-secret",
     GAME_NICKNAME_CHAT_URL: "",
   };
@@ -50,6 +51,8 @@ async function createStack() {
       "all",
       "-f",
       join(root, "docker-compose.yml"),
+      "-f",
+      join(root, "docker-compose.dev.yml"),
       "config",
       "--format",
       "json",
@@ -61,11 +64,13 @@ async function createStack() {
     new Response(sourceConfig.stderr).text(),
     sourceConfig.exited,
   ]);
-  if (configCode) throw new Error("Base Compose configuration is invalid");
+  if (configCode) throw new Error("Development Compose configuration is invalid");
   const isolated = JSON.parse(serialized);
   expect(isolated.services.server.environment.GAME_NICKNAME_CHAT_URL).toBe(
     "http://chat:8083/_internal/nickname",
   );
+  expect(isolated.services.server.environment.REDIS_URL).toBe("redis://redis:6379/0");
+  expect(isolated.services.api.environment.REDIS_URL).toBe("redis://redis:6379/0");
   isolated.name = project;
   isolated.services.mongodb.environment = {
     MONGO_INITDB_ROOT_USERNAME: "synthetic",
@@ -75,7 +80,9 @@ async function createStack() {
     "mongodb://synthetic:synthetic-mongo-secret@mongodb:27017/opencok_chat?authSource=admin";
   for (const [name, service] of Object.entries(isolated.services) as [string, any][]) {
     service.container_name = project + "-" + name;
-    expect(new Set(service.profiles)).toEqual(new Set(["all", "dev"]));
+    expect(new Set(service.profiles)).toEqual(
+      new Set(name === "redis" ? ["all", "dev", "redis"] : ["all", "dev"]),
+    );
   }
   for (const [name, volume] of Object.entries(isolated.volumes) as [string, any][])
     volume.name = project + "_" + name;

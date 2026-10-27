@@ -125,12 +125,17 @@ Set the advertised game host/port in `docker-compose.yml` to an address the clie
 can reach; the committed LAN address is a local development value.
 
 ```sh
-docker compose --profile dev config --quiet
-docker compose --profile dev up --build -d --wait
-docker compose --profile dev ps -a
+docker compose -f docker-compose.yml -f docker-compose.dev.yml --profile dev config --quiet
+docker compose -f docker-compose.yml -f docker-compose.dev.yml --profile dev up --build -d --wait
+docker compose -f docker-compose.yml -f docker-compose.dev.yml --profile dev ps -a
 ```
 
-Profiles `dev` and `all` select the same local services. The setup jobs apply
+Use both files for local development; the dev override adds local Redis readiness
+dependencies. Set shared `REDIS_URL=redis://redis:6379/0` in the development env.
+Profiles `dev` and `all` select the same local services; `redis` selects only Redis
+from the base file. Production supplies an external `REDIS_URL` without the dev
+override. The Redis 8.2.11 Bookworm upgrade is runtime-unverified; see the
+[stack guide](infra/compose/README.md#external-redis-and-deployment-separation). The setup jobs apply
 PostgreSQL migrations and import the CDN; API/server and gateway wait for their
 prerequisites. Development credentials and exposed inspection ports are for a
 controlled local environment, not a public production deployment.
@@ -146,8 +151,8 @@ controlled local environment, not a public production deployment.
 Follow logs and stop without deleting persistent volumes:
 
 ```sh
-docker compose logs --follow --tail=100 api server gateway
-docker compose --profile dev down
+docker compose -f docker-compose.yml -f docker-compose.dev.yml logs --follow --tail=100 api server gateway
+docker compose -f docker-compose.yml -f docker-compose.dev.yml --profile dev down
 ```
 
 Named volumes preserve databases, objects and tool state across service recreation.

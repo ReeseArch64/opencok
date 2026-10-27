@@ -83,8 +83,9 @@ Compose declares each application's internal `DATABASE_URL` directly, while
 host tools retain the host-facing root value; container builds exclude `.env`.
 
 For the current local Compose workflow, the root file is limited to `NODE_ENV`,
-`DATABASE_ROLE`, `DATABASE_URL` and the `GAME_LOGIN_SECRET` exception. Other local
-service values are hardcoded in Compose and are still validated by the relevant
+`DATABASE_ROLE`, `DATABASE_URL`, shared `REDIS_URL` and the `GAME_LOGIN_SECRET`
+exception, with optional endpoint/telemetry overrides. Other local service values
+are declared in Compose and are still validated by the relevant
 runtime schema. Production deployment is separate. Gameplay catalogs ship as
 maintained TypeScript; GAME_RESOURCES and external XML inputs are no longer
 application settings.
@@ -101,5 +102,10 @@ validate that snapshot inside Effect and report only invalid/missing key names.
 App-specific configuration services map these validated settings to adapter
 contracts. API and realm schemas share realm identity, database naming, Redis URL,
 port and timeout validators, retaining their different defaults and required keys.
+Both Redis-consuming apps use `REDIS_URL`, defaulting to `redis://127.0.0.1:6379/0`
+outside Compose. Custom `redis://` and TLS `rediss://` URLs retain their credentials,
+port and database path. Compose requires the shared root/process value; use
+`redis://redis:6379/0` with the explicit dev override for local containers and a
+separate external URL/secret environment for production. Do not log URL values.
 Zod remains the single validation definition; no parallel Effect Config schema is
 maintained. Existing synchronous subpaths remain for database/offline tools.

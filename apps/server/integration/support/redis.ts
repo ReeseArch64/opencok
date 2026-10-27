@@ -23,7 +23,7 @@ export class DisposableRedis {
       this.name,
       "--publish",
       "127.0.0.1::6379",
-      "redis:6.2.24-bookworm",
+      "redis:8.2.11-bookworm",
     ]);
     this.created = true;
     const port = Number((await this.docker(["port", this.name, "6379/tcp"])).split(":").at(-1));

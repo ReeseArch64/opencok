@@ -61,14 +61,14 @@ WebSocket operations. See the [shared logging contract](../../packages/core/READ
 After rebuilding the development stack, follow the realm and discovery logs:
 
 ```sh
-docker compose --profile dev up --build -d --wait
-docker compose logs --follow --tail=200 server api
+docker compose -f docker-compose.yml -f docker-compose.dev.yml --profile dev up --build -d --wait
+docker compose -f docker-compose.yml -f docker-compose.dev.yml logs --follow --tail=200 server api
 ```
 
 For a JSON stream suitable for local filtering:
 
 ```sh
-docker compose logs --follow --no-log-prefix server api | jq -R 'fromjson?'
+docker compose -f docker-compose.yml -f docker-compose.dev.yml logs --follow --no-log-prefix server api | jq -R 'fromjson?'
 ```
 
 Filter by `level`, `event`, `connectionId`, `operationId` or `requestId`.
@@ -118,10 +118,11 @@ Native screen progression still requires operator verification after reconnect.
 From the repository root:
 
 ```sh
-docker compose --profile dev up --build -d --wait
+docker compose -f docker-compose.yml -f docker-compose.dev.yml --profile dev up --build -d --wait
 ```
 
-The root `.env` contains `NODE_ENV`, `DATABASE_ROLE`, `DATABASE_URL` and the
+The root `.env` contains `NODE_ENV`, `DATABASE_ROLE`, `DATABASE_URL`, shared
+`REDIS_URL=redis://redis:6379/0` for local containers and the
 private `GAME_LOGIN_SECRET` exception. Optional chat and avatar integration settings also come
 from the environment. Other development values are direct
 Compose settings, still validated by the shared Zod schemas through `@opencok/env/effect`.
@@ -130,25 +131,25 @@ runtime uses no external XML directory or resource volume. See the
 [catalog editing guide](../../packages/resources/README.md). Direct Bun execution
 requires the remaining service settings through its process environment.
 
-| Setting                          | Purpose/default                                                                                                                      |
-| -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
-| `DATABASE_URL`                   | Required PostgreSQL cluster URL; the adapter selects physical databases from the names below, retaining URL credentials/TLS options. |
-| `KINGDOM_ID`                     | Realm ID, default `1`; selects SFS zone `COK1` or `COK2`.                                                                            |
-| `KINGDOM_DATABASE_NAME`          | Defaults to `opencok_kingdom_<KINGDOM_ID>`.                                                                                          |
-| `GLOBAL_DATABASE_NAME`           | Defaults to `opencok_global`.                                                                                                        |
-| `GAME_CHAT_SESSION_URL`          | Optional internal HTTP(S) endpoint ending in `/external/session`; unset disables chat session issuance.                              |
-| `CHAT_SIGNING_SECRET`            | Required when the session URL is configured; must match the maintained chat service.                                                 |
-| `GAME_FILES_URL`                 | Optional internal files-service HTTP(S) origin; unset disables avatar grants.                                                        |
-| `GAME_LOGIN_SECRET`              | Required private secret matching the legacy mobile login issuer.                                                                     |
-| `GAME_REDIS_URL`                 | Defaults to `redis://127.0.0.1:6379/0`.                                                                                              |
-| `GAME_ZOOKEEPER`                 | Defaults to `127.0.0.1:2181`.                                                                                                        |
-| `GAME_HOST`                      | Bind address, default `127.0.0.1`.                                                                                                   |
-| `GAME_PORT` / `GAME_HEALTH_PORT` | Defaults to `19933` / `18090`.                                                                                                       |
-| `GAME_MAP_SIZE`                  | Defaults to `1200`.                                                                                                                  |
-| `GAME_CROSS_SEARCH`              | Defaults to `true`; `false` restricts general player search to the local realm without global search reads.                          |
-| `GAME_PLAYER_KINGDOMS`           | Optional public-read routes, such as `1:opencok_kingdom_1,2:opencok_kingdom_2`; at most two realms.                                  |
-| `GAME_MAIL_TRANSLATION`          | Defaults to `true`; `false` suppresses category-chat translation IDs and stored-translation reads.                                   |
-| `DEPENDENCY_TIMEOUT_MS`          | Defaults to `5000`.                                                                                                                  |
+| Setting                          | Purpose/default                                                                                                                        |
+| -------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| `DATABASE_URL`                   | Required PostgreSQL cluster URL; the adapter selects physical databases from the names below, retaining URL credentials/TLS options.   |
+| `KINGDOM_ID`                     | Realm ID, default `1`; selects SFS zone `COK1` or `COK2`.                                                                              |
+| `KINGDOM_DATABASE_NAME`          | Defaults to `opencok_kingdom_<KINGDOM_ID>`.                                                                                            |
+| `GLOBAL_DATABASE_NAME`           | Defaults to `opencok_global`.                                                                                                          |
+| `GAME_CHAT_SESSION_URL`          | Optional internal HTTP(S) endpoint ending in `/external/session`; unset disables chat session issuance.                                |
+| `CHAT_SIGNING_SECRET`            | Required when the session URL is configured; must match the maintained chat service.                                                   |
+| `GAME_FILES_URL`                 | Optional internal files-service HTTP(S) origin; unset disables avatar grants.                                                          |
+| `GAME_LOGIN_SECRET`              | Required private secret matching the legacy mobile login issuer.                                                                       |
+| `REDIS_URL`                      | Shared API/realm URL; defaults to `redis://127.0.0.1:6379/0` outside Compose. Set the local Compose URL or an external production URL. |
+| `GAME_ZOOKEEPER`                 | Defaults to `127.0.0.1:2181`.                                                                                                          |
+| `GAME_HOST`                      | Bind address, default `127.0.0.1`.                                                                                                     |
+| `GAME_PORT` / `GAME_HEALTH_PORT` | Defaults to `19933` / `18090`.                                                                                                         |
+| `GAME_MAP_SIZE`                  | Defaults to `1200`.                                                                                                                    |
+| `GAME_CROSS_SEARCH`              | Defaults to `true`; `false` restricts general player search to the local realm without global search reads.                            |
+| `GAME_PLAYER_KINGDOMS`           | Optional public-read routes, such as `1:opencok_kingdom_1,2:opencok_kingdom_2`; at most two realms.                                    |
+| `GAME_MAIL_TRANSLATION`          | Defaults to `true`; `false` suppresses category-chat translation IDs and stored-translation reads.                                     |
+| `DEPENDENCY_TIMEOUT_MS`          | Defaults to `5000`.                                                                                                                    |
 
 The root [Compose stack](../../infra/compose/README.md) starts this server, the
 shared discovery API, gateway, PostgreSQL, Redis, ZooKeeper and MinIO CDN. It mounts the XML
@@ -1400,8 +1401,8 @@ including owner-origin routing; see [the event contracts](RANKINGS.md).
 
 Four focused unit tests cover exact SFS StringArray output, correlation, ignored
 selectors, authenticated owner checks, missing-provider versus reached-failure behavior
-and complete string/collection/frame bounds. A disposable Redis 6.2.24 test executes
-real list reads for two realms and checks duplicates, empty/NUL/Unicode strings, repeated
+and complete string/collection/frame bounds. A prior disposable Redis 6.2.24 test
+(not validation of the current Redis 8.2.11 image) executed real list reads for two realms and checks duplicates, empty/NUL/Unicode strings, repeated
 reads, unchanged contents/expiry, wrong-type fallback and service loss. Affected types,
 lint and formatting pass. Native clients and production Redis remain unverified. No
 schema, dependency or CI workflow changes are required. This evidence completes the

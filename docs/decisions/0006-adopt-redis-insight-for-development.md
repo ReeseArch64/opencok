@@ -77,6 +77,13 @@ The maintainer added a Redis Insight Compose service and subsequently requested
 profile for this local stack. A named `redisinsight-data` volume supplies its
 persistent UI state. API/server do not depend directly on the visualizer.
 
+Redis now additionally has a Redis-only `redis` profile; Redis Insight remains in
+`dev`/`all` only, with its local Redis health dependency. API/server receive local
+Redis dependencies only through `docker-compose.dev.yml`. External production URLs
+must never be connected to this development visualizer. The Redis image upgrade
+has not verified Redis Insight compatibility or resolved the authentication and
+image-pinning criteria below.
+
 - [ ] Verify both profiles include Redis Insight and its health endpoint, UI and
       database-list API respond in the isolated stack.
 

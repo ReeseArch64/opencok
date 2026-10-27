@@ -1,6 +1,6 @@
 import { expect, test } from "bun:test";
 import { createConnection, createServer } from "node:net";
-import { Effect, Layer, ManagedRuntime } from "effect";
+import { Effect, Layer, ManagedRuntime, Exit } from "effect";
 import { EnvironmentSource } from "@opencok/env/effect";
 import { RealmConfig, RealmConfigLive, config } from "../src/config.ts";
 import { RealmDependencies, RealmServer, RealmServerLive, startServer } from "../src/server.ts";
@@ -85,6 +85,41 @@ const dependencies: ServerDependencies = {
 };
 
 const configured = RealmConfigLive.pipe(Layer.provide(source));
+
+test.each([
+  undefined,
+  "redis://synthetic:synthetic-secret@cache.internal:6380/4",
+  "rediss://synthetic:synthetic-secret@cache.internal:6381/5",
+])("realm configuration uses shared REDIS_URL %s", async (REDIS_URL) => {
+  const settings = await Effect.runPromise(
+    config.pipe(
+      Effect.provideService(EnvironmentSource, {
+        DATABASE_URL: "postgres://synthetic:secret@localhost/global",
+        GAME_LOGIN_SECRET: "synthetic",
+        REDIS_URL,
+      }),
+    ),
+  );
+
+  expect(settings.redisUrl).toBe(REDIS_URL ?? "redis://127.0.0.1:6379/0");
+});
+
+test("realm rejects invalid shared Redis URLs without disclosing credentials", async () => {
+  const result = await Effect.runPromiseExit(
+    config.pipe(
+      Effect.provideService(EnvironmentSource, {
+        DATABASE_URL: "postgres://synthetic:secret@localhost/global",
+        GAME_LOGIN_SECRET: "synthetic",
+        REDIS_URL: "https://synthetic:private-redis-secret@cache.invalid/4",
+      }),
+    ),
+  );
+
+  expect(Exit.isFailure(result)).toBe(true);
+  expect(JSON.stringify(result)).toContain("REDIS_URL");
+  expect(JSON.stringify(result)).not.toContain("private-redis-secret");
+  expect(JSON.stringify(result)).not.toContain("cache.invalid");
+});
 
 test("realm configuration derives database and ownership from the shared snapshot", async () => {
   const settings = await Effect.runPromise(config.pipe(Effect.provide(source)));

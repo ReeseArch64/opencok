@@ -327,7 +327,7 @@ test("creation coordinates durable global reservations and atomic realm seeds ac
           .at(-1),
       );
     for (const [image, port] of [
-      ["redis:6.2.24-bookworm", 6379],
+      ["redis:8.2.11-bookworm", 6379],
       ["zookeeper:3.4.14", 2181],
     ] as const) {
       const name = `opencok-creation-${randomUUID()}`;

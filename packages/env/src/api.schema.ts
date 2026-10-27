@@ -92,7 +92,7 @@ export const apiSchema = z
     API_HOST: z.string().min(1).default("127.0.0.1"),
     API_PORT: port(8082),
     API_DEPENDENCY_TIMEOUT_MS: timeout(3000),
-    API_REDIS_URL: redisUrl,
+    REDIS_URL: redisUrl,
     API_SERVERS_FILE: optionalPath,
     API_GAME_HOST: z.preprocess(
       blankToUndefined,

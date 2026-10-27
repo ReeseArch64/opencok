@@ -163,7 +163,7 @@ export const serverSchema = z
         )
         .optional(),
     ),
-    GAME_REDIS_URL: redisUrl,
+    REDIS_URL: redisUrl,
     GAME_ZOOKEEPER: z.string().min(1).default("127.0.0.1:2181"),
     GAME_LOGIN_SECRET: z.string().min(1),
     GAME_MAP_SIZE: z.coerce.number().int().min(100).max(4000).default(1200),

@@ -29,7 +29,7 @@ bun install --frozen-lockfile
 bun run --cwd apps/api start
 ```
 
-For containers, use `docker compose --profile dev up --build -d` after configuring
+For containers, use `docker compose -f docker-compose.yml -f docker-compose.dev.yml --profile dev up --build -d` after configuring
 the game secret and repository-local input copies described in the
 [stack guide](../../infra/compose/README.md). The gateway is the public HTTP entry
 point; the API has no directly published container port.
@@ -39,18 +39,18 @@ Container/process settings are validated through `@opencok/env/api` and
 optional integration settings. Media is enabled by the complete S3 configuration
 described in [Avatar media](#avatar-media):
 
-| Setting                     | Purpose                                                                                                                |
-| --------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
-| `DATABASE_URL`              | PostgreSQL cluster connection; the configured global database replaces the URL pathname.                               |
-| `KINGDOM_ID`                | Default single-realm directory ID/zone; defaults to `1`, matching the Compose server.                                  |
-| `GLOBAL_DATABASE_NAME`      | Global physical database, default `opencok_global`.                                                                    |
-| `API_HOST` / `API_PORT`     | Direct Bun listener, defaults `127.0.0.1:8082`; Compose uses `0.0.0.0:8080` internally.                                |
-| `API_REDIS_URL`             | Dependency health endpoint; Compose uses `redis://redis:6379/0`.                                                       |
-| `API_DEPENDENCY_TIMEOUT_MS` | Database/Redis timeout, default 3000 ms.                                                                               |
-| `API_SERVERS_FILE`          | Optional JSON directory, relative to the workspace root; defaults to an in-memory directory derived from `KINGDOM_ID`. |
-| `API_GAME_HOST`             | Optional advertised client-reachable TCP host. A bind wildcard is rejected.                                            |
-| `API_CHAT_URL`              | Optional HTTP(S) origin of the maintained chat service; no path, embedded credentials, query or fragment.              |
-| `API_GAME_PORT`             | Optional advertised port override for a single-realm directory. Compose uses `GATEWAY_GAME_PORT`.                      |
+| Setting                     | Purpose                                                                                                                              |
+| --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| `DATABASE_URL`              | PostgreSQL cluster connection; the configured global database replaces the URL pathname.                                             |
+| `KINGDOM_ID`                | Default single-realm directory ID/zone; defaults to `1`, matching the Compose server.                                                |
+| `GLOBAL_DATABASE_NAME`      | Global physical database, default `opencok_global`.                                                                                  |
+| `API_HOST` / `API_PORT`     | Direct Bun listener, defaults `127.0.0.1:8082`; Compose uses `0.0.0.0:8080` internally.                                              |
+| `REDIS_URL`                 | Shared Redis URL for health and media authorization; set `redis://redis:6379/0` for local Compose or an external URL for production. |
+| `API_DEPENDENCY_TIMEOUT_MS` | Database/Redis timeout, default 3000 ms.                                                                                             |
+| `API_SERVERS_FILE`          | Optional JSON directory, relative to the workspace root; defaults to an in-memory directory derived from `KINGDOM_ID`.               |
+| `API_GAME_HOST`             | Optional advertised client-reachable TCP host. A bind wildcard is rejected.                                                          |
+| `API_CHAT_URL`              | Optional HTTP(S) origin of the maintained chat service; no path, embedded credentials, query or fragment.                            |
+| `API_GAME_PORT`             | Optional advertised port override for a single-realm directory. Compose uses `GATEWAY_GAME_PORT`.                                    |
 
 Direct Bun execution requires separately reachable dependencies; the default
 Compose network does not publish Redis. If the server runs directly in Bun, set

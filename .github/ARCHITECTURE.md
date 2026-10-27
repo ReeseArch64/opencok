@@ -330,6 +330,11 @@ for actual coverage and deferred cases. Historical details remain in the
 The implemented Compose stack runs Bun API/server, Traefik, PostgreSQL, Redis,
 ZooKeeper, MinIO/CDN and development tools. Both `all`/`dev` profiles select the
 same services, including Chat with a directly published WebSocket on port 8083.
+Use base Compose plus `docker-compose.dev.yml` for local Redis startup ordering;
+base API/server have no local Redis dependency and accept shared `REDIS_URL`.
+Only Redis also has the `redis` profile. The realm joins the outbound network for
+external Redis access; production URL/provider and image compatibility remain
+subject to runtime verification, not established by this configuration.
 Media uses API S3 configuration; API metadata and realm session issuance target Chat.
 [Local stack guide](../infra/compose/README.md) and [API media](../apps/api/README.md#avatar-media)
 cover configuration, isolated verification and recovery. Local containers do not

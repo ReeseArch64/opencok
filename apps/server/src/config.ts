@@ -38,7 +38,7 @@ export const config = Effect.gen(function* () {
     playerKingdoms: settings.GAME_PLAYER_KINGDOMS,
     globalDatabase: settings.GLOBAL_DATABASE_NAME,
     databaseUrl: yield* databaseUrl,
-    redisUrl: settings.GAME_REDIS_URL,
+    redisUrl: settings.REDIS_URL,
     zookeeper: settings.GAME_ZOOKEEPER,
     zkPath: `/opencok-experiment/COK${settings.KINGDOM_ID}`,
     loginSecret: settings.GAME_LOGIN_SECRET,

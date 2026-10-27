@@ -24,6 +24,20 @@ test("API and realm read the same injected snapshot with independent service def
   expect(result[2]).toBe("postgresql://example:secret@localhost/global");
 });
 
+test.each([
+  "redis://synthetic:synthetic-secret@cache.internal:6380/4",
+  "rediss://synthetic:synthetic-secret@cache.internal:6381/5",
+])("API and realm schemas preserve the same shared Redis URL %s", async (REDIS_URL) => {
+  const [api, realm] = await Effect.runPromise(
+    Effect.all([readEnvironment(apiSchema), readEnvironment(serverSchema)]).pipe(
+      Effect.provideService(EnvironmentSource, { GAME_LOGIN_SECRET: "synthetic", REDIS_URL }),
+    ),
+  );
+
+  expect(api.REDIS_URL).toBe(REDIS_URL);
+  expect(realm.REDIS_URL).toBe(REDIS_URL);
+});
+
 test("configuration fails inside the Effect without leaking supplied secrets", async () => {
   for (const values of [{ DATABASE_URL: "private-secret" }, {}]) {
     const result = await Effect.runPromiseExit(

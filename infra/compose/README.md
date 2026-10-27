@@ -2,11 +2,14 @@
 
 Compose is the local development environment. Production uses a separate deployment
 and does not depend on this Compose configuration. Development settings are written
-directly in `docker-compose.yml`; the game login secret and optional endpoint
-overrides are substituted from the root `.env`.
+in `docker-compose.yml`; `docker-compose.dev.yml` explicitly adds local Redis
+readiness dependencies for API/server. The game login secret, shared `REDIS_URL`
+and optional endpoint overrides are substituted from the root `.env`.
 
-Every service uses both profiles `all` and `dev`; either profile starts the same
-complete set of containers, including pgAdmin, Redis Insight and Portainer.
+Use both files for local development. Every service uses both profiles `all` and
+`dev`; either profile starts the same complete set of containers, including
+pgAdmin, Redis Insight and Portainer. Only Redis also has the `redis` profile;
+it selects Redis alone, without applications or inspection tools.
 Chat runs as its own service. Media runs inside the API using the five S3 settings
 and shared Redis authorization; there is no Files container or media overlay. See the
 [API guide](../../apps/api/README.md#avatar-media). MinIO and `minio-setup` provide the
@@ -22,7 +25,8 @@ filter into `dist/data`. Rebuild images after source or resource changes.
 ## Local inputs and start
 
 The root `.env` contains `NODE_ENV`, `DATABASE_ROLE`, `DATABASE_URL` and the private
-`GAME_LOGIN_SECRET` exception. Chat defaults to `chat:8083`: the realm uses
+`GAME_LOGIN_SECRET` exception, plus `REDIS_URL=redis://redis:6379/0` for local
+containers. Chat defaults to `chat:8083`: the realm uses
 `/external/session` for sessions and `/_internal/nickname` for player renames,
 and the API proxies public metadata. `CHAT_SIGNING_SECRET`
 overrides the shared development signing value on both Chat and the realm. Optional
@@ -31,12 +35,12 @@ overrides the shared development signing value on both Chat and the realm. Optio
 `ws://192.168.1.104:8083/chat/ws`. Use `.env.example` as the reference and preserve
 existing values. No app-local env files are needed. The example database URL uses
 Compose service DNS; PostgreSQL has no published host port. Run database tools
-through `docker compose --profile dev exec -T postgres` or the internal network.
+through `docker compose -f docker-compose.yml -f docker-compose.dev.yml --profile dev exec -T postgres` or the internal network.
 
 After changing `GAME_LOGIN_SECRET`, recreate the server to apply it:
 
 ```sh
-docker compose --profile dev up -d --no-deps --wait server
+docker compose -f docker-compose.yml -f docker-compose.dev.yml --profile dev up -d --no-deps --wait server
 ```
 
 A container restart retains its previous environment. A stale login secret causes
@@ -62,11 +66,11 @@ Compose. These local inputs are not supplied by the public repository. The sourc
 must contain both extracted host trees for the import to succeed. Obtain the authorized inputs before starting a new checkout.
 
 ```sh
-docker compose --profile dev config --quiet
-docker compose --profile dev up --build -d --wait
-docker compose --profile dev ps -a
+docker compose -f docker-compose.yml -f docker-compose.dev.yml --profile dev config --quiet
+docker compose -f docker-compose.yml -f docker-compose.dev.yml --profile dev up --build -d --wait
+docker compose -f docker-compose.yml -f docker-compose.dev.yml --profile dev ps -a
 
-docker compose --profile all up --build -d --wait
+docker compose -f docker-compose.yml -f docker-compose.dev.yml --profile all up --build -d --wait
 ```
 
 PostgreSQL setup applies pending Drizzle migrations to the global database and both
@@ -87,10 +91,11 @@ The one-shot jobs exit with code zero after completion.
 | Redis Insight                            | 5540           |
 | Portainer HTTP (host to container)       | 9443 → 9000    |
 
-Maple binds its host port to loopback; the other development port mappings have no host-IP prefix. Internal connections use service DNS:
+Maple and the other development port mappings have no host-IP prefix. Internal connections use service DNS:
 `postgres:5432`, `redis:6379`, `zookeeper:2181`, `api:8080`, `server:9933`,
 `minio:9000` and `chat:8083`. The API and game server have no directly published host
-ports. The API joins the external network for outbound access. Avatar storage operations use `S3_ENDPOINT=http://minio:9000`;
+ports. API and server join the external network for outbound access, including
+external Redis. Avatar storage operations use `S3_ENDPOINT=http://minio:9000`;
 image URLs use the client-reachable `S3_PUBLIC_ENDPOINT`.
 The local API advertises `192.168.1.104:9933`; edit that direct value if the host
 address changes. The MinIO console redirect uses the same local host address.
@@ -113,7 +118,7 @@ quota, remaining and pool values can retain its point-ID cursor while its size
 metadata is corrected to the verified terrain width. Other producer snapshots
 need separate reconciliation because their area numbering depends on map size.
 Do not delete producer snapshots or regenerate occupied terrain automatically.
-Recreate the server with `docker compose --profile dev up -d --no-deps server`
+Recreate the server with `docker compose -f docker-compose.yml -f docker-compose.dev.yml --profile dev up -d --no-deps server`
 and confirm its health and absence of world recovery failures.
 
 Future `server_info.activityTime`, `shuaguaiActStart` or `daoliangStart` values
@@ -127,13 +132,53 @@ container values directly; host-side tools use the root database URL. Database a
 MinIO credentials in Compose are local development values. The prepared client's
 existing login secret remains in the ignored root env file rather than source.
 
+## External Redis and deployment separation
+
+Both Redis consumers (API, including media tickets, and realm/server sessions) use
+`REDIS_URL`. Chat and the remaining services do not consume Redis. The same root
+value reaches both containers; `redis://` and `rediss://` URLs with credentials,
+custom ports and database paths pass through unchanged. Outside Compose, both
+schemas default to `redis://127.0.0.1:6379/0`. For host-side development, set a
+host-reachable URL; the local Redis service deliberately publishes no host port.
+
+The base file has no API/server `depends_on: redis`; profiles alone cannot remove
+a dependency. Production must supply an external `REDIS_URL` through its own
+secret/environment configuration and must not include `docker-compose.dev.yml`.
+Use TLS and provider-required credentials/network controls. Do not use the local
+Redis service DNS name in a production environment. Keep production and development
+env files and deployment projects separate, never reuse production credentials in
+the local stack or Redis Insight, and do not print resolved Compose config with
+real credentials. Base Compose requires `REDIS_URL` even when inspecting a subset
+of services because interpolation covers the full file.
+
+For a Redis-only local instance using nonsecret example settings:
+
+```sh
+docker compose --env-file .env.example -f docker-compose.yml --profile redis up -d --wait
+```
+
+Use a separate checkout/environment for concurrent stacks: project names alone
+cannot isolate the existing fixed container/network names and published ports;
+those also need isolated overrides. This is not a production Compose conversion:
+PostgreSQL/ZooKeeper/MinIO setup dependencies, development credentials, tool
+exposure and other production hardening remain separate work. The external network
+permits outbound routing but does not prove DNS, firewall, TLS or provider access.
+Application readiness checks still require Redis at runtime; removing Compose
+ordering does not make Redis optional. Validate readiness, session claim/TTL,
+compare-token renewal/release, media tickets, persistence and outage/recovery with
+synthetic data before any deployment. No Redis/container runtime validation was
+performed for this update.
+
 ## Persistence and recovery
 
 The existing PostgreSQL, Redis, ZooKeeper and MinIO named volumes are preserved.
 The service names are `postgres`, `postgres-setup` and `minio`; update local
 overrides that previously targeted `database`, `database-setup` or `storage`.
-Redis 6.2.24 and ZooKeeper 3.4.14 use pinned upstream images with configuration
-in Compose. Redis command arguments retain RDB/AOF persistence, a 384 MiB limit,
+Redis 8.2.11 Bookworm and ZooKeeper 3.4.14 use pinned upstream images with
+configuration in Compose. The Redis upgrade is runtime-unverified; the official
+image tag is not evidence of Bun client, managed-service or production compatibility.
+See [ADR-0005](../../docs/decisions/0005-adopt-redis-for-cache.md).
+Redis command arguments retain RDB/AOF persistence, a 384 MiB limit,
 `noeviction` and disabled command slowlogs. ZooKeeper environment variables retain
 session timing, client limits, hourly snapshot cleanup, the 256 MiB heap and
 `ruok`/`srvr` health commands. Both services remain private on the internal network.
@@ -141,11 +186,14 @@ Recreate the affected service after configuration changes; no image rebuild is n
 The MariaDB volume is never mounted by this stack. Startup does not reseed players,
 reactivate accounts, flush Redis or remove objects/volumes. PostgreSQL remains the
 authority for player progress. Back up databases and local inputs before changes;
-an image rollback does not reverse SQL migrations.
+an image rollback does not reverse SQL migrations. Before the Redis major upgrade,
+back up the existing Redis volume and test the upgrade on a disposable copy.
+Redis 8 persistence files may not be readable by Redis 6; rollback requires a
+compatible pre-upgrade backup, not merely changing the image tag.
 
 ```sh
-docker compose --profile dev run --rm postgres-setup
-docker compose --profile dev down
+docker compose -f docker-compose.yml -f docker-compose.dev.yml --profile dev run --rm postgres-setup
+docker compose -f docker-compose.yml -f docker-compose.dev.yml --profile dev down
 ```
 
 PostgreSQL initialization passwords do not rotate existing accounts. Keep direct
@@ -163,10 +211,17 @@ local container administration.
 bun run --cwd apps/api check-types
 bun run --cwd apps/server check-types
 bun run --cwd packages/env test
+bun --no-env-file test tests/compose
 bun run test:stack
 ```
 
-The integration test creates an isolated Compose configuration with synthetic
+`bun --no-env-file test tests/compose` checks the base and development YAML
+statically without Docker: shared URL mappings, outbound networks, local dependency
+override and Redis-only selection. It does not prove Compose merge or runtime health.
+
+The integration test loads both base and dev files and forces a synthetic local
+`REDIS_URL` before interpolation, regardless of inherited environment settings.
+It creates an isolated Compose configuration with synthetic
 accounts, a compiled synthetic catalog registry and CDN files, unique ports/networks and disposable volumes. It
 checks that `dev` and `all` select the same complete service set and runs a named
 lifecycle/functional test for each of the 13 services. Long-running containers must
@@ -206,7 +261,7 @@ Its own outgoing telemetry/update checks are disabled.
 Start the services after rebuilding the applications:
 
 ```sh
-docker compose --profile dev up --build -d --wait maple server api
+docker compose -f docker-compose.yml -f docker-compose.dev.yml --profile dev up --build -d --wait maple server api
 ```
 
 Compose's PostgreSQL setup applies migration `0044_mutation_trace_context.sql` before
@@ -244,10 +299,10 @@ Useful local queries require no token arguments because the container environmen
 already supplies its access token:
 
 ```sh
-docker compose --profile dev exec -T maple maple services --local
-docker compose --profile dev exec -T maple maple logs --service server --since 15m --local
-docker compose --profile dev exec -T maple maple errors --since 15m --local
-docker compose --profile dev exec -T maple maple metrics --local
+docker compose -f docker-compose.yml -f docker-compose.dev.yml --profile dev exec -T maple maple services --local
+docker compose -f docker-compose.yml -f docker-compose.dev.yml --profile dev exec -T maple maple logs --service server --since 15m --local
+docker compose -f docker-compose.yml -f docker-compose.dev.yml --profile dev exec -T maple maple errors --since 15m --local
+docker compose -f docker-compose.yml -f docker-compose.dev.yml --profile dev exec -T maple maple metrics --local
 ```
 
 Maple Local does not schedule automatic alerts. Keep the dashboard open for interactive
