@@ -32,18 +32,65 @@ Synthetic tests exercise prerequisites, costs, wire types, four concurrent retri
 wrong-target completion, duplicate completion and cancellation against a disposable
 PostgreSQL instance. No test uses the operator's running realm or player data.
 
-## Remaining topic boundaries
+## Implemented scope and acceptance boundaries
 
-| Topic | Modules still requiring implementation and acceptance                                                                                                  |
-| ----- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| 25    | Validated tower battle integration, battle skills and garrison interactions; native-client acceptance                                                  |
-| 26    | Remaining local activity handlers and trusted score producers; matched-period coordination, arena battle integration and full native period acceptance |
-| 27    | Specialized target engines and native-device acceptance                                                                                                |
+The integrated baseline for this delivery is `e5ea8974`. Topics25–27 cover the
+families below. Their detailed sections retain the original catalog gates,
+transaction rules and acceptance evidence; enabled configuration alone never
+proves an economic transition or combat outcome.
 
-Existing read projections, catalogs, rankings and schema definitions are reused,
-but do not establish that these mutations are implemented. Combat-dependent modes
-must use their corresponding validated engine before being enabled. No generic
-victory or empty success response substitutes for combat acceptance.
+| Topic | Implemented noncombat families                                                                                                                                                                                                                                                                                                                                                 | Explicit acceptance boundary                                                                                                                                                                                                                                          |
+| ----- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 25    | Civilization science and castle placement, construction, movement and settlement; petdragon incubation, friendship, feeding, experience, travel, skills and owned companions; continuous/status dragon talents; totem placement, recycling and durable status delivery; dragon-tower offers, virtual armies, healing, resets, buffs and owned imported entitlements.           | Tower battle/sweep outcomes, battle-triggered talents, civilization garrison/robbery and totem damage require their validated combat integrations. The independent lord title/talisman equipment subsystem is outside these listed families.                          |
+| 26    | The [local activity inventory](#topic26-local-noncombat-inventory) includes minigames, owned progress and reward claims, exchanges, operators, local gifts, verified delivered-payment observers, authoritative hero/expedition/consumption periods and their ranking settlement, GoldEggs, legacy eggs and trusted campaign producers.                                        | Arena and matched combat outcomes, battle resource modes and boss actors require their respective engines. Commercial primary delivery and card claims retain their own provider boundary. Historical dates and closed controls remain effective.                     |
+| 27    | Resident terrain admission and static reservations; known-phase birth allocation and legacy adoption; native city geometry, relocation and recreation; ordinary/black-land resource supply and expiry; shared37/38 supply, owned parties and pinned return rewards; ordinary gathering, treasure hints/excavation, map queries, monster props and temporary monster discovery. | Specialized territory, neutral, expedition and boss actors retain their own rules. Reserved map projections do not activate their interactions. Natural field/exploration/barbarian replenishment and the read-only extensions below are tracked as integration work. |
+
+The compatibility target remains the 12.06.0 server protocol. Native TCP fixtures
+and killed-process recovery establish the tested server paths. Native APK
+execution and the other recognized client tracks remain unverified. No generic
+victory, arbitrary hit points, empty success response or client-submitted score
+substitutes for a validated engine.
+
+### Modules in integration
+
+Read-only allied and observer march inspection is prepared in `a428df20`.
+`world.get.march` with another owner validates the observer and applies the
+appropriate alliance and visibility projection without recovering that owner's
+marches or changing economic state. Its combined acceptance belongs to the
+integrated branch after composition.
+
+Scout preflight cost/timing quotation is the next read-only extension under
+integration. Its quotation must preserve Source admission and saved actor facts;
+a quote cannot reserve troops, debit inventory, settle a march or authorize an
+unsupported battle. No completion evidence is asserted here for that pending
+module.
+
+Natural ordinary field, exploration and barbarian production is also under
+integration, separate from the implemented owned monster props and
+`world.get.monster` temporary producer. It must supply and expire actual catalog
+actors under the realm owner without manufacturing battle results or rewards.
+Its final producer proof will be recorded after integration.
+
+### Reported validation checkpoints
+
+These recorded checkpoints cover the integrated work. Cases overlap across
+groups and do not form a combined final-suite total. Later integration can
+append its exact command, branch and result without rewriting earlier evidence.
+
+| Checkpoint                                            | Cases | Assertions | Recorded scope                                                      |
+| ----------------------------------------------------- | ----- | ---------- | ------------------------------------------------------------------- |
+| Integrated server units before legacy egg integration | 1,570 | 277,191    | Unit checkpoint before the final egg composition.                   |
+| Terrain and resident-world acceptance                 | 49    | 787        | PostgreSQL, native TCP and killed-process coverage.                 |
+| Shared type37/38 supply and expiry                    | 8     | 72         | Dormant gates, creation, expiry, replacement, fencing and rollback. |
+| Shared parties and gathering regressions              | 29    | 281        | Owned admission, deadlines, stock, cargo, return and restart.       |
+| Corrected shared main-anchor subset                   | 1     | 20         | Focused main-anchor regression, counted separately as a subset.     |
+| GoldEggs rules and PostgreSQL acceptance              | 8     | 138        | Real costs/grants, periods, frozen rankings and reward mail.        |
+| Ordinary monster actor acceptance                     | 5     | 35         | Owned props and factual temporary actor/discovery paths.            |
+| Integrated legacy egg and shared-resource regression  | 12    | 152        | Integrated regression checkpoint for egg and shared behavior.       |
+
+Final integrated-suite evidence and the pending modules' acceptance will be
+recorded after their composition. Documentation consolidation is checked with
+the required lint and formatting commands.
 
 ## Local event timing and minstrel
 
@@ -65,7 +112,8 @@ these grants. Clients never submit authoritative counters, times or reward value
 No migration is required. Back up realm state before rollout and retain counters,
 mail, receipts and ledger records on rollback. PostgreSQL acceptance covers a
 closed event, four concurrent first listens, repeated shares with one mail, reward
-cooldowns and next-day reset. See the remaining topic boundaries for the local modes still awaiting acceptance.
+cooldowns and next-day reset. See the [scope and acceptance boundaries](#implemented-scope-and-acceptance-boundaries)
+for the combat and native-device limits.
 
 ## March transition foundation
 
@@ -2194,8 +2242,11 @@ one item and the complete gold amount. Native correlation supplies a stable
 receipt for transport retries. Preview, status and received-history commands keep
 the source field names and SFS integer and long types. Alliance access rechecks
 matching current membership; visiting profiles and foreign kingdoms cannot claim.
-Group audiences and foreign-server transfers require their corresponding shared
-protocol and remain unavailable.
+The Source audience enum also declares GROUP as value2, but the audited send
+handler has no room parameter and the maintained producers supply no GROUP room
+binding. No client parameter or new room backend is invented for that unreachable
+variant. Foreign-server transfers retain their separate ownership protocol
+boundary.
 
 Claims lock the shared packet row inside the recipient's fenced economic
 transaction. Saved funding history must match the remaining pool and claimant
@@ -2675,34 +2726,8 @@ conversion before the Source division by 1000.
 This projection does not substitute regional recall for the separate legacy
 `comeback` engine. Normal accumulated recharge (type 20), legacy comeback (21), today-sale (24) and
 overseas trade (26) are covered by the focused backend/projection sections below. Combat
-resource battles (38) remain gated. Those remaining engines and native-device
-rendering are separate completion work; this section does not declare topics
-25–27 complete. No migration, dependency or environment variable is added.
-
-## Ordinary resource supply and dragon skill acceptance
-
-The source audit identified an absent ordinary world resource producer, despite
-existing gathering, return and search handlers. The maintained lifecycle and its
-precise remaining boundaries are recorded in
-[ordinary world resource creation and recovery](ordinary-world-resources.md).
-
-The audit also checked the source `PetDragonSkillService` material workflow.
-`petdragon.upgrade.skill` now validates the whole material selection and processes
-strengthening materials before ordinary experience materials, independent of
-client order. It retains unused ordinary materials when boosters already reach
-the cap and rejects an already capped target before consumption. Experience
-discarded at the final cap no longer inflates the skill's transferable total.
-Concurrent retries and reversed input order produce the same persisted result.
-
-The inspected public handler families include petdragon incubation, info,
-friendship, gifts, civilization unlock, active selection, feeding, level upgrades,
-travel, names and skills; dragon talents; civilization science; civilization
-castle placement, settlement, speed-up, movement and removal; and totem placement,
-recycling and status delivery. Existing tests establish those maintained slices,
-not full native acceptance. Tower battle outcomes, civilization garrison and
-robbery, battle-triggered talents and totem damage still require their validated
-combat integrations. Ordinary world refresh is a server-owned producer and adds
-no client command or alternate wire representation.
+resource battles (38) remain gated by their combat engine. Native-device rendering
+remains unverified. No migration, dependency or environment variable is added.
 
 ## Legacy comeback enrollment and explicit claims
 
@@ -2776,75 +2801,6 @@ stake, pinned weighted return and atomic receipt. Completing a tier does not
 remove the Source navigation entry early. Historical dates and closed production
 controls remain intact. Neither projection adds a payment claim route, mutation,
 schema, dependency or environment setting.
-
-## Verified gift campaigns and funded red packets
-
-The internal delivered-gift consumer requires `ServerConfig.paidGiftGateway` and
-its owned, completed `paylog` record. `server.paidGifts.consume` binds the player,
-kingdom, provider, order, exchange catalog identity, product tier, exact price in
-cents and original delivery instant. The gateway attests that the original gift
-body has already been delivered; this consumer neither accepts money nor repeats
-that gift body. The default composition has no gateway and rejects consumption.
-Native commands cannot invoke the trusted producer or submit campaign counters.
-
-A permanent canonical command receipt pins the verified evidence and prevents
-repeated provider/order delivery from issuing a second bonus. Event 56 observes
-that evidence at its original instant. The six maintained system packet tiers
-retain `gold_8` at 0.99 and `gold_1` through `gold_5` at 4.99, 9.99, 19.99, 49.99
-and 99.99. Condition 104 compares the actual saved product tier. The declared
-window, rule state, open type and personal purchase quota continue through the
-campaign planner. Action 47 saves the declared funded pool, audience, distribution
-mode, claimant count and original expiry together with campaign progress and its
-announcement outbox event. Delayed consumption cannot extend that lifetime.
-
-Native `redPackets.sd` validates the owned type-15 envelope, actual castle level,
-item limits, message and current kingdom or alliance membership before reserving
-one item and the complete gold amount. Native correlation supplies a stable
-receipt for transport retries. Preview, status and received-history commands keep
-the source field names and SFS integer and long types. Alliance access rechecks
-matching current membership; visiting profiles and foreign kingdoms cannot claim.
-Group audiences and foreign-server transfers require their corresponding shared
-protocol and remain unavailable.
-
-Claims lock the shared packet row inside the recipient's fenced economic
-transaction. Saved funding history must match the remaining pool and claimant
-count. A recipient receives at most one grant, the configured claimant quota
-cannot be exceeded, and the final claimant receives the remainder. The random
-selector retains the configured single-precision distribution and its five
-parameters while reserving positive shares for later claimants. Average packets
-retain ceiling division and the final remainder. System claims require the
-configured castle threshold. Only a newly credited claim emits event 52;
-condition 81 reads its actual grant and system sender. Previews and receipt or
-claim-history retries cannot repeat score or gold.
-
-The packet lifecycle sweep closes at most 128 due pools per transaction, using
-row locks and the realm fence. Claims reject the exact expiry boundary even
-before that sweep runs. Player-funded remainders become deterministic funded
-mail for the original local sender, with the packet closure, mail notification
-and receipt committed together. Repeated or concurrent sweep attempts cannot
-repeat the refund, and an ordinary owned mail claim delivers the reserved gold.
-System remainders close without creating mail for the synthetic system sender.
-Imported pools with inconsistent funding history require reconciliation; missing
-or relocated original senders retain their reserved pool until local ownership
-can be established. The native post-12 announcement retains the packet identity,
-server, sender and dialog identity and rechecks its current online audience.
-Without a maintained localization table, its optional system message is empty.
-
-No schema migration, dependency or environment variable is added. Inventory stays
-at 848 tables and 6,917 fields. Back up packet pools and claim records, payment
-records, inventories, wallets, campaign variables, permanent receipts, refund mail
-and outbox together. Preserve outstanding pools and evidence during rollback;
-resume their claim and refund lifecycle with a supporting binary. Provider
-integration and native-device execution remain unverified.
-
-Fourteen PostgreSQL acceptance cases passed with 121 assertions, covering all six
-paid tiers, rejected evidence, native previews and claims, concurrent conservation,
-quotas, sender and audience isolation, funded refund-mail collection, transaction
-rollback, fencing and delayed delivery. Four rule and native-routing tests passed
-with 27,021 assertions. The complete server unit suite passed 1,504 tests with
-272,974 assertions. Native TCP regression passed one test with 222 assertions
-across two realms. Required lint, formatting and 19 implemented workspace type
-checks passed.
 
 ## Normal accumulated recharge
 
@@ -2928,6 +2884,39 @@ and safe retry. Native two-realm acceptance configures the proof adapter and
 checks the real server composition, canonical retry and login replay. The
 existing default composition remains unconfigured for external payment
 providers. This composition adds no schema, dependency or environment setting.
+
+## Resident birth policy and shared resource ownership
+
+Fresh validated terrain import initializes a known birth priority, round and
+phase in its final fenced transaction. Initial provisioning, random relocation
+and lost-city recreation consume that saved allocation policy. Epoch replacement
+rebuilds factual current city counters while preserving the known phase. Missing
+phase metadata in a legacy realm blocks those allocations before a fee or city
+write; it cannot imply a fresh world or an unknown historical quota. Existing
+imported cities remain in place. Operators first use the read-only `inspect`
+path, then explicitly `adopt` a verified Source phase or declare a future
+placement policy with reason, expected version and canonical operation identity.
+See [resident world birth](resident-world-birth.md) and
+[terrain admission](resident-world-terrain.md) for the operator contract.
+
+The shared resource lifecycle is noncombat. Its producer reserves all four
+physical37/38 cells, while each owned march targets the main37 anchor and reserves
+its own real troops and companions. Entry uses actual party slots, stock, rate
+and load. Joins, recalls and depletion reschedule only matching owned peer
+checkpoints under the shared placement lock. Unknown legacy actors require
+factual recovery; they cannot be dropped to create room or converted into funded
+parties by a read. A full or unavailable target returns the actual army through
+the existing return path.
+
+Collected cargo consumes real remaining stock and is credited once on owned
+return. Additional weighted rewards are selected and pinned in the party's saved
+checkpoint before return funding. Recovery preserves those identities, counts,
+original deadlines and troop reservations; retries cannot reroll rewards or
+fund cargo again. Supply, occupied expiry, delayed replacements, party counters,
+checkpoints and native notifications retain durable ownership and atomic writes.
+See [shared world gathering](shared-world-gathering.md) and
+[shared four-cell supply and expiry](ordinary-world-resources.md#shared-four-cell-supply-and-expiry).
+No Source quota or historical interval is changed to activate this lifecycle.
 
 ## Owned resource placement items
 
@@ -3159,15 +3148,16 @@ sections and tests; command registration alone remains insufficient evidence.
 | Activity navigation        | Native operators project backed recharge, return, upgrade, sale, shipping, target, recall, group-buy and specific custom pages. GoldEggs panel47 belongs to this score-panel family; the AbstractActivity directory has its own separate enum and factory.              |
 | Trusted campaign producers | Real item grants/uses, shop purchases, mail claims, verified delivered gifts, hot-item purchases, prayer outcomes and post-merge timers reach their corresponding internal planners. Login, retry and historical scans cannot substitute for original economic actions. |
 
-The maintained activity backend inventory also includes the generic activity
-directory and reward-dispatch work tracked separately in this stack, plus the
-shared party and expedition lifecycle work. Their final combined acceptance must
-use the integrated branch. The Halloween activity helper delegates boss creation
-to combat. Resource-battle, world-boss, arena and matched cross-server combat
+The maintained activity backend inventory also includes the integrated generic
+activity directory, owned reward dispatch, shared parties and expedition
+lifecycles. The validation checkpoints above identify the tested combinations;
+new modules under integration retain their separate acceptance status. The
+Halloween activity helper delegates boss creation to combat. Resource-battle, world-boss, arena and matched cross-server combat
 outcomes still require their corresponding validated engines; enum48/49 or a
 configured panel does not establish a new independent local noncombat service.
-The title/talisman subsystem belongs to adjacent progression rather than this
-local activity inventory and needs its own scope and acceptance audit.
+The independent lord title/talisman equipment subsystem has separate ownership
+and catalogs outside the listed topic25 families and this local activity
+inventory.
 
 Historical closures and disabled controls remain effective after implementation.
 Monthly commercial cards retain their separate Type5 primary delivery and claim
