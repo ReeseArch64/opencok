@@ -82,7 +82,7 @@ test("a killed realm recovers the same march and publishes native transitions on
         resLevel: 0,
         resInitValue: 0,
         pointType: 0,
-        gridType: 0,
+        gridType: 2,
         grid2Type: 0,
       })),
     );
@@ -142,6 +142,7 @@ test("a killed realm recovers the same march and publishes native transitions on
       pointType: 3,
       resLevel: 1,
       resInitValue: 5,
+      flushTime: BigInt(Date.now()) + 21600000n,
       resCostValue: 0,
       pointItem: "0",
       ownerId: "",

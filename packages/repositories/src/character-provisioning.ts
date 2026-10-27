@@ -76,7 +76,7 @@ export function createCharacterCreator(
       WHERE p."worldId" = 0 AND p.x > 0 AND p.y > 0 AND p.x < ${mapSize} AND p.y < ${mapSize}
       AND p.id = 1 + p.x + p.y * ${mapSize}
       AND p."pointType" = 0 AND e."pointType" = 0 AND s."pointType" = 0 AND c."pointType" = 0
-      AND p."gridType" = 0 AND e."gridType" = 0 AND s."gridType" = 0 AND c."gridType" = 0
+      AND p."gridType" = 2 AND e."gridType" = 2 AND s."gridType" = 2 AND c."gridType" = 2
       AND p."grid2Type" = 0 AND e."grid2Type" = 0 AND s."grid2Type" = 0 AND c."grid2Type" = 0
       AND coalesce(p."ownerId", '') = '' AND coalesce(e."ownerId", '') = '' AND coalesce(s."ownerId", '') = '' AND coalesce(c."ownerId", '') = ''
       AND coalesce(p."territoryAlliance", '') = '' AND coalesce(e."territoryAlliance", '') = '' AND coalesce(s."territoryAlliance", '') = '' AND coalesce(c."territoryAlliance", '') = ''
