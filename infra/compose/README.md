@@ -210,9 +210,17 @@ configuration in Compose. Redis remains on the existing baseline; an upgrade req
 client, command, persistence and recovery compatibility validation first.
 See [ADR-0005](../../docs/decisions/0005-adopt-redis-for-cache.md).
 Redis command arguments retain RDB/AOF persistence, a 384 MiB limit,
-`noeviction` and disabled command slowlogs. ZooKeeper environment variables retain
-session timing, client limits, hourly snapshot cleanup, the 256 MiB heap and
-`ruok`/`srvr` health commands. Both services remain private on the internal network.
+`noeviction` and disabled command slowlogs. ZooKeeper retains session timing,
+client limits, hourly snapshot cleanup and `ruok`/`srvr` health commands.
+Both services remain private on the internal network.
+ZooKeeper relies on the pinned image defaults for its 2000 ms tick, 60 client
+connections per IP, retention of three snapshots and console logging at INFO.
+The Compose overrides retain `initLimit=10`, `syncLimit=5` and hourly cleanup;
+the image defaults for these differ. These settings follow the
+[official image configuration](https://hub.docker.com/_/zookeeper) and were checked
+against the local `3.4.14` image. This image's startup scripts do not consume
+`ZOO_HEAP_SIZE`; removing that unused variable leaves the JVM command unchanged.
+Keep the existing volumes and healthcheck.
 Recreate the affected service after configuration changes; no image rebuild is needed.
 The MariaDB volume is never mounted by this stack. Startup does not reseed players,
 reactivate accounts, flush Redis or remove objects/volumes. PostgreSQL remains the

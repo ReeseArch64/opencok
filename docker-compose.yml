@@ -187,13 +187,8 @@ services:
       - zookeeper-datalog:/datalog
       - zookeeper-logs:/logs
     environment:
-      ZOO_HEAP_SIZE: 256
-      ZOO_LOG4J_PROP: INFO,CONSOLE
-      ZOO_TICK_TIME: 2000
       ZOO_INIT_LIMIT: 10
       ZOO_SYNC_LIMIT: 5
-      ZOO_MAX_CLIENT_CNXNS: 60
-      ZOO_AUTOPURGE_SNAPRETAINCOUNT: 3
       ZOO_AUTOPURGE_PURGEINTERVAL: 1
       ZOO_CFG_EXTRA: 4lw.commands.whitelist=ruok,srvr
     healthcheck:
