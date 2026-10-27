@@ -1173,8 +1173,8 @@ the group, and ambiguous local periods or stale authorities reject the transitio
 Global migration `0012_hero_matching` adds `hero_match_period` and
 `hero_match_realm`. The legacy `hero_kingdom_activity` input table remains intact;
 its activity-only identity cannot store independent realm/period registrations.
-The maintained inventory now contains 820 tables and 6,666 fields: 136 global and
-684 kingdom tables. No dependency or environment variable is added. Apply the
+At this matching migration, the inventory contains 820 tables and 6,666 fields:
+136 global and 684 kingdom tables. No dependency or environment variable is added. Apply the
 global migration before starting this binary, and back up cohort headers,
 registrations, local hero periods, event groups and scores together. Binary rollback
 can retain the additional tables; deleting a closed cohort would lose its immutable
@@ -1187,3 +1187,45 @@ local attachment transactions. Pure cases cover exact power beyond binary64 inte
 precision, ties, incomplete groups and duplicate realm rejection. Global rank
 publication, final ranking prizes and expedition matching remain subsequent work.
 Native device execution remains unverified.
+
+## Recoverable hero ranking publication
+
+Hero scores now feed the existing native global rank keys through a recoverable
+PostgreSQL projection. Each realm reads only its fenced score/event rows, captures
+at most four pages of 64 members per refresh and advances its cursor only after
+successful cache publication. Personal and guild bands, ordinary realm ranges,
+matched kingdom group order and signed scores retain their existing wire/key
+contracts. Unmatched kingdom events remain excluded. A failed page retries without
+losing its tail, and overlapping refresh requests share one in-flight snapshot.
+
+Global migration `0013_hero_rank_publication` adds `hero_rank_owner` and
+`hero_rank_score`. The inventory now contains 822 tables and 6,683 fields: 138 global
+and 684 kingdom tables. Each shared write checks the realm's authority generation,
+persists a durable sequence and rejects an older owner or another realm's member.
+The snapshot and sequence commit together. Public guild metadata contains only its
+ID, name, abbreviation, icon and realm. No economy or reward claim changes in this
+projection, and no dependency or environment variable is added.
+
+Redis publication replaces absolute scores, retains native ascending negative-score
+ordering and limits each board to 5,000 members. Authority generations and sequences
+use exact decimal comparisons, including values beyond binary64 integer precision.
+Delayed publications cannot overwrite a newer cached generation or member version.
+Guild metadata has its own shared version guard. Recent scores rebuild the existing
+rank/history maps after cache loss; rank keys and their member-version maps expire
+ten days after the stage end. The durable PostgreSQL projection remains available
+for subsequent coordinated finality and reward settlement.
+
+Apply the global migration before this binary. Back up realm authority, hero events,
+owned scores and the global owner/projection tables together. Retain the additional
+projection tables during binary rollback; restoring only an older realm authority
+while keeping a newer shared generation requires an operator-coordinated restore.
+Redis can be rebuilt from the persisted scores. Publication itself sends no funded
+mail, chooses no battle winner and does not finalize an event.
+
+PostgreSQL/Redis acceptance covers two-realm ordering, ties, positive and negative
+score changes, complete cache loss, authority replacement, delayed publications,
+exact large versions, write rollback, foreign member rejection, guild metadata,
+matched group ordering, board limits and a 257-member page boundary. Native TCP and
+SIGKILL recovery pass with the publisher composed into the realm. Final ranking
+prizes, kingdom result settlement and expedition coordination remain subsequent
+runtime work. Native device execution remains unverified.

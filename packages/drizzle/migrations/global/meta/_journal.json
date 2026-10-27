@@ -92,6 +92,13 @@
       "when": 1793035461325,
       "tag": "0012_hero_matching",
       "breakpoints": false
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1793036488934,
+      "tag": "0013_hero_rank_publication",
+      "breakpoints": false
     }
   ]
 }
