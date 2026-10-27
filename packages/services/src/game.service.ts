@@ -1,3 +1,4 @@
+import { worldUtility } from "./world-utility";
 import { rewardPreviewArray } from "@opencok/mappings/rewards";
 import { heroEventBand, heroEventRewards, nextHeroPanel } from "@opencok/rules/hero-event";
 import {
@@ -192,7 +193,7 @@ const playerRankingKinds = {
 type GameConfig = Pick<
   ServerConfig,
   "kingdomId" | "mailTranslationEnabled" | "crossSearchEnabled" | "chatInterval" | "feedMaxCount"
->;
+> & { mapSize?: number };
 
 type ReadyCity = CityState & { profile: Row; resource: Row };
 export interface Result {
@@ -783,6 +784,20 @@ export class GameService {
         break;
       case "search.player":
         body = await this.playerSearch(uid, params);
+        break;
+      case "point.nearest.find":
+      case "world.al.leader.pt":
+      case "world.leave":
+        if (!this.services.worldUtility) throw new GameError(errors.unsupported);
+        body = await worldUtility(
+          this.services.worldUtility,
+          uid,
+          command,
+          params,
+          this.config.kingdomId,
+          this.config.mapSize ?? Number(this.rules.items.get("worldmap_map")?.k1 ?? 1201),
+          this.now(),
+        );
         break;
       case "world.search.user":
         body = await this.worldSearch(uid, params);

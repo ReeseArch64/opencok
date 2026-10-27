@@ -332,6 +332,7 @@ export interface GameServices {
   worldPointDetail?: WorldPointDetailStore;
   playerSearch?: PlayerSearchStore;
   worldSearch?: WorldSearchStore;
+  worldUtility?: import("./world-utility").WorldUtilityStore;
   worldFavorites?: WorldFavoriteStore;
   avatar?: AvatarGrantService;
   avatarFinish?: AvatarFinishService;

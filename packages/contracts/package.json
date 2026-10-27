@@ -178,7 +178,9 @@
     "./responses/fragment-exchange": "./src/responses/fragment-exchange.ts",
     "./monster-exchange": "./src/monster-exchange.ts",
     "./responses/monster-exchange": "./src/responses/monster-exchange.ts",
-    "./world-resource-refresh": "./src/world-resource-refresh.ts"
+    "./world-resource-refresh": "./src/world-resource-refresh.ts",
+    "./world-utility": "./src/world-utility.ts",
+    "./responses/world-utility": "./src/responses/world-utility.ts"
   },
   "dependencies": {
     "@opencok/enums": "workspace:*",

@@ -1,3 +1,4 @@
+import { createWorldUtilityStore } from "@opencok/repositories/world-utility";
 import { createWorldResourceRefreshExecutor } from "@opencok/repositories/world-resource-refresh";
 import { refreshWorldResources } from "@opencok/services/world-resource-refresh";
 import { createExchangeActivityDomain } from "@opencok/services/exchange-activity";
@@ -2169,6 +2170,7 @@ export const RealmDependenciesLive = Layer.effect(
           worldPointDetail,
           playerSearch,
           worldSearch,
+          worldUtility: createWorldUtilityStore(db.kingdom.db, authority, config.mapSize),
           worldFavorites,
           avatarFinish: avatar
             ? {
