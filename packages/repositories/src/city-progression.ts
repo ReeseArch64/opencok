@@ -272,7 +272,10 @@ export function createCityProgressionStore(
           ? await readCivilizationCastle(tx, owner, request)
           : {}),
         worldMutation:
-          command?.startsWith("world.") || command === "totem" || command === "civilizationCastle"
+          command?.startsWith("world.") ||
+          command === "buy.citydef" ||
+          command === "totem" ||
+          command === "civilizationCastle"
             ? await readWorldMutationState(tx, owner, request, mapSize, command)
             : undefined,
         dragons: await readDragonProgression(tx, owner),

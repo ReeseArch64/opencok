@@ -1,5 +1,6 @@
 import { activityDirectory } from "@opencok/mappings/activity-directory";
 import { activityDirectoryEntries } from "@opencok/rules/activity-directory";
+import { cityDefenseCommands } from "./city-defense";
 import { worldUtility } from "./world-utility";
 import { rewardPreviewArray } from "@opencok/mappings/rewards";
 import { heroEventBand, heroEventRewards, nextHeroPanel } from "@opencok/rules/hero-event";
@@ -471,7 +472,7 @@ export class GameService {
     await this.services.reconcileAlliance?.(uid);
     let body: Fields;
     let pushes: Result["pushes"] = [];
-    if (worldMutationCommands.includes(command)) {
+    if (worldMutationCommands.includes(command) || cityDefenseCommands.includes(command)) {
       if (command === "world.tick" || !this.services.cityProgression)
         throw new GameError(errors.unsupported);
       const result = await this.services.cityProgression(uid, command, params);
