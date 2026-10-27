@@ -147,7 +147,8 @@
     "./treasure-map": "./src/treasure-map.ts",
     "./world-use": "./src/world-use.ts",
     "./world-recreation": "./src/world-recreation.ts",
-    "./world-march-inspection": "./src/world-march-inspection.ts"
+    "./world-march-inspection": "./src/world-march-inspection.ts",
+    "./world-scout": "./src/world-scout.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",
