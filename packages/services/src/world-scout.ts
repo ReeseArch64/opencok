@@ -1,3 +1,4 @@
+import { scoutWatchtowerValues } from "@opencok/rules/world-scout-watchtower";
 import type { GameServices } from "@opencok/contracts/game";
 import type { WorldScoutStore } from "@opencok/contracts/world-scout";
 import { num, long, text } from "@opencok/contracts/rows";
@@ -8,7 +9,6 @@ import { GameError } from "@opencok/errors/game";
 import { barbarianCurrentHP, scoutCost } from "@opencok/rules/world-scout";
 import { ordinaryMarchRoute, worldFootprint } from "@opencok/rules/world-march-runtime";
 import { resolveWorldCityGeometry } from "@opencok/rules/world-city-geometry";
-import { scoutWatchtowerValues } from "@opencok/rules/world-scout-watchtower";
 import { worldPowerEffects } from "@opencok/rules/power-world";
 import { playerGameEffect } from "@opencok/rules/power-resolver";
 import { generalSkillPoints, decodeWorldPowerEffects } from "./power";
