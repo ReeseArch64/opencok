@@ -9,6 +9,7 @@ import { createMergeCampaignStore, mergeCampaignActor } from "@opencok/repositor
 import { mergeEffectBoard } from "@opencok/mappings/merge-campaign";
 import { publishMergeEffectBoard } from "@opencok/services/merge-campaign";
 import { serverFeature } from "@opencok/rules/power-context";
+import { createWorldUtilityStore } from "@opencok/repositories/world-utility";
 import { createWorldResourceRefreshExecutor } from "@opencok/repositories/world-resource-refresh";
 import { refreshWorldResources } from "@opencok/services/world-resource-refresh";
 import { createRedPacketExpiryStore } from "@opencok/repositories/red-packets";
@@ -2291,6 +2292,7 @@ export const RealmDependenciesLive = Layer.effect(
           worldPointDetail,
           playerSearch,
           worldSearch,
+          worldUtility: createWorldUtilityStore(db.kingdom.db, authority, config.mapSize),
           worldFavorites,
           avatarFinish: avatar
             ? {

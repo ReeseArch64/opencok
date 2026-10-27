@@ -2324,3 +2324,33 @@ equipment, profile/resource, score, campaign, receipt and outbox rows together.
 An older binary can retain those rows during rollback, but hot-item commands
 should be disabled until the owned executor is restored. Native device rendering
 remains unverified; the implementation does not activate combat-dependent events.
+
+## Resident map utilities and viewport departure
+
+The source `FindNearestFreePoint`, `GetAllianceLeaderWorldPoint` and `LeaveWorld`
+handlers now have maintained native routes: `point.nearest.find`,
+`world.al.leader.pt` and `world.leave`. Their reads use a bounded, repeatable
+PostgreSQL snapshot and the authenticated resident player's realm and alliance.
+Client-supplied alliance identifiers cannot select another alliance's positions.
+
+Nearest-point search preserves the source's seven perimeter rings, iteration
+order and bottom-right four-cell anchor convention. It reads at most the native
+17-by-17 window and rejects edge wrapping, occupied cells and invalid realm
+selection. The result remains an integer `point`, with zero when no complete
+footprint exists. This helper does not redefine existing provisioning or march
+geometry.
+
+Alliance map output preserves `pointId`, optional `territoryPointId` and optional
+`memberPointId` order. Member entries retain integer point/world IDs and string
+alliance IDs. The leader and requester are excluded from the ordinary member
+array; only the current alliance's native type-14 towers appear in its territory
+array. Multiple saved leaders fail instead of choosing an arbitrary owner.
+Battle-world observer and specialized minimap projections remain unavailable in
+this resident realm path.
+
+Leaving the world removes only that player's durable viewport interest through a
+fenced transaction. Repeating it is harmless; another viewer's subscription is
+preserved. The next `world.get` obtains a fresh snapshot and resubscribes through
+the existing world service. These commands add no schema, asset grant or
+configuration setting. Synthetic PostgreSQL and native field tests establish
+these routes; device execution remains unverified.
