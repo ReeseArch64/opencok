@@ -1,4 +1,4 @@
 {
   "extends": "../../packages/config/tsconfig.base.json",
-  "include": ["*.ts", "../compose/*.ts"]
+  "include": ["*.ts", "../compose/*.ts", "../../infra/observability/maple/mcp*.ts"]
 }
