@@ -337,7 +337,11 @@ export async function loadRules(directory?: string, kingdomId = 1) {
       refinementRepeats: await optionalRecords(GameplayCatalog.GeneralRepeat),
       recruits: await optional(GameplayCatalog.Recruit),
     },
-    { ranks: await optional(GameplayCatalog.Rank), gifts: await optional(GameplayCatalog.Gift) },
+    {
+      ranks: await optional(GameplayCatalog.Rank),
+      gifts: await optional(GameplayCatalog.Gift),
+      buildingSkills: await optional(GameplayCatalog.AllianceBuildingSkill),
+    },
     {
       comebacks: await optional(GameplayCatalog.Comeback),
       activityPages: await optional(GameplayCatalog.ActivityPage),

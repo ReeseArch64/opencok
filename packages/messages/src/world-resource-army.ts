@@ -229,3 +229,22 @@ export function encodeWorldMarchArmy(army: SavedMarchArmy): Buffer {
   readMaintainedMarchArmy(data);
   return data;
 }
+
+export function decodeWorldMarchSpeedEffects(
+  data: Buffer,
+): ReadonlyMap<string, number> | undefined {
+  if (isMaintainedMarchArmy(data)) return undefined;
+  const decoded = decodeJavaObjectStream(data);
+  if (decoded === null) return undefined;
+  const root = checked(decoded, armyName, 1740992047662150684n, 2);
+  const soldiers = list(field(root, "soldierList", "Ljava/util/List;"));
+  const result = new Map<string, number>();
+  for (const value of soldiers ?? []) {
+    const soldier = checked(value, `${armyName}$Soldier`, -1404739455579587157n, 2);
+    const id = text(field(soldier, "armsId", "Ljava/lang/String;"));
+    if (!id) invalid();
+    const effect = field(soldier, "marchSpdEffectVal", "I") as number;
+    result.set(id, Math.min(result.get(id) ?? effect, effect));
+  }
+  return result;
+}
