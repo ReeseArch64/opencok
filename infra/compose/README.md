@@ -2,9 +2,10 @@
 
 Compose is the local development environment. Production uses a separate deployment
 and does not depend on this Compose configuration. Development settings are written
-in `docker-compose.yml`; `docker-compose.dev.yml` explicitly adds local Redis
-readiness dependencies for API/server. The game login secret, shared `REDIS_URL`
-and optional endpoint overrides are substituted from the root `.env`.
+in `docker-compose.yml`; `docker-compose.dev.yml` adds local Redis readiness for
+API/server and PostgreSQL setup ordering for API/server/Chat and pgAdmin. The game
+login secret, shared `REDIS_URL` and `DATABASE_URL`, and optional endpoint overrides
+are substituted from the root `.env`.
 
 Use both files for local development. The `dev` profile starts the application stack;
 `all` also includes pgAdmin, Redis Insight and Portainer. The `devops` profile selects
@@ -135,6 +136,33 @@ container values directly; host-side tools use the root database URL. Database a
 MinIO credentials in Compose are local development values. The prepared client's
 existing login secret remains in the ignored root env file rather than source.
 
+## External PostgreSQL and development ordering
+
+API, realm/server and Chat receive the same `DATABASE_URL` from the root environment.
+Use `postgres://postgres:postgres@postgres:5432/opencok_global` for the local stack.
+The base file has no application or pgAdmin dependency on `postgres` or
+`postgres-setup`; the development override adds the setup dependency, and the local
+setup job waits for PostgreSQL health before applying migrations and generating
+pgAdmin registration. Both local services remain defined in the base file with
+their existing profiles. Omitting the override removes startup ordering; profiles
+such as `all` still select the local PostgreSQL and setup services.
+
+For an external database, supply its `DATABASE_URL` through environment configuration,
+omit the development override and select the intended services. Preserve the provider's
+connection options, including TLS. Provision the global and kingdom databases and
+apply migrations separately before starting applications; removing Compose ordering
+does not provision the external database. The existing administrative setup entrypoint
+is `bun run --cwd packages/drizzle db:setup`; `POSTGRES_ADMIN_URL` selects an
+administrative connection when application credentials cannot create databases or
+apply migrations. Run it deliberately against the intended environment. The local
+`postgres-setup` service remains configured for local PostgreSQL only. Configure an
+external server manually in pgAdmin when not using local setup registrations.
+
+Base Compose requires `DATABASE_URL` during interpolation even for service subsets.
+The example URL is for local development; existing volumes and their `PGDATA` path
+are preserved. This configuration does not establish external database connectivity,
+provider compatibility or migration success.
+
 ## External Redis and deployment separation
 
 Both Redis consumers (API, including media tickets, and realm/server sessions) use
@@ -163,7 +191,7 @@ docker compose --env-file .env.example -f docker-compose.yml --profile redis up 
 Use a separate checkout/environment for concurrent stacks: project names alone
 cannot isolate the existing fixed container/network names and published ports;
 those also need isolated overrides. This is not a production Compose conversion:
-PostgreSQL/ZooKeeper/MinIO setup dependencies, development credentials, tool
+ZooKeeper/MinIO setup dependencies, development credentials, tool
 exposure and other production hardening remain separate work. The external network
 permits outbound routing but does not prove DNS, firewall, TLS or provider access.
 Application readiness checks still require Redis at runtime; removing Compose
@@ -223,7 +251,8 @@ statically without Docker: shared URL mappings, outbound networks, local depende
 override and profile selection with administration dependencies. It does not prove Compose merge or runtime health.
 
 The integration test loads both base and dev files and forces a synthetic local
-`REDIS_URL` before interpolation, regardless of inherited environment settings.
+`REDIS_URL` and `DATABASE_URL` before interpolation, regardless of inherited
+environment settings. It verifies PostgreSQL setup ordering in the merged config.
 It creates an isolated Compose configuration with synthetic
 accounts, a compiled synthetic catalog registry and CDN files, unique ports/networks and disposable volumes. It
 checks that `dev` excludes administration tools and `all` selects every service,

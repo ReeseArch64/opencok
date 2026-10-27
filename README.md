@@ -131,12 +131,15 @@ docker compose -f docker-compose.yml -f docker-compose.dev.yml --profile dev ps 
 ```
 
 Use both files for local development; the dev override adds local Redis readiness
-dependencies. Set shared `REDIS_URL=redis://redis:6379/0` in the development env.
+and PostgreSQL setup dependencies. Set `REDIS_URL=redis://redis:6379/0` and
+`DATABASE_URL=postgres://postgres:postgres@postgres:5432/opencok_global` in the
+development env. API/server/Chat share `DATABASE_URL`.
 Profile `dev` starts the application stack; `all` also includes pgAdmin, Redis Insight
 and Portainer. Profile `devops` selects those tools and their dependencies; `redis`
 selects Redis with Redis Insight, `database` selects PostgreSQL/setup with pgAdmin,
 and `observability` selects only Maple from the base file. Production supplies an
-external `REDIS_URL` without the dev override. Redis remains pinned to the existing 6.2.24 Bookworm baseline pending
+external `REDIS_URL` and `DATABASE_URL` without the dev override, with database
+provisioning and migrations handled separately. Redis remains pinned to the existing 6.2.24 Bookworm baseline pending
 compatibility validation before any upgrade; see the
 [stack guide](infra/compose/README.md#external-redis-and-deployment-separation). The setup jobs apply
 PostgreSQL migrations and import the CDN; API/server and gateway wait for their

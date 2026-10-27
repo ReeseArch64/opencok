@@ -40,6 +40,7 @@ async function createStack() {
     ...process.env,
     COMPOSE_PROFILES: "",
     REDIS_URL: "redis://redis:6379/0",
+    DATABASE_URL: "postgres://postgres:postgres@postgres:5432/opencok_global",
     GAME_LOGIN_SECRET: "synthetic-secret",
     GAME_NICKNAME_CHAT_URL: "",
   };
@@ -71,6 +72,12 @@ async function createStack() {
   );
   expect(isolated.services.server.environment.REDIS_URL).toBe("redis://redis:6379/0");
   expect(isolated.services.api.environment.REDIS_URL).toBe("redis://redis:6379/0");
+  for (const name of ["api", "server", "chat"]) {
+    expect(isolated.services[name].environment.DATABASE_URL).toBe(env.DATABASE_URL);
+    expect(isolated.services[name].depends_on["postgres-setup"].condition).toBe(
+      "service_completed_successfully",
+    );
+  }
   isolated.name = project;
   isolated.services.mongodb.environment = {
     MONGO_INITDB_ROOT_USERNAME: "synthetic",

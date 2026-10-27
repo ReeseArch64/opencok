@@ -115,9 +115,6 @@ services:
       PGADMIN_SERVER_JSON_FILE: /configuration/servers.json
     ports:
       - 5050:8080
-    depends_on:
-      postgres-setup:
-        condition: service_completed_successfully
     volumes:
       - pgadmin-data:/var/lib/pgadmin
       - pgadmin-servers:/configuration:ro
@@ -280,7 +277,7 @@ services:
       OTEL_EXPORTER_OTLP_ENDPOINT: http://maple:4318
       MAPLE_LOCAL_INGEST_KEY: ${MAPLE_LOCAL_INGEST_KEY}
       OTEL_EXPORT_INTERVAL_MS: 1000
-      DATABASE_URL: postgres://postgres:postgres@postgres:5432/opencok_global
+      DATABASE_URL: ${DATABASE_URL:?Set DATABASE_URL for API, server and Chat}
       KINGDOM_ID: 1
       KINGDOM_DATABASE_NAME: opencok_kingdom_1
       GLOBAL_DATABASE_NAME: opencok_global
@@ -302,8 +299,6 @@ services:
       GAME_MAP_SIZE: 1201
       DEPENDENCY_TIMEOUT_MS: 5000
     depends_on:
-      postgres-setup:
-        condition: service_completed_successfully
       zookeeper:
         condition: service_healthy
     healthcheck:
@@ -338,7 +333,7 @@ services:
       OTEL_EXPORTER_OTLP_ENDPOINT: http://maple:4318
       MAPLE_LOCAL_INGEST_KEY: ${MAPLE_LOCAL_INGEST_KEY}
       OTEL_EXPORT_INTERVAL_MS: 1000
-      DATABASE_URL: postgres://postgres:postgres@postgres:5432/opencok_global
+      DATABASE_URL: ${DATABASE_URL:?Set DATABASE_URL for API, server and Chat}
       GLOBAL_DATABASE_NAME: opencok_global
       KINGDOM_ID: 1
       API_SERVERS_FILE: ""
@@ -360,8 +355,6 @@ services:
     depends_on:
       minio:
         condition: service_healthy
-      postgres-setup:
-        condition: service_completed_successfully
     healthcheck:
       test:
         [
@@ -404,7 +397,7 @@ services:
     networks: [opencok-internal-network, opencok-external-network]
     environment:
       NODE_ENV: development
-      DATABASE_URL: postgres://postgres:postgres@postgres:5432/opencok_global
+      DATABASE_URL: ${DATABASE_URL:?Set DATABASE_URL for API, server and Chat}
       GLOBAL_DATABASE_NAME: opencok_global
       CHAT_KINGDOM_DATABASES: 1:opencok_kingdom_1,2:opencok_kingdom_2
       CHAT_HOST: 0.0.0.0
@@ -415,9 +408,6 @@ services:
       CHAT_WEBSOCKET_URL: ${CHAT_WEBSOCKET_URL:-ws://192.168.1.104:8083/chat/ws}
     ports:
       - 8083:8083
-    depends_on:
-      postgres-setup:
-        condition: service_completed_successfully
     healthcheck:
       test:
         [
