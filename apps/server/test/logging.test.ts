@@ -6,7 +6,7 @@ import { createSessionHandler, type ConnectionState } from "@opencok/connection/
 import type { ServerDependencies } from "@opencok/connection/dependencies";
 import { initializeLogging } from "@opencok/core/logging";
 import { frame } from "@opencok/messages/frame";
-import { envelope, extension, sfs } from "@opencok/messages/sfs";
+import { envelope, extension, sfs, str } from "@opencok/messages/sfs";
 
 class TestSocket extends EventEmitter {
   destroyed = false;
@@ -35,6 +35,7 @@ test("sessions correlate successful commands and every repeated failure without 
       records.push(JSON.parse(String(value))),
     ),
   );
+  const hotOperations: string[] = [];
   const socket = new TestSocket();
   const state: ConnectionState = {
     sockets: new Set(),
@@ -110,7 +111,11 @@ test("sessions correlate successful commands and every repeated failure without 
     coordination: { ready: true, start: async () => {}, close: () => {} },
     game: {
       initialize: async () => ({ body: {}, pushes: [] }),
-      execute: async (_uid, command) => {
+      execute: async (_uid, command, params) => {
+        if (command.startsWith("hot.item.")) {
+          hotOperations.push(str(params, "operationId"));
+          return { body: {}, pushes: [] };
+        }
         if (command !== "cmd.ping") throw new Error("private-database-password");
         return { body: {}, pushes: [] };
       },
@@ -139,20 +144,35 @@ test("sessions correlate successful commands and every repeated failure without 
         }),
       }),
       extension("cmd.ping", {}),
+      extension("hot.item.v2.buy", { _cok_: sfs.string("hot-repeat") }),
+      extension("hot.item.v2.buy", { _cok_: sfs.string("hot-repeat") }),
+      extension("hot.item.v3.buy", { _cok_: sfs.string("hot-repeat") }),
+      extension("hot.item.refresh", { _cok_: sfs.int(7) }),
+      extension("hot.item.refresh", { _cok_: sfs.int(7) }),
+      extension("hot.item.refreshV3", { _cok_: sfs.int(7) }),
       extension("private-unknown-command", { password: sfs.string("private-payload") }),
       extension("private-unknown-command", {}),
     ];
     socket.emit("data", Buffer.concat(packets.map(frame)));
     while (state.inFlight.size) await Promise.all(state.inFlight);
     const completed = records.filter((record) => record.event === "command_completed");
-    expect(completed.map((record) => record.outcome)).toEqual(["success", "failure", "failure"]);
+    expect(completed.map((record) => record.outcome)).toEqual([
+      ...Array(7).fill("success"),
+      "failure",
+      "failure",
+    ]);
+    expect(hotOperations).toHaveLength(6);
+    expect(hotOperations[0]).toBe(hotOperations[1]);
+    expect(hotOperations[2]).not.toBe(hotOperations[0]);
+    expect(hotOperations[3]).toBe(hotOperations[4]);
+    expect(hotOperations[5]).not.toBe(hotOperations[3]);
     expect(records.filter((record) => record.event === "command_rejected")).toHaveLength(2);
     expect(records.find((record) => record.event === "login_accepted")).toMatchObject({
       outcome: "success",
       level: "info",
     });
     expect(new Set(records.map((record) => record.connectionId)).size).toBe(1);
-    expect(new Set(completed.map((record) => record.operationId)).size).toBe(3);
+    expect(new Set(completed.map((record) => record.operationId)).size).toBe(9);
     expect(completed.every((record) => typeof record.durationMs === "number")).toBe(true);
     socket.emit("data", Buffer.from([0, 0, 0]));
     expect(records.find((record) => record.event === "frame_rejected")).toMatchObject({

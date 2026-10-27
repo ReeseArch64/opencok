@@ -2260,3 +2260,67 @@ stored periods, reconnect reads, end boundaries, factory exclusions, ownership,
 bans, optional field order, native integer overflow and unchanged stored state.
 Required lint, formatting and server/nine package type checks passed. Device
 rendering and unvalidated combat schedules remain separate acceptance evidence.
+
+## Black-market offers and confirmed hero actions
+
+The maintained hot-item engine implements native `hot.item.v2.get`,
+`hot.item.refresh`, `hot.item.refreshV3`, `hot.item.v2.buy` and `hot.item.v3.buy`.
+The shared get command selects V3 only while the `hotstore` feature/version gate
+and strict `store.k10`/`store.k11` activity window allow it; otherwise it serves
+V2 and respects `store.k7`. Historical activity dates are retained. These
+commands execute in the owned city transaction and preserve the Source integer,
+string, array and long wire fields, including V3 `kind` and `endTime`.
+
+Offers and featured cards persist in the existing V2/V3 hot-item tables.
+`hot_refresh_record` retains the shared daily free/paid refresh budget and
+`hot_buy_record` retains the per-pack purchase counts used by weighted draws.
+Initial reads persist a zero-count daily checkpoint so reconnecting does not
+reroll an unrefreshed board. A new actual UTC day resets the budget and purchase
+weights without replaying missed purchases. Automatic and manual generation
+preserve their different eligibility rules, early gold-offer exclusion,
+purchase-dependent weights, routine entries, V2 item deduplication, V3 category
+quotas and configured fallback entries. All state, stock, refresh charges,
+grants, receipts, postings, campaign state and score effects commit together.
+
+Purchases match the saved pack, price and payment type; clients cannot choose a
+cheaper price, spend another owner's stock or buy an expired-day board. Gold
+uses the existing paid/free pool order, resource costs consume bound stock before
+regular stock, and item-token/crystal costs use their authoritative inventory or
+profile balances. Grants create actual goods, resource balances or equipment.
+The Source request `num` depletes that many stock units while `price` and
+`itemNum` describe one purchased pack; it does not multiply either the debit or
+grant. Sold-out offers draw a replacement from their eligible category. If no
+alternative exists, the exhausted zero-stock entry remains visible until a
+refresh rather than inventing stock or committing an incomplete grant.
+
+The TCP adapter derives stable receipt identities for repeated native hot-item
+correlation values within the authenticated connection; explicit operation IDs
+retain the existing replay contract. Native replies include the updated offer,
+remaining gold/crystal and resource state, plus goods or equipment when granted.
+Eligibility reads remain bounded to 64 offers per version, 2048 purchase-history
+entries, 128 relevant legacy score facts and 4096 catalog entries. Invalid or
+oversized saved state fails before economic effects commit.
+
+The successful purchase path records hero action **8**, parameter **2**, count
+one, plus expedition action 11, campaign event 84 and the corresponding quest
+progress. Source `WISH_AND_HOTITEM` is ordinal 8; ordinal 5 is a combat action.
+The existing `user.pray` altar engine already records action 8, parameter 1 after
+its real grant and debit. An ordinary shop or paid gift does not produce this
+black-market action. Receipt replay, forged/failed purchases and rolled-back
+transactions cannot add another score contribution.
+
+Login includes the Source `businessMan` calendar. A realm-local cache retains
+that derived configuration board until its next arrival/departure boundary,
+matching the Source lifecycle rather than moving its end time on every login.
+The current owner publishes `push.businessman.refresh` to subscribed, eligible
+local characters in pages of 500 and batches of 32; unsuccessful publication is
+retried and reconnects read the current board. This calendar is reconstructible
+UI availability, not economic progress or reward authority. Its configured open
+flag and offer transaction gates remain distinct.
+
+No migration, dependency or new environment variable is introduced. Back up the
+existing hot-item, featured-card, daily-budget, purchase-history, inventory,
+equipment, profile/resource, score, campaign, receipt and outbox rows together.
+An older binary can retain those rows during rollback, but hot-item commands
+should be disabled until the owned executor is restored. Native device rendering
+remains unverified; the implementation does not activate combat-dependent events.
