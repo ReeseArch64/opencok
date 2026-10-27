@@ -201,7 +201,9 @@ export async function readWorldMutationState(
     command !== "world.march.check"
       ? [
           ...new Set([
-            ...marches.filter((row) => row.type === 1).map((row) => row.targetId),
+            ...marches
+              .filter((row) => row.type === 1 && row.state === 0)
+              .map((row) => row.targetId),
             ...(command === "world.march" && int(params, "type", -1) === 1
               ? [int(params, "point")]
               : []),
