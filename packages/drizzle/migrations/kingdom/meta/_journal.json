@@ -176,6 +176,13 @@
       "when": 1792975540747,
       "tag": "0024_vip_box_history",
       "breakpoints": false
+    },
+    {
+      "idx": 25,
+      "version": "7",
+      "when": 1792978778191,
+      "tag": "0025_player_item_gift_index",
+      "breakpoints": false
     }
   ]
 }

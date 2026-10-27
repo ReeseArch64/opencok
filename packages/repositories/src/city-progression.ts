@@ -1,3 +1,4 @@
+import { readPlayerItemGifts, writePlayerItemGifts } from "./player-item-gifts";
 import { readSeasonalExchange, writeSeasonalExchange } from "./seasonal-exchange";
 import { readVipBox, writeVipBox } from "./vip-box";
 import { readTargetTasks, writeTargetTasks } from "./target-task";
@@ -138,6 +139,10 @@ export function createCityProgressionStore(
       return {
         profile,
         resource,
+        playerItemGifts:
+          command === "item.send" || command === "gift.init"
+            ? await readPlayerItemGifts(tx, owner, command, request)
+            : undefined,
         seasonalExchange: command?.startsWith("activity.exchange.")
           ? await readSeasonalExchange(tx, owner)
           : undefined,
@@ -267,6 +272,7 @@ export function createCityProgressionStore(
               set: value,
             });
         }
+        if (write.playerItemGifts) await writePlayerItemGifts(tx, owner, write.playerItemGifts);
         if (write.seasonalExchange) await writeSeasonalExchange(tx, owner, write.seasonalExchange);
         if (write.vipBox) await writeVipBox(tx, owner, write.vipBox);
         if (write.targetTask) await writeTargetTasks(tx, owner, write.targetTask);
