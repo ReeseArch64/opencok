@@ -56,7 +56,7 @@ export function heroScoreFlags(score: Row) {
     ...new Set(
       text(score, "rewardFlag")
         .split(",")
-        .filter(Boolean)
+        .filter((value) => value !== "" && value !== "-1")
         .map((value) => cityInteger(value, 0, 127)),
     ),
   ];

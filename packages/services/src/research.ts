@@ -47,6 +47,7 @@ function complete(context: CityProgressionContext, row: Row, data?: ProgressionA
   if (!context.completing) recordTargetTask(context, 12, 1);
   const delta = cityAmount(after.power ?? 0) - cityAmount(before.power ?? 0);
   context.power(delta);
+  context.recordHero(6, "2", delta);
   if (delta > 0n) recordExpeditionScore(context, 3, 2, cityInteger(delta));
   if (["army", "trap", "up"].includes(after.para1 ?? "")) {
     const id = cityInteger(after.para2),

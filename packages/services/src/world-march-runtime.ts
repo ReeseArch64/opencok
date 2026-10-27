@@ -273,6 +273,8 @@ function returnState(context: CityProgressionContext, state: RuntimeMarch, now: 
         Math.trunc(Math.fround(state.collectRate * Math.fround(Number(elapsed) / 1000))),
     ),
   );
+  const heroResource = [3, 0, 5, 2, 1].indexOf(state.targetResource);
+  if (heroResource >= 0) context.recordHero(1, String(heroResource), amount, now);
   recordExpeditionScore(context, 1, state.targetResource, amount, now);
   recordTargetTask(context, 1, amount, String(state.targetResource), now);
   if (target.ownerMarchUUid !== state.id) worldMutationFailure();

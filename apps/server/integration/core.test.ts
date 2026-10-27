@@ -321,6 +321,7 @@ test("PostgreSQL SFS login, city and map preserve state and isolate both realms"
       expect(costInfo._cok_).toEqual(sfs.long(9007199254740993n));
       expect(costInfo.costPoint).toBeUndefined();
       expect((await client.command("continuedcost.apply", {})).errorCode?.value).toBe("102192");
+      expect((await client.command("hero.target.deliver", {})).errorCode?.value).toBe("102192");
       for (const [command, params] of [
         ["hero.event.info.get", { activityId: sfs.string("9000000") }],
         ["hero.event.ranking.get", { actId: sfs.string("missing") }],

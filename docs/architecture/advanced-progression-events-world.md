@@ -1114,3 +1114,40 @@ fixture retains its empty optional-calendar behavior. Shared kingdom matching,
 confirmed score ingestion and economic reward settlement remain subsequent runtime
 work; calendar admission itself grants no reward or battle result. Device execution
 remains unverified.
+
+## Confirmed hero score and target rewards
+
+Owned progression commands now record the hero catalog's confirmed action pairs:
+resource collection, completed troop/fort training, signed power changes, building
+and research power, prayer, and outer/inner lottery spins. Healing does not count
+as training. Queued and direct training share their completion producer. Gathering
+uses the actual saved amount and transition time, including recovered deadlines;
+a failed command rolls back its action, score, contribution, ledger and outbox.
+No client command can supply a score or invoke target-reward delivery.
+
+The realm reads bounded eligible events lazily, uses half-open running intervals,
+freezes the first saved reward band and serializes guild contributions with a
+transaction-scoped event/guild lock. Guild points retain each contributor's owned
+row. Milestones persist every earned tier flag, so a later decrease and recovery
+cannot award a tier again. Legacy negative sentinel flags remain readable; score
+arithmetic rejects signed integer overflow instead of wrapping into a false score.
+Unmatched kingdom events and characters visiting another realm do not earn points.
+Validated combat and hot-item payment producers remain prerequisites for their
+corresponding action pairs.
+
+Target entitlements pin each eligible recipient's reward and mail template in the
+same mutation outbox as the score. Guild recipients are current members who have
+contributed to that event. Delivery batches contain at most 64 recipients, and
+owned deterministic receipts fund mail once even when a batch retries after a
+partial failure. Banned or unavailable recipients retain pending deliveries.
+The existing worker retries with a delay, and successful delivery publishes the
+native target-achieved view. Guild score notifications use the persisted total
+and discard superseded totals before publication.
+
+No schema, environment variable or dependency is added. Back up score rows,
+contributions, tier flags, mutation outbox, receipts and funded mail together;
+retain unpublished delivery facts during rollback. PostgreSQL acceptance covers
+concurrent actors, receipt replay, cutoffs, negative power, unmatched events,
+rollback and mail recovery. Native TCP rejects the private delivery command.
+Shared kingdom matching and global rank publication/final prizes remain separate
+coordinated runtime work. Device execution remains unverified.

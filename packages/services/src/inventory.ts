@@ -11,7 +11,7 @@ import {
   inventoryResponse,
   inventoryReplay,
 } from "@opencok/mappings/inventory";
-import type { EconomyPosting } from "@opencok/contracts/mutation";
+import type { MutationEvent, EconomyPosting } from "@opencok/contracts/mutation";
 import { randomUUID } from "node:crypto";
 import type {
   InventoryExecutor,
@@ -144,6 +144,7 @@ export class InventoryService {
 }
 
 export class InventoryPlanner {
+  readonly domainEvents: MutationEvent[] = [];
   readonly items: InventoryItem[];
   readonly changed = new Map<string, InventoryItem>();
   readonly postings: EconomyPosting[] = [];
@@ -438,6 +439,7 @@ export class InventoryPlanner {
       confirmedSpending: confirmedContinuedCost(this.state, this.rules, this.now, this.items),
       postings: this.postings,
       events: [
+        ...this.domainEvents,
         {
           id: "inventory",
           type: "inventory.changed",

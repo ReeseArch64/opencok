@@ -1,3 +1,4 @@
+import { heroScoreReader, writeHeroScore } from "./hero-score";
 import { readOlympic, writeOlympic } from "./olympic";
 import { readCupBetting, writeCupBetting } from "./cup-betting";
 import { readGroupBuy, writeGroupBuy } from "./groupbuy";
@@ -82,6 +83,7 @@ export function createCityProgressionStore(
   boundary: ProgressionBoundary,
   mapSize = 1200,
 ): CityProgressionStore {
+  let alliance = "";
   let cosmeticTarget: Awaited<ReturnType<typeof readCosmeticTarget>>;
   return {
     async getState(command, ranking, request) {
@@ -148,7 +150,9 @@ export function createCityProgressionStore(
         .limit(4097);
       if (civilizationSciences.length > 4096)
         throw new Error("Civilization science aggregate exceeds bound");
+      alliance = profile.allianceId ?? "";
       return {
+        heroScore: heroScoreReader(tx, owner, alliance),
         profile,
         resource,
         cosmeticTarget:
@@ -314,6 +318,7 @@ export function createCityProgressionStore(
         }
         if (write.cosmeticTarget)
           await writeCosmeticTarget(tx, owner, cosmeticTarget?.uid, write.cosmeticTarget);
+        if (write.heroScore) await writeHeroScore(tx, owner, alliance, write.heroScore);
         if (write.olympic) await writeOlympic(tx, owner, write.olympic);
         if (write.cupBetting) await writeCupBetting(tx, owner, write.cupBetting);
         if (write.groupBuy) await writeGroupBuy(tx, owner, write.groupBuy);
