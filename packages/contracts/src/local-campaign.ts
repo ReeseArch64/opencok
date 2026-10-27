@@ -14,6 +14,7 @@ export interface CampaignAction extends CampaignClause {
   };
 }
 export interface CampaignRule {
+  readonly name?: string;
   readonly id: number | string;
   readonly state?: number;
   readonly openType?: number;

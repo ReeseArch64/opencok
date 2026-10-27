@@ -1,3 +1,4 @@
+import { mergeSignInRewards } from "@opencok/rules/merge-campaign";
 import { recordTargetTask } from "./target-task";
 import { recordCampaignUse } from "./local-campaign";
 import { javaMailBytes } from "@opencok/rules/avatar-mail";
@@ -21,15 +22,20 @@ import { rewardPreviewArray } from "@opencok/mappings/rewards";
 import { questTasks } from "@opencok/mappings/quests";
 import type { CityDomain, CityProgressionContext } from "./city-progression";
 
-export function grantRewards(context: CityProgressionContext, id: string | undefined) {
+export function grantRewards(
+  context: CityProgressionContext,
+  id: string | undefined,
+  signIn = false,
+) {
   if (!id || !context.rules.reconnect.rewards?.has(id))
     throw new GameError(errors.invalid, "city_progression");
-  const rewards = previewRewards(
+  const preview = previewRewards(
     id,
     context.rules,
     { kingdomId: context.rules.kingdomId, version: "12.06.0", now: Number(context.now) },
     randomInt,
   );
+  const rewards = signIn ? mergeSignInRewards(preview, context.effect(310)) : preview;
   for (const reward of rewards) {
     if (reward.kind === "item" && reward.type === 14) {
       const rows = [...(context.write.equipment ?? [])];
@@ -444,7 +450,7 @@ async function prepare(context: CityProgressionContext, command: string, params:
     if (command === "signIn.reward") {
       if (same) throw new GameError(errors.rewardClaimed, "city_progression");
       body = {
-        reward: grantRewards(context, rewards[day % 7]?.split("|")[1]),
+        reward: grantRewards(context, rewards[day % 7]?.split("|")[1], true),
         day: sfs.int((day % 7) + 1),
       };
       write.signIn = { day: day + 1, lastRewardTime: now, reward };

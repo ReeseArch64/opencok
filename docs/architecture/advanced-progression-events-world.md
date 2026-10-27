@@ -2060,3 +2060,62 @@ catalog, probability, legacy-format and clock units passed with 57 assertions.
 The complete server unit suite passed 1,500 tests with 245,953 assertions. Native
 TCP passed one test with 222 assertions, including real saved token offers in
 both realms. Required lint, formatting and server/nine package type checks passed.
+
+## Post-merge realm timers
+
+The realm now runs active noncombat timer rules 656, 748 and 749 from the declared
+campaign catalog. Condition 90 compares elapsed milliseconds with the inclusive
+hour limits against `server_info.lastMergeMillis` for the `server` row. Missing,
+zero or future merge facts never establish a campaign. The 24-hour monster gate
+and the 120/168-hour upper limits remain distinct. Disabled timers and the
+world-boss spawn/offline-notification actions remain outside this executor.
+
+An advisory-locked, owner-fenced PostgreSQL transaction updates the exact declared
+`trigger_timmer.timmer_name`, successful execution count and `last_exec_millis`.
+Imported progress is retained. Missed ticks collapse into one execution at the
+actual successful time; there is no reward or timer backfill. Each successful
+action retains its full 600-second lifetime, including a legitimate tail after
+an inclusive campaign boundary.
+
+The same transaction writes a version-one snapshot of at most four effects in
+`trigger_var` under realm scope type 2 and key `realm.merge.effects`, together
+with its command receipt and `merge.campaign.board` outbox invalidation. The key
+is excluded from the public `long_` campaign-variable query. Snapshot decoding
+bounds the payload to 4096 bytes, validates effect identities, times and values,
+and tracks the last advertised active identifiers so expiry produces one clear.
+No schema migration or new dependency is required; existing realm tables remain
+the backup and recovery unit.
+
+The authoritative overlay owns effects 307 through 310 and removes their Redis
+entries before adding live, matching-merge PostgreSQL values. Expired effects,
+a changed merge fact and a cache replay cannot resurrect a boost. Unrelated
+world effects remain intact. Economic reads reuse the active realm transaction
+and hold shared locks on the merge fact and saved board, avoiding a second
+connection per active mutation. `server_buff` continues to gate their benefits.
+Gathering consumes effect 308 through the existing owner-effect resolver. Actual
+`signIn.reward` goods grants now apply effect 310 with Java float arithmetic and
+integer truncation; direct resources and equipment retain their original amounts.
+Other reward commands receive no sign-in multiplier. Effect 307 is available to
+the fresh resource-creation producer and never rewrites existing resource stock;
+effect 309 remains available for a validated monster reward engine.
+
+Native `world.effect.push` sends integer `effNum`, `effVal` and `stateId` plus a
+long `endTime`, with string clears for 307, 308, 309 and 310. Login replays the
+current board. Recovery relays rebuild that board instead of replaying a stale
+outbox body, including clear-only boards after expiry. Delivery selects only
+subscribed, eligible local characters in pages of 500, sends at most 32 at once,
+and checks current ownership. Offline characters receive the current board on
+their next login; no offline notification or missed sign-in reward is fabricated.
+
+PostgreSQL integration evidence covers concurrent execution, imported cadence,
+state/receipt/outbox rollback, owner replacement, missing/future merge facts,
+TTL tails, expiry, stale Redis removal and actual sign-in inventory/ledger
+behavior. Protocol tests verify native types, login replay, feature gating,
+bounded fanout, payload bounds and float multiplication. Native-device rendering
+and combat rewards remain separate compatibility evidence.
+
+Before rollback to a binary without this executor, stop its worker and clear only
+effect identifiers 307 through 310 from the Redis world-effect projection. Retain
+the PostgreSQL snapshot, timer progress, receipts and outbox together. Restoring
+the compatible binary resumes cadence and rebuilds the current board; an old
+queued invalidation never grants a missed reward.
