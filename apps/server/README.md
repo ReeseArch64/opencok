@@ -4109,3 +4109,26 @@ and material acceleration have domain hooks in the timed activity service.
 Run `bun run test:player-progression-mutations` alongside the normal server tests.
 The corresponding synthetic integration suites use disposable PostgreSQL and
 maintained catalogs; they do not distribute or execute private reference inputs.
+
+## Left castle area visibility
+
+The realm restores `branchcityopen` during login from `user_branch_city_info`.
+State 0 keeps the expansion closed, state 2 opens the hero area, and state 1
+opens the full left castle area. `branchcity.open` checks the `subcity` feature
+and the castle level including stars against `subcity_reward.k5` for
+`branchCityType=1` and `subcity_reward.k4` otherwise. Current catalog thresholds
+are 15 and 20. A fully opened area cannot be downgraded by a repeated hero-area
+request. Older untyped requests retain the reference boolean response.
+
+The protocol follows the authorized local server reference under
+`data/reference/server`, specifically the branch-city module and handler.
+The existing table stores the opening state without changing reward counters,
+resources, buildings or feature settings. No migration or player reset is
+required. Deploy the updated realm and reconnect eligible players; roll back
+by restoring the prior realm build, retaining the saved expansion state.
+Branch-city NPC rewards remain outside this visibility correction.
+
+`test/branch-city.test.ts` checks stage gates, wire types, command routing and
+login restoration. `integration/branch-city.test.ts` checks PostgreSQL
+persistence, retries and reward-counter preservation using a disposable realm.
+Native APK rendering and other client tracks require separate device validation.
