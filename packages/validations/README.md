@@ -19,4 +19,4 @@ Transport-specific SFS validation lives separately in `sfs.ts`. The
 at the serialization boundary. Image validation remains under `image`.
 
 Run `bun run --cwd packages/validations test` for validation tests and
-`bun run test:packages` for validation, mapping and package boundary checks.
+`bun run test:packages` for validation, mapping, controller, rule and resource tests.

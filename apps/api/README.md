@@ -126,8 +126,7 @@ changes are involved.
 Socket-free units compose the API routes with the maintained chat metadata handlers,
 verify configuration/dependency injection, failures, stream/deadline limits and gateway
 allowlist declarations. They do not prove live DNS, HTTP proxying, WebSocket connectivity,
-Traefik execution or native-client behavior. The existing integration suite remains
-unexecuted under the current unit-only validation restriction.
+Traefik execution or native-client behavior.
 
 ## Verification
 
@@ -135,15 +134,10 @@ unexecuted under the current unit-only validation restriction.
 bun run --cwd apps/api check-types
 bun run --cwd apps/api test
 bun run --cwd packages/env test
-bun run test:stack
 ```
 
-The stack test builds images and starts a uniquely named disposable Compose project
-with synthetic PostgreSQL accounts/XML. It verifies all discovery aliases, real TCP
-handshake/login through Traefik, exact bigint responses, unchanged resources and
-inactive accounts, rejected out-of-scope routes, body limits and Redis failure/recovery.
-It never connects to the imported player databases. A native APK remains a separate
-validation step; previous PHP/MariaDB checks do not establish this port's compatibility.
+A native APK remains a separate validation step; previous PHP/MariaDB checks do
+not establish this port's compatibility.
 
 ## Avatar media
 

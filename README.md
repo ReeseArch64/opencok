@@ -207,7 +207,6 @@ workspace commands above. Isolated integration commands require Docker:
 
 ```sh
 bun run --cwd apps/api test:media
-bun run test:stack
 ```
 
 These create disposable resources and synthetic accounts/assets rather than

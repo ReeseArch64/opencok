@@ -124,8 +124,8 @@ it into `GameService`, whose constructor preserves a default for existing caller
 
 Packages never import applications. Declare direct workspace dependencies and
 public exports; do not turn helpers into a cross-domain rules container.
-`bun run test:packages` checks declared package APIs and cycles between
-responsibilities, including the corresponding directories inside `hero`. Follow
+`bun run test:packages` runs resource, validation, mapping, controller and rule tests
+within their packages. Follow
 [repository conventions](../packages/repositories/README.md). Current service
 composition uses Effect; [ADR-0012](../docs/decisions/0012-adopt-effect-for-service-composition.md)
 remains proposed, while the existing runtime implementation remains checkable.

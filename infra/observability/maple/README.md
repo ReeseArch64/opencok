@@ -11,10 +11,10 @@ Local operational telemetry follows
 
 The adapter only exposes three read-only tools:
 
-| Tool            | Filters                                  |
-| --------------- | ---------------------------------------- |
-| `list_services` | `since`, `service`, `env`, `limit`       |
-| `search_logs`   | Common filters plus `severity`, `search` |
+| Tool            | Filters                                   |
+| --------------- | ----------------------------------------- |
+| `list_services` | `since`, `service`, `env`, `limit`        |
+| `search_logs`   | Common filters plus `severity`, `search`  |
 | `search_traces` | Common filters plus `errors`, `span_name` |
 
 All filters are optional. `limit` defaults to 20 and must be an integer from 1 to 100.
@@ -86,19 +86,16 @@ succeeded for services, logs and traces against the running container. Authentic
 was handled inside Maple's CLI; no Cloud connection or container restart was needed.
 Only success and aggregate result sizes were reported.
 
-### Docker-free adapter validation
+### Adapter type checking
 
 ```sh
-bun --no-env-file test tests/compose/maple-mcp.test.ts
-bun --no-env-file x tsc --project tests/stack/tsconfig.json --noEmit
+bunx --no-install tsc --project tsconfig.json --noEmit
 ```
 
-These checks exercise the actual stdio entrypoint for negotiation and discovery,
-inject a fake CLI runner for tool calls, and run disposable host Bun processes for
-timeout/output limits. They do not query or change Docker, certify Pi configuration,
-or prove live authentication. Keep MCP files out of the image: `.dockerignore`
-allowlists only the Dockerfile and `patch-csp.ts`, and the Dockerfile copies only
-the patch script into its build stage and the patched executable into the runtime.
+Run this command from the repository root. It checks the MCP adapter types without
+querying Docker. Keep MCP files out of the image: `.dockerignore` allowlists only
+the Dockerfile and `patch-csp.ts`, and the Dockerfile copies only the patch script
+into its build stage and the patched executable into the runtime.
 
 ## Maple v0.3.0 WebAssembly CSP workaround
 
@@ -136,12 +133,6 @@ and rendered the dashboard without startup errors. A browser probe successfully
 compiled a minimal WebAssembly module while JavaScript string evaluation remained
 blocked. The original running container and its volume were not changed. This does
 not certify a Docker image build, Firefox behavior, ingest or restart persistence.
-
-Run Docker-free patch and Compose wiring tests with:
-
-```sh
-bun --no-env-file test tests/compose
-```
 
 The Maple integration test builds the derived image and checks login/dashboard CSP,
 unauthorized-query rejection, ingest, authenticated queries and restart persistence.

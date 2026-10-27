@@ -104,4 +104,4 @@ Server/API/Maple container logs rotate at 20 MiB with five files.
 Run `bun run --cwd packages/core test:maple` for an isolated real-container integration
 check of both service names, all required signals, correlation, authentication and clean
 restart persistence. It generates synthetic inputs and removes only its own containers,
-network and volume. The full `bun run test:stack` suite verifies actual application export.
+network and volume.

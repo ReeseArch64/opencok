@@ -37,9 +37,6 @@ logs status/duration without payloads. Client Authorization headers are not stri
 by an obsolete media compatibility middleware. Forwarded headers are not trusted
 from arbitrary sources.
 
-Verification: `bun run test:stack` builds and exercises a disposable full stack,
-including discovery aliases, CDN reads/Range/ETag, body limits, private paths and
-real SFS handshake/login through the TCP proxy. No player database is used.
 Historical Nginx, Apache-upload and avatar configs have been removed from this
 stage instead of serving as misleading deployment alternatives.
 

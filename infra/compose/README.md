@@ -107,7 +107,7 @@ address changes. The MinIO console redirect uses the same local host address.
 The realm is explicitly configured as ID 1 / `opencok_kingdom_1`, with shared global
 state in `opencok_global`. The second kingdom database keeps the same schema.
 Changing the active realm requires matching server database/ID and API directory
-configuration; the disposable test exercises COK2 through explicit overrides.
+configuration.
 
 The resident map uses `GAME_MAP_SIZE=1201`, matching the saved native terrain and
 the one-based identity `id = 1 + x + y * 1201`. A worker configured with 1200 can
@@ -242,32 +242,17 @@ local container administration.
 bun run --cwd apps/api check-types
 bun run --cwd apps/server check-types
 bun run --cwd packages/env test
-bun --no-env-file test tests/compose
-bun run test:stack
 ```
 
-`bun --no-env-file test tests/compose` checks the base and development YAML
-statically without Docker: shared URL mappings, outbound networks, local dependency
-override and profile selection with administration dependencies. It does not prove Compose merge or runtime health.
+Validate Compose interpolation and dependencies without starting containers:
 
-The integration test loads both base and dev files and forces a synthetic local
-`REDIS_URL` and `DATABASE_URL` before interpolation, regardless of inherited
-environment settings. It verifies PostgreSQL setup ordering in the merged config.
-It creates an isolated Compose configuration with synthetic
-accounts, a compiled synthetic catalog registry and CDN files, unique ports/networks and disposable volumes. It
-checks that `dev` excludes administration tools and `all` selects every service,
-then runs a named lifecycle/functional test for each service using `all`. Long-running containers must
-be running; `postgres-setup` and `minio-setup` must exit successfully. Checks cover
-PostgreSQL databases, setup registrations, pgAdmin ping/login page, Redis TTLs,
-ZooKeeper status, API/server readiness, gateway routing, MinIO health/CDN policy,
-Redis Insight health/API and Portainer HTTPS/authentication boundaries.
+```sh
+docker compose --env-file .env.example -f docker-compose.yml -f docker-compose.dev.yml --profile dev config --quiet
+docker compose --env-file .env.example -f docker-compose.yml -f docker-compose.dev.yml --profile all config --quiet
+```
 
-The existing discovery, SFS login, CDN reads/Range/ETag, private-path, player-state
-and Redis failure/recovery checks remain. Every published test port binds to
-loopback with a unique port. Portainer receives a disposable data volume and no
-host Docker socket: these tests validate its UI/API startup and authentication
-boundary, not management of the host daemon. Cleanup removes only the test project.
-Native APK rendering and unimplemented gameplay still require separate evidence.
+These checks do not establish runtime health, gateway behavior or client compatibility.
+Application and package suites remain alongside their respective implementations.
 
 ## Social chat archive
 
@@ -372,10 +357,8 @@ Verification commands use synthetic inputs and disposable infrastructure:
 
 ```sh
 bun run --cwd packages/core test:maple
-bun run test:stack
 ```
 
-The first checks every required signal, trace/log correlation, private-field filtering,
-query authentication and clean-restart persistence against the real Maple image. The
-second exercises the actual API/server containers and queries their stored telemetry.
+This checks every required signal, trace/log correlation, private-field filtering,
+query authentication and clean-restart persistence against the real Maple image.
 Production capacity and representative load remain separate admission work.
