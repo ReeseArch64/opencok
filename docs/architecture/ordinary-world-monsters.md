@@ -164,3 +164,36 @@ owned-monster and resource-prop regressions passed nine cases with 86 assertions
 the periodic configured-barbarian actor case also passed after sharing its actor
 constructor with the native handler. Rule and health helpers, affected workspace
 types, lint and formatting remain checked.
+
+`create.boss` is the separate ordinary `UseWorldBoss.DEFAULT` entry point. It
+accepts native `uuid` and `pointIndex`, consumes one owned WORLD_BOSS item of type
+16, and resolves its literal `para1` as a field-monster configuration. It does not
+invent weighted selection for goods whose raw value contains several IDs. The
+main uses the same backdated start, lifetime, zero stored HP and custom flag as
+`world.use` monster props; configured four-cell ranges change only to 17. A
+DEFAULT creation does not schedule Angrybull growth or set its growth timestamp.
+
+The native reply retains `itemId` as a string, `count` as an integer and an empty
+`itemEffectObj` object in that order, inside the existing command-replay envelope.
+Only actual interested viewers receive `push.fieldMonster.create`, with ordered
+`pointIndex`, `mmhp`, `mchp`, `monsterId`, `rt`, `st` and `isBoss` fields. Maximum
+and displayed health are derived from the configured field monster; persisted HP
+remains zero. Push lifetime seconds use the reference signed integer conversion.
+There is no automatic owner subscription when the creation point is outside the
+owner's current view.
+
+Creation and ordinary `world.use` props check authoritative pending march, boss
+and orphaned barbarian claims before consuming the selected stack. This extends
+the existing saved ownership checks to pending claims whose target cell still
+looks empty. Four PostgreSQL `create.boss` cases passed with 47 assertions for
+native response bytes and field order, recipient isolation, literal catalog
+binding, single/four-cell placement, foreign ownership, pending claims, durable
+replay and atomic rollback.
+
+The item `type2=1` branch is the separate Defensor actor workflow. The reference
+checks its feature and castle level, consults `IDefensorModule.hasDefensor`, applies
+configured k16 resources, k17 items and k18 gold, then registers the owned Defensor
+actor. Ordinary DEFAULT support does not fabricate that module or charge any of
+those additional costs. This branch remains explicitly unavailable before debit
+until its actor lifecycle and costs can be applied together. Source variants with
+missing literal field-monster catalog evidence also preserve the item.
