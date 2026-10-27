@@ -1,3 +1,4 @@
+import { scoutWatchtowerValues } from "@opencok/rules/world-scout-watchtower";
 import type { GameServices } from "@opencok/contracts/game";
 import type { WorldScoutStore } from "@opencok/contracts/world-scout";
 import { num, long, text } from "@opencok/contracts/rows";
@@ -8,10 +9,8 @@ import { GameError } from "@opencok/errors/game";
 import { barbarianCurrentHP, scoutCost } from "@opencok/rules/world-scout";
 import { ordinaryMarchRoute, worldFootprint } from "@opencok/rules/world-march-runtime";
 import { resolveWorldCityGeometry } from "@opencok/rules/world-city-geometry";
-import { serverFeature } from "@opencok/rules/power-context";
 import { worldPowerEffects } from "@opencok/rules/power-world";
 import { playerGameEffect } from "@opencok/rules/power-resolver";
-import { buildingStep } from "@opencok/rules/building";
 import { generalSkillPoints, decodeWorldPowerEffects } from "./power";
 import { resourceOwnerRuleContext } from "./world-resource-owner-context";
 function invalid(): never {
@@ -61,23 +60,11 @@ export async function worldScoutQuotation(
     abilities = generalSkillPoints(snapshot.owner.effects.generals),
     effect = (id: Parameters<typeof playerGameEffect>[6]) =>
       playerGameEffect(snapshot.owner.effects, rules, context, abilities, world, emperor, id);
-  let detect = 0;
-  if (serverFeature(rules, "honour_watchtower", context)) {
-    const tower = snapshot.buildings.find((row) => num(row, "itemId") === 417000);
-    if (tower) {
-      const rule = rules.building(
-        "417000",
-        num(tower, "level"),
-        num(tower, "star"),
-        num(tower, "progress"),
-      );
-      detect = Number(
-        buildingStep(rule.clientParameters?.[2]?.steps, num(tower, "progress"))?.value.split(
-          ";",
-        )[0] ?? 0,
-      );
-    }
-  }
+  const detect = scoutWatchtowerValues(
+    rules,
+    snapshot.buildings.find((row) => num(row, "itemId") === 417000),
+    context,
+  ).speed;
   const source = num(snapshot.world, "pointId"),
     origin = resolveWorldCityGeometry(source, size, observer, snapshot.points)?.points;
   if (!origin) invalid();

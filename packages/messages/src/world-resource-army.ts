@@ -165,7 +165,7 @@ export function decodeWorldMarchArmy(data: Buffer): SavedMarchArmy | null {
 }
 
 const maintainedMarchPrefix = Buffer.from("OCMA1\0");
-function isMaintainedMarchArmy(data: Buffer) {
+export function isMaintainedMarchArmy(data: Buffer) {
   return (
     Buffer.isBuffer(data) &&
     data.subarray(0, maintainedMarchPrefix.length).equals(maintainedMarchPrefix)

@@ -1,3 +1,4 @@
+import { user_building } from "@opencok/drizzle/schema/opencok_kingdom/user_building";
 import { createCityProgressionHandlers } from "@opencok/services/city-progression";
 import { createCityProgressionStore } from "@opencok/repositories/city-progression";
 import { createCityProductionBoundary } from "@opencok/repositories/city-production";
@@ -351,6 +352,34 @@ test("trouble history migration retains old numeric owners, null owners and dupl
       .insert(trouble_log)
       .values({ uid: "0123456789abcdef0123456789abcdef", username: "New", itemid: "210097" });
     expect(await h.db.db.select().from(trouble_log)).toHaveLength(4);
+  } finally {
+    await h.close();
+  }
+}, 120000);
+
+test("trouble marches use actual glory watchtower speed and black-ground scout speed outside black land", async () => {
+  const h = await fixture();
+  try {
+    await h.db.db
+      .update(userprofile)
+      .set({ appVersion: "12.06.0" })
+      .where(eq(userprofile.uid, "owner"));
+    await h.db.db.insert(user_building).values({
+      uuid: "owner-watchtower",
+      uid: "owner",
+      itemId: 417000,
+      pos: 13,
+      level: 30,
+      star: 5,
+      progress: 0,
+    });
+    h.effects.world = async () => new Map([[402, 100]]);
+    const reply = await h.start();
+    expect(reply.body.mt).toEqual(sfs.int(5000));
+    expect(
+      (await h.db.db.select().from(user_item).where(eq(user_item.uuid, "trouble")))[0]!.count,
+    ).toBe(1);
+    expect((await h.db.db.select().from(world_march))[0]!.type).toBe(13);
   } finally {
     await h.close();
   }
