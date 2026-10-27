@@ -14519,6 +14519,41 @@ update "opencok_kingdom"."totem_delivery" set "activationId" = $1, "targetUid" =
 delete from "opencok_kingdom"."totem_delivery" where "opencok_kingdom"."totem_delivery"."activationId" = $1"
 `;
 
+exports[`opencok_kingdom.arena_registration: schema and CRUD SQL 1`] = `
+"schema opencok_kingdom
+column ["uid","varchar(40)",true,null,null,null]
+column ["rankScore","integer",true,null,null,null]
+column ["state","integer",true,null,null,null]
+column ["fightServerId","integer",true,null,null,null]
+column ["worldId","integer",true,null,null,null]
+column ["version","integer",true,null,null,null]
+column ["time","bigint",true,null,null,null]
+column ["totalWinCount","integer",true,null,null,null]
+column ["totalLoseCount","integer",true,null,null,null]
+column ["serialWinCount","integer",true,null,null,null]
+column ["applicationId","varchar(40)",true,null,null,null]
+primary ["arena_registration_PRIMARY",["uid"]]
+index ["arena_registration_pending",false,["state","time","uid"]]
+check ["arena_registration_bounds","\\"state\\" IN (0, 1, 2, 3) AND \\"rankScore\\" >= 0 AND \\"fightServerId\\" >= 0 AND \\"worldId\\" >= 0 AND \\"version\\" >= 0 AND \\"time\\" >= 0 AND \\"totalWinCount\\" >= 0 AND \\"totalLoseCount\\" >= 0 AND \\"serialWinCount\\" >= 0"]
+insert into "opencok_kingdom"."arena_registration" ("uid", "rankScore", "state", "fightServerId", "worldId", "version", "time", "totalWinCount", "totalLoseCount", "serialWinCount", "applicationId") values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+select "uid", "rankScore", "state", "fightServerId", "worldId", "version", "time", "totalWinCount", "totalLoseCount", "serialWinCount", "applicationId" from "opencok_kingdom"."arena_registration" where "opencok_kingdom"."arena_registration"."uid" = $1
+update "opencok_kingdom"."arena_registration" set "uid" = $1, "rankScore" = $2, "state" = $3, "fightServerId" = $4, "worldId" = $5, "version" = $6, "time" = $7, "totalWinCount" = $8, "totalLoseCount" = $9, "serialWinCount" = $10, "applicationId" = $11 where "opencok_kingdom"."arena_registration"."uid" = $12
+delete from "opencok_kingdom"."arena_registration" where "opencok_kingdom"."arena_registration"."uid" = $1"
+`;
+
+exports[`opencok_kingdom.user_arena_army: schema and CRUD SQL 1`] = `
+"schema opencok_kingdom
+column ["uid","varchar(40)",true,null,null,null]
+column ["armyId","varchar(40)",true,null,null,null]
+column ["free","integer",true,null,null,null]
+primary ["user_arena_army_PRIMARY",["uid","armyId"]]
+check ["user_arena_army_quantity","\\"free\\" >= 0"]
+insert into "opencok_kingdom"."user_arena_army" ("uid", "armyId", "free") values ($1, $2, $3)
+select "uid", "armyId", "free" from "opencok_kingdom"."user_arena_army" where "opencok_kingdom"."user_arena_army"."uid" = $1
+update "opencok_kingdom"."user_arena_army" set "uid" = $1, "armyId" = $2, "free" = $3 where "opencok_kingdom"."user_arena_army"."uid" = $4
+delete from "opencok_kingdom"."user_arena_army" where "opencok_kingdom"."user_arena_army"."uid" = $1"
+`;
+
 exports[`opencok_chat.chat_consumer: schema and CRUD SQL 1`] = `
 "schema opencok_chat
 column ["id","varchar(100)",true,null,null,null]

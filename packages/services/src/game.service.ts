@@ -511,6 +511,12 @@ export class GameService {
       case "minstrel":
       case "civilizationCastle":
       case "totem":
+      case "arena.info":
+      case "arena.apply":
+      case "arena.army":
+      case "show.arena.army":
+      case "arena.enter":
+      case "arena.leave":
       case "1year.info":
       case "third.anniversary":
       case "third.anniversary.reward":
