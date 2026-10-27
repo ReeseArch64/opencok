@@ -773,8 +773,8 @@ realm boundaries, map projections, expiry and notification privacy.
 
 Native type-13 marches carry one exact owned type-26 item to another resident
 city. The scout route uses the investigation-speed effect and watchtower honour
-steps. Empty armies are allowed only for this explicit march purpose; they cannot
-collect or carry resources. Supplied troops remain subject to ownership and march
+steps. Empty armies are allowed for explicit trouble and scout marches; they
+cannot collect or carry resources. Supplied troops remain subject to ownership and march
 reservation limits. Preview does not consume inventory. Departure, item decrement,
 checkpoint and owner notification commit together, and retries retain one march.
 
@@ -3175,3 +3175,69 @@ boundary. External providers remain responsible for actual commercial delivery;
 campaign observers only consume attested completed delivery. Native APK execution
 and other client compatibility tracks remain unverified. This inventory records
 concrete backend coverage and boundaries without changing those production facts.
+
+## Ordinary scout execution and durable intelligence
+
+Native `world.march` type 1 creates an owned SCOUT party for an ordinary resident
+city (1), an actually occupied resource (3) or camp (2), or a persisted barbarian (44). Empty
+scout parties are valid. Supplied troops and companions use the existing owned
+reservation and return lifecycle. The Source troop quota uses the actual school,
+flat and percentage effects, civilization modifiers and one-unit tolerance.
+Expedition capacity additions require a configured, admitted, currently live
+fighting phase. Their presence does not resolve a battle. March slots, food or
+barbarian-configured resource costs, shield removal, detect counters, story event 16,
+campaign event 37, checkpoint and outbox commit together under the realm fence and world
+mutation lock. A retry cannot charge or reserve twice.
+
+Scout travel uses its Source per-army float speed, effects 401 and 402 and the
+shared `glory_watchtower` helper. Honour steps use the exact stored progress key
+and underscore-separated speed/cooldown values. A protected city requires the
+actual available honour cooldown while that control is enabled. The departure
+pins the honour marker and cooldown. Arrival observes current target ownership,
+protection and anti-scout facts, writes its report and begins the return at the
+successful current time. A moved or unavailable target returns without invented
+intel. Reverse routes retain Source four-point selection and Java coordinate
+semantics at map edges. No scout path resolves combat, kills troops, removes
+resources from the target or grants forecast barbarian rewards.
+
+The report snapshot selects bounded public profile, owned resource, production,
+defence, troop, fortification, reinforcement, general, dragon and rally facts.
+Foreign profile rows are read without waiting for their mutation locks. The
+watchtower selectors determine aggregate, approximate or exact fields. Source
+modulo-biased troop approximations are pinned by the successful report commit.
+Current dragon identity, level, friendship, training stars and real rally members
+come from their persisted owners; missing teams cannot manufacture a battle
+result. Foreign resource and defence projection does not settle or modify that
+player. Active factual FAST_REPAIR kingdom skills and their applicable skill log
+can affect the projected defence value. Migrated-owner effects remain gated.
+
+City and camp anti-scout protection distinguishes personal effects from the
+actual alliance tree and the nearby highest-level allied turret's active skill.
+The corresponding failure templates preserve that distinction. Honour may
+produce a protection-countdown-only report when anti-scout still hides all intel.
+Successful reports use native mail type 8 and defender notices use mail type 6; configured
+failure templates retain their Source item-ID flag and native mail category.
+Report JSON preserves signed 64-bit values without conversion through unsafe
+JavaScript numbers. The existing mail reader performs the eventual native
+projection, including its established scout-format compatibility rules.
+
+Canonical owned march identities bind report mails to their actor, current target
+and same-realm recipient. Mail rows, immutable report bytes, return checkpoint and
+`world.scout.mail` outbox headers persist in the same transaction. Failed writes
+roll them back together. Only the intended recipient receives the mail header;
+private report contents are absent from map broadcasts. Existing startup scans
+adopt bounded legacy SCOUT rows from actual reservations and retain saved native
+speed effects. Returning legacy parties do not reissue reports, charge costs or
+repeat story progress. Replacement realm authority fences the former worker.
+Back up march, army, companion, mail, receipt and outbox records together. No
+schema or external dependency is added.
+
+PostgreSQL checks cover all four ordinary targets, real food costs, bound-first
+spending, shield removal, current protection and honour, target changes, durable
+mail-reader visibility, rollback, concurrent retries, legacy adoption and recovery
+with a new connection pool and realm epoch. Unit checks cover watchtower gates,
+Source float quotas and route geometry, report visibility, current companions,
+barbarian regeneration, signed 64-bit mail values and actual rally facts. Special
+territory targets and other battle modes still require their own mode-correct
+capabilities. Native TCP composition and native-device execution require their
+separate integrated acceptance evidence.

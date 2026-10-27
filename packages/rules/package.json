@@ -186,7 +186,8 @@
     "./egg-activity": "./src/egg-activity.ts",
     "./world-scout": "./src/world-scout.ts",
     "./world-monster-refresh": "./src/world-monster-refresh.ts",
-    "./world-scout-watchtower": "./src/world-scout-watchtower.ts"
+    "./world-scout-watchtower": "./src/world-scout-watchtower.ts",
+    "./world-scout-report": "./src/world-scout-report.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",
