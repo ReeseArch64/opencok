@@ -2060,3 +2060,26 @@ catalog, probability, legacy-format and clock units passed with 57 assertions.
 The complete server unit suite passed 1,500 tests with 245,953 assertions. Native
 TCP passed one test with 222 assertions, including real saved token offers in
 both realms. Required lint, formatting and server/nine package type checks passed.
+
+## Dragon skill material ordering and capped experience
+
+Skill upgrade now validates the complete material selection before applying it.
+Strengthening materials run before ordinary experience materials, as in the
+reference. An ordinary material appearing first in the client request therefore
+cannot block a valid upgrade beyond the original level cap. The effective
+strengthening cap is calculated before consumption, while unused ordinary
+materials remain owned. A skill already at its reachable cap rejects without a
+charge.
+
+Experience arithmetic retains the reference's float conversion. Experience
+clipped at the final cap is excluded from the saved transferable total, preventing
+clipped points from becoming extra material value later. Both client material
+orders produce the same owned state, and concurrent retries share one receipt.
+No migration, dependency or configuration is added. Existing records are retained;
+only newly accepted upgrades use the corrected accounting. Back up dragon skill
+rows, receipts, ledger and outbox together before rollback. Device execution
+remains unverified.
+
+Ten dragon progression acceptance cases passed with 112 assertions across the
+PostgreSQL and unit files. Required lint, formatting and server/nine package type
+checks passed.
