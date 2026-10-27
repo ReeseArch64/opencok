@@ -299,6 +299,8 @@ export function createSessionHandler(
               command === "activity.accept.reward" ||
               command === "redPackets.sd" ||
               command === "redPackets.rv" ||
+              command === "world.use" ||
+              command === "world.get.monster" ||
               command === "trade.info" ||
               command === "trade.exchange" ||
               command === "trade.cancel") &&

@@ -180,7 +180,8 @@
     "./world-birth": "./src/world-birth.ts",
     "./world-terrain": "./src/world-terrain.ts",
     "./world-map-point": "./src/world-map-point.ts",
-    "./world-resource-new": "./src/world-resource-new.ts"
+    "./world-resource-new": "./src/world-resource-new.ts",
+    "./world-monsters": "./src/world-monsters.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",
