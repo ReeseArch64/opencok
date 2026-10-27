@@ -200,7 +200,7 @@ export async function readWorldMutationState(
           )
       : [];
   const scoutIds =
-    command !== "world.march.check"
+    command !== "world.march.check" && command !== "world.march.retreat"
       ? [
           ...new Set([
             ...marches

@@ -25,6 +25,7 @@ import { world_march } from "@opencok/drizzle/schema/opencok_kingdom/world_march
 import { world_march_checkpoint } from "@opencok/drizzle/schema/opencok_kingdom/world_march_checkpoint";
 import { user_resource } from "@opencok/drizzle/schema/opencok_kingdom/user_resource";
 import { user_army } from "@opencok/drizzle/schema/opencok_kingdom/user_army";
+import { user_item } from "@opencok/drizzle/schema/opencok_kingdom/user_item";
 import { playerinfo } from "@opencok/drizzle/schema/opencok_kingdom/playerinfo";
 import { mail } from "@opencok/drizzle/schema/opencok_kingdom/mail";
 import { mutation_outbox } from "@opencok/drizzle/schema/opencok_kingdom/mutation_outbox";
@@ -650,3 +651,198 @@ test("returning scouts restore their reservations independently of newly unproje
     await h.close();
   }
 }, 120000);
+
+test("older callers do not enter the honour watchtower shield admission or speed branch", async () => {
+  const h = await scoutHarness();
+  try {
+    h.clock.now = 200000000;
+    h.rules.features.set("glory_watchtower", {
+      id: "glory_watchtower",
+      online: "all",
+      test: "all",
+      version: "12.06.0",
+    });
+    h.rules.power.statuses!.set("990001", { id: "990001", effect: "61;1" });
+    await h.db.db.insert(user_state).values({
+      uid: "other",
+      stateId: 990001,
+      startTime: 0n,
+      endTime: BigInt(h.clock.now + 10000000),
+    });
+    await h.db.db
+      .update(user_building)
+      .set({ level: 30, star: 5, progress: 0, effectTime: BigInt(h.clock.now - 1) })
+      .where(eq(user_building.uuid, "owner-watchtower"));
+    await h.db.db
+      .update(userprofile)
+      .set({ appVersion: "1.0.0" })
+      .where(eq(userprofile.uid, "owner"));
+    await h.scout();
+    expect((await h.db.db.select().from(world_march))[0]!.honourWatchtower).toBe(0);
+    expect((await h.building("owner-watchtower"))!.effectTime).toBe(199999999n);
+    h.clock.now = Number((await checkpoint(h)).dueAt);
+    await h.tick();
+    expect((await h.db.db.select().from(mail).where(eq(mail.type, 8))).length).toBe(0);
+    expect((await h.db.db.select().from(mail))[0]).toMatchObject({
+      toUser: "owner",
+      type: 6,
+      title: "114163",
+    });
+    h.clock.now = Number((await checkpoint(h)).dueAt);
+    await h.tick();
+    await h.db.db
+      .update(userprofile)
+      .set({ appVersion: "12.06.0" })
+      .where(eq(userprofile.uid, "owner"));
+    await expect(h.scout()).rejects.toThrow();
+    expect((await h.db.db.select().from(world_march)).length).toBe(0);
+  } finally {
+    await h.close();
+  }
+}, 120000);
+
+for (const duePeer of [false, true])
+  test(`outbound scout recall ignores unprojectable foreign intel${duePeer ? " and defers another due scout" : " while restoring its owned troops"}`, async () => {
+    const h = await scoutHarness();
+    try {
+      await h.db.db.insert(user_item).values({
+        uuid: "scout-recall",
+        ownerId: "owner",
+        itemId: "200004",
+        count: 2,
+        value: 0,
+      });
+      let peer: Awaited<ReturnType<typeof checkpoint>> | undefined;
+      if (duePeer) {
+        h.effects.world = async () => new Map([[55, 1]]);
+        await h.scout({ soldiers: sfs.object({ "107000": sfs.int(10) }) });
+        peer = await checkpoint(h);
+      }
+      const started = await h.scout(
+        duePeer ? {} : { soldiers: sfs.object({ "107000": sfs.int(10) }) },
+      );
+      const id = started.body.uuid!;
+      const selected = (
+        await h.db.db
+          .select()
+          .from(world_march_checkpoint)
+          .where(eq(world_march_checkpoint.id, String(id.value)))
+      )[0]!;
+      await h.db.db.insert(user_building).values(
+        Array.from({ length: 257 }, (_, index) => ({
+          uuid: `recall-unprojectable-${index}`,
+          uid: "other",
+          itemId: 411000,
+          level: 1,
+          pos: 50 + index,
+          refreshTime: BigInt(h.clock.now),
+        })),
+      );
+      await expect(
+        h.db.db.transaction((tx) => readWorldScoutTargets(tx, [1220], 1)),
+      ).rejects.toThrow();
+      if (peer) {
+        expect(peer.dueAt).toBeLessThan(selected.dueAt);
+        h.clock.now = Number(peer.dueAt);
+      } else h.clock.now++;
+      const recall = { uuid: id, operationId: sfs.string(randomUUID()) };
+      await Promise.all(Array.from({ length: 3 }, () => h.command("world.march.retreat", recall)));
+      const returning = (
+        await h.db.db
+          .select()
+          .from(world_march_checkpoint)
+          .where(eq(world_march_checkpoint.id, String(id.value)))
+      )[0]!;
+      expect(decode(returning.payload).phase!.value).toBe("returning");
+      expect(
+        (await h.db.db.select().from(user_item).where(eq(user_item.uuid, "scout-recall")))[0]!
+          .count,
+      ).toBe(1);
+      expect((await h.db.db.select().from(mail)).length).toBe(0);
+      if (peer) {
+        const unchanged = (
+          await h.db.db
+            .select()
+            .from(world_march_checkpoint)
+            .where(eq(world_march_checkpoint.id, peer.id))
+        )[0]!;
+        expect(unchanged).toEqual(peer);
+      } else {
+        h.clock.now = Number(returning.dueAt);
+        await h.tick();
+        expect((await h.db.db.select().from(world_march)).length).toBe(0);
+        expect(
+          (await h.db.db.select().from(user_army).where(eq(user_army.uid, "owner")))[0],
+        ).toMatchObject({ free: 100, march: 0 });
+      }
+    } finally {
+      await h.close();
+    }
+  }, 120000);
+
+for (const unavailable of ["expired", "burned"])
+  test(`${unavailable} barbarians at scout arrival return the owned party without an intel report`, async () => {
+    const h = await scoutHarness();
+    try {
+      const rule = h.rules.world.barbarians!.get("4800000")!,
+        army = scoutPairs(h.rules.world.armies!.get(rule.army!)!.arm),
+        awards = scoutPairs(rule.arm_reward);
+      await h.db.db
+        .update(worldpoint)
+        .set({
+          pointType: 44,
+          pointItem: "4800000",
+          ownerId: "",
+          ownerMarchUUid: "",
+          flushTime: BigInt(h.clock.now + 10000000),
+        })
+        .where(eq(worldpoint.id, 10));
+      await h.db.db.insert(world_barbarion).values({
+        pointId: 10,
+        configId: "4800000",
+        currentHP: Number(rule.para1),
+        lastBeAttackedTime: 0n,
+        lastArmyMapByteArray: encodeJavaIntMap(army),
+        lastAwardArmyMapByteArray: encodeJavaIntMap(awards),
+      });
+      await h.scout({
+        point: sfs.int(10),
+        soldiers: sfs.object({ "107000": sfs.int(10) }),
+      });
+      h.clock.now = Number((await checkpoint(h)).dueAt);
+      await h.db.db
+        .update(worldpoint)
+        .set(
+          unavailable === "expired"
+            ? { flushTime: BigInt(h.clock.now) }
+            : { fireTime: BigInt(h.clock.now) },
+        )
+        .where(eq(worldpoint.id, 10));
+      const actor = (await h.db.db.select().from(world_barbarion))[0]!,
+        point = (await h.db.db.select().from(worldpoint).where(eq(worldpoint.id, 10)))[0]!;
+      await h.tick();
+      const returning = await checkpoint(h);
+      expect(decode(returning.payload).phase!.value).toBe("returning");
+      expect((await h.db.db.select().from(mail)).length).toBe(0);
+      expect((await h.db.db.select().from(world_barbarion))[0]).toEqual(actor);
+      expect((await h.db.db.select().from(worldpoint).where(eq(worldpoint.id, 10)))[0]).toEqual(
+        point,
+      );
+      h.clock.now = Number(returning.dueAt);
+      await h.tick();
+      expect((await h.db.db.select().from(world_march)).length).toBe(0);
+      expect(
+        (await h.db.db.select().from(user_army).where(eq(user_army.uid, "owner")))[0],
+      ).toMatchObject({ free: 100, march: 0 });
+      expect(
+        (
+          await h.db.db
+            .select()
+            .from(mutation_outbox)
+            .where(eq(mutation_outbox.eventType, "world.scout.mail"))
+        ).length,
+      ).toBe(0);
+    } finally {
+      await h.close();
+    }
+  }, 120000);

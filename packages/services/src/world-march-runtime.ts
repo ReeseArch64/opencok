@@ -662,6 +662,7 @@ function returnState(context: CityProgressionContext, state: RuntimeMarch, now: 
 export function recoverWorldMarches(
   context: CityProgressionContext,
   size = context.state.worldMutation?.mapSize ?? 1200,
+  settleOutboundScouts = true,
 ) {
   const indexed = new Map(
     (context.state.worldMutation?.checkpoints ?? []).map((row) => [text(row, "id"), row]),
@@ -998,6 +999,7 @@ export function recoverWorldMarches(
     if (state.owner !== context.owner) worldMutationFailure();
     let original = marchRows(context).find((row) => row.uuid === state.id);
     if (!original) worldMutationFailure();
+    if (!settleOutboundScouts && state.purpose === "scout" && state.phase === "outbound") continue;
     let changed = false;
     for (
       let guard = 0;
@@ -1262,7 +1264,7 @@ export function createWorldMarchDomain(size: number): CityDomain {
           event: null,
         };
       }
-      recoverWorldMarches(context, size);
+      recoverWorldMarches(context, size, command !== "world.march.retreat");
       const push = () => worldMarchMutationEvent(context, params);
       const reply = (body: Fields, event = true) => ({
         response: encode(body),
