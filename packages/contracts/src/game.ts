@@ -82,6 +82,9 @@ export interface CityState {
   civilizationPrestige?: bigint;
 }
 export interface GameStore extends AuthenticationStore {
+  activityDirectory?(
+    uid: string,
+  ): Promise<import("./activity-directory").ActivityDirectorySnapshot>;
   heroEvents?(
     uid: string,
     kingdomId: number,

@@ -32,6 +32,7 @@ export class GameError extends Error {
       | "reconnect"
       | "reward_preview"
       | "ranking"
+      | "activity_directory"
       | "mail"
       | "avatar_rule"
       | "power_rule"

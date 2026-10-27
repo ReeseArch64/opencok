@@ -2060,3 +2060,27 @@ catalog, probability, legacy-format and clock units passed with 57 assertions.
 The complete server unit suite passed 1,500 tests with 245,953 assertions. Native
 TCP passed one test with 222 assertions, including real saved token offers in
 both realms. Required lint, formatting and server/nine package type checks passed.
+
+## Native activity directory
+
+`act.ls` reads the owned character and current realm activity declarations in one
+repeatable-read snapshot. The query returns native `act` entries with integer
+`t`, optional integer `opt`, `st` and `et`, and Java signed-second conversion.
+Entry iteration retains the source integer-map order. Closed declarations,
+unsupported factory types and elapsed periods are omitted. Future opening and
+start dates remain visible as announcements. An exact end boundary remains
+visible until the next millisecond. The query never advances a period, creates a
+reward or admits a combat command; validated period writers remain authoritative.
+
+Queries require a local, existing, eligible profile. Reads use at most 4,096
+announcements and reject oversized native frames. A new service instance reads
+updated saved declarations immediately without a process-local schedule cache.
+Missing directory support returns the standard unavailable error. No new schema,
+dependency, environment variable or configuration key is required. Existing
+activity rows are retained during upgrade and rollback.
+
+PostgreSQL and wire-rule acceptance passed two tests with 19 assertions covering
+stored periods, reconnect reads, end boundaries, factory exclusions, ownership,
+bans, optional field order, native integer overflow and unchanged stored state.
+Required lint, formatting and server/nine package type checks passed. Device
+rendering and unvalidated combat schedules remain separate acceptance evidence.
