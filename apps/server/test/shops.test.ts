@@ -79,6 +79,21 @@ test("daily, cycle and server stock limits are independent at exact UTC boundari
   expect(() => shopLimit(cycle, current, 2)).toThrow();
 });
 
+test("weekly offers use the selected UTC weekday and publish its daily window", () => {
+  const monday = Date.UTC(2026, 0, 5);
+  const weekly = { ...offer, onsale_type: "2", begin_time: "2,4", sale_life: "3" };
+  expect(shopAvailable(weekly, { ...state(), now: monday }, rules)).toBe(true);
+  expect(shopAvailable(weekly, { ...state(), now: monday + 3 * 3600000 }, rules)).toBe(false);
+  expect(shopAvailable(weekly, { ...state(), now: monday + 86400000 }, rules)).toBe(false);
+  expect(shopAvailable(weekly, { ...state(), now: monday + 2 * 86400000 }, rules)).toBe(true);
+  const view = shopOffer(weekly, { ...state(), now: monday + 3600000 });
+  expect(view.beginTime).toEqual(sfs.long(BigInt(monday)));
+  expect(view.endTime).toEqual(sfs.long(BigInt(monday + 3 * 3600000)));
+  for (const begin_time of ["0", "8", "1,,2", "1;2"])
+    expect(() => shopWindow({ ...weekly, begin_time }, monday)).toThrow();
+  expect(() => shopWindow({ ...weekly, buy_times_refresh: "2" }, monday)).toThrow();
+});
+
 test("shop eligibility enforces catalog, country, castle, version and schedule gates", () => {
   const current = state();
   expect(shopAvailable(offer, current, rules)).toBe(true);
