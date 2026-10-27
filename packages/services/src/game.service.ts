@@ -1,3 +1,7 @@
+import { randomInt } from "node:crypto";
+import { closedActivityPanels, catalogReward } from "@opencok/rules/local-activity-info";
+import { closedActivities, catalogRewardView } from "@opencok/mappings/local-activity-info";
+import { previewRewards } from "@opencok/rules/rewards";
 import { worldMutationCommands } from "./world-march-runtime";
 import { dragonProgressionCommands } from "./dragon-progression";
 import { friendshipMineCommands } from "./friendship-mine";
@@ -435,6 +439,22 @@ export class GameService {
       return result;
     }
     switch (command) {
+      case "activity.close.info":
+        body = closedActivities(
+          closedActivityPanels(await this.profile(uid), this.rules, BigInt(this.now())),
+        );
+        break;
+      case "resource.client.reward.get": {
+        const profile = await this.profile(uid),
+          id = wireString(params, "rewardId"),
+          definition = catalogReward(this.rules, id);
+        body = catalogRewardView(
+          id,
+          definition,
+          previewRewards(id, this.rules, this.featureContext(profile), randomInt),
+        );
+        break;
+      }
       case "trade.info":
       case "trade.exchange":
       case "trade.cancel":

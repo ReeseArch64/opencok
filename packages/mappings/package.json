@@ -67,7 +67,8 @@
     "./dragon-tower": "./src/dragon-tower.ts",
     "./chat-social": "./src/chat-social.ts",
     "./postbox": "./src/postbox.ts",
-    "./chat-native": "./src/chat-native.ts"
+    "./chat-native": "./src/chat-native.ts",
+    "./local-activity-info": "./src/local-activity-info.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",

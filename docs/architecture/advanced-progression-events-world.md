@@ -316,3 +316,17 @@ Tower battle and sweep operations remain gated because the realm has no validate
 tower combat integration. Local tests exercise existing imported completed-floor
 and wounded-army fixtures; those fixtures are not proof of battle correctness.
 No client-submitted win, score, report or casualty map can advance a floor.
+
+The native `activity.close.info` query projects enabled close markers within
+strict inclusive UTC windows; malformed or partial dates do not activate a
+marker. `resource.client.reward.get` authenticates the player and returns the
+maintained reward preview plus the source catalog strings. It performs no claim,
+inventory mutation or counter update. Reward previews preserve their native
+array, string and correlation fields without introducing a free grant endpoint.
+
+The integrated migration sequence preserves the already published social outbox
+retention migration as `0017`. The additional world, totem, arena and expedition
+migrations follow as `0018` through `0021`. Databases that applied only the
+published develop sequence can upgrade without editing their migration history.
+Earlier draft worktree migration numbers were not a deployed release sequence;
+disposable databases built from those drafts must be recreated before validation.
