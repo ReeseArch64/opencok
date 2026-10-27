@@ -1,4 +1,5 @@
 import { redPacketReader, writeRedPackets } from "./red-packets";
+import { readHotItems, writeHotItems } from "./hot-item";
 import { readMonsterExchanges, writeMonsterExchanges } from "./monster-exchange";
 import { readFragmentExchanges, writeFragmentExchanges } from "./fragment-exchange";
 import { readCampaignProfile } from "./campaign-notice";
@@ -166,7 +167,8 @@ export function createCityProgressionStore(
         campaignProfile:
           command?.startsWith("campaign.") ||
           command?.startsWith("redPackets.") ||
-          command === "trigger.activity"
+          command === "trigger.activity" ||
+          command?.startsWith("hot.item.")
             ? await readCampaignProfile(tx, owner)
             : undefined,
         costRankAward:
@@ -175,6 +177,7 @@ export function createCityProgressionStore(
           command === "expedition.award.deliver" ? expeditionAwardReader(tx, owner) : undefined,
         heroRankingAward:
           command === "hero.rank.deliver" ? heroRankAwardReader(tx, owner) : undefined,
+        hotItem: command?.startsWith("hot.item.") ? await readHotItems(tx, owner, now) : undefined,
         heroScore: heroScoreReader(tx, owner, alliance),
         profile,
         resource,
@@ -371,6 +374,7 @@ export function createCityProgressionStore(
           await writeContinuedCostHide(tx, owner, write.continuedCostHide);
         if (write.continuedCost) await writeContinuedCost(tx, owner, write.continuedCost);
         if (write.troubleHistory) await writeTrouble(tx, owner, write.troubleHistory);
+        if (write.hotItem) await writeHotItems(tx, owner, write.hotItem);
         if (write.prayer) await writePrayer(tx, owner, write.prayer);
         if (write.recallTask) await writeRecallTasks(tx, owner, write.recallTask);
         if (write.regionalRecall) await writeRegionalRecall(tx, owner, write.regionalRecall);

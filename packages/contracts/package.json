@@ -181,7 +181,8 @@
     "./world-resource-refresh": "./src/world-resource-refresh.ts",
     "./paid-gifts": "./src/paid-gifts.ts",
     "./activity-directory": "./src/activity-directory.ts",
-    "./responses/activity-directory": "./src/responses/activity-directory.ts"
+    "./responses/activity-directory": "./src/responses/activity-directory.ts",
+    "./hot-item": "./src/hot-item.ts"
   },
   "dependencies": {
     "@opencok/enums": "workspace:*",

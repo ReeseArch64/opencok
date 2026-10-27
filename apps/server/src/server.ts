@@ -1,3 +1,8 @@
+import {
+  createHotItemDomain,
+  createHotBusinessMan,
+  publishHotBusinessMan,
+} from "@opencok/services/hot-item";
 import { AsyncLocalStorage } from "node:async_hooks";
 import { createMergeCampaignStore, mergeCampaignActor } from "@opencok/repositories/merge-campaign";
 import { mergeEffectBoard } from "@opencok/mappings/merge-campaign";
@@ -664,6 +669,7 @@ export const RealmDependenciesLive = Layer.effect(
         playerItemGiftDomain,
         createSeasonalExchangeDomain(),
         createExchangeActivityDomain(),
+        createHotItemDomain(),
         createVipBoxDomain(),
         createTargetTaskDomain(),
         createLuckyDayDomain(),
@@ -887,6 +893,31 @@ export const RealmDependenciesLive = Layer.effect(
       [...db.databases.kingdoms.keys()],
     );
     const campaignAudience = createCampaignAudience(db.kingdom.db, authority);
+    const hotBusinessMan = createHotBusinessMan(rules);
+    let publishedHotBusinessMan: string | undefined;
+    yield* Effect.tryPromise({
+      try: async () => {
+        const current = hotBusinessMan.current();
+        if (!current || current.key === publishedHotBusinessMan) return;
+        await publishHotBusinessMan(
+          notifications.owners(),
+          campaignAudience,
+          () => hotBusinessMan.current()?.body ?? current.body,
+          (owner, command, body) => {
+            authority.assertReady();
+            return notifications.publish(owner, command, body);
+          },
+        );
+        publishedHotBusinessMan = current.key;
+      },
+      catch: () => new Error("Businessman publication unavailable"),
+    }).pipe(
+      Effect.catch(() => Effect.void),
+      Effect.andThen(Effect.sleep(1000)),
+      Effect.forever,
+      Effect.forkScoped,
+    );
+
     yield* Effect.tryPromise({
       try: async () => {
         await mergeCampaigns.refresh();
@@ -2334,6 +2365,10 @@ export const RealmDependenciesLive = Layer.effect(
           expeditionStage: (kingdomId) => cache.expeditionStage(kingdomId),
           worldPowerEffects: (kingdomId) => worldEffects(kingdomId),
           worldEffectBoard: currentMergeBoard,
+          hotItemBusinessMan: async () => {
+            authority.assertReady();
+            return hotBusinessMan.current()?.body;
+          },
           worldTurretKills: (kingdomId, territory) => cache.worldTurretKills(kingdomId, territory),
           emperorVersion: (kingdomId) => cache.emperorVersion(kingdomId),
           changeAccountCount: (deviceId) => cache.deviceChangeCount(deviceId),
