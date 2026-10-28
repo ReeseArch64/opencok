@@ -35,7 +35,8 @@
     "@opencok/city": "workspace:*",
     "@opencok/research": "workspace:*",
     "@opencok/troops": "workspace:*",
-    "@opencok/building": "workspace:*"
+    "@opencok/building": "workspace:*",
+    "@opencok/equipment": "workspace:*"
   },
   "devDependencies": {
     "@opencok/api": "workspace:*",

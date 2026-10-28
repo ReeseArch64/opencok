@@ -86,6 +86,7 @@
         "@opencok/core": "workspace:*",
         "@opencok/economy": "workspace:*",
         "@opencok/env": "workspace:*",
+        "@opencok/equipment": "workspace:*",
         "@opencok/hero": "workspace:*",
         "@opencok/ledger": "workspace:*",
         "@opencok/mappings": "workspace:*",
@@ -258,6 +259,7 @@
         "@opencok/drizzle": "workspace:*",
         "@opencok/economy": "workspace:*",
         "@opencok/enums": "workspace:*",
+        "@opencok/equipment": "workspace:*",
         "@opencok/errors": "workspace:*",
         "@opencok/hero": "workspace:*",
         "@opencok/mappings": "workspace:*",
@@ -345,6 +347,7 @@
         "@opencok/base": "workspace:*",
         "@opencok/economy": "workspace:*",
         "@opencok/enums": "workspace:*",
+        "@opencok/equipment": "workspace:*",
         "@opencok/hero": "workspace:*",
         "@opencok/ledger": "workspace:*",
         "@opencok/messages": "workspace:*",
@@ -486,6 +489,26 @@
         "typescript": "catalog:",
       },
     },
+    "packages/equipment": {
+      "name": "@opencok/equipment",
+      "dependencies": {
+        "@opencok/base": "workspace:*",
+        "@opencok/building": "workspace:*",
+        "@opencok/constants": "workspace:*",
+        "@opencok/drizzle": "workspace:*",
+        "@opencok/economy": "workspace:*",
+        "@opencok/enums": "workspace:*",
+        "@opencok/errors": "workspace:*",
+        "@opencok/messages": "workspace:*",
+        "drizzle-orm": "0.45.4",
+        "zod": "catalog:",
+      },
+      "devDependencies": {
+        "@opencok/config": "workspace:*",
+        "@types/bun": "catalog:",
+        "typescript": "catalog:",
+      },
+    },
     "packages/errors": {
       "name": "@opencok/errors",
       "devDependencies": {
@@ -597,6 +620,7 @@
         "@opencok/constants": "workspace:*",
         "@opencok/contracts": "workspace:*",
         "@opencok/economy": "workspace:*",
+        "@opencok/equipment": "workspace:*",
         "@opencok/errors": "workspace:*",
         "@opencok/hero": "workspace:*",
         "@opencok/ledger": "workspace:*",
@@ -674,6 +698,7 @@
         "@opencok/contracts": "workspace:*",
         "@opencok/core": "workspace:*",
         "@opencok/drizzle": "workspace:*",
+        "@opencok/equipment": "workspace:*",
         "@opencok/errors": "workspace:*",
         "@opencok/ledger": "workspace:*",
         "@opencok/mappings": "workspace:*",
@@ -830,6 +855,7 @@
         "@opencok/dtos": "workspace:*",
         "@opencok/economy": "workspace:*",
         "@opencok/enums": "workspace:*",
+        "@opencok/equipment": "workspace:*",
         "@opencok/errors": "workspace:*",
         "@opencok/hero": "workspace:*",
         "@opencok/identity": "workspace:*",
@@ -947,6 +973,7 @@
         "@opencok/constants": "workspace:*",
         "@opencok/contracts": "workspace:*",
         "@opencok/economy": "workspace:*",
+        "@opencok/equipment": "workspace:*",
         "@opencok/errors": "workspace:*",
         "@opencok/hero": "workspace:*",
         "@opencok/messages": "workspace:*",
@@ -1325,6 +1352,8 @@
     "@opencok/enums": ["@opencok/enums@workspace:packages/enums"],
 
     "@opencok/env": ["@opencok/env@workspace:packages/env"],
+
+    "@opencok/equipment": ["@opencok/equipment@workspace:packages/equipment"],
 
     "@opencok/errors": ["@opencok/errors@workspace:packages/errors"],
 

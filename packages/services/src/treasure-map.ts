@@ -5,7 +5,7 @@ import { randomInt, randomUUID } from "node:crypto";
 import { num, type Row } from "@opencok/contracts/rows";
 import { encode, sfs, str, type Fields } from "@opencok/messages/sfs";
 import { cityInteger } from "@opencok/rules/city-progression";
-import { chooseWeight } from "@opencok/rules/equipment";
+import { chooseWeight } from "@opencok/rules/weighted-choice";
 import { worldMutationFailure } from "@opencok/rules/world-march-runtime";
 import {
     treasureMapItem,

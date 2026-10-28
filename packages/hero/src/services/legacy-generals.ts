@@ -3,7 +3,7 @@ import { sfs, str, int, type Fields } from "@opencok/messages/sfs";
 import { num, text, long, type Row } from "@opencok/contracts/rows";
 import { cityInteger, cityAmount } from "@opencok/rules/city-progression";
 import { generalFailure } from "@opencok/hero/rules/general-progression";
-import { chooseWeight } from "@opencok/rules/equipment";
+import { chooseWeight } from "@opencok/rules/weighted-choice";
 import { ownGeneralSnapshots } from "@opencok/hero/rules/profile-generals";
 import { generalInfo } from "@opencok/hero/mappings/profile-generals";
 import { decodeGeneralAbilities } from "@opencok/hero/services/profile-generals";

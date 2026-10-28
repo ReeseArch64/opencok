@@ -1,4 +1,4 @@
-import type { PublicEquipmentResponse } from "@opencok/contracts/responses/equipment-preview";
+import type { PublicEquipmentResponse } from "@opencok/equipment/contracts/responses/equipment-preview";
 
 export interface PublicStatisticsResponse
 {

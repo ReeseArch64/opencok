@@ -4,7 +4,7 @@ import { randomInt } from "node:crypto";
 import { sfs, encode, str, int, Type, type Fields, type Value } from "@opencok/messages/sfs";
 import { num, text, long, type Row } from "@opencok/contracts/rows";
 import { cityInteger } from "@opencok/rules/city-progression";
-import { chooseWeight } from "@opencok/rules/equipment";
+import { chooseWeight } from "@opencok/rules/weighted-choice";
 import {
     generalPairs,
     generalContent,

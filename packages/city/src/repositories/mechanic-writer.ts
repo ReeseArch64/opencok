@@ -272,7 +272,7 @@ export class CityMechanicWriter
 
         await writers.writePlayerEffects(tx, owner, write);
 
-        await writers.writeEquipment(tx, owner, write);
+        await session.equipment.writeEquipment(write);
 
         if (write.quests)
         {

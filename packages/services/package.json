@@ -31,6 +31,7 @@
     "@opencok/economy": "workspace:*",
     "@opencok/ledger": "workspace:*",
     "@opencok/building": "workspace:*",
-    "@opencok/base": "workspace:*"
+    "@opencok/base": "workspace:*",
+    "@opencok/equipment": "workspace:*"
   }
 }

@@ -8,7 +8,6 @@ import { playerinfo } from "@opencok/drizzle/schema/opencok_kingdom/playerinfo";
 import { queue } from "@opencok/drizzle/schema/opencok_kingdom/queue";
 import { user_task } from "@opencok/drizzle/schema/opencok_kingdom/user_task";
 import { user_achievement } from "@opencok/drizzle/schema/opencok_kingdom/user_achievement";
-import { user_equip } from "@opencok/drizzle/schema/opencok_kingdom/user_equip";
 import { user_glory_info } from "@opencok/drizzle/schema/opencok_kingdom/user_glory_info";
 import type { CityProgressionStore } from "@opencok/contracts/city-progression";
 import { num } from "@opencok/contracts/rows";
@@ -65,7 +64,7 @@ export class CitySnapshotReader
             .select()
             .from(user_achievement)
             .where(eq(user_achievement.uid, owner));
-        const equipment = await tx.select().from(user_equip).where(eq(user_equip.uid, owner));
+        const equipment = await session.equipment.read();
         const [glory] = await tx.select().from(user_glory_info).where(
             eq(user_glory_info.uid, owner),
         );
@@ -276,7 +275,7 @@ export class CitySnapshotReader
                 : undefined,
             generalRoster: await readers.readGeneralRoster(tx, owner, command, ranking),
             abilityPages: await readers.readAbilityPages(tx, owner),
-            suitDecompositions: await readers.readSuitDecompositions(tx, owner),
+            suitDecompositions: await session.equipment.readSuitDecompositions(),
             quests,
             statistics: statistics ?? {},
             buildingExperience: buildingExperience ?? {},

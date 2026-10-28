@@ -80,3 +80,8 @@ world/march dependencies remain tracked in its ownership register.
 Building also owns typed persistence after #647. The realm injects the current
 transaction; City retains legacy row adaptation and cross-mechanic ordering while
 shared projection boundaries continue to migrate under #558.
+
+The [equipment domain](equipment/README.md) owns equipment and workshop workflows,
+forge/material rules, native/public projections, schema and persistence after #651.
+The realm injects numeric and quest collaborators. Shared weighted choice stays in
+Rules, and three tracked creation/projection adapters serve remaining callers.
