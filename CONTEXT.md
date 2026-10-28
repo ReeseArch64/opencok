@@ -1,53 +1,53 @@
-# Contexto técnico do OpenCoK
+# OpenCoK Technical Context
 
-Antes de recomendar, planejar ou executar, identifique o problema, as versões afetadas, os responsáveis pelo estado e o resultado verificável. O contexto é o projeto e sua evolução técnica, não a vida pessoal dos contribuidores. Não presuma recursos, implantação, suporte ou autorização.
+Before recommending, planning or executing, identify the problem, affected versions, state owners and verifiable outcome. Context concerns the project and its technical evolution, not contributors' personal lives. Do not assume resources, deployment, support or authorization.
 
-## O que é o projeto
+## What the project is
 
-OpenCoK é uma plataforma auto-hospedada, reproduzível e compatível com Clash of Kings para operar, estudar e personalizar reinos privados. Integra backend de jogo, serviços web, persistência, infraestrutura, ferramentas operacionais e clientes, sem depender do serviço online original ou de procedimentos ocultos.
+OpenCoK is a reproducible, self-hosted Clash of Kings-compatible platform for operating, studying and customizing private kingdoms. It integrates gameplay backends, web services, persistence, infrastructure, operator tooling and clients without depending on the original online service or hidden procedures.
 
-Não é um snapshot imutável de servidor nem uma reprodução da infraestrutura comercial do publicador. O operador controla implantação e dados; o backend mantém a autoridade sobre regras e progresso. Compatibilidade exige evidência por conjunto de cliente, recursos, protocolo, esquema e regras, não apenas inicialização bem-sucedida.
+It is neither an immutable server snapshot nor a recreation of the publisher's commercial infrastructure. Operators control deployment and data; the backend owns rules and progress. Compatibility requires evidence for the client/resource/protocol/schema/rule combination, not merely successful startup.
 
-A configuração padrão prepara dois reinos com estado isolado e serviços globais compartilhados; o Compose de desenvolvimento inicia atualmente um servidor de reino ativo. Reconhecer as versões `v5.36.0`, `v6.12.20`, `v9.27.0` e `v12.06.0` não comprova suporte a todas elas.
+Default configuration prepares two kingdoms with isolated state and shared global services; development Compose currently starts one active realm server. Recognizing `v5.36.0`, `v6.12.20`, `v9.27.0` and `v12.06.0` does not prove support for every track.
 
-## Base técnica e limites de responsabilidade
+## Technical baseline and responsibility boundaries
 
-- **Código:** monorepo TypeScript; Bun é a ferramenta de desenvolvimento. O runtime de produção permanece em aberto, com o mandato anterior de Node.js suspenso. Imagens locais não comprovam prontidão de produção.
-- **Organização:** `apps/` compõe processos e configuração; `packages/` concentra capacidades reutilizáveis e domínios; `infra/` mantém implantação e entrada de rede. Pacotes não importam aplicações. A migração para pacotes donos de domínio é incremental, preservando contratos públicos e registrando a retirada de fachadas.
-- **Autoridade:** o servidor do reino é dono do estado de jogo, economia e combate. API, Chat, Scheduler e workers têm responsabilidades delimitadas, não autorização genérica para escrever gameplay. Scheduler descobre vencimentos e solicita transições ao dono; workers executam apenas integrações e projeções autorizadas.
-- **Persistência:** PostgreSQL é a autoridade transacional; MongoDB atende documentos e projeções; Redis atende cache, sessões e coordenação efêmera, nunca como único registro durável do progresso. Objetos privados usam interface S3; MinIO é a base local, distinta da distribuição de releases.
-- **Clientes:** o APK Elex autorizado permanece transitório. Novos adaptadores preservam identidade, progresso e contratos; atualização Lua/nativa é planejada, Flutter/Dart é avaliação sem prazo de substituição e o cliente web continua experimental.
+- **Code:** TypeScript monorepo; Bun is the development toolchain. Production runtime remains open, with the previous Node.js mandate suspended. Local images do not prove production readiness.
+- **Organization:** `apps/` composes processes/configuration; `packages/` owns reusable capabilities/domains; `infra/` owns deployment and ingress. Packages do not import applications. Domain-owned package migration is incremental, preserving public contracts and tracking facade retirement.
+- **Authority:** the realm server currently owns gameplay, economy and combat state. API, Chat, Scheduler and Workers have bounded responsibilities, not generic gameplay write permission. Scheduler discovers deadlines and requests owner transitions; Workers perform only authorized integrations/projections. The accepted player/world authority split remains subject to the architecture's migration gates.
+- **Persistence:** PostgreSQL is transactional authority; MongoDB serves documents/projections; Redis serves cache, sessions and ephemeral coordination, never the only durable progress record. Private objects use S3 interfaces; MinIO is the local baseline, separate from release distribution.
+- **Clients:** the authorized Elex APK remains transitional. New adapters preserve identity, progress and contracts; Lua/native updating is planned, Flutter/Dart is an evaluation without a replacement deadline, and the web client remains experimental.
 
-Esses limites orientam mudanças; detalhes, inventário e topologia pertencem à arquitetura. Diretórios existentes, serviços planejados e ADRs aceitos não comprovam implementação, implantação ou verificação concluídas.
+These boundaries guide changes; inventory, topology and details belong in architecture. Existing directories, planned services and accepted ADRs do not prove completed implementation, deployment or verification.
 
-## O que deve ser tecnicamente
+## What it should become technically
 
-- **Reproduzível:** configuração explícita, dependências identificadas, versões rastreáveis e início do ambiente sem reparos manuais não documentados. Entradas privadas não podem virar dependências compartilhadas ocultas.
-- **Modular e compreensível:** domínios e contratos com donos claros; composição nas aplicações, regras fora do transporte e dependências explícitas. Preferir padrões existentes a novas camadas ou abstrações sem necessidade demonstrada.
-- **Consistente e recuperável:** progresso preservado em retries, desconexões, reinícios e recriação de serviços. Custos, concessões, recibos e eventos devem respeitar as transações e invariantes do dono, sem duplicar bens ou inventar sucesso.
-- **Seguro por limite:** autenticação, validação e autorização no servidor; isolamento entre reinos e ambientes; menor privilégio; credenciais fora de clientes, código e evidências. Dados pessoais e privados não são fixtures de depuração.
-- **Resiliente:** esperas, filas, recuperação e processamento limitados. Dependências opcionais degradam de modo explícito, sem paralisar login ou gameplay essencial. Mais réplicas não substituem exclusão de escritores obsoletos nem transferência segura de autoridade.
-- **Observável e operável:** distinguir preparação, commit e entrega; medir latência, recursos, backlog e recuperação sem expor payloads ou identidades privadas. Logs operacionais não substituem estado autoritativo ou auditoria econômica durável.
-- **Validável e evolutivo:** mudanças com testes e evidências proporcionais ao risco, compatibilidade por versão e caminhos de migração, rollback e restauração. Testes sintéticos não comprovam renderização no cliente nativo.
+- **Reproducible:** explicit configuration, identified dependencies, traceable versions and startup without undocumented manual repairs. Private inputs must not become hidden shared dependencies.
+- **Modular and understandable:** clear domain/contract owners, application composition, rules outside transport and explicit dependencies. Prefer established patterns to unnecessary layers or abstractions.
+- **Consistent and recoverable:** preserve progress through retries, disconnects, restarts and service recreation. Costs, grants, receipts and events obey owner transactions/invariants without duplicating assets or fabricating success.
+- **Secure at boundaries:** server-side authentication, validation and authorization; realm/environment isolation; least privilege; credentials outside clients, source and evidence. Personal/private data is not debugging fixture material.
+- **Resilient:** bounded waits, queues, recovery and processing. Optional dependencies degrade explicitly without blocking login or essential gameplay. More replicas do not replace stale-writer fencing or safe authority transfer.
+- **Observable and operable:** distinguish preparation, commit and delivery; measure latency, resources, backlog and recovery without exposing payloads/private identities. Operational logs replace neither authoritative state nor durable economic audit.
+- **Verifiable and evolvable:** risk-appropriate tests/evidence, version-specific compatibility and migration/rollback/restore paths. Synthetic tests do not establish native-client rendering.
 
-## Entendimento e avaliação
+## Understanding and evaluation
 
-1. Delimite objetivo, escopo, comportamento esperado e critérios de aceite. Identifique clientes, serviços, domínios, dados e integrações afetados.
-2. Separe requisito de produto, contrato existente, decisão técnica e evidência de execução. Confira o status das decisões pertinentes: proposta não é decisão aceita; aceitação não é implementação concluída.
-3. Verifique no código e nas evidências o que funciona hoje. Não promova metas de produção, capacidade estimada, presença de dependências ou documentação de intenção a fatos operacionais.
-4. Avalie efeitos sobre autorização, concorrência, persistência, economia, protocolo e recuperação antes de conveniência de implementação. Não substitua comportamento desconhecido por defaults permissivos ou respostas de falso sucesso.
-5. Defina como reproduzir, testar, observar, implantar e reverter a mudança, preservando dados válidos. Lacunas relevantes exigem investigação ou esclarecimento antes da etapa que depender delas.
+1. Establish goals, scope, expected behavior and acceptance criteria. Identify affected clients, services, domains, data and integrations.
+2. Separate product requirements, existing contracts, technical decisions and execution evidence. Check decision status: proposed is not accepted; accepted is not implemented.
+3. Verify current behavior in code and evidence. Do not present production targets, estimated capacity, dependencies or documented intent as operational facts.
+4. Evaluate authorization, concurrency, persistence, economy, protocol and recovery before implementation convenience. Do not replace unknown behavior with permissive defaults or false-success responses.
+5. Define reproduction, testing, observation, deployment and reversal while preserving valid data. Investigate or clarify material gaps before the dependent step.
 
-## Ordem de avaliação e prioridades
+## Evaluation order and priorities
 
-**Escopo autorizado e decisões vigentes → segurança e privacidade → correção e integridade do estado → compatibilidade e recuperação → utilidade real → simplicidade e manutenibilidade → integração → performance medida → conveniência.** Ganhos posteriores não justificam violar invariantes ou restrições anteriores.
+**Authorized scope and current decisions → security/privacy → correctness/state integrity → compatibility/recovery → real utility → simplicity/maintainability → integration → measured performance → convenience.** Later benefits do not justify violating earlier invariants or restrictions.
 
-As prioridades são estabilizar clientes ativos, remover dependências externas bloqueantes, melhorar desempenho e recuperação, completar mídia e tornar a operação compreensível. Não transformar otimizações, mudanças de stack ou reescritas de cliente em pré-requisitos sem decisão explícita. Capacidade de produção, alta disponibilidade e metas de recuperação precisam de medição e testes, não de promessas derivadas do desenho.
+Prioritize active-client stability, removal of blocking external dependencies, performance/recovery, media completion and understandable operations. Do not make optimizations, stack changes or client rewrites prerequisites without explicit decisions. Production capacity, high availability and recovery goals require measurements/tests, not promises inferred from design.
 
-## Interpretação, conflitos e fontes
+## Interpretation, conflicts and sources
 
-Diante de conflito, apresente o requisito ou contrato afetado, a evidência disponível e alternativas compatíveis. Não altere decisões ou registros para justificar uma implementação; mudanças de direção exigem o processo e a autorização correspondentes. Diferencie incompatibilidade comprovada, hipótese e ausência de evidência.
+For conflicts, present the affected requirement/contract, available evidence and compatible alternatives. Do not rewrite decisions or records to justify implementation; direction changes require the corresponding process and authorization. Distinguish proven incompatibility, hypothesis and missing evidence.
 
-Este documento sintetiza orientação técnica, sem substituir fontes ou criar decisões de tecnologia. [Produto](PRODUCT.md) define objetivos e limites; [arquitetura](.github/ARCHITECTURE.md), desenho e responsabilidades; [ADRs](docs/decisions/README.md), decisões e status; [contribuição](.github/CONTRIBUTING.md), testes, revisão e entrega; [regras](.agents/RULES.md) e [segurança](.github/SECURITY.md), autorização e proteção de dados. O [guia de agentes](AGENTS.md) centraliza quando consultar cada fonte, sem exigir leitura recursiva.
+This document summarizes technical direction, not replacement sources or new technology decisions. [Product](PRODUCT.md) owns goals/boundaries; [architecture](.github/ARCHITECTURE.md), design/responsibilities; [ADRs](docs/decisions/README.md), decisions/status; [contribution](.github/CONTRIBUTING.md), tests/review/delivery; [rules](.agents/RULES.md) and [security](.github/SECURITY.md), authorization/data protection. The [agent guide](AGENTS.md) centralizes when to consult each source without recursive reading requirements.
 
-O projeto não pressupõe hospedagem pública multi-tenant, escala global, compatibilidade universal, dependência de contas de nuvem dos contribuidores ou direitos sobre material de terceiros. Componentes substitutos devem ser de autoria independente ou autorizada, com origem e licença documentadas.
+The project assumes no public multi-tenant hosting, global scale, universal compatibility, dependency on contributors' cloud accounts or rights over third-party material. Replacement components must be independently authored or authorized, with documented origin/license.

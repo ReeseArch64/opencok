@@ -1,30 +1,31 @@
-# Guia para Agentes de IA
+# AI Agent Guide
 
-Orienta contribuições ao OpenCoK, uma plataforma de jogo auto-hospedada, respeitando o escopo autorizado e os dados de jogadores e operadores.
+Guide contributions to OpenCoK, a self-hosted game platform, within authorized scope and with player/operator data protected.
 
-## Contexto e fontes
+## Context and sources
 
-Centralize a leitura neste guia, sem cadeias recursivas obrigatórias. Reutilize contexto já lido; releia após mudanças ou para conferir orientações. Procure títulos e leia apenas seções relevantes de documentos extensos. Se uma fonte necessária estiver ausente ou inacessível, informe; não presuma seu conteúdo.
+Centralize reading here without recursive mandatory chains. Reuse previously read context; reread after changes or to verify guidance. Search headings and read only relevant sections of long documents. Report necessary sources that are missing or inaccessible; do not invent their contents.
 
-| Fonte                                   | Quando e para quê                                                                                                                   |
-| --------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
-| [Regras de atuação](.agents/RULES.md)   | Antes de escrever: escopo, caminhos protegidos, confirmação de autorização e destinos.                                              |
-| [Segurança](.github/SECURITY.md)        | Acesso a dados, segredos, transmissões, incidentes e relatos privados.                                                              |
-| [Contribuição](.github/CONTRIBUTING.md) | Git/GitHub, padrões, testes, revisão e entrega em toda tarefa de contribuição.                                                      |
-| [Produto](PRODUCT.md)                   | Objetivos, escopo e comportamento de jogadores/operadores.                                                                          |
-| [Arquitetura](.github/ARCHITECTURE.md)  | Serviços, responsabilidades, infraestrutura e compatibilidade; antes de criar, mover ou reorganizar e antes de trabalho no cliente. |
-| [Glossário](GLOSSARY.md)                | Vocabulário, nomes, contratos e apresentação de código.                                                                             |
-| [ADRs](docs/decisions/README.md)        | Consultar decisões aceitas antes de mudar tecnologia.                                                                               |
+| Source                                        | When and why                                                                                                                  |
+| --------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| [Operating rules](.agents/RULES.md)           | Before writing: scope, protected paths, authorization confirmation and destinations.                                          |
+| [Security](.github/SECURITY.md)               | Data access, secrets, transfers, incidents and private reports.                                                               |
+| [Contribution guide](.github/CONTRIBUTING.md) | Git/GitHub, standards, tests, review and delivery for every contribution.                                                     |
+| [Product](PRODUCT.md)                         | Goals, scope and player/operator behavior.                                                                                    |
+| [Technical context](CONTEXT.md)               | Project identity, technical direction, priorities and evaluation criteria.                                                    |
+| [Architecture](.github/ARCHITECTURE.md)       | Services, responsibilities, infrastructure and compatibility; before creating, moving or reorganizing and before client work. |
+| [Glossary](GLOSSARY.md)                       | Vocabulary, naming, contracts and code presentation.                                                                          |
+| [ADRs](docs/decisions/README.md)              | Accepted decisions before changing technology.                                                                                |
 
-Mantenha justificativas em ADRs, desenho na arquitetura, decisões de produto em `PRODUCT.md` e procedimentos no guia de contribuição; não duplique definições aqui. Use links Markdown relativos, não links Obsidian.
+Keep rationale in ADRs, design in architecture, product decisions in `PRODUCT.md` and procedures in the contribution guide; do not duplicate definitions here. Use relative Markdown links, not Obsidian links.
 
-## Execução e entrega
+## Execution and delivery
 
-- Examine Git e código relevante antes de editar; preserve alterações existentes, inclusive staged e não rastreadas. Mantenha o foco no pedido e padrões existentes antes de acrescentar dependências ou abstrações. Confirme alterações protegidas conforme as regras.
-- Use `generate-tests` para cada implementação e cubra as camadas exigidas no guia. Execute `bun run lint`, `bun run format:check`, testes e verificações de tipos pertinentes. Corrija violações próprias sem enfraquecer verificações; registre bloqueios e justificativas de inaplicabilidade.
-- Ao concluir uma implementação, use `code-review` contra a issue e critérios de aceite antes da PR, nos eixos Standards e Spec; resolva bloqueios e repita após mudanças, conforme o guia.
-- Revise diff/Git, documente premissas e novas dependências no local apropriado e relate alterações, validações e limitações. Siga o fluxo de commits, branches, stacks e PRs; não amplie autorização para cumprir a entrega.
+- Inspect Git and relevant code before editing; preserve existing changes, including staged and untracked work. Stay within the request and established patterns before adding dependencies or abstractions. Confirm protected changes under the operating rules.
+- Use `generate-tests` for every implementation and cover the layers required by the contribution guide. Run `bun run lint`, `bun run format:check`, relevant tests and type checks. Fix introduced violations without weakening checks; record blockers and justified inapplicability.
+- After implementation, use `code-review` against the issue and acceptance criteria before the PR, covering Standards and Spec. Resolve blockers and rerun after changes as the guide requires.
+- Review diff/Git, document assumptions and new dependencies in their proper locations, and report changes, validation and limitations. Follow commit, branch, stack and PR workflows; delivery does not expand authorization.
 
-## Dados e entradas privadas
+## Private data and inputs
 
-Ignorados são entradas locais, não dependências compartilhadas; nunca force inclusão de arquivos privados, artefatos do cliente ou chaves. Mantenha originais mobile somente leitura e extraia, altere ou empacote em destino separado autorizado. Consulte apenas dados necessários; exclua credenciais, chaves, tokens, código privado Elex e dados de jogadores de código, logs e relatórios. Diante de exposição, interrompa e avise sem reproduzir o valor, seguindo a política de segurança.
+Ignored files are local inputs, not shared dependencies; never force-add private files, client artifacts or keys. Keep original mobile inputs read-only; extract, patch or package in a separate authorized destination. Access only necessary data; exclude credentials, keys, tokens, private Elex code and player data from source, logs and reports. On exposure, stop and notify without reproducing the value, following the security policy.
