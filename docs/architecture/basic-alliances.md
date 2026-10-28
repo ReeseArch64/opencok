@@ -65,8 +65,24 @@ injects actual catalog, reward/RNG, economy, mail-byte and stable-identity behav
 Shared join/remove context ports delegate to the owned Service. Lord/point/march
 reads and member/profile/world/application/donation/first-join/mail writes retain
 their transaction positions and participant checks. The existing aggregate still
-coordinates production, receipts and outbox. Directory, snapshot/effect assembly
-and aggregate/publication ownership remain later #558 slices.
+coordinates production, receipts and outbox. Queries and snapshots follow in #675;
+effects and aggregate/publication ownership remain later #558 slices.
+
+## Query and snapshot ownership
+
+After #675, Alliance owns initialization, directory/candidate/member queries,
+first-join status and native snapshots. Realm composition supplies required query
+and snapshot factories with actual record readers, failures and membership policy.
+Shared context ports provide profile, power and science data. Snapshot assembly
+projects pending member writes/removals, requires exactly one leader and preserves
+native aliases, field order, long precision and science evaluation order.
+
+The owned repository reads directory rows, totals and candidate players at their
+original transaction positions, retaining exact/substring predicates, realm and
+ban scopes, ordering and paging. Candidate language preference, application filters
+and the existing database-plus-memory pagination remain unchanged. The former
+single-consumer shared mapper and response declaration are removed. This changes
+source ownership without introducing process authority or saved-state changes.
 
 ## Queue assistance
 

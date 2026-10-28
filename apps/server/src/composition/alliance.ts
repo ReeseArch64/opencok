@@ -1,3 +1,9 @@
+import { AllianceQueryService } from "@opencok/alliance/services/queries";
+import { AllianceSnapshotService } from "@opencok/alliance/services/snapshot";
+import { AllianceQueryMapper } from "@opencok/alliance/mappings/queries";
+import { AllianceSnapshotMapper } from "@opencok/alliance/mappings/snapshot";
+import type { AllianceQueryContext } from "@opencok/alliance/contracts/queries";
+import type { AllianceSnapshotContext } from "@opencok/alliance/contracts/snapshot";
 import { AllianceMembershipService } from "@opencok/alliance/services/membership";
 import { AllianceMembershipMapper } from "@opencok/alliance/mappings/membership";
 import type { AllianceMembershipContext } from "@opencok/alliance/contracts/membership";
@@ -148,6 +154,33 @@ export function createRealmAllianceMembership(
     );
 }
 
+export function createRealmAllianceQueries(context: AllianceQueryContext)
+{
+    const runtime = {
+        text,
+        num,
+        long,
+        allianceFailure,
+        unsupportedFailure: (): never => {
+            throw new GameError(errors.unsupported);
+        },
+    };
+
+    return new AllianceQueryService(context, runtime, new AllianceQueryMapper(runtime));
+}
+
+export function createRealmAllianceSnapshot(context: AllianceSnapshotContext)
+{
+    const runtime = { text, num, long, allianceFailure };
+    const policy = new AllianceMembershipPolicy({ ...runtime, cityInteger, errors });
+
+    return new AllianceSnapshotService(
+        context,
+        runtime,
+        new AllianceSnapshotMapper(runtime, policy),
+    );
+}
+
 export function createRealmAllianceService(
     repository: AllianceRepository,
     rules: Rules,
@@ -165,6 +198,8 @@ export function createRealmAllianceService(
         createRealmAllianceGovernance,
         createRealmAllianceApplications,
         createRealmAllianceMembership,
+        createRealmAllianceQueries,
+        createRealmAllianceSnapshot,
         forbidden,
     );
 }

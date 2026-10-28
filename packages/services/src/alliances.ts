@@ -1,3 +1,6 @@
+import type { AllianceQueriesFactory } from "@opencok/alliance/contracts/queries";
+import type { AllianceSnapshotFactory } from "@opencok/alliance/contracts/snapshot";
+import { AllianceQueryCommand } from "@opencok/alliance/enums/query-command";
 import type { AllianceMembershipFactory } from "@opencok/alliance/contracts/membership";
 import { AllianceMembershipCommand } from "@opencok/alliance/enums/membership-command";
 import type { AllianceApplicationsFactory } from "@opencok/alliance/contracts/applications";
@@ -20,11 +23,8 @@ import {
     allianceText,
     allianceMember,
     allianceRight,
-    alliancePermissions,
-    allianceTargets,
 } from "@opencok/rules/alliance";
 import { cityInteger } from "@opencok/rules/city-progression";
-import { allianceSnapshot } from "@opencok/mappings/alliance";
 import { inventoryReplay } from "@opencok/economy/mappings/inventory";
 import { playerGameEffect } from "@opencok/rules/power-resolver";
 import { generalSkillPoints } from "@opencok/hero/services/general-power";
@@ -45,10 +45,10 @@ export const allianceCommands = [
     AllianceMembershipCommand.Create,
     AllianceGovernanceCommand.Attributes,
     AllianceGovernanceCommand.ChangeAttributes,
-    "al.checkname",
-    "al.name",
-    "al.abbr",
-    "al.searchuser",
+    AllianceQueryCommand.CheckName,
+    AllianceQueryCommand.Name,
+    AllianceQueryCommand.Abbreviation,
+    AllianceQueryCommand.Candidates,
     AllianceApplicationCommand.Apply,
     AllianceApplicationCommand.CancelApply,
     AllianceApplicationCommand.Invite,
@@ -70,11 +70,11 @@ export const allianceCommands = [
     AllianceGovernanceCommand.Rank,
     AllianceGovernanceCommand.Transfer,
     AllianceGovernanceCommand.Replace,
-    "al.get.firstjoin",
-    "al.rank",
-    "al.view",
-    "al.check",
-    "al.search",
+    AllianceQueryCommand.FirstJoin,
+    AllianceQueryCommand.Rank,
+    AllianceQueryCommand.View,
+    AllianceQueryCommand.Check,
+    AllianceQueryCommand.Search,
     AllianceGovernanceCommand.PermissionGet,
     AllianceGovernanceCommand.PermissionModify,
     AllianceGovernanceCommand.RankNames,
@@ -108,6 +108,8 @@ export class AllianceService
         readonly governance: AllianceGovernanceFactory,
         readonly applicationsFactory: AllianceApplicationsFactory,
         readonly membershipFactory: AllianceMembershipFactory<Rules, RealmInventoryPlanner>,
+        readonly queriesFactory: AllianceQueriesFactory,
+        readonly snapshotFactory: AllianceSnapshotFactory,
         readonly forbidden: (value: string) => boolean | Promise<boolean> = () => false,
     )
     {}
@@ -144,6 +146,8 @@ export class AllianceService
                     this.governance,
                     this.applicationsFactory,
                     this.membershipFactory,
+                    this.queriesFactory,
+                    this.snapshotFactory,
                 );
                 context.member();
                 const body = this.gifts(context).publish(giftEvent, type),
@@ -176,7 +180,7 @@ export class AllianceService
     {
         if (
             command !== "alliance.tick"
-            && command !== "alliance.init"
+            && command !== AllianceQueryCommand.Init
             && !(allianceCommands as readonly string[]).includes(command)
         )
         {
@@ -303,7 +307,7 @@ export class AllianceService
 
         if (
             command !== "alliance.tick"
-            && command !== "alliance.init"
+            && command !== AllianceQueryCommand.Init
             && !/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
                 requestId,
             )
@@ -324,26 +328,40 @@ export class AllianceService
 
         const selection = {
             allianceId: str(params, "allianceId", "")
-                || (["al.view", "al.rank"].includes(command) ? str(params, "uid", "") : "")
+                || (([AllianceQueryCommand.View, AllianceQueryCommand.Rank] as readonly string[])
+                        .includes(command)
+                    ? str(params, "uid", "")
+                    : "")
                 || undefined,
-            playerId:
-                (command === "al.check" ? str(params, "uid", "") : str(params, "playerId", ""))
+            playerId: (command === AllianceQueryCommand.Check
+                ? str(params, "uid", "")
+                : str(params, "playerId", ""))
                 || undefined,
             mailId: str(params, "mailId", "") || undefined,
             helpId: str(params, "helpId", "") || undefined,
-            key: [
-                    "al.search",
-                    "al.checkname",
-                    "al.name",
-                    "al.abbr",
-                    "al.searchuser",
+            key: ([
+                    AllianceQueryCommand.Search,
+                    AllianceQueryCommand.CheckName,
+                    AllianceQueryCommand.Name,
+                    AllianceQueryCommand.Abbreviation,
+                    AllianceQueryCommand.Candidates,
                     AllianceMembershipCommand.Create,
-                ].includes(command)
-                ? str(params, "key", str(params, command === "al.abbr" ? "abbr" : "name", ""))
+                ] as readonly string[]).includes(command)
+                ? str(
+                    params,
+                    "key",
+                    str(
+                        params,
+                        command === AllianceQueryCommand.Abbreviation ? "abbr" : "name",
+                        "",
+                    ),
+                )
                 : undefined,
-            searchPlayers: command === "al.searchuser",
+            searchPlayers: command === AllianceQueryCommand.Candidates,
             language: str(params, "lang", str(params, "language", "")),
-            pageSize: command === "al.search" && int(params, "type", 0) === 2 ? 5 : 10,
+            pageSize: command === AllianceQueryCommand.Search && int(params, "type", 0) === 2
+                ? 5
+                : 10,
             page: Math.max(1, cityInteger(int(params, "page", 1), 0, 1000)),
         };
 
@@ -376,6 +394,8 @@ export class AllianceService
                     this.governance,
                     this.applicationsFactory,
                     this.membershipFactory,
+                    this.queriesFactory,
+                    this.snapshotFactory,
                 );
                 const body = await context.command(command, params);
                 const inventory = context.ledger.result(body);
@@ -438,6 +458,8 @@ export class AllianceContext
         private readonly governance: AllianceGovernanceFactory,
         private readonly applicationsFactory: AllianceApplicationsFactory,
         private readonly membershipFactory: AllianceMembershipFactory<Rules, RealmInventoryPlanner>,
+        private readonly queriesFactory: AllianceQueriesFactory,
+        private readonly snapshotFactory: AllianceSnapshotFactory,
     )
     {
         this.allianceId = text(state.inventory.profile, "allianceId");
@@ -573,92 +595,14 @@ export class AllianceContext
             }, 0);
     }
 
-    snapshot(
-        alliance = this.alliance(),
-        member = [...(this.write.members ?? []), ...this.state.members].find(
-            (row) => row.uid === this.owner && row.allianceId === alliance.uid,
-        ),
-    )
+    snapshot(alliance?: Row, member?: Row)
     {
-        const id = text(alliance, "uid"),
-            members = this.list(id).filter(
-                (row) => !(this.write.removedMembers ?? []).includes(text(row, "uid")),
-            );
+        return this.snapshotFactory(this).snapshot(alliance, member);
+    }
 
-        for (const row of this.write.members ?? [])
-        {
-            if (row.allianceId === id)
-            {
-                const index = members.findIndex((value) => value.uid === row.uid);
-
-                if (index >= 0)
-                {
-                    members[index] = row;
-                }
-                else
-                {
-                    members.push(row);
-                }
-            }
-        }
-
-        const leaders = members.filter((row) => num(row, "rank") === 5);
-
-        if (leaders.length !== 1)
-        {
-            allianceFailure();
-        }
-
-        const leader = this.profile(text(leaders[0]!, "uid"));
-        const result = allianceSnapshot({
-            uid: id,
-            name: text(alliance, "alliancename"),
-            abbr: text(alliance, "abbr"),
-            intro: text(alliance, "intro"),
-            announce: text(alliance, "announce"),
-            language: text(alliance, "language"),
-            member: members.length,
-            maxMember: num(alliance, "maxMember") + Math.trunc(this.scienceEffect(500, id)),
-            recruit: num(alliance, "recruit"),
-            rank: num(member ?? {}, "rank"),
-            point: num(member ?? {}, "point"),
-            accPoint: num(member ?? {}, "accPoint"),
-            leaderUid: text(leader, "uid"),
-            leaderName: text(leader, "name"),
-            fightpower: members.reduce((sum, row) => sum + this.power(text(row, "uid")), 0n),
-        });
-
-        return {
-            ...result,
-            alliancename: result.name!,
-            curMember: result.member!,
-            alliancepoint: sfs.long(long(alliance, "alliancepoint")),
-            icon: sfs.string(text(alliance, "icon")),
-            bannerStyle: sfs.string(text(alliance, "bannerStyle")),
-            permission: sfs.object(
-                Object.fromEntries(
-                    Object.entries(alliancePermissions(text(alliance, "permission"))).map((
-                        [key, value],
-                    ) => [
-                        key,
-                        sfs.int(value),
-                    ]),
-                ),
-            ),
-            donateCDTime: sfs.long(long(member ?? {}, "donateCDTime")),
-            donateAvailable: sfs.int(Number(member?.donateAvailable ?? 1)),
-            jointime: sfs.long(long(member ?? {}, "jointime")),
-            currentlevel: sfs.int(Math.floor(num(alliance, "giftlevel") / 1000)),
-            nextlevel: sfs.int((Math.floor(num(alliance, "giftlevel") / 1000) + 1) * 1000),
-            allianceScience: this.science(this).snapshots(id),
-            ...Object.fromEntries(
-                ["rankone", "ranktwo", "rankthree", "rankfour", "rankfive"].map((key) => [
-                    key,
-                    sfs.string(text(alliance, key)),
-                ]),
-            ),
-            targetScience: sfs.string(allianceTargets(text(alliance, "targetScience")).join(";")),
-        };
+    scienceSnapshots(id: string)
+    {
+        return this.science(this).snapshots(id);
     }
 
     join(uid: string, alliance: Row, rank = 1)
@@ -678,13 +622,9 @@ export class AllianceContext
             return this.science(this).complete();
         }
 
-        if (command === "alliance.init")
+        if (command === AllianceQueryCommand.Init)
         {
-            const present = this.state.alliances.some((row) => row.uid === this.allianceId)
-                && this.list().some((row) => row.uid === this.owner)
-                && this.list().filter((row) => num(row, "rank") === 5).length === 1;
-
-            return { alliance: sfs.object(present ? this.snapshot() : {}) };
+            return this.queriesFactory(this).command(command);
         }
 
         if (command === AllianceMembershipCommand.Create)
@@ -692,153 +632,9 @@ export class AllianceContext
             return this.membershipFactory(this).create(params);
         }
 
-        if (command === "al.check")
+        if ((Object.values(AllianceQueryCommand) as readonly string[]).includes(command))
         {
-            return {
-                allianceId: sfs.string(
-                    text(
-                        this.state.profiles.find((row) => row.uid === this.state.selection.playerId)
-                            ?? {},
-                        "allianceId",
-                    ),
-                ),
-            };
-        }
-
-        if (command === "al.name" || command === "al.abbr")
-        {
-            const key = command === "al.name" ? "alliancename" : "abbr",
-                value = this.state.selection.key ?? "";
-            const invalid = value.length < 3
-                || value.length > (command === "al.name" ? 20 : 3)
-                || this.state.directory.some((row) =>
-                    text(row, key).toLowerCase() === value.toLowerCase()
-                );
-
-            return { result: sfs.bool(invalid) };
-        }
-
-        if (command === "al.searchuser")
-        {
-            this.right("invite");
-            const eligible = this.state.candidates.filter(
-                (row) =>
-                    !this.state.applications.some(
-                        (application) =>
-                            application.userId === row.uid
-                            && application.allianceId === this.allianceId
-                            && (this.state.selection.key ? num(application, "type") === 1 : true),
-                    ),
-            );
-            const preferred = eligible.filter((row) =>
-                text(row, "lang").startsWith(this.state.selection.language ?? "")
-            );
-            const candidates = preferred.length ? preferred : eligible,
-                page = this.state.selection.page ?? 1;
-
-            return {
-                list: sfs.array(
-                    candidates.slice((page - 1) * 10, page * 10).map((row) =>
-                        sfs.object({
-                            uid: sfs.string(text(row, "uid")),
-                            name: sfs.string(text(row, "name")),
-                            pic: sfs.string(text(row, "pic")),
-                            picVer: sfs.int(num(row, "picVer")),
-                            picfraId: sfs.int(num(row, "picfraId")),
-                            lang: sfs.string(text(row, "lang")),
-                            power: sfs.long(long(row, "power")),
-                            offLineTime: sfs.long(long(row, "offLineTime")),
-                            online: sfs.bool(false),
-                        })
-                    ),
-                ),
-                total: sfs.long(BigInt(candidates.length)),
-                page: sfs.int(this.state.selection.page ?? 1),
-            };
-        }
-
-        if (command === "al.search" || command === "al.checkname")
-        {
-            return command === "al.checkname"
-                ? {
-                    result: sfs.bool(
-                        !this.state.directory.some(
-                            (row) =>
-                                text(row, "alliancename").toLowerCase()
-                                    === (this.state.selection.key ?? "").toLowerCase(),
-                        ),
-                    ),
-                }
-                : {
-                    list: sfs.array(
-                        this.state.directory.map((row) =>
-                            sfs.object({
-                                uid: sfs.string(text(row, "uid")),
-                                alliancename: sfs.string(text(row, "alliancename")),
-                                abbr: sfs.string(text(row, "abbr")),
-                                curMember: sfs.int(num(row, "curMember")),
-                                maxMember: sfs.int(num(row, "maxMember")),
-                                language: sfs.string(text(row, "language")),
-                                recruit: sfs.int(num(row, "recruit")),
-                            })
-                        ),
-                    ),
-                    page: sfs.int(this.state.selection.page ?? 1),
-                    total: sfs.long(this.state.directoryTotal),
-                };
-        }
-
-        if (command === "al.get.firstjoin")
-        {
-            return {
-                firstJoin: sfs.int(
-                    Number(
-                        this.state.lords.find((row) => row.uid === this.owner)
-                            ?.firstJoinAllianceFlag ?? 1,
-                    ),
-                ),
-            };
-        }
-
-        if (command === "al.view")
-        {
-            return {
-                alliance: sfs.object(
-                    this.snapshot(
-                        this.alliance(this.state.selection.allianceId ?? this.allianceId),
-                    ),
-                ),
-            };
-        }
-
-        if (command === "al.rank")
-        {
-            const id = this.state.selection.allianceId ?? this.allianceId;
-            this.alliance(id);
-
-            return {
-                list: sfs.array(
-                    this.list(id)
-                        .sort(
-                            (a, b) =>
-                                num(b, "rank") - num(a, "rank")
-                                || text(a, "uid").localeCompare(text(b, "uid")),
-                        )
-                        .map((row) => {
-                            const profile = this.profile(text(row, "uid"));
-
-                            return sfs.object({
-                                uid: sfs.string(text(row, "uid")),
-                                name: sfs.string(text(profile, "name")),
-                                pic: sfs.string(text(profile, "pic")),
-                                picVer: sfs.int(num(profile, "picVer")),
-                                picfraId: sfs.int(num(profile, "picfraId")),
-                                rank: sfs.int(num(row, "rank")),
-                                power: sfs.long(this.power(text(row, "uid"))),
-                            });
-                        }),
-                ),
-            };
+            return this.queriesFactory(this).command(command);
         }
 
         if (
