@@ -81,6 +81,7 @@
         "@opencok/contracts": "workspace:*",
         "@opencok/controllers": "workspace:*",
         "@opencok/core": "workspace:*",
+        "@opencok/economy": "workspace:*",
         "@opencok/env": "workspace:*",
         "@opencok/hero": "workspace:*",
         "@opencok/mappings": "workspace:*",
@@ -393,6 +394,20 @@
     },
     "packages/dtos": {
       "name": "@opencok/dtos",
+      "devDependencies": {
+        "@opencok/config": "workspace:*",
+        "@types/bun": "catalog:",
+        "typescript": "catalog:",
+      },
+    },
+    "packages/economy": {
+      "name": "@opencok/economy",
+      "dependencies": {
+        "@opencok/contracts": "workspace:*",
+        "@opencok/drizzle": "workspace:*",
+        "@opencok/ledger": "workspace:*",
+        "drizzle-orm": "0.45.4",
+      },
       "devDependencies": {
         "@opencok/config": "workspace:*",
         "@types/bun": "catalog:",
@@ -1184,6 +1199,8 @@
     "@opencok/drizzle": ["@opencok/drizzle@workspace:packages/drizzle"],
 
     "@opencok/dtos": ["@opencok/dtos@workspace:packages/dtos"],
+
+    "@opencok/economy": ["@opencok/economy@workspace:packages/economy"],
 
     "@opencok/email": ["@opencok/email@workspace:packages/email"],
 
