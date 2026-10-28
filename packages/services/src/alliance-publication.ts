@@ -1,3 +1,4 @@
+import type { AllianceHelpMapper } from "@opencok/alliance/mappings/help";
 import { decode, fields, str, sfs, type Fields } from "@opencok/messages/sfs";
 import { text, num, long, type Row } from "@opencok/contracts/rows";
 import type { AlliancePublicationSnapshot } from "@opencok/contracts/alliance-gameplay";
@@ -11,6 +12,7 @@ export async function publishAllianceMutation(
     payload: Buffer,
     publish: (owner: string, command: string, body: Fields) => Promise<unknown>,
     rules: Rules,
+    helpMapper: Pick<AllianceHelpMapper, "publication">,
 )
 {
     const data = decode(payload),
@@ -187,21 +189,7 @@ export async function publishAllianceMutation(
                 await publish(
                     text(member, "uid"),
                     command === "al.callhelp" ? "push.al.help.new" : "push.al.help.update",
-                    {
-                        helpId: sfs.string(text(help, "helpId")),
-                        senderId: sfs.string(text(help, "senderId")),
-                        content: sfs.string(text(help, "content")),
-                        queueId: sfs.string(text(help, "content")),
-                        updateTime: sfs.long(long(active, "updateTime")),
-                        maxcount: sfs.int(num(help, "maxcount")),
-                        nowcount: sfs.int(num(help, "nowcount")),
-                        maxCount: sfs.int(num(help, "maxcount")),
-                        nowCount: sfs.int(num(help, "nowcount")),
-                        qType: sfs.int(num(help, "type")),
-                        itemId: sfs.string(text(help, "itemId")),
-                        level: sfs.int(num(help, "level")),
-                        isvalid: sfs.int(num(help, "isvalid")),
-                    },
+                    helpMapper.publication(help, active),
                 );
             }
         }

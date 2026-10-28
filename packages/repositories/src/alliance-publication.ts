@@ -1,9 +1,9 @@
+import { AllianceHelpRepository } from "@opencok/alliance/repositories/help";
 import { and, eq, inArray } from "drizzle-orm";
 import { alliance } from "@opencok/drizzle/schema/opencok_kingdom/alliance";
 import { alliance_member } from "@opencok/drizzle/schema/opencok_kingdom/alliance_member";
 import { userprofile } from "@opencok/drizzle/schema/opencok_kingdom/userprofile";
 import { queue } from "@opencok/drizzle/schema/opencok_kingdom/queue";
-import { alliance_help } from "@opencok/drizzle/schema/opencok_kingdom/alliance_help";
 import { alliance_science } from "@opencok/drizzle/schema/opencok_kingdom/alliance_science";
 import { alliance_science_upgrade } from "@opencok/drizzle/schema/opencok_kingdom/alliance_science_upgrade";
 import type { DatabaseClient } from "@opencok/drizzle/contracts/database";
@@ -52,11 +52,7 @@ export function createAlliancePublicationReader(
                             ),
                         )
                     : [];
-                const helps = await tx
-                    .select()
-                    .from(alliance_help)
-                    .where(eq(alliance_help.allianceId, id))
-                    .limit(4096);
+                const helps = await AllianceHelpRepository.readPublication(tx, id);
                 const sciences = await tx
                     .select()
                     .from(alliance_science)

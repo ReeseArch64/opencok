@@ -98,3 +98,8 @@ activation, projection, notification and transactional persistence after #661.
 Realm factories inject campaign, effect and numeric collaborators; remaining
 campaign/trouble/world bindings have explicit retirement conditions. Media uploads
 and profile-avatar workflows remain with their existing owners.
+
+The [Alliance domain](alliance/README.md) owns existing member-help commands,
+generation validation, native mapping and transactional persistence after #663.
+The realm injects numeric/catalog collaborators; shared membership, science, gifts
+and aggregate publication remain subsequent slices.
