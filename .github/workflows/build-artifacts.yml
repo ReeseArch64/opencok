@@ -56,16 +56,18 @@ jobs:
           bun --no-env-file node_modules/typescript/bin/tsc --noEmit -p .github/testing/tsconfig.json
       - name: Build maintained application entrypoints
         run: |
-          for app in api chat server web
+          for app in api chat server
           do
             bun run --cwd "apps/$app" build
           done
+          bun --no-env-file .github/build-pilot/web-workspace.ts "$RUNNER_TEMP/opencok-web-build"
+          bun run --cwd "$RUNNER_TEMP/opencok-web-build/apps/web" build
       - name: Verify relocated environment loading
         run: bun run --cwd packages/env test
       - name: Execute emitted backend compatibility checks
         run: bun --no-env-file .github/build-pilot/verify.ts
       - name: Execute emitted frontend loading flow
-        run: bun --no-env-file .github/build-pilot/verify-web.ts apps/web/dist
+        run: bun --no-env-file .github/build-pilot/verify-web.ts "$RUNNER_TEMP/opencok-web-build/apps/web/dist"
       - name: Verify Bun auth mutation instrumentation
         run: bun --no-env-file apps/server/scripts/mutate-auth.ts
       - name: Verify Bun Chat mutation instrumentation

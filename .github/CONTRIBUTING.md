@@ -57,6 +57,8 @@ implemented apps, execute synthetic emitted backend/frontend scenarios and verif
 the environment relocation and Bun mutation plugins. See the
 [build pilot](build-pilot/README.md) for reproduction and evidence limits. Benchmark
 timing is recorded for evaluation, not enforced as a machine-dependent CI limit.
+Browser checks copy maintained source into a temporary workspace with public
+synthetic images; ignored prepared game artwork is never a CI dependency.
 
 JS/TS formatting uses four spaces, double quotes, semicolons, LF and a 100-column
 print width. dprint exclusively owns JS/JSX/TS/TSX and c/m module variants; Oxfmt
