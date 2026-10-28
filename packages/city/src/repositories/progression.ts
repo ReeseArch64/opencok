@@ -35,6 +35,7 @@ export class CityProgressionRepository implements CityProgressionStore
             troops: adapters.troops,
             buildings: adapters.buildings,
             equipment: adapters.equipment,
+            quests: adapters.quests,
             writers: adapters.writers,
             birth: adapters.birth,
             alliance: "",

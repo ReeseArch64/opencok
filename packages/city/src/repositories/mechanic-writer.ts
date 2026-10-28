@@ -276,7 +276,7 @@ export class CityMechanicWriter
 
         if (write.quests)
         {
-            await writers.writeQuests(tx, owner, write.quests, session.questBefore);
+            await session.quests.writeQuests(write.quests, session.questBefore);
         }
     };
 }

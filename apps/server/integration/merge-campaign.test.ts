@@ -16,12 +16,14 @@ import { user_item } from "@opencok/drizzle/schema/opencok_kingdom/user_item";
 import { user_resource } from "@opencok/drizzle/schema/opencok_kingdom/user_resource";
 import { user_14day_login } from "@opencok/drizzle/schema/opencok_kingdom/user_14day_login";
 import { publishMergeEffectBoard } from "@opencok/services/merge-campaign";
-import { questsDomain } from "@opencok/services/quests";
+import { createRealmQuestsDomain } from "../src/composition/quests";
 import { decodeWorldPowerEffects } from "@opencok/services/power";
 import { worldPowerEffects } from "@opencok/rules/power-world";
 import { mergeEffectBoard } from "@opencok/mappings/merge-campaign";
 import { encode, decode, fields, int, sfs, type Fields, type Value } from "@opencok/messages/sfs";
 import { cityHarness } from "./support/city";
+
+const questsDomain = createRealmQuestsDomain();
 
 const hour = 3600000;
 const mergeAt = Date.UTC(2030, 0, 1);

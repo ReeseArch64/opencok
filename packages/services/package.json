@@ -32,6 +32,7 @@
     "@opencok/ledger": "workspace:*",
     "@opencok/building": "workspace:*",
     "@opencok/base": "workspace:*",
-    "@opencok/equipment": "workspace:*"
+    "@opencok/equipment": "workspace:*",
+    "@opencok/tasks": "workspace:*"
   }
 }

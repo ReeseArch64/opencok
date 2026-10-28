@@ -97,7 +97,6 @@ export interface CityPersistenceReaders
     >;
     readAbilityPages: CityReadField<"abilityPages">;
     readProgressionEffects: CityReadField<"effects", [effects: CityProgressionState["effects"]]>;
-    readQuests: CityReadField<"quests", [profile: Row, now: bigint]>;
     readResourceNewGenerals: CityReadField<"newGenerals", [moved: boolean]>;
     readPlayerEffects: (
         tx: CityTransaction,

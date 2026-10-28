@@ -1,0 +1,79 @@
+# Player quests
+
+Tasks owns ordinary/main, story, daily, legacy daily and sign-in quests after
+[#653](https://github.com/ReeseArch64/opencok/issues/653), under
+[ADR-0016](../../docs/decisions/0016-adopt-domain-owned-package-layout.md).
+Target tasks, recall and event-specific mission workflows remain in their current
+owners for later #558 slices. Background work belongs to jobs.
+
+## Responsibilities and composition
+
+`services/quests` specializes Base's activity lifecycle and composes commands,
+reward grants and pending-plan progression. `rules/progression` owns eligibility,
+counts, daily selection, periods and level rewards; `rules/changes` owns delta
+selection. `mappings/quests` preserves native field order and main string IDs versus
+numeric story/daily IDs. The fourteen command names live in `enums/command`.
+
+`apps/server/src/composition/quests.ts` injects the actual shared record readers,
+numeric/reconnect algorithms, target-task and campaign callbacks, mail encoding,
+reward previews and Equipment factory. Tasks imports no broad Contracts, Rules,
+Services, Mappings or Repositories package. Structural ports retain the existing
+row-shaped catalog/state boundaries; semantic definitions remain #558 W14 work.
+The command dispatcher is approximately 500 lines; its one responsibility is the
+existing fourteen-command protocol, with rewards and progression separated.
+
+`repositories/progression` receives the current realm transaction, owner and
+system-mail insertion adapter from `composition/quest-persistence.ts`. It owns task
+reads, quest snapshot reads and writes, including alliance refresh compare-and-set,
+mail ordering, ownership validation before delta filtering, 256-row batches,
+daily type keys, resets, sign-in state and alliance box locking. City delegates at
+the same points in its aggregate snapshot/write sequence. The repository remains
+one cohesive transaction adapter; it does not open a competing transaction.
+
+No process, writer authority, schema, saved key, reward identity or native wire
+behavior changes. Daily rollover uses the existing five-minute boundary and
+materializes completed unclaimed daily rewards through the same mail writer.
+
+## Compatibility and retirement
+
+Tasks owns the following remaining facades, tracked by #558 W20. Migrate consumers
+to constructor ports or owned imports, verify public exports and remove each facade
+when no maintained consumer remains. There is one implementation of each algorithm.
+
+- `services/src/quests.ts` binds owned classes to existing realm helpers and exports
+  `grantRewards` and `refreshQuests`. Its nine direct consumers are server composition
+  `city` and `equipment`; Hero Services `general-draws` and `general-skills`; shared
+  Services `hot-item`, `lottery`, `minstrel`, `prayer` and `world-scout-runtime`.
+  The adapter still consumes the legacy City context and equipment creation facade.
+- `contracts/src/city-progression.ts` imports and re-exports `QuestState`/`QuestWrite`.
+  There are no external direct named imports of those aliases; aggregate interfaces
+  in that same module still embed both. Retire the aliases with the remaining
+  aggregate-contract boundary and public-export audit.
+- `contracts/src/reconnect.ts` re-exports `ReconnectTask`/`ReconnectTaskPlan`.
+  Direct consumers are `mappings/src/reconnect.ts` and `rules/src/reconnect-tasks.ts`;
+  the reconnect aggregate also uses the owned plan internally.
+- Rules `reconnect-tasks.ts` and `reconnect-task-counts.ts` re-export their former
+  context types for server tests `reconnect-tasks.test.ts` and
+  `reconnect-task-counts.test.ts`, respectively. Move these imports with the remaining
+  reconnect algorithm ownership review before deleting the aliases.
+
+The previous quest Rules, Mappings and Repository modules are removed after all
+callers migrate. The real system-mail contract now belongs to
+[Mail](../mail/README.md); its shared Contracts facade remains tracked separately.
+
+## Verification and recovery
+
+Run `bun --no-env-file test packages/tasks/tests`, root package/architecture suites,
+Tasks and affected workspace type checks, root lint/format and the realm build.
+Existing app quest tests exercise real catalogs and composition. PostgreSQL quest,
+anniversary and merge-campaign scenarios cover repeat claims, replay, rollover mail,
+rollback and statement timeouts. Owned tests cover delta identity/duplicates,
+wire field order/types, boundary selection and bound policy helpers.
+
+The migration comparison checks 27 structures: original runtime bodies, complete
+City snapshot/writer flows, moved declarations, command order, period arithmetic and
+task SQL. The synthetic `benchmark-quest-writes.ts` keeps zero writes for nine
+unchanged initialization stages versus 9,252 simulated unfiltered writes; this is
+not a production latency claim. Native-device and production-load acceptance remain
+separate. Deploy or roll back the realm artifact against the same persisted quests,
+mail, inventory, receipts and outbox; no data conversion is required.
