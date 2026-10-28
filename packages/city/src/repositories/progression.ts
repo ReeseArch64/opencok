@@ -31,6 +31,7 @@ export class CityProgressionRepository implements CityProgressionStore
             boundary,
             mapSize,
             readers: adapters.readers,
+            research: adapters.research,
             writers: adapters.writers,
             birth: adapters.birth,
             alliance: "",

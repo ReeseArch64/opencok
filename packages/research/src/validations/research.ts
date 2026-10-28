@@ -1,5 +1,5 @@
 import { z } from "zod";
-import type { ResearchResponse } from "@opencok/contracts/responses/research";
+import type { ResearchResponse } from "../contracts/responses/research";
 import { field } from "@opencok/messages/validations/response";
 
 export const researchSchema = z.strictObject({

@@ -1,6 +1,6 @@
 import { user_item } from "@opencok/drizzle/schema/opencok_kingdom/user_item";
 import { user_state } from "@opencok/drizzle/schema/opencok_kingdom/user_state";
-import { researchDomain } from "@opencok/services/research";
+import { createRealmResearchDomain } from "../src/composition/research";
 import { user_science } from "@opencok/drizzle/schema/opencok_kingdom/user_science";
 import { test, expect } from "bun:test";
 import { eq } from "drizzle-orm";
@@ -13,6 +13,8 @@ import { new_general_skill } from "@opencok/drizzle/schema/opencok_kingdom/new_g
 import { user_mixed_info } from "@opencok/drizzle/schema/opencok_kingdom/user_mixed_info";
 import { user_resource } from "@opencok/drizzle/schema/opencok_kingdom/user_resource";
 import { cityHarness } from "./support/city";
+const researchDomain = createRealmResearchDomain();
+
 test(
     "talents, cooldowns, and refinement proposals survive replay without duplicate rewards",
     async () => {

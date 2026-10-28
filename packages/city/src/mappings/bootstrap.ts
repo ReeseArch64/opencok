@@ -8,7 +8,7 @@ import type {
 import type { ReadyCity } from "@opencok/contracts/city-bootstrap";
 import { long, num, text, type Row } from "@opencok/contracts/rows";
 import { building, gold, queue, user } from "@opencok/mappings/city";
-import { researchData } from "@opencok/mappings/research";
+import { ResearchMapper } from "@opencok/research/mappings/research";
 import { resource } from "@opencok/economy/mappings/resources";
 import { sfs, fields, type Fields } from "@opencok/messages/sfs";
 import type { Rules } from "@opencok/rules/game";
@@ -21,6 +21,7 @@ export class CityBootstrapMapper
         private readonly rules: Rules,
         private readonly now: () => number,
         private readonly presentation: CityBootstrapPresentation,
+        private readonly research = new ResearchMapper(),
     )
     {}
 
@@ -100,7 +101,7 @@ export class CityBootstrapMapper
             resource: sfs.object(resource(state.resource)),
             gold: sfs.long(gold(state.profile)),
             ...(state.sciences && this.rules.power.sciences?.size
-                ? { science: researchData(state.sciences, state.queues, this.rules) }
+                ? { science: this.research.data(state.sciences, state.queues, this.rules) }
                 : {}),
         };
     }

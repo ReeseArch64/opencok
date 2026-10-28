@@ -1,13 +1,11 @@
 import { user_branch_city_info } from "@opencok/drizzle/schema/opencok_kingdom/user_branch_city_info";
 import { activity_minstrel } from "@opencok/drizzle/schema/opencok_kingdom/activity_minstrel";
-import { user_civilization_science } from "@opencok/drizzle/schema/opencok_kingdom/user_civilization_science";
 import { user_skill } from "@opencok/drizzle/schema/opencok_kingdom/user_skill";
 import { and, asc, eq } from "drizzle-orm";
 import { userprofile } from "@opencok/drizzle/schema/opencok_kingdom/userprofile";
 import { user_resource } from "@opencok/drizzle/schema/opencok_kingdom/user_resource";
 import { user_building } from "@opencok/drizzle/schema/opencok_kingdom/user_building";
 import { user_building_exp } from "@opencok/drizzle/schema/opencok_kingdom/user_building_exp";
-import { user_science } from "@opencok/drizzle/schema/opencok_kingdom/user_science";
 import { user_army } from "@opencok/drizzle/schema/opencok_kingdom/user_army";
 import { user_hospital } from "@opencok/drizzle/schema/opencok_kingdom/user_hospital";
 import { user_wall } from "@opencok/drizzle/schema/opencok_kingdom/user_wall";
@@ -56,12 +54,7 @@ export class CitySnapshotReader
             .where(eq(user_building.uid, owner))
             .orderBy(asc(user_building.uuid))
             .limit(257);
-        const sciences = await tx
-            .select()
-            .from(user_science)
-            .where(eq(user_science.uid, owner))
-            .orderBy(asc(user_science.itemId))
-            .limit(4097);
+        const sciences = await session.research.read();
         const armies = await tx
             .select()
             .from(user_army)
@@ -104,11 +97,7 @@ export class CitySnapshotReader
         const [glory] = await tx.select().from(user_glory_info).where(
             eq(user_glory_info.uid, owner),
         );
-        const civilizationSciences = await tx
-            .select()
-            .from(user_civilization_science)
-            .where(eq(user_civilization_science.userID, owner))
-            .limit(4097);
+        const civilizationSciences = await session.research.readCivilization();
 
         if (civilizationSciences.length > 4096)
         {

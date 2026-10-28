@@ -1,19 +1,21 @@
 import { expect, test } from "bun:test";
 import { loadRules } from "@opencok/resources/rules";
-import { researchDomain } from "@opencok/services/research";
-import { researchData } from "@opencok/mappings/research";
+import { createRealmResearchDomain } from "../src/composition/research";
+import { ResearchMapper } from "@opencok/research/mappings/research";
 import {
     researchCosts,
     checkResearchRequirements,
     researchDefinition,
-} from "@opencok/rules/research";
+} from "@opencok/research/rules/research";
 import { sfs, fields } from "@opencok/messages/sfs";
 import { cityFixture } from "./fixtures/city-progression";
+
+const researchDomain = createRealmResearchDomain();
 
 const rules = await loadRules();
 test("login projects legacy research IDs by addition while mutation selection remains strict", () => {
     const saved = [{ itemId: "700101", level: 1 }];
-    const snapshot = researchData(saved, [], rules);
+    const snapshot = new ResearchMapper().data(saved, [], rules);
     const records = snapshot.value as import("@opencok/messages/sfs").Value[];
     const row = records.map(fields).find((row) => row.itemId?.value === "700101")!;
     expect(row.itemId).toEqual(sfs.string("700101"));
@@ -72,7 +74,7 @@ test("research completion advances exactly one level and returns the scalar wire
     expect(context.write.statistics!.power).toBe(1004n);
 });
 test("research snapshots include locked base technologies and expose only their occupied deadline", () => {
-    const value = researchData(
+    const value = new ResearchMapper().data(
         [{ uid: "owner", itemId: "700100", level: 1 }],
         [{ type: 6, itemId: "700100", updateTime: 100n }],
         rules,

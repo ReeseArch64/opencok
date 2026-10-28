@@ -1,11 +1,13 @@
 import type { Rule } from "@opencok/rules/game";
 import { test, expect } from "bun:test";
 import { loadRules } from "@opencok/resources/rules";
-import { civilizationScienceDomain } from "@opencok/services/civilization-science";
-import { civilizationScience } from "@opencok/rules/civilization-science";
+import { CivilizationScienceDomain } from "@opencok/research/services/civilization";
+import { civilizationScience } from "@opencok/research/rules/civilization";
 import { decode, sfs, Type } from "@opencok/messages/sfs";
 import { cityFixture } from "./fixtures/city-progression";
 import type { TimedActivity } from "@opencok/contracts/timed-activity";
+
+const civilizationScienceDomain = new CivilizationScienceDomain();
 
 async function fixture()
 {

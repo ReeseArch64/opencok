@@ -249,7 +249,7 @@ import {
 import { DragonTalentsDomain } from "@opencok/services/dragon-talents";
 import { DragonProgressionDomain } from "@opencok/services/dragon-progression";
 import { MinstrelDomain } from "@opencok/services/minstrel";
-import { CivilizationScienceDomain } from "@opencok/services/civilization-science";
+import { CivilizationScienceDomain } from "@opencok/research/services/civilization";
 import { createChatNoticeCostReader } from "@opencok/repositories/chat-notice-cost";
 import { cleanupSocialRealm } from "@opencok/repositories/social-cleanup";
 import type { Fields } from "@opencok/messages/sfs";
@@ -275,7 +275,7 @@ import { cityQueueCommands } from "@opencok/rules/city-command";
 import { TrainingDomain } from "@opencok/services/training";
 import { HospitalDomain } from "@opencok/services/hospital";
 import { FortificationDomain } from "@opencok/services/fortifications";
-import { ResearchDomain } from "@opencok/services/research";
+import { createRealmResearchDomain } from "./composition/research";
 import { createRealmCityProgressionStore } from "./composition/city-persistence.ts";
 import { createCityProductionBoundary } from "@opencok/production/repositories/city-boundary";
 import type { CityProgressionService } from "@opencok/city/services/progression";
@@ -930,7 +930,7 @@ export const RealmDependenciesLive = Layer.effect(
                     observeAdapter(new PlayerEffectsDomain(), "realm.PlayerEffectsDomain"),
                     observeAdapter(new QuestsDomain(), "realm.QuestsDomain"),
                     observeAdapter(new ConstructionDomain(), "realm.ConstructionDomain"),
-                    observeAdapter(new ResearchDomain(), "realm.ResearchDomain"),
+                    observeAdapter(createRealmResearchDomain(), "realm.ResearchDomain"),
                     observeAdapter(
                         new CivilizationScienceDomain(),
                         "realm.CivilizationScienceDomain",

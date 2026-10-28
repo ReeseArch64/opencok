@@ -151,3 +151,9 @@ bindings, plus all 50 unchanged GameService methods after explicit delegate subs
 Deploy or roll back the realm artifact against the same schema. No migration,
 new setting, authority change or native-client artifact is required. Native-device
 acceptance and production-load measurement remain separate verification work.
+
+After #643, realm composition also injects the owned research repository. Snapshot
+reads, the production-boundary level query and ordinary/civilization upserts keep
+their original positions; aggregate validation and the shared transaction remain
+here. Bootstrap receives the research Mapper. Research's two workflows no longer
+use the legacy city context/domain aliases, reducing their consumers to 56/66.
