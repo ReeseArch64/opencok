@@ -1,9 +1,9 @@
 # Economy
 
 `economy` owns wallet/resource balance mutations, activity economic coordination
-and inventory rules/responses under #611, #613, #615 and #619, part of #558 W06. Full inventory
-planning, item persistence, production and reservation protocols remain subsequent
-work. These extractions do not create a network service or a second mutation authority.
+and the inventory ledger, rules and responses under #611, #613, #615, #619 and
+#621, part of #558 W06. Full command planning, item persistence, production and
+reservation protocols remain subsequent work. These extractions do not create a network service or a second mutation authority.
 
 ## Boundaries
 
@@ -120,3 +120,35 @@ invalid rows, purchase/use/composition shapes, receipt operation IDs, event bala
 primary-body preservation and ordered chained pushes. Schema and response types
 retain their shapes. Existing planner/transaction ownership, saved data and process
 authority remain unchanged; rollback uses the prior artifact.
+
+## Inventory ledger (#621)
+
+`domain/inventory-ledger` owns item/balance staging, posting records, item lookup,
+expiration, grants, consumption, currency pool selection and saved/staged balance
+reads. `contracts/inventory-ledger` owns its narrow profile/resource/assets/item
+snapshot. The class implements the existing ActivityLedger port; it does not import
+horizontal Services, contracts, rules, mappings or repositories.
+
+The current InventoryPlanner extends this implementation with its existing command,
+item-effect and continued-cost coordination. Shared InventoryState extends the owned
+snapshot and retains only the additional command/effect state. Generic snapshot and
+catalog parameters preserve the subclass's precise types without coupling economy
+to those cross-domain contracts. Existing constructors and transaction call sites
+remain unchanged.
+
+The six ledger tests pass with 86 identical assertions against the original planner,
+the extracted ledger and the inheriting planner. Clock validation and input-item
+copying stay in the constructor. Eleven ledger methods retain their emitted bodies
+after exact row-helper inlining; the remaining four planner methods and Service
+methods are unchanged. Tests preserve the existing partial in-memory plan on failure;
+PostgreSQL integration verifies that failed transactions commit none of that plan.
+
+Inventory, campaign producer and timed-economy integrations exercise retries,
+receipt/grant rollback, recovery and authority loss through the real subclass and
+transaction executor. No schema, saved-data rewrite or writer-authority change is
+introduced. Rollback uses the previous realm artifact against the same state.
+
+The ledger is 177 lines with one cohesive item/balance responsibility. The residual
+Services inventory module is 616 lines and remains under review for #558: command
+validation, cross-domain effects and continued-cost observation still require their
+own ports and extraction. This slice does not claim complete inventory ownership.

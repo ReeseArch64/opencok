@@ -402,3 +402,19 @@ its actual dependency on the owned item schema. Zod uses the existing catalog ve
 Before/after vectors verify fields, errors, precise balances, replay and push order.
 No schema, save rewrite, native format or authority change occurs. Full inventory
 planning and persistence remain under #558; see [economy](economy/README.md).
+
+## Stateful inventory ledger (#621)
+
+Economy has sixteen source modules and six test files after extracting the eleven
+existing item/balance ledger methods and their staging fields. The narrow owned
+snapshot supplies profile/resource/assets/items; shared InventoryState extends it
+with the remaining command/effect fields. InventoryPlanner inherits the domain
+ledger while retaining command coordination and the current transaction executor.
+
+Six identical tests (86 assertions) pass against the original planner, extracted
+ledger and inheriting planner. Real PostgreSQL suites cover composed retry, rollback,
+recovery and fencing. No new dependency, architecture exception, saved-state format
+or process authority is introduced. The 177-line ledger is cohesive; the residual
+616-line Services module remains a reviewed migration target under #558, including
+cross-domain effects, continued-cost observation and command/transaction ownership.
+See [economy](economy/README.md) for the boundary and rollback details.
