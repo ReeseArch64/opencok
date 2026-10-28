@@ -102,6 +102,7 @@ new process ownership and named-definition rules remain separate decisions.
 | `hero`                                                              | Hero and general contracts, rules, workflows, mappings, validations, catalog types and persistence adapters, separated by responsibility.             |
 | `dragon`                                                            | Named dragon archetypes, configuration contracts, validation and catalog mapping; existing gameplay workflows remain in their current packages.       |
 | `resources`                                                         | Versioned typed gameplay catalogs.                                                                                                                    |
+| `player`                                                            | Saved profile-preference contracts, commands, workflow and transactional adapter; composed by the realm through an injected callback.                 |
 | `shop`                                                              | In-game mall and NPC trading contracts, pure rules, Services, offer mappings and transactional adapters; inventory planning is injected by the realm. |
 | `policy`                                                            | Pure content matching, bounded file/worker adapters and the maintained nickname/description dictionary.                                               |
 | `repositories`, `drizzle`, `storage`                                | Owned transactional state, schemas, Redis/ZooKeeper and S3 adapters.                                                                                  |
@@ -157,7 +158,7 @@ See the [dragon authoring guide](../packages/resources/README.md#named-dragon-de
 
 Packages never import applications. Declare direct workspace dependencies and
 public exports; do not turn helpers into a cross-domain rules container.
-`bun run test:packages` runs resource, policy, shop, validation, mapping, controller and rule tests
+`bun run test:packages` runs resource, policy, shop, player, validation, mapping, controller and rule tests
 within their packages. Follow
 [repository conventions](../packages/repositories/README.md). Current service
 composition uses Effect; [ADR-0012](../docs/decisions/0012-adopt-effect-for-service-composition.md)

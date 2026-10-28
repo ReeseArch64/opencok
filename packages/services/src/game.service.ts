@@ -61,7 +61,6 @@ import { dragonRankingRanges } from "@opencok/rules/dragon-ranking";
 import { dragonRanking } from "@opencok/mappings/dragon-ranking";
 import { decodeDragonRanking } from "./dragon-ranking.ts";
 import { worldPointDetail } from "./world-point-detail.ts";
-import { profilePreference } from "./profile-preferences.ts";
 import { celebrityDescription, saveCelebrityDescription } from "./celebrity.ts";
 import { checkNickname } from "@opencok/rules/nickname";
 import { favoriteInteger, favoriteName, favoriteServer } from "@opencok/rules/world-favorites";
@@ -1148,7 +1147,12 @@ export class GameService
             case "equip.scroll":
             case "banner.set":
             case "speed.cd.open":
-                body = await profilePreference(this.db, uid, command, params, this.now());
+                if (!this.services.profilePreference)
+                {
+                    throw new GameError(errors.unsupported);
+                }
+
+                body = await this.services.profilePreference(uid, command, params, this.now());
                 break;
             case "pushSetting.get":
                 body = await this.getPushPreferences(uid);

@@ -1,3 +1,5 @@
+import { ProfilePreferenceService } from "@opencok/player/services/profile-preferences";
+import { updateProfilePreference } from "@opencok/player/repositories/profile-preferences";
 import { planInventoryGrants } from "@opencok/services/inventory";
 import { ActivityRecoveryJob } from "./activity-recovery-job.ts";
 import { WorldMarchRecoveryJob } from "./world-march-recovery-job.ts";
@@ -375,6 +377,21 @@ export const RealmDependenciesLive = Layer.effect(
             "realm.database",
             async () => observeAdapter(new Database(config), "realm.Database"),
             (db) => db.close(),
+        );
+        const profilePreferences = observeAdapter(
+            new ProfilePreferenceService({
+                getProfileById: (uid) => db.getProfileById(uid),
+                updateProfilePreference: (uid, field, now, readValue) =>
+                    updateProfilePreference(
+                        db.kingdom.db,
+                        uid,
+                        config.kingdomId,
+                        field,
+                        now,
+                        readValue,
+                    ),
+            }),
+            "realm.ProfilePreferenceService",
         );
         yield* fromPromise(
             "realm.world-favorites",
@@ -3265,6 +3282,8 @@ export const RealmDependenciesLive = Layer.effect(
                             config,
                             Date.now,
                             {
+                                profilePreference: (uid, command, params, now) =>
+                                    profilePreferences.command(uid, command, params, now),
                                 timed: async (owner, command, params) => {
                                     const target = ["queue.open", "queue.rent"].includes(command)
                                         ? undefined
