@@ -26,9 +26,12 @@ and does not claim a speed improvement. No gameplay or database rules changed.
 
 ## Reproduction and environment
 
-[The protocol](README.md) gives the exact commands and configuration. Both result
-files pin application/tooling source to commit
+[The protocol](README.md) gives the exact commands and configuration. Backend shortlist and Rollup/SWC results pin application/tooling source to commit
 `24b570d17cfcf5c468f80983a206ba8c6e607d7b`, after the environment correction.
+Public-fixture web results pin source to `06f8b157f9b3432bd71a791cdb36b7defff4163b`;
+maintained application code and compiler options are unchanged, while browser input
+images are the generated public fixtures in `web-assets.json`. No prepared private
+artwork is required or overwritten. Each report records its exact source and lock.
 The lock SHA-256 is
 `97fa75265eb0c6515ee36157b75e429e60e2f788793912b64a43296c65771db9`.
 Measurements began on 2026-10-28 UTC (2026-10-27 locally), on Linux
@@ -42,11 +45,15 @@ Outputs are cleaned each time; installed dependency and OS caches are retained.
 These are not cold-cache results, and there is no watch/incremental build claim.
 No other builds or tests from this investigation ran concurrently with measurements.
 Memory is summed process-tree RSS sampled every 5 ms, including esbuild's service;
-shared pages can be counted more than once and short peaks can be missed. Polling
-materially quantizes the 10–16 ms Bun web scenarios: tiny CLI/API differences are
+shared pages can be counted more than once and short peaks can be missed.
+Web results additionally record the kernel `wait4` high-water mark and use it as
+a floor; their table reports the greater observation. Backend reports retain the
+original sampled tree RSS. These are not exact simultaneous tree memory peaks. Polling
+materially quantizes the 5–17 ms Bun web scenarios: tiny CLI/API differences are
 not meaningful. Installation, type checking, resource copy, compression and Docker
 work are excluded from compilation timing. First-use values and every measured
 run, including failures, are retained in [shortlist results](results.json) and
+[public-fixture web results](web-results.json) and
 [Rollup/SWC results](rollup-results.json). Only ANSI colors and absolute path prefixes
 in compiler failure diagnostics were normalized after measurement.
 
@@ -94,9 +101,9 @@ map sizes below are KiB. Failed HTML attempts are not reported as fast builds.
 | server | bun-api    | 539.0 [482.3–567.8]       | 925.0 [920.4–931.7]    | 39572.1 | 0.0      | 0/5      |
 | server | esbuild    | 1633.4 [1422.1–1737.2]    | 1577.5 [1545.2–1659.6] | 39922.7 | 0.0      | 0/5      |
 | server | rolldown   | 2579.2 [2283.7–2709.3]    | 2648.2 [2574.0–2655.5] | 38989.6 | 0.0      | 0/5      |
-| web    | bun-cli    | 16.3 [11.3–16.7]          | 19.1 [18.2–22.9]       | 3.0     | 0.0      | 0/5      |
-| web    | bun-api    | 16.2 [16.1–16.3]          | 29.9 [28.5–30.0]       | 3.0     | 0.0      | 0/5      |
-| web    | esbuild    | 53.6 [48.4–60.0]          | 58.5 [57.5–60.1]       | 3.1     | 0.0      | 0/5      |
+| web    | bun-cli    | 11.2 [5.8–11.4]           | 25.4 [25.4–25.4]       | 3.0     | 0.0      | 0/5      |
+| web    | bun-api    | 16.6 [16.4–16.8]          | 28.5 [28.4–29.3]       | 3.0     | 0.0      | 0/5      |
+| web    | esbuild    | 77.2 [49.8–104.4]         | 55.8 [54.2–57.0]       | 3.1     | 0.0      | 0/5      |
 | web    | rolldown   | Failed                    | —                      | —       | —        | 5/5      |
 | api    | rollup-swc | 11254.0 [10707.2–12094.3] | 1684.0 [1643.0–1732.8] | 2177.1  | 0.0      | 0/5      |
 
@@ -116,9 +123,9 @@ map sizes below are KiB. Failed HTML attempts are not reported as fast builds.
 | server | bun-api    | 1267.2 [1096.9–1544.2]    | 1616.4 [1612.4–1620.7] | 76955.1 | 178166.8 | 0/5      |
 | server | esbuild    | 2566.2 [1994.8–2719.4]    | 2708.2 [2668.5–2774.2] | 91804.2 | 184536.6 | 0/5      |
 | server | rolldown   | 1817.8 [1507.1–1911.6]    | 2845.9 [2840.0–2867.5] | 63638.2 | 151423.5 | 0/5      |
-| web    | bun-cli    | 10.8 [10.8–10.8]          | 21.5 [21.3–22.0]       | 4.8     | 11.3     | 0/5      |
-| web    | bun-api    | 16.0 [16.0–21.6]          | 31.3 [29.7–33.2]       | 4.9     | 11.3     | 0/5      |
-| web    | esbuild    | 42.8 [42.6–48.4]          | 58.4 [58.1–60.1]       | 4.9     | 17.7     | 0/5      |
+| web    | bun-cli    | 12.3 [11.2–17.3]          | 25.4 [25.4–25.4]       | 4.9     | 11.2     | 0/5      |
+| web    | bun-api    | 30.5 [23.5–59.5]          | 28.9 [28.6–29.0]       | 5.3     | 11.2     | 0/5      |
+| web    | esbuild    | 55.1 [49.0–60.1]          | 54.3 [53.7–55.7]       | 5.3     | 17.6     | 0/5      |
 | web    | rolldown   | Failed                    | —                      | —       | —        | 5/5      |
 | api    | rollup-swc | 10434.7 [10200.9–10934.5] | 1890.8 [1818.9–2198.1] | 5598.2  | 13350.1  | 0/5      |
 
@@ -127,6 +134,12 @@ The CLI/API diagnostic outputs can differ slightly in path/debug metadata; their
 minified backend bytes match. Production scripts remain minified without maps.
 
 ### Frontend assets and compression
+
+Browser measurements copy only maintained source into an isolated temporary
+workspace and decode three committed public solid-color image fixtures there.
+The ignored local game artwork is neither read nor copied. These tiny fixtures
+measure compiler/HTML/asset plumbing, not production image transfer or rendering
+performance. Their digest is recorded in `web-results.json`.
 
 These totals include all emitted JS, HTML, CSS and image files, but exclude maps.
 Gzip level 9 is computed per file, then summed; these are not browser cache traces.
@@ -137,12 +150,12 @@ difference does not meet the agreed time-or-memory criterion.
 
 | Pipeline / mode      | Other assets bytes | JS + assets bytes | Gzip bytes | Source maps bytes |
 | -------------------- | ------------------ | ----------------- | ---------- | ----------------- |
-| bun-cli / minified   | 1840575            | 1843693           | 1779798    | 0                 |
-| bun-api / minified   | 1840575            | 1843693           | 1779798    | 0                 |
-| esbuild / minified   | 1801136            | 1804279           | 1749692    | 0                 |
-| bun-cli / diagnostic | 1841431            | 1846374           | 1780336    | 11527             |
-| bun-api / diagnostic | 1841440            | 1846440           | 1780350    | 11527             |
-| esbuild / diagnostic | 1802022            | 1807055           | 1750203    | 18139             |
+| bun-cli / minified   | 6349               | 9467              | 4285       | 0                 |
+| bun-api / minified   | 6349               | 9467              | 4286       | 0                 |
+| esbuild / minified   | 5470               | 8613              | 3939       | 0                 |
+| bun-cli / diagnostic | 7205               | 12185             | 4808       | 11447             |
+| bun-api / diagnostic | 7273               | 12686             | 4885       | 11447             |
+| esbuild / diagnostic | 6415               | 11861             | 4545       | 18039             |
 
 ## Graph diagnosis and deployment footprint
 
@@ -200,6 +213,10 @@ passes the same measured and executable gates. In this run the 20% threshold did
 not justify a replacement; no unsupported universal fastest/smallest claim is needed.
 The useful implementation changes are the corrected environment relocation and
 repeatable emitted-artifact checks, not a forced bundler migration.
+
+Clean-checkout CI builds web in the same isolated public-fixture workspace,
+using its unchanged build command. Prepared game artwork remains an ignored
+local input and is not a shared project dependency.
 
 The stack separates the env correction, this evaluation/ADR proposal and CI
 integration. The proposed decision has explicit affected paths, pinned dependencies,

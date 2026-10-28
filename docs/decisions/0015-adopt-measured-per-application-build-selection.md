@@ -80,6 +80,9 @@ resource changes, a database migration or a production deployment through this A
   of the original workspace and current working directory.
   Use the shared synthetic mutation workspace manifest/dependency fixture for
   temporary emitted tests; it must not read the original workspace's `.env`.
+  Build browser fixtures in an empty temporary copy of maintained source with
+  committed synthetic images. Prepared local artwork remains ignored and must
+  not become a CI dependency or be overwritten by fixture generation.
 - **Patterns to avoid**: No arbitrary secret definitions, private fixtures,
   unminified-versus-minified rankings, counting SWC/Rollup or Oxc/Rolldown as
   independent wins, or weakening checks to qualify a candidate.

@@ -1,0 +1,843 @@
+{
+  "measuredAtUtc": "2026-10-28T00:36:58Z",
+  "sourceCommit": "06f8b157f9b3432bd71a791cdb36b7defff4163b",
+  "lockSha256": "97fa75265eb0c6515ee36157b75e429e60e2f788793912b64a43296c65771db9",
+  "system": "Linux-6.18.55-1-cachyos-lts-x86_64-with-glibc2.44",
+  "cpu": "AMD Ryzen 5 5500",
+  "cpuCount": 12,
+  "memoryBytes": 33529372672,
+  "bun": "1.4.2",
+  "versions": {
+    "esbuild": "0.28.2",
+    "rolldown": "1.2.15",
+    "typescript": "7.0.2",
+    "rollup": "4.65.1",
+    "@swc/core": "1.16.20",
+    "@rollup/plugin-node-resolve": "16.0.3",
+    "@rollup/plugin-commonjs": "29.0.3",
+    "@rollup/plugin-json": "6.1.0"
+  },
+  "protocol": "Sequential fresh processes; clean output each run; one recorded first-use run, then five or more measured repetitions; OS/dependency caches retained; RSS process-tree sampled every 5ms plus kernel wait4 high-water floor; gzip level 9; no watch, installation, typecheck, Docker or resource copy in compilation timing",
+  "scenarios": [
+    {
+      "app": "web",
+      "mode": "minified",
+      "candidate": "bun-cli",
+      "runs": [
+        {
+          "seconds": 0.01124261299992213,
+          "sampledTreeRssBytes": 18714624,
+          "kernelMaxRssBytes": 26628096,
+          "observedPeakRssBytes": 26628096,
+          "exitCode": 0,
+          "bytes": {
+            "js": 3118,
+            "maps": 0,
+            "assets": 6349,
+            "gzip": 4285
+          },
+          "error": null
+        },
+        {
+          "seconds": 0.011281845996563789,
+          "sampledTreeRssBytes": 19591168,
+          "kernelMaxRssBytes": 26628096,
+          "observedPeakRssBytes": 26628096,
+          "exitCode": 0,
+          "bytes": {
+            "js": 3118,
+            "maps": 0,
+            "assets": 6349,
+            "gzip": 4285
+          },
+          "error": null
+        },
+        {
+          "seconds": 0.005883518999326043,
+          "sampledTreeRssBytes": 16384,
+          "kernelMaxRssBytes": 26628096,
+          "observedPeakRssBytes": 26628096,
+          "exitCode": 0,
+          "bytes": {
+            "js": 3118,
+            "maps": 0,
+            "assets": 6349,
+            "gzip": 4285
+          },
+          "error": null
+        },
+        {
+          "seconds": 0.005804261003504507,
+          "sampledTreeRssBytes": 163840,
+          "kernelMaxRssBytes": 26628096,
+          "observedPeakRssBytes": 26628096,
+          "exitCode": 0,
+          "bytes": {
+            "js": 3118,
+            "maps": 0,
+            "assets": 6349,
+            "gzip": 4285
+          },
+          "error": null
+        },
+        {
+          "seconds": 0.011407028003304731,
+          "sampledTreeRssBytes": 19668992,
+          "kernelMaxRssBytes": 26628096,
+          "observedPeakRssBytes": 26628096,
+          "exitCode": 0,
+          "bytes": {
+            "js": 3118,
+            "maps": 0,
+            "assets": 6349,
+            "gzip": 4285
+          },
+          "error": null
+        }
+      ],
+      "firstUse": {
+        "seconds": 0.04050482000457123,
+        "sampledTreeRssBytes": 217088,
+        "kernelMaxRssBytes": 26497024,
+        "observedPeakRssBytes": 26497024,
+        "exitCode": 0,
+        "bytes": {
+          "js": 3118,
+          "maps": 0,
+          "assets": 6349,
+          "gzip": 4285
+        },
+        "error": null
+      },
+      "seconds": {
+        "median": 0.01124261299992213,
+        "min": 0.005804261003504507,
+        "max": 0.011407028003304731
+      },
+      "sampledTreeRssBytes": {
+        "median": 18714624,
+        "min": 16384,
+        "max": 19668992
+      },
+      "observedPeakRssBytes": {
+        "median": 26628096,
+        "min": 26628096,
+        "max": 26628096
+      }
+    },
+    {
+      "app": "web",
+      "mode": "minified",
+      "candidate": "bun-api",
+      "runs": [
+        {
+          "seconds": 0.016575957997702062,
+          "sampledTreeRssBytes": 26419200,
+          "kernelMaxRssBytes": 29884416,
+          "observedPeakRssBytes": 29884416,
+          "exitCode": 0,
+          "bytes": {
+            "js": 3118,
+            "maps": 0,
+            "assets": 6349,
+            "gzip": 4286
+          },
+          "error": null
+        },
+        {
+          "seconds": 0.016753910000261385,
+          "sampledTreeRssBytes": 23982080,
+          "kernelMaxRssBytes": 30015488,
+          "observedPeakRssBytes": 30015488,
+          "exitCode": 0,
+          "bytes": {
+            "js": 3118,
+            "maps": 0,
+            "assets": 6349,
+            "gzip": 4286
+          },
+          "error": null
+        },
+        {
+          "seconds": 0.016462317005789373,
+          "sampledTreeRssBytes": 29184000,
+          "kernelMaxRssBytes": 29745152,
+          "observedPeakRssBytes": 29745152,
+          "exitCode": 0,
+          "bytes": {
+            "js": 3118,
+            "maps": 0,
+            "assets": 6349,
+            "gzip": 4286
+          },
+          "error": null
+        },
+        {
+          "seconds": 0.016444624001451302,
+          "sampledTreeRssBytes": 30769152,
+          "kernelMaxRssBytes": 30015488,
+          "observedPeakRssBytes": 30769152,
+          "exitCode": 0,
+          "bytes": {
+            "js": 3118,
+            "maps": 0,
+            "assets": 6349,
+            "gzip": 4286
+          },
+          "error": null
+        },
+        {
+          "seconds": 0.01670274399657501,
+          "sampledTreeRssBytes": 27254784,
+          "kernelMaxRssBytes": 29884416,
+          "observedPeakRssBytes": 29884416,
+          "exitCode": 0,
+          "bytes": {
+            "js": 3118,
+            "maps": 0,
+            "assets": 6349,
+            "gzip": 4286
+          },
+          "error": null
+        }
+      ],
+      "firstUse": {
+        "seconds": 0.016758967998612206,
+        "sampledTreeRssBytes": 24862720,
+        "kernelMaxRssBytes": 29884416,
+        "observedPeakRssBytes": 29884416,
+        "exitCode": 0,
+        "bytes": {
+          "js": 3118,
+          "maps": 0,
+          "assets": 6349,
+          "gzip": 4286
+        },
+        "error": null
+      },
+      "seconds": {
+        "median": 0.016575957997702062,
+        "min": 0.016444624001451302,
+        "max": 0.016753910000261385
+      },
+      "sampledTreeRssBytes": {
+        "median": 27254784,
+        "min": 23982080,
+        "max": 30769152
+      },
+      "observedPeakRssBytes": {
+        "median": 29884416,
+        "min": 29745152,
+        "max": 30769152
+      }
+    },
+    {
+      "app": "web",
+      "mode": "minified",
+      "candidate": "esbuild",
+      "runs": [
+        {
+          "seconds": 0.05482357700384455,
+          "sampledTreeRssBytes": 58560512,
+          "kernelMaxRssBytes": 36630528,
+          "observedPeakRssBytes": 58560512,
+          "exitCode": 0,
+          "bytes": {
+            "js": 3143,
+            "maps": 0,
+            "assets": 5470,
+            "gzip": 3939
+          },
+          "error": null
+        },
+        {
+          "seconds": 0.04982225900312187,
+          "sampledTreeRssBytes": 56856576,
+          "kernelMaxRssBytes": 36564992,
+          "observedPeakRssBytes": 56856576,
+          "exitCode": 0,
+          "bytes": {
+            "js": 3143,
+            "maps": 0,
+            "assets": 5470,
+            "gzip": 3939
+          },
+          "error": null
+        },
+        {
+          "seconds": 0.08150348899653181,
+          "sampledTreeRssBytes": 58462208,
+          "kernelMaxRssBytes": 36433920,
+          "observedPeakRssBytes": 58462208,
+          "exitCode": 0,
+          "bytes": {
+            "js": 3143,
+            "maps": 0,
+            "assets": 5470,
+            "gzip": 3939
+          },
+          "error": null
+        },
+        {
+          "seconds": 0.07717795800272143,
+          "sampledTreeRssBytes": 59764736,
+          "kernelMaxRssBytes": 36630528,
+          "observedPeakRssBytes": 59764736,
+          "exitCode": 0,
+          "bytes": {
+            "js": 3143,
+            "maps": 0,
+            "assets": 5470,
+            "gzip": 3939
+          },
+          "error": null
+        },
+        {
+          "seconds": 0.10436907099938253,
+          "sampledTreeRssBytes": 59129856,
+          "kernelMaxRssBytes": 36102144,
+          "observedPeakRssBytes": 59129856,
+          "exitCode": 0,
+          "bytes": {
+            "js": 3143,
+            "maps": 0,
+            "assets": 5470,
+            "gzip": 3939
+          },
+          "error": null
+        }
+      ],
+      "firstUse": {
+        "seconds": 0.05495248599618208,
+        "sampledTreeRssBytes": 56504320,
+        "kernelMaxRssBytes": 36319232,
+        "observedPeakRssBytes": 56504320,
+        "exitCode": 0,
+        "bytes": {
+          "js": 3143,
+          "maps": 0,
+          "assets": 5470,
+          "gzip": 3939
+        },
+        "error": null
+      },
+      "seconds": {
+        "median": 0.07717795800272143,
+        "min": 0.04982225900312187,
+        "max": 0.10436907099938253
+      },
+      "sampledTreeRssBytes": {
+        "median": 58560512,
+        "min": 56856576,
+        "max": 59764736
+      },
+      "observedPeakRssBytes": {
+        "median": 58560512,
+        "min": 56856576,
+        "max": 59764736
+      }
+    },
+    {
+      "app": "web",
+      "mode": "minified",
+      "candidate": "rolldown",
+      "runs": [
+        {
+          "seconds": 0.09005350000370527,
+          "sampledTreeRssBytes": 58449920,
+          "kernelMaxRssBytes": 71348224,
+          "observedPeakRssBytes": 71348224,
+          "exitCode": 1,
+          "bytes": {
+            "js": 0,
+            "maps": 0,
+            "assets": 0,
+            "gzip": 0
+          },
+          "error": "44 | \t\t\tsummary += \"...\";\n45 | \t\t\tbreak;\n46 | \t\t}\n47 | \t\tsummary += getErrorMessage(errors[i]);\n48 | \t}\n49 | \tconst wrapper = new Error(summary);\n                          ^\nerror: Build failed with 1 error:\n\n[PARSE_ERROR] Unexpected JSX expression\n   \u256d\u2500[ ../../../..<temporary-output>/web-workspace/apps/web/src/index.html:1:1 ]\n   \u2502\n 1 \u2502 <!doctype html>\n   \u2502 \u252c  \n   \u2502 \u2570\u2500\u2500 \n   \u2502 \n   \u2502 Help: JSX syntax is disabled and should be enabled via the parser options\n\u2500\u2500\u2500\u256f\n\n      at aggregateBindingErrorsIntoJsError (<workspace>/node_modules/rolldown/dist/shared/error-D0SD8_tL.mjs:49:22)\n      at unwrapBindingResult (<workspace>/node_modules/rolldown/dist/shared/error-D0SD8_tL.mjs:19:128)\n      at #build (<workspace>/node_modules/rolldown/dist/shared/rolldown-CMhwwZPA.mjs:145:34)\n\nBun v1.4.2 (Linux x64)\n"
+        },
+        {
+          "seconds": 0.08602151700324612,
+          "sampledTreeRssBytes": 71737344,
+          "kernelMaxRssBytes": 74088448,
+          "observedPeakRssBytes": 74088448,
+          "exitCode": 1,
+          "bytes": {
+            "js": 0,
+            "maps": 0,
+            "assets": 0,
+            "gzip": 0
+          },
+          "error": "44 | \t\t\tsummary += \"...\";\n45 | \t\t\tbreak;\n46 | \t\t}\n47 | \t\tsummary += getErrorMessage(errors[i]);\n48 | \t}\n49 | \tconst wrapper = new Error(summary);\n                          ^\nerror: Build failed with 1 error:\n\n[PARSE_ERROR] Unexpected JSX expression\n   \u256d\u2500[ ../../../..<temporary-output>/web-workspace/apps/web/src/index.html:1:1 ]\n   \u2502\n 1 \u2502 <!doctype html>\n   \u2502 \u252c  \n   \u2502 \u2570\u2500\u2500 \n   \u2502 \n   \u2502 Help: JSX syntax is disabled and should be enabled via the parser options\n\u2500\u2500\u2500\u256f\n\n      at aggregateBindingErrorsIntoJsError (<workspace>/node_modules/rolldown/dist/shared/error-D0SD8_tL.mjs:49:22)\n      at unwrapBindingResult (<workspace>/node_modules/rolldown/dist/shared/error-D0SD8_tL.mjs:19:128)\n      at #build (<workspace>/node_modules/rolldown/dist/shared/rolldown-CMhwwZPA.mjs:145:34)\n\nBun v1.4.2 (Linux x64)\n"
+        },
+        {
+          "seconds": 0.0665506910008844,
+          "sampledTreeRssBytes": 59682816,
+          "kernelMaxRssBytes": 74375168,
+          "observedPeakRssBytes": 74375168,
+          "exitCode": 1,
+          "bytes": {
+            "js": 0,
+            "maps": 0,
+            "assets": 0,
+            "gzip": 0
+          },
+          "error": "44 | \t\t\tsummary += \"...\";\n45 | \t\t\tbreak;\n46 | \t\t}\n47 | \t\tsummary += getErrorMessage(errors[i]);\n48 | \t}\n49 | \tconst wrapper = new Error(summary);\n                          ^\nerror: Build failed with 1 error:\n\n[PARSE_ERROR] Unexpected JSX expression\n   \u256d\u2500[ ../../../..<temporary-output>/web-workspace/apps/web/src/index.html:1:1 ]\n   \u2502\n 1 \u2502 <!doctype html>\n   \u2502 \u252c  \n   \u2502 \u2570\u2500\u2500 \n   \u2502 \n   \u2502 Help: JSX syntax is disabled and should be enabled via the parser options\n\u2500\u2500\u2500\u256f\n\n      at aggregateBindingErrorsIntoJsError (<workspace>/node_modules/rolldown/dist/shared/error-D0SD8_tL.mjs:49:22)\n      at unwrapBindingResult (<workspace>/node_modules/rolldown/dist/shared/error-D0SD8_tL.mjs:19:128)\n      at #build (<workspace>/node_modules/rolldown/dist/shared/rolldown-CMhwwZPA.mjs:145:34)\n\nBun v1.4.2 (Linux x64)\n"
+        },
+        {
+          "seconds": 0.06590744399727555,
+          "sampledTreeRssBytes": 67940352,
+          "kernelMaxRssBytes": 74043392,
+          "observedPeakRssBytes": 74043392,
+          "exitCode": 1,
+          "bytes": {
+            "js": 0,
+            "maps": 0,
+            "assets": 0,
+            "gzip": 0
+          },
+          "error": "44 | \t\t\tsummary += \"...\";\n45 | \t\t\tbreak;\n46 | \t\t}\n47 | \t\tsummary += getErrorMessage(errors[i]);\n48 | \t}\n49 | \tconst wrapper = new Error(summary);\n                          ^\nerror: Build failed with 1 error:\n\n[PARSE_ERROR] Unexpected JSX expression\n   \u256d\u2500[ ../../../..<temporary-output>/web-workspace/apps/web/src/index.html:1:1 ]\n   \u2502\n 1 \u2502 <!doctype html>\n   \u2502 \u252c  \n   \u2502 \u2570\u2500\u2500 \n   \u2502 \n   \u2502 Help: JSX syntax is disabled and should be enabled via the parser options\n\u2500\u2500\u2500\u256f\n\n      at aggregateBindingErrorsIntoJsError (<workspace>/node_modules/rolldown/dist/shared/error-D0SD8_tL.mjs:49:22)\n      at unwrapBindingResult (<workspace>/node_modules/rolldown/dist/shared/error-D0SD8_tL.mjs:19:128)\n      at #build (<workspace>/node_modules/rolldown/dist/shared/rolldown-CMhwwZPA.mjs:145:34)\n\nBun v1.4.2 (Linux x64)\n"
+        },
+        {
+          "seconds": 0.06711120399995707,
+          "sampledTreeRssBytes": 64851968,
+          "kernelMaxRssBytes": 70754304,
+          "observedPeakRssBytes": 70754304,
+          "exitCode": 1,
+          "bytes": {
+            "js": 0,
+            "maps": 0,
+            "assets": 0,
+            "gzip": 0
+          },
+          "error": "44 | \t\t\tsummary += \"...\";\n45 | \t\t\tbreak;\n46 | \t\t}\n47 | \t\tsummary += getErrorMessage(errors[i]);\n48 | \t}\n49 | \tconst wrapper = new Error(summary);\n                          ^\nerror: Build failed with 1 error:\n\n[PARSE_ERROR] Unexpected JSX expression\n   \u256d\u2500[ ../../../..<temporary-output>/web-workspace/apps/web/src/index.html:1:1 ]\n   \u2502\n 1 \u2502 <!doctype html>\n   \u2502 \u252c  \n   \u2502 \u2570\u2500\u2500 \n   \u2502 \n   \u2502 Help: JSX syntax is disabled and should be enabled via the parser options\n\u2500\u2500\u2500\u256f\n\n      at aggregateBindingErrorsIntoJsError (<workspace>/node_modules/rolldown/dist/shared/error-D0SD8_tL.mjs:49:22)\n      at unwrapBindingResult (<workspace>/node_modules/rolldown/dist/shared/error-D0SD8_tL.mjs:19:128)\n      at #build (<workspace>/node_modules/rolldown/dist/shared/rolldown-CMhwwZPA.mjs:145:34)\n\nBun v1.4.2 (Linux x64)\n"
+        }
+      ],
+      "firstUse": {
+        "seconds": 0.07982233000075212,
+        "sampledTreeRssBytes": 67608576,
+        "kernelMaxRssBytes": 71168000,
+        "observedPeakRssBytes": 71168000,
+        "exitCode": 1,
+        "bytes": {
+          "js": 0,
+          "maps": 0,
+          "assets": 0,
+          "gzip": 0
+        },
+        "error": "44 | \t\t\tsummary += \"...\";\n45 | \t\t\tbreak;\n46 | \t\t}\n47 | \t\tsummary += getErrorMessage(errors[i]);\n48 | \t}\n49 | \tconst wrapper = new Error(summary);\n                          ^\nerror: Build failed with 1 error:\n\n[PARSE_ERROR] Unexpected JSX expression\n   \u256d\u2500[ ../../../..<temporary-output>/web-workspace/apps/web/src/index.html:1:1 ]\n   \u2502\n 1 \u2502 <!doctype html>\n   \u2502 \u252c  \n   \u2502 \u2570\u2500\u2500 \n   \u2502 \n   \u2502 Help: JSX syntax is disabled and should be enabled via the parser options\n\u2500\u2500\u2500\u256f\n\n      at aggregateBindingErrorsIntoJsError (<workspace>/node_modules/rolldown/dist/shared/error-D0SD8_tL.mjs:49:22)\n      at unwrapBindingResult (<workspace>/node_modules/rolldown/dist/shared/error-D0SD8_tL.mjs:19:128)\n      at #build (<workspace>/node_modules/rolldown/dist/shared/rolldown-CMhwwZPA.mjs:145:34)\n\nBun v1.4.2 (Linux x64)\n"
+      }
+    },
+    {
+      "app": "web",
+      "mode": "diagnostic",
+      "candidate": "bun-cli",
+      "runs": [
+        {
+          "seconds": 0.011179596003785264,
+          "sampledTreeRssBytes": 19861504,
+          "kernelMaxRssBytes": 26628096,
+          "observedPeakRssBytes": 26628096,
+          "exitCode": 0,
+          "bytes": {
+            "js": 4980,
+            "maps": 11447,
+            "assets": 7205,
+            "gzip": 4808
+          },
+          "error": null
+        },
+        {
+          "seconds": 0.011191657002200373,
+          "sampledTreeRssBytes": 18702336,
+          "kernelMaxRssBytes": 26628096,
+          "observedPeakRssBytes": 26628096,
+          "exitCode": 0,
+          "bytes": {
+            "js": 4980,
+            "maps": 11447,
+            "assets": 7205,
+            "gzip": 4808
+          },
+          "error": null
+        },
+        {
+          "seconds": 0.01644006499554962,
+          "sampledTreeRssBytes": 17924096,
+          "kernelMaxRssBytes": 26628096,
+          "observedPeakRssBytes": 26628096,
+          "exitCode": 0,
+          "bytes": {
+            "js": 4980,
+            "maps": 11447,
+            "assets": 7205,
+            "gzip": 4808
+          },
+          "error": null
+        },
+        {
+          "seconds": 0.012315358995692804,
+          "sampledTreeRssBytes": 17321984,
+          "kernelMaxRssBytes": 26628096,
+          "observedPeakRssBytes": 26628096,
+          "exitCode": 0,
+          "bytes": {
+            "js": 4980,
+            "maps": 11447,
+            "assets": 7205,
+            "gzip": 4808
+          },
+          "error": null
+        },
+        {
+          "seconds": 0.017341272003250197,
+          "sampledTreeRssBytes": 19759104,
+          "kernelMaxRssBytes": 26628096,
+          "observedPeakRssBytes": 26628096,
+          "exitCode": 0,
+          "bytes": {
+            "js": 4980,
+            "maps": 11447,
+            "assets": 7205,
+            "gzip": 4808
+          },
+          "error": null
+        }
+      ],
+      "firstUse": {
+        "seconds": 0.01117451599566266,
+        "sampledTreeRssBytes": 15872000,
+        "kernelMaxRssBytes": 26628096,
+        "observedPeakRssBytes": 26628096,
+        "exitCode": 0,
+        "bytes": {
+          "js": 4980,
+          "maps": 11447,
+          "assets": 7205,
+          "gzip": 4808
+        },
+        "error": null
+      },
+      "seconds": {
+        "median": 0.012315358995692804,
+        "min": 0.011179596003785264,
+        "max": 0.017341272003250197
+      },
+      "sampledTreeRssBytes": {
+        "median": 18702336,
+        "min": 17321984,
+        "max": 19861504
+      },
+      "observedPeakRssBytes": {
+        "median": 26628096,
+        "min": 26628096,
+        "max": 26628096
+      }
+    },
+    {
+      "app": "web",
+      "mode": "diagnostic",
+      "candidate": "bun-api",
+      "runs": [
+        {
+          "seconds": 0.03050232500390848,
+          "sampledTreeRssBytes": 29421568,
+          "kernelMaxRssBytes": 30019584,
+          "observedPeakRssBytes": 30019584,
+          "exitCode": 0,
+          "bytes": {
+            "js": 5413,
+            "maps": 11447,
+            "assets": 7273,
+            "gzip": 4885
+          },
+          "error": null
+        },
+        {
+          "seconds": 0.056556351999461185,
+          "sampledTreeRssBytes": 29757440,
+          "kernelMaxRssBytes": 30003200,
+          "observedPeakRssBytes": 30003200,
+          "exitCode": 0,
+          "bytes": {
+            "js": 5413,
+            "maps": 11447,
+            "assets": 7273,
+            "gzip": 4885
+          },
+          "error": null
+        },
+        {
+          "seconds": 0.05948851900029695,
+          "sampledTreeRssBytes": 30294016,
+          "kernelMaxRssBytes": 30216192,
+          "observedPeakRssBytes": 30294016,
+          "exitCode": 0,
+          "bytes": {
+            "js": 5413,
+            "maps": 11447,
+            "assets": 7273,
+            "gzip": 4885
+          },
+          "error": null
+        },
+        {
+          "seconds": 0.02391861299838638,
+          "sampledTreeRssBytes": 28942336,
+          "kernelMaxRssBytes": 30408704,
+          "observedPeakRssBytes": 30408704,
+          "exitCode": 0,
+          "bytes": {
+            "js": 5413,
+            "maps": 11447,
+            "assets": 7273,
+            "gzip": 4885
+          },
+          "error": null
+        },
+        {
+          "seconds": 0.0234722109962604,
+          "sampledTreeRssBytes": 29728768,
+          "kernelMaxRssBytes": 30457856,
+          "observedPeakRssBytes": 30457856,
+          "exitCode": 0,
+          "bytes": {
+            "js": 5413,
+            "maps": 11447,
+            "assets": 7273,
+            "gzip": 4885
+          },
+          "error": null
+        }
+      ],
+      "firstUse": {
+        "seconds": 0.023437818003003486,
+        "sampledTreeRssBytes": 29687808,
+        "kernelMaxRssBytes": 30408704,
+        "observedPeakRssBytes": 30408704,
+        "exitCode": 0,
+        "bytes": {
+          "js": 5413,
+          "maps": 11447,
+          "assets": 7273,
+          "gzip": 4885
+        },
+        "error": null
+      },
+      "seconds": {
+        "median": 0.03050232500390848,
+        "min": 0.0234722109962604,
+        "max": 0.05948851900029695
+      },
+      "sampledTreeRssBytes": {
+        "median": 29728768,
+        "min": 28942336,
+        "max": 30294016
+      },
+      "observedPeakRssBytes": {
+        "median": 30294016,
+        "min": 30003200,
+        "max": 30457856
+      }
+    },
+    {
+      "app": "web",
+      "mode": "diagnostic",
+      "candidate": "esbuild",
+      "runs": [
+        {
+          "seconds": 0.060146533003717195,
+          "sampledTreeRssBytes": 56287232,
+          "kernelMaxRssBytes": 36499456,
+          "observedPeakRssBytes": 56287232,
+          "exitCode": 0,
+          "bytes": {
+            "js": 5446,
+            "maps": 18039,
+            "assets": 6415,
+            "gzip": 4545
+          },
+          "error": null
+        },
+        {
+          "seconds": 0.05507325100188609,
+          "sampledTreeRssBytes": 56913920,
+          "kernelMaxRssBytes": 36368384,
+          "observedPeakRssBytes": 56913920,
+          "exitCode": 0,
+          "bytes": {
+            "js": 5446,
+            "maps": 18039,
+            "assets": 6415,
+            "gzip": 4545
+          },
+          "error": null
+        },
+        {
+          "seconds": 0.056848656000511255,
+          "sampledTreeRssBytes": 58355712,
+          "kernelMaxRssBytes": 36106240,
+          "observedPeakRssBytes": 58355712,
+          "exitCode": 0,
+          "bytes": {
+            "js": 5446,
+            "maps": 18039,
+            "assets": 6415,
+            "gzip": 4545
+          },
+          "error": null
+        },
+        {
+          "seconds": 0.04904851999890525,
+          "sampledTreeRssBytes": 56799232,
+          "kernelMaxRssBytes": 36622336,
+          "observedPeakRssBytes": 56799232,
+          "exitCode": 0,
+          "bytes": {
+            "js": 5446,
+            "maps": 18039,
+            "assets": 6415,
+            "gzip": 4545
+          },
+          "error": null
+        },
+        {
+          "seconds": 0.05415687600179808,
+          "sampledTreeRssBytes": 56930304,
+          "kernelMaxRssBytes": 36175872,
+          "observedPeakRssBytes": 56930304,
+          "exitCode": 0,
+          "bytes": {
+            "js": 5446,
+            "maps": 18039,
+            "assets": 6415,
+            "gzip": 4545
+          },
+          "error": null
+        }
+      ],
+      "firstUse": {
+        "seconds": 0.05452719500317471,
+        "sampledTreeRssBytes": 56352768,
+        "kernelMaxRssBytes": 36630528,
+        "observedPeakRssBytes": 56352768,
+        "exitCode": 0,
+        "bytes": {
+          "js": 5446,
+          "maps": 18039,
+          "assets": 6415,
+          "gzip": 4545
+        },
+        "error": null
+      },
+      "seconds": {
+        "median": 0.05507325100188609,
+        "min": 0.04904851999890525,
+        "max": 0.060146533003717195
+      },
+      "sampledTreeRssBytes": {
+        "median": 56913920,
+        "min": 56287232,
+        "max": 58355712
+      },
+      "observedPeakRssBytes": {
+        "median": 56913920,
+        "min": 56287232,
+        "max": 58355712
+      }
+    },
+    {
+      "app": "web",
+      "mode": "diagnostic",
+      "candidate": "rolldown",
+      "runs": [
+        {
+          "seconds": 0.059446069004479796,
+          "sampledTreeRssBytes": 58671104,
+          "kernelMaxRssBytes": 73330688,
+          "observedPeakRssBytes": 73330688,
+          "exitCode": 1,
+          "bytes": {
+            "js": 0,
+            "maps": 0,
+            "assets": 0,
+            "gzip": 0
+          },
+          "error": "44 | \t\t\tsummary += \"...\";\n45 | \t\t\tbreak;\n46 | \t\t}\n47 | \t\tsummary += getErrorMessage(errors[i]);\n48 | \t}\n49 | \tconst wrapper = new Error(summary);\n                          ^\nerror: Build failed with 1 error:\n\n[PARSE_ERROR] Unexpected JSX expression\n   \u256d\u2500[ ../../../..<temporary-output>/web-workspace/apps/web/src/index.html:1:1 ]\n   \u2502\n 1 \u2502 <!doctype html>\n   \u2502 \u252c  \n   \u2502 \u2570\u2500\u2500 \n   \u2502 \n   \u2502 Help: JSX syntax is disabled and should be enabled via the parser options\n\u2500\u2500\u2500\u256f\n\n      at aggregateBindingErrorsIntoJsError (<workspace>/node_modules/rolldown/dist/shared/error-D0SD8_tL.mjs:49:22)\n      at unwrapBindingResult (<workspace>/node_modules/rolldown/dist/shared/error-D0SD8_tL.mjs:19:128)\n      at #build (<workspace>/node_modules/rolldown/dist/shared/rolldown-CMhwwZPA.mjs:145:34)\n\nBun v1.4.2 (Linux x64)\n"
+        },
+        {
+          "seconds": 0.05462014800286852,
+          "sampledTreeRssBytes": 70709248,
+          "kernelMaxRssBytes": 73748480,
+          "observedPeakRssBytes": 73748480,
+          "exitCode": 1,
+          "bytes": {
+            "js": 0,
+            "maps": 0,
+            "assets": 0,
+            "gzip": 0
+          },
+          "error": "44 | \t\t\tsummary += \"...\";\n45 | \t\t\tbreak;\n46 | \t\t}\n47 | \t\tsummary += getErrorMessage(errors[i]);\n48 | \t}\n49 | \tconst wrapper = new Error(summary);\n                          ^\nerror: Build failed with 1 error:\n\n[PARSE_ERROR] Unexpected JSX expression\n   \u256d\u2500[ ../../../..<temporary-output>/web-workspace/apps/web/src/index.html:1:1 ]\n   \u2502\n 1 \u2502 <!doctype html>\n   \u2502 \u252c  \n   \u2502 \u2570\u2500\u2500 \n   \u2502 \n   \u2502 Help: JSX syntax is disabled and should be enabled via the parser options\n\u2500\u2500\u2500\u256f\n\n      at aggregateBindingErrorsIntoJsError (<workspace>/node_modules/rolldown/dist/shared/error-D0SD8_tL.mjs:49:22)\n      at unwrapBindingResult (<workspace>/node_modules/rolldown/dist/shared/error-D0SD8_tL.mjs:19:128)\n      at #build (<workspace>/node_modules/rolldown/dist/shared/rolldown-CMhwwZPA.mjs:145:34)\n\nBun v1.4.2 (Linux x64)\n"
+        },
+        {
+          "seconds": 0.048590706996037625,
+          "sampledTreeRssBytes": 59760640,
+          "kernelMaxRssBytes": 72728576,
+          "observedPeakRssBytes": 72728576,
+          "exitCode": 1,
+          "bytes": {
+            "js": 0,
+            "maps": 0,
+            "assets": 0,
+            "gzip": 0
+          },
+          "error": "44 | \t\t\tsummary += \"...\";\n45 | \t\t\tbreak;\n46 | \t\t}\n47 | \t\tsummary += getErrorMessage(errors[i]);\n48 | \t}\n49 | \tconst wrapper = new Error(summary);\n                          ^\nerror: Build failed with 1 error:\n\n[PARSE_ERROR] Unexpected JSX expression\n   \u256d\u2500[ ../../../..<temporary-output>/web-workspace/apps/web/src/index.html:1:1 ]\n   \u2502\n 1 \u2502 <!doctype html>\n   \u2502 \u252c  \n   \u2502 \u2570\u2500\u2500 \n   \u2502 \n   \u2502 Help: JSX syntax is disabled and should be enabled via the parser options\n\u2500\u2500\u2500\u256f\n\n      at aggregateBindingErrorsIntoJsError (<workspace>/node_modules/rolldown/dist/shared/error-D0SD8_tL.mjs:49:22)\n      at unwrapBindingResult (<workspace>/node_modules/rolldown/dist/shared/error-D0SD8_tL.mjs:19:128)\n      at #build (<workspace>/node_modules/rolldown/dist/shared/rolldown-CMhwwZPA.mjs:145:34)\n\nBun v1.4.2 (Linux x64)\n"
+        },
+        {
+          "seconds": 0.053424894002091605,
+          "sampledTreeRssBytes": 66138112,
+          "kernelMaxRssBytes": 73986048,
+          "observedPeakRssBytes": 73986048,
+          "exitCode": 1,
+          "bytes": {
+            "js": 0,
+            "maps": 0,
+            "assets": 0,
+            "gzip": 0
+          },
+          "error": "44 | \t\t\tsummary += \"...\";\n45 | \t\t\tbreak;\n46 | \t\t}\n47 | \t\tsummary += getErrorMessage(errors[i]);\n48 | \t}\n49 | \tconst wrapper = new Error(summary);\n                          ^\nerror: Build failed with 1 error:\n\n[PARSE_ERROR] Unexpected JSX expression\n   \u256d\u2500[ ../../../..<temporary-output>/web-workspace/apps/web/src/index.html:1:1 ]\n   \u2502\n 1 \u2502 <!doctype html>\n   \u2502 \u252c  \n   \u2502 \u2570\u2500\u2500 \n   \u2502 \n   \u2502 Help: JSX syntax is disabled and should be enabled via the parser options\n\u2500\u2500\u2500\u256f\n\n      at aggregateBindingErrorsIntoJsError (<workspace>/node_modules/rolldown/dist/shared/error-D0SD8_tL.mjs:49:22)\n      at unwrapBindingResult (<workspace>/node_modules/rolldown/dist/shared/error-D0SD8_tL.mjs:19:128)\n      at #build (<workspace>/node_modules/rolldown/dist/shared/rolldown-CMhwwZPA.mjs:145:34)\n\nBun v1.4.2 (Linux x64)\n"
+        },
+        {
+          "seconds": 0.058870739005215,
+          "sampledTreeRssBytes": 58953728,
+          "kernelMaxRssBytes": 73785344,
+          "observedPeakRssBytes": 73785344,
+          "exitCode": 1,
+          "bytes": {
+            "js": 0,
+            "maps": 0,
+            "assets": 0,
+            "gzip": 0
+          },
+          "error": "44 | \t\t\tsummary += \"...\";\n45 | \t\t\tbreak;\n46 | \t\t}\n47 | \t\tsummary += getErrorMessage(errors[i]);\n48 | \t}\n49 | \tconst wrapper = new Error(summary);\n                          ^\nerror: Build failed with 1 error:\n\n[PARSE_ERROR] Unexpected JSX expression\n   \u256d\u2500[ ../../../..<temporary-output>/web-workspace/apps/web/src/index.html:1:1 ]\n   \u2502\n 1 \u2502 <!doctype html>\n   \u2502 \u252c  \n   \u2502 \u2570\u2500\u2500 \n   \u2502 \n   \u2502 Help: JSX syntax is disabled and should be enabled via the parser options\n\u2500\u2500\u2500\u256f\n\n      at aggregateBindingErrorsIntoJsError (<workspace>/node_modules/rolldown/dist/shared/error-D0SD8_tL.mjs:49:22)\n      at unwrapBindingResult (<workspace>/node_modules/rolldown/dist/shared/error-D0SD8_tL.mjs:19:128)\n      at #build (<workspace>/node_modules/rolldown/dist/shared/rolldown-CMhwwZPA.mjs:145:34)\n\nBun v1.4.2 (Linux x64)\n"
+        }
+      ],
+      "firstUse": {
+        "seconds": 0.06508210799802328,
+        "sampledTreeRssBytes": 68939776,
+        "kernelMaxRssBytes": 72232960,
+        "observedPeakRssBytes": 72232960,
+        "exitCode": 1,
+        "bytes": {
+          "js": 0,
+          "maps": 0,
+          "assets": 0,
+          "gzip": 0
+        },
+        "error": "44 | \t\t\tsummary += \"...\";\n45 | \t\t\tbreak;\n46 | \t\t}\n47 | \t\tsummary += getErrorMessage(errors[i]);\n48 | \t}\n49 | \tconst wrapper = new Error(summary);\n                          ^\nerror: Build failed with 1 error:\n\n[PARSE_ERROR] Unexpected JSX expression\n   \u256d\u2500[ ../../../..<temporary-output>/web-workspace/apps/web/src/index.html:1:1 ]\n   \u2502\n 1 \u2502 <!doctype html>\n   \u2502 \u252c  \n   \u2502 \u2570\u2500\u2500 \n   \u2502 \n   \u2502 Help: JSX syntax is disabled and should be enabled via the parser options\n\u2500\u2500\u2500\u256f\n\n      at aggregateBindingErrorsIntoJsError (<workspace>/node_modules/rolldown/dist/shared/error-D0SD8_tL.mjs:49:22)\n      at unwrapBindingResult (<workspace>/node_modules/rolldown/dist/shared/error-D0SD8_tL.mjs:19:128)\n      at #build (<workspace>/node_modules/rolldown/dist/shared/rolldown-CMhwwZPA.mjs:145:34)\n\nBun v1.4.2 (Linux x64)\n"
+      }
+    }
+  ],
+  "webFixturesSha256": "f104f559e8ed496cffea36068a8019cead9f2213c2cc79b7844480fe68890369",
+  "sanitization": "Only ANSI color escapes and absolute workspace/temporary-output prefixes in compiler failure diagnostics were normalized after measurement; timings, sizes and memory values are unchanged."
+}

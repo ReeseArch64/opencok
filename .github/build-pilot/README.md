@@ -6,10 +6,11 @@ is pinned in root development dependencies and the single `bun.lock`. It does
 not change the package manager, deployed runtime or application build commands.
 Production-only container installs do not need the candidate tools.
 
-The [measured report](REPORT.md), [shortlist results](results.json),
+The [measured report](REPORT.md), [backend shortlist results](results.json),
+[public-fixture web results](web-results.json),
 [Rollup/SWC results](rollup-results.json) and
 [proposed ADR-0015](../../docs/decisions/0015-adopt-measured-per-application-build-selection.md)
-record the per-app recommendation and evidence limits. Both raw result files pin
+record the per-app recommendation and evidence limits. Each result file pins
 the measured source and lockfile; compiler error paths/colors are normalized before
 committing, without changing timing, memory or size measurements.
 
@@ -22,8 +23,10 @@ from timing, then check types and execute the selected baseline's emitted code:
 bun install --frozen-lockfile
 bun --no-env-file node_modules/typescript/bin/tsc --noEmit -p .github/build-pilot/tsconfig.json
 bun --no-env-file .github/build-pilot/verify.ts
-bun run --cwd apps/web build
-bun --no-env-file .github/build-pilot/verify-web.ts apps/web/dist
+build_pilot_web="$(mktemp -d)"
+bun --no-env-file .github/build-pilot/web-workspace.ts "$build_pilot_web"
+bun run --cwd "$build_pilot_web/apps/web" build
+bun --no-env-file .github/build-pilot/verify-web.ts "$build_pilot_web/apps/web/dist"
 python3 .github/build-pilot/benchmark.py --output /tmp/opencok-build-results.json
 python3 .github/build-pilot/benchmark.py --apps api --candidates rollup-swc --output /tmp/opencok-rollup-results.json
 ```
@@ -42,11 +45,21 @@ first-use run is not a claim of a cold filesystem cache: OS caches and installed
 dependencies remain warm. The report records median, minimum, maximum and all
 individual failures. No persistent compiler service, watch mode or incremental
 build is used. Process-tree resident memory is sampled from Linux `/proc` every
-5 ms, including esbuild's child service. This is a sampled peak, not an exact
-kernel high-water mark; sampling and process-start overhead are included equally
+5 ms, including esbuild's child service. New measurements also record the kernel
+`wait4` high-water mark as a floor for short processes; the public web report uses
+the greater of those observations. Older backend reports retain sampled RSS only.
+This is not an exact simultaneous tree high-water mark; shared pages may be counted
+more than once. Sampling and process-start overhead are included equally
 in wall time. Raw JS, source maps and other assets are counted separately. Gzip
 level 9 bytes exclude maps and are calculated outside the timer, caching identical
 contents. Gzip is frontend transfer evidence, not a backend deployment-size claim.
+
+Web measurements and clean-checkout CI build a temporary copy of maintained web
+source with three committed synthetic solid-color fixtures from `web-assets.json`.
+The generator refuses a nonempty destination and never reads or overwrites ignored
+prepared artwork. Fixture generation is outside build timing and its digest is
+recorded. These small assets verify packaging and loading, not production artwork
+transfer or rendering performance. Backend measurements do not require web assets.
 
 ## Equivalent settings and exceptions
 

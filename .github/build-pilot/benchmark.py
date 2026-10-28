@@ -37,8 +37,13 @@ def measure(command, cwd, output):
             stdin=subprocess.DEVNULL, stdout=logs, stderr=logs,
         )
         peak = 0
-        while child.poll() is None:
+        while True:
             peak = max(peak, tree_rss(child.pid))
+            waited, status, usage = os.wait4(child.pid, os.WNOHANG)
+            if waited:
+                child.returncode = os.waitstatus_to_exitcode(status)
+                kernel_peak = usage.ru_maxrss * 1024
+                break
             time.sleep(0.005)
         elapsed = time.perf_counter() - started
         logs.seek(0)
@@ -56,6 +61,7 @@ def measure(command, cwd, output):
                 sizes["gzip"] += GZIP_SIZES[digest]
     return {
         "seconds": elapsed, "sampledTreeRssBytes": peak,
+        "kernelMaxRssBytes": kernel_peak, "observedPeakRssBytes": max(peak, kernel_peak),
         "exitCode": child.returncode, "bytes": sizes, "error": error,
     }
 
@@ -81,11 +87,18 @@ def main():
             name: json.loads((ROOT / "node_modules" / name / "package.json").read_text())["version"]
             for name in ["esbuild", "rolldown", "typescript", "rollup", "@swc/core", "@rollup/plugin-node-resolve", "@rollup/plugin-commonjs", "@rollup/plugin-json"]
         },
-        "protocol": "Sequential fresh processes; clean output each run; one recorded first-use run, then five or more measured repetitions; OS/dependency caches retained; RSS process-tree sampled every 5ms; gzip level 9; no watch, installation, typecheck, Docker or resource copy in compilation timing",
+        "protocol": "Sequential fresh processes; clean output each run; one recorded first-use run, then five or more measured repetitions; OS/dependency caches retained; RSS process-tree sampled every 5ms plus kernel wait4 high-water floor; gzip level 9; no watch, installation, typecheck, Docker or resource copy in compilation timing",
         "scenarios": [],
     }
     with tempfile.TemporaryDirectory(prefix="opencok-build-pilot-") as temporary:
         output = pathlib.Path(temporary) / "dist"
+        web_app = pathlib.Path(temporary) / "web-workspace" / "apps/web"
+        if "web" in options.apps:
+            subprocess.run([
+                bun, "--no-env-file", str(ROOT / ".github/build-pilot/web-workspace.ts"),
+                str(web_app.parents[1]),
+            ], cwd=ROOT, env={"PATH": os.environ["PATH"]}, check=True, stdout=subprocess.DEVNULL)
+            report["webFixturesSha256"] = hashlib.sha256((ROOT / ".github/build-pilot/web-assets.json").read_bytes()).hexdigest()
         for app in options.apps:
             for mode in ["minified", "diagnostic"]:
                 for candidate in options.candidates:
@@ -96,9 +109,11 @@ def main():
                         if candidate == "bun-cli":
                             command = [bun, "--no-env-file", "build", "src/index.html" if app == "web" else "src/index.ts", "--target", "browser" if app == "web" else "bun", "--outdir", str(output if app == "web" else output / "src")]
                             command += ["--minify"] if mode == "minified" else ["--sourcemap=linked"]
-                            cwd = ROOT / "apps" / app
+                            cwd = web_app if app == "web" else ROOT / "apps" / app
                         else:
                             command = [bun, "--no-env-file", str(ROOT / ".github/build-pilot/build.ts"), candidate, app, mode, str(output)]
+                            if app == "web":
+                                command.append(str(web_app / "src/index.html"))
                             cwd = ROOT
                         result = measure(command, cwd, output)
                         if iteration == 0:
@@ -107,7 +122,7 @@ def main():
                             scenario["runs"].append(result)
                     successful = [run for run in scenario["runs"] if run["exitCode"] == 0]
                     if successful:
-                        for field in ["seconds", "sampledTreeRssBytes"]:
+                        for field in ["seconds", "sampledTreeRssBytes", "observedPeakRssBytes"]:
                             values = [run[field] for run in successful]
                             scenario[field] = {"median": statistics.median(values), "min": min(values), "max": max(values)}
                     report["scenarios"].append(scenario)
