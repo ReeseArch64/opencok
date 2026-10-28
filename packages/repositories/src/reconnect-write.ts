@@ -1,3 +1,4 @@
+import { ReconnectTaskRepository } from "@opencok/tasks/repositories/reconnect";
 import { appendMutationRecords } from "./mutation.ts";
 import { and, eq } from "drizzle-orm";
 import { user_resource } from "@opencok/drizzle/schema/opencok_kingdom/user_resource";
@@ -5,7 +6,6 @@ import { user_army } from "@opencok/drizzle/schema/opencok_kingdom/user_army";
 import { user_general } from "@opencok/drizzle/schema/opencok_kingdom/user_general";
 import { user_skill } from "@opencok/drizzle/schema/opencok_kingdom/user_skill";
 import { user_building } from "@opencok/drizzle/schema/opencok_kingdom/user_building";
-import { user_task } from "@opencok/drizzle/schema/opencok_kingdom/user_task";
 import { user_glory_info } from "@opencok/drizzle/schema/opencok_kingdom/user_glory_info";
 import { user_weakness_building } from "@opencok/drizzle/schema/opencok_kingdom/user_weakness_building";
 import { resource_settlement } from "@opencok/drizzle/schema/opencok_kingdom/resource_settlement";
@@ -312,55 +312,10 @@ export async function persistReconnectProgress(
         }
     }
 
-    unique(write.tasks.inserts.map((task) => task.id));
-    unique(write.tasks.updates.map((task) => task.id));
-    const inserted = new Set(write.tasks.inserts.map((task) => task.id));
-
-    for (const task of [...write.tasks.inserts, ...write.tasks.updates])
-    {
-        if (![0, 1].includes(integer(task.state)))
-        {
-            throw new Error("Reconnect cannot claim tasks");
-        }
-
-        integer(task.num);
-        integer(task.type);
-    }
-
-    for (const task of write.tasks.inserts)
-    {
-        if (state.tasks.some((row) => row.id === task.id))
-        {
-            throw new Error("Reconnect task already exists");
-        }
-
-        await tx
-            .insert(user_task)
-            .values({ uid, id: task.id, num: task.num, state: task.state, type: task.type });
-    }
-
-    for (const task of write.tasks.updates)
-    {
-        if (inserted.has(task.id))
-        {
-            continue;
-        }
-
-        if (!state.tasks.some((row) => row.id === task.id && integer(row.state) === 0))
-        {
-            throw new Error("Invalid reconnect task transition");
-        }
-
-        updated(
-            await tx
-                .update(user_task)
-                .set({ num: task.num, state: task.state })
-                .where(
-                    and(eq(user_task.uid, uid), eq(user_task.id, task.id), eq(user_task.state, 0)),
-                )
-                .returning({ id: user_task.id }),
-        );
-    }
+    await new ReconnectTaskRepository(tx, uid, { integer, unique, updated }).writeTasks(
+        state.tasks,
+        write.tasks,
+    );
 
     for (const uuid of write.generalResets)
     {

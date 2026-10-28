@@ -638,6 +638,7 @@
         "@opencok/ledger": "workspace:*",
         "@opencok/messages": "workspace:*",
         "@opencok/rules": "workspace:*",
+        "@opencok/tasks": "workspace:*",
         "@opencok/validations": "workspace:*",
       },
       "devDependencies": {
@@ -790,6 +791,7 @@
         "@opencok/mappings": "workspace:*",
         "@opencok/messages": "workspace:*",
         "@opencok/rules": "workspace:*",
+        "@opencok/tasks": "workspace:*",
         "drizzle-orm": "0.45.4",
       },
       "devDependencies": {

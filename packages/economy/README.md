@@ -232,3 +232,21 @@ Contracts. They introduce no runtime implementation. Building consumes the owned
 paths to keep its construction workflow independent of horizontal Contracts.
 The old paths remain type-only re-exports; [the migration register](../MIGRATION.md#construction-workflows-649)
 tracks all remaining consumers and removal under #558 W20.
+
+## Reward-preview wire contracts (#659)
+
+The existing `RewardPreviewResponse` and strict `rewardPreviewArraySchema` now live
+in `contracts/responses/rewards` and `validations/rewards`. Reconnect Tasks consumes
+these owned leaves without importing broad Contracts or Validations. Exact field
+order, union alternatives and 32,767-array bound are unchanged; the native preview
+algorithm and serializer remain with their current owners.
+
+Economy owns both compatibility aliases under #558 W20. The response alias in
+`contracts/src/responses/rewards.ts` has four callers: shared response contracts
+`groupbuy`, `local-activity-info`, `new-expedition`, and Hero's `hero-event` response.
+The schema alias in `validations/src/rewards.ts` has five callers: shared validations
+`groupbuy`, `local-activity-info`, `new-expedition`, shared Mappings `rewards`, and
+Hero's `hero-event` validation. Migrate these consumers to the owned leaves with
+their domain slices, verify exports and remove aliases when unused. No duplicate
+schema or response declaration remains. Structural comparisons, Tasks native-wire
+scenarios, full package/server suites and affected workspace types verify this move.

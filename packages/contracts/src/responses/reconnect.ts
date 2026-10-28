@@ -39,7 +39,6 @@ export interface ReconnectMineResponse
 }
 
 import type { QueueResponse } from "./city.ts";
-import type { RewardPreviewResponse } from "./rewards.ts";
 
 export interface ReconnectQueuesResponse
 {
@@ -71,22 +70,4 @@ export interface ReconnectResourceResponse
 export interface ReconnectResourcesResponse
 {
     readonly resource: ReconnectResourceResponse;
-}
-
-export interface ReconnectTaskResponse
-{
-    readonly id: string;
-    readonly num: number;
-    readonly state: number;
-    readonly type: number;
-    readonly currPhase?: number;
-    readonly maxPhase?: number;
-    readonly reward?: RewardPreviewResponse[];
-}
-
-export interface ReconnectTasksResponse
-{
-    readonly task: ReconnectTaskResponse[];
-    readonly ckfTask: ReconnectTaskResponse[];
-    readonly taskCompleteNum: number;
 }
