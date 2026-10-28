@@ -1,42 +1,24 @@
-import type { AllianceQueriesFactory } from "@opencok/alliance/contracts/queries";
-import type { AllianceSnapshotFactory } from "@opencok/alliance/contracts/snapshot";
+import type { AllianceContextFactory } from "@opencok/alliance/contracts/context";
 import { AllianceQueryCommand } from "@opencok/alliance/enums/query-command";
-import type { AllianceMembershipFactory } from "@opencok/alliance/contracts/membership";
 import { AllianceMembershipCommand } from "@opencok/alliance/enums/membership-command";
-import type { AllianceApplicationsFactory } from "@opencok/alliance/contracts/applications";
 import { AllianceApplicationCommand } from "@opencok/alliance/enums/application-command";
-import type { AllianceGovernanceFactory } from "@opencok/alliance/contracts/governance";
 import { AllianceGovernanceCommand } from "@opencok/alliance/enums/governance-command";
 import { randomUUID, createHash } from "node:crypto";
 import { errors } from "@opencok/constants/game";
 import { GameError } from "@opencok/errors/game";
 import { sfs, str, int, Type, encode, type Fields } from "@opencok/messages/sfs";
-import { text, num, long, type Row } from "@opencok/contracts/rows";
-import type {
-    AllianceRepository,
-    AllianceState,
-    AllianceWrite,
-} from "@opencok/contracts/alliance-gameplay";
+import { text } from "@opencok/contracts/rows";
+import type { AllianceRepository, AllianceState } from "@opencok/contracts/alliance-gameplay";
 import type { Rules } from "@opencok/rules/game";
-import {
-    allianceFailure,
-    allianceText,
-    allianceMember,
-    allianceRight,
-} from "@opencok/rules/alliance";
+import { allianceFailure, allianceText } from "@opencok/rules/alliance";
 import { cityInteger } from "@opencok/rules/city-progression";
 import { inventoryReplay } from "@opencok/economy/mappings/inventory";
-import { playerGameEffect } from "@opencok/rules/power-resolver";
-import { generalSkillPoints } from "@opencok/hero/services/general-power";
 import {
     createInventoryPlanner,
     type RealmInventoryPlanner,
     type InventoryEffects,
 } from "@opencok/services/inventory-runtime";
-import { activityEconomy } from "@opencok/economy/services/activity-economy";
-import type { AllianceScienceFactory } from "@opencok/alliance/contracts/science";
 import { AllianceScienceCommand } from "@opencok/alliance/enums/science-command";
-import type { AllianceHelpFactory } from "@opencok/alliance/contracts/help";
 import { AllianceHelpCommand } from "@opencok/alliance/enums/help-command";
 import type { AllianceGiftFactory } from "@opencok/alliance/contracts/gifts";
 import { AllianceGiftCommand } from "@opencok/alliance/enums/gift-command";
@@ -102,14 +84,13 @@ export class AllianceService
         readonly repository: AllianceRepository,
         readonly rules: Rules,
         readonly effects: InventoryEffects,
-        readonly help: AllianceHelpFactory<Rules>,
+        readonly contextFactory: AllianceContextFactory<
+            AllianceState,
+            Rules,
+            RealmInventoryPlanner,
+            InventoryEffects
+        >,
         readonly gifts: AllianceGiftFactory<RealmInventoryPlanner>,
-        readonly science: AllianceScienceFactory<RealmInventoryPlanner>,
-        readonly governance: AllianceGovernanceFactory,
-        readonly applicationsFactory: AllianceApplicationsFactory,
-        readonly membershipFactory: AllianceMembershipFactory<Rules, RealmInventoryPlanner>,
-        readonly queriesFactory: AllianceQueriesFactory,
-        readonly snapshotFactory: AllianceSnapshotFactory,
         readonly forbidden: (value: string) => boolean | Promise<boolean> = () => false,
     )
     {}
@@ -129,7 +110,7 @@ export class AllianceService
             },
             { giftEvent },
             async (state) => {
-                const context = new AllianceContext(
+                const context = this.contextFactory(
                     owner,
                     state,
                     this.rules,
@@ -140,14 +121,6 @@ export class AllianceService
                         Number(state.now),
                     ),
                     this.effects,
-                    this.help,
-                    this.gifts,
-                    this.science,
-                    this.governance,
-                    this.applicationsFactory,
-                    this.membershipFactory,
-                    this.queriesFactory,
-                    this.snapshotFactory,
                 );
                 context.member();
                 const body = this.gifts(context).publish(giftEvent, type),
@@ -377,7 +350,7 @@ export class AllianceService
             { owner, command, requestId, request: encode(request) },
             selection,
             async (state) => {
-                const context = new AllianceContext(
+                const context = this.contextFactory(
                     owner,
                     state,
                     this.rules,
@@ -388,14 +361,6 @@ export class AllianceService
                         Number(state.now),
                     ),
                     this.effects,
-                    this.help,
-                    this.gifts,
-                    this.science,
-                    this.governance,
-                    this.applicationsFactory,
-                    this.membershipFactory,
-                    this.queriesFactory,
-                    this.snapshotFactory,
                 );
                 const body = await context.command(command, params);
                 const inventory = context.ledger.result(body);
@@ -436,268 +401,6 @@ export class AllianceService
         );
 
         return inventoryReplay(response, requestId);
-    }
-}
-
-export class AllianceContext
-{
-    readonly write: AllianceWrite = {};
-    readonly productionOwners = new Set<string>();
-    productionAt?: bigint;
-    readonly allianceId: string;
-
-    constructor(
-        readonly owner: string,
-        readonly state: AllianceState,
-        readonly rules: Rules,
-        readonly ledger: RealmInventoryPlanner,
-        readonly effects: InventoryEffects,
-        private readonly help: AllianceHelpFactory<Rules>,
-        private readonly gifts: AllianceGiftFactory<RealmInventoryPlanner>,
-        private readonly science: AllianceScienceFactory<RealmInventoryPlanner>,
-        private readonly governance: AllianceGovernanceFactory,
-        private readonly applicationsFactory: AllianceApplicationsFactory,
-        private readonly membershipFactory: AllianceMembershipFactory<Rules, RealmInventoryPlanner>,
-        private readonly queriesFactory: AllianceQueriesFactory,
-        private readonly snapshotFactory: AllianceSnapshotFactory,
-    )
-    {
-        this.allianceId = text(state.inventory.profile, "allianceId");
-    }
-
-    async effect(id: number)
-    {
-        const state = await this.state.inventory.effects();
-        const value = playerGameEffect(
-            state,
-            this.rules,
-            { kingdomId: this.rules.kingdomId, version: "12.06.0", now: Number(this.now) },
-            generalSkillPoints(state.generals),
-            await this.effects.world(),
-            await this.effects.emperor(),
-            id as Parameters<typeof playerGameEffect>[6],
-        );
-
-        if (!Number.isFinite(value))
-        {
-            allianceFailure();
-        }
-
-        return value;
-    }
-
-    get now()
-    {
-        return this.state.now;
-    }
-
-    member(uid = this.owner, id = this.allianceId)
-    {
-        if (!id || text(this.profile(uid), "allianceId") !== id)
-        {
-            allianceFailure(errors.locked);
-        }
-
-        return allianceMember(
-            [
-                ...(this.write.members ?? []),
-                ...this.state.members.filter(
-                    (row) => !(this.write.members ?? []).some((next) => next.uid === row.uid),
-                ),
-            ],
-            uid,
-            id,
-        );
-    }
-
-    alliance(id = this.allianceId)
-    {
-        const row = (this.write.alliances ?? []).find((row) => row.uid === id)
-            ?? this.state.alliances.find((row) => row.uid === id);
-
-        if (!row)
-        {
-            allianceFailure();
-        }
-
-        return row;
-    }
-
-    profile(uid = this.owner)
-    {
-        const row = this.state.profiles.find((row) => row.uid === uid);
-
-        if (!row)
-        {
-            allianceFailure();
-        }
-
-        return row;
-    }
-
-    castle(uid: string)
-    {
-        return num(
-            this.state.cities.find((row) => row.uid === uid && num(row, "itemId") === 400000) ?? {},
-            "level",
-        );
-    }
-
-    power(uid: string)
-    {
-        return long(this.state.powers.find((row) => row.uid === uid) ?? {}, "power");
-    }
-
-    right(key: string)
-    {
-        allianceRight(this.member(), this.rules, key);
-    }
-
-    setAlliance(row: Row)
-    {
-        this.write.alliances = [
-            ...(this.write.alliances ?? []).filter((value) => value.uid !== row.uid),
-            row,
-        ];
-    }
-
-    setMember(row: Row)
-    {
-        this.write.members = [
-            ...(this.write.members ?? []).filter((value) => value.uid !== row.uid),
-            row,
-        ];
-    }
-
-    cost(key: string)
-    {
-        activityEconomy(this.ledger).gold(
-            -BigInt(cityInteger(this.rules.items.get("alliance_cost")?.[key])),
-        );
-    }
-
-    list(id = this.allianceId)
-    {
-        return this.state.members.filter((row) => row.allianceId === id);
-    }
-
-    scienceEffect(effect: number, id = this.allianceId)
-    {
-        return this.state.sciences
-            .filter((row) => row.allianceId === id)
-            .reduce((total, row) => {
-                const rule = this.rules.power.allianceSciences?.get(
-                    String(num(row, "scienceId") + num(row, "level")),
-                );
-
-                return total
-                    + (rule?.para1?.split(";").includes(String(effect)) ? Number(rule.para2) : 0);
-            }, 0);
-    }
-
-    snapshot(alliance?: Row, member?: Row)
-    {
-        return this.snapshotFactory(this).snapshot(alliance, member);
-    }
-
-    scienceSnapshots(id: string)
-    {
-        return this.science(this).snapshots(id);
-    }
-
-    join(uid: string, alliance: Row, rank = 1)
-    {
-        return this.membershipFactory(this).join(uid, alliance, rank);
-    }
-
-    remove(uid: string)
-    {
-        return this.membershipFactory(this).remove(uid);
-    }
-
-    async command(command: string, params: Fields): Promise<Fields>
-    {
-        if (command === "alliance.tick")
-        {
-            return this.science(this).complete();
-        }
-
-        if (command === AllianceQueryCommand.Init)
-        {
-            return this.queriesFactory(this).command(command);
-        }
-
-        if (command === AllianceMembershipCommand.Create)
-        {
-            return this.membershipFactory(this).create(params);
-        }
-
-        if ((Object.values(AllianceQueryCommand) as readonly string[]).includes(command))
-        {
-            return this.queriesFactory(this).command(command);
-        }
-
-        if (
-            ([
-                AllianceApplicationCommand.Apply,
-                AllianceApplicationCommand.CancelApply,
-                AllianceApplicationCommand.AcceptApply,
-                AllianceApplicationCommand.RefuseApply,
-                AllianceApplicationCommand.Invite,
-                AllianceApplicationCommand.CancelInvite,
-                AllianceApplicationCommand.AcceptInvite,
-                AllianceApplicationCommand.RefuseInvite,
-            ] as readonly string[]).includes(command)
-        )
-        {
-            return this.applicationsFactory(this).command(command, params);
-        }
-
-        if (
-            ([
-                AllianceApplicationCommand.ApplyList,
-                AllianceApplicationCommand.InviteList,
-                AllianceApplicationCommand.UserApplyList,
-                AllianceApplicationCommand.UserInviteList,
-                AllianceApplicationCommand.Message,
-                AllianceApplicationCommand.GetMessage,
-            ] as readonly string[]).includes(command)
-        )
-        {
-            return this.applicationsFactory(this).queries(command, params);
-        }
-
-        this.member();
-
-        if (command.startsWith("al.science.") || command === AllianceScienceCommand.Target)
-        {
-            return this.science(this).command(command, params);
-        }
-
-        if (
-            ([
-                AllianceHelpCommand.Call,
-                AllianceHelpCommand.Render,
-                AllianceHelpCommand.All,
-                AllianceHelpCommand.Show,
-            ] as readonly string[]).includes(command)
-        )
-        {
-            return this.help(this).command(command, params);
-        }
-
-        if (
-            ([
-                AllianceGiftCommand.Show,
-                AllianceGiftCommand.Open,
-                AllianceGiftCommand.Clear,
-            ] as readonly string[]).includes(command)
-        )
-        {
-            return this.gifts(this).command(command, params);
-        }
-
-        return this.governance(this).command(command, params);
     }
 }
 
