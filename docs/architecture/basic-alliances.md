@@ -41,7 +41,7 @@ commands, generation validation, mapping and persistence under ADR-0016. Realm
 composition injects the help factory into the shared coordinator and supplies the
 publication mapper. Shared aggregate repositories delegate help operations within
 the same transaction and at the same read/write/invalidation positions. Membership
-and science remain in their existing owners pending subsequent #558 slices.
+remains in its existing owner pending subsequent #558 slices.
 
 A new help request records the running timed-activity identity, start time and
 helpers. Queue IDs and client-supplied helper identities confer no authority.
@@ -59,6 +59,12 @@ running queue generation. Ambiguous or stale requests cannot accelerate a reused
 queue. Leaving invalidates that player's outstanding help requests.
 
 ## Research and effects
+
+After #667, Alliance owns the science Service, policies, native Mapper, bounded
+contracts and research/donation persistence and recovery reader. Realm composition
+injects actual numeric, RNG, calendar and economy collaborators. Shared aggregates
+retain their transaction and publication ordering; Production and catalog tests
+retain a tracked binding to the owned policy until their consumers migrate.
 
 Donation offers persist their costs, contribution and progress outcomes. Opening
 an existing offer does not reroll it. A successful donation consumes resources or
