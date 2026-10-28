@@ -176,3 +176,9 @@ suit/material/equipment writes at their existing transaction positions. Equipmen
 and Workshop use owned structural contexts rather than the legacy City aliases,
 reducing current context/domain consumers to 51/59. City bootstrap still uses the
 tracked equipment projection adapter until that boundary moves to constructor ports.
+
+After #653, the injected Tasks repository owns task/quest snapshots and persistence.
+City keeps their aggregate ordering and original before-state cloning. Ordinary
+quest commands specialize Base directly; the legacy context/domain aliases now
+have 51/58 consumers. Shared quest refresh callers still use the tracked adapter
+in [Tasks](../tasks/README.md#compatibility-and-retirement).

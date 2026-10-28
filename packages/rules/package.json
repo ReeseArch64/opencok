@@ -22,6 +22,7 @@
     "@opencok/policy": "workspace:*",
     "@opencok/economy": "workspace:*",
     "@opencok/ledger": "workspace:*",
-    "@opencok/building": "workspace:*"
+    "@opencok/building": "workspace:*",
+    "@opencok/tasks": "workspace:*"
   }
 }

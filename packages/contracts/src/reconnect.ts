@@ -1,3 +1,5 @@
+import type { ReconnectTaskPlan } from "@opencok/tasks/contracts/reconnect";
+export type { ReconnectTask, ReconnectTaskPlan } from "@opencok/tasks/contracts/reconnect";
 import type { Value } from "@opencok/messages/sfs";
 import type { Row } from "./rows.ts";
 
@@ -32,27 +34,6 @@ export interface FriendshipMineView extends FriendshipMine
 export interface FriendshipMineStore
 {
     friendshipMine(uid: string, initial: () => FriendshipMine): Promise<Row>;
-}
-
-export interface ReconnectTask
-{
-    accepted: boolean;
-    id: string;
-    num: number;
-    state: number;
-    type: number;
-    trigger: number;
-    phase: number;
-    predecessor: string | undefined;
-    reward: string | undefined;
-}
-
-export interface ReconnectTaskPlan
-{
-    tasks: readonly ReconnectTask[];
-    inserts: readonly ReconnectTask[];
-    updates: readonly ReconnectTask[];
-    pushes: readonly { command: string; tasks: readonly ReconnectTask[]; }[];
 }
 
 export interface ReconnectProgressState extends ReconnectBaseState

@@ -20,6 +20,8 @@
     "@opencok/economy": "workspace:*",
     "@opencok/ledger": "workspace:*",
     "@opencok/base": "workspace:*",
-    "@opencok/equipment": "workspace:*"
+    "@opencok/equipment": "workspace:*",
+    "@opencok/tasks": "workspace:*",
+    "@opencok/mail": "workspace:*"
   }
 }

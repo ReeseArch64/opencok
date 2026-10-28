@@ -1,5 +1,6 @@
+import type { ReconnectTaskContext } from "@opencok/tasks/contracts/reconnect";
+export type { ReconnectTaskContext } from "@opencok/tasks/contracts/reconnect";
 import type { ReconnectTask, ReconnectTaskPlan } from "@opencok/contracts/reconnect";
-import type { RewardRandom } from "@opencok/contracts/rewards";
 import type { Row } from "@opencok/contracts/rows";
 import type { Rule } from "./game.ts";
 import { javaDecimal } from "./java-integer.ts";
@@ -9,18 +10,6 @@ import { mailBlank } from "./mail.ts";
 const integer = (value: unknown) => Number(javaDecimal(String(value), 32));
 
 const parts = (value: string | undefined) => value?.split("|").filter(Boolean) ?? [];
-
-export interface ReconnectTaskContext
-{
-    platform: string;
-    registrationPlatform: string | null;
-    chinaPlatform: boolean;
-    level: number;
-    castleLevel: number;
-    containsBuildings: (requirements: readonly string[]) => boolean;
-    initialCount: (rule: Rule) => number;
-    random: RewardRandom;
-}
 
 function ordered(tasks: readonly ReconnectTask[]): ReconnectTask[]
 {

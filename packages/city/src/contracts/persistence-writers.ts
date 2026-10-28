@@ -1,7 +1,4 @@
-import type {
-    CityProgressionState,
-    CityProgressionWrite,
-} from "@opencok/contracts/city-progression";
+import type { CityProgressionWrite } from "@opencok/contracts/city-progression";
 import type { CityTransaction } from "./transaction";
 
 type CityWriteField<K extends keyof CityProgressionWrite, TArgs extends unknown[] = []> = (
@@ -81,8 +78,4 @@ export interface CityPersistenceWriters
         owner: string,
         write: CityProgressionWrite,
     ) => Promise<unknown>;
-    writeQuests: CityWriteField<
-        "quests",
-        [before?: Pick<CityProgressionState, "tasks" | "quests">]
-    >;
 }

@@ -106,7 +106,7 @@ import {
     readProgressionEffects,
     writePlayerEffects,
 } from "@opencok/repositories/player-effects";
-import { readQuests, writeQuests } from "@opencok/repositories/quests";
+import { createRealmQuestRepository } from "./quest-persistence";
 import { readResourceNewGenerals } from "@opencok/hero/repositories/general-resource-owner";
 import { readPlayerEffects } from "@opencok/repositories/power";
 import { CityProgressionRepository } from "@opencok/city/repositories/progression";
@@ -166,7 +166,6 @@ const readers: CityPersistenceReaders = {
     readGeneralRoster,
     readAbilityPages,
     readProgressionEffects,
-    readQuests,
     readResourceNewGenerals,
     readPlayerEffects,
 };
@@ -221,7 +220,6 @@ const writers: CityPersistenceWriters = {
     writeDragonProgression,
     writeGeneralRoster,
     writePlayerEffects,
-    writeQuests,
 };
 
 export function createRealmCityProgressionStore(
@@ -240,6 +238,7 @@ export function createRealmCityProgressionStore(
         troops: new TroopsRepository(tx, owner),
         buildings: new BuildingRepository(tx, owner),
         equipment: new EquipmentRepository(tx, owner, { text, num, long }),
+        quests: createRealmQuestRepository(tx, owner),
         birth: authority
             ? (rules, mode) => allocateWorldBirth(tx, authority, mapSize, rules, now, mode)
             : undefined,

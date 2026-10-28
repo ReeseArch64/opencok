@@ -270,7 +270,7 @@ import { relayMutationEvent } from "@opencok/repositories/mutation";
 import { GeneralsDomain } from "@opencok/hero/services/generals";
 import { createRealmEquipmentDomains } from "./composition/equipment";
 import { PlayerEffectsDomain } from "@opencok/services/player-effects";
-import { QuestsDomain } from "@opencok/services/quests";
+import { createRealmQuestsDomain } from "./composition/quests";
 import { cityQueueCommands } from "@opencok/rules/city-command";
 import { createRealmTrainingDomain } from "./composition/troops";
 import { createRealmHospitalDomain } from "./composition/troops";
@@ -932,7 +932,7 @@ export const RealmDependenciesLive = Layer.effect(
                     ),
                     observeAdapter(equipmentDomains.workshop, "realm.WorkshopDomain"),
                     observeAdapter(new PlayerEffectsDomain(), "realm.PlayerEffectsDomain"),
-                    observeAdapter(new QuestsDomain(), "realm.QuestsDomain"),
+                    observeAdapter(createRealmQuestsDomain(), "realm.QuestsDomain"),
                     observeAdapter(createRealmConstructionDomain(), "realm.ConstructionDomain"),
                     observeAdapter(createRealmResearchDomain(), "realm.ResearchDomain"),
                     observeAdapter(

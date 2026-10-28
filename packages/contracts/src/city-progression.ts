@@ -1,3 +1,5 @@
+import type { QuestState, QuestWrite } from "@opencok/tasks/contracts/progression";
+export type { QuestState, QuestWrite } from "@opencok/tasks/contracts/progression";
 export type { ProgressionActivityData } from "@opencok/economy/contracts/progression-activity";
 import type { GeneralWrite } from "@opencok/hero/contracts/generals";
 import type { GeneralRoster } from "@opencok/hero/contracts/generals";
@@ -6,37 +8,6 @@ import type { WorldResourceOwnerSnapshot } from "./world-point-detail";
 import type { Row } from "./rows";
 import type { PlayerEffectSnapshot } from "./power";
 import type { ActivityEconomy } from "@opencok/economy/contracts/activity-economy";
-
-export interface QuestState
-{
-    legacy: readonly Row[];
-    fresh: Row;
-    lord: Row;
-    mixed: Row;
-    signIn: Row;
-    story: readonly Row[];
-    daily: readonly Row[];
-    alliance: Row;
-}
-
-export interface QuestWrite
-{
-    mail?: readonly import("./files").AvatarSystemMail[];
-    legacy?: readonly Row[];
-    resetLegacy?: boolean;
-    legacyPeriod?: bigint;
-    dailyClaims?: string;
-    fresh?: { day: number; signInTime: bigint; };
-    tasks?: readonly Row[];
-    story?: readonly Row[];
-    daily?: readonly Row[];
-    resetDaily?: boolean;
-    lord?: { newDailyTaskFlushTime: bigint; newDailyTaskBoxRewardState: number; };
-    signIn?: { day: number; lastRewardTime: bigint; reward: string; };
-    taskStage?: number;
-    allianceTasks?: number;
-    allianceBox?: { threshold: number; period: bigint; };
-}
 
 export interface DragonProgressionState
 {

@@ -100,6 +100,7 @@
         "@opencok/services": "workspace:*",
         "@opencok/shop": "workspace:*",
         "@opencok/storage": "workspace:*",
+        "@opencok/tasks": "workspace:*",
         "@opencok/troops": "workspace:*",
         "effect": "catalog:",
       },
@@ -266,6 +267,7 @@
         "@opencok/messages": "workspace:*",
         "@opencok/research": "workspace:*",
         "@opencok/rules": "workspace:*",
+        "@opencok/tasks": "workspace:*",
         "@opencok/troops": "workspace:*",
         "drizzle-orm": "0.45.4",
       },
@@ -350,7 +352,9 @@
         "@opencok/equipment": "workspace:*",
         "@opencok/hero": "workspace:*",
         "@opencok/ledger": "workspace:*",
+        "@opencok/mail": "workspace:*",
         "@opencok/messages": "workspace:*",
+        "@opencok/tasks": "workspace:*",
       },
       "devDependencies": {
         "@opencok/config": "workspace:*",
@@ -613,6 +617,14 @@
         "typescript": "catalog:",
       },
     },
+    "packages/mail": {
+      "name": "@opencok/mail",
+      "devDependencies": {
+        "@opencok/config": "workspace:*",
+        "@types/bun": "catalog:",
+        "typescript": "catalog:",
+      },
+    },
     "packages/mappings": {
       "name": "@opencok/mappings",
       "dependencies": {
@@ -838,6 +850,7 @@
         "@opencok/hero": "workspace:*",
         "@opencok/ledger": "workspace:*",
         "@opencok/policy": "workspace:*",
+        "@opencok/tasks": "workspace:*",
       },
       "devDependencies": {
         "@opencok/config": "workspace:*",
@@ -864,6 +877,7 @@
         "@opencok/messages": "workspace:*",
         "@opencok/policy": "workspace:*",
         "@opencok/rules": "workspace:*",
+        "@opencok/tasks": "workspace:*",
         "@opencok/validations": "workspace:*",
       },
       "devDependencies": {
@@ -930,6 +944,16 @@
     },
     "packages/tasks": {
       "name": "@opencok/tasks",
+      "dependencies": {
+        "@opencok/base": "workspace:*",
+        "@opencok/constants": "workspace:*",
+        "@opencok/drizzle": "workspace:*",
+        "@opencok/economy": "workspace:*",
+        "@opencok/errors": "workspace:*",
+        "@opencok/mail": "workspace:*",
+        "@opencok/messages": "workspace:*",
+        "drizzle-orm": "0.45.4",
+      },
       "devDependencies": {
         "@opencok/config": "workspace:*",
         "@types/bun": "catalog:",
@@ -1374,6 +1398,8 @@
     "@opencok/kvk": ["@opencok/kvk@workspace:packages/kvk"],
 
     "@opencok/ledger": ["@opencok/ledger@workspace:packages/ledger"],
+
+    "@opencok/mail": ["@opencok/mail@workspace:packages/mail"],
 
     "@opencok/mappings": ["@opencok/mappings@workspace:packages/mappings"],
 

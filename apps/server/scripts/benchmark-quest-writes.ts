@@ -1,4 +1,5 @@
-import { writeQuests } from "@opencok/repositories/quests";
+import { createRealmQuestRepository } from "../src/composition/quest-persistence";
+
 import type { MutationTransaction } from "@opencok/repositories/mutation";
 import type { Row } from "@opencok/contracts/rows";
 
@@ -61,7 +62,7 @@ async function measure(batched: boolean)
     {
         if (batched)
         {
-            await writeQuests(tx, "synthetic", { tasks, story }, before);
+            await createRealmQuestRepository(tx, "synthetic").writeQuests({ tasks, story }, before);
         }
         else
         {
