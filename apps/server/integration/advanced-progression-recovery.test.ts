@@ -1,3 +1,4 @@
+import { planRealmProductionContext } from "../src/composition/production.ts";
 import { expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { eq } from "drizzle-orm";
@@ -11,13 +12,12 @@ import { queue } from "@opencok/drizzle/schema/opencok_kingdom/queue";
 import { command_receipt } from "@opencok/drizzle/schema/opencok_kingdom/command_receipt";
 import { acquireRealmAuthority, type RealmAuthority } from "@opencok/repositories/realm-authority";
 import { createActivityExecutor } from "@opencok/repositories/timed-activity";
-import { createCityProductionBoundary } from "@opencok/repositories/city-production";
+import { createCityProductionBoundary } from "@opencok/production/repositories/city-boundary";
 import { createCityProgressionStore } from "@opencok/repositories/city-progression";
 import { readReconnectProgress } from "@opencok/repositories/reconnect-progress";
 import { persistReconnectProgress } from "@opencok/repositories/reconnect-write";
 import { createCityProgressionHandlers } from "@opencok/services/city-progression";
 import { TimedActivityService } from "@opencok/services/timed-activity";
-import { productionContext } from "@opencok/services/production-context";
 import { dragonProgressionDomain } from "@opencok/services/dragon-progression";
 import { civilizationScienceDomain } from "@opencok/services/civilization-science";
 import { lotteryDomain } from "@opencok/services/lottery";
@@ -118,7 +118,7 @@ function resumed(
         )
         {
             const state = await readReconnectProgress(tx, owner, authority.kingdomId, at);
-            const plan = await productionContext(state, h.rules, at, {
+            const plan = await planRealmProductionContext(state, h.rules, at, {
                 worldPowerEffects: async () => new Map<string, string>(),
                 emperorVersion: async () => null,
             });

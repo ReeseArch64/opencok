@@ -56,6 +56,7 @@ Counts describe maintained TypeScript/JavaScript source under `src` and named te
 | `payments`       |                  0 / 0 | Idempotent delivery of purchased benefits to the realm. Economic grants remain under the realm authority.                                                                                                      | Retain for confirmed scope; move real implementations in tested slices                                                                                                                                                                                                                        | Confirmed in #567/#568   |
 | `player`         |                43 / 20 | Character provisioning, profiles/descriptions, nickname workflows, preferences and bounded player progression.                                                                                                 | Preferences in #595/#603, provisioning in #609 and public profile queries in #627 and celebrity descriptions in #629; nickname workflows in #631; remaining progression ownership is tracked by #558. Keep wallet/inventory and mechanics in their own packages; global account != character. | Proposed; pending review |
 | `policy`         |                  7 / 4 | Content matching, reserved-name rules, bounded file/worker adapters and the maintained word dictionary.                                                                                                        | Implemented in #589; five compatibility paths retired in #590. Player nickname mutations remain separate.                                                                                                                                                                                     | Confirmed in #567/#568   |
+| `production`     |                  9 / 2 | Building production accounts, accumulation, collection/boosts, rate schedules and atomic city settlement.                                                                                                      | New owned domain in #633 under W07; current realm authority and shared economic transactions remain. Catalog authoring and broader city/building ownership remain tracked separately.                                                                                                         | Implemented in #633      |
 | `prompts`        |                  0 / 0 | No current use. Remove the unused workspace.                                                                                                                                                                   | Retired in #568                                                                                                                                                                                                                                                                               | Confirmed in #567/#568   |
 | `queues`         |                  0 / 0 | Persistent timed-activity lifecycle, dispatch contracts and shared queue invariants.                                                                                                                           | Populate current timed-activity mechanism; keep economic completion inside owned transactions. Transport queues and broker clients are distinct infrastructure responsibilities.                                                                                                              | Proposed; pending review |
 | `ranking`        |                  0 / 0 | Common ranking contracts, exact arithmetic, tie-breaking, publication/finality primitives and bounded ranking use cases.                                                                                       | Populate existing code; move large event-specific families to their event packages. A projection may be asynchronous; prize funding remains authoritative.                                                                                                                                    | Proposed; pending review |
@@ -518,3 +519,24 @@ modules/20 test files; account has eight source modules. Workspace dependency ed
 change for explicit composition, with no version upgrade. Existing operation receipts,
 pending deliveries, saved names and schema stay compatible. See [player](player/README.md)
 and [account](account/README.md) for rollout, rollback and remaining scope.
+
+## Production ownership (#633)
+
+The new production workspace owns its Service, effect/rate context, fixed-point
+settlement rules, rate codec/boost mapping, contracts, production repository and city
+mutation boundary. The former horizontal production modules are removed after all
+maintained callers migrate. Timed activity lifecycle rules/contracts remain shared.
+
+Realm composition injects inventory planning, fenced mutation/inventory execution and
+world decoding. Production has no reverse facade and no import from horizontal Services
+or Repositories. The existing city change callback remains inside the same transaction
+between old-rate settlement and new-rate generation, including demolition resource
+transfers. Upkeep, weakness, effect expiry, Hero and alliance contributions retain their
+existing calculations and deadlines.
+
+Production has nine source modules and two test files. Root package tests include it.
+The original unit and PostgreSQL cases retain their assertions; mapping tests and
+fourteen runtime comparisons supplement integration coverage of city/effect consumers.
+No dependency version, database schema, checkpoint format or authority changes. Broader
+W07 ownership and W14 named definitions remain incomplete. See
+[production](production/README.md) for contracts, validation and rollback.

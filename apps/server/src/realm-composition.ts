@@ -1,3 +1,8 @@
+import {
+    createRealmProductionService,
+    planRealmProductionContext,
+    createRealmProductionExecutor,
+} from "./composition/production.ts";
 import { nicknameChangePayment } from "@opencok/player/repositories/nickname-change";
 import { createRealmNicknameService } from "./composition/nickname.ts";
 import { createRealmCelebrityDescriptionService } from "./composition/celebrity-description.ts";
@@ -271,7 +276,7 @@ import { HospitalDomain } from "@opencok/services/hospital";
 import { FortificationDomain } from "@opencok/services/fortifications";
 import { ResearchDomain } from "@opencok/services/research";
 import { createCityProgressionStore } from "@opencok/repositories/city-progression";
-import { createCityProductionBoundary } from "@opencok/repositories/city-production";
+import { createCityProductionBoundary } from "@opencok/production/repositories/city-boundary";
 import { CityProgressionService } from "@opencok/services/city-progression.service";
 import { ConstructionDomain } from "@opencok/services/construction";
 import { num, text } from "@opencok/contracts/rows";
@@ -282,12 +287,9 @@ import {
     activityTransitionInstant,
     type ActivityDomain,
 } from "@opencok/repositories/timed-activity";
-import { createProductionExecutor } from "@opencok/repositories/production";
 import { readReconnectProgress } from "@opencok/repositories/reconnect-progress";
 import { persistReconnectProgress } from "@opencok/repositories/reconnect-write";
 import { TimedActivityService } from "@opencok/services/timed-activity";
-import { ProductionService } from "@opencok/services/production";
-import { productionContext } from "@opencok/services/production-context";
 import { sfs, encode, decode, str, int, fields, Type } from "@opencok/messages/sfs";
 import { createCharacterCreator } from "./character-provisioning";
 import { CharacterProvisioningService } from "@opencok/player/services/character-provisioning";
@@ -792,7 +794,7 @@ export const RealmDependenciesLive = Layer.effect(
             )
             {
                 const state = await readReconnectProgress(tx, owner, config.kingdomId, now);
-                const planned = await productionContext(state, rules, now, {
+                const planned = await planRealmProductionContext(state, rules, now, {
                     worldPowerEffects: (id) => worldEffects(id),
                     emperorVersion: (id) => cache.emperorVersion(id),
                 });
@@ -2448,9 +2450,9 @@ export const RealmDependenciesLive = Layer.effect(
             Effect.forkScoped,
         );
         const production = observeAdapter(
-            new ProductionService(
+            createRealmProductionService(
                 observeAdapter(
-                    createProductionExecutor(db.kingdom.db, authority, {
+                    createRealmProductionExecutor(db.kingdom.db, authority, {
                         ...productionPreparation,
                         recordAction: async (tx, owner, kind, itemId, count, now, economy) => {
                             await city.command(
