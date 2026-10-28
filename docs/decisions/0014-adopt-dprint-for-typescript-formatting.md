@@ -94,11 +94,11 @@ in both owners, normal TypeScript names, public contracts and behavior.
       both are idempotent and preserve the compared normalized ASTs.
 - [x] Synthetic ASI, object returns, nested if/else, loops, callbacks, generics,
       templates and TSX fixtures pass; Oxlint curly rejects/fixes unbraced bodies.
-- [ ] Root commands and CI use disjoint owners and frozen pinned dependencies.
-- [ ] Full mechanical baseline passes normalized AST comparison, two formatting
+- [x] Root commands and CI use disjoint owners and frozen pinned dependencies.
+- [x] Full mechanical baseline passes normalized AST comparison, two formatting
       runs, lint, format checks, workspace type checks and affected tests.
-- [ ] All prior ignore boundaries remain intact and private/generated inputs are untouched.
-- [ ] Structural follow-up issues are linked separately.
+- [x] All prior ignore boundaries remain intact and private/generated inputs are untouched.
+- [x] Structural follow-up issues are linked separately.
 
 ## Alternatives Considered
 
@@ -114,3 +114,5 @@ in both owners, normal TypeScript names, public contracts and behavior.
 The pilot report records exact versions, output excerpts, reproduction commands,
 AST normalization limits and rollout boundaries. Revisit if pinned releases stop
 supporting maintained syntax or editor/CI ownership cannot remain deterministic.
+
+- **2026-10-27 implementation evidence**: [Migration validation](../../.github/formatting-pilot/MIGRATION.md) records 4,143 matching source ASTs, formatting idempotence, editor LSP/CLI equivalence, all 27 implemented workspace type checks, 1,809 expanded tests and 858 Drizzle/hook tests passing. Structural work is tracked separately in #552 and #553.
