@@ -80,16 +80,16 @@ Counts describe maintained TypeScript/JavaScript source under `src` and named te
 
 These candidates use existing modules and confirmed meanings. They are review units, not permission to omit the rest of the inventory. The current composing authority remains `apps/server` unless stated otherwise. Create a new package only when its implementation moves.
 
-| Slice             | Existing evidence                                                                                  | Proposed owner              | Required verification and remaining decisions                                                                                         |
-| ----------------- | -------------------------------------------------------------------------------------------------- | --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
-| Content policy    | `resources/src/nickname-words.ts`, `resources/data/badwords.json`, nickname matching rules         | `policy`                    | Implemented in #589 with relocated tests, immutable fixture hashes and packaged loader checks. Compatibility paths retired in #590.   |
-| Shop              | Shop Services, rules, repositories, contracts and mappings                                         | `shop`                      | Gameplay slice in #593; catalog authoring remains pending. Event exchanges and paid entitlements stay distinct.                       |
-| Player missions   | Quests and target-task modules across global layers                                                | `tasks`                     | Initialization, claim/retry, timed progression and restart. Event score/finality may remain event-owned; no background jobs in tasks. |
-| Buildings         | Building catalogs, construction Services/rules and contracts                                       | `building`                  | 60 / 3                                                                                                                                | Building definitions, catalogs, policies, construction workflows and transaction-bound persistence. | #635 owns definitions; #647 persistence; #649 commands, completion and integration ports. Semantic archetypes and shared projections remain tracked. | Owned #635/#647/#649 |
-| Research          | Ordinary/civilization workflows, rules, mappings, validation, contracts and transactional adapters | `research`                  | Implemented in #643; shared catalogs/read providers and semantic definitions remain tracked.                                          |
-| Troops            | Training, hospital, fortification and military modules                                             | `troops`                    | Implemented in #645; shared helpers, catalogs and world/march consumers remain tracked.                                               |
-| Media and postbox | Existing GameService workflows                                                                     | `media` / `mail` candidates | Reuse #552/#553 and avatar/mail suites; do not duplicate their work.                                                                  |
-| World recovery    | Population/march jobs in server composition                                                        | Domain extraction pending   | #572/#574 tests plus world persistence/process recovery. These jobs do not establish a player/world authority split.                  |
+| Slice             | Existing evidence                                                                                  | Proposed owner                           | Required verification and remaining decisions                                                                                         |
+| ----------------- | -------------------------------------------------------------------------------------------------- | ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| Content policy    | `resources/src/nickname-words.ts`, `resources/data/badwords.json`, nickname matching rules         | `policy`                                 | Implemented in #589 with relocated tests, immutable fixture hashes and packaged loader checks. Compatibility paths retired in #590.   |
+| Shop              | Shop Services, rules, repositories, contracts and mappings                                         | `shop`                                   | Gameplay slice in #593; catalog authoring remains pending. Event exchanges and paid entitlements stay distinct.                       |
+| Player missions   | Quests and target-task modules across global layers                                                | `tasks`                                  | Initialization, claim/retry, timed progression and restart. Event score/finality may remain event-owned; no background jobs in tasks. |
+| Buildings         | Building catalogs, construction Services/rules and contracts                                       | `building`                               | 60 / 3                                                                                                                                | Building definitions, catalogs, policies, construction workflows and transaction-bound persistence. | #635 owns definitions; #647 persistence; #649 commands, completion and integration ports. Semantic archetypes and shared projections remain tracked. | Owned #635/#647/#649 |
+| Research          | Ordinary/civilization workflows, rules, mappings, validation, contracts and transactional adapters | `research`                               | Implemented in #643; shared catalogs/read providers and semantic definitions remain tracked.                                          |
+| Troops            | Training, hospital, fortification and military modules                                             | `troops`                                 | Implemented in #645; shared helpers, catalogs and world/march consumers remain tracked.                                               |
+| Media and postbox | Existing GameService workflows                                                                     | `media` / `mail` candidates              | Reuse #552/#553 and avatar/mail suites; do not duplicate their work.                                                                  |
+| World recovery    | Population/march jobs in server composition                                                        | Population owned; march recovery pending | #695 owns population verticals; #572/#574 retain job sequencing. The existing realm writer remains unchanged.                         |
 
 ## Catalog and command review
 
@@ -987,9 +987,9 @@ the guarded database and explicit leave fence in place. No process authority or
 saved-state conversion is introduced.
 
 This package is additional to the original 64-directory inventory above. It does
-not absorb all files prefixed world: resource/gathering state, population, scouting,
-recovery and march lifecycles retain their current owners until cohesive migrations
-are verified. W10 and the separate authority protocol in W18 remain incomplete.
+not absorb all files prefixed world: resource/gathering state, scouting,
+multi-aggregate recovery and march lifecycles retain their current owners until
+cohesive migrations are verified. Population ownership is recorded in #695 below. W10 and the separate authority protocol in W18 remain incomplete.
 
 ## World point details and specialized projections (#693)
 
@@ -1006,3 +1006,34 @@ Hero, Scout, march inspection and reconnect until those owners migrate. Consumer
 move directly; the former point-detail contract path is removed. The World register
 records remaining W10/W20 responsibilities, read-only guarantees and compatibility
 limits. No gameplay repair, reward grant or process authority change is introduced.
+
+## World population admission and recovery (#695)
+
+The twelve former shared-resource, ordinary-resource and monster population modules
+now live under World contracts, rules, Services and repositories. The complete
+vertical includes expiry, occupied-cell handling, quotas, cursor progression,
+tickets, durable clocks and transactional outbox writes. Zero-caller horizontal
+paths are retired, and all realm/test/item-use consumers use the owned algorithms.
+
+The former 799-line monster Service is divided into expiry, field/black-land,
+exploration and barbarian workflows. The resulting World package has 64 source
+modules and 7,935 physical lines, with no generated catalog payload. Its bounded
+spatial ownership is documented in the [package register](world/README.md).
+Typed live catalog access, numeric operations and NPC configuration/selection are
+injected by the application; no broad Rules/Services/Repositories dependency is
+introduced into World, including type-only imports.
+
+The same realm database and authority remain in use. Executors retain fence, world
+advisory lock, timestamp capture, original SQL and outbox inside each transaction.
+The existing population job retains order, independent failure reporting and
+resource effects inside the transaction callback. No schema, clock version, ticket
+identity, process lifecycle, client payload or deployment topology changes.
+
+The maintained [Server benchmarks](../apps/server/README.md#synthetic-world-population-performance-baseline)
+compare the parent and owned implementation with bounded disposable-PostgreSQL
+scenarios and measure cell-selection calculation separately. Measurements include
+explicit workload, source provenance and instrumentation limits. They provide
+partial W02 evidence; they do not establish production performance or justify a
+worker backend. W10 still includes gathering/cargo, scouting, march lifecycle and
+multi-aggregate recovery. W18 authority protocols and the full #558 inventory
+remain incomplete.

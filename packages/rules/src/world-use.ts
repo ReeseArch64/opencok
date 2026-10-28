@@ -3,7 +3,7 @@ import type { Rules, Rule } from "./game";
 import { cityInteger } from "./city-progression";
 import { chooseWeight } from "./weighted-choice";
 import { worldMutationFailure } from "./world-march-runtime";
-import { worldResourceDuration } from "./world-resource-refresh";
+import { worldResourceDuration } from "@opencok/world/rules/world-resource-refresh";
 
 export function worldItemTarget(rule: Rule, random: (maximum: number) => number)
 {
@@ -69,6 +69,18 @@ export function worldItemResource(rules: Rules, id: string)
         type,
         level,
         amount: cityInteger(rules.items.get(key)?.[`k${level}`], 1),
-        duration: worldResourceDuration(rules, level),
+        duration: worldResourceDuration(
+            {
+                settings: {
+                    get resources_life()
+                    {
+                        return rules.items.get("resources_life");
+                    },
+                },
+            },
+            level,
+            false,
+            { worldMutationFailure },
+        ),
     };
 }

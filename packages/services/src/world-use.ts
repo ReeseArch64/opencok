@@ -1,10 +1,12 @@
+import { javaDecimal } from "@opencok/rules/java-integer";
+import { javaHashMapOrder } from "@opencok/rules/java-hash-map-order";
 import { CityCommandDomain } from "./city-command-domain.ts";
 import { worldMonsterMaximum } from "@opencok/rules/world-monster-detail";
 import { GameError } from "@opencok/errors/game";
 import { errors } from "@opencok/constants/game";
 import { ruleAvailable } from "@opencok/rules/availability";
 import { barbarianCurrentHP } from "@opencok/rules/world-scout";
-import { worldBarbarianActor } from "@opencok/rules/world-monster-refresh";
+import { worldBarbarianActor } from "@opencok/world/rules/world-monster-refresh";
 import { randomInt } from "node:crypto";
 import { num, text, long } from "@opencok/contracts/rows";
 import { encode, int, str, sfs } from "@opencok/messages/sfs";
@@ -141,7 +143,20 @@ export class WorldUseDomain extends CityCommandDomain
                     return { response: encode({ pointId: sfs.int(-1) }), event: null };
                 }
 
-                const actor = worldBarbarianActor(context.rules, "4800000"),
+                const actor = worldBarbarianActor(
+                        {
+                            get barbarianSpawns()
+                            {
+                                return context.rules.world.barbarians;
+                            },
+                            get armyLayouts()
+                            {
+                                return context.rules.world.armies;
+                            },
+                        },
+                        "4800000",
+                        { cityInteger, worldMutationFailure, javaDecimal, javaHashMapOrder },
+                    ),
                     points = chosen.map((point, index) => ({
                         ...point,
                         pointType: index ? 45 : 44,

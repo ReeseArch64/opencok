@@ -1,11 +1,13 @@
 import { expect, test } from "bun:test";
 import { loadRules } from "@opencok/resources/rules";
-import {
+import { createRealmWorldPopulationPolicies } from "../src/composition/world-population";
+
+const {
     parseWorldResourceNewClock,
     worldResourceNewFootprint,
     worldResourceNewSettings,
     worldResourceNewSlots,
-} from "@opencok/rules/world-resource-new";
+} = createRealmWorldPopulationPolicies();
 
 test("shared resources retain the dormant Source calendar and native footprint without enabling the event", async () => {
     const rules = await loadRules();

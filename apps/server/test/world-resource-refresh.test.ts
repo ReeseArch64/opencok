@@ -1,11 +1,13 @@
 import { expect, test } from "bun:test";
 import { loadRules } from "@opencok/resources/rules";
-import {
+import { createRealmWorldPopulationPolicies } from "../src/composition/world-population";
+
+const {
     worldResourceAreaCount,
     worldResourceChoice,
     worldResourceDuration,
     worldResourceQuota,
-} from "@opencok/rules/world-resource-refresh";
+} = createRealmWorldPopulationPolicies();
 
 const rules = await loadRules();
 

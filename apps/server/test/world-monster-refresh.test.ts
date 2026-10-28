@@ -1,13 +1,16 @@
 import { expect, test } from "bun:test";
 import { loadRules } from "@opencok/resources/rules";
 import { Rules, type Rule } from "@opencok/rules/game";
-import {
+import { createRealmWorldPopulationPolicies } from "../src/composition/world-population";
+
+const {
     worldMonsterAreaCount,
     worldMonsterQuotas,
     worldBarbarianQuota,
     worldBarbarianChoice,
     worldMonsterFree,
-} from "@opencok/rules/world-monster-refresh";
+} = createRealmWorldPopulationPolicies();
+
 const loaded = await loadRules();
 function fixture()
 {

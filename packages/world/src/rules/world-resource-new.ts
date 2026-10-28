@@ -1,8 +1,6 @@
-import type { Rules } from "./game";
-import { cityInteger } from "./city-progression";
-import { eventTimestamp } from "./local-events";
-import { worldMutationFailure } from "./world-march-runtime";
-import type { WorldResourceNewClock } from "@opencok/contracts/world-resource-new";
+import type { WorldPopulationCatalog } from "../contracts/population-catalog";
+import type { WorldPopulationNumericRuntime } from "../contracts/population-numeric";
+import type { WorldResourceNewClock } from "../contracts/world-resource-new";
 
 export const worldResourceNewIdentity = {
     type: -1,
@@ -10,9 +8,14 @@ export const worldResourceNewIdentity = {
     key: "opencok.world.shared-resources.v1",
 };
 
-export function worldResourceNewSettings(rules: Rules, now: bigint)
+export function worldResourceNewSettings(
+    catalog: WorldPopulationCatalog,
+    now: bigint,
+    runtime: Pick<WorldPopulationNumericRuntime, "cityInteger" | "eventTimestamp">,
+)
 {
-    const rule = rules.items.get("on_event2");
+    const { cityInteger, eventTimestamp } = runtime;
+    const rule = catalog.settings["on_event2"];
 
     if (!rule)
     {
@@ -30,10 +33,16 @@ export function worldResourceNewSettings(rules: Rules, now: bigint)
     };
 }
 
-export function worldResourceNewSlots(rules: Rules, random: (maximum: number) => number)
+export function worldResourceNewSlots(
+    catalog: WorldPopulationCatalog,
+    random: (maximum: number) => number,
+    runtime: Pick<WorldPopulationNumericRuntime, "cityInteger" | "worldMutationFailure">,
+)
 {
-    const counts = rules.items.get("on_event2")?.k12,
-        presence = rules.items.get("on_event3")?.k1;
+    const { cityInteger } = runtime;
+    const worldMutationFailure: () => never = runtime.worldMutationFailure;
+    const counts = catalog.settings["on_event2"]?.k12,
+        presence = catalog.settings["on_event3"]?.k1;
 
     if (!counts || !presence)
     {
@@ -92,8 +101,13 @@ export function worldResourceNewFootprint(point: number, size: number)
     return [point, point - 1, point - size, point - size - 1];
 }
 
-export function parseWorldResourceNewClock(raw: string, areas: number): WorldResourceNewClock
+export function parseWorldResourceNewClock(
+    raw: string,
+    areas: number,
+    runtime: Pick<WorldPopulationNumericRuntime, "worldMutationFailure">,
+): WorldResourceNewClock
 {
+    const worldMutationFailure: () => never = runtime.worldMutationFailure;
     if (raw.length > 256)
     {
         worldMutationFailure();

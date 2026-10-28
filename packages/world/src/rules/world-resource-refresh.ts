@@ -1,8 +1,9 @@
-import { num, type Row } from "@opencok/contracts/rows";
-import type { Rules, Rule } from "./game";
-import { chooseWeight } from "./weighted-choice";
-import { cityInteger } from "./city-progression";
-import { worldMutationFailure } from "./world-march-runtime";
+import type {
+    WorldPopulationCatalog,
+    WorldPopulationRule as Rule,
+} from "../contracts/population-catalog";
+import type { WorldPopulationNumericRuntime } from "../contracts/population-numeric";
+import { num, type Row } from "../contracts/rows";
 
 export function worldResourceBlackLand(point: Row)
 {
@@ -12,10 +13,16 @@ export function worldResourceBlackLand(point: Row)
     return x >= 575 && x <= 625 && y >= 575 && y <= 625;
 }
 
-export function worldResourceDuration(rules: Rules, level: number, dead = false)
+export function worldResourceDuration(
+    catalog: Pick<WorldPopulationCatalog, "settings">,
+    level: number,
+    dead = false,
+    runtime: Pick<WorldPopulationNumericRuntime, "worldMutationFailure">,
+)
 {
+    const worldMutationFailure: () => never = runtime.worldMutationFailure;
     const hours = Number(
-        rules.items.get(dead ? "resources_death" : "resources_life")?.[`k${level}`],
+        catalog.settings[dead ? "resources_death" : "resources_life"]?.[`k${level}`],
     );
     const duration = Math.trunc(hours * 3600000);
 
@@ -27,23 +34,32 @@ export function worldResourceDuration(rules: Rules, level: number, dead = false)
     return BigInt(duration);
 }
 
-export function worldResourceAreaCount(rules: Rules, size: number)
+export function worldResourceAreaCount(
+    catalog: WorldPopulationCatalog,
+    size: number,
+    runtime: Pick<WorldPopulationNumericRuntime, "cityInteger">,
+)
 {
-    const width = cityInteger(rules.items.get("worldmap_city")?.k6, 1);
+    const { cityInteger } = runtime;
+    const width = cityInteger(catalog.settings["worldmap_city"]?.k6, 1);
 
     return Math.floor(size / width) ** 2 + (size % width === 0 ? 0 : 1);
 }
 
-export function worldResourceQuota(rules: Rules)
+export function worldResourceQuota(
+    catalog: WorldPopulationCatalog,
+    runtime: Pick<WorldPopulationNumericRuntime, "cityInteger">,
+)
 {
-    const width = cityInteger(rules.items.get("worldmap_city")?.k6, 1),
-        ratio = Math.fround(cityInteger(rules.items.get("worldmap_city")?.k7, 0, 100) / 100);
+    const { cityInteger } = runtime;
+    const width = cityInteger(catalog.settings["worldmap_city"]?.k6, 1),
+        ratio = Math.fround(cityInteger(catalog.settings["worldmap_city"]?.k7, 0, 100) / 100);
 
     return Math.trunc(Math.fround(width * width * ratio));
 }
 
 export function worldResourceChoice(
-    rules: Rules,
+    catalog: WorldPopulationCatalog,
     group: readonly Rule[],
     point: Row,
     size: number,
@@ -52,9 +68,15 @@ export function worldResourceChoice(
     goldBonus: boolean,
     random: (maximum: number) => number,
     blackLand = false,
+    runtime: Pick<
+        WorldPopulationNumericRuntime,
+        "cityInteger" | "worldMutationFailure" | "chooseWeight"
+    >,
 )
 {
-    const bandWidth = cityInteger(rules.items.get("worldmap_city")?.k4, 1),
+    const { cityInteger, chooseWeight } = runtime;
+    const worldMutationFailure: () => never = runtime.worldMutationFailure;
+    const bandWidth = cityInteger(catalog.settings["worldmap_city"]?.k4, 1),
         center = Math.trunc((size - 1) / 2),
         band = blackLand
             ? 0
@@ -78,7 +100,9 @@ export function worldResourceChoice(
         return undefined;
     }
 
-    const goldRatio = goldBonus ? Math.fround(Number(rules.items.get("17_wk")?.k11 ?? 0) / 100) : 0;
+    const goldRatio = goldBonus
+        ? Math.fround(Number(catalog.settings["17_wk"]?.k11 ?? 0) / 100)
+        : 0;
     const selected = choices[
         chooseWeight(
             choices.map((rule) => {
@@ -105,15 +129,15 @@ export function worldResourceChoice(
         return { type, level, amount: 0 };
     }
 
-    const key = [
+    const key = ([
         "world_wood",
         "world_stone",
         "world_iron",
         "world_food",
         "world_fineiron",
         "world_gold",
-    ][type]!;
-    let amount = cityInteger(rules.items.get(key)?.[`k${level}`], 1);
+    ] as const)[type]!;
+    let amount = cityInteger(catalog.settings[key]?.[`k${level}`], 1);
 
     if (type !== 5)
     {

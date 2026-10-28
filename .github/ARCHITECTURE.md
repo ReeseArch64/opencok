@@ -152,8 +152,14 @@ leave retains its explicit transaction fence. World also owns point-detail query
 orchestration and specialized spatial presentation, with actual effect/resource,
 monster and player/Hero collaborators injected by the realm. Generic snapshots keep
 those domains outside World; the original local/remote read-only transactions are
-preserved. Populations, recovery and march/gathering authority remain separate
-migration work.
+preserved. World also owns shared-resource, ordinary-resource and monster
+population admission, quotas, expiry, durable clocks and transactional persistence.
+The realm injects live catalog/NPC/numeric collaborators and the same authority
+fence. Its existing population job retains sequential family execution, failure
+isolation and world-effect lookup inside the resource transaction. Every executor
+keeps fence, advisory lock, clock capture and transactional outbox ordering; no new
+process or writer is introduced. March/gathering authority and multi-aggregate
+recovery remain separate migration work.
 
 Realm composition injects `GameService` and `WorldService` into `GameController`
 and `WorldController`. Controllers delegate commands; Services coordinate use

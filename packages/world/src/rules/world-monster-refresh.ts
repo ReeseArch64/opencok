@@ -1,10 +1,9 @@
-import type { Rules, Rule } from "./game";
-import { cityInteger } from "./city-progression";
-import { javaDecimal } from "./java-integer";
-import { javaHashMapOrder } from "./java-hash-map-order";
-import { chooseWeight } from "./weighted-choice";
-import { num, text, type Row } from "@opencok/contracts/rows";
-import { worldMutationFailure } from "./world-march-runtime";
+import type {
+    WorldPopulationCatalog,
+    WorldPopulationRule as Rule,
+} from "../contracts/population-catalog";
+import type { WorldPopulationNumericRuntime } from "../contracts/population-numeric";
+import { num, text, type Row } from "../contracts/rows";
 
 export const worldMonsterIntervals = {
     field: 10800000n,
@@ -13,8 +12,13 @@ export const worldMonsterIntervals = {
     barbarian: 1800000n,
 };
 
-export function worldMonsterAreaCount(size: number, side: number)
+export function worldMonsterAreaCount(
+    size: number,
+    side: number,
+    runtime: Pick<WorldPopulationNumericRuntime, "cityInteger">,
+)
 {
+    const { cityInteger } = runtime;
     cityInteger(size, 2, 4000);
     cityInteger(side, 1, size);
 
@@ -73,8 +77,11 @@ function groupCounts(
     black: boolean,
     factor: number,
     random: (maximum: number) => number,
+    runtime: Pick<WorldPopulationNumericRuntime, "cityInteger" | "worldMutationFailure">,
 )
 {
+    const { cityInteger } = runtime;
+    const worldMutationFailure: () => never = runtime.worldMutationFailure;
     let selected: Rule | undefined,
         maximum = -1;
 
@@ -153,38 +160,41 @@ function groupCounts(
 }
 
 export function worldMonsterQuotas(
-    rules: Rules,
+    catalog: WorldPopulationCatalog,
     age: bigint,
     black: boolean,
     random: (maximum: number) => number,
+    runtime: Pick<WorldPopulationNumericRuntime, "cityInteger" | "worldMutationFailure">,
 )
 {
+    const { cityInteger } = runtime;
+    const worldMutationFailure: () => never = runtime.worldMutationFailure;
     if (age < 0n)
     {
         worldMutationFailure();
     }
 
-    const groups = rules.world.fieldMonsterGroups;
+    const groups = catalog.monsterGroups;
 
     if (!groups?.get("refresh")?.length)
     {
         worldMutationFailure();
     }
 
-    const event = black || rules.items.get("function_on2")?.k9 === "1",
+    const event = black || catalog.settings["function_on2"]?.k9 === "1",
         common = groups.get("refresh")!,
         result = new Map<string, number>();
 
     if (!event)
     {
-        return groupCounts(common, age, black, 1, random);
+        return groupCounts(common, age, black, 1, random, runtime);
     }
 
-    const config = rules.items.get("monster_event_config"),
+    const config = catalog.settings["monster_event_config"],
         rate = cityInteger(config?.k1, 0, 100),
         leader = cityInteger(config?.k6, 0, 100),
         factor = 1 - (rate + leader) / 100;
-    const base = groupCounts(common, age, black, factor, random),
+    const base = groupCounts(common, age, black, factor, random, runtime),
         act = groups.get("refresh_event") ?? [],
         other = groups.get("refresh_event_other") ?? [],
         csmod = groups.get("refresh_event_csmod") ?? [],
@@ -193,9 +203,9 @@ export function worldMonsterQuotas(
         total = (map: ReadonlyMap<string, number>) =>
             [...map.values()].reduce((sum, n) => sum + n, 0),
         normal = total(base),
-        actTotal = total(groupCounts(act, age, black, 1, random)),
+        actTotal = total(groupCounts(act, age, black, 1, random, runtime)),
         leaderTotal = [other, csmod, boss, npc].reduce(
-            (sum, g) => sum + total(groupCounts(g, age, black, 1, random)),
+            (sum, g) => sum + total(groupCounts(g, age, black, 1, random, runtime)),
             0,
         );
     const actorFactor = normal === 0 ? 1 : ((normal / factor) * (rate / 100)) / actTotal,
@@ -204,10 +214,10 @@ export function worldMonsterQuotas(
     for (
         const map of [
             base,
-            groupCounts(act, age, black, actorFactor, random),
-            groupCounts(csmod, age, black, leaderFactor, random),
-            groupCounts(npc, age, black, leaderFactor, random),
-            groupCounts(other, age, black, leaderFactor, random),
+            groupCounts(act, age, black, actorFactor, random, runtime),
+            groupCounts(csmod, age, black, leaderFactor, random, runtime),
+            groupCounts(npc, age, black, leaderFactor, random, runtime),
+            groupCounts(other, age, black, leaderFactor, random, runtime),
         ]
     )
     {
@@ -220,9 +230,14 @@ export function worldMonsterQuotas(
     return result;
 }
 
-export function worldBarbarianQuota(rules: Rules)
+export function worldBarbarianQuota(
+    catalog: WorldPopulationCatalog,
+    runtime: Pick<WorldPopulationNumericRuntime, "cityInteger" | "worldMutationFailure">,
+)
 {
-    const row = rules.items.get("world_barbarion"),
+    const { cityInteger } = runtime;
+    const worldMutationFailure: () => never = runtime.worldMutationFailure;
+    const row = catalog.settings["world_barbarion"],
         side = cityInteger(row?.k2, 1),
         ratio = Math.fround(Number(row?.k3));
 
@@ -234,9 +249,15 @@ export function worldBarbarianQuota(rules: Rules)
     return Math.trunc(Math.fround(side * side * Math.fround(ratio / 100)));
 }
 
-export function worldBarbarianBand(rules: Rules, point: Row, size: number)
+export function worldBarbarianBand(
+    catalog: WorldPopulationCatalog,
+    point: Row,
+    size: number,
+    runtime: Pick<WorldPopulationNumericRuntime, "cityInteger">,
+)
 {
-    const width = cityInteger(rules.items.get("worldmap_city")?.k4, 1),
+    const { cityInteger } = runtime;
+    const width = cityInteger(catalog.settings["worldmap_city"]?.k4, 1),
         center = Math.trunc((size - 1) / 2);
 
     return Math.max(
@@ -246,14 +267,19 @@ export function worldBarbarianBand(rules: Rules, point: Row, size: number)
 }
 
 export function worldBarbarianChoice(
-    rules: Rules,
+    catalog: WorldPopulationCatalog,
     point: Row,
     size: number,
     random: (maximum: number) => number,
+    runtime: Pick<
+        WorldPopulationNumericRuntime,
+        "cityInteger" | "chooseWeight" | "worldMutationFailure" | "javaDecimal" | "javaHashMapOrder"
+    >,
 )
 {
-    const band = worldBarbarianBand(rules, point, size),
-        choices = [...(rules.world.barbarians?.values() ?? [])].filter(
+    const { cityInteger, chooseWeight } = runtime;
+    const band = worldBarbarianBand(catalog, point, size, runtime),
+        choices = [...(catalog.barbarianSpawns?.values() ?? [])].filter(
             (row) => Number(row.area_level) === band,
         );
 
@@ -269,12 +295,21 @@ export function worldBarbarianChoice(
         )
     ]!;
 
-    return worldBarbarianActor(rules, rule.id!);
+    return worldBarbarianActor(catalog, rule.id!, runtime);
 }
 
-export function worldBarbarianActor(rules: Rules, id: string)
+export function worldBarbarianActor(
+    catalog: Pick<WorldPopulationCatalog, "barbarianSpawns" | "armyLayouts">,
+    id: string,
+    runtime: Pick<
+        WorldPopulationNumericRuntime,
+        "cityInteger" | "worldMutationFailure" | "javaDecimal" | "javaHashMapOrder"
+    >,
+)
 {
-    const rule = rules.world.barbarians?.get(id);
+    const { cityInteger, javaDecimal, javaHashMapOrder } = runtime;
+    const worldMutationFailure: () => never = runtime.worldMutationFailure;
+    const rule = catalog.barbarianSpawns?.get(id);
 
     if (!rule)
     {
@@ -305,7 +340,7 @@ export function worldBarbarianActor(rules: Rules, id: string)
 
         return new Map(javaHashMapOrder(values.keys()).map((id) => [id, values.get(id)!]));
     };
-    const army = rules.world.armies?.get(rule.army ?? "");
+    const army = catalog.armyLayouts?.get(rule.army ?? "");
 
     if (!army)
     {

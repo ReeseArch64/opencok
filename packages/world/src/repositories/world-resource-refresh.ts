@@ -1,4 +1,3 @@
-import { outgoingTrace } from "@opencok/core/operation";
 import { randomUUID } from "node:crypto";
 import { and, asc, eq, lte, sql, inArray } from "drizzle-orm";
 import { worldpoint } from "@opencok/drizzle/schema/opencok_kingdom/worldpoint";
@@ -8,14 +7,14 @@ import { world_resource_runtime } from "@opencok/drizzle/schema/opencok_kingdom/
 import { server_info } from "@opencok/drizzle/schema/opencok_kingdom/server_info";
 import { mutation_outbox } from "@opencok/drizzle/schema/opencok_kingdom/mutation_outbox";
 import { encode, sfs } from "@opencok/messages/sfs";
-import { num, text, long } from "@opencok/contracts/rows";
-import type { WorldResourceRefreshExecutor } from "@opencok/contracts/world-resource-refresh";
+import { num, text, long } from "../contracts/rows";
+import type { WorldResourceRefreshExecutor } from "../contracts/world-resource-refresh";
 import type { DatabaseClient } from "@opencok/drizzle/contracts/database";
-import { fenceRealmTransaction, type RealmAuthority } from "./realm-authority";
+import type { WorldPopulationPersistenceRuntime } from "../contracts/population-persistence";
 
 export function createWorldResourceRefreshExecutor(
     db: DatabaseClient<"kingdom">,
-    authority: RealmAuthority,
+    authority: WorldPopulationPersistenceRuntime,
     size = 1201,
     captureTime = Date.now,
 ): WorldResourceRefreshExecutor
@@ -26,7 +25,7 @@ export function createWorldResourceRefreshExecutor(
         async execute(at, work)
         {
             const next = await db.transaction(async (tx) => {
-                await fenceRealmTransaction(tx, authority);
+                await authority.fence(tx);
                 await tx.execute(sql`select pg_advisory_xact_lock(728214, 0)`);
                 const now = at ?? BigInt(captureTime());
 
@@ -309,7 +308,7 @@ export function createWorldResourceRefreshExecutor(
                 {
                     const id = randomUUID().replaceAll("-", "");
                     await tx.insert(mutation_outbox).values({
-                        traceparent: outgoingTrace(new Headers()).get("traceparent"),
+                        traceparent: authority.traceparent(),
                         kingdomId: authority.kingdomId,
                         ownerUid: "",
                         requestId: `resources:${id}`,
