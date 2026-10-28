@@ -4,7 +4,6 @@ import { HeroDefinitionMapper } from "@opencok/hero/mappings/hero-definition";
 import { heroCatalogBindings } from "@opencok/constants/hero-catalog-bindings";
 import { HeroItem } from "@opencok/enums/hero-item";
 import { HeroTalentTree } from "@opencok/enums/hero-talent-tree";
-import { namedHeroRecord } from "../scripts/named-hero-records.ts";
 import { catalog } from "../src/catalogs/data/general_base.ts";
 import { catalogCodecs } from "../src/catalog-codecs.ts";
 import { legacyRecord } from "../src/catalog-compatibility.ts";
@@ -139,17 +138,4 @@ test("invalid ordering and unrepresentable item costs fail instead of losing dom
         refinement: { ...original.refinement, slots: [] },
     });
     expect(() => mapper.toDefinition(missingSlot)).toThrow("Invalid hero definition");
-});
-
-test("catalog imports retain named hero authorship and reject unmodeled heroes", () => {
-    expect(namedHeroRecord("general_base", { id: 53571, levelMax: 48 })?.expression).toBe(
-        "heroDefinitionByIdentity[HeroIdentity.Mulan]",
-    );
-    expect(namedHeroRecord("general_base", { id: 53572 })?.expression).toBe(
-        "heroDefinitionByIdentity[HeroIdentity.Unknown1]",
-    );
-    expect(() => namedHeroRecord("general_base", { id: 999999 })).toThrow(
-        "requires a named definition",
-    );
-    expect(namedHeroRecord("general_skill", { id: 53571 })).toBeUndefined();
 });

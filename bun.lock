@@ -208,6 +208,8 @@
         "@opencok/config": "workspace:*",
         "@opencok/constants": "workspace:*",
         "@opencok/dragon": "workspace:*",
+        "@opencok/enums": "workspace:*",
+        "@opencok/hero": "workspace:*",
         "@opencok/resources": "workspace:*",
         "@types/bun": "catalog:",
         "fast-xml-parser": "^5.0.0",

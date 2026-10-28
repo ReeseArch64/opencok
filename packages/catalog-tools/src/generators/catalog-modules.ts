@@ -3,10 +3,10 @@ import { createHash } from "node:crypto";
 import { join } from "node:path";
 import { GameplayCatalog } from "@opencok/enums/gameplay-catalog";
 import { CatalogKind } from "@opencok/enums/catalog-kind";
-import type { CatalogValue, CatalogCodec } from "../src/catalog-model.ts";
-import { convertCatalog, type SourceElement } from "./catalog-conversion.ts";
-import { namedHeroRecord, namedHeroDefinition } from "./named-hero-records.ts";
-import { namedDragonRecord, namedDragonDefinition } from "./named-dragon-records.ts";
+import type { CatalogValue, CatalogCodec } from "@opencok/resources/catalog-model";
+import { convertCatalog, type SourceElement } from "../mappings/catalog-conversion.ts";
+import { namedHeroRecord, namedHeroDefinition } from "../mappings/named-hero-records.ts";
+import { namedDragonRecord, namedDragonDefinition } from "../mappings/named-dragon-records.ts";
 
 export interface CatalogSource
 {
@@ -109,13 +109,15 @@ function recordType(records: readonly object[], name: string): string
     );
 }
 
-export async function writeCatalogModules(sources: AsyncIterable<CatalogSource>): Promise<void>
+export async function writeCatalogModules(
+    sources: AsyncIterable<CatalogSource>,
+    destinations: { resources: string; heroTypes: string; },
+): Promise<void>
 {
-    const base = new URL("../src/", import.meta.url).pathname;
+    const base = destinations.resources;
     const directory = join(base, "catalogs", "data");
     const typesDirectory = join(base, "catalogs", "types");
-    const heroTypesDirectory = new URL("../../hero/src/resources/catalogs/types/", import.meta.url)
-        .pathname;
+    const heroTypesDirectory = destinations.heroTypes;
     await mkdir(directory, { recursive: true });
     await mkdir(typesDirectory, { recursive: true });
     await mkdir(heroTypesDirectory, { recursive: true });
