@@ -8,7 +8,8 @@
   "devDependencies": {
     "@opencok/config": "workspace:*",
     "@types/bun": "catalog:",
-    "typescript": "catalog:"
+    "typescript": "catalog:",
+    "@opencok/world": "workspace:*"
   },
   "type": "module",
   "exports": {

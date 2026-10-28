@@ -1,10 +1,10 @@
 import { GameError } from "@opencok/errors/game";
 import { errors } from "@opencok/constants/game";
-import { num, text, long } from "@opencok/contracts/rows";
-import type { WorldUtilityStore } from "@opencok/contracts/world-utility";
+import { num, text, long } from "../contracts/rows";
+import type { WorldUtilityStore } from "../contracts/world-utility";
 import { int, type Fields } from "@opencok/messages/sfs";
-import { nearestWorldFootprint } from "@opencok/rules/world-utility";
-import { allianceWorldPoints, worldNearestPoint } from "@opencok/mappings/world-utility";
+import { nearestWorldFootprint } from "../rules/world-utility";
+import { allianceWorldPoints, worldNearestPoint } from "../mappings/world-utility";
 
 export async function worldUtility(
     store: WorldUtilityStore,

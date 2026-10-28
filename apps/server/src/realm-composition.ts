@@ -54,7 +54,7 @@ import { assertWorldTerrain } from "@opencok/repositories/world-terrain";
 import { WorldUseDomain } from "@opencok/services/world-use";
 import { TreasureMapDomain } from "@opencok/services/treasure-map";
 import { CityDefenseDomain } from "@opencok/services/city-defense";
-import { createWorldUtilityStore } from "@opencok/repositories/world-utility";
+import { createRealmWorldUtilityStore } from "./composition/world";
 import { createWorldResourceRefreshExecutor } from "@opencok/repositories/world-resource-refresh";
 import { createWorldResourceNewExecutor } from "@opencok/repositories/world-resource-new";
 import { worldResourceAreaCount } from "@opencok/rules/world-resource-refresh";
@@ -325,12 +325,15 @@ import { createNicknameChangeRuntime } from "./nickname-change.ts";
 import { createChatNicknamePublisher } from "@opencok/connection/chat-nickname";
 import { createChatMailboxPublisher } from "@opencok/connection/chat-mailbox";
 import { GameController } from "@opencok/controllers/game";
-import { WorldController } from "@opencok/controllers/world";
+import { WorldController } from "@opencok/world/controllers/world";
 import {
     createWorldPointDetailStore,
     checkWorldPointDetailStore,
 } from "@opencok/repositories/world-point-detail";
-import { createWorldSearchStore, checkWorldSearchStore } from "@opencok/repositories/world-search";
+import {
+    createWorldSearchStore,
+    checkWorldSearchStore,
+} from "@opencok/world/repositories/world-search";
 import {
     createPlayerSearchStore,
     checkPlayerSearchStore,
@@ -338,7 +341,7 @@ import {
 import {
     createWorldFavoriteStore,
     checkWorldFavoriteStore,
-} from "@opencok/repositories/world-favorites";
+} from "@opencok/world/repositories/world-favorites";
 import { createAvatarRuntime } from "./avatar.ts";
 import { checkAvatarVersionStore } from "@opencok/repositories/avatar-version";
 import { AvatarRelay } from "./avatar-relay.ts";
@@ -356,7 +359,8 @@ import { Cache } from "@opencok/storage/session";
 import { Coordination } from "@opencok/storage/coordination";
 import { loadRules } from "@opencok/resources/rules";
 import { createRealmGameService } from "./composition/game";
-import { WorldService } from "@opencok/services/world";
+import { createRealmWorldService } from "./composition/world";
+import { readWorldMap } from "@opencok/world/repositories/map";
 import { createRealmChatSessionIssuer } from "@opencok/connection/realm-chat-session";
 import { MailGiftRelay } from "./mail-gift-relay.ts";
 import { loadNicknameServices } from "./nickname.ts";
@@ -3511,7 +3515,7 @@ export const RealmDependenciesLive = Layer.effect(
                                 playerSearch,
                                 worldSearch,
                                 worldUtility: observeAdapter(
-                                    createWorldUtilityStore(
+                                    createRealmWorldUtilityStore(
                                         db.kingdom.db,
                                         authority,
                                         config.mapSize,
@@ -3653,10 +3657,18 @@ export const RealmDependenciesLive = Layer.effect(
             world: observeAdapter(
                 new WorldController(
                     observeAdapter(
-                        new WorldService(db, config.mapSize, config.kingdomId, {
-                            ...worldInterest,
-                            rules,
-                        }),
+                        createRealmWorldService(
+                            {
+                                getWorldByPointIds: (uid, ids) =>
+                                    readWorldMap(db.kingdom.db, uid, ids),
+                            },
+                            config.mapSize,
+                            config.kingdomId,
+                            {
+                                ...worldInterest,
+                                rules,
+                            },
+                        ),
                         "realm.WorldService",
                     ),
                 ),

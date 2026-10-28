@@ -1,8 +1,8 @@
 import { validateFields } from "@opencok/messages/validations/fields";
-import { worldFavoritesSchema } from "@opencok/validations/world-favorites";
+import { worldFavoritesSchema } from "../validations/world-favorites";
 
-import type { WorldFavoriteList } from "@opencok/contracts/world-favorites";
-import { favoriteInteger, favoriteServerType } from "@opencok/rules/world-favorites";
+import type { WorldFavoriteList } from "../contracts/world-favorites";
+import { favoriteInteger, favoriteServerType } from "../rules/world-favorites";
 import { GameError } from "@opencok/errors/game";
 import { errors } from "@opencok/constants/game";
 import { sfs, type Fields } from "@opencok/messages/sfs";

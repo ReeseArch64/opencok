@@ -45,7 +45,6 @@ function game(
         getAccountsByPlayerId: unused,
         getPowerByPlayerId: unused,
         getCityByPlayerId: unused,
-        getWorldByPointIds: unused,
     };
     const rules = new Rules(
         new Map(),

@@ -144,6 +144,13 @@ a developer dependency, dynamically loaded only for explicit synthetic fixtures;
 import tools read authorized originals without modifying them. See the
 [catalog editing and provenance guide](../packages/resources/README.md).
 
+The [World package](../packages/world/README.md) owns map/viewport, search,
+favorites and nearest/leader/leave workflows, their SQL adapters and map Controller.
+The realm constructs its map reader directly and injects existing projections,
+clocks and authority fencing. Favorite writes retain the guarded realm database;
+leave retains its explicit transaction fence. Specialized world details, populations,
+recovery and march/gathering authority remain separate migration work.
+
 Realm composition injects `GameService` and `WorldService` into `GameController`
 and `WorldController`. Controllers delegate commands; Services coordinate use
 cases, rule evaluation and persistence ports. NestJS supplies the organizational

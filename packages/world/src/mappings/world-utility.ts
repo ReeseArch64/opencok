@@ -1,10 +1,10 @@
 import type {
     WorldNearestPointResponse,
     WorldAlliancePointsResponse,
-} from "@opencok/contracts/responses/world-utility";
+} from "../contracts/responses/world-utility";
 import { sfs, type Fields } from "@opencok/messages/sfs";
-import { num, text } from "@opencok/contracts/rows";
-import type { WorldUtilitySnapshot } from "@opencok/contracts/world-utility";
+import { num, text } from "../contracts/rows";
+import type { WorldUtilitySnapshot } from "../contracts/world-utility";
 
 export function worldNearestPoint(response: WorldNearestPointResponse): Fields
 {

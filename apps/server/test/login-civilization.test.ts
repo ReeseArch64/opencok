@@ -56,7 +56,6 @@ test("login carries the saved civilization and exact score/prestige in init.user
         getProfileById: unused,
         getAccountsByPlayerId: unused,
         getPlayerSummariesByIds: unused,
-        getWorldByPointIds: unused,
         getCityByPlayerId: async (uid) => {
             expect(uid).toBe("synthetic");
             return state;

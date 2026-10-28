@@ -12,7 +12,6 @@
   "type": "module",
   "exports": {
     "./game": "./src/game.service.ts",
-    "./world": "./src/world.service.ts",
     "./*": "./src/*.ts"
   },
   "dependencies": {
@@ -36,6 +35,7 @@
     "@opencok/tasks": "workspace:*",
     "@opencok/skins": "workspace:*",
     "@opencok/alliance": "workspace:*",
-    "@opencok/share": "workspace:*"
+    "@opencok/share": "workspace:*",
+    "@opencok/world": "workspace:*"
   }
 }

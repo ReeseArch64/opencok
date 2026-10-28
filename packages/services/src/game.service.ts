@@ -13,7 +13,6 @@ import { worldRecreationCommands } from "./world-recreation";
 import { worldUseCommands } from "./world-use";
 import { treasureMapCommands } from "./treasure-map";
 import { cityDefenseCommands } from "./city-defense";
-import { worldUtility } from "./world-utility";
 import { legacyIntegerOrder } from "@opencok/messages/legacy-object-order";
 import { activityOperators } from "@opencok/rules/activity-operators";
 import { activityOperatorsView } from "@opencok/mappings/activity-operators";
@@ -31,7 +30,6 @@ import { postboxCommands } from "./postbox";
 import { chatSocialCommands } from "./chat-social";
 import { UPLOAD_PATH } from "@opencok/contracts/files";
 import type { MilitaryProjection } from "@opencok/contracts/military-projection";
-import type { CreateWorldFavoriteDto } from "@opencok/dtos/world-favorites/create-world-favorite.dto";
 import { decodeFightRanking, decodePlayoffTeams } from "./battle-ranking.ts";
 import { fightRanking, playoffRanking } from "@opencok/mappings/battle-ranking";
 import { battleRankingOpen } from "@opencok/rules/battle-ranking";
@@ -59,10 +57,8 @@ import { dragonRankingRanges } from "@opencok/rules/dragon-ranking";
 import { dragonRanking } from "@opencok/mappings/dragon-ranking";
 import { decodeDragonRanking } from "./dragon-ranking.ts";
 import { worldPointDetail } from "./world-point-detail.ts";
-import { favoriteInteger, favoriteName, favoriteServer } from "@opencok/rules/world-favorites";
-import { worldFavorites } from "@opencok/mappings/world-favorites";
-import { worldSearch } from "@opencok/mappings/world-search";
-import { worldSearchName, worldSearchOffset } from "@opencok/rules/world-search";
+import { favoriteInteger } from "@opencok/world/rules/world-favorites";
+import { worldSearchName } from "@opencok/world/rules/world-search";
 import { playerSearch } from "@opencok/mappings/player-search";
 import {
     playerSearchQuery,
@@ -209,12 +205,23 @@ export class GameService
             snapshot: missingMilitaryProjection,
         },
         readonly ranking = services.ranking,
+        readonly worldQueries = services.worldQueries,
     )
     {
         this.bootstrap = createBootstrap?.({
             power: (uid) => this.power(uid, true),
             features: (profile) => featureConfig(this.rules, this.featureContext(profile)),
         });
+    }
+
+    private world()
+    {
+        if (!this.worldQueries)
+        {
+            throw new GameError(errors.unsupported);
+        }
+
+        return this.worldQueries;
     }
 
     private rankings()
@@ -866,28 +873,15 @@ export class GameService
             case "point.nearest.find":
             case "world.al.leader.pt":
             case "world.leave":
-                if (!this.services.worldUtility)
-                {
-                    throw new GameError(errors.unsupported);
-                }
-
-                body = await worldUtility(
-                    this.services.worldUtility,
-                    uid,
-                    command,
-                    params,
-                    this.config.kingdomId,
-                    this.config.mapSize ?? Number(this.rules.items.get("worldmap_map")?.k1 ?? 1201),
-                    this.now(),
-                );
+                body = await this.world().utility(uid, command, params);
                 break;
             case "world.search.user":
-                body = await this.worldSearch(uid, params);
+                body = await this.world().search(uid, params);
                 break;
             case "world.favo.get":
             case "world.favo.add":
             case "world.favo.delme":
-                body = await this.worldFavorites(uid, command, params);
+                body = await this.world().favorites(uid, command, params);
                 break;
             case "report.picVer":
                 body = await reportAvatar(this.db, uid, this.config.kingdomId, params, this.now());
@@ -1202,190 +1196,6 @@ export class GameService
         }));
 
         return playerSearch(selectPlayerSearch(query, state.local, remote));
-    }
-
-    private async worldSearch(uid: string, params: Fields): Promise<Fields>
-    {
-        const store = this.services.worldSearch;
-
-        if (!store)
-        {
-            throw new GameError(errors.unsupported);
-        }
-
-        const integer = (key: string, fallback: number) => {
-            const field = params[key];
-
-            if (field === undefined)
-            {
-                return fallback;
-            }
-
-            if (field.type !== Type.Int || !favoriteInteger(field.value))
-            {
-                throw new GameError(errors.invalid);
-            }
-
-            return field.value;
-        };
-        const name = params.name === undefined ? "" : params.name.value;
-
-        if (
-            (params.name !== undefined && params.name.type !== Type.String)
-            || !worldSearchName(name)
-        )
-        {
-            throw new GameError(errors.invalid);
-        }
-
-        const kingdomId = integer("serverId", this.config.kingdomId);
-        const offset = worldSearchOffset(integer("page", 1));
-        const now = this.now();
-
-        if (kingdomId < 1 || !Number.isSafeInteger(now) || now < 0)
-        {
-            throw new GameError(errors.invalid);
-        }
-
-        const state = await store.search(uid, { name, offset, kingdomId, now });
-        const profile = this.checkProfile(state.profile, now);
-
-        if (
-            profile.uid !== uid
-            || profile.serverId !== this.config.kingdomId
-            || state.kingdomId !== kingdomId
-        )
-        {
-            throw new GameError(errors.invalid);
-        }
-
-        return worldSearch(state.rows);
-    }
-
-    private async worldFavorites(uid: string, command: string, params: Fields): Promise<Fields>
-    {
-        const store = this.services.worldFavorites;
-
-        if (!store)
-        {
-            throw new GameError(errors.unsupported);
-        }
-
-        const now = this.now();
-
-        if (!Number.isSafeInteger(now) || now < 0)
-        {
-            throw new GameError(errors.invalid);
-        }
-
-        const check = (profile: Row | undefined) => {
-            const owned = this.checkProfile(profile, now);
-
-            if (owned.uid !== uid || owned.serverId !== this.config.kingdomId)
-            {
-                throw new GameError(errors.invalid);
-            }
-        };
-
-        if (command === "world.favo.get")
-        {
-            const state = await store.list(uid, now);
-            check(state.profile);
-
-            return worldFavorites(state, uid);
-        }
-
-        const integer = (key: string, fallback?: number) => {
-            const field = params[key];
-
-            if (field === undefined && fallback !== undefined)
-            {
-                return fallback;
-            }
-
-            if (field?.type !== Type.Int || !favoriteInteger(field.value))
-            {
-                throw new GameError(errors.invalid);
-            }
-
-            return field.value;
-        };
-
-        if (command === "world.favo.add")
-        {
-            if (params.name?.type !== Type.String || !favoriteName(params.name.value))
-            {
-                throw new GameError(errors.invalid);
-            }
-
-            const dto: CreateWorldFavoriteDto = {
-                point: integer("point"),
-                type: integer("type"),
-                cityType: integer("cityType", -1),
-                resType: integer("resType", -1),
-                name: params.name.value,
-                server: favoriteServer(
-                    params.server === undefined ? undefined : integer("server"),
-                    this.config.kingdomId,
-                    this.rules,
-                ),
-            };
-            const state = await store.add(uid, { ...dto, now });
-            check(state.profile);
-            const repliedAt = this.now();
-
-            if (!Number.isSafeInteger(repliedAt) || repliedAt < 0)
-            {
-                throw new GameError(errors.invalid);
-            }
-
-            return {
-                state: sfs.int(1),
-                createTime: sfs.long(repliedAt),
-                point: sfs.int(dto.point),
-            };
-        }
-
-        const selection = (key: string): number[] => {
-            const field = params[key];
-
-            if (
-                field?.type !== Type.Array || !Array.isArray(field.value)
-                || field.value.length > 32767
-            )
-            {
-                throw new GameError(errors.invalid);
-            }
-
-            return field.value.map((entry: Value) => {
-                if (entry?.type !== Type.Int || !favoriteInteger(entry.value))
-                {
-                    throw new GameError(errors.invalid);
-                }
-
-                return entry.value;
-            });
-        };
-        const points = selection("point"),
-            servers = selection("server");
-
-        if (points.length !== servers.length)
-        {
-            throw new GameError(errors.invalid);
-        }
-
-        const result = await store.remove(
-            uid,
-            points.map((point, index) => ({ point, server: servers[index]! })),
-            now,
-        );
-        check(result.profile);
-
-        return {
-            state: sfs.int(result.success ? 1 : 0),
-            pointArray: sfs.array(points.map(sfs.int)),
-            serverArray: sfs.array(servers.map(sfs.int)),
-        };
     }
 
     private async avatarVersion(uid: string): Promise<Fields>

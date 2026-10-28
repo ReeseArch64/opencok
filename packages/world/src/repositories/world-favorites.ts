@@ -1,8 +1,8 @@
 import { world_favorite } from "@opencok/drizzle/schema/opencok_kingdom/world_favorite";
 import { userprofile } from "@opencok/drizzle/schema/opencok_kingdom/userprofile";
 import { server_info } from "@opencok/drizzle/schema/opencok_global/server_info";
-import type { WorldFavoriteStore } from "@opencok/contracts/world-favorites";
-import type { Row } from "@opencok/contracts/rows";
+import type { WorldFavoriteStore } from "../contracts/world-favorites";
+import type { Row } from "../contracts/rows";
 import type { DatabaseClient } from "@opencok/drizzle/contracts/database";
 import { and, asc, eq, inArray, or, sql } from "drizzle-orm";
 

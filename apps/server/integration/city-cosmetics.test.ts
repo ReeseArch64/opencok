@@ -7,7 +7,8 @@ import {
     publishCosmeticInteractionMutation,
 } from "../src/composition/skins";
 import { Database } from "@opencok/repositories/game";
-import { WorldService } from "@opencok/services/world";
+import { createRealmWorldService } from "../src/composition/world";
+import { readWorldMap } from "@opencok/world/repositories/map";
 import { user_item } from "@opencok/drizzle/schema/opencok_kingdom/user_item";
 import { user_state } from "@opencok/drizzle/schema/opencok_kingdom/user_state";
 import { user_world } from "@opencok/drizzle/schema/opencok_kingdom/user_world";
@@ -58,12 +59,17 @@ async function fixture()
         databaseUrl: url.href,
         timeoutMs: 5000,
     });
-    const world = new WorldService(adapter, 1200, 1, {
-        rules: h.rules,
-        now: () => h.clock.now,
-        subscribe: async () => {},
-        marches: async () => [],
-    });
+    const world = createRealmWorldService(
+        { getWorldByPointIds: (uid, ids) => readWorldMap(adapter.kingdom.db, uid, ids) },
+        1200,
+        1,
+        {
+            rules: h.rules,
+            now: () => h.clock.now,
+            subscribe: async () => {},
+            marches: async () => [],
+        },
+    );
     const map = async () => {
         const reply = await world.get("owner", {
             x: sfs.int(3),
@@ -216,7 +222,7 @@ test(
             });
             expect(point.sid).toBe(509878);
             expect(point.set).toBe(Date.UTC(2024, 8, 5, 13) / 1000);
-            const snapshot = await h.adapter.getWorldByPointIds("owner", [4]);
+            const snapshot = await readWorldMap(h.adapter.kingdom.db, "owner", [4]);
             expect(snapshot.cosmetics.every((row) => row.uid === "other")).toBe(true);
             h.clock.now += 6000;
             expect((await h.map()).bubble).toBeUndefined();

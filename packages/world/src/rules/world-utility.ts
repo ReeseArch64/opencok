@@ -1,4 +1,4 @@
-import { num, text, type Row } from "@opencok/contracts/rows";
+import { num, text, type Row } from "../contracts/rows";
 
 export function nearestWorldFootprint(points: readonly Row[], target: number, size: number)
 {

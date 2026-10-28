@@ -109,6 +109,7 @@
         "@opencok/tasks": "workspace:*",
         "@opencok/troops": "workspace:*",
         "@opencok/validations": "workspace:*",
+        "@opencok/world": "workspace:*",
         "effect": "catalog:",
       },
       "devDependencies": {
@@ -332,6 +333,7 @@
         "@opencok/messages": "workspace:*",
         "@opencok/player": "workspace:*",
         "@opencok/validations": "workspace:*",
+        "@opencok/world": "workspace:*",
         "effect": "catalog:",
         "ws": "8.22.0",
       },
@@ -377,6 +379,7 @@
         "@opencok/share": "workspace:*",
         "@opencok/skins": "workspace:*",
         "@opencok/tasks": "workspace:*",
+        "@opencok/world": "workspace:*",
       },
       "devDependencies": {
         "@opencok/config": "workspace:*",
@@ -888,6 +891,7 @@
         "@opencok/policy": "workspace:*",
         "@opencok/skins": "workspace:*",
         "@opencok/tasks": "workspace:*",
+        "@opencok/world": "workspace:*",
       },
       "devDependencies": {
         "@opencok/config": "workspace:*",
@@ -919,6 +923,7 @@
         "@opencok/skins": "workspace:*",
         "@opencok/tasks": "workspace:*",
         "@opencok/validations": "workspace:*",
+        "@opencok/world": "workspace:*",
       },
       "devDependencies": {
         "@opencok/config": "workspace:*",
@@ -1061,12 +1066,29 @@
       },
       "devDependencies": {
         "@opencok/config": "workspace:*",
+        "@opencok/world": "workspace:*",
         "@types/bun": "catalog:",
         "typescript": "catalog:",
       },
     },
     "packages/webhooks": {
       "name": "@opencok/webhooks",
+      "devDependencies": {
+        "@opencok/config": "workspace:*",
+        "@types/bun": "catalog:",
+        "typescript": "catalog:",
+      },
+    },
+    "packages/world": {
+      "name": "@opencok/world",
+      "dependencies": {
+        "@opencok/constants": "workspace:*",
+        "@opencok/drizzle": "workspace:*",
+        "@opencok/errors": "workspace:*",
+        "@opencok/messages": "workspace:*",
+        "drizzle-orm": "0.45.4",
+        "zod": "catalog:",
+      },
       "devDependencies": {
         "@opencok/config": "workspace:*",
         "@types/bun": "catalog:",
@@ -1511,6 +1533,8 @@
     "@opencok/web": ["@opencok/web@workspace:apps/web"],
 
     "@opencok/webhooks": ["@opencok/webhooks@workspace:packages/webhooks"],
+
+    "@opencok/world": ["@opencok/world@workspace:packages/world"],
 
     "@opentelemetry/api": ["@opentelemetry/api@1.10.0", "", {}, "sha512-lMkyes8iHrG+mk6WH7X70MdCLI2RS0FwNBY1PyQ8UemaijE2m5mv5A0Niy3HtbYTFrgkUEQjFMXmSAk2hQDuPQ=="],
 

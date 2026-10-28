@@ -1,7 +1,7 @@
 import type { RealmNotifications } from "./notifications.ts";
 import type { GameStore } from "@opencok/contracts/game";
 import type { GameController } from "@opencok/controllers/game";
-import type { WorldController } from "@opencok/controllers/world";
+import type { WorldController } from "@opencok/world/controllers/world";
 import type { ServerConfig } from "@opencok/contracts/server";
 
 export type ConnectionConfig = Pick<

@@ -17,7 +17,6 @@ test("setting.xml preserves IDs, string values, Unicode, and correlation through
         getProfileById: unused,
         getAccountsByPlayerId: unused,
         getCityByPlayerId: unused,
-        getWorldByPointIds: unused,
         mailGroups: unused,
         mailBatch: unused,
         mailCategory: unused,
@@ -114,7 +113,6 @@ test("build.info uses the injected clock for buildings and queue previews withou
         getPowerByPlayerId: unused,
         getAccountsByPlayerId: unused,
         getCityByPlayerId: async () => state,
-        getWorldByPointIds: unused,
     };
     let now = Date.UTC(2026, 9, 23, 12);
     const game = createRealmGameService(store, rules, { kingdomId: 1 }, () => now);

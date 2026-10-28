@@ -51,7 +51,6 @@ function fixture(issuer?: ChatSessionIssuer, clock = () => now)
         },
         getAccountsByPlayerId: unused,
         getCityByPlayerId: unused,
-        getWorldByPointIds: unused,
         getPowerByPlayerId: unused,
 
         getPlayerSummariesByIds: unused,

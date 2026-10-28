@@ -73,7 +73,6 @@ function fixture()
         playerRanking: unused,
         getPlayerSummariesByIds: unused,
         getCityByPlayerId: unused,
-        getWorldByPointIds: unused,
         getPowerByPlayerId: async (uid, time) => {
             calls.push({ uid, now: time });
             return state;

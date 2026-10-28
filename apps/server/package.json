@@ -43,7 +43,8 @@
     "@opencok/constants": "workspace:*",
     "@opencok/errors": "workspace:*",
     "@opencok/ranking": "workspace:*",
-    "@opencok/validations": "workspace:*"
+    "@opencok/validations": "workspace:*",
+    "@opencok/world": "workspace:*"
   },
   "devDependencies": {
     "@opencok/api": "workspace:*",

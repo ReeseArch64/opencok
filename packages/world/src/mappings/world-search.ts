@@ -1,7 +1,7 @@
 import { validateFields } from "@opencok/messages/validations/fields";
-import { worldSearchSchema } from "@opencok/validations/world-search";
+import { worldSearchSchema } from "../validations/world-search";
 
-import type { Row } from "@opencok/contracts/rows";
+import type { Row } from "../contracts/rows";
 import { GameError } from "@opencok/errors/game";
 import { errors } from "@opencok/constants/game";
 import { sfs, type Fields } from "@opencok/messages/sfs";

@@ -13,7 +13,7 @@ import { user_world } from "@opencok/drizzle/schema/opencok_kingdom/user_world";
 import { worldpoint } from "@opencok/drizzle/schema/opencok_kingdom/worldpoint";
 import { mutation_outbox } from "@opencok/drizzle/schema/opencok_kingdom/mutation_outbox";
 import { sfs, Type, type Fields } from "@opencok/messages/sfs";
-import { compactPoint } from "@opencok/services/world";
+import { createRealmCompactPoint } from "../src/composition/world";
 import { cityHarness } from "./support/city";
 async function fixture(online = false)
 {
@@ -86,7 +86,9 @@ test(
             expect(
                 cities.every((row) => row.sendHeartDurationTime === 1060n && row.heartType === "1"),
             ).toBe(true);
-            expect(JSON.parse(compactPoint(cities[0]!)).sendHeartDurationTime).toBe(1060);
+            expect(JSON.parse(createRealmCompactPoint()(cities[0]!)).sendHeartDurationTime).toBe(
+                1060,
+            );
             expect(await h.db.db.select().from(receive_heart)).toHaveLength(1);
             expect(await pendingAllianceHeartOwners(h.db.db, ["owner"])).toEqual([]);
             expect(await pendingAllianceHeartOwners(h.db.db, ["other"])).toEqual(["other"]);

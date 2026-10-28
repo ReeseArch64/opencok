@@ -1,5 +1,5 @@
 import type { Fields } from "@opencok/messages/sfs";
-import type { WorldService } from "@opencok/services/world";
+import type { WorldService } from "../services/world";
 
 export class WorldController
 {

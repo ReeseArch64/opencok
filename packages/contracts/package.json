@@ -26,6 +26,7 @@
     "@opencok/skins": "workspace:*",
     "@opencok/alliance": "workspace:*",
     "@opencok/share": "workspace:*",
-    "@opencok/ranking": "workspace:*"
+    "@opencok/ranking": "workspace:*",
+    "@opencok/world": "workspace:*"
   }
 }

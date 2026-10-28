@@ -1,5 +1,5 @@
 import { expect, test } from "bun:test";
-import { nearestWorldFootprint } from "@opencok/rules/world-utility";
+import { nearestWorldFootprint } from "@opencok/world/rules/world-utility";
 
 function footprint(point: number, size: number)
 {

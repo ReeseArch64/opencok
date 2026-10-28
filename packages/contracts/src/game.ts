@@ -1,3 +1,4 @@
+import type { WorldQueryStores, WorldQueryCommands } from "@opencok/world/contracts/runtime";
 import type {
     RankingStore,
     RankingCommands,
@@ -18,8 +19,6 @@ import type {
 } from "@opencok/hero/contracts/hero-ranking";
 import type { DragonRankingEntry, DragonRankingRange } from "./dragon-ranking.ts";
 import type { WorldPointDetailStore } from "./world-point-detail.ts";
-import type { WorldFavoriteStore } from "./world-favorites.ts";
-import type { WorldSearchStore } from "./world-search.ts";
 import type { PlayerSearchStore } from "./player-search.ts";
 import type { AvatarFinishService } from "./files.ts";
 import type { AvatarVersionService } from "./avatar-version.ts";
@@ -200,15 +199,6 @@ export interface GameStore extends AuthenticationStore, RankingStore
     configurationSwitches?(): Promise<Row[] | undefined>;
     updateAvatarReport?(owner: string, target: string, now: number): Promise<void>;
     getCityByPlayerId(uid: string, now: number): Promise<CityState>;
-    getWorldByPointIds(
-        uid: string,
-        ids: number[],
-    ): Promise<{
-        world: Row | undefined;
-        points: Row[];
-        hasMarches: boolean;
-        cosmetics?: readonly Row[];
-    }>;
 }
 
 export interface PlayerSummary
@@ -225,9 +215,10 @@ export interface LoginConfigurationState
     pushSettings: Row[];
 }
 
-export interface GameServices extends RankingPublications
+export interface GameServices extends RankingPublications, WorldQueryStores
 {
     ranking?: RankingCommands;
+    worldQueries?: WorldQueryCommands;
     celebrityDescription?: {
         read(owner: string, params: Fields, now: number): Promise<Fields>;
         save(owner: string, params: Fields, now: number): Promise<Fields>;
@@ -336,9 +327,6 @@ export interface GameServices extends RankingPublications
     worldFightBulletins?: import("./world-bulletins").WorldBulletinArchive;
     worldMarchInspection?: import("./world-march-inspection").WorldMarchInspectionStore;
     playerSearch?: PlayerSearchStore;
-    worldSearch?: WorldSearchStore;
-    worldUtility?: import("./world-utility").WorldUtilityStore;
-    worldFavorites?: WorldFavoriteStore;
     avatar?: AvatarGrantService;
     avatarFinish?: AvatarFinishService;
     avatarVersion?: AvatarVersionService;

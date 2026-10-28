@@ -103,7 +103,6 @@ function fixture(remote = false)
         playerRanking: unused,
         getAccountsByPlayerId: unused,
         getCityByPlayerId: unused,
-        getWorldByPointIds: unused,
         getPlayerSummariesByIds: unused,
         getPowerByPlayerId: unused,
     };

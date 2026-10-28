@@ -66,7 +66,6 @@ test("complete configuration wire contract survives XML loading, realm compositi
             getProfileById: async (uid: string) => ({ uid, level: 5 }),
             getAccountsByPlayerId: unexpected,
             getCityByPlayerId: unexpected,
-            getWorldByPointIds: unexpected,
             getPlayerSummariesByIds: unexpected,
             getPowerByPlayerId: unexpected,
             mailGroups: unexpected,

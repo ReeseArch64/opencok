@@ -31,7 +31,7 @@ import {
     selectWorldExplorationMarch,
 } from "@opencok/rules/world-monster-detail";
 import { resourceRemaining, neutralResourceStart } from "@opencok/rules/world-resource-detail";
-import { favoriteInteger } from "@opencok/rules/world-favorites";
+import { favoriteInteger } from "@opencok/world/rules/world-favorites";
 import { mailBlank } from "@opencok/rules/mail";
 import type { Rules } from "@opencok/rules/game";
 import { legacyObjectOrder } from "@opencok/messages/legacy-object-order";
