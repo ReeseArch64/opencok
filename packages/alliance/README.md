@@ -11,11 +11,12 @@ Creation and membership follow in [#673](https://github.com/ReeseArch64/opencok/
 Queries and snapshots follow in [#675](https://github.com/ReeseArch64/opencok/issues/675).
 Publication follows in [#677](https://github.com/ReeseArch64/opencok/issues/677).
 Execution context and dispatch follow in [#679](https://github.com/ReeseArch64/opencok/issues/679).
-Its seventy-five source modules and nine test files cover help, gifts, research,
+Mutation coordination follows in [#681](https://github.com/ReeseArch64/opencok/issues/681).
+Its eighty-four source modules and ten test files cover help, gifts, research,
 donations, governance, applications/invitations, creation/membership, queries,
-snapshots, publication, context/dispatch, native mapping and transactional
-persistence/recovery. The outer mutation coordinator and aggregate repository
-remain subsequent domain slices.
+snapshots, publication, context/dispatch, mutation coordination, native mapping
+and transactional persistence/recovery. Aggregate persistence remains a subsequent
+domain slice.
 
 ## Responsibilities and composition
 
@@ -403,7 +404,7 @@ No process authority, receipt, production schedule or outbox boundary changes.
 The unused Rules `newAllianceMember` export is removed; the owned policy remains
 the single implementation. Remaining creation/join policy bindings still serve
 Rules catalog tests. `allianceStableId` remains shared for the trusted gift producer,
-realm march-gift producer and this composed mail mapper. Alliance owns its eventual
+realm research-recovery identity and this composed mail mapper. Alliance owns its eventual
 relocation under #558 W20 with aggregate migration; hashes and saved identities must
 remain unchanged. Directory/search, snapshot/effect assembly, transaction discovery,
 aggregate orchestration/publication and semantic catalog definitions remain open.
@@ -600,3 +601,63 @@ separation. Deploy or roll back the complete realm artifact with unchanged schem
 saves, environment and client resources. Preserve memberships, production,
 inventory, receipts and outbox; native-device and production-load acceptance
 remain separate.
+
+## Mutation coordination, requests and event identity
+
+`services/alliance` owns ordinary commands and trusted gift publication.
+`validations/command` owns native field validation, sequential moderation,
+operation identity admission, canonical request fields and read selection.
+`mappings/mutation` owns request encoding and alliance mutation-event payloads.
+The realm injects the existing inventory planner, context factory, gift Service,
+record readers, UUID generator, errors and membership policy. Economy's existing
+replay mapping retains the response and push contract.
+
+Unsupported commands are rejected before recovery. Every accepted non-tick command
+still runs a tick before parameter validation; a failed tick aborts the caller.
+Field checks retain command-specific science ID types, integer/string bounds,
+scalar admission and the correlation-field bypass. Moderation remains sequential
+in its original field order, before operation identity validation. Canonical
+requests sort keys and exclude operation/correlation IDs. Selection retains query
+aliases, language fallback, page sizes, bounds and ID validation.
+
+The owned Service keeps context/ledger construction and plans inside the existing
+repository callback. Ordinary writes append the same event after existing events,
+including created-alliance fallback and changed memberships. Empty writes do not
+append an event. Production owners and deadlines retain their original plan fields.
+Trusted gift publication keeps its separate path, admission limits, deterministic
+receipt and publication condition, without adding command recovery. Receipts,
+locking, inventory application and outbox delivery remain in their current owners.
+
+`services/identity` retains the exact 32-character SHA-256 hex prefix. Gift receipts,
+first-join mail and realm research-recovery identities now use this single owned
+implementation. `constants/commands` retains the complete ordered command registry;
+shared game dispatch imports it directly. The former shared `Services/alliances`
+module has no remaining consumers and is removed. Ledger's existing leaf mutation
+contracts are declared as a direct workspace dependency; no third-party version
+changes. The lockfile adds only that workspace dependency entry.
+
+| Former source                                       | Owned destination                                          | Integration and retirement                                                                     |
+| --------------------------------------------------- | ---------------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| Services `alliances` outer workflows                | `services/alliance` and bounded mutation/runtime contracts | Realm composition supplies actual adapters; legacy module removed                              |
+| Inline field/moderation/identity/selection handling | `validations/command`                                      | Called after the existing recovery gate                                                        |
+| Request/event encoding                              | `mappings/mutation`                                        | Same evaluation position, field order, payload and append conditions                           |
+| Command registry and deterministic identity         | `constants/commands`, `services/identity`                  | Game dispatch, first-join mail and realm research recovery migrate directly                    |
+| Shared plan/repository definitions                  | `contracts/mutation`                                       | Shared repository facade binds concrete inventory state; unused plan/selection aliases removed |
+
+Eight tests add 66 assertions for recovery ordering, validation/moderation,
+canonical fields, aliases, exact longs, operation IDs, event append conditions,
+production markers, replay, trusted gifts, error propagation and fixed hash vectors.
+The owned suite has 69 tests/663 assertions; package tests have 462 tests/558,050
+assertions. Eight structural/wiring comparisons verify both full workflows with
+validation and mapping inlined, registry, hash algorithm/arguments, plan/repository
+contracts and actual unsupported-command errors. Four disposable PostgreSQL suites
+retain 28 tests/284 assertions; server tests retain 1,501 tests/245,699 assertions.
+Five affected workspace type checks, architecture tests/types, frozen install,
+lint, formatting and build pass. The architecture baseline remains 71 violations.
+
+The shared aggregate Repository and inventory-state binding remain W08/W20 work;
+semantic catalogs and effect ownership remain W14 work. Deploy or roll back the
+complete realm artifact and workspace lockfile. No schema/save conversion,
+environment or client packaging change is required. Preserve operation receipts,
+mail/gift/recovery identities, player progress and outbox. Native-device,
+production-load and process-separation acceptance remain separate.
