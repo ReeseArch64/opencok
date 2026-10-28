@@ -5,8 +5,6 @@ export type {
     ProvisionReceiptResponse as ProvisionReceipt,
 } from "./responses/provisioning";
 
-import type { Row } from "./rows.ts";
-
 export const characterPath = "/api/v1/characters";
 
 export const provisionPath = "/_internal/characters";
@@ -35,30 +33,6 @@ export interface CharacterReservation extends CharacterInput
     createdAt: number;
     preset: string;
 }
-
-export interface CharacterSeed
-{
-    birth: import("./world-birth").WorldBirthRules;
-    profile: Row;
-    resource: Row;
-    buildings: readonly Row[];
-    queues: readonly Row[];
-    tasks: readonly Row[];
-    generals: readonly Row[];
-    player: Row;
-    lord: Row;
-    vip: Row;
-    shield: Row;
-    shieldEnd: bigint;
-    cityDefense: number;
-    stamina: number;
-    color: number;
-}
-
-export type CharacterCreator = (
-    reservation: CharacterReservation,
-    plan: (now: number) => CharacterSeed,
-) => Promise<ProvisionReceipt>;
 
 export interface IdentityVerifier
 {

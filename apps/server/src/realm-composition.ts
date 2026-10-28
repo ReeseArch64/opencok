@@ -284,9 +284,9 @@ import { TimedActivityService } from "@opencok/services/timed-activity";
 import { ProductionService } from "@opencok/services/production";
 import { productionContext } from "@opencok/services/production-context";
 import { sfs, encode, decode, str, int, fields, Type } from "@opencok/messages/sfs";
-import { createCharacterCreator } from "@opencok/repositories/character-provisioning";
-import { CharacterProvisioningService } from "@opencok/services/provisioning";
-import { CharacterProvisioningController } from "@opencok/controllers/provisioning";
+import { createCharacterCreator } from "./character-provisioning";
+import { CharacterProvisioningService } from "@opencok/player/services/character-provisioning";
+import { CharacterProvisioningController } from "@opencok/player/controllers/character-provisioning";
 import { characterProvisioningHandler } from "@opencok/connection/provisioning";
 import {
     createMailRewardExecutor,

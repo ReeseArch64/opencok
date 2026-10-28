@@ -1,10 +1,11 @@
-import { worldBirthRules } from "./world-birth";
+import type { CharacterSeed } from "../contracts/character-provisioning";
+import { worldBirthRules } from "@opencok/rules/world-birth";
 import { randomUUID } from "node:crypto";
-import type { CharacterReservation, CharacterSeed } from "@opencok/contracts/provisioning";
+import type { CharacterReservation } from "@opencok/contracts/provisioning";
 import { starterVersion } from "@opencok/contracts/provisioning";
 import type { Row } from "@opencok/contracts/rows";
 import { MOBILE_CLIENT_VERSION } from "@opencok/constants/game";
-import type { Rules } from "./game.ts";
+import type { Rules } from "@opencok/rules/game";
 
 const basics = new Set([
     "400000",

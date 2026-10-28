@@ -21,14 +21,13 @@ The shared signed account/realm messages, response contracts, validation schemas
 and canonical hash remain in `contracts`, `validations`, `mappings` and `rules`.
 Both owners use those same implementations. Identity cryptography stays in
 `identity`; HTTP/signing adapters stay in `connection`; PHP discovery transport
-stays in `api`. Realm character seed generation and writes remain in the current
-realm implementation pending their player-domain migration. Account code neither
+stays in `api`. Realm character seed generation and writes belong to `player` after #609. Account code neither
 seeds a city nor writes a realm database.
 
 All maintained callers use these domain paths. The former horizontal account,
 reservation, Service, Controller, DTO and account-reader paths are removed;
-there are no compatibility re-exports back into this domain. The remaining
-horizontal provisioning aggregates expose only realm character creation.
+there are no compatibility re-exports back into this domain. The remaining horizontal provisioning aggregates were retired when realm
+creation moved to `player` in #609.
 
 ## Preserved behavior
 

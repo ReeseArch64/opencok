@@ -1,6 +1,6 @@
 import { expect, test } from "bun:test";
 import { loadRules } from "@opencok/resources/rules";
-import { characterSeed } from "@opencok/rules/character-seed";
+import { characterSeed } from "@opencok/player/rules/character-seed";
 import type { CharacterReservation } from "@opencok/contracts/provisioning";
 
 const reservation: CharacterReservation = {

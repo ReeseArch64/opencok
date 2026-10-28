@@ -1,4 +1,5 @@
-import { allocateWorldBirth } from "./world-birth";
+import type { CharacterCreator } from "../contracts/character-provisioning";
+import type { CharacterProvisioningTransactions } from "./character-provisioning-transactions";
 import { and, eq, inArray, sql } from "drizzle-orm";
 import { userprofile } from "@opencok/drizzle/schema/opencok_kingdom/userprofile";
 import { user_resource } from "@opencok/drizzle/schema/opencok_kingdom/user_resource";
@@ -15,16 +16,14 @@ import { user_reg } from "@opencok/drizzle/schema/opencok_kingdom/user_reg";
 import { user_world } from "@opencok/drizzle/schema/opencok_kingdom/user_world";
 import { worldpoint } from "@opencok/drizzle/schema/opencok_kingdom/worldpoint";
 import { command_receipt } from "@opencok/drizzle/schema/opencok_kingdom/command_receipt";
-import type { CharacterCreator, ProvisionReceipt } from "@opencok/contracts/provisioning";
+import type { ProvisionReceipt } from "@opencok/contracts/provisioning";
 import { long } from "@opencok/contracts/rows";
 import { provisionHash } from "@opencok/rules/provisioning";
-import { fenceRealmTransaction, type RealmAuthority } from "./realm-authority.ts";
-import { appendMutationRecords } from "./mutation.ts";
 import type { DatabaseClient } from "@opencok/drizzle/contracts/database";
 
 export function createCharacterCreator(
     db: DatabaseClient<"kingdom">,
-    authority: RealmAuthority,
+    transactions: CharacterProvisioningTransactions,
     mapSize: number,
     now = Date.now,
 ): CharacterCreator
@@ -36,12 +35,12 @@ export function createCharacterCreator(
 
     return (reservation, plan) =>
         db.transaction(async (tx) => {
-            if (reservation.kingdomId !== authority.kingdomId)
+            if (reservation.kingdomId !== transactions.kingdomId)
             {
                 throw new Error("Wrong provisioning realm");
             }
 
-            await fenceRealmTransaction(tx, authority);
+            await transactions.fence(tx);
             const uid = reservation.gameUid,
                 requestHash = provisionHash(reservation);
             await tx.execute(
@@ -52,7 +51,7 @@ export function createCharacterCreator(
                 .from(command_receipt)
                 .where(
                     and(
-                        eq(command_receipt.kingdomId, authority.kingdomId),
+                        eq(command_receipt.kingdomId, transactions.kingdomId),
                         eq(command_receipt.ownerUid, uid),
                         eq(command_receipt.requestId, "character.create"),
                     ),
@@ -68,7 +67,7 @@ export function createCharacterCreator(
                     throw new Error("Character creation conflict");
                 }
 
-                authority.assertReady();
+                transactions.assertReady();
 
                 return JSON.parse(receipt.response.toString()) as ProvisionReceipt;
             }
@@ -112,9 +111,8 @@ export function createCharacterCreator(
             }
 
             const seed = plan(captured);
-            const { point } = await allocateWorldBirth(
+            const { point } = await transactions.allocateBirth(
                 tx,
-                authority,
                 mapSize,
                 seed.birth,
                 BigInt(captured),
@@ -190,12 +188,11 @@ export function createCharacterCreator(
                 );
             const response: ProvisionReceipt = {
                 gameUid: uid,
-                kingdomId: authority.kingdomId,
+                kingdomId: transactions.kingdomId,
                 requestHash,
             };
-            await appendMutationRecords(
+            await transactions.appendRecords(
                 tx,
-                authority,
                 {
                     owner: uid,
                     requestId: "character.create",
@@ -237,7 +234,7 @@ export function createCharacterCreator(
                 },
                 BigInt(captured),
             );
-            authority.assertReady();
+            transactions.assertReady();
 
             return response;
         });
