@@ -131,6 +131,38 @@ Existing centralized packages remain compatibility locations during migration.
 Validate at the mapping or application boundary and preserve mobile wire types
 and field order.
 
+## Required implementation tests
+
+For every implementation, use the
+[generate-tests skill](../.agents/skills/generate-tests/SKILL.md) to analyze the
+changed behavior, establish test cases against the originating issue and its
+acceptance criteria, and generate or extend unit tests. Complete implementation
+coverage with all of the following test layers:
+
+- **Unit tests:** domain rules, boundary conditions, validation and failure paths.
+- **E2E tests:** observable behavior across the affected application workflows.
+- **Integration tests:** interactions with persistence, messaging and other affected
+  components, using isolated disposable resources.
+- **Mutation tests:** demonstrate that assertions detect meaningful changes to
+  critical rules, authorization, state transitions and economic invariants.
+- **Snapshot tests:** reviewed, deterministic representations of relevant outputs;
+  never update snapshots blindly to accept a regression.
+- **Contract tests:** compatibility at affected service, package and client protocol
+  boundaries, including field names, types, optionality and serialization order.
+
+The skill's specialized workflow covers unit tests; use the repository's existing
+stack, tools and conventions for the other layers rather than assuming the skill
+automatically provides them. Reuse existing suites and synthetic fixtures. Do not
+introduce frameworks or dependencies without the required authorization.
+
+Generate, execute and review the relevant suites before the required pre-PR review.
+Record commands, results and coverage for each layer in the PR's validation evidence.
+If a layer is genuinely inapplicable, document the specific reason; if tooling or
+an environment is unavailable, report the gap as blocked rather than passed.
+Do not weaken assertions, disable failing tests or change expected behavior merely
+to match an implementation that violates the issue. Report such defects and resolve
+them within the authorized scope before proceeding.
+
 ## Required pre-PR review
 
 After completing every implementation and before opening its pull request, run
