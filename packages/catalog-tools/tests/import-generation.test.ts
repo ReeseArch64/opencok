@@ -1,5 +1,5 @@
 import { expect, test } from "bun:test";
-import { mkdtemp, readFile, readdir, rm, writeFile } from "node:fs/promises";
+import { mkdir, mkdtemp, readFile, readdir, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join, relative, sep } from "node:path";
 import { pathToFileURL } from "node:url";
@@ -105,9 +105,14 @@ test("CLI supports isolated output from another directory and rejects a partial 
         const partial = await run("import-gameplay-catalogs", [directory, output]);
         expect(partial.code).not.toBe(0);
         expect(partial.stderr).toContain("Supply both resource and Hero type destinations");
-        const incomplete = await run("import-gameplay-catalogs", [directory, output, output]);
+        const sourceDirectory = join(directory, "source");
+        await mkdir(sourceDirectory);
+        const incomplete = await run("import-gameplay-catalogs", [sourceDirectory, output, output]);
         expect(incomplete.code).not.toBe(0);
         expect(incomplete.stderr).toContain("Supply the complete authorized catalog directory");
+        const overlapping = await run("import-building-definitions", [input, directory]);
+        expect(overlapping.code).not.toBe(0);
+        expect(overlapping.stderr).toContain("must be separate from authorized inputs");
         expect(await readFile(input, "utf8")).toBe(buildingXml);
     }
     finally
