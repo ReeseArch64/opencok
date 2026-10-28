@@ -122,9 +122,17 @@ bun --no-env-file test packages/core/tests packages/city/tests apps/server/test/
 The tests cover TCP response order and field types, replacement during unfinished work,
 disconnect during authentication, cancellation between recovery phases, serial progression
 and push order, reconnect projection, and OTLP export with independent packet traces.
-They use synthetic state and an in-process collector; they do not certify Maple storage,
-PostgreSQL persistence or native rendering. No snapshot format changes are introduced;
-existing deterministic wire assertions remain the contract checks.
+The focused run passed 58 tests with 426 assertions. Three meaningful mutations were detected:
+removing the previous-session drain, conflating cancellation with timeout, and removing
+bootstrap cancellation barriers. Removing only a redundant post-phase barrier survived,
+since the next phase still checks cancellation before work.
+
+The existing `apps/server/integration/core.test.ts` also passed against disposable
+PostgreSQL 17.11, Redis 6.2.24 and ZooKeeper 3.4.14: 304 assertions covering SFS login,
+persistent state, both kingdoms and restart/reconnect. Its 41.50-second suite duration is
+not login latency. The focused telemetry tests use an in-process OTLP collector; neither
+suite certifies Maple storage or native rendering. No snapshot format changes are
+introduced; existing deterministic wire assertions remain the contract checks.
 
 Remaining acceptance evidence for #560 requires an authorized disposable workload: record
 exact server/image revision, native client track, both kingdoms, topology and dependency
