@@ -52,13 +52,16 @@ import { acquireRealmAuthority } from "@opencok/repositories/realm-authority";
 import { expeditionCalendarPhases } from "@opencok/rules/expedition-calendar";
 import { expeditionDiscovery } from "@opencok/rules/expedition-score-publication";
 import { expeditionDomain } from "@opencok/services/new-expedition";
-import { trainingDomain } from "@opencok/services/training";
+import { createRealmTrainingDomain } from "../src/composition/troops";
 import { expedition_progress } from "@opencok/drizzle/schema/opencok_kingdom/expedition_progress";
 import { userprofile } from "@opencok/drizzle/schema/opencok_kingdom/userprofile";
 import { Cache } from "@opencok/storage/session";
 import { sfs, fields, type Value } from "@opencok/messages/sfs";
 import { cityHarness } from "./support/city";
 import { DisposableRedis } from "./support/redis";
+
+const trainingDomain = createRealmTrainingDomain();
+
 async function fixture()
 {
     const h = await cityHarness([expeditionDomain, trainingDomain, expeditionStageRewardDomain]),

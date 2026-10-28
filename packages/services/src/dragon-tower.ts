@@ -32,7 +32,7 @@ import {
     towerBuffViews,
     towerRankingView,
 } from "@opencok/mappings/dragon-tower";
-import { militaryBoolean } from "./training";
+import { progressionBoolean } from "@opencok/validations/city-parameters";
 import type { CityDomain } from "./city-domain.ts";
 import type { CityProgressionContext } from "./city-progression-context.ts";
 
@@ -584,7 +584,7 @@ export class DragonTowerDomain extends CityCommandDomain
             saveUnits(row, "armyrevive", selected);
             let buy: Fields | undefined;
 
-            if (duration === 0n || militaryBoolean(params, "gold"))
+            if (duration === 0n || progressionBoolean(params, "gold"))
             {
                 if (duration > 0n)
                 {
@@ -617,7 +617,7 @@ export class DragonTowerDomain extends CityCommandDomain
 
             if (remaining > 0n)
             {
-                if (militaryBoolean(params, "gold"))
+                if (progressionBoolean(params, "gold"))
                 {
                     const cost = Math.trunc(
                         Math.fround(

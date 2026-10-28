@@ -1,3 +1,5 @@
+import { MilitaryMapper } from "@opencok/troops/mappings/military";
+import type { Row } from "@opencok/contracts/rows";
 import { ResearchMapper } from "@opencok/research/mappings/research";
 import type { ReconnectResearchProjection } from "@opencok/contracts/reconnect";
 import { importBuildingDefinition } from "@opencok/building/mappings/legacy-definition";
@@ -85,6 +87,10 @@ function fixture()
         new ResearchMapper().data(rows, queues, rules);
     const environment = {
         research,
+        military: {
+            wounded: (row: Row) => new MilitaryMapper().woundedTroops(row),
+            fortification: (row: Row) => new MilitaryMapper().fortification(row, rules),
+        },
         specialServer: false,
         cn1: null,
         random: () => 0,

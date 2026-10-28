@@ -5,7 +5,7 @@ import { sfs, str, int, encode, decode, fields, type Fields } from "@opencok/mes
 import { heroTargetDomain, deliverHeroTargetBatch } from "@opencok/hero/services/hero-score";
 import { createPrayerDomain } from "@opencok/services/prayer";
 import { lotteryDomain } from "@opencok/services/lottery";
-import { trainingDomain } from "@opencok/services/training";
+import { createRealmTrainingDomain } from "../src/composition/troops";
 import { user_resource } from "@opencok/drizzle/schema/opencok_kingdom/user_resource";
 import { user_building } from "@opencok/drizzle/schema/opencok_kingdom/user_building";
 import { score_act } from "@opencok/drizzle/schema/opencok_kingdom/score_act";
@@ -17,6 +17,8 @@ import { mutation_outbox } from "@opencok/drizzle/schema/opencok_kingdom/mutatio
 import { mail } from "@opencok/drizzle/schema/opencok_kingdom/mail";
 import type { CityDomain } from "@opencok/city/contracts/domain";
 import { cityHarness } from "./support/city";
+
+const trainingDomain = createRealmTrainingDomain();
 const producer: CityDomain = {
     commands: ["hero.synthetic.action"],
     types: [],

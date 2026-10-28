@@ -98,6 +98,7 @@
         "@opencok/services": "workspace:*",
         "@opencok/shop": "workspace:*",
         "@opencok/storage": "workspace:*",
+        "@opencok/troops": "workspace:*",
         "effect": "catalog:",
       },
       "devDependencies": {
@@ -253,6 +254,7 @@
         "@opencok/messages": "workspace:*",
         "@opencok/research": "workspace:*",
         "@opencok/rules": "workspace:*",
+        "@opencok/troops": "workspace:*",
         "drizzle-orm": "0.45.4",
       },
       "devDependencies": {
@@ -899,6 +901,20 @@
     },
     "packages/troops": {
       "name": "@opencok/troops",
+      "dependencies": {
+        "@opencok/base": "workspace:*",
+        "@opencok/constants": "workspace:*",
+        "@opencok/contracts": "workspace:*",
+        "@opencok/drizzle": "workspace:*",
+        "@opencok/enums": "workspace:*",
+        "@opencok/errors": "workspace:*",
+        "@opencok/mappings": "workspace:*",
+        "@opencok/messages": "workspace:*",
+        "@opencok/rules": "workspace:*",
+        "@opencok/validations": "workspace:*",
+        "drizzle-orm": "0.45.4",
+        "zod": "catalog:",
+      },
       "devDependencies": {
         "@opencok/config": "workspace:*",
         "@types/bun": "catalog:",
@@ -916,6 +932,7 @@
     "packages/validations": {
       "name": "@opencok/validations",
       "dependencies": {
+        "@opencok/constants": "workspace:*",
         "@opencok/contracts": "workspace:*",
         "@opencok/economy": "workspace:*",
         "@opencok/errors": "workspace:*",
