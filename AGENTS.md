@@ -22,7 +22,8 @@ Use [CONTEXT.md](CONTEXT.md) for technical direction, [CONTRIBUTING.md](.github/
 ## Execution and delivery
 
 - Inspect Git and relevant code before editing; preserve existing changes, including staged and untracked work. Stay within the request and established patterns before adding dependencies or abstractions. Confirm protected changes under the operating rules.
-- Use `generate-tests` for every implementation and cover the layers required by the contribution guide. Run `bun run lint`, `bun run format:check`, relevant tests and type checks. Fix introduced violations, create data/backups as needed, and address the issue and acceptance criteria before the PR, covering Standards and Spec. Resolve blockers and rerun after changes as the guide requires.
+- Use `generate-tests` for every implementation and cover the layers required by the contribution guide. Run `bun run lint`, `bun run format:check`, relevant tests and type checks. Fix introduced violations without weakening checks; record blockers and justified inapplicability.
+- After implementation, use `code-review` against the issue and acceptance criteria before the PR, covering Standards and Spec. Resolve blockers and rerun after changes as the guide requires.
 - Review diff/Git, document assumptions and new dependencies in their proper locations, and report changes, validation and limitations. Follow commit, branch, stack and PR workflows; delivery does not expand authorization.
 
 ## Private data and inputs
