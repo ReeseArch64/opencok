@@ -88,7 +88,7 @@ governs named-definition migration and its evidence gates. The offline
 [catalog-tools workspace](../catalog-tools/README.md) checks declared client links,
 versioned fingerprints, identity coverage and unresolved entries. Its first
 maintained manifest covers the existing Dragon roster; it does not migrate other
-catalogs or replace the authoring importers below. Runtime imports remain independent
+catalogs. Authoring importers also live in catalog-tools, as described below. Runtime imports remain independent
 of the tool and private client files.
 
 ## Import and provenance
@@ -101,14 +101,20 @@ player records or client binaries are included.
 Migration tools can recreate maintained definitions from an authorized snapshot:
 
 ```sh
-bun run --cwd packages/resources import:catalogs /path/to/authorized/xml
-bun run --cwd packages/resources import:buildings /path/to/authorized/building.xml
+bun run --cwd packages/catalog-tools import:catalogs /path/to/authorized/xml
+bun run --cwd packages/catalog-tools import:buildings /path/to/authorized/building.xml
 ```
 
 Importing overwrites maintained edits. The general importer requires the complete
 set of catalog identifiers, excludes building.xml and emits typed definitions;
 it cannot restore XML-shaped source modules. Format generated files before
 committing. Importers and original XMLs are not deployment requirements.
+
+The former `resources/scripts` entrypoints are retired in #601. The CLI and generators
+now belong to [catalog-tools](../catalog-tools/README.md#catalog-and-building-imports),
+with unchanged default resource/Hero destinations and explicit isolated-output options.
+Runtime fixture loading and the building compatibility mapper remain in resources
+because maintained runtime/test callers still use them.
 
 No wire, database, account, inventory or queue migration is introduced. Roll back
 the complete application artifact to restore prior behavior. Native mobile client

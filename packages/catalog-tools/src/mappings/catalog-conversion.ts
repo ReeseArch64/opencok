@@ -10,7 +10,7 @@ import type {
     CatalogValue,
     TileMapDefinition,
     VariableDefinition,
-} from "../src/catalog-model.ts";
+} from "@opencok/resources/catalog-model";
 
 export type SourceElement = Record<string, unknown> & { ":@"?: Record<string, string>; };
 const children = (node: SourceElement, tag: string): SourceElement[] => {

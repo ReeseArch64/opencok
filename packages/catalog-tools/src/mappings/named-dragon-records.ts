@@ -1,7 +1,7 @@
 import { dragonCatalogBindings } from "@opencok/constants/dragon-catalog-bindings";
 import { DragonIdentity } from "@opencok/enums/dragon-identity";
 import { GameplayCatalog } from "@opencok/enums/gameplay-catalog";
-import { dragonDefinitionByIdentity } from "../src/dragons/roster.ts";
+import { dragonDefinitionByIdentity } from "@opencok/resources/dragons/roster";
 
 const identities = new Map<number, DragonIdentity>(
     Object.entries(dragonCatalogBindings.dragons).map(([identity, id]) => [
