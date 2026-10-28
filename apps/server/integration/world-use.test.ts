@@ -10,8 +10,8 @@ import { world_res_dead } from "@opencok/drizzle/schema/opencok_kingdom/world_re
 import { black_land_res_dead } from "@opencok/drizzle/schema/opencok_kingdom/black_land_res_dead";
 import { mutation_outbox } from "@opencok/drizzle/schema/opencok_kingdom/mutation_outbox";
 import { createWorldUseDomain } from "@opencok/services/world-use";
-import { createWorldResourceRefreshExecutor } from "@opencok/repositories/world-resource-refresh";
-import { refreshWorldResources } from "@opencok/services/world-resource-refresh";
+import { createRealmWorldResourceRefreshExecutor as createWorldResourceRefreshExecutor } from "../src/composition/world-population";
+import { createRealmWorldResourceRefreshService } from "../src/composition/world-population";
 import { publishWorldMutation } from "@opencok/services/world-publication";
 import { sfs, Type } from "@opencok/messages/sfs";
 import { cityHarness } from "./support/city";
@@ -176,17 +176,17 @@ test(
                 .where(eq(worldpoint.id, 1));
             const executor = createWorldResourceRefreshExecutor(h.db.db, h.authority, 4),
                 run = (now: bigint) =>
-                    executor.execute(now, (store) =>
-                        refreshWorldResources(
-                            store,
-                            h.rules,
-                            4,
-                            new Map([
-                                [305, 1000],
-                                [307, 1000],
-                            ]),
-                            () => 0,
-                        ));
+                    executor.execute(
+                        now,
+                        (store) =>
+                            createRealmWorldResourceRefreshService(h.rules, 4, () => 0).refresh(
+                                store,
+                                new Map([
+                                    [305, 1000],
+                                    [307, 1000],
+                                ]),
+                            ),
+                    );
             await run(65800000n);
             const [occupied] = await h.db.db.select().from(worldpoint).where(eq(worldpoint.id, 1));
             expect(occupied).toMatchObject({
@@ -232,7 +232,11 @@ test(
                 run = (now: bigint) =>
                     executor.execute(
                         now,
-                        (store) => refreshWorldResources(store, h.rules, 4, new Map(), () => 0),
+                        (store) =>
+                            createRealmWorldResourceRefreshService(h.rules, 4, () => 0).refresh(
+                                store,
+                                new Map(),
+                            ),
                     );
             for (const [index, opening] of [undefined, 0n, 1000000000000n].entries())
             {
@@ -318,7 +322,10 @@ test(
             );
             const executor = createWorldResourceRefreshExecutor(h.db.db, h.authority, 1200),
                 refresh = (store: Parameters<Parameters<typeof executor.execute>[1]>[0]) =>
-                    refreshWorldResources(store, h.rules, 1200, new Map(), () => 0),
+                    createRealmWorldResourceRefreshService(h.rules, 1200, () => 0).refresh(
+                        store,
+                        new Map(),
+                    ),
                 resources = () =>
                     h.db.db.select().from(worldpoint).where(eq(worldpoint.pointType, 3));
             await expect(

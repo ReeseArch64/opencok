@@ -6,13 +6,13 @@ import { world_march } from "@opencok/drizzle/schema/opencok_kingdom/world_march
 import { world_res_new_dead } from "@opencok/drizzle/schema/opencok_kingdom/world_res_new_dead";
 import { mutation_outbox } from "@opencok/drizzle/schema/opencok_kingdom/mutation_outbox";
 import { trigger_var } from "@opencok/drizzle/schema/opencok_kingdom/trigger_var";
-import { createWorldResourceNewExecutor } from "@opencok/repositories/world-resource-new";
+import { createRealmWorldResourceNewExecutor as createWorldResourceNewExecutor } from "../src/composition/world-population";
 import { acquireRealmAuthority } from "@opencok/repositories/realm-authority";
 import {
     worldResourceNewFootprint,
     worldResourceNewIdentity,
-} from "@opencok/rules/world-resource-new";
-import { refreshWorldResourceNew } from "@opencok/services/world-resource-new";
+} from "@opencok/world/rules/world-resource-new";
+import { createRealmWorldResourceNewService } from "../src/composition/world-population";
 import { cityHarness } from "./support/city";
 
 const now = BigInt(Date.UTC(2030, 0, 1));
@@ -42,7 +42,10 @@ async function fixture()
     }
     const executor = createWorldResourceNewExecutor(h.db.db, h.authority, 5, 1),
         run = (at: bigint) =>
-            executor.execute(at, (store) => refreshWorldResourceNew(store, h.rules, 5, () => 0)),
+            executor.execute(
+                at,
+                (store) => createRealmWorldResourceNewService(h.rules, 5, () => 0).refresh(store),
+            ),
         main = async () =>
             (await h.db.db.select().from(worldpoint).where(eq(worldpoint.pointType, 37)))[0],
         open = () =>
@@ -150,7 +153,7 @@ test(
                 next = createWorldResourceNewExecutor(fresh.db, authority, 5, 1);
             await next.execute(
                 now + 9000002n,
-                (store) => refreshWorldResourceNew(store, h.rules, 5, () => 0),
+                (store) => createRealmWorldResourceNewService(h.rules, 5, () => 0).refresh(store),
             );
             expect(await h.main()).toMatchObject({
                 resInitValue: 1000,
@@ -179,7 +182,7 @@ test(
             const before = await h.db.db.select().from(worldpoint);
             await expect(
                 h.executor.execute(now, async (store) => {
-                    await refreshWorldResourceNew(store, h.rules, 5, () => 0);
+                    await createRealmWorldResourceNewService(h.rules, 5, () => 0).refresh(store);
                     throw new Error("forced shared resource rollback");
                 }),
             ).rejects.toThrow("forced shared resource rollback");
@@ -231,7 +234,8 @@ test(
                 }),
                 pending = executor.execute(
                     undefined,
-                    (store) => refreshWorldResourceNew(store, h.rules, 5, () => 0),
+                    (store) =>
+                        createRealmWorldResourceNewService(h.rules, 5, () => 0).refresh(store),
                 );
             await Bun.sleep(30);
             expect(captures).toBe(0);
@@ -252,7 +256,8 @@ test(
             await expect(
                 createWorldResourceNewExecutor(h.db.db, live, 5, 1).execute(
                     now + 9000000n,
-                    (store) => refreshWorldResourceNew(store, h.rules, 5, () => 0),
+                    (store) =>
+                        createRealmWorldResourceNewService(h.rules, 5, () => 0).refresh(store),
                 ),
             ).rejects.toThrow("lost shared resource owner");
             expect(await h.db.db.select().from(worldpoint)).toEqual(before);

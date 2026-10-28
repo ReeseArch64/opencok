@@ -1,4 +1,3 @@
-import { outgoingTrace } from "@opencok/core/operation";
 import { randomUUID } from "node:crypto";
 import { and, eq, sql, inArray, asc, lte } from "drizzle-orm";
 import { worldpoint } from "@opencok/drizzle/schema/opencok_kingdom/worldpoint";
@@ -11,18 +10,22 @@ import { black_land_barbarion_dead } from "@opencok/drizzle/schema/opencok_kingd
 import { mutation_outbox } from "@opencok/drizzle/schema/opencok_kingdom/mutation_outbox";
 import { encodeJavaIntMap } from "@opencok/messages/java-int-map";
 import { encode, sfs } from "@opencok/messages/sfs";
-import { num, text, long, type Row } from "@opencok/contracts/rows";
+import { num, text, long, type Row } from "../contracts/rows";
 import type {
     WorldMonsterFamily,
     WorldMonsterRefreshExecutor,
     WorldMonsterSupplyClock,
-} from "@opencok/contracts/world-monster-refresh";
+} from "../contracts/world-monster-refresh";
 import type { DatabaseClient } from "@opencok/drizzle/contracts/database";
-import { fenceRealmTransaction, type RealmAuthority } from "./realm-authority";
+import type { WorldPopulationPersistenceRuntime } from "../contracts/population-persistence";
 
 const key = (family: WorldMonsterFamily) => `opencok.world.monsters.${family}.v1`;
 
-function parseClock(raw: string, authority: RealmAuthority, size: number): WorldMonsterSupplyClock
+function parseClock(
+    raw: string,
+    authority: WorldPopulationPersistenceRuntime,
+    size: number,
+): WorldMonsterSupplyClock
 {
     if (Buffer.byteLength(raw) > 262144)
     {
@@ -101,7 +104,7 @@ function parseClock(raw: string, authority: RealmAuthority, size: number): World
 
 export function createWorldMonsterRefreshExecutor(
     db: DatabaseClient<"kingdom">,
-    authority: RealmAuthority,
+    authority: WorldPopulationPersistenceRuntime,
     size: number,
     captureTime = Date.now,
 ): WorldMonsterRefreshExecutor
@@ -115,7 +118,7 @@ export function createWorldMonsterRefreshExecutor(
         async execute(at, work)
         {
             await db.transaction(async (tx) => {
-                await fenceRealmTransaction(tx, authority);
+                await authority.fence(tx);
                 await tx.execute(sql`select pg_advisory_xact_lock(728214,0)`);
                 const now = at ?? BigInt(captureTime());
 
@@ -516,7 +519,7 @@ export function createWorldMonsterRefreshExecutor(
                 {
                     const id = randomUUID().replaceAll("-", "");
                     await tx.insert(mutation_outbox).values({
-                        traceparent: outgoingTrace(new Headers()).get("traceparent"),
+                        traceparent: authority.traceparent(),
                         kingdomId: authority.kingdomId,
                         ownerUid: "",
                         requestId: `monsters:${id}`,

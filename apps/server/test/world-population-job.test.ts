@@ -1,11 +1,22 @@
 import { expect, test } from "bun:test";
-import type { WorldResourceRefreshStore } from "@opencok/contracts/world-resource-refresh";
+import type { WorldResourceRefreshStore } from "@opencok/world/contracts/world-resource-refresh";
+import type { WorldResourceNewStore } from "@opencok/world/contracts/world-resource-new";
 import { Rules } from "@opencok/rules/game";
+import {
+    createRealmWorldResourceNewService,
+    createRealmWorldResourceRefreshService,
+    createRealmWorldMonsterRefreshService,
+} from "../src/composition/world-population";
 import { WorldPopulationJob } from "../src/world-population-job.ts";
 
-function rules()
+function services()
 {
-    return new Rules(new Map(), new Map(), new Map());
+    const rules = new Rules(new Map(), new Map(), new Map());
+    return {
+        shared: createRealmWorldResourceNewService(rules, 1201),
+        resources: createRealmWorldResourceRefreshService(rules, 1201),
+        monsters: createRealmWorldMonsterRefreshService(rules, 1201),
+    };
 }
 
 function idleResources(): WorldResourceRefreshStore
@@ -67,8 +78,7 @@ test("population recovery waits for each executor and leaves timestamp capture t
                 calls.push("monsters");
             },
         },
-        rules(),
-        1201,
+        services(),
         async () => new Map(),
         (event) => calls.push(event),
     );
@@ -107,8 +117,7 @@ for (let failures = 0; failures < 8; failures++)
             executor(0),
             executor(1),
             executor(2),
-            rules(),
-            1201,
+            services(),
             async () => new Map(),
             (event) => reports.push(event),
         );
@@ -157,8 +166,7 @@ test("resource effects are loaded inside the executor callback and failures pres
                 monsterRuns++;
             },
         },
-        rules(),
-        1201,
+        services(),
         async () => {
             expect(inside).toBe(true);
             effectReads++;
@@ -180,4 +188,38 @@ test("resource effects are loaded inside the executor callback and failures pres
     expect(monsterRuns).toBe(2);
     expect(reports).toHaveLength(1);
     expect(inside).toBe(false);
+});
+
+test("a reused population service observes replacement catalog settings while retaining occupied footprints", async () => {
+    const rules = new Rules(new Map(), new Map(), new Map());
+    rules.items.set("worldmap_city", { k6: "5" });
+    rules.items.set("on_event2", { k1: "0", k2: "1000", k8: "3600" });
+    const service = createRealmWorldResourceNewService(rules, 5);
+    const deadlines: bigint[] = [];
+    const unexpected = async () => {
+        throw new Error("Occupied footprint must not be cleared, funded or replaced");
+    };
+    const store: WorldResourceNewStore = {
+        now: 1000n,
+        clock: undefined,
+        expired: async () => [{ id: 7, flushTime: 100n }],
+        occupied: async () => true,
+        postpone: async (point, deadline) => {
+            expect(point.id).toBe(7);
+            deadlines.push(deadline);
+        },
+        clear: unexpected,
+        clearOrphans: async () => 0,
+        pending: async () => [],
+        population: unexpected,
+        ticket: unexpected,
+        retry: unexpected,
+        removeTicket: unexpected,
+        spawn: unexpected,
+        save: async () => {},
+    };
+    await service.refresh(store);
+    rules.items.set("on_event2", { k1: "0", k2: "1000", k8: "7200" });
+    await service.refresh(store);
+    expect(deadlines).toEqual([3600100n, 7200100n]);
 });

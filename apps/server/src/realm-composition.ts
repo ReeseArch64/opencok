@@ -48,16 +48,21 @@ import { createMergeCampaignStore, mergeCampaignActor } from "@opencok/repositor
 import { mergeEffectBoard } from "@opencok/mappings/merge-campaign";
 import { publishMergeEffectBoard } from "@opencok/services/merge-campaign";
 import { serverFeature } from "@opencok/rules/power-context";
-import { createWorldMonsterRefreshExecutor } from "@opencok/repositories/world-monster-refresh";
+import { createRealmWorldMonsterRefreshExecutor as createWorldMonsterRefreshExecutor } from "./composition/world-population";
 import { WorldRecreationDomain } from "@opencok/services/world-recreation";
 import { assertWorldTerrain } from "@opencok/repositories/world-terrain";
 import { WorldUseDomain } from "@opencok/services/world-use";
 import { TreasureMapDomain } from "@opencok/services/treasure-map";
 import { CityDefenseDomain } from "@opencok/services/city-defense";
 import { createRealmWorldUtilityStore } from "./composition/world";
-import { createWorldResourceRefreshExecutor } from "@opencok/repositories/world-resource-refresh";
-import { createWorldResourceNewExecutor } from "@opencok/repositories/world-resource-new";
-import { worldResourceAreaCount } from "@opencok/rules/world-resource-refresh";
+import { createRealmWorldResourceRefreshExecutor as createWorldResourceRefreshExecutor } from "./composition/world-population";
+import { createRealmWorldResourceNewExecutor as createWorldResourceNewExecutor } from "./composition/world-population";
+import {
+    createRealmWorldPopulationPolicies,
+    createRealmWorldResourceNewService,
+    createRealmWorldResourceRefreshService,
+    createRealmWorldMonsterRefreshService,
+} from "./composition/world-population";
 import { createRedPacketExpiryStore, redPacketReader } from "@opencok/repositories/red-packets";
 import {
     RedPacketDomain,
@@ -2226,7 +2231,7 @@ export const RealmDependenciesLive = Layer.effect(
                 db.kingdom.db,
                 authority,
                 config.mapSize,
-                worldResourceAreaCount(rules, config.mapSize),
+                createRealmWorldPopulationPolicies().worldResourceAreaCount(rules, config.mapSize),
             ),
             "realm.createWorldResourceNewExecutor",
         );
@@ -2234,8 +2239,11 @@ export const RealmDependenciesLive = Layer.effect(
             resourceNewRefresh,
             resourceRefresh,
             monsterRefresh,
-            rules,
-            config.mapSize,
+            {
+                shared: createRealmWorldResourceNewService(rules, config.mapSize),
+                resources: createRealmWorldResourceRefreshService(rules, config.mapSize),
+                monsters: createRealmWorldMonsterRefreshService(rules, config.mapSize),
+            },
             () => economyEffects.world(),
             (event) => logEvent(event, { kingdom: config.kingdomId, outcome: "failure" }, "error"),
         );

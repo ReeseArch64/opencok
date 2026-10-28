@@ -1,4 +1,3 @@
-import { outgoingTrace } from "@opencok/core/operation";
 import { randomUUID } from "node:crypto";
 import { and, asc, eq, inArray, lt, sql } from "drizzle-orm";
 import { worldpoint } from "@opencok/drizzle/schema/opencok_kingdom/worldpoint";
@@ -6,16 +5,12 @@ import { world_march } from "@opencok/drizzle/schema/opencok_kingdom/world_march
 import { world_res_new_dead } from "@opencok/drizzle/schema/opencok_kingdom/world_res_new_dead";
 import { trigger_var } from "@opencok/drizzle/schema/opencok_kingdom/trigger_var";
 import { mutation_outbox } from "@opencok/drizzle/schema/opencok_kingdom/mutation_outbox";
-import { long, num, text, type Row } from "@opencok/contracts/rows";
-import type { WorldResourceNewExecutor } from "@opencok/contracts/world-resource-new";
-import {
-    parseWorldResourceNewClock,
-    worldResourceNewFootprint,
-    worldResourceNewIdentity,
-} from "@opencok/rules/world-resource-new";
+import { long, num, text, type Row } from "../contracts/rows";
+import type { WorldResourceNewExecutor } from "../contracts/world-resource-new";
+import { worldResourceNewFootprint, worldResourceNewIdentity } from "../rules/world-resource-new";
 import { encode, sfs } from "@opencok/messages/sfs";
 import type { DatabaseClient } from "@opencok/drizzle/contracts/database";
-import { fenceRealmTransaction, type RealmAuthority } from "./realm-authority";
+import type { WorldResourceNewPersistenceRuntime } from "../contracts/population-persistence";
 
 const empty = {
     pointType: 0,
@@ -43,7 +38,7 @@ const owned = (point: Row) =>
 
 export function createWorldResourceNewExecutor(
     db: DatabaseClient<"kingdom">,
-    authority: RealmAuthority,
+    authority: WorldResourceNewPersistenceRuntime,
     size: number,
     areas: number,
     captureTime = Date.now,
@@ -53,7 +48,7 @@ export function createWorldResourceNewExecutor(
         async execute(at, work)
         {
             await db.transaction(async (tx) => {
-                await fenceRealmTransaction(tx, authority);
+                await authority.fence(tx);
                 await tx.execute(sql`select pg_advisory_xact_lock(728214, 0)`);
                 authority.assertReady();
                 const now = at ?? BigInt(captureTime());
@@ -69,7 +64,7 @@ export function createWorldResourceNewExecutor(
                     eq(trigger_var.key, worldResourceNewIdentity.key),
                 );
                 const [saved] = await tx.select().from(trigger_var).where(identity).for("update");
-                const clock = saved ? parseWorldResourceNewClock(saved.value, areas) : undefined,
+                const clock = saved ? authority.parseClock(saved.value, areas) : undefined,
                     changed = new Set<number>();
                 const footprint = async (point: Row) => {
                     const id = num(point, "id"),
@@ -345,7 +340,7 @@ export function createWorldResourceNewExecutor(
                     },
                     async save(value)
                     {
-                        parseWorldResourceNewClock(JSON.stringify(value), areas);
+                        authority.parseClock(JSON.stringify(value), areas);
                         await tx
                             .insert(trigger_var)
                             .values({
@@ -364,7 +359,7 @@ export function createWorldResourceNewExecutor(
                 {
                     const id = randomUUID().replaceAll("-", "");
                     await tx.insert(mutation_outbox).values({
-                        traceparent: outgoingTrace(new Headers()).get("traceparent"),
+                        traceparent: authority.traceparent(),
                         kingdomId: authority.kingdomId,
                         ownerUid: "",
                         requestId: `shared-resources:${id}`,

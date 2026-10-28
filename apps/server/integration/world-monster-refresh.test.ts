@@ -8,9 +8,9 @@ import { trigger_var } from "@opencok/drizzle/schema/opencok_kingdom/trigger_var
 import { server_info } from "@opencok/drizzle/schema/opencok_kingdom/server_info";
 import { userprofile } from "@opencok/drizzle/schema/opencok_kingdom/userprofile";
 import { mutation_outbox } from "@opencok/drizzle/schema/opencok_kingdom/mutation_outbox";
-import { createWorldMonsterRefreshExecutor } from "@opencok/repositories/world-monster-refresh";
+import { createRealmWorldMonsterRefreshExecutor as createWorldMonsterRefreshExecutor } from "../src/composition/world-population";
 import { acquireRealmAuthority } from "@opencok/repositories/realm-authority";
-import { refreshWorldMonsters } from "@opencok/services/world-monster-refresh";
+import { createRealmWorldMonsterRefreshService } from "../src/composition/world-population";
 import { decodeJavaIntMap } from "@opencok/messages/java-int-map";
 import { cityHarness } from "./support/city";
 async function fixture(size = 4, fresh = false)
@@ -79,7 +79,9 @@ async function fixture(size = 4, fresh = false)
         const run = (at: bigint) =>
             executor.execute(
                 at,
-                (store) => refreshWorldMonsters(store, h.rules, size, (maximum) => maximum - 1),
+                (store) =>
+                    createRealmWorldMonsterRefreshService(h.rules, size, (maximum) => maximum - 1)
+                        .refresh(store),
             );
         const points = () => h.db.db.select().from(worldpoint).orderBy(worldpoint.id);
         const clock = async (family: string) => {
@@ -114,7 +116,9 @@ test(
                     () =>
                         recovered.execute(
                             1000000n,
-                            (store) => refreshWorldMonsters(store, h.rules, h.size, () => 0),
+                            (store) =>
+                                createRealmWorldMonsterRefreshService(h.rules, h.size, () => 0)
+                                    .refresh(store),
                         ),
                 ),
             );
@@ -373,7 +377,8 @@ test(
             const recovered = createWorldMonsterRefreshExecutor(h.db.db, current, 4);
             await recovered.execute(
                 1000000n,
-                (store) => refreshWorldMonsters(store, h.rules, 4, () => 0),
+                (store) =>
+                    createRealmWorldMonsterRefreshService(h.rules, 4, () => 0).refresh(store),
             );
             expect((await h.points()).filter((row) => row.pointType === 9)).toHaveLength(1);
             expect((await h.clock("field")).epoch).toBe(String(current.epoch));
@@ -460,7 +465,8 @@ test(
                         recovered.execute(
                             1000000n,
                             (store) =>
-                                refreshWorldMonsters(store, h.rules, 16, (maximum) => maximum - 1),
+                                createRealmWorldMonsterRefreshService(h.rules, 16, (maximum) =>
+                                    maximum - 1).refresh(store),
                         ),
                 ),
             );
@@ -569,7 +575,8 @@ test(
                     executor.execute(
                         at,
                         (store) =>
-                            refreshWorldMonsters(store, h.rules, 1201, (maximum) => maximum - 1),
+                            createRealmWorldMonsterRefreshService(h.rules, 1201, (maximum) =>
+                                maximum - 1).refresh(store),
                     );
             await run(1000000n);
             expect(
@@ -648,7 +655,8 @@ test(
             const recovered = createWorldMonsterRefreshExecutor(h.db.db, h.authority, 16);
             await recovered.execute(
                 1099511627776n,
-                (store) => refreshWorldMonsters(store, h.rules, 16, () => 0),
+                (store) =>
+                    createRealmWorldMonsterRefreshService(h.rules, 16, () => 0).refresh(store),
             );
             expect((await h.points())[64]!.pointType).toBe(0);
             expect(

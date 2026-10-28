@@ -6,9 +6,9 @@ import { world_resource_runtime } from "@opencok/drizzle/schema/opencok_kingdom/
 import { mutation_outbox } from "@opencok/drizzle/schema/opencok_kingdom/mutation_outbox";
 import { server_info } from "@opencok/drizzle/schema/opencok_kingdom/server_info";
 import { user_resource } from "@opencok/drizzle/schema/opencok_kingdom/user_resource";
-import { createWorldResourceRefreshExecutor } from "@opencok/repositories/world-resource-refresh";
+import { createRealmWorldResourceRefreshExecutor as createWorldResourceRefreshExecutor } from "../src/composition/world-population";
 import { acquireRealmAuthority } from "@opencok/repositories/realm-authority";
-import { refreshWorldResources } from "@opencok/services/world-resource-refresh";
+import { createRealmWorldResourceRefreshService } from "../src/composition/world-population";
 import { publishWorldMutation } from "@opencok/services/world-publication";
 import { cityHarness } from "./support/city";
 
@@ -57,7 +57,11 @@ async function resourceHarness(type = 0, size = 4)
     const run = (at: bigint, effects = new Map<number, number>(), random = () => 0) =>
         executor.execute(
             at,
-            (store) => refreshWorldResources(store, h.rules, size, effects, random),
+            (store) =>
+                createRealmWorldResourceRefreshService(h.rules, size, random).refresh(
+                    store,
+                    effects,
+                ),
         );
     return { ...h, run, executor };
 }
@@ -103,7 +107,11 @@ test(
             const recovered = createWorldResourceRefreshExecutor(h.db.db, h.authority, 4);
             await recovered.execute(
                 expiry + 3600000n,
-                (store) => refreshWorldResources(store, h.rules, 4, new Map(), () => 0),
+                (store) =>
+                    createRealmWorldResourceRefreshService(h.rules, 4, () => 0).refresh(
+                        store,
+                        new Map(),
+                    ),
             );
             const replenished = await resources();
             expect(replenished).toHaveLength(4);
@@ -188,7 +196,10 @@ test(
         {
             await expect(
                 h.executor.execute(1000000n, async (store) => {
-                    await refreshWorldResources(store, h.rules, 4, new Map(), () => 0);
+                    await createRealmWorldResourceRefreshService(h.rules, 4, () => 0).refresh(
+                        store,
+                        new Map(),
+                    );
                     throw new Error("synthetic interruption");
                 }),
             ).rejects.toThrow("synthetic interruption");
@@ -285,7 +296,10 @@ test(
                 executor.execute(
                     at,
                     (store) =>
-                        refreshWorldResources(store, h.rules, 1201, new Map([[307, 100]]), () => 0),
+                        createRealmWorldResourceRefreshService(h.rules, 1201, () => 0).refresh(
+                            store,
+                            new Map([[307, 100]]),
+                        ),
                 );
             const now = 1000000n;
             await Promise.all(Array.from({ length: 4 }, () => run(now)));
@@ -373,7 +387,10 @@ test(
             let observed = 0n;
             const pending = executor.execute(undefined, async (store) => {
                 observed = store.now;
-                await refreshWorldResources(store, h.rules, 4, new Map(), () => 0);
+                await createRealmWorldResourceRefreshService(h.rules, 4, () => 0).refresh(
+                    store,
+                    new Map(),
+                );
             });
             try
             {

@@ -81,10 +81,10 @@ owned `worldSearchName`/`favoriteInteger` primitives; they do not retain duplica
 implementations. GameServices retains aggregate adapters until those callers are
 composed directly under #558 W20.
 
-Point-detail ownership follows in #693, with actual power/Hero, resource, monster
-and territory projection collaborators. Resource queries, gathering/cargo,
-populations, march lifecycle, scouting and multi-aggregate spatial recovery remain
-later W10 work. Their current realm
+Point-detail ownership is implemented in #693, with actual power/Hero, resource,
+monster and territory projection collaborators. Population ownership follows in
+#695 below. Resource queries, gathering/cargo, march lifecycle, scouting and
+multi-aggregate spatial recovery remain later W10 work. Their current realm
 transactions and authority are unchanged. This delivery does not complete
 [ADR-0017](../../docs/decisions/0017-adopt-fenced-realm-process-authorities.md), W10,
 W18 or the full [#558](https://github.com/ReeseArch64/opencok/issues/558) inventory.
@@ -132,7 +132,7 @@ There is no reexport at the former `contracts/world-point-detail` path.
 
 The former 823-line point repository is separated into the factory/readiness flow,
 target selection, owner/city reads, march snapshots and shared value validation.
-Their original transaction reader and call order remain intact. World now contains
+Their original transaction reader and call order remain intact. At #693, World contained
 43 source modules (4,512 physical lines), four package test files (113 lines) and
 no generated catalog payload. The 492-line specialized presentation Service was
 reviewed as one bounded read workflow with territory/boss variants and explicit
@@ -159,3 +159,59 @@ Deployment and rollback use the complete realm artifact against the same schemas
 saved identifiers, exploration/march state, effects and reward ledgers. No client
 asset, environment value or process topology conversion is introduced. Native
 rendering, semantic definitions and full W10/W18 completion remain separate work.
+
+## Population admission and recovery (#695)
+
+[Issue #695](https://github.com/ReeseArch64/opencok/issues/695) moves all twelve
+shared-resource, ordinary-resource and monster population modules from Contracts,
+Rules, Services and Repositories into World. This includes settings and quotas,
+expiry, occupied-cell handling, dead tickets, replenishment, durable clocks and
+transactional persistence. All callers use the owned implementations; the old
+horizontal paths have no compatibility aliases.
+
+The three population Services receive bounded catalog and numeric collaborators.
+Monster work is separated into expiry, field/black-land, exploration and barbarian
+families, with a small shared state module. Catalog getters retain live access to
+the existing records; NPC configuration, cell selection, feature gates and numeric
+algorithms are real collaborators supplied by realm composition. World does not
+acquire NPC semantic definitions, troop/economic behavior or gathering settlement.
+The item-use consumer calls the same owned resource-duration and barbarian-actor
+rules with narrow inputs; it does not copy their algorithms.
+
+World now contains 64 source modules (7,935 physical lines), four package test files
+(113 lines) and no generated catalog payload. This growth represents the existing
+spatial population vertical, not a new workspace or a catch-all gameplay package.
+The former 799-line monster Service is divided by its actual family workflows;
+the three persistence modules retain their cohesive transaction, clock and outbox
+boundaries. Broader march, scouting and gathering workflows remain separately
+tracked rather than extending these modules.
+
+The existing application `WorldPopulationJob` still runs shared resources, ordinary
+resources and monsters sequentially, isolates each failure and loads world effects
+inside the ordinary-resource transaction callback. The same realm writer and
+recovery fiber own its lifecycle. Each executor preserves transaction fencing,
+then advisory lock `(728214, 0)`, then timestamp capture, followed by the existing
+work and outbox writes in that transaction. Readiness checks and dynamic authority
+epochs retain their original positions. Ordinary-resource expiry throttling updates
+its in-memory deadline only after a successful commit.
+
+SQL ordering and row locks, page limits, RNG consumption, Java numeric behavior,
+clock versions, retry deadlines, ticket identities, UUID generation and native
+outbox payloads are unchanged. Family coordination retains expiry before opening
+checks, then exploration and barbarians, followed by field and black-land monsters
+when enabled. No new writer, scheduler, worker backend or cross-owner protocol is
+introduced.
+
+Existing Server fixtures exercise the real composed collaborators and disposable
+PostgreSQL persistence, including clock-after-lock, restart, occupied cells,
+rollback and stale authority. The maintained
+[population benchmarks](../../apps/server/README.md#synthetic-world-population-performance-baseline)
+measure bounded PostgreSQL workloads and a separate cell-selection calculation.
+Their synthetic measurements do not establish production latency, native rendering
+or a benefit from process isolation. W02, W10 and the broader #558 inventory remain
+incomplete.
+
+Deploy or roll back the complete realm artifact with its matching lockfile. Existing
+population clocks, tickets, points, authority epochs and outbox records retain
+their schema and saved identities. No reset, data conversion, configuration change
+or client asset replacement is required.

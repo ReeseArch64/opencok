@@ -1,10 +1,9 @@
-import type { WorldResourceNewExecutor } from "@opencok/contracts/world-resource-new";
-import type { WorldResourceRefreshExecutor } from "@opencok/contracts/world-resource-refresh";
-import type { WorldMonsterRefreshExecutor } from "@opencok/contracts/world-monster-refresh";
-import type { Rules } from "@opencok/rules/game";
-import { refreshWorldResourceNew } from "@opencok/services/world-resource-new";
-import { refreshWorldResources } from "@opencok/services/world-resource-refresh";
-import { refreshWorldMonsters } from "@opencok/services/world-monster-refresh";
+import type { WorldResourceNewExecutor } from "@opencok/world/contracts/world-resource-new";
+import type { WorldResourceRefreshExecutor } from "@opencok/world/contracts/world-resource-refresh";
+import type { WorldMonsterRefreshExecutor } from "@opencok/world/contracts/world-monster-refresh";
+import type { WorldResourceNewService } from "@opencok/world/services/world-resource-new";
+import type { WorldResourceRefreshService } from "@opencok/world/services/world-resource-refresh";
+import type { WorldMonsterRefreshService } from "@opencok/world/services/world-monster-refresh";
 
 export class WorldPopulationJob
 {
@@ -12,8 +11,11 @@ export class WorldPopulationJob
         private readonly sharedResources: WorldResourceNewExecutor,
         private readonly resources: WorldResourceRefreshExecutor,
         private readonly monsters: WorldMonsterRefreshExecutor,
-        private readonly rules: Rules,
-        private readonly mapSize: number,
+        private readonly services: {
+            shared: Pick<WorldResourceNewService, "refresh">;
+            resources: Pick<WorldResourceRefreshService, "refresh">;
+            monsters: Pick<WorldMonsterRefreshService, "refresh">;
+        },
         private readonly worldEffects: () => Promise<ReadonlyMap<number, number>>,
         private readonly reportFailure: (event: string) => void,
     )
@@ -25,7 +27,7 @@ export class WorldPopulationJob
         {
             await this.sharedResources.execute(
                 undefined,
-                (store) => refreshWorldResourceNew(store, this.rules, this.mapSize),
+                (store) => this.services.shared.refresh(store),
             );
         }
         catch
@@ -37,13 +39,7 @@ export class WorldPopulationJob
         {
             await this.resources.execute(
                 undefined,
-                async (store) =>
-                    refreshWorldResources(
-                        store,
-                        this.rules,
-                        this.mapSize,
-                        await this.worldEffects(),
-                    ),
+                async (store) => this.services.resources.refresh(store, await this.worldEffects()),
             );
         }
         catch
@@ -55,7 +51,7 @@ export class WorldPopulationJob
         {
             await this.monsters.execute(
                 undefined,
-                (store) => refreshWorldMonsters(store, this.rules, this.mapSize),
+                (store) => this.services.monsters.refresh(store),
             );
         }
         catch

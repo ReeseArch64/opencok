@@ -4153,16 +4153,18 @@ configuration, credentials and retention/alerting limitations.
 `WorldPopulationJob` in `src/world-population-job.ts` runs shared-resource,
 ordinary-resource and monster recovery sequentially. Each family retains its
 failure event and can fail without skipping the later families. Realm composition
-injects the existing fenced transaction executors, rules, map size, world effects
-and failure reporter. Effects are still loaded inside the ordinary-resource
+injects the owned World Services and transaction executors, plus world effects
+and the failure reporter. The application composes the Services with live catalog,
+numeric and NPC collaborators. Effects are still loaded inside the ordinary-resource
 transaction callback; each executor still captures its own timestamp.
 
 The existing `recoverWorld` Effect fiber awaits this job before its delivery and
 march recovery work. It retains the same scope, shutdown behavior and one-second
 sleep after each iteration; the job starts no timer or independent process.
 PostgreSQL authority, advisory locks, rules and protocol payloads are unchanged.
-This is a preparatory composition slice of #558, not world authority extraction,
-a scheduler implementation or a measured performance improvement.
+The population vertical is owned by World after #695. This preserves the original
+#572 sequencing and current realm authority; it introduces no scheduler or worker
+backend. Source ownership alone does not imply a performance improvement.
 
 ## March recovery composition
 
@@ -4267,3 +4269,119 @@ performance improvement.
 disposable database to verify callback/Promise calls, failures, lock sampling,
 pool contention, cleanup and failure propagation. The benchmark changes no
 runtime composition, gameplay rule, persistence schema or deployment setting.
+
+## Synthetic World population performance baseline
+
+`scripts/benchmark-world-population.ts` exercises the three real population
+executors through their application composition against disposable PostgreSQL.
+Run from the repository root with Docker available and explicit report paths
+outside the checkout:
+
+```sh
+population_benchmark_dir=$(mktemp -d /tmp/opencok-world-population-XXXXXX)
+bun --no-env-file apps/server/scripts/benchmark-world-population.ts "$population_benchmark_dir/report.json" 4 > "$population_benchmark_dir/run.log" 2>&1
+bun --no-env-file apps/server/scripts/benchmark-world-population-calculation.ts "$population_benchmark_dir/calculation.json" 1000 > "$population_benchmark_dir/calculation.log" 2>&1
+```
+
+The PostgreSQL workload accepts 1–8 expiry pages, defaulting to four. It creates a
+64×64 synthetic realm, uses an eight-connection workload pool and a separate
+one-connection observer, and cleans up its own container. It never uses a configured
+player database. Each backlog page has 64 expired entries per family; a shared
+resource occupies four cells. The five sequential scenarios cover idle work,
+expiry backlog, the same backlog contending with a synthetic transaction that
+holds the world lock for 5 ms, free generation, and generation with every cell
+owned. Free generation expects 40 ordinary resources and 100 field monsters;
+blocked generation preserves the occupied cells. The contender is a SQL workload,
+not a player command.
+
+Each measured operation runs all three family executors; the contended scenario
+also measures contender operations. Reports include latency/throughput, Bun CPU,
+RSS/heap, event-loop delay, SQL round trips, pool acquisition, sampled waiters,
+world-lock acquisition round trips and observed hold through transaction completion.
+Assertions check population, outbox and ticket outcomes. Setup, reset and verification
+are outside scenario timing; import/setup costs are reported separately. JavaScript
+RNG is fixed, while SQL `ORDER BY random()` and generated UUIDs remain unchanged.
+Generation therefore checks counts and quotas, not identical cell selections or
+encoded bytes.
+
+Reports include revision, runtime/workload/adapter hashes and a companion source
+manifest. A snapshot without Git metadata requires the optional explicit revision
+argument after the page count; it must identify the actual captured source. Keep
+raw reports and logs outside Git. Compare the same workload hash across fresh
+processes and record both revisions and dirty-tree status. A different adapter hash
+is expected when connecting the original and domain-owned implementations.
+
+Lock acquisition includes client transport and server execution; observed hold
+starts at the successful lock response and ends at the transaction response.
+Neither is exact server lock duration. SQL durations include transport/client cost
+and overlapping work; subtracting them from wall time does not yield pure
+calculation cost. Bun CPU/RSS excludes PostgreSQL. Ten-millisecond sampling can miss
+short waits and spikes, and instrumentation adds overhead. Four sequential ticks
+provide descriptive observations, not tail-latency SLOs. This fixture covers normal
+resource and field-monster generation, not every family, shared-resource generation,
+real players, native clients or two-realm recovery.
+
+The separate calculation command needs no database and accepts 100–10,000 calls
+per case, defaulting to 1,000. After 20 warmups it measures the existing
+`chooseWorldMonsterCells` algorithm with 4,096 candidate cells: one cell, a valid
+four-cell footprint, a four-cell footprint after a rejected draw, and an exhausted
+2,048-cell checkerboard. It checks exact selected cells, RNG draw counts and unchanged
+input. Function timing includes the draw counter and result projection; CPU/wall
+measurements also include assertions and garbage collection. This measures a bounded
+calculation, not the full recovery transaction, IPC cost or a worker implementation.
+
+Measurements on 2026-10-28 used Bun 1.4.2, Linux x64, an AMD Ryzen 5 5500
+(12 logical CPUs, 32 GiB host memory) and PostgreSQL 17.11. There were six fresh
+process trials per implementation: three initial trials per side followed by three
+interleaved parent/final pairs. The parent was `087aed43`; final reports captured
+the uncommitted #695 tree on that base, with runtime SHA-256 prefix `f848902e8d598571`
+versus parent `9d0e919012e7891c`. All twelve reports share workload SHA-256 prefix
+`b7e02c7bb2e92f28`, identical SQL counts, transaction counts and asserted state
+outcomes. The recorded final runtime hash, rather than its precommit Git HEAD,
+identifies the measured implementation.
+
+The following numbers include all six trials per side. Wall time is the median
+and full trial range in milliseconds; CPU is median Bun user plus system time.
+SQL counts and committed transactions are per trial and equal on both sides.
+
+| Scenario              | Parent wall ms (range) | Final wall ms (range)  | Parent/final CPU ms | SQL calls / commits |
+| --------------------- | ---------------------- | ---------------------- | ------------------- | ------------------- |
+| Idle                  | 76.6 (63.9–88.3)       | 84.6 (71.3–128.0)      | 88.8 / 89.3         | 87 / 12             |
+| Expiry backlog        | 2751.1 (2357.8–3650.3) | 2651.1 (2280.9–3240.1) | 1773.0 / 1747.5     | 3212 / 12           |
+| Expiry with contender | 2516.4 (2385.0–3356.8) | 3024.1 (2346.0–3353.1) | 1349.1 / 1527.1     | 3228 / 16           |
+| Free generation       | 571.3 (546.8–632.8)    | 565.9 (503.4–1023.1)   | 398.0 / 323.6       | 303 / 12            |
+| Blocked generation    | 147.3 (135.2–157.0)    | 158.6 (128.0–495.9)    | 117.3 / 125.2       | 119 / 12            |
+
+The initial three final trials had higher median expiry and contended wall times
+than their parent trials. The interleaved expiry pairs were 2780→2281,
+2358→2500 and 3650→2375 ms; contended pairs were 2385→2432, 2421→2346 and
+3357→3169 ms. The direction was not consistent across pairs. Final trial six also
+recorded free generation at 1023 ms and blocked generation at 496 ms, with a
+100.5 ms event-loop p99 in the latter. These slower observations remain part of
+the result; their cause was not established. The measurements support neither a
+stable speedup nor performance equivalence, and do not establish a consistent
+causal regression from the extraction.
+
+Across the contended trials, the median operation p95 was 1209.8 ms for the parent
+and 1467.4 ms for final. World-lock acquisition p95 ranged 433.3–646.7 ms versus
+424.5–752.9 ms; observed hold p95 ranged 429.2–648.3 ms versus 422.9–740.1 ms.
+The observer saw at most one lock waiter and no pool queue. Across all scenarios,
+pool-acquisition p95 ranged 0.11–7.50 ms versus 0.11–7.35 ms, and sampled peak Bun
+RSS ranged 388–514 MiB versus 365–580 MiB. These are instrumented observations,
+not exact database wait durations or isolated memory costs.
+
+The calculation benchmark used three fresh trials per side with 1,000 calls per
+case. Source and expected-output checks were identical, including the unchanged
+selection algorithm; reported ranges are per-trial function p50 in milliseconds.
+
+| Calculation                | Parent p50 range ms | Final p50 range ms |
+| -------------------------- | ------------------- | ------------------ |
+| Single cell                | 0.139–0.147         | 0.133–0.192        |
+| Valid four-cell footprint  | 0.148–0.160         | 0.142–0.200        |
+| Four cells after rejection | 0.166–0.180         | 0.145–0.174        |
+| Exhausted checkerboard     | 0.719–0.751         | 0.658–0.670        |
+
+These complementary measurements provide partial W02 evidence under #695. They do
+not establish production performance, workload frequency, independent world
+ownership or a benefit from moving calculations to another process. W02/W10/W18
+and broader #558 migration work remain open.
