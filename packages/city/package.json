@@ -27,6 +27,7 @@
     "drizzle-orm": "0.45.4",
     "@opencok/mappings": "workspace:*",
     "@opencok/research": "workspace:*",
-    "@opencok/troops": "workspace:*"
+    "@opencok/troops": "workspace:*",
+    "@opencok/building": "workspace:*"
   }
 }

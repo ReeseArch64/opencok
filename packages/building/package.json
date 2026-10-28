@@ -17,6 +17,8 @@
   "dependencies": {
     "@opencok/enums": "workspace:*",
     "@opencok/errors": "workspace:*",
-    "@opencok/constants": "workspace:*"
+    "@opencok/constants": "workspace:*",
+    "@opencok/drizzle": "workspace:*",
+    "drizzle-orm": "0.45.4"
   }
 }

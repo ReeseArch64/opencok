@@ -17,7 +17,7 @@ Counts describe maintained TypeScript/JavaScript source under `src` and named te
 | `api-contracts`  |                  0 / 0 | Versioned HTTP API requests/responses and boundary validators.                                                                                                                                                 | Populate HTTP-specific contracts; keep domain ports local and integration envelopes separately owned. Avoid duplicating the entire domain model.                                                                                                                                              | Proposed; pending review |
 | `base`           |                  1 / 0 | Domain base classes; shared exact command matching.                                                                                                                                                            | #643 supplies the dependency-free base used by research and legacy city domains.                                                                                                                                                                                                              | Implemented in #643      |
 | `billing`        |                  0 / 0 | Orders, billing and provider reconciliation.                                                                                                                                                                   | Retain for confirmed scope; move real implementations in tested slices                                                                                                                                                                                                                        | Confirmed in #567/#568   |
-| `building`       |                 48 / 2 | Typed building catalogs, definition contracts, level/star evaluation and display/legacy mappings.                                                                                                              | #635 owns the catalog/evaluation boundary. Construction Services and city coordination remain W07; semantic archetypes remain W14.                                                                                                                                                            | Partial; #635            |
+| `building`       |                 51 / 2 | Typed building definitions, catalogs, levels, stars, display mappings and transaction-bound persistence.                                                                                                       | #635 owns definitions; #647 adds typed update DTOs and owner-checked building/experience SQL. Construction workflows and semantic archetypes remain W07/W14 work.                                                                                                                             | Implemented in #635/#647 |
 | `campaigns`      |                  0 / 0 | Bounded campaign/event orchestration and publication.                                                                                                                                                          | Populate current campaign-related code; split independent event families instead of absorbing every event in the game.                                                                                                                                                                        | Proposed; pending review |
 | `city`           |                 20 / 3 | Transactional plans, dispatch, bounded snapshots, persistence and bootstrap coordination.                                                                                                                      | #637/#639/#641 own runtime, persistence and bootstrap coordination. Shared ports/aliases, reconnect planning and individual mechanic ownership remain W07–W12/W20 work.                                                                                                                       | Partial; #637/#639/#641  |
 | `combat`         |                  0 / 0 | Pure battle models, calculations, deterministic replay and result contracts.                                                                                                                                   | Populate only implemented/extracted mechanics; separate computation from result application. Package required where real code exists, standalone app optional.                                                                                                                                | Proposed; pending review |
@@ -689,3 +689,24 @@ Army bootstrap serialization, shared Rules catalogs, world/march providers and
 semantic troop definitions remain W07/W10/W14/W20 work. This slice adds no cycle
 exception, authority change or schema migration. See [troops](troops/README.md)
 for composition, compatibility, validation and rollback.
+
+## Typed building persistence (#647)
+
+Building now owns the city progression queries/upserts for building instances and
+experience, plus owner-scoped deletion. Realm composition injects the repository
+with the original transaction and owner. Two declaration-only DTOs describe the
+normalized update inputs; City retains its existing row conversion and aggregate
+validation until construction plans migrate to the domain.
+
+Snapshot ordering and the 257-row overflow sentinel, foreign UUID checks, guarded
+upserts, exact bigint fields and deletion predicates are unchanged. City preserves
+call order, production settlement and the general-detachment update before removal.
+Building imports no shared City/Rules/Services contracts; no cycle exception is
+added. The workspace now contains 51 source modules and two owned test files.
+
+PostgreSQL tests verify rollback after earlier writes, exact committed fields,
+foreign-row isolation, owner-scoped deletion and bounded sorted reads. Comparison
+of both reconstructed city methods preserves their complete SQL/order behavior and
+all 14 normalized building fields. Construction workflows remain in Services;
+#558 W07/W14/W20 still tracks their migration, semantic identities and legacy row
+adaptation. See [building](building/README.md#typed-persistence-647).

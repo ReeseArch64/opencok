@@ -34,7 +34,8 @@
     "@opencok/production": "workspace:*",
     "@opencok/city": "workspace:*",
     "@opencok/research": "workspace:*",
-    "@opencok/troops": "workspace:*"
+    "@opencok/troops": "workspace:*",
+    "@opencok/building": "workspace:*"
   },
   "devDependencies": {
     "@opencok/api": "workspace:*",
@@ -46,7 +47,6 @@
     "@opencok/messages": "workspace:*",
     "drizzle-orm": "0.45.4",
     "@opencok/ledger": "workspace:*",
-    "@opencok/account": "workspace:*",
-    "@opencok/building": "workspace:*"
+    "@opencok/account": "workspace:*"
   }
 }
