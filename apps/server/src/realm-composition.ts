@@ -328,7 +328,6 @@ import { nicknameAllianceReward } from "@opencok/rules/nickname-alliance";
 import { createCn1Sessions } from "@opencok/repositories/cn1-session";
 import { createNicknameChangeRuntime } from "./nickname-change.ts";
 import { createChatNicknamePublisher } from "@opencok/connection/chat-nickname";
-import { createChatMailboxPublisher } from "@opencok/connection/chat-mailbox";
 import { GameController } from "@opencok/controllers/game";
 import { WorldController } from "@opencok/world/controllers/world";
 import {
@@ -367,7 +366,7 @@ import { createRealmGameService } from "./composition/game";
 import { createRealmWorldService } from "./composition/world";
 import { readWorldMap } from "@opencok/world/repositories/map";
 import { createRealmChatSessionIssuer } from "@opencok/connection/realm-chat-session";
-import { MailGiftRelay } from "./mail-gift-relay.ts";
+import { createRealmMailIntegrationWorker } from "./composition/mail-integration";
 import { loadNicknameServices } from "./nickname.ts";
 import {
     acquireRealmAuthority,
@@ -540,60 +539,11 @@ export const RealmDependenciesLive = Layer.effect(
             () => initializeRealmOpeningClock(db.kingdom.db, authority),
         );
         yield* acquireResource(
-            "realm.mail-gift-relay",
+            "realm.mail-integration",
             async () =>
-                observeAdapter(
-                    new MailGiftRelay(
-                        () => db.relayMailGifts(),
-                        () => {
-                            logEvent(
-                                "mail_gift_relay_failed",
-                                { kingdom: config.kingdomId, outcome: "failure" },
-                                "error",
-                            );
-                        },
-                    ),
-                    "realm.MailGiftRelay",
-                ),
-            (relay) => relay.close(),
+                createRealmMailIntegrationWorker(config, db.kingdom.db, db.databases.global.db),
+            async (worker) => worker?.close(),
         );
-
-        if (config.mailChat)
-        {
-            const publish = observeAdapter(
-                createChatMailboxPublisher({
-                    ...config.mailChat,
-                    timeoutMs: config.timeoutMs,
-                }),
-                "realm.createChatMailboxPublisher",
-            );
-            yield* acquireResource(
-                "realm.mail-chat-relay",
-                async () =>
-                    observeAdapter(
-                        new MailGiftRelay(
-                            async () => {
-                                let delivered = 0;
-
-                                while (delivered < 50 && (await db.relayMailChat(publish)))
-                                {
-                                    delivered++;
-                                }
-
-                                return delivered;
-                            },
-                            () =>
-                                logEvent(
-                                    "mail_chat_relay_failed",
-                                    { kingdom: config.kingdomId, outcome: "failure" },
-                                    "error",
-                                ),
-                        ),
-                        "realm.MailGiftRelay",
-                    ),
-                (relay) => relay.close(),
-            );
-        }
 
         const notifications = observeAdapter(
             createRealmNotifications(),

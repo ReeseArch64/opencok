@@ -2,7 +2,7 @@ import { expect, test } from "bun:test";
 import { drizzle, type NodePgClient } from "drizzle-orm/node-postgres";
 import * as kingdomSchema from "@opencok/drizzle/schema/kingdom";
 import * as globalSchema from "@opencok/drizzle/schema/global";
-import { relayMailGiftOpenings } from "@opencok/repositories/mail-gift-relay";
+import { relayMailGiftOpenings } from "@opencok/mail/repositories/gift-opening-relay";
 
 const sent = 9007199254740993n;
 const opened = 1792756800000n;

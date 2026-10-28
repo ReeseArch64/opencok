@@ -1,18 +1,9 @@
+import type { ChatMailboxUpdate } from "@opencok/mail/contracts/chat-mailbox";
 import { isRecord } from "./chat.ts";
 
-export const chatMailboxPath = "/_internal/mailbox";
+export type { ChatMailboxUpdate, ChatMailboxPublisher } from "@opencok/mail/contracts/chat-mailbox";
 
-export interface ChatMailboxUpdate
-{
-    owner: string;
-    kingdomId: number;
-    operationId: string;
-    effectIndex: number;
-    action: "read" | "delete";
-    others: string;
-    types: readonly number[];
-    requestedAt: number;
-}
+export const chatMailboxPath = "/_internal/mailbox";
 
 export type ChatMailboxResult = "applied" | "unchanged";
 
@@ -38,11 +29,6 @@ export interface ChatMailboxStore
         limit: number,
     ): Promise<readonly ChatMailboxMessage[]>;
 }
-
-export type ChatMailboxPublisher = (
-    update: ChatMailboxUpdate,
-    signal: AbortSignal,
-) => Promise<void>;
 
 const identifier = (value: unknown, empty = false): value is string =>
     typeof value === "string"

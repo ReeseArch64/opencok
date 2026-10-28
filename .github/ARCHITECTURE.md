@@ -54,14 +54,15 @@ flowchart LR
 
 ## 3. Applications and responsibility boundaries
 
-| Application                                           | State and responsibility                                                                                                                                            |
-| ----------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `apps/api`                                            | Implemented shared discovery, optional chat metadata proxy and opt-in avatar media. Identity, Admin, push and payment endpoints remain target capabilities.         |
-| `apps/server`                                         | Implemented realm TCP/SFS composition and maintained gameplay commands. Owns progression and combat application; future calculation workers remain within this app. |
-| `apps/chat`                                           | Implemented HTTP/WebSocket chat, private session/metadata adapters and persistence; included in local Compose with independent production hosting.                  |
-| `apps/web`                                            | Implemented experimental browser scaffold; SSR deployment and full gameplay remain under evaluation.                                                                |
-| `apps/bot`                                            | Planned TypeScript authenticated simulator, with quotas and kill switch; no direct database writes.                                                                 |
-| `apps/admin`, `apps/www`, `apps/docs`, `apps/workers` | Planned deployable applications; names do not imply implementation.                                                                                                 |
+| Application                           | State and responsibility                                                                                                                                            |
+| ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `apps/api`                            | Implemented shared discovery, optional chat metadata proxy and opt-in avatar media. Identity, Admin, push and payment endpoints remain target capabilities.         |
+| `apps/server`                         | Implemented realm TCP/SFS composition and maintained gameplay commands. Owns progression and combat application; future calculation workers remain within this app. |
+| `apps/chat`                           | Implemented HTTP/WebSocket chat, private session/metadata adapters and persistence; included in local Compose with independent production hosting.                  |
+| `apps/web`                            | Implemented experimental browser scaffold; SSR deployment and full gameplay remain under evaluation.                                                                |
+| `apps/bot`                            | Planned TypeScript authenticated simulator, with quotas and kill switch; no direct database writes.                                                                 |
+| `apps/workers`                        | Implemented bounded mail integration process: realm queue acknowledgment, global gift-opening projection and signed Chat delivery under restricted credentials.     |
+| `apps/admin`, `apps/www`, `apps/docs` | Planned deployable applications; names do not imply implementation.                                                                                                 |
 
 Files has been merged into the API; there is no separate Files app or listener.
 There is no Combat app. `packages/combat` remains a domain package, composed by
@@ -94,33 +95,33 @@ implementation and verification tracked separately.
 
 ### Implemented API and realm package boundaries
 
-| Packages                                                         | Boundary                                                                                                                                                         |
-| ---------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `env`, `config`, `core`                                          | Validated root environment, strict compiler settings, scoped runtime/resources, HTTP and filtered logging.                                                       |
-| `api`, `connection`, `controllers`, `identity`                   | HTTP/SFS entry, authentication and thin command Controllers.                                                                                                     |
-| `contracts`, `dtos`, `enums`, `validations`, `mappings`          | Versioned ports, wire types, DTOs, runtime validation and serialization.                                                                                         |
-| `services`                                                       | Application workflows and orchestration of rules, contracts and persistence ports.                                                                               |
-| `rules`, domain rule modules including `hero/rules` and `combat` | Pure rule evaluation; no sockets, ORM or broker imports.                                                                                                         |
-| `messages`                                                       | SFS codecs, shared response values and wire/schema validation primitives; domain schemas remain with their owners.                                               |
-| `ledger`                                                         | Shared mutation/posting/outbox message contracts and signed-64 posting validation; no domain or persistence dependency.                                          |
-| `economy`                                                        | Owned balance/item/activity contracts, inventory commands/grants/ledger, rules/responses and persistence; injected runtime and transaction ports.                |
-| `account`                                                        | Global account discovery, reservations, activation, contracts, input DTO, Controller, Service and persistence; realm seeds remain separate.                      |
-| `hero`                                                           | Hero and general contracts, rules, workflows, mappings, validations, catalog types and persistence adapters, separated by responsibility.                        |
-| `dragon`                                                         | Named dragon archetypes, configuration contracts, validation and catalog mapping; existing gameplay workflows remain in their current packages.                  |
-| `resources`                                                      | Versioned typed gameplay catalogs.                                                                                                                               |
-| `player`                                                         | Profiles, descriptions, preferences, nicknames and character provisioning, with app-injected integration collaborators.                                          |
-| `production`                                                     | Building resource accumulation, collection/boosts, effect schedules and atomic city settlement, with app-injected runtime adapters.                              |
-| `building`                                                       | Building definitions, policies, construction commands/completion and transactional persistence; realm-injected projection and integration ports.                 |
-| `research`                                                       | Ordinary/civilization research, prerequisites, costs, native projections and transactional adapters; realm-injected event/reconnect collaborators.               |
-| `troops`                                                         | Training, healing, fortifications, military policies/projections and persistence; realm-injected scoring and login/reconnect collaborators.                      |
-| `equipment`                                                      | Equipment/sets and workshop workflows, recipes, projections and persistence; realm-injected numeric and quest collaborators.                                     |
-| `tasks`                                                          | Ordinary/main, story, daily, sign-in, target and recall quests; reconnect planning/counts, native mapping and transactional persistence; injected collaborators. |
-| `skins`                                                          | City skin/bubble/overlap ownership, activation, native projection and publication, with transaction-bound persistence and realm-injected collaborators.          |
-| `mail`                                                           | Existing system-mail leaf contract used by Tasks and a shared Contracts facade; avatar/postbox workflow ownership remains pending.                               |
-| `city`                                                           | Transactional plans, dispatch, snapshots, persistence and bootstrap; realm-injected callbacks preserve atomic writes and reconnect order.                        |
-| `shop`                                                           | In-game mall and NPC trading contracts, pure rules, Services, offer mappings and transactional adapters; inventory planning is injected by the realm.            |
-| `policy`                                                         | Pure content matching, bounded file/worker adapters and the maintained nickname/description dictionary.                                                          |
-| `repositories`, `drizzle`, `storage`                             | Owned transactional state, schemas, Redis/ZooKeeper and S3 adapters.                                                                                             |
+| Packages                                                         | Boundary                                                                                                                                                                                                    |
+| ---------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `env`, `config`, `core`                                          | Validated root environment, strict compiler settings, scoped runtime/resources, HTTP and filtered logging.                                                                                                  |
+| `api`, `connection`, `controllers`, `identity`                   | HTTP/SFS entry, authentication and thin command Controllers.                                                                                                                                                |
+| `contracts`, `dtos`, `enums`, `validations`, `mappings`          | Versioned ports, wire types, DTOs, runtime validation and serialization.                                                                                                                                    |
+| `services`                                                       | Application workflows and orchestration of rules, contracts and persistence ports.                                                                                                                          |
+| `rules`, domain rule modules including `hero/rules` and `combat` | Pure rule evaluation; no sockets, ORM or broker imports.                                                                                                                                                    |
+| `messages`                                                       | SFS codecs, shared response values and wire/schema validation primitives; domain schemas remain with their owners.                                                                                          |
+| `ledger`                                                         | Shared mutation/posting/outbox message contracts and signed-64 posting validation; no domain or persistence dependency.                                                                                     |
+| `economy`                                                        | Owned balance/item/activity contracts, inventory commands/grants/ledger, rules/responses and persistence; injected runtime and transaction ports.                                                           |
+| `account`                                                        | Global account discovery, reservations, activation, contracts, input DTO, Controller, Service and persistence; realm seeds remain separate.                                                                 |
+| `hero`                                                           | Hero and general contracts, rules, workflows, mappings, validations, catalog types and persistence adapters, separated by responsibility.                                                                   |
+| `dragon`                                                         | Named dragon archetypes, configuration contracts, validation and catalog mapping; existing gameplay workflows remain in their current packages.                                                             |
+| `resources`                                                      | Versioned typed gameplay catalogs.                                                                                                                                                                          |
+| `player`                                                         | Profiles, descriptions, preferences, nicknames and character provisioning, with app-injected integration collaborators.                                                                                     |
+| `production`                                                     | Building resource accumulation, collection/boosts, effect schedules and atomic city settlement, with app-injected runtime adapters.                                                                         |
+| `building`                                                       | Building definitions, policies, construction commands/completion and transactional persistence; realm-injected projection and integration ports.                                                            |
+| `research`                                                       | Ordinary/civilization research, prerequisites, costs, native projections and transactional adapters; realm-injected event/reconnect collaborators.                                                          |
+| `troops`                                                         | Training, healing, fortifications, military policies/projections and persistence; realm-injected scoring and login/reconnect collaborators.                                                                 |
+| `equipment`                                                      | Equipment/sets and workshop workflows, recipes, projections and persistence; realm-injected numeric and quest collaborators.                                                                                |
+| `tasks`                                                          | Ordinary/main, story, daily, sign-in, target and recall quests; reconnect planning/counts, native mapping and transactional persistence; injected collaborators.                                            |
+| `skins`                                                          | City skin/bubble/overlap ownership, activation, native projection and publication, with transaction-bound persistence and realm-injected collaborators.                                                     |
+| `mail`                                                           | Existing system-mail leaf contract, gift-opening projection, committed Chat mailbox intent delivery and bounded integration lifecycle; gameplay mailbox/reward and avatar/postbox ownership remain pending. |
+| `city`                                                           | Transactional plans, dispatch, snapshots, persistence and bootstrap; realm-injected callbacks preserve atomic writes and reconnect order.                                                                   |
+| `shop`                                                           | In-game mall and NPC trading contracts, pure rules, Services, offer mappings and transactional adapters; inventory planning is injected by the realm.                                                       |
+| `policy`                                                         | Pure content matching, bounded file/worker adapters and the maintained nickname/description dictionary.                                                                                                     |
+| `repositories`, `drizzle`, `storage`                             | Owned transactional state, schemas, Redis/ZooKeeper and S3 adapters.                                                                                                                                        |
 
 The [Ranking domain](../packages/ranking/README.md) owns permanent player/alliance
 boards and published attribute/payment/consumption views. Realm composition injects
@@ -449,7 +450,23 @@ ordering or economic invariants. [Simulation policy](../docs/architecture/persis
 
 The realm owns game/economy/combat state; API owns identity, payment and media
 metadata boundaries; chat owns messages. Workers mutate only their own projections
-or send commands to the owner. State, ledger, receipt and outbox commit atomically.
+or send commands to the owner. The implemented Mail worker acknowledges committed
+queues in one configured realm and updates only the two gift-opening fields in the
+global gift log. That log has no kingdom column: this is explicit global integration
+projection ownership, not row-level realm isolation. Chat still owns mailbox message
+changes and deduplication receipts behind its signed endpoint. Workers share no
+RealmAuthority token, gameplay Rules catalog or Redis connection. Their distinct
+PostgreSQL credentials must reject gameplay, other-realm queue and non-owned global
+writes before external mode is activated.
+
+The realm defaults to local delivery; external mode suppresses only its gift and
+Chat polling loops. Queues remain durable across process death and drain/rollback.
+Gift global commit precedes realm acknowledgment; Chat receipt commit precedes
+HTTP acknowledgment and realm intent deletion. No cross-database exactly-once
+transport is claimed. [Worker operations](../apps/workers/README.md) defines the
+bounds, credential checks and cutover sequence. This W15 integration boundary does
+not establish separate player/world writers, scheduler authority or a performance
+improvement. State, ledger, receipt and outbox commit atomically.
 Enforce quantity bounds, reservations, unique operation keys and version checks.
 [Ownership and invariants](../docs/architecture/persistence.md#17-data-model-and-write-ownership).
 

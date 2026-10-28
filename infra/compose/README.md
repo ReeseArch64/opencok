@@ -174,6 +174,72 @@ The example URL is for local development; existing volumes and their `PGDATA` pa
 are preserved. This configuration does not establish external database connectivity,
 provider compatibility or migration success.
 
+## Opt-in mail integration Workers
+
+[`mail-workers.yml`](mail-workers.yml) adds the implemented Workers process and
+switches the selected Server realm to external Mail delivery. It is a controlled
+one-realm overlay, not an automatic fleet migration. The default stack keeps local
+realm delivery. Read the [Workers guide](../../apps/workers/README.md) for the
+restricted-role provisioning entrypoint, exact grants, bindings, failure recovery
+and measured limits before using the overlay.
+
+Provision the intended realm/global databases and their migrations first, then run
+the operator-only role provisioning command with fresh role names. Administrative
+URLs and the provisioning password belong only in that operator process. The
+worker receives only its two restricted URLs, its realm mailbox key and telemetry
+settings. The overlay adds no migration/setup dependency and does not provision
+permissions during application startup.
+
+Configure these deployment values in the private environment supplied to Compose:
+
+| Variable                            | Scope                                                           |
+| ----------------------------------- | --------------------------------------------------------------- |
+| `MAIL_WORKER_KINGDOM_ID`            | Realm shared by Server and this worker                          |
+| `MAIL_WORKER_KINGDOM_DATABASE_NAME` | Actual realm database expected by both                          |
+| `MAIL_WORKER_GLOBAL_DATABASE_NAME`  | Global database, default `opencok_global`                       |
+| `MAIL_WORKER_KINGDOM_URL`           | Restricted role bound to that realm database                    |
+| `MAIL_WORKER_GLOBAL_URL`            | Distinct restricted global projection role                      |
+| `CHAT_MAILBOX_SECRETS`              | JSON realm-to-key map passed only to Chat                       |
+| `MAIL_WORKER_CHAT_URL`              | Reachable private Chat origin, normally `http://chat:8083` here |
+| `MAIL_WORKER_CHAT_SECRET`           | Only the map value for this worker's realm                      |
+
+Map every realm using external workers to a distinct key, different from the broad
+Chat key and optional unmapped-realm fallback. Chat receives the map;
+Server and its worker receive only their selected realm value. The overlay does not expose other
+realm signing keys to Workers. Unmapped realms may retain local delivery with the
+explicit fallback described in the Chat guide.
+
+Build matching artifacts before cutover:
+
+```sh
+docker compose -f docker-compose.yml -f infra/compose/mail-workers.yml --profile mail-workers build server chat mail-workers
+```
+
+This command requires the normal base-stack interpolation values as well as the
+private worker values above. Do not print resolved Compose configuration with real
+credentials. The new Workers image uses the pinned Bun runtime and a non-root
+user. Its health listener uses port 18091 inside the container; the overlay does
+not publish it on the host. The internal network must reach PostgreSQL, Chat and
+telemetry. External services require an explicit operator-controlled network path;
+the overlay does not create one or prove connectivity.
+
+After matching Chat/key-map support is deployed while delivery remains local,
+stop and drain the old Server consumer and any previous worker. Start the worker
+with this overlay, verify health and backlog progress, then start Server with the
+same overlay and realm identity. The overlay's Server environment selects external
+mode, suppressing its two local Mail loops. It does not start a worker implicitly
+unless the worker service/profile is selected. Keep all durable intent and Chat
+receipt rows throughout this transition.
+
+The overlay sets a 45-second graceful stop allowance, pools of two realm and one
+global connection, five-second polling/operation timeouts and bounded health
+requests. These are explicit deployment limits, not measured production SLOs.
+For rollback, stop/drain Workers and Server, return Server to local mode without
+the external overlay, and restart it. Retain the Chat key configuration needed by
+that Server version and preserve queues/receipts for uncertain-outcome replay.
+Follow the full [cutover sequence](../../apps/workers/README.md#cutover-and-rollback).
+No production deployment or native client repackaging is performed by this change.
+
 ## External Redis and deployment separation
 
 Both Redis consumers (API, including media tickets, and realm/server sessions) use

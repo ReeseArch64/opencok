@@ -7,8 +7,6 @@ import { user_hospital } from "@opencok/drizzle/schema/opencok_kingdom/user_hosp
 import { user_wall } from "@opencok/drizzle/schema/opencok_kingdom/user_wall";
 import { user_science } from "@opencok/drizzle/schema/opencok_kingdom/user_science";
 import { deleteMailConversations } from "./mail-conversation-delete.ts";
-import { relayMailChat } from "./mail-chat-intents.ts";
-import type { ChatMailboxPublisher } from "@opencok/contracts/chat-mailbox";
 import { readBattleRankingState } from "./battle-ranking.ts";
 import { readFlowerRanking } from "./flower-ranking.ts";
 import { readDonationRanking, readCemeteryRanking } from "./community-ranking.ts";
@@ -70,7 +68,6 @@ import { saveMailConversation } from "./mail-conversation-save.ts";
 import { mail_gift_log } from "@opencok/drizzle/schema/opencok_global/mail_gift_log";
 import { mail_gift_opening } from "@opencok/drizzle/schema/opencok_kingdom/mail_gift_opening";
 import { markMailRead } from "./mail-read.ts";
-import { relayMailGiftOpenings } from "./mail-gift-relay.ts";
 import { mail_update } from "@opencok/drizzle/schema/opencok_kingdom/mail_update";
 import { saveMail } from "./mail-save.ts";
 import { material_cost_ranking } from "@opencok/drizzle/schema/opencok_kingdom/material_cost_ranking";
@@ -621,21 +618,6 @@ export class Database implements GameStore, FriendshipMineStore
     mailUpdates(uid: string, query: MailUpdateQuery, inspect: MailUpdateInspector)
     {
         return readMailUpdates(this.kingdom.db, this.config.kingdomId, uid, query, inspect);
-    }
-
-    relayMailChat(publish: ChatMailboxPublisher)
-    {
-        return relayMailChat(
-            this.kingdom.db,
-            this.config.kingdomId,
-            publish,
-            this.config.timeoutMs,
-        );
-    }
-
-    relayMailGifts()
-    {
-        return relayMailGiftOpenings(this.kingdom.db, this.databases.global.db);
     }
 
     allianceRanking(uid: string, query: AllianceRankingQuery)
