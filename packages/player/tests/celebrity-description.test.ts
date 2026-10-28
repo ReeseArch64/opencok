@@ -1,3 +1,4 @@
+import { PostboxOrchestrationService } from "@opencok/services/postbox-orchestration";
 import { CelebrityDescriptionService } from "@opencok/player/services/celebrity-description";
 import { expect, test } from "bun:test";
 import { drizzle, type NodePgClient } from "drizzle-orm/node-postgres";
@@ -86,6 +87,11 @@ function fixture()
         store as unknown as GameStore,
         new Rules(new Map(), new Map(), new Map()),
         { kingdomId: 1 },
+        new PostboxOrchestrationService(
+            store as unknown as GameStore,
+            { kingdomId: 1 },
+            () => 1000,
+        ),
         () => 1000,
         { celebrityDescription: new CelebrityDescriptionService(store, 1) },
     );

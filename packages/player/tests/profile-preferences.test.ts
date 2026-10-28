@@ -1,3 +1,4 @@
+import { PostboxOrchestrationService } from "@opencok/services/postbox-orchestration";
 import { errors } from "@opencok/constants/game";
 import { expect, test } from "bun:test";
 import { drizzle, type NodePgClient } from "drizzle-orm/node-postgres";
@@ -196,6 +197,11 @@ function fixture()
             store as unknown as GameStore,
             new Rules(new Map(), new Map(), new Map()),
             { kingdomId: 2 },
+            new PostboxOrchestrationService(
+                store as unknown as GameStore,
+                { kingdomId: 2 },
+                () => now,
+            ),
             () => now,
             {
                 profilePreference: (uid, command, params, instant) =>
@@ -569,15 +575,17 @@ test("unrecognized player preference commands reject before reading or decoding 
 
 test("a realm without a composed preference service rejects every routed preference command", async () => {
     let reads = 0;
+    const store = {
+        getProfileById: async () => {
+            reads++;
+            return { uid: "self" };
+        },
+    } as unknown as GameStore;
     const game = new Game(
-        {
-            getProfileById: async () => {
-                reads++;
-                return { uid: "self" };
-            },
-        } as unknown as GameStore,
+        store,
         new Rules(new Map(), new Map(), new Map()),
         { kingdomId: 2 },
+        new PostboxOrchestrationService(store, { kingdomId: 2 }, () => now),
         () => now,
     );
 
