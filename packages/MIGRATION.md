@@ -19,7 +19,7 @@ Counts describe maintained TypeScript/JavaScript source under `src` and named te
 | `billing`        |                  0 / 0 | Orders, billing and provider reconciliation.                                                                                                                                                                   | Retain for confirmed scope; move real implementations in tested slices                                                                                                                                                                                                                        | Confirmed in #567/#568   |
 | `building`       |                 48 / 2 | Typed building catalogs, definition contracts, level/star evaluation and display/legacy mappings.                                                                                                              | #635 owns the catalog/evaluation boundary. Construction Services and city coordination remain W07; semantic archetypes remain W14.                                                                                                                                                            | Partial; #635            |
 | `campaigns`      |                  0 / 0 | Bounded campaign/event orchestration and publication.                                                                                                                                                          | Populate current campaign-related code; split independent event families instead of absorbing every event in the game.                                                                                                                                                                        | Proposed; pending review |
-| `city`           |                  5 / 1 | Transactional context, snapshot/effect factory and command/activity dispatch with injected mechanic callbacks.                                                                                                 | #637 owns runtime coordination. Shared state/plan ports and legacy mechanic aliases remain tracked in W07/W20; city persistence/bootstrap and domain moves are incomplete.                                                                                                                    | Partial; #637            |
+| `city`           |                 16 / 2 | Transactional plans, dispatch, bounded snapshots and aggregate persistence coordination.                                                                                                                       | #637/#639 own runtime and persistence coordination. Shared ports/aliases, bootstrap and individual mechanic ownership remain W07–W12/W20 work.                                                                                                                                                | Partial; #637/#639       |
 | `combat`         |                  0 / 0 | Pure battle models, calculations, deterministic replay and result contracts.                                                                                                                                   | Populate only implemented/extracted mechanics; separate computation from result application. Package required where real code exists, standalone app optional.                                                                                                                                | Proposed; pending review |
 | `command`        |                  0 / 0 | Explicit command registration/routing/envelopes and execution boundary contracts.                                                                                                                              | Populate reusable routing responsibilities now mixed with generic GameService/transport; domain command behavior stays in domain Services.                                                                                                                                                    | Proposed; pending review |
 | `config`         |                  0 / 0 | Shared TypeScript/tool configuration.                                                                                                                                                                          | Retain; this is not an unused runtime package just because it lacks `src`. Do not move secrets or ambient runtime configuration here.                                                                                                                                                         | Proposed; pending review |
@@ -590,3 +590,26 @@ injection and constructor-backed property ordering normalization.
 No schema, authority, queue, receipt or outbox change is introduced. City database
 repositories, bootstrap projection and remaining mechanic ownership still require
 separate W07 work. See [city](city/README.md) for scope and rollback.
+
+## City aggregate persistence (#639)
+
+The horizontal city store is replaced by owned snapshot, validation, write
+coordination, aggregate-row and world-target adapters. Realm composition injects
+54 readers, 51 writers and world-birth allocation from their existing owners.
+No mechanic implementation is copied into city. Each store retains the original
+transaction and mutable alliance/quest/cosmetic snapshot context.
+
+All maintained factory callers migrate to the realm composition adapter. The old
+repository path is removed; alliance/totem boundary types use a shared generic
+contract without a reverse city dependency. Removing the city/totem type cycle
+reduces the guardrail baseline from 92 to 90 entries; no exception is added.
+
+Structural comparisons preserve the full read and reconstructed write sequences,
+validation, world locks and original collaborator bindings. Dedicated PostgreSQL
+coverage verifies an earlier mechanic write, a later ownership failure and complete
+rollback; the successful path commits the same aggregate rows. Production settlement,
+receipt/outbox transactions, schema and authority remain unchanged.
+
+The handwritten store is split by responsibility instead of expanding the former
+1,153-line module. The remaining generic state/plan ports, domain callbacks and
+bootstrap projection are still #558 work. See [city](city/README.md#aggregate-persistence-639).

@@ -2,7 +2,7 @@ import { randomUUID } from "node:crypto";
 import { and, eq } from "drizzle-orm";
 import { createGoldEggsDomain } from "@opencok/services/gold-eggs";
 import { createActivityExecutor, type ActivityDomain } from "@opencok/repositories/timed-activity";
-import { createCityProgressionStore } from "@opencok/repositories/city-progression";
+import { createRealmCityProgressionStore } from "../../src/composition/city-persistence.ts";
 import { createRealmCityProgressionHandlers } from "../../src/composition/city.ts";
 import { TimedActivityService } from "@opencok/services/timed-activity";
 import { type RealmAuthority } from "@opencok/repositories/realm-authority";
@@ -28,7 +28,7 @@ export function goldEggsCommands(
     const effects = { world: async () => new Map<number, number>(), emperor: async () => null };
     const handlers = createRealmCityProgressionHandlers(
         (tx, owner, at) =>
-            createCityProgressionStore(
+            createRealmCityProgressionStore(
                 tx as MutationTransaction,
                 owner,
                 at,

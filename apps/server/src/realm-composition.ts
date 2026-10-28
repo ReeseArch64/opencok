@@ -276,7 +276,7 @@ import { TrainingDomain } from "@opencok/services/training";
 import { HospitalDomain } from "@opencok/services/hospital";
 import { FortificationDomain } from "@opencok/services/fortifications";
 import { ResearchDomain } from "@opencok/services/research";
-import { createCityProgressionStore } from "@opencok/repositories/city-progression";
+import { createRealmCityProgressionStore } from "./composition/city-persistence.ts";
 import { createCityProductionBoundary } from "@opencok/production/repositories/city-boundary";
 import type { CityProgressionService } from "@opencok/city/services/progression";
 import { ConstructionDomain } from "@opencok/services/construction";
@@ -909,7 +909,7 @@ export const RealmDependenciesLive = Layer.effect(
             createRealmCityProgressionHandlers(
                 (tx: Parameters<typeof readReconnectProgress>[0], owner, now) =>
                     observeAdapter(
-                        createCityProgressionStore(
+                        createRealmCityProgressionStore(
                             tx,
                             owner,
                             now,
@@ -917,7 +917,7 @@ export const RealmDependenciesLive = Layer.effect(
                             config.mapSize,
                             authority,
                         ),
-                        "realm.createCityProgressionStore",
+                        "realm.createRealmCityProgressionStore",
                     ),
                 [
                     observeAdapter(new GeneralsDomain(), "realm.GeneralsDomain"),

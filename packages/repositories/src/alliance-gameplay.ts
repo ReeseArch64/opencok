@@ -25,7 +25,7 @@ import type { AllianceRepository, AllianceWrite } from "@opencok/contracts/allia
 import { text, long, type Row } from "@opencok/contracts/rows";
 import { createMutationExecutor, type MutationTransaction } from "./mutation";
 import { executeRealmInventoryTransaction } from "@opencok/repositories/inventory-runtime";
-import type { ProgressionBoundary } from "./city-progression";
+import type { ProgressionBoundary } from "@opencok/contracts/progression-boundary";
 import type { RealmAuthority } from "./realm-authority";
 import type { ActivityDomain } from "./timed-activity";
 import type { DatabaseClient } from "@opencok/drizzle/contracts/database";
@@ -33,7 +33,7 @@ import type { DatabaseClient } from "@opencok/drizzle/contracts/database";
 export function createAllianceRepository(
     db: DatabaseClient<"kingdom">,
     authority: RealmAuthority,
-    boundary: ProgressionBoundary,
+    boundary: ProgressionBoundary<MutationTransaction>,
     now = Date.now,
     domains: ReadonlyMap<number, ActivityDomain> = new Map(),
     recordAction?: (

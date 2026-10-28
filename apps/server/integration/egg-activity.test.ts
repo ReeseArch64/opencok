@@ -3,7 +3,7 @@ import { randomUUID } from "node:crypto";
 import { eq, and } from "drizzle-orm";
 import { createEggActivityDomain } from "@opencok/services/egg-activity";
 import { createActivityExecutor, type ActivityDomain } from "@opencok/repositories/timed-activity";
-import { createCityProgressionStore } from "@opencok/repositories/city-progression";
+import { createRealmCityProgressionStore } from "../src/composition/city-persistence.ts";
 import { createRealmCityProgressionHandlers } from "../src/composition/city.ts";
 import { TimedActivityService } from "@opencok/services/timed-activity";
 import { acquireRealmAuthority } from "@opencok/repositories/realm-authority";
@@ -48,7 +48,7 @@ async function fixture()
             effects = { world: async () => new Map<number, number>(), emperor: async () => null };
         const handlers = createRealmCityProgressionHandlers(
             (tx, owner, at) =>
-                createCityProgressionStore(
+                createRealmCityProgressionStore(
                     tx as MutationTransaction,
                     owner,
                     at,
