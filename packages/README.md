@@ -105,5 +105,6 @@ Shared gift production, claims, mapping and persistence follow in #665. The real
 injects numeric/catalog/economic collaborators. Research, donations and recovery
 follow in #667; governance commands, membership policies and alliance/member/blacklist
 persistence follow in #669. Applications, invitations and their messages follow in
-#671. Shared membership entry/removal and aggregate publication remain subsequent
-slices. Remaining policy bindings have tracked retirement tasks.
+#671. Creation and member entry/removal follow in #673. Directory, snapshots/effects
+and aggregate publication remain subsequent slices. Remaining policy bindings have
+tracked retirement tasks.
