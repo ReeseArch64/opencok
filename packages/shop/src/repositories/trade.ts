@@ -4,7 +4,7 @@ import type { TradeExecutor } from "@opencok/shop/contracts/trade";
 import type { DatabaseClient } from "@opencok/drizzle/contracts/database";
 import type { RealmAuthority } from "@opencok/repositories/realm-authority";
 import { createMutationExecutor } from "@opencok/repositories/mutation";
-import { executeInventoryTransaction } from "@opencok/repositories/inventory";
+import { executeRealmInventoryTransaction } from "@opencok/repositories/inventory-runtime";
 
 export function createTradeExecutor(
     db: DatabaseClient<"kingdom">,
@@ -32,7 +32,7 @@ export function createTradeExecutor(
                     }
                     : { trade: "", time: BigInt(timestamp), num: 0, superValue: 0 };
 
-            return executeInventoryTransaction(
+            return executeRealmInventoryTransaction(
                 tx,
                 input.owner,
                 async (inventory) => {

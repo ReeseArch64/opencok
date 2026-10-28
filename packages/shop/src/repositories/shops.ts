@@ -11,7 +11,7 @@ import type { ShopRepository } from "@opencok/shop/contracts/shops";
 import type { DatabaseClient } from "@opencok/drizzle/contracts/database";
 import type { RealmAuthority } from "@opencok/repositories/realm-authority";
 import { createMutationExecutor } from "@opencok/repositories/mutation";
-import { executeInventoryTransaction } from "@opencok/repositories/inventory";
+import { executeRealmInventoryTransaction } from "@opencok/repositories/inventory-runtime";
 
 export function createShopRepository(
     db: DatabaseClient<"kingdom">,
@@ -90,7 +90,7 @@ export function createShopRepository(
                 const timestamp = now();
                 let savedPurchase: ShopPurchase | undefined;
 
-                return executeInventoryTransaction(
+                return executeRealmInventoryTransaction(
                     tx,
                     input.owner,
                     async (inventory) => {

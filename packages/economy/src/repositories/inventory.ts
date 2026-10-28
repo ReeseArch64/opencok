@@ -1,5 +1,3 @@
-import type { InventoryState } from "@opencok/contracts/inventory";
-import { mergeInventoryConfirmation } from "./inventory-confirmation";
 import { user_assets } from "@opencok/drizzle/schema/opencok_kingdom/user_assets";
 import { and, asc, eq } from "drizzle-orm";
 import { user_item } from "@opencok/drizzle/schema/opencok_kingdom/user_item";
@@ -7,45 +5,27 @@ import { user_item_cd } from "@opencok/drizzle/schema/opencok_kingdom/user_item_
 import { user_building } from "@opencok/drizzle/schema/opencok_kingdom/user_building";
 import { userprofile } from "@opencok/drizzle/schema/opencok_kingdom/userprofile";
 import { user_resource } from "@opencok/drizzle/schema/opencok_kingdom/user_resource";
-import type { InventoryExecutor } from "@opencok/economy/contracts/inventory-planning";
-import type { EconomyPosting } from "@opencok/ledger/contracts/mutation";
+import type {
+    InventoryExecutor,
+    InventoryCommandState,
+    InventoryPlan,
+} from "../contracts/inventory-planning.ts";
+import type { EconomyPosting, MutationResult } from "@opencok/ledger/contracts/mutation";
 import { validatePosting } from "@opencok/ledger/posting";
-import { createMutationExecutor, type MutationTransaction } from "./mutation.ts";
-import { readPlayerEffects } from "./power.ts";
-import type { RealmAuthority } from "./realm-authority.ts";
-import type { DatabaseClient } from "@opencok/drizzle/contracts/database";
+import type {
+    InventoryPreparation,
+    InventoryTransaction,
+    InventoryTransactionExecutor,
+    InventoryTransactionRuntime,
+} from "./inventory-transaction.ts";
 
-export interface InventoryPreparation
-{
-    recordAction?(
-        tx: MutationTransaction,
-        owner: string,
-        kind: "use" | "compose" | "harvest",
-        itemId: string,
-        count: number,
-        now: bigint,
-        economy: import("@opencok/economy/contracts/activity-economy").ActivityEconomy,
-    ): Promise<void>;
-    before?(tx: MutationTransaction, owner: string, now: bigint): Promise<void>;
-    useEffect?(
-        tx: MutationTransaction,
-        owner: string,
-        itemId: string,
-        count: number,
-        now: bigint,
-        economy: import("@opencok/economy/contracts/activity-economy").ActivityEconomy,
-    ): Promise<import("@opencok/economy/contracts/inventory").InventoryFields>;
-}
-
-export function createInventoryExecutor(
-    db: DatabaseClient<"kingdom">,
-    authority: RealmAuthority,
+export function createInventoryExecutor<State extends InventoryCommandState>(
+    execute: InventoryTransactionExecutor,
+    runtime: InventoryTransactionRuntime<State>,
     now = Date.now,
     preparation?: InventoryPreparation,
-): InventoryExecutor<InventoryState>
+): InventoryExecutor<State>
 {
-    const execute = createMutationExecutor(db, authority, now);
-
     return (input, plan) => {
         const command = { ...input, request: Buffer.from(input.request) };
 
@@ -55,6 +35,7 @@ export function createInventoryExecutor(
 
             return executeInventoryTransaction(
                 tx,
+                runtime,
                 command.owner,
                 plan,
                 command.command,
@@ -79,16 +60,17 @@ export function createInventoryExecutor(
     };
 }
 
-export async function executeInventoryTransaction(
-    tx: MutationTransaction,
+export async function executeInventoryTransaction<State extends InventoryCommandState>(
+    tx: InventoryTransaction,
+    runtime: InventoryTransactionRuntime<State>,
     owner: string,
-    plan: Parameters<InventoryExecutor<InventoryState>>[1],
+    plan: Parameters<InventoryExecutor<State>>[1],
     reason: string,
-    useEffect?: import("@opencok/contracts/inventory").InventoryState["useEffect"],
-    recordAction?: import("@opencok/contracts/inventory").InventoryState["recordAction"],
+    useEffect?: InventoryCommandState["useEffect"],
+    recordAction?: InventoryCommandState["recordAction"],
     confirmed?: (
-        plan: import("@opencok/economy/contracts/inventory-planning").InventoryPlan,
-    ) => Promise<import("@opencok/ledger/contracts/mutation").MutationResult | undefined>,
+        plan: InventoryPlan,
+    ) => Promise<MutationResult | undefined>,
 )
 {
     const [assets] = await tx.select().from(user_assets).where(eq(user_assets.uid, owner));
@@ -112,7 +94,7 @@ export async function executeInventoryTransaction(
         .for("update");
     const cooldowns = await tx.select().from(user_item_cd).where(eq(user_item_cd.uid, owner));
     const buildings = await tx.select().from(user_building).where(eq(user_building.uid, owner));
-    const result = await plan({
+    const result = await plan(runtime.extendState(tx, profile, {
         profile: Object.freeze({ ...profile }),
         assets: assets ?? {},
         resource: Object.freeze({ ...resource }),
@@ -123,8 +105,7 @@ export async function executeInventoryTransaction(
         buildings,
         useEffect,
         recordAction,
-        effects: () => readPlayerEffects(tx, profile, true),
-    });
+    }));
 
     if (result.items.length > 128 || result.cooldowns.size > 128)
     {
@@ -335,5 +316,5 @@ export async function executeInventoryTransaction(
         },
         observed = await confirmed?.(result);
 
-    return observed ? mergeInventoryConfirmation(base, observed) : base;
+    return observed ? runtime.mergeConfirmation(base, observed) : base;
 }

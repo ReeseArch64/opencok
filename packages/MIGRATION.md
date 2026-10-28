@@ -436,6 +436,26 @@ receives shared effects directly. No new dependency cycle exception is permitted
 Seven original command/resource vectors retain 53 assertions; three domain runtime
 vectors and two server adapter tests cover ordering, precision and rejection. Real
 PostgreSQL integrations verify the composed factories and atomic side effects.
-No schema migration or data rewrite is required. Remaining inventory persistence,
-app composition and process authority work stays under #558. See
+No schema migration or data rewrite is required. #625 below moves inventory
+persistence; remaining app composition and process authority work stays under #558. See
 [economy](economy/README.md) for verification boundaries and recovery.
+
+## Inventory persistence (#625)
+
+Economy has twenty-six source modules and eight test files. Its inventory repository
+now owns snapshot reads, item/balance/cooldown writes, identity validation and posting
+chains. The owned transaction contract supplies preparation callbacks, an injected
+mutation executor and cross-domain snapshot/confirmation ports. No new dependency
+or architecture exception is required.
+
+The existing realm repository adapter supplies fenced execution, lazy power reads
+and continued-cost confirmation merging. Maintained consumers use its explicit
+realm factory names; the old horizontal inventory module is removed. Shared mutation
+infrastructure and the remaining power/confirmation adapters stay tracked under #558.
+
+Six original persistence vectors retain 84 assertions, with three additional port
+vectors verifying request capture, callback order and failures. PostgreSQL realm
+and chat integration verifies real atomicity, replay and recovery. SQL ordering,
+owner predicates, limits, native output and saved data remain unchanged. No migration
+or configuration change is required; rollback uses the previous artifacts. See
+[economy](economy/README.md) for exact boundaries and verification limits.

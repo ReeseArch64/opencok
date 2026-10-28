@@ -298,9 +298,9 @@ import { TradeService } from "@opencok/shop/services/trade";
 import { ShopService } from "@opencok/shop/services/shops";
 import { MailRewardService } from "@opencok/services/mail-rewards";
 import {
-    createInventoryExecutor,
-    executeInventoryTransaction,
-} from "@opencok/repositories/inventory";
+    createRealmInventoryExecutor,
+    executeRealmInventoryTransaction,
+} from "@opencok/repositories/inventory-runtime";
 import { createInventoryService } from "@opencok/services/inventory-runtime";
 import { decodeWorldPowerEffects } from "@opencok/services/power";
 import { worldPowerEffects } from "@opencok/rules/power-world";
@@ -2828,7 +2828,7 @@ export const RealmDependenciesLive = Layer.effect(
                 return undefined;
             }
 
-            return executeInventoryTransaction(
+            return executeRealmInventoryTransaction(
                 tx,
                 owner,
                 (state) =>
@@ -2971,7 +2971,7 @@ export const RealmDependenciesLive = Layer.effect(
         const notices = observeAdapter(
             new ChatNoticeService(
                 observeAdapter(
-                    createInventoryExecutor(db.kingdom.db, authority, Date.now, {
+                    createRealmInventoryExecutor(db.kingdom.db, authority, Date.now, {
                         before: async (tx, owner, now) => {
                             await productionPreparation.prepare(tx, owner, now);
                         },
@@ -3129,7 +3129,7 @@ export const RealmDependenciesLive = Layer.effect(
         const inventory = observeAdapter(
             createInventoryService(
                 observeAdapter(
-                    createInventoryExecutor(db.kingdom.db, authority, Date.now, {
+                    createRealmInventoryExecutor(db.kingdom.db, authority, Date.now, {
                         before: async (tx, owner, now) => {
                             await productionPreparation.prepare(tx, owner, now);
                         },
@@ -3198,7 +3198,7 @@ export const RealmDependenciesLive = Layer.effect(
                 db.kingdom.db,
                 authority,
                 (tx, owner, now) =>
-                    executeInventoryTransaction(
+                    executeRealmInventoryTransaction(
                         tx,
                         owner,
                         (state) =>

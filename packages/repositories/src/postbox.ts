@@ -1,4 +1,4 @@
-import type { InventoryPreparation } from "./inventory.ts";
+import type { InventoryPreparation } from "@opencok/economy/repositories/inventory-transaction";
 import { and, asc, eq, gt, inArray, ne, sql } from "drizzle-orm";
 import { post_box } from "@opencok/drizzle/schema/opencok_kingdom/post_box";
 import { post_relation } from "@opencok/drizzle/schema/opencok_kingdom/post_relation";
@@ -8,7 +8,7 @@ import { user_auth } from "@opencok/drizzle/schema/opencok_kingdom/user_auth";
 import type { PostboxExecutor } from "@opencok/contracts/postbox";
 import { text, num, long } from "@opencok/contracts/rows";
 import { createMutationExecutor } from "./mutation.ts";
-import { executeInventoryTransaction } from "./inventory.ts";
+import { executeRealmInventoryTransaction } from "@opencok/repositories/inventory-runtime";
 import type { RealmAuthority } from "./realm-authority.ts";
 import type { DatabaseClient } from "@opencok/drizzle/contracts/database";
 
@@ -33,7 +33,7 @@ export function createPostboxExecutor(
                 sql`select pg_advisory_xact_lock(hashtextextended('postbox:distribution',0))`,
             );
 
-            return executeInventoryTransaction(
+            return executeRealmInventoryTransaction(
                 tx,
                 owner,
                 (inventory) =>

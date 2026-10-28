@@ -5,7 +5,7 @@ import { sfs } from "@opencok/messages/sfs";
 import { cityHarness } from "./support/city";
 import { equipmentDomain, workshopDomain } from "@opencok/services/equipment";
 import { createInventoryService } from "@opencok/services/inventory-runtime";
-import { createInventoryExecutor } from "@opencok/repositories/inventory";
+import { createRealmInventoryExecutor } from "@opencok/repositories/inventory-runtime";
 import { user_equip } from "@opencok/drizzle/schema/opencok_kingdom/user_equip";
 import { user_item } from "@opencok/drizzle/schema/opencok_kingdom/user_item";
 import { user_building } from "@opencok/drizzle/schema/opencok_kingdom/user_building";
@@ -22,7 +22,7 @@ test(
                 .insert(user_building)
                 .values({ uid: "owner", uuid: "forge", itemId: 429000, level: 1, pos: 12 });
             const inventory = createInventoryService(
-                createInventoryExecutor(h.db.db, h.authority, () => h.clock.now),
+                createRealmInventoryExecutor(h.db.db, h.authority, () => h.clock.now),
                 h.rules,
                 h.effects,
                 () => h.clock.now,

@@ -3,7 +3,7 @@ import { randomUUID } from "node:crypto";
 import { eq, sql } from "drizzle-orm";
 import { createPrayerDomain } from "@opencok/services/prayer";
 import { recallTaskDomain } from "@opencok/services/recall-task";
-import { createInventoryExecutor } from "@opencok/repositories/inventory";
+import { createRealmInventoryExecutor } from "@opencok/repositories/inventory-runtime";
 import { createInventoryService } from "@opencok/services/inventory-runtime";
 import { user_pray } from "@opencok/drizzle/schema/opencok_kingdom/user_pray";
 import { pray_record } from "@opencok/drizzle/schema/opencok_kingdom/pray_record";
@@ -53,7 +53,7 @@ async function fixture()
     const resources = async () =>
         (await h.db.db.select().from(user_resource).where(eq(user_resource.uid, "owner")))[0]!;
     const inventory = createInventoryService(
-        createInventoryExecutor(h.db.db, h.authority, () => h.clock.now, {
+        createRealmInventoryExecutor(h.db.db, h.authority, () => h.clock.now, {
             useEffect: async (tx, owner, itemId, count, now, economy) =>
                 decode(
                     Buffer.from(

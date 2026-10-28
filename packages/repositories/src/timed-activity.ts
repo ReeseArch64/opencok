@@ -14,7 +14,7 @@ import type {
 } from "@opencok/contracts/timed-activity";
 import { long, num, text } from "@opencok/contracts/rows";
 import { createMutationExecutor, type MutationTransaction } from "./mutation";
-import { executeInventoryTransaction } from "./inventory";
+import { executeRealmInventoryTransaction } from "@opencok/repositories/inventory-runtime";
 import type { DatabaseClient } from "@opencok/drizzle/contracts/database";
 import type { RealmAuthority } from "./realm-authority";
 
@@ -78,7 +78,7 @@ export function createActivityExecutor(
                 throw new Error("Invalid activity domain clock");
             }
 
-            return executeInventoryTransaction(
+            return executeRealmInventoryTransaction(
                 tx,
                 command.owner,
                 async (inventory) => {

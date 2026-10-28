@@ -1,8 +1,8 @@
-import type { InventoryPreparation } from "./inventory.ts";
+import type { InventoryPreparation } from "@opencok/economy/repositories/inventory-transaction";
 import { and, eq } from "drizzle-orm";
 import { user_mine } from "@opencok/drizzle/schema/opencok_kingdom/user_mine";
 import { createMutationExecutor } from "./mutation.ts";
-import { executeInventoryTransaction } from "./inventory.ts";
+import { executeRealmInventoryTransaction } from "@opencok/repositories/inventory-runtime";
 import { readFriendshipBinding } from "./reconnect-mine.ts";
 import type { FriendshipMineExecutor, MineHelper } from "@opencok/contracts/friendship-mine";
 import { text, num, long } from "@opencok/contracts/rows";
@@ -71,7 +71,7 @@ export function createFriendshipMineExecutor(
                 throw new Error("Invalid mine helper history");
             }
 
-            return executeInventoryTransaction(
+            return executeRealmInventoryTransaction(
                 tx,
                 command.owner,
                 (inventory) =>
