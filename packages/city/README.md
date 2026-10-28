@@ -22,8 +22,8 @@ foreign-owner rule context and campaign, quest, Hero and expedition callbacks.
 The coordinator preserves their original ordering before the repository update.
 Buildings, research, troops, equipment and events retain their own implementations;
 their remaining domain extractions are tracked by #558. City imports no horizontal
-Services or Repositories. The existing database store is passed through composition
-and commits inside the same mutation transaction.
+Services or Repositories. After #639, its owned database adapter receives mechanic
+persistence collaborators from realm composition and commits inside the same mutation transaction.
 
 The context keeps bound-resource consumption, optional gold purchases, cancellation
 refunds, outstanding power reservations, score timestamps and linked level/power
@@ -48,9 +48,9 @@ callers. The aliases are owned by this migration and their retirement is tracked
 remaining source consumers are listed in the migration register.
 
 This shared state/plan contract is transitional infrastructure. It does not assign
-all referenced mechanics to city. Broader city persistence/bootstrap ownership and
-mechanic migrations remain incomplete; no package or process completion is inferred
-from the existence of this coordinator.
+all referenced mechanics to city. The aggregate store is owned after #639; bootstrap
+projection and individual mechanic migrations remain incomplete. No process completion
+is inferred from the existence of this coordinator.
 
 ## Compatibility, tests and rollout
 
@@ -69,3 +69,43 @@ Deploy the rebuilt realm artifact. There is no schema conversion, new environmen
 variable, worker, scheduler or client repackaging. Rollback deploys the previous
 artifact against the same data. Native device acceptance and production-load
 measurements remain separate from these compatibility checks.
+
+## Aggregate persistence (#639)
+
+The former `repositories/src/city-progression.ts` is retired. The realm factory in
+`apps/server/src/composition/city-persistence.ts` composes `CityProgressionRepository`
+with 54 reader functions, 51 writer functions and the existing world-birth allocator.
+Those mechanic implementations stay with their current owners. Static adapter objects
+contain functions only; mutable alliance, pre-write quest and cosmetic-target state
+belongs to each store session, scoped to the original transaction.
+
+| Responsibility                                                | Owned module                       |
+| ------------------------------------------------------------- | ---------------------------------- |
+| Store/session composition                                     | `repositories/progression.ts`      |
+| Bounded aggregate and command-specific snapshots              | `repositories/snapshot.ts`         |
+| Validation, effect-change detection and production boundary   | `repositories/plan-writer.ts`      |
+| Ordered mechanic callbacks and branch-city row                | `repositories/mechanic-writer.ts`  |
+| Pending aggregate rows, ownership checks, queues and deletion | `repositories/aggregate-writer.ts` |
+| Resident-city check and bounded, ordered world locks          | `repositories/world-targets.ts`    |
+| Row identity, signed quantity/deadline and batch bounds       | `validations/write.ts`             |
+
+Readers/writers are typed from existing state/write contracts and use the actual
+PostgreSQL transaction type. Their broad set reflects the current aggregate's
+cross-mechanic coupling; it is not a universal registry or a new mechanic home.
+Narrow these ports as domain-specific persistence moves under #558 W07–W12/W20.
+The 1,153-line original is split into focused adapters, each below 350 lines; the
+complete write sequence remains serial. Constructors bind callbacks without running
+queries or mutating state.
+
+Shared `contracts/progression-boundary.ts` is transaction-generic. Alliance and
+totem retain their existing caller types through this port; they do not import city.
+This removes the previous city/totem module cycle. No compatibility store facade
+remains and no architecture exception is introduced.
+
+Seven structural comparisons cover the snapshot, mechanic writes, aggregate writes,
+reconstructed full update, world birth, treasure locks and validation. Adapter import
+and binding checks cover all 106 original collaborators. Dedicated PostgreSQL coverage
+verifies that a branch-city write has occurred before a foreign aggregate rejection,
+then observes rollback outside the transaction. Existing mechanics, recovery and SFS
+suites verify broader consumers. The production boundary still wraps effect changes;
+production-account deletion still follows building deletion in the same transaction.

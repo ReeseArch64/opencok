@@ -22,6 +22,8 @@
     "@opencok/constants": "workspace:*",
     "@opencok/messages": "workspace:*",
     "@opencok/economy": "workspace:*",
-    "@opencok/hero": "workspace:*"
+    "@opencok/hero": "workspace:*",
+    "@opencok/drizzle": "workspace:*",
+    "drizzle-orm": "0.45.4"
   }
 }

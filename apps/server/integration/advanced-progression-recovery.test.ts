@@ -13,7 +13,7 @@ import { command_receipt } from "@opencok/drizzle/schema/opencok_kingdom/command
 import { acquireRealmAuthority, type RealmAuthority } from "@opencok/repositories/realm-authority";
 import { createActivityExecutor } from "@opencok/repositories/timed-activity";
 import { createCityProductionBoundary } from "@opencok/production/repositories/city-boundary";
-import { createCityProgressionStore } from "@opencok/repositories/city-progression";
+import { createRealmCityProgressionStore } from "../src/composition/city-persistence.ts";
 import { readReconnectProgress } from "@opencok/repositories/reconnect-progress";
 import { persistReconnectProgress } from "@opencok/repositories/reconnect-write";
 import { createRealmCityProgressionHandlers } from "../src/composition/city.ts";
@@ -112,7 +112,7 @@ function resumed(
 {
     const preparation = {
         async prepare(
-            tx: Parameters<typeof createCityProgressionStore>[0],
+            tx: Parameters<typeof createRealmCityProgressionStore>[0],
             owner: string,
             at: bigint,
         )
@@ -138,8 +138,8 @@ function resumed(
             : ["wood", "stone", "iron", "food"][rule.effects.productionResourceId ?? -1];
     });
     const handlers = createRealmCityProgressionHandlers(
-        (tx: Parameters<typeof createCityProgressionStore>[0], owner, at) =>
-            createCityProgressionStore(tx, owner, at, boundary, 1200, authority),
+        (tx: Parameters<typeof createRealmCityProgressionStore>[0], owner, at) =>
+            createRealmCityProgressionStore(tx, owner, at, boundary, 1200, authority),
         domains,
         h.rules,
         h.effects,

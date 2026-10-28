@@ -15,7 +15,7 @@ import { restoreTotemConfiguration } from "@opencok/rules/totem";
 import type { ActivityEconomy } from "@opencok/economy/contracts/activity-economy";
 import { insertSystemMail } from "./system-mail";
 import { writePlayerEffects } from "./player-effects";
-import type { ProgressionBoundary } from "./city-progression";
+import type { ProgressionBoundary } from "@opencok/contracts/progression-boundary";
 import type { MutationTransaction } from "./mutation";
 import type { DatabaseClient } from "@opencok/drizzle/contracts/database";
 
@@ -141,7 +141,7 @@ export function createTotemEffectStore(
     now: bigint,
     size: number,
     kingdomId: number,
-    boundary: ProgressionBoundary,
+    boundary: ProgressionBoundary<MutationTransaction>,
 ): TotemEffectStore
 {
     return {

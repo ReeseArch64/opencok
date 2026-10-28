@@ -8,7 +8,7 @@ import { user_state } from "@opencok/drizzle/schema/opencok_kingdom/user_state";
 import { economy_posting } from "@opencok/drizzle/schema/opencok_kingdom/economy_posting";
 import { createMutationExecutor, type MutationTransaction } from "@opencok/repositories/mutation";
 import { acquireRealmAuthority } from "@opencok/repositories/realm-authority";
-import { createCityProgressionStore } from "@opencok/repositories/city-progression";
+import { createRealmCityProgressionStore } from "../src/composition/city-persistence.ts";
 import {
     militaryRankAwardReader,
     writeMilitaryRankAward,
@@ -68,7 +68,7 @@ async function fixture()
                     {
                         return { response: encode({}) };
                     }
-                    const state = await createCityProgressionStore(
+                    const state = await createRealmCityProgressionStore(
                         tx,
                         owner,
                         BigInt(now()),

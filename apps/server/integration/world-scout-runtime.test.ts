@@ -11,7 +11,7 @@ import { user_state } from "@opencok/drizzle/schema/opencok_kingdom/user_state";
 import { user_building } from "@opencok/drizzle/schema/opencok_kingdom/user_building";
 import { createDatabase } from "@opencok/drizzle";
 import { acquireRealmAuthority } from "@opencok/repositories/realm-authority";
-import { createCityProgressionStore } from "@opencok/repositories/city-progression";
+import { createRealmCityProgressionStore } from "../src/composition/city-persistence.ts";
 import { createRealmCityProgressionHandlers } from "../src/composition/city.ts";
 import { createWorldMarchDomain } from "@opencok/services/world-march-runtime";
 import { createActivityExecutor, type ActivityDomain } from "@opencok/repositories/timed-activity";
@@ -334,8 +334,8 @@ test(
                 emperor: async () => null,
             };
             const handlers = createRealmCityProgressionHandlers(
-                (tx: Parameters<typeof createCityProgressionStore>[0], owner, now) =>
-                    createCityProgressionStore(
+                (tx: Parameters<typeof createRealmCityProgressionStore>[0], owner, now) =>
+                    createRealmCityProgressionStore(
                         tx,
                         owner,
                         now,
