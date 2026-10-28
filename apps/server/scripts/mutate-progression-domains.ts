@@ -1,9 +1,8 @@
-import { mkdtemp, readFile, rm } from "node:fs/promises";
-import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { readFile, rm } from "node:fs/promises";
+import { createMutationWorkspace } from "../../../.github/testing/mutation-workspace.ts";
 
 const app = new URL("../", import.meta.url),
-    directory = await mkdtemp(join(tmpdir(), "opencok-progression-domain-mutations-"));
+    directory = await createMutationWorkspace("opencok-progression-domain-mutations-");
 const mutations = [
     [
         "science prerequisites",

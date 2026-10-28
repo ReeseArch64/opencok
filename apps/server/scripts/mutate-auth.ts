@@ -1,9 +1,8 @@
-import { mkdtemp, readFile, rm } from "node:fs/promises";
-import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { readFile, rm } from "node:fs/promises";
+import { createMutationWorkspace } from "../../../.github/testing/mutation-workspace.ts";
 
 const app = new URL("../", import.meta.url);
-const directory = await mkdtemp(join(tmpdir(), "opencok-auth-mutations-"));
+const directory = await createMutationWorkspace("opencok-auth-mutations-");
 const authFile = new URL("../../../packages/identity/src/mobile.ts", import.meta.url).pathname;
 const mutations = [
     ["signature", "if (!equal(signature, expected))", "if (false)"],

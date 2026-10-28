@@ -1,12 +1,11 @@
-import { mkdtemp, readFile, rm } from "node:fs/promises";
-import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { readFile, rm } from "node:fs/promises";
+import { createMutationWorkspace } from "../../../.github/testing/mutation-workspace.ts";
 
-const directory = await mkdtemp(join(tmpdir(), "opencok-chat-mutations-"));
+const directory = await createMutationWorkspace("opencok-chat-mutations-");
 const mutations = [
     [
         "expired socket command",
-        "packages/connection/src/chat-websocket.ts",
+        "packages/connection/src/chat-websocket-connection.ts",
         "if (!(await authorizeSession(false)))",
         "if (false)",
     ],
@@ -19,8 +18,8 @@ const mutations = [
     [
         "expired durable recipient",
         "packages/services/src/chat-delivery.ts",
-        "if (peer.authorizeSession && !(await peer.authorizeSession())) return;",
-        "if (false) return;",
+        "if (peer.authorizeSession && !(await peer.authorizeSession()))",
+        "if (false)",
     ],
 ] as const;
 const root = new URL("../../../", import.meta.url);
