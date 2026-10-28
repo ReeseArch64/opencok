@@ -327,14 +327,6 @@
         "typescript": "catalog:",
       },
     },
-    "packages/custom": {
-      "name": "@opencok/custom",
-      "devDependencies": {
-        "@opencok/config": "workspace:*",
-        "@types/bun": "catalog:",
-        "typescript": "catalog:",
-      },
-    },
     "packages/decorators": {
       "name": "@opencok/decorators",
       "devDependencies": {
@@ -601,14 +593,6 @@
         "typescript": "catalog:",
       },
     },
-    "packages/prompts": {
-      "name": "@opencok/prompts",
-      "devDependencies": {
-        "@opencok/config": "workspace:*",
-        "@types/bun": "catalog:",
-        "typescript": "catalog:",
-      },
-    },
     "packages/queues": {
       "name": "@opencok/queues",
       "devDependencies": {
@@ -663,14 +647,6 @@
         "typescript": "catalog:",
       },
     },
-    "packages/robot": {
-      "name": "@opencok/robot",
-      "devDependencies": {
-        "@opencok/config": "workspace:*",
-        "@types/bun": "catalog:",
-        "typescript": "catalog:",
-      },
-    },
     "packages/rules": {
       "name": "@opencok/rules",
       "dependencies": {
@@ -680,14 +656,6 @@
         "@opencok/errors": "workspace:*",
         "@opencok/hero": "workspace:*",
       },
-      "devDependencies": {
-        "@opencok/config": "workspace:*",
-        "@types/bun": "catalog:",
-        "typescript": "catalog:",
-      },
-    },
-    "packages/scripts": {
-      "name": "@opencok/scripts",
       "devDependencies": {
         "@opencok/config": "workspace:*",
         "@types/bun": "catalog:",
@@ -749,8 +717,8 @@
         "typescript": "catalog:",
       },
     },
-    "packages/store": {
-      "name": "@opencok/store",
+    "packages/shop": {
+      "name": "@opencok/shop",
       "devDependencies": {
         "@opencok/config": "workspace:*",
         "@types/bun": "catalog:",
@@ -1146,8 +1114,6 @@
 
     "@opencok/core": ["@opencok/core@workspace:packages/core"],
 
-    "@opencok/custom": ["@opencok/custom@workspace:packages/custom"],
-
     "@opencok/decorators": ["@opencok/decorators@workspace:packages/decorators"],
 
     "@opencok/dragon": ["@opencok/dragon@workspace:packages/dragon"],
@@ -1200,8 +1166,6 @@
 
     "@opencok/policy": ["@opencok/policy@workspace:packages/policy"],
 
-    "@opencok/prompts": ["@opencok/prompts@workspace:packages/prompts"],
-
     "@opencok/queues": ["@opencok/queues@workspace:packages/queues"],
 
     "@opencok/ranking": ["@opencok/ranking@workspace:packages/ranking"],
@@ -1210,11 +1174,7 @@
 
     "@opencok/resources": ["@opencok/resources@workspace:packages/resources"],
 
-    "@opencok/robot": ["@opencok/robot@workspace:packages/robot"],
-
     "@opencok/rules": ["@opencok/rules@workspace:packages/rules"],
-
-    "@opencok/scripts": ["@opencok/scripts@workspace:packages/scripts"],
 
     "@opencok/server": ["@opencok/server@workspace:apps/server"],
 
@@ -1226,7 +1186,7 @@
 
     "@opencok/storage": ["@opencok/storage@workspace:packages/storage"],
 
-    "@opencok/store": ["@opencok/store@workspace:packages/store"],
+    "@opencok/shop": ["@opencok/shop@workspace:packages/shop"],
 
     "@opencok/tasks": ["@opencok/tasks@workspace:packages/tasks"],
 

@@ -1,5 +1,5 @@
 {
-  "name": "@opencok/prompts",
+  "name": "@opencok/shop",
   "private": true,
   "scripts": {
     "check-types": "tsc --noEmit"
