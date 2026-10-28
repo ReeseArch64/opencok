@@ -51,6 +51,15 @@ pull requests targeting any branch and pushes to all branches; lint warnings fai
 the check. PostgreSQL database, PostgreSQL realm server and Chat and API media
 run only on pushes to `main`, subject to their path filters.
 
+Application build artifact checks run for relevant pull requests and pushes to
+`develop` and `main`. They check semantic types separately, build all four
+implemented apps, execute synthetic emitted backend/frontend scenarios and verify
+the environment relocation and Bun mutation plugins. See the
+[build pilot](build-pilot/README.md) for reproduction and evidence limits. Benchmark
+timing is recorded for evaluation, not enforced as a machine-dependent CI limit.
+Browser checks copy maintained source into a temporary workspace with public
+synthetic images; ignored prepared game artwork is never a CI dependency.
+
 JS/TS formatting uses four spaces, double quotes, semicolons, LF and a 100-column
 print width. dprint exclusively owns JS/JSX/TS/TSX and c/m module variants; Oxfmt
 owns its other supported formats, including JSON, YAML, Markdown, CSS and HTML,

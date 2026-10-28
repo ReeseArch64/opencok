@@ -1,0 +1,74 @@
+name: Application build artifacts
+
+on:
+  pull_request:
+    paths:
+      - "apps/api/**"
+      - "apps/chat/**"
+      - "apps/server/**"
+      - "apps/web/**"
+      - "packages/**"
+      - "package.json"
+      - "bun.lock"
+      - "bunfig.toml"
+      - ".github/actions/setup/**"
+      - ".github/build-pilot/**"
+      - ".github/testing/**"
+      - ".github/workflows/build-artifacts.yml"
+  push:
+    branches: [develop, main]
+    paths:
+      - "apps/api/**"
+      - "apps/chat/**"
+      - "apps/server/**"
+      - "apps/web/**"
+      - "packages/**"
+      - "package.json"
+      - "bun.lock"
+      - "bunfig.toml"
+      - ".github/actions/setup/**"
+      - ".github/build-pilot/**"
+      - ".github/testing/**"
+      - ".github/workflows/build-artifacts.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: build-artifacts-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+      - uses: ./.github/actions/setup
+      - name: Check semantic types separately from bundling
+        run: |
+          for workspace in packages/env apps/api apps/chat apps/server
+          do
+            bun run --cwd "$workspace" check-types
+          done
+          bun run --cwd apps/web check:types
+          bun --no-env-file node_modules/typescript/bin/tsc --noEmit -p .github/build-pilot/tsconfig.json
+          bun --no-env-file node_modules/typescript/bin/tsc --noEmit -p .github/testing/tsconfig.json
+      - name: Build maintained application entrypoints
+        run: |
+          for app in api chat server
+          do
+            bun run --cwd "apps/$app" build
+          done
+          bun --no-env-file .github/build-pilot/web-workspace.ts "$RUNNER_TEMP/opencok-web-build"
+          bun run --cwd "$RUNNER_TEMP/opencok-web-build/apps/web" build
+      - name: Verify relocated environment loading
+        run: bun run --cwd packages/env test
+      - name: Execute emitted backend compatibility checks
+        run: bun --no-env-file .github/build-pilot/verify.ts
+      - name: Execute emitted frontend loading flow
+        run: bun --no-env-file .github/build-pilot/verify-web.ts "$RUNNER_TEMP/opencok-web-build/apps/web/dist"
+      - name: Verify Bun auth mutation instrumentation
+        run: bun --no-env-file apps/server/scripts/mutate-auth.ts
+      - name: Verify Bun Chat mutation instrumentation
+        run: bun --no-env-file apps/chat/scripts/mutate-chat.ts
