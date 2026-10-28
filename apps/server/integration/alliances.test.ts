@@ -207,8 +207,10 @@ test("donations debit once, cap progress and complete durable research after res
         h.allianceCommand("al.science.research", { scienceId: sfs.int(250000) }),
     ).rejects.toThrow();
     h.clock.now = Number(started.body.finishTime!.value);
-    const { dueAllianceResearch } = await import("@opencok/repositories/alliance-recovery");
-    const pending = await dueAllianceResearch(h.db.db, 1, BigInt(h.clock.now));
+    const { AllianceScienceRecoveryReader } = await import(
+        "@opencok/alliance/repositories/science-recovery"
+    );
+    const pending = await new AllianceScienceRecoveryReader(h.db.db).due(1, BigInt(h.clock.now));
     expect(pending).toHaveLength(1);
     expect(Buffer.isBuffer(pending[0]!.accelerate)).toBe(true);
     const restarted = createRealmAllianceService(h.repository, h.rules, h.effects);

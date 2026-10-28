@@ -1,6 +1,6 @@
+import { AllianceScienceRepository } from "@opencok/alliance/repositories/science";
 import { AllianceGiftRepository } from "@opencok/alliance/repositories/gifts";
 import { AllianceHelpRepository } from "@opencok/alliance/repositories/help";
-import { donate_history } from "@opencok/drizzle/schema/opencok_kingdom/donate_history";
 import { allianceMailData } from "@opencok/mappings/alliance";
 import { mail_group } from "@opencok/drizzle/schema/opencok_kingdom/mail_group";
 import { mail } from "@opencok/drizzle/schema/opencok_kingdom/mail";
@@ -8,9 +8,6 @@ import { and, asc, eq, inArray, or, sql } from "drizzle-orm";
 import { alliance } from "@opencok/drizzle/schema/opencok_kingdom/alliance";
 import { alliance_member } from "@opencok/drizzle/schema/opencok_kingdom/alliance_member";
 import { alliance_apply } from "@opencok/drizzle/schema/opencok_kingdom/alliance_apply";
-import { alliance_science } from "@opencok/drizzle/schema/opencok_kingdom/alliance_science";
-import { alliance_science_upgrade } from "@opencok/drizzle/schema/opencok_kingdom/alliance_science_upgrade";
-import { alliance_donate } from "@opencok/drizzle/schema/opencok_kingdom/alliance_donate";
 import { alliance_blacklist } from "@opencok/drizzle/schema/opencok_kingdom/alliance_blacklist";
 import { userprofile } from "@opencok/drizzle/schema/opencok_kingdom/userprofile";
 import { user_lord } from "@opencok/drizzle/schema/opencok_kingdom/user_lord";
@@ -207,26 +204,13 @@ export function createAllianceRepository(
                                     ),
                                 )
                                 .limit(8193),
-                            sciences: groups.length
-                                ? await tx
-                                    .select()
-                                    .from(alliance_science)
-                                    .where(inArray(alliance_science.allianceId, groups))
-                                : [],
-                            research: groups.length
-                                ? await tx
-                                    .select()
-                                    .from(alliance_science_upgrade)
-                                    .where(inArray(alliance_science_upgrade.allianceId, groups))
-                                : [],
-                            history: await tx
-                                .select()
-                                .from(donate_history)
-                                .where(eq(donate_history.uid, input.owner)),
-                            donations: await tx
-                                .select()
-                                .from(alliance_donate)
-                                .where(eq(alliance_donate.uerid, input.owner)),
+                            sciences: await AllianceScienceRepository.readSciences(tx, groups),
+                            research: await AllianceScienceRepository.readResearch(tx, groups),
+                            history: await AllianceScienceRepository.readHistory(tx, input.owner),
+                            donations: await AllianceScienceRepository.readDonations(
+                                tx,
+                                input.owner,
+                            ),
                             helps: await AllianceHelpRepository.readGroups(tx, groups),
                             queues: await tx.select().from(queue).where(
                                 inArray(queue.ownerId, participants),
@@ -549,7 +533,7 @@ async function writeAlliance(
             .set({ allianceId: member.allianceId })
             .where(eq(worldpoint.ownerId, member.uid));
         await tx.delete(alliance_apply).where(eq(alliance_apply.userId, member.uid));
-        await tx.delete(alliance_donate).where(eq(alliance_donate.uerid, member.uid));
+        await AllianceScienceRepository.removeDonations(tx, member.uid);
         await tx
             .update(world_march)
             .set({ allianceId: member.allianceId })
@@ -594,70 +578,7 @@ async function writeAlliance(
             );
     }
 
-    for (const row of write.sciences ?? [])
-    {
-        check(row);
-        const value = row as typeof alliance_science.$inferInsert;
-        await tx
-            .insert(alliance_science)
-            .values(value)
-            .onConflictDoUpdate({
-                target: [alliance_science.allianceId, alliance_science.scienceId],
-                set: value,
-            });
-    }
-
-    for (const row of write.research ?? [])
-    {
-        check(row);
-        const value = row as typeof alliance_science_upgrade.$inferInsert;
-        await tx
-            .insert(alliance_science_upgrade)
-            .values(value)
-            .onConflictDoUpdate({ target: alliance_science_upgrade.allianceId, set: value });
-    }
-
-    if (write.deletedResearch?.length)
-    {
-        await tx.delete(alliance_science_upgrade).where(
-            inArray(
-                alliance_science_upgrade.allianceId,
-                write.deletedResearch.filter((id) => allowed.has(id)),
-            ),
-        );
-    }
-
-    for (const row of write.history ?? [])
-    {
-        if (row.uid !== owner)
-        {
-            throw new Error("Foreign donation history");
-        }
-
-        check(row);
-        const value = row as typeof donate_history.$inferInsert;
-        await tx
-            .insert(donate_history)
-            .values(value)
-            .onConflictDoUpdate({ target: donate_history.uid, set: value });
-    }
-
-    for (const row of write.donations ?? [])
-    {
-        if (row.uerid !== owner)
-        {
-            throw new Error("Foreign donation offer");
-        }
-
-        const value = row as typeof alliance_donate.$inferInsert;
-        await tx
-            .insert(alliance_donate)
-            .values(value)
-            .onConflictDoUpdate({
-                target: [alliance_donate.uerid, alliance_donate.scienceid],
-                set: value,
-            });
-    }
+    await new AllianceScienceRepository(tx, owner, allowed, { text, check }).write(write);
 
     await new AllianceHelpRepository(tx, participants, { text, long, check }).write(write);
 
@@ -719,10 +640,7 @@ async function writeAlliance(
         }
 
         await tx.delete(alliance).where(eq(alliance.uid, id));
-        await tx.delete(alliance_science).where(eq(alliance_science.allianceId, id));
-        await tx.delete(alliance_science_upgrade).where(
-            eq(alliance_science_upgrade.allianceId, id),
-        );
+        await AllianceScienceRepository.removeAlliance(tx, id);
         await tx.delete(alliance_apply).where(eq(alliance_apply.allianceId, id));
         await AllianceHelpRepository.invalidateAlliance(tx, id);
     }

@@ -102,5 +102,6 @@ and profile-avatar workflows remain with their existing owners.
 The [Alliance domain](alliance/README.md) owns existing member-help commands,
 generation validation, native mapping and transactional persistence after #663.
 Shared gift production, claims, mapping and persistence follow in #665. The realm
-injects numeric/catalog/economic collaborators; shared membership, science and
-aggregate publication remain subsequent slices.
+injects numeric/catalog/economic collaborators. Research, donations and recovery
+follow in #667; shared membership and aggregate publication remain subsequent
+slices. Production and catalog tests retain a tracked science-rule binding.

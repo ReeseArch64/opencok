@@ -1,3 +1,7 @@
+import type {
+    AllianceScienceState,
+    AllianceScienceWrite,
+} from "@opencok/alliance/contracts/science";
 import type { AllianceGiftState, AllianceGiftWrite } from "@opencok/alliance/contracts/gifts";
 import type { AllianceHelpState, AllianceHelpWrite } from "@opencok/alliance/contracts/help";
 import type { Row } from "./rows";
@@ -19,7 +23,7 @@ export interface AllianceSelection
     page?: number;
 }
 
-export interface AllianceState extends AllianceHelpState, AllianceGiftState
+export interface AllianceState extends AllianceHelpState, AllianceGiftState, AllianceScienceState
 {
     now: bigint;
     inventory: InventoryState;
@@ -32,10 +36,6 @@ export interface AllianceState extends AllianceHelpState, AllianceGiftState
     points: readonly Row[];
     powers: readonly Row[];
     marches: readonly Row[];
-    sciences: readonly Row[];
-    research: readonly Row[];
-    donations: readonly Row[];
-    history: readonly Row[];
     blacklist: readonly Row[];
     directory: readonly Row[];
     candidates: readonly Row[];
@@ -43,7 +43,7 @@ export interface AllianceState extends AllianceHelpState, AllianceGiftState
     mails: readonly Row[];
 }
 
-export interface AllianceWrite extends AllianceHelpWrite, AllianceGiftWrite
+export interface AllianceWrite extends AllianceHelpWrite, AllianceGiftWrite, AllianceScienceWrite
 {
     alliances?: readonly Row[];
     deletedAlliances?: readonly string[];
@@ -53,11 +53,6 @@ export interface AllianceWrite extends AllianceHelpWrite, AllianceGiftWrite
     applications?: readonly Row[];
     deletedApplications?: readonly string[];
     firstJoin?: readonly string[];
-    sciences?: readonly Row[];
-    research?: readonly Row[];
-    deletedResearch?: readonly string[];
-    donations?: readonly Row[];
-    history?: readonly Row[];
     blacklist?: readonly Row[];
     mails?: readonly Row[];
     mailUpdates?: readonly Row[];
