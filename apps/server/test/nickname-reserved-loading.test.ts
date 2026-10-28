@@ -3,7 +3,7 @@ import { mkdtemp, writeFile, rm } from "node:fs/promises";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
 import { Cache } from "@opencok/storage/session";
-import { NicknameWordFilter } from "@opencok/resources/nickname-words";
+import { NicknameWordFilter } from "@opencok/policy/resources/nickname-words";
 import { loadNicknameServices } from "../src/nickname.ts";
 
 const keys = ["regular", "strict", "pattern", "weight", "name"].map(

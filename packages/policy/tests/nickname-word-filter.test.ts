@@ -2,7 +2,7 @@ import { expect, test } from "bun:test";
 import { mkdtemp, writeFile, truncate, rm } from "node:fs/promises";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
-import { NicknameWordFilter, loadNicknameWordFilter } from "../src/nickname-words.ts";
+import { NicknameWordFilter, loadNicknameWordFilter } from "../src/resources/nickname-words.ts";
 
 test("nickname filtering stays locked during an asynchronous resource load", async () => {
     let finish!: (value: string[]) => void;

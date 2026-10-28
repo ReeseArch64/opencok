@@ -18,6 +18,7 @@
     "@opencok/contracts": "workspace:*",
     "@opencok/errors": "workspace:*",
     "@opencok/enums": "workspace:*",
-    "@opencok/hero": "workspace:*"
+    "@opencok/hero": "workspace:*",
+    "@opencok/policy": "workspace:*"
   }
 }

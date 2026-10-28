@@ -115,7 +115,7 @@ Before starting, supply these authorized local inputs:
 | CDN host trees | `data/cdn/data/cok.eleximg.com/cok` and `data/cdn/data/asset.cok.chat/100001` |
 
 Gameplay catalogs are included as typed TypeScript in `packages/resources/src/catalogs`,
-and the nickname filter is included as `packages/resources/data/badwords.json`.
+and the nickname filter is included as `packages/policy/src/resources/data/badwords.json`.
 The server requires no external XML/TXT or resource bind mount. See the
 [catalog editing guide](packages/resources/README.md); rebuild the server after changes.
 

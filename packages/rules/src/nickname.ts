@@ -1,7 +1,13 @@
+import {
+    nicknameTrim,
+    validateNicknameText as validateText,
+} from "@opencok/policy/rules/nickname-text";
 import { errors } from "@opencok/constants/game";
 import { GameError } from "@opencok/errors/game";
 import { javaGbkLength } from "./java-gbk.ts";
 import { mailBlank } from "./mail.ts";
+
+export { nicknameTrim } from "@opencok/policy/rules/nickname-text";
 
 export interface NicknameCheck
 {
@@ -15,33 +21,6 @@ export interface NicknameCheckProviders
 {
     containsBadWords(name: string): boolean | Promise<boolean>;
     occupied(name: string): Promise<boolean>;
-}
-
-function validateText(text: string): void
-{
-    if (typeof text !== "string" || text.length > 65535)
-    {
-        throw new GameError(errors.invalid);
-    }
-}
-
-export function nicknameTrim(text: string): string
-{
-    validateText(text);
-    let first = 0,
-        last = text.length;
-
-    while (first < last && text.charCodeAt(first) <= 32)
-    {
-        first++;
-    }
-
-    while (last > first && text.charCodeAt(last - 1) <= 32)
-    {
-        last--;
-    }
-
-    return text.slice(first, last);
 }
 
 export function nicknameLength(text: string): number

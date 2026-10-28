@@ -1,9 +1,9 @@
-import { containsReservedNickname } from "@opencok/resources/nickname-reserved";
+import { containsReservedNickname } from "@opencok/policy/resources/nickname-reserved";
 import type { GameServices } from "@opencok/contracts/game";
 import {
     loadNicknameWordFilter,
     type NicknameForbiddenReader,
-} from "@opencok/resources/nickname-words";
+} from "@opencok/policy/resources/nickname-words";
 
 export async function loadNicknameServices(
     readForbidden?: NicknameForbiddenReader,

@@ -1,5 +1,5 @@
 import { expect, test } from "bun:test";
-import { filterNicknameBadWords } from "@opencok/rules/nickname-words";
+import { filterNicknameBadWords } from "@opencok/policy/rules/nickname-words";
 import vectors from "./fixtures/nickname-replacement-vectors.json";
 
 const text = (hex: string) => Buffer.from(hex, "hex").swap16().toString("utf16le");

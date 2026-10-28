@@ -376,8 +376,8 @@ literal. Supplementary/surrogate matching and final line-terminator anchors foll
 Java primitive vectors. A matching exception stops the remaining list and returns false;
 the loading lock returns true before inspecting entries or text.
 
-`resources/nickname-words` reads the bundled UTF-8 JSON array in
-[`packages/resources/data/badwords.json`](../../packages/resources/data/badwords.json),
+`policy/resources/nickname-words` reads the bundled UTF-8 JSON array in
+[`packages/policy/src/resources/data/badwords.json`](../../packages/policy/src/resources/data/badwords.json),
 independently of `GAME_RESOURCES` and the current working directory. The 16 MiB
 resource-size limit remains. JSON must contain an array of strings; invalid input
 is rejected before changing the loaded entries. Empty entries are dropped without

@@ -31,6 +31,7 @@
     "@opencok/contracts": "workspace:*",
     "@opencok/hero": "workspace:*",
     "@opencok/constants": "workspace:*",
-    "@opencok/dragon": "workspace:*"
+    "@opencok/dragon": "workspace:*",
+    "@opencok/policy": "workspace:*"
   }
 }
