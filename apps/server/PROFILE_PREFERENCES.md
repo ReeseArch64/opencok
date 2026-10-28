@@ -109,8 +109,7 @@ and cache projections.
 ## Validation
 
 The server tests exercise exact typed replies, invalid owners, realms and bans,
-validation order, reserved words and hostile regex deadlines. Four deliberate mutations
-to owner, realm and ban checks are killed by `scripts/mutate-profile.ts`. Disposable
+validation order, reserved words and hostile regex deadlines. Disposable
 PostgreSQL integration covers payment, concurrent reservation, uncertain commits,
 refunds, restart recovery, notifications, throne history isolation, CN1 restoration,
 alliance mail and shared-user fencing. A command integration uses actual Chat HTTP and

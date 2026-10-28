@@ -98,8 +98,7 @@ offers, concurrent exchange, cancellation and daily renewal. Unit tests cover
 batch tier prices, overflow, eligibility windows, separate DMM pools and debit/grant
 ledger continuity. The two-realm TCP/SFS scenario checks catalog discovery,
 purchase, correlation replay, exhausted limits and subsequent inventory use.
-`apps/server/scripts/mutate-shops.ts` checks that critical protection removals
-cause validation failures. These synthetic tests do not validate APK rendering.
+These synthetic tests do not validate APK rendering.
 
 The recovery suite compares complete synthetic profile, resource, inventory,
 purchase, realm-stock, NPC-offer, receipt, ledger and outbox snapshots after each
@@ -136,7 +135,6 @@ Reproduce the targeted checks from the repository root:
 bun --no-env-file test apps/server/test/shops.test.ts apps/server/test/inventory.test.ts
 bun --no-env-file test apps/server/integration/shops.test.ts apps/server/integration/shop-trade-recovery.test.ts
 bun --no-env-file test apps/server/integration/core.test.ts apps/server/integration/campaign-producers.test.ts apps/server/integration/continued-cost.test.ts
-bun --no-env-file apps/server/scripts/mutate-shops.ts
 bun run lint
 bun run format:check
 bun run --cwd apps/server check-types

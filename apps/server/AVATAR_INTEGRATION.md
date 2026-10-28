@@ -126,9 +126,7 @@ delivery failure events and pending bits; repair the dependency and let the rela
 ## Evidence
 
 Synthetic unit cases cover signed allocation, upload exhaustion, approval/rejection,
-report preservation, Java overflow and exact revision serialization. Four deliberate
-mutations to repeat-rejection protection, approval ban reset, ban escalation and signed
-counter wrapping are killed by `scripts/mutate-avatar.ts`.
+report preservation, Java overflow and exact revision serialization.
 
 Disposable PostgreSQL tests cover concurrent replay, stale review, foreign realms,
 uncertain commit retry, transaction rollback, revision exhaustion, ban preservation and

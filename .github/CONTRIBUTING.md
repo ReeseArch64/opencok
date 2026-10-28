@@ -36,7 +36,7 @@ Oxlint and Oxfmt versions bundled with `vite-plus` and the pinned dprint CLI and
 TypeScript plugin from the root lockfile. Configure lint in `.oxlintrc.json`,
 JS/TS formatting in `dprint.json`, and other formatting in `.oxfmtrc.json`.
 [ADR-0014](../docs/decisions/0014-adopt-dprint-for-typescript-formatting.md) records
-the confirmed policy and [pilot evidence](formatting-pilot/README.md).
+the confirmed policy and historical validation summary.
 
 Run these commands from the repository root before submitting changes:
 
@@ -50,15 +50,6 @@ apply formatting. Review the resulting diff. CI checks lint and formatting on
 pull requests targeting any branch and pushes to all branches; lint warnings fail
 the check. PostgreSQL database, PostgreSQL realm server and Chat and API media
 run only on pushes to `main`, subject to their path filters.
-
-Application build artifact checks run for relevant pull requests and pushes to
-`develop` and `main`. They check semantic types separately, build all four
-implemented apps, execute synthetic emitted backend/frontend scenarios and verify
-the environment relocation and Bun mutation plugins. See the
-[build pilot](build-pilot/README.md) for reproduction and evidence limits. Benchmark
-timing is recorded for evaluation, not enforced as a machine-dependent CI limit.
-Browser checks copy maintained source into a temporary workspace with public
-synthetic images; ignored prepared game artwork is never a CI dependency.
 
 JS/TS formatting uses four spaces, double quotes, semicolons, LF and a 100-column
 print width. dprint exclusively owns JS/JSX/TS/TSX and c/m module variants; Oxfmt
@@ -189,8 +180,6 @@ base with the repository's default branch rather than replaying inherited
 history. Pull requests use their target's merge base when the target has advanced.
 A run with no distinct range, including a manual run on the default branch,
 validates the tip commit. The same Conventional Commit rules apply in every case.
-Run `bun --no-env-file test ./.github/tests/commitlint.test.ts` to exercise these
-boundaries with real commitlint validation in isolated Git repositories.
 
 Use `HUSKY=0` when hook setup should be disabled, or install with
 `--ignore-scripts`. Existing container builds use `--ignore-scripts`, including

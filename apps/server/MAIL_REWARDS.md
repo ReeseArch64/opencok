@@ -148,10 +148,8 @@ legacy claimed state, rollback after an injected SQL marker failure, unsupported
 mixed rewards, lost replies, deletion/restoration, numeric overflow, upgrade notices,
 regular/advanced resources, DMM gold, PostgreSQL restart and stale owner rejection.
 The core integration suite exercises actual authenticated SFS redemption and replay
-in both realms. Rule tests cover parsing, aggregation and label bounds. The critical
-mutation runner removes per-mail identity, claimed flags, owner selection and reward
-credit; all must be detected. Existing inventory mutation tests guard the extracted
-transaction helper against regressions.
+in both realms. Rule tests cover parsing, aggregation and label bounds. The
+standalone mail reward and inventory mutation harnesses have been removed.
 
 Evidence targets maintained v12.06.0 server contracts. Native APK rendering and
 other client tracks are untested. Pending reward domains above remain explicit

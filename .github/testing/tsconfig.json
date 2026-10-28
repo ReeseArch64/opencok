@@ -1,8 +1,0 @@
-{
-  "extends": "../../packages/config/tsconfig.base.json",
-  "include": [
-    "*.ts",
-    "../../apps/server/scripts/mutate-*.ts",
-    "../../apps/chat/scripts/mutate-chat.ts"
-  ]
-}

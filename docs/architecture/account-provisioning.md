@@ -150,9 +150,6 @@ restart. Unit tests reject invalid input, unsigned receipts, modified or expired
 signatures and authentication failures.
 
 The focused check is `bun --no-env-file test apps/server/integration/provisioning.test.ts`.
-`bun --no-env-file apps/server/scripts/mutate-provisioning.ts` verifies that the
-tests reject removal of receipt replay, reservation hash binding and epoch
-fencing, and detect an incorrect initial gold grant.
 
 Live Firebase credential verification and native APK registration are not
 certified by these tests. The native client still needs its Firebase identity

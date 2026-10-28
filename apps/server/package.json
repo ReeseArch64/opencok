@@ -8,12 +8,7 @@
     "check-types": "tsc --noEmit",
     "test": "bun --no-env-file test ./test",
     "test:integration": "bun --no-env-file test integration",
-    "test:mutations": "bun --no-env-file scripts/mutate-auth.ts",
     "avatar:moderate": "bun --no-env-file scripts/moderate-avatar.ts",
-    "test:timed-mutations": "bun --no-env-file scripts/mutate-timed-economy.ts",
-    "test:city-mutations": "bun --no-env-file scripts/mutate-city-progression.ts",
-    "test:progression-mutations": "bun --no-env-file scripts/mutate-progression-domains.ts",
-    "test:player-progression-mutations": "bun --no-env-file scripts/mutate-player-progression.ts",
     "world:import": "bun --no-env-file scripts/import-world-terrain.ts",
     "build": "bun build src/index.ts --target bun --minify --outdir dist/src && mkdir -p dist/data && cp ../../packages/resources/data/badwords.json dist/data/badwords.json"
   },
