@@ -101,7 +101,7 @@ new process ownership and named-definition rules remain separate decisions.
 | `rules`, domain rule modules including `hero/rules` and `combat`    | Pure rule evaluation; no sockets, ORM or broker imports.                                                                                        |
 | `hero`                                                              | Hero and general contracts, rules, workflows, mappings, validations, catalog types and persistence adapters, separated by responsibility.       |
 | `dragon`                                                            | Named dragon archetypes, configuration contracts, validation and catalog mapping; existing gameplay workflows remain in their current packages. |
-| `resources`                                                         | Versioned typed gameplay catalogs and temporary policy compatibility exports.                                                                   |
+| `resources`                                                         | Versioned typed gameplay catalogs.                                                                                                              |
 | `policy`                                                            | Pure content matching, bounded file/worker adapters and the maintained nickname/description dictionary.                                         |
 | `repositories`, `drizzle`, `storage`                                | Owned transactional state, schemas, Redis/ZooKeeper and S3 adapters.                                                                            |
 
