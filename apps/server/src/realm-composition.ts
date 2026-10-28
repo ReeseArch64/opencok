@@ -1,3 +1,4 @@
+import { WorldMarchRecoveryJob } from "./world-march-recovery-job.ts";
 import { WorldPopulationJob } from "./world-population-job.ts";
 import { logEvent } from "@opencok/core/logging";
 import { observeAdapter, observeJob } from "@opencok/core/operation";
@@ -1225,8 +1226,6 @@ export const RealmDependenciesLive = Layer.effect(
             createWorldInterest(db.kingdom.db, authority, config.mapSize),
             "realm.createWorldInterest",
         );
-        let worldCursor: { dueAt: bigint; id: string; } | undefined;
-        let worldImportCursor: string | undefined;
         const heroCalendar = observeAdapter(
             new HeroCalendarService(
                 observeAdapter(
@@ -2145,6 +2144,13 @@ export const RealmDependenciesLive = Layer.effect(
             () => economyEffects.world(),
             (event) => logEvent(event, { kingdom: config.kingdomId, outcome: "failure" }, "error"),
         );
+        const marchRecovery = new WorldMarchRecoveryJob(
+            (after) => unregisteredWorldMarches(db.kingdom.db, after),
+            (now, after) => dueWorldMarches(db.kingdom.db, now, after),
+            (owner) => recoverActivities(owner),
+            (owner, command, params) => activities.domainCommand(owner, command, params),
+            (event) => logEvent(event, { kingdom: config.kingdomId, outcome: "failure" }, "error"),
+        );
         const recoverWorld = async () => {
             await population.run();
 
@@ -2273,52 +2279,7 @@ export const RealmDependenciesLive = Layer.effect(
                 }
             }
 
-            const imported = await unregisteredWorldMarches(db.kingdom.db, worldImportCursor);
-            worldImportCursor = imported.length === 64 ? imported.at(-1)!.id : undefined;
-
-            for (const entry of imported)
-            {
-                if (entry.owner)
-                {
-                    try
-                    {
-                        await recoverActivities(entry.owner);
-                        await activities.domainCommand(entry.owner, "world.tick", {
-                            operationId: sfs.string(`world-import:${entry.id}`),
-                        });
-                    }
-                    catch
-                    {
-                        logEvent(
-                            "world_import_failed",
-                            { kingdom: config.kingdomId, outcome: "failure" },
-                            "error",
-                        );
-                    }
-                }
-            }
-
-            const due = await dueWorldMarches(db.kingdom.db, BigInt(Date.now()), worldCursor);
-            worldCursor = due.length === 64 ? due.at(-1) : undefined;
-
-            for (const entry of due)
-            {
-                try
-                {
-                    await recoverActivities(entry.owner);
-                    await activities.domainCommand(entry.owner, "world.tick", {
-                        operationId: sfs.string(`world:${entry.id}:${entry.version}`),
-                    });
-                }
-                catch
-                {
-                    logEvent(
-                        "world_recovery_failed",
-                        { kingdom: config.kingdomId, outcome: "failure" },
-                        "error",
-                    );
-                }
-            }
+            await marchRecovery.run();
 
             for (
                 const command of [
