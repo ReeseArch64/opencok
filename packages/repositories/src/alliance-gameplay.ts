@@ -1,6 +1,6 @@
+import { AllianceGiftRepository } from "@opencok/alliance/repositories/gifts";
 import { AllianceHelpRepository } from "@opencok/alliance/repositories/help";
 import { donate_history } from "@opencok/drizzle/schema/opencok_kingdom/donate_history";
-import { alliance_gift } from "@opencok/drizzle/schema/opencok_kingdom/alliance_gift";
 import { allianceMailData } from "@opencok/mappings/alliance";
 import { mail_group } from "@opencok/drizzle/schema/opencok_kingdom/mail_group";
 import { mail } from "@opencok/drizzle/schema/opencok_kingdom/mail";
@@ -12,7 +12,6 @@ import { alliance_science } from "@opencok/drizzle/schema/opencok_kingdom/allian
 import { alliance_science_upgrade } from "@opencok/drizzle/schema/opencok_kingdom/alliance_science_upgrade";
 import { alliance_donate } from "@opencok/drizzle/schema/opencok_kingdom/alliance_donate";
 import { alliance_blacklist } from "@opencok/drizzle/schema/opencok_kingdom/alliance_blacklist";
-import { user_gift } from "@opencok/drizzle/schema/opencok_kingdom/user_gift";
 import { userprofile } from "@opencok/drizzle/schema/opencok_kingdom/userprofile";
 import { user_lord } from "@opencok/drizzle/schema/opencok_kingdom/user_lord";
 import { worldpoint } from "@opencok/drizzle/schema/opencok_kingdom/worldpoint";
@@ -251,17 +250,11 @@ export function createAllianceRepository(
                                         eq(timed_activity.status, 0),
                                     ),
                                 ),
-                            sharedGifts: selection.giftEvent
-                                ? await tx
-                                    .select()
-                                    .from(alliance_gift)
-                                    .where(eq(alliance_gift.uid, selection.giftEvent))
-                                : [],
-                            gifts: await tx
-                                .select()
-                                .from(user_gift)
-                                .where(eq(user_gift.uid, input.owner))
-                                .limit(2049),
+                            sharedGifts: await AllianceGiftRepository.readEvent(
+                                tx,
+                                selection.giftEvent,
+                            ),
+                            gifts: await AllianceGiftRepository.readOwned(tx, input.owner),
                             mails: selection.mailId
                                 ? await tx.select().from(mail).where(eq(mail.uid, selection.mailId))
                                 : [],
@@ -668,45 +661,7 @@ async function writeAlliance(
 
     await new AllianceHelpRepository(tx, participants, { text, long, check }).write(write);
 
-    if (write.publishedGift)
-    {
-        check(write.publishedGift, "allianceid");
-        await tx.insert(alliance_gift).values(
-            write.publishedGift as typeof alliance_gift.$inferInsert,
-        );
-    }
-
-    for (const row of write.sharedGifts ?? [])
-    {
-        check(row);
-
-        if (!participants.includes(text(row, "uid")))
-        {
-            throw new Error("Foreign shared gift recipient");
-        }
-
-        await tx.insert(user_gift).values(row as typeof user_gift.$inferInsert);
-    }
-
-    for (const row of write.gifts ?? [])
-    {
-        if (row.uid !== owner)
-        {
-            throw new Error("Foreign alliance gift");
-        }
-
-        await tx
-            .update(user_gift)
-            .set({ valid: Number(row.valid) })
-            .where(and(eq(user_gift.uuid, text(row, "uuid")), eq(user_gift.uid, owner)));
-    }
-
-    if (write.deletedGifts?.length)
-    {
-        await tx
-            .delete(user_gift)
-            .where(and(eq(user_gift.uid, owner), inArray(user_gift.uuid, [...write.deletedGifts])));
-    }
+    await new AllianceGiftRepository(tx, owner, participants, { text, check }).write(write);
 
     for (const row of write.mailUpdates ?? [])
     {

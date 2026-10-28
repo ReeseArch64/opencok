@@ -3,19 +3,19 @@ import { alliance_help } from "@opencok/drizzle/schema/opencok_kingdom/alliance_
 import { queue } from "@opencok/drizzle/schema/opencok_kingdom/queue";
 import { timed_activity } from "@opencok/drizzle/schema/opencok_kingdom/timed_activity";
 import type { AllianceHelpWrite } from "../contracts/help";
-import type { AllianceHelpTransaction } from "../contracts/help-persistence";
+import type { AllianceTransaction } from "../contracts/persistence";
 import type { AllianceHelpPersistenceRuntime } from "../contracts/help-runtime";
 
 export class AllianceHelpRepository
 {
     public constructor(
-        private readonly tx: AllianceHelpTransaction,
+        private readonly tx: AllianceTransaction,
         private readonly participants: readonly string[],
         private readonly runtime: AllianceHelpPersistenceRuntime,
     )
     {}
 
-    public static async readGroups(tx: AllianceHelpTransaction, groups: string[])
+    public static async readGroups(tx: AllianceTransaction, groups: string[])
     {
         return groups.length
             ? await tx
@@ -26,7 +26,7 @@ export class AllianceHelpRepository
             : [];
     }
 
-    public static readPublication(tx: AllianceHelpTransaction, id: string)
+    public static readPublication(tx: AllianceTransaction, id: string)
     {
         return tx
             .select()
@@ -35,12 +35,12 @@ export class AllianceHelpRepository
             .limit(4096);
     }
 
-    public static invalidateSender(tx: AllianceHelpTransaction, id: string)
+    public static invalidateSender(tx: AllianceTransaction, id: string)
     {
         return tx.update(alliance_help).set({ isvalid: 0 }).where(eq(alliance_help.senderId, id));
     }
 
-    public static invalidateAlliance(tx: AllianceHelpTransaction, id: string)
+    public static invalidateAlliance(tx: AllianceTransaction, id: string)
     {
         return tx.update(alliance_help).set({ isvalid: 0 }).where(eq(alliance_help.allianceId, id));
     }

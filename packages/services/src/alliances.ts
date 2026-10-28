@@ -39,7 +39,8 @@ import { activityEconomy } from "@opencok/economy/services/activity-economy";
 import { AllianceScienceContext } from "./alliance-science";
 import type { AllianceHelpFactory } from "@opencok/alliance/contracts/help";
 import { AllianceHelpCommand } from "@opencok/alliance/enums/help-command";
-import { publishAllianceGift, allianceGift } from "./alliance-gifts";
+import type { AllianceGiftFactory } from "@opencok/alliance/contracts/gifts";
+import { AllianceGiftCommand } from "@opencok/alliance/enums/gift-command";
 
 export const allianceCommands = [
     "al.create",
@@ -88,9 +89,9 @@ export const allianceCommands = [
     AllianceHelpCommand.Render,
     AllianceHelpCommand.All,
     AllianceHelpCommand.Show,
-    "al.showgift",
-    "al.opengift",
-    "al.cleargift",
+    AllianceGiftCommand.Show,
+    AllianceGiftCommand.Open,
+    AllianceGiftCommand.Clear,
     "al.diplo",
     "al.blacklist.query",
     "al.blacklist.modify",
@@ -103,6 +104,7 @@ export class AllianceService
         readonly rules: Rules,
         readonly effects: InventoryEffects,
         readonly help: AllianceHelpFactory<Rules>,
+        readonly gifts: AllianceGiftFactory<RealmInventoryPlanner>,
         readonly forbidden: (value: string) => boolean | Promise<boolean> = () => false,
     )
     {}
@@ -134,9 +136,10 @@ export class AllianceService
                     ),
                     this.effects,
                     this.help,
+                    this.gifts,
                 );
                 context.member();
-                const body = publishAllianceGift(context, giftEvent, type),
+                const body = this.gifts(context).publish(giftEvent, type),
                     inventory = context.ledger.result(body);
 
                 if (context.write.publishedGift)
@@ -360,6 +363,7 @@ export class AllianceService
                     ),
                     this.effects,
                     this.help,
+                    this.gifts,
                 );
                 const body = await context.command(command, params);
                 const inventory = context.ledger.result(body);
@@ -417,6 +421,7 @@ export class AllianceContext
         readonly ledger: RealmInventoryPlanner,
         readonly effects: InventoryEffects,
         private readonly help: AllianceHelpFactory<Rules>,
+        private readonly gifts: AllianceGiftFactory<RealmInventoryPlanner>,
     )
     {
         this.allianceId = text(state.inventory.profile, "allianceId");
@@ -1112,9 +1117,15 @@ export class AllianceContext
             return this.help(this).command(command, params);
         }
 
-        if (["al.showgift", "al.opengift", "al.cleargift"].includes(command))
+        if (
+            ([
+                AllianceGiftCommand.Show,
+                AllianceGiftCommand.Open,
+                AllianceGiftCommand.Clear,
+            ] as readonly string[]).includes(command)
+        )
         {
-            return allianceGift(this, command, params);
+            return this.gifts(this).command(command, params);
         }
 
         if (command === "al.permission.get")

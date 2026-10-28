@@ -1,11 +1,13 @@
-# Alliance member help
+# Alliance gameplay
 
 Alliance owns the existing queue-assistance workflow after
 [#663](https://github.com/ReeseArch64/opencok/issues/663), part of #558 W08, under
 [ADR-0016](../../docs/decisions/0016-adopt-domain-owned-package-layout.md).
-Its ten source modules and one test file cover help commands, persisted generation
-validation, native mapping and transactional help persistence. Membership, science,
-gifts and their broad coordinator remain subsequent domain slices.
+Shared gifts follow in [#665](https://github.com/ReeseArch64/opencok/issues/665).
+Its nineteen source modules and two test files cover help and gift commands,
+persisted generation validation, weighted gift choices, native mapping and
+transactional persistence. Membership, science and their broad coordinator remain
+subsequent domain slices.
 
 ## Responsibilities and composition
 
@@ -56,10 +58,10 @@ a lazy profile reader to preserve the original evaluation order.
 
 There is no remaining `alliance-help` compatibility entrypoint. Shared Alliance
 contracts still compose the help fields; shared repositories/publication and the
-membership/science/gift coordinator remain integration adapters. Their retirement
-belongs to #558 W08/W20 after those consumers have migrated. Two removed Service
-cycle entries are deleted from the architecture baseline; 77 existing violations
-remain elsewhere. No baseline rule is relaxed.
+membership/science coordinator remain integration adapters. Their retirement
+belongs to #558 W08/W20 after those consumers have migrated. Help and gift extraction
+each remove two Service cycle entries from the architecture baseline; 75 existing
+violations remain elsewhere. No baseline rule is relaxed.
 
 ## Verification and recovery
 
@@ -80,3 +82,60 @@ Deploy or roll back the complete realm artifact against unchanged alliance help,
 queue, timed-activity, inventory, receipt and outbox storage. No schema migration,
 configuration, save conversion, new workspace or client repackaging is required.
 Keep committed receipts and player progress when rolling back.
+
+## Shared gifts
+
+`services/gifts` owns the existing trusted producer and `al.showgift`, `al.opengift`
+and `al.cleargift` commands. `rules/gifts` prepares weighted choices from the existing
+catalog without changing regex matching, source ordering, zero-weight handling or
+quantity validation. The bounded catalog port retains string records; semantic
+catalog definitions remain #558 W14 work. `mappings/gifts` owns snapshots, claim,
+clear and producer responses, including the native `alliancegfitexp` spelling.
+A lazy alliance accessor preserves repeated lookups in their original order.
+
+The realm supplies actual record readers, integer/failure checks, weighted RNG,
+UUID generation and the existing activity-economy adapter. The generic ledger port
+requires only item addition; its concrete planner type stays in composition and
+the shared coordinator. No broad package import or new dependency is added to
+Alliance. Help and gifts now share `contracts/readers` and `contracts/persistence`;
+the former help-specific reader name and transaction path have no remaining callers
+and are removed. Their runtime and structural definitions are unchanged.
+
+The producer still validates the saved event's alliance and type before returning
+without rerolling. New events resolve the level-specific catalog before its base
+fallback, pin one outcome per current member and store the event and recipient
+rows together. Deterministic event/receipt identities, trusted entitlement checks
+and mutation-event publication remain in the shared coordinator. Client commands
+cannot create purchase or gameplay entitlements.
+
+Claims retain recipient/alliance binding, exact expiry, valid-state checks and
+resource, gold, honor or parameterized-item credits. They consume the gift and add
+alliance experience in the same existing mutation. Clear accepts consumed or
+expired gifts. Listing retains its 2,048-row bound and current filters, including
+the original presentation of consumed but unexpired entries.
+
+`repositories/gifts` owns producer-event reads, the 2,049-row recipient read
+sentinel and event/recipient/claim/deletion writes. Shared aggregate adapters call
+it at the original positions. Participant validation, membership locks, economic
+postings, receipts and outbox remain in the enclosing transaction.
+
+| Former source                              | Owned destination               | Composition and retirement                                                            |
+| ------------------------------------------ | ------------------------------- | ------------------------------------------------------------------------------------- |
+| Services `alliance-gifts` command/producer | `services/gifts`, `rules/gifts` | Required realm-composed gift factory in the shared coordinator; legacy source removed |
+| Gift snapshot/result objects               | `mappings/gifts`                | Owned Service; native field and roundtrip checks                                      |
+| Aggregate gift state/write fields          | `contracts/gifts`               | Shared Contracts aggregate extends the owned interfaces                               |
+| Aggregate gift reads and writes            | `repositories/gifts`            | Shared transaction adapter; retire with the remaining Alliance aggregate in W08/W20   |
+
+Six gift tests add 83 assertions for pinned outcomes, saved-event replay, catalog
+validation, reward kinds, expiry/ownership gates, clear permissions, listing bounds
+and exact wire representation. Together with help, the owned suite has eleven
+tests and 120 assertions. The four disposable PostgreSQL alliance/social-economy/
+timed-economy/activity-reward suites retain 28 tests and 284 assertions before and
+after this extraction. Thirty-nine runtime and eight contract comparisons cover
+gift workflows, whole aggregate read/write/coordinator flows and unchanged help
+adapters. Root package tests discover both owned suites.
+
+Deploy or roll back the complete realm artifact against unchanged `alliance_gift`
+and `user_gift` rows, inventories, membership, receipts and outbox. Preserve pinned
+recipient outcomes and committed claims across rollback. No configuration,
+schema/save conversion, client artifact or dependency version changes.
