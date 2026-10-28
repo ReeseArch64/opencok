@@ -42,3 +42,4 @@ This index bootstraps the ADR practice without introducing an extra technology d
 - [ADR-0015: Adopt measured per-application build selection](0015-adopt-measured-per-application-build-selection.md) — proposed
 - [ADR-0016: Adopt domain-owned package layout](0016-adopt-domain-owned-package-layout.md) — accepted
 - [ADR-0017: Adopt fenced process authorities per realm](0017-adopt-fenced-realm-process-authorities.md) — accepted
+- [ADR-0018: Adopt client-backed semantic gameplay definitions](0018-adopt-client-backed-semantic-definitions.md) — accepted
