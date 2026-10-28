@@ -4,7 +4,9 @@ This shared integration suite implements the first dependency checks for
 [ADR-0016](../../docs/decisions/0016-adopt-domain-owned-package-layout.md) and
 [#578](https://github.com/ReeseArch64/opencok/issues/578), under #558 W01/W05.
 It inspects maintained workspace files without importing applications, catalogs
-or private inputs. Use `bun --no-env-file test tests/architecture` directly.
+or private inputs. Run `bun run test:architecture` and
+`bun run check-types:architecture` from the repository root. The code-quality
+workflow executes both commands on pushes and pull requests before package tests.
 
 ## What is checked
 
@@ -38,7 +40,7 @@ introduced; this suite supplies dependency evidence, not automatic approval.
 
 ## Inventory
 
-Run `bun --no-env-file tests/architecture/inventory.ts` and redirect stdout into a
+Run `bun run inventory:architecture` and redirect stdout into a
 task-owned temporary directory outside the repository. The deterministic report
 lists every maintained workspace file, current workspace owner, source imports,
 direct dependents and graph violations. Root workspace documentation has the
