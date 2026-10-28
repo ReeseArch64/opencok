@@ -23,6 +23,22 @@ test.each(
     expect(postgresFailureKind(Object.assign(new Error(message), { code }))).toBe(expected);
 });
 
+test("postgresFailureKind_driverReadTimeout_distinguishesClientFromServer", () => {
+    expect(postgresFailureKind(new Error("Query read timeout"))).toBe(
+        PostgresFailureKind.DriverReadTimeout,
+    );
+});
+
+test("postgresFailureKind_unknownDriverMessage_remainsUnclassified", () => {
+    expect(postgresFailureKind(new Error("Query read timeout: private query"))).toBeUndefined();
+});
+
+test("postgresFailureKind_driverMessageWithSqlState_preservesQueryCancellation", () => {
+    const error = Object.assign(new Error("Query read timeout"), { code: "57014" });
+
+    expect(postgresFailureKind(error)).toBe(PostgresFailureKind.QueryCancelled);
+});
+
 test("postgresFailureKind_applicationCancellation_doesNotClaimADatabaseTimeout", () => {
     expect(postgresFailureKind(new DOMException("cancelled", "AbortError"))).toBeUndefined();
     expect(postgresFailureKind(new DOMException("deadline", "TimeoutError"))).toBeUndefined();

@@ -166,6 +166,49 @@ test("errorReason distinguishes cancellation from dependency deadlines through w
     );
 });
 
+test("errorReason_driverReadTimeout_returnsDatabaseReadTimeout", () => {
+    expect(errorReason(new Error("Query read timeout"))).toBe("database_read_timeout");
+});
+
+test("errorReason_wrappedDriverReadTimeout_returnsDatabaseReadTimeout", () => {
+    const error = new Error("private query and parameters", {
+        cause: new Error("Query read timeout"),
+    });
+
+    expect(errorReason(error)).toBe("database_read_timeout");
+});
+
+test.each([
+    "Connection terminated unexpectedly",
+    "Connection terminated",
+    "Client has encountered a connection error and is not queryable",
+    "Client was closed and is not queryable",
+])("errorReason_%s_returnsDatabaseConnectionFailure", (message) => {
+    expect(errorReason(new Error(message))).toBe("database_connection_failure");
+});
+
+test("errorReason_unknownReadTimeoutMessage_remainsUnclassified", () => {
+    expect(errorReason(new Error("Query read timeout: private query"))).toBe("unexpected_failure");
+});
+
+test("errorReason_driverMessageWithSqlState_preservesDatabaseCancellation", () => {
+    const error = Object.assign(new Error("Query read timeout"), { code: "57014" });
+
+    expect(errorReason(error)).toBe("database_query_cancelled");
+});
+
+test("errorReason_driverReadTimeout_logsOnlyControlledReason", async () => {
+    await Effect.runPromiseExit(
+        fromPromise("postgresql.kingdom.select", async () => {
+            throw new Error("private query", { cause: new Error("Query read timeout") });
+        }),
+    );
+
+    expect(records.at(-1)).toMatchObject({ reason: "database_read_timeout", level: "error" });
+    expect(JSON.stringify(records)).not.toContain("private query");
+    expect(JSON.stringify(records)).not.toContain("Query read timeout");
+});
+
 test("errorReason distinguishes an explicit application deadline from dependency timeout", () => {
     const deadline = Object.assign(new Error("synthetic caller deadline"), {
         name: "ApplicationDeadlineError",

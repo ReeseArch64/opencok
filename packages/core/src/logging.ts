@@ -213,6 +213,24 @@ function classifiedErrorReason(error: unknown): string
         return code;
     }
 
+    if (code === undefined && error.name === "Error")
+    {
+        if (error.message === "Query read timeout")
+        {
+            return "database_read_timeout";
+        }
+
+        if (
+            error.message === "Connection terminated unexpectedly"
+            || error.message === "Connection terminated"
+            || error.message === "Client has encountered a connection error and is not queryable"
+            || error.message === "Client was closed and is not queryable"
+        )
+        {
+            return "database_connection_failure";
+        }
+    }
+
     if (error.name === "AbortError")
     {
         return "operation_cancelled";

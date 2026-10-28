@@ -225,46 +225,53 @@ test("replacement aborts the abandoned initializer and retains only the new sess
     expect(h.closed).toHaveLength(2);
 });
 
-test("initialization failure releases its claim and permits a successful retry", async () => {
-    let calls = 0;
-    const h = await harness(async () => {
-        if (++calls === 1)
-        {
-            throw Object.assign(new Error("synthetic database failure"), { code: "57014" });
-        }
+test.each([
+    Object.assign(new Error("synthetic database failure"), { code: "57014" }),
+    new Error("Query read timeout"),
+    new Error("Connection terminated unexpectedly"),
+])(
+    "initialization failure %s releases its claim and permits a successful retry",
+    async (failure) => {
+        let calls = 0;
+        const h = await harness(async () => {
+            if (++calls === 1)
+            {
+                throw failure;
+            }
 
-        return { body: { marker: sfs.string("retry") }, pushes: [] };
-    });
-    try
-    {
-        const failed = await h.connect();
-        const rejection = await Promise.race([
-            failed.loginResult,
-            Bun.sleep(2000).then(() => {
-                throw new Error("Failure response deadline exceeded");
-            }),
-        ]);
-        expect(fields(rejection.p).ec).toEqual(sfs.short(3));
+            return { body: { marker: sfs.string("retry") }, pushes: [] };
+        });
+        try
+        {
+            const failed = await h.connect();
+            const rejection = await Promise.race([
+                failed.loginResult,
+                Bun.sleep(2000).then(() => {
+                    throw new Error("Failure response deadline exceeded");
+                }),
+            ]);
+            expect(fields(rejection.p).ec).toEqual(sfs.short(3));
+            expect(h.claims.size).toBe(0);
+            expect(failed.packets).toHaveLength(2);
+            failed.socket.destroy();
+            const retry = await h.connect();
+            await Promise.race([
+                retry.initialized,
+                Bun.sleep(2000).then(() => {
+                    throw new Error("Retry deadline exceeded");
+                }),
+            ]);
+            expect(h.claims.size).toBe(1);
+            retry.socket.destroy();
+        }
+        finally
+        {
+            await h.close();
+        }
         expect(h.claims.size).toBe(0);
-        expect(failed.packets).toHaveLength(2);
-        failed.socket.destroy();
-        const retry = await h.connect();
-        await Promise.race([
-            retry.initialized,
-            Bun.sleep(2000).then(() => {
-                throw new Error("Retry deadline exceeded");
-            }),
-        ]);
-        expect(h.claims.size).toBe(1);
-        retry.socket.destroy();
-    }
-    finally
-    {
-        await h.close();
-    }
-    expect(h.claims.size).toBe(0);
-    expect(h.closed).toHaveLength(2);
-});
+        expect(h.closed).toHaveLength(2);
+    },
+);
 
 test("replacement waits for an abandoned mutation to settle before initializing the next session", async () => {
     const entered = Promise.withResolvers<void>();
