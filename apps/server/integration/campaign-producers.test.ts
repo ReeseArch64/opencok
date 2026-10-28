@@ -1,4 +1,4 @@
-import { planInventoryGrants } from "@opencok/services/inventory";
+import { planRealmInventoryGrants } from "@opencok/services/inventory-runtime";
 import { test, expect } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { eq } from "drizzle-orm";
@@ -87,7 +87,7 @@ async function fixture()
                     ),
             ),
             h.rules,
-            planInventoryGrants,
+            planRealmInventoryGrants,
         ),
         claims = new MailRewardService(
             createMailRewardExecutor(

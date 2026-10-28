@@ -30,7 +30,11 @@ import { javaMailBytes } from "@opencok/rules/avatar-mail";
 import type { CreateAllianceDto } from "@opencok/dtos/create-alliance.dto";
 import { playerGameEffect } from "@opencok/rules/power-resolver";
 import { generalSkillPoints } from "@opencok/hero/services/general-power";
-import { InventoryPlanner, type InventoryEffects } from "./inventory";
+import {
+    createInventoryPlanner,
+    type RealmInventoryPlanner,
+    type InventoryEffects,
+} from "@opencok/services/inventory-runtime";
 import { activityEconomy } from "@opencok/economy/services/activity-economy";
 import { AllianceScienceContext } from "./alliance-science";
 import { AllianceHelpContext } from "./alliance-help";
@@ -120,12 +124,13 @@ export class AllianceService
                     owner,
                     state,
                     this.rules,
-                    new InventoryPlanner(
+                    createInventoryPlanner(
                         state.inventory,
                         this.rules,
                         this.effects,
                         Number(state.now),
                     ),
+                    this.effects,
                 );
                 context.member();
                 const body = publishAllianceGift(context, giftEvent, type),
@@ -344,12 +349,13 @@ export class AllianceService
                     owner,
                     state,
                     this.rules,
-                    new InventoryPlanner(
+                    createInventoryPlanner(
                         state.inventory,
                         this.rules,
                         this.effects,
                         Number(state.now),
                     ),
+                    this.effects,
                 );
                 const body = await context.command(command, params);
                 const inventory = context.ledger.result(body);
@@ -404,7 +410,8 @@ export class AllianceContext
         readonly owner: string,
         readonly state: AllianceState,
         readonly rules: Rules,
-        readonly ledger: InventoryPlanner,
+        readonly ledger: RealmInventoryPlanner,
+        readonly effects: InventoryEffects,
     )
     {
         this.allianceId = text(state.inventory.profile, "allianceId");
@@ -418,8 +425,8 @@ export class AllianceContext
             this.rules,
             { kingdomId: this.rules.kingdomId, version: "12.06.0", now: Number(this.now) },
             generalSkillPoints(state.generals),
-            await this.ledger.effects.world(),
-            await this.ledger.effects.emperor(),
+            await this.effects.world(),
+            await this.effects.emperor(),
             id as Parameters<typeof playerGameEffect>[6],
         );
 

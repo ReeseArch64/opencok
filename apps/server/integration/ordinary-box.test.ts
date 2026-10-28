@@ -2,7 +2,7 @@ import { test, expect } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { eq, sql } from "drizzle-orm";
 import { createOrdinaryBoxDomain } from "@opencok/services/ordinary-box";
-import { InventoryService } from "@opencok/services/inventory";
+import { createInventoryService } from "@opencok/services/inventory-runtime";
 import { createInventoryExecutor } from "@opencok/repositories/inventory";
 import { boxWords, boxWord, boxCounter } from "@opencok/rules/ordinary-box";
 import { user_mixed_info } from "@opencok/drizzle/schema/opencok_kingdom/user_mixed_info";
@@ -63,7 +63,7 @@ async function fixture()
         { uuid: "boxes", ownerId: "owner", itemId: "210920", count: 3, value: 0 },
         { uuid: "keys", ownerId: "owner", itemId: "210921", count: 2, value: 0 },
     ]);
-    const inventory = new InventoryService(
+    const inventory = createInventoryService(
         createInventoryExecutor(h.db.db, h.authority, () => h.clock.now, {
             before: async (tx, owner, now) => {
                 await h.preparation.prepare(tx, owner, now);

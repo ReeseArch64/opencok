@@ -12,7 +12,7 @@ import type { Rules } from "@opencok/rules/game";
 import { cityInteger } from "@opencok/rules/city-progression";
 import { previewRewards } from "@opencok/rules/rewards";
 import { inventoryReplay } from "@opencok/economy/mappings/inventory";
-import { InventoryPlanner, type InventoryEffects } from "./inventory.ts";
+import { createInventoryPlanner, type InventoryEffects } from "@opencok/services/inventory-runtime";
 import { activityEconomy } from "@opencok/economy/services/activity-economy";
 
 export const postboxCommands = [
@@ -72,7 +72,7 @@ export class PostboxService
                 expiresAt: BigInt(now + 30 * 86_400_000),
             },
             async (inventory, store) => {
-                const planner = new InventoryPlanner(inventory, this.rules, this.effects, now);
+                const planner = createInventoryPlanner(inventory, this.rules, this.effects, now);
                 const economy = activityEconomy(planner);
                 const config = (key: string) => cityInteger(rule[key]);
                 const identifiers = (value: string, separator: string) => {

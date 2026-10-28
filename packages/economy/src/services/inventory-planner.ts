@@ -1,31 +1,11 @@
-import { confirmedContinuedCost } from "./continued-cost-spending";
-import { activityEconomy } from "@opencok/economy/services/activity-economy";
-import type { InventoryCommandResponse } from "@opencok/economy/contracts/responses/inventory";
-import {
-    inventoryPurchase,
-    inventoryUse,
-    inventoryBuyUse,
-    inventoryComposition,
-    inventoryChanges,
-    inventoryEvent,
-    inventoryResponse,
-    inventoryReplay,
-} from "@opencok/economy/mappings/inventory";
-import { InventoryLedger } from "@opencok/economy/domain/inventory-ledger";
-import { randomUUID } from "node:crypto";
-import type { InventoryItem } from "@opencok/economy/contracts/inventory";
-import type {
-    InventoryExecutor,
-    InventoryPlan,
-    InventoryState,
-} from "@opencok/contracts/inventory";
-import { long, num, text } from "@opencok/contracts/rows";
-import { errors, MOBILE_CLIENT_VERSION } from "@opencok/constants/game";
 import { GameError } from "@opencok/errors/game";
-import { Type, sfs, encode, decode, fields, str, int, type Fields } from "@opencok/messages/sfs";
-import { inventoryItem } from "@opencok/economy/mappings/inventory-item";
-import { resource } from "@opencok/mappings/city";
-import type { Rules } from "@opencok/rules/game";
+import { errors, MOBILE_CLIENT_VERSION } from "@opencok/constants/game";
+import { Type, sfs, str, int, type Fields } from "@opencok/messages/sfs";
+import type { InventoryCommandState, InventoryPlan } from "../contracts/inventory-planning.ts";
+import type { InventoryPlanningCatalogs } from "../contracts/inventory-catalogs.ts";
+import type { InventoryRuntime, InventoryResourceEffect } from "../contracts/inventory-runtime.ts";
+import type { InventoryItem } from "../contracts/inventory.ts";
+import { InventoryLedger } from "../domain/inventory-ledger.ts";
 import {
     inventoryCount,
     inventoryInteger,
@@ -34,164 +14,29 @@ import {
     inventoryPairs,
     inventoryRecipe,
     inventoryWeighted,
-} from "@opencok/economy/rules/inventory";
-import { serverFeature } from "@opencok/rules/power-context";
-import { playerGameEffect } from "@opencok/rules/power-resolver";
-import { generalSkillPoints } from "@opencok/hero/services/general-power";
+} from "../rules/inventory.ts";
+import {
+    inventoryPurchase,
+    inventoryUse,
+    inventoryBuyUse,
+    inventoryComposition,
+    inventoryChanges,
+    inventoryEvent,
+    inventoryResponse,
+} from "../mappings/inventory.ts";
+import { inventoryItem } from "../mappings/inventory-item.ts";
+import { resource } from "../mappings/resources.ts";
+import { activityEconomy } from "./activity-economy.ts";
 
-export interface InventoryEffects
-{
-    world(): Promise<ReadonlyMap<number, number>>;
-    emperor(): Promise<number | null | undefined>;
-}
-
-export class InventoryService
-{
-    constructor(
-        readonly execute: InventoryExecutor,
-        readonly rules: Rules,
-        readonly effects: InventoryEffects,
-        readonly now = Date.now,
-    )
-    {}
-
-    async command(owner: string, command: string, params: Fields): Promise<InventoryCommandResponse>
-    {
-        if (
-            ![
-                "item.buy",
-                "item.use",
-                "item.buyUse",
-                "item.compose",
-                "item.compose2",
-                "item.compose.suitequipment.store",
-            ].includes(command)
-        )
-        {
-            throw new GameError(errors.unsupported);
-        }
-
-        for (const key of ["num", "count", "pernum", "batch", "id"])
-        {
-            const value = params[key];
-
-            if (
-                value
-                && (value.type !== Type.Int
-                    || typeof value.value !== "number"
-                    || !Number.isInteger(value.value)
-                    || value.value < 0
-                    || value.value > 2147483647)
-            )
-            {
-                throw new GameError(errors.invalid);
-            }
-        }
-
-        for (const key of ["itemId", "uuid", "targetId"])
-        {
-            const value = params[key];
-
-            if (
-                value
-                && (value.type !== Type.String
-                    || typeof value.value !== "string"
-                    || value.value.length > 255
-                    || !value.value.isWellFormed())
-            )
-            {
-                throw new GameError(errors.invalid);
-            }
-        }
-
-        const operation = params.operationId;
-
-        if (
-            operation
-            && (operation.type !== Type.String
-                || typeof operation.value !== "string"
-                || !/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
-                    .test(
-                        operation.value,
-                    ))
-        )
-        {
-            throw new GameError(errors.invalid);
-        }
-
-        const request: Fields = {};
-
-        for (const key of Object.keys(params).sort())
-        {
-            if (!["operationId", "_cok_", "cmdBaseTime"].includes(key))
-            {
-                request[key] = params[key]!;
-            }
-        }
-
-        const requestId = operation ? (operation.value as string).toLowerCase() : randomUUID();
-        const bytes = encode(request);
-        const response = await this.execute(
-            { owner, requestId, command, request: bytes },
-            async (state) => {
-                const planner = new InventoryPlanner(state, this.rules, this.effects, this.now());
-                const body = await planner.command(command, decode(bytes));
-
-                return planner.result(body);
-            },
-        );
-
-        return inventoryReplay(response, requestId);
-    }
-
-    async grant(
-        owner: string,
-        operationId: string,
-        itemId: string,
-        count: number,
-        value = 0,
-    ): Promise<Fields>
-    {
-        inventoryCount(count);
-
-        if (!Number.isInteger(value) || value < 0 || value > 2147483647)
-        {
-            throw new GameError(errors.invalid);
-        }
-
-        const request = encode({
-            itemId: sfs.string(itemId),
-            count: sfs.int(count),
-            value: sfs.int(value),
-        });
-
-        return fields(
-            decode(
-                await this.execute(
-                    { owner, requestId: operationId, command: "inventory.grant", request },
-                    async (state) => {
-                        const planner = new InventoryPlanner(
-                            state,
-                            this.rules,
-                            this.effects,
-                            this.now(),
-                        );
-                        const item = planner.add(itemId, count, value);
-
-                        return planner.result(inventoryItem({ ...item }, this.rules));
-                    },
-                ),
-            ).body,
-        );
-    }
-}
-
-export class InventoryPlanner extends InventoryLedger<InventoryState, Rules>
+export class InventoryPlanner<
+    State extends InventoryCommandState = InventoryCommandState,
+    Catalogs extends InventoryPlanningCatalogs = InventoryPlanningCatalogs,
+> extends InventoryLedger<State, Catalogs>
 {
     constructor(
-        state: InventoryState,
-        rules: Rules,
-        readonly effects: InventoryEffects,
+        state: State,
+        rules: Catalogs,
+        readonly runtime: InventoryRuntime<State, Catalogs>,
         now: number,
     )
     {
@@ -213,7 +58,7 @@ export class InventoryPlanner extends InventoryLedger<InventoryState, Rules>
         if (
             params.hasCDTime?.value === true
             || (itemId === "200065"
-                && serverFeature(this.rules, "sale_badge1", {
+                && this.runtime.feature(this.rules, "sale_badge1", {
                     kingdomId: this.rules.kingdomId,
                     version: MOBILE_CLIENT_VERSION,
                     now: this.now,
@@ -233,7 +78,7 @@ export class InventoryPlanner extends InventoryLedger<InventoryState, Rules>
         if (
             batch > 0
             && rule.type === "7"
-            && !serverFeature(this.rules, "prep_cant_buy", {
+            && !this.runtime.feature(this.rules, "prep_cant_buy", {
                 kingdomId: this.rules.kingdomId,
                 version: MOBILE_CLIENT_VERSION,
                 now: this.now,
@@ -295,7 +140,7 @@ export class InventoryPlanner extends InventoryLedger<InventoryState, Rules>
             rule.civilizations
             && rule.civilizations !== "0"
             && !rule.civilizations.split(";").includes(
-                String(num(this.state.profile, "civilizationType")),
+                String(Number(this.state.profile["civilizationType"] ?? 0)),
             )
         )
         {
@@ -340,7 +185,7 @@ export class InventoryPlanner extends InventoryLedger<InventoryState, Rules>
         }
         else if (effectRule.type === "3")
         {
-            if (text(this.state.profile, "pf") === "cn1")
+            if (String(this.state.profile["pf"] ?? "") === "cn1")
             {
                 throw new GameError(errors.unsupported);
             }
@@ -354,21 +199,11 @@ export class InventoryPlanner extends InventoryLedger<InventoryState, Rules>
 
             const base = inventoryInteger(effectRule.para2);
             inventoryCount(base * count);
-            const state = await this.state.effects();
-            const bonus = playerGameEffect(
-                {
-                    ...state,
-                    profile: {
-                        ...state.profile,
-                        decomposeSuitEffect: state.profile.decomposesuiteffect ?? null,
-                    },
-                },
+            const bonus = await this.runtime.resourceBonus(
+                this.state,
                 this.rules,
-                { kingdomId: this.rules.kingdomId, version: MOBILE_CLIENT_VERSION, now: this.now },
-                generalSkillPoints(state.generals),
-                await this.effects.world(),
-                await this.effects.emperor(),
-                id as 100 | 101 | 102 | 103 | 104 | 158 | 159 | 160,
+                this.now,
+                id as InventoryResourceEffect,
             );
             const amount = Math.trunc(
                 Math.fround(base * Math.max(0, Math.fround(Math.fround(100 + bonus) / 100))),
@@ -408,7 +243,7 @@ export class InventoryPlanner extends InventoryLedger<InventoryState, Rules>
                         String(row.itemId) === "400000"
                     );
 
-                    if (!castle || num(castle, "level") < required)
+                    if (!castle || Number(castle["level"] ?? 0) < required)
                     {
                         throw new GameError(errors.unsupported);
                     }
@@ -416,18 +251,23 @@ export class InventoryPlanner extends InventoryLedger<InventoryState, Rules>
 
                 const bound = id >= 158 ? key : `${key}bind`;
 
-                if (id >= 158 && long(this.state.resource, bound) + BigInt(amount) > 2147483647n)
+                if (
+                    id >= 158
+                    && BigInt(String(this.state.resource[bound] ?? 0)) + BigInt(amount)
+                        > 2147483647n
+                )
                 {
                     throw new GameError(errors.invalid);
                 }
 
                 this.post(
                     `resource.${bound}`,
-                    long(this.state.resource, bound),
-                    long(this.state.resource, bound) + BigInt(amount),
+                    BigInt(String(this.state.resource[bound] ?? 0)),
+                    BigInt(String(this.state.resource[bound] ?? 0)) + BigInt(amount),
                     "inventory.effect",
                 );
-                this.resources[bound] = long(this.state.resource, bound) + BigInt(amount);
+                this.resources[bound] = BigInt(String(this.state.resource[bound] ?? 0))
+                    + BigInt(amount);
                 this.pushes.push({
                     command: "push.city.refresh",
                     body: resource({ ...this.state.resource, ...this.resources }),
@@ -567,7 +407,12 @@ export class InventoryPlanner extends InventoryLedger<InventoryState, Rules>
         }
 
         return {
-            confirmedSpending: confirmedContinuedCost(this.state, this.rules, this.now, this.items),
+            confirmedSpending: this.runtime.confirmedSpending(
+                this.state,
+                this.rules,
+                this.now,
+                this.items,
+            ),
             postings: this.postings,
             events: [
                 ...this.domainEvents,
@@ -585,32 +430,4 @@ export class InventoryPlanner extends InventoryLedger<InventoryState, Rules>
             response: inventoryResponse(body, this.pushes),
         };
     }
-}
-
-export function planInventoryGrants(
-    state: InventoryState,
-    rules: Rules,
-    grants: readonly { itemId: string; count: number; }[],
-    now: number,
-    costs: readonly { itemId: string; count: number; }[] = [],
-): InventoryPlan
-{
-    const planner = new InventoryPlanner(
-        state,
-        rules,
-        { world: async () => new Map(), emperor: async () => null },
-        now,
-    );
-
-    for (const cost of costs)
-    {
-        planner.spendItems(cost.itemId, inventoryCount(cost.count));
-    }
-
-    for (const grant of grants)
-    {
-        planner.add(grant.itemId, grant.count);
-    }
-
-    return planner.result({});
 }

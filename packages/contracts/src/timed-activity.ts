@@ -35,7 +35,8 @@ export interface PreparedActivity
 
 export type ActivityAction = `${TimedActivityAction}`;
 
-import type { InventoryState, InventoryPlan } from "./inventory";
+import type { InventoryState } from "./inventory";
+import type { InventoryPlan } from "@opencok/economy/contracts/inventory-planning";
 
 export interface ActivityState extends InventoryState
 {

@@ -3,7 +3,8 @@ import { randomInt, createHash } from "node:crypto";
 import { sfs, encode, decode, str } from "@opencok/messages/sfs";
 import { num, long, text, type Row } from "@opencok/contracts/rows";
 import type { ComebackActivity } from "@opencok/contracts/comeback";
-import type { InventoryState, InventoryPlan } from "@opencok/contracts/inventory";
+import type { InventoryState } from "@opencok/contracts/inventory";
+import type { InventoryPlan } from "@opencok/economy/contracts/inventory-planning";
 import {
     comebackFailure,
     comebackEnabled,
@@ -21,7 +22,7 @@ import { javaMailBytes } from "@opencok/rules/avatar-mail";
 import { previewRewards } from "@opencok/rules/rewards";
 import { comebackInfoView, comebackRewardView } from "@opencok/mappings/comeback";
 import { pinProgressionReward, grantNativeProgressionReward } from "./progression-rewards";
-import { InventoryPlanner, type InventoryEffects } from "./inventory";
+import { createInventoryPlanner, type InventoryEffects } from "@opencok/services/inventory-runtime";
 import { activityEconomy } from "@opencok/economy/services/activity-economy";
 import type { ActivityEconomy } from "@opencok/economy/contracts/activity-economy";
 import type { PreparedActivity } from "@opencok/contracts/timed-activity";
@@ -342,7 +343,7 @@ export async function planComebackLogin(
     prepare: (economy: ActivityEconomy) => Promise<PreparedActivity>,
 ): Promise<InventoryPlan>
 {
-    const ledger = new InventoryPlanner(state, rules, effects, Number(now));
+    const ledger = createInventoryPlanner(state, rules, effects, Number(now));
     const result = await prepare(activityEconomy(ledger));
 
     return ledger.result(decode(Buffer.from(result.response)));

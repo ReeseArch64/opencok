@@ -1,9 +1,10 @@
+import type { InventoryState } from "@opencok/contracts/inventory";
 import type { ChatNoticeCostReader } from "@opencok/contracts/chat-delivery";
 import { randomUUID, createHash } from "node:crypto";
-import type { InventoryExecutor } from "@opencok/contracts/inventory";
+import type { InventoryExecutor } from "@opencok/economy/contracts/inventory-planning";
 import { sfs, str, int, encode, type Fields } from "@opencok/messages/sfs";
 import { inventoryReplay } from "@opencok/economy/mappings/inventory";
-import { InventoryPlanner, type InventoryEffects } from "./inventory.ts";
+import { createInventoryPlanner, type InventoryEffects } from "@opencok/services/inventory-runtime";
 import { activityEconomy } from "@opencok/economy/services/activity-economy";
 import { long, text, num } from "@opencok/contracts/rows";
 import type { Rules } from "@opencok/rules/game";
@@ -16,7 +17,7 @@ export const noticeCommands = ["chat.notice", "chat.original.notice"];
 export class ChatNoticeService
 {
     constructor(
-        readonly execute: InventoryExecutor,
+        readonly execute: InventoryExecutor<InventoryState>,
         readonly rules: Rules,
         readonly effects: InventoryEffects,
         readonly now = Date.now,
@@ -82,7 +83,7 @@ export class ChatNoticeService
                     throw new GameError(errors.invalid, "social_rule");
                 }
 
-                const planner = new InventoryPlanner(state, this.rules, this.effects, now);
+                const planner = createInventoryPlanner(state, this.rules, this.effects, now);
                 const economy = activityEconomy(planner);
                 const existing = economy.quantity?.("200011") ?? 0;
 
@@ -159,7 +160,7 @@ export class ChatNoticeService
                 request: encode({ original: sfs.string(original) }),
             },
             async (state) => {
-                const planner = new InventoryPlanner(state, this.rules, this.effects, this.now());
+                const planner = createInventoryPlanner(state, this.rules, this.effects, this.now());
 
                 for (const posting of cost.postings)
                 {

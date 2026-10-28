@@ -1,8 +1,8 @@
 # Economy
 
 `economy` owns wallet/resource balance mutations, activity economic coordination
-and the inventory ledger, rules and responses under #611, #613, #615, #619 and
-#621, part of #558 W06. Full command planning, item persistence, production and
+and inventory commands, grants, ledger, rules and responses under #611, #613,
+#615, #619, #621 and #623, part of #558 W06. Item persistence, production and
 reservation protocols remain subsequent work. These extractions do not create a network service or a second mutation authority.
 
 ## Boundaries
@@ -71,8 +71,8 @@ posting and outbox message types belong to `ledger/contracts/mutation`. All
 maintained type consumers migrate; the old exports are removed, with no reverse
 facades. Economy and ledger no longer depend on the broad contracts package.
 This avoids the pre-existing contracts/Hero/Services cycle rather than extending
-it into economy. The shared inventory/timed-activity state/planning contracts and
-remaining InventoryPlanner implementation still await their domain migrations.
+it into economy. The shared timed-activity contracts and cross-domain power snapshot still await
+their domain migrations; inventory command contracts and planning move in #623.
 
 Seven tests pass with identical 57 assertions against the original and extracted
 adapter. The function bodies are unchanged apart from the structural ledger type
@@ -129,12 +129,11 @@ reads. `contracts/inventory-ledger` owns its narrow profile/resource/assets/item
 snapshot. The class implements the existing ActivityLedger port; it does not import
 horizontal Services, contracts, rules, mappings or repositories.
 
-The current InventoryPlanner extends this implementation with its existing command,
-item-effect and continued-cost coordination. Shared InventoryState extends the owned
-snapshot and retains only the additional command/effect state. Generic snapshot and
-catalog parameters preserve the subclass's precise types without coupling economy
-to those cross-domain contracts. Existing constructors and transaction call sites
-remain unchanged.
+InventoryPlanner extends this implementation with command, item-effect and
+continued-cost coordination. Generic snapshot and catalog parameters preserve its
+precise types without coupling economy to cross-domain contracts. The ledger
+extraction preserved constructors and transaction call sites; #623 moves the
+remaining command behavior behind an injected runtime port.
 
 The six ledger tests pass with 86 identical assertions against the original planner,
 the extracted ledger and the inheriting planner. Clock validation and input-item
@@ -149,6 +148,38 @@ transaction executor. No schema, saved-data rewrite or writer-authority change i
 introduced. Rollback uses the previous realm artifact against the same state.
 
 The ledger is 177 lines with one cohesive item/balance responsibility. The residual
-Services inventory module is 616 lines and remains under review for #558: command
-validation, cross-domain effects and continued-cost observation still require their
-own ports and extraction. This slice does not claim complete inventory ownership.
+616-line Services inventory module was the next migration target; #623 below
+extracts its command behavior. Inventory persistence remains under #558.
+
+## Inventory command ownership (#623)
+
+`services/inventory` owns command validation, request capture, receipt identity
+and grants. `services/inventory-planner` owns purchase/use/composition planning;
+`services/inventory-grants` owns grant/cost planning. The command state, plan and
+executor contracts now belong to economy. The planning catalog adds kingdom ID,
+materials and item definitions to the existing goods port.
+
+`contracts/inventory-runtime` injects feature checks, resource bonuses and
+confirmed-spending observation. The current `services/inventory-runtime` module
+outside economy composes existing power, feature and continued-cost functions with
+the owned classes. Its power callback preserves snapshot, world and emperor read
+order and the saved decompose-suite field conversion. All maintained consumers use
+explicit factories; the old `services/inventory` path is removed. AllianceContext
+receives its effects directly instead of reaching through the planner.
+
+Resource response mapping, schema and contract move with the command boundary.
+All eighteen native fields retain their order, signed bound balances, bigint
+precision, zero defaults and legacy clamping. Shared InventoryState now extends
+the owned command state only to add the cross-domain power snapshot callback.
+The existing horizontal repository still executes fenced transactions and persists
+plans, receipts, postings and outbox together. This is not complete persistence or
+process-authority migration, and the composition adapter remains tracked under #558.
+
+Seven baseline command/resource tests retain 53 assertions before and after the
+move. Three additional domain tests verify feature short-circuiting, exact runtime
+inputs, float32 resource rounding, bigint credit precision, callback order and
+failure-before-consumption. Two composed server tests verify real power evaluation,
+read order and failure propagation. Existing PostgreSQL scenarios exercise the
+factories through inventory, campaign, timed economy, continued cost, item effects,
+equipment, alliances and shops. No dependency, schema, saved-state format or writer
+authority changes; rollback uses the prior realm artifact with the same data.

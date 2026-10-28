@@ -12,7 +12,7 @@ import type { CityProgressionStore } from "@opencok/contracts/city-progression";
 import { num } from "@opencok/contracts/rows";
 import { encode, decode } from "@opencok/messages/sfs";
 import type { Rules } from "@opencok/rules/game";
-import type { InventoryEffects } from "./inventory";
+import type { InventoryEffects } from "@opencok/services/inventory-runtime";
 import type { CityDomain } from "./city-domain.ts";
 import { CityProgressionContextFactory } from "./city-progression-context-factory.ts";
 
