@@ -263,10 +263,13 @@ import { createRealmSocialExecutor } from "@opencok/connection/realm-social";
 import { createAvatarTickets } from "@opencok/storage/avatar-tickets";
 import { GeneralDrawDomain } from "@opencok/hero/services/general-draws";
 import { AllianceIdentity } from "@opencok/alliance/services/identity";
-import { createRealmAllianceService } from "./composition/alliance";
-import { createAllianceRepository } from "@opencok/repositories/alliance-gameplay";
 import { AllianceScienceRecoveryReader } from "@opencok/alliance/repositories/science-recovery";
-import { createAlliancePublicationReader, publishAllianceMutation } from "./composition/alliance";
+import {
+    createAllianceRepository,
+    createRealmAllianceService,
+    createAlliancePublicationReader,
+    publishAllianceMutation,
+} from "./composition/alliance";
 import { relayMutationEvent } from "@opencok/repositories/mutation";
 import { GeneralsDomain } from "@opencok/hero/services/generals";
 import { createRealmEquipmentDomains } from "./composition/equipment";
