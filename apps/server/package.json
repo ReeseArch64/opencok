@@ -27,7 +27,8 @@
     "@opencok/services": "workspace:*",
     "@opencok/hero": "workspace:*",
     "@opencok/policy": "workspace:*",
-    "@opencok/shop": "workspace:*"
+    "@opencok/shop": "workspace:*",
+    "@opencok/player": "workspace:*"
   },
   "devDependencies": {
     "@opencok/api": "workspace:*",

@@ -85,6 +85,7 @@
         "@opencok/env": "workspace:*",
         "@opencok/hero": "workspace:*",
         "@opencok/mappings": "workspace:*",
+        "@opencok/player": "workspace:*",
         "@opencok/policy": "workspace:*",
         "@opencok/repositories": "workspace:*",
         "@opencok/resources": "workspace:*",
@@ -581,8 +582,18 @@
     },
     "packages/player": {
       "name": "@opencok/player",
+      "dependencies": {
+        "@opencok/constants": "workspace:*",
+        "@opencok/contracts": "workspace:*",
+        "@opencok/drizzle": "workspace:*",
+        "@opencok/errors": "workspace:*",
+        "@opencok/messages": "workspace:*",
+        "drizzle-orm": "0.45.4",
+      },
       "devDependencies": {
         "@opencok/config": "workspace:*",
+        "@opencok/rules": "workspace:*",
+        "@opencok/services": "workspace:*",
         "@types/bun": "catalog:",
         "typescript": "catalog:",
       },

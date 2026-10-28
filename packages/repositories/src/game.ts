@@ -92,7 +92,6 @@ import { switches } from "@opencok/drizzle/schema/opencok_kingdom/switches";
 import { parse_info } from "@opencok/drizzle/schema/opencok_kingdom/parse_info";
 import { WORLD_NEWS_PUSH_TYPE } from "@opencok/constants/game";
 import { setPushPreference } from "./push-preferences.ts";
-import { updateProfilePreference } from "./profile-preferences.ts";
 import { nicknameOccupied } from "./nickname.ts";
 import { readCelebrityDescription, saveCelebrityDescription } from "./celebrity.ts";
 import { celebrity } from "@opencok/drizzle/schema/opencok_kingdom/celebrity";
@@ -115,7 +114,6 @@ import type {
     CityState,
     LoginConfigurationState,
     PushPreference,
-    ProfilePreferenceField,
 } from "@opencok/contracts/game";
 import { num, type Row } from "@opencok/contracts/rows";
 import { checkPlayerSummaryStore, getPlayerSummariesByIds } from "./players.ts";
@@ -581,23 +579,6 @@ export class Database implements GameStore, FriendshipMineStore
     nicknameOccupied(name: string): Promise<boolean>
     {
         return nicknameOccupied(this.databases.global.db, name);
-    }
-
-    updateProfilePreference(
-        uid: string,
-        field: ProfilePreferenceField,
-        now: number,
-        readValue: () => number,
-    ): Promise<number | undefined>
-    {
-        return updateProfilePreference(
-            this.kingdom.db,
-            uid,
-            this.config.kingdomId,
-            field,
-            now,
-            readValue,
-        );
     }
 
     getPowerByPlayerId(uid: string, now: number)
