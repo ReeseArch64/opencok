@@ -862,7 +862,6 @@
     "packages/rules": {
       "name": "@opencok/rules",
       "dependencies": {
-        "@opencok/alliance": "workspace:*",
         "@opencok/building": "workspace:*",
         "@opencok/constants": "workspace:*",
         "@opencok/contracts": "workspace:*",

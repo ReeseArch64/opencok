@@ -1,6 +1,10 @@
 import type { ReconnectProgressState, ReconnectProgressWrite } from "@opencok/contracts/reconnect";
 import type { ProductionRate } from "@opencok/production/contracts/production";
-import type { ProductionEffectProviders, ProductionWorldDecoder } from "../contracts/runtime.ts";
+import type {
+    ProductionEffectProviders,
+    ProductionWorldDecoder,
+    ProductionAllianceScienceValidator,
+} from "../contracts/runtime.ts";
 import { long, num, type Row } from "@opencok/contracts/rows";
 import type { Rules } from "@opencok/rules/game";
 import { MOBILE_CLIENT_VERSION } from "@opencok/constants/game";
@@ -13,7 +17,6 @@ import { worldPowerEffects } from "@opencok/rules/power-world";
 import { serverFeature } from "@opencok/rules/power-context";
 import { productionScale } from "@opencok/production/rules/settlement";
 import { generalSkillPoints } from "@opencok/hero/services/general-power";
-import { allianceScienceRule } from "@opencok/rules/alliance-science";
 import { resourceGeneralBuildingEffect } from "@opencok/hero/services/general-building-effects";
 
 export async function productionContext(
@@ -22,6 +25,7 @@ export async function productionContext(
     now: bigint,
     services: ProductionEffectProviders,
     decodeWorldPowerEffects: ProductionWorldDecoder,
+    validateAllianceScience: ProductionAllianceScienceValidator,
 )
 {
     if (!services.worldPowerEffects)
@@ -54,7 +58,7 @@ export async function productionContext(
                         return row;
                     }
 
-                    allianceScienceRule(rules, num(row, "scienceId"), num(row, "level") + 1);
+                    validateAllianceScience(num(row, "scienceId"), num(row, "level") + 1);
 
                     return { ...row, level: num(row, "level") + 1 };
                 }),

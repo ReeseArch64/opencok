@@ -18,11 +18,9 @@ import type { AllianceApplicationContext } from "@opencok/alliance/contracts/app
 import { errors } from "@opencok/constants/game";
 import { GameError } from "@opencok/errors/game";
 import { AllianceGovernanceService } from "@opencok/alliance/services/governance";
-import { AllianceMembershipPolicy } from "@opencok/alliance/rules/membership";
 import { AllianceGovernanceMapper } from "@opencok/alliance/mappings/governance";
 import type { AllianceGovernanceContext } from "@opencok/alliance/contracts/governance";
 import { AllianceScienceService } from "@opencok/alliance/services/science";
-import { AllianceSciencePolicy } from "@opencok/alliance/rules/science";
 import { AllianceScienceMapper } from "@opencok/alliance/mappings/science";
 import type { AllianceScienceContext } from "@opencok/alliance/contracts/science";
 import { rankingCalendar } from "@opencok/rules/community-ranking";
@@ -69,7 +67,11 @@ import { allianceScienceEffects } from "@opencok/rules/power-memberships";
 import { text, num, long } from "@opencok/contracts/rows";
 import { cityInteger } from "@opencok/rules/city-progression";
 import { cityBuildingParameter } from "@opencok/rules/military";
-import { allianceFailure } from "@opencok/rules/alliance";
+import {
+    allianceFailure,
+    createRealmAllianceMembershipPolicy,
+    createRealmAllianceSciencePolicy,
+} from "./alliance-policy";
 
 type RealmAllianceState = AllianceGameplayState<InventoryState>;
 
@@ -136,7 +138,7 @@ export function createRealmAllianceGifts(context: AllianceGiftContext<RealmInven
 
 export function createRealmAllianceScience(context: AllianceScienceContext<RealmInventoryPlanner>)
 {
-    const policy = new AllianceSciencePolicy({ num, cityInteger, allianceFailure });
+    const policy = createRealmAllianceSciencePolicy();
 
     return new AllianceScienceService(
         context,
@@ -172,7 +174,7 @@ export function createRealmAllianceGovernance(context: AllianceGovernanceContext
     return new AllianceGovernanceService(
         context,
         runtime,
-        new AllianceMembershipPolicy(runtime),
+        createRealmAllianceMembershipPolicy(),
         new AllianceGovernanceMapper({ text }),
     );
 }
@@ -184,7 +186,7 @@ export function createRealmAllianceApplications(context: AllianceApplicationCont
     return new AllianceApplicationsService(
         context,
         runtime,
-        new AllianceMembershipPolicy({ ...runtime, cityInteger }),
+        createRealmAllianceMembershipPolicy(),
         new AllianceApplicationsMapper(runtime),
     );
 }
@@ -209,7 +211,7 @@ export function createRealmAllianceMembership(
     return new AllianceMembershipService(
         context,
         runtime,
-        new AllianceMembershipPolicy({ ...runtime, cityInteger }),
+        createRealmAllianceMembershipPolicy(),
         new AllianceMembershipMapper({
             allianceFailure,
             allianceStableId: AllianceIdentity.stableId,
@@ -235,7 +237,7 @@ export function createRealmAllianceQueries(context: AllianceQueryContext)
 export function createRealmAllianceSnapshot(context: AllianceSnapshotContext)
 {
     const runtime = { text, num, long, allianceFailure };
-    const policy = new AllianceMembershipPolicy({ ...runtime, cityInteger, errors });
+    const policy = createRealmAllianceMembershipPolicy();
 
     return new AllianceSnapshotService(
         context,
@@ -281,7 +283,7 @@ export function createRealmAllianceContext(
         rules,
         ledger,
         runtime,
-        new AllianceMembershipPolicy(runtime),
+        createRealmAllianceMembershipPolicy(),
         {
             help: createRealmAllianceHelp,
             gifts: createRealmAllianceGifts,
@@ -315,7 +317,7 @@ export function createRealmAllianceService(
             throw new GameError(errors.unsupported);
         },
     };
-    const policy = new AllianceMembershipPolicy(runtime);
+    const policy = createRealmAllianceMembershipPolicy();
 
     return new AllianceService(
         repository,
@@ -358,8 +360,8 @@ export function publishAllianceMutation(
         publish,
         rules,
         { ...runtime, scienceEffects: (sciences) => allianceScienceEffects(sciences, rules) },
-        new AlliancePublicationMapper(runtime, new AllianceMembershipPolicy(runtime)),
+        new AlliancePublicationMapper(runtime, createRealmAllianceMembershipPolicy()),
         new AllianceHelpMapper(runtime),
-        new AllianceScienceMapper(runtime, new AllianceSciencePolicy(runtime)),
+        new AllianceScienceMapper(runtime, createRealmAllianceSciencePolicy()),
     ).deliver(payload);
 }

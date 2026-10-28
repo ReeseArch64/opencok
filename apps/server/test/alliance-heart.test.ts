@@ -1,19 +1,23 @@
 import { test, expect } from "bun:test";
-import { allianceHeartRule } from "@opencok/rules/alliance-heart";
-import { allianceHeartLogin, allianceHeartNotification } from "@opencok/mappings/alliance-heart";
+import { createRealmAllianceHeartPolicy } from "../src/composition/alliance-heart";
+import { AllianceHeartMapper } from "@opencok/alliance/mappings/heart";
 import { compactPoint } from "@opencok/services/world";
 import { loadRules } from "@opencok/resources/rules";
 import { sfs, Type } from "@opencok/messages/sfs";
 import { createRealmGameService } from "../src/composition/game";
 import type { GameStore } from "@opencok/contracts/game";
+
+const policy = createRealmAllianceHeartPolicy();
+const mapper = new AllianceHeartMapper();
+
 test("heart catalogs and native seconds, milliseconds and Java integer map fields retain their wire contracts", async () => {
     const rules = await loadRules();
-    expect(allianceHeartRule(rules, "209818")).toEqual({ effect: "1", duration: 60 });
-    expect(() => allianceHeartRule(rules, "210059")).toThrow();
-    expect(allianceHeartLogin(["one", "two"], "1", 2147483648000n).heart_time).toEqual(
+    expect(policy.rule(rules, "209818")).toEqual({ effect: "1", duration: 60 });
+    expect(() => policy.rule(rules, "210059")).toThrow();
+    expect(mapper.login(["one", "two"], "1", 2147483648000n).heart_time).toEqual(
         sfs.long(2147483648000n),
     );
-    const notification = allianceHeartNotification(4, "1", 2147483648000n, "recipient", "sender");
+    const notification = mapper.notification(4, "1", 2147483648000n, "recipient", "sender");
     expect(Object.keys(notification)).toEqual([
         "point",
         "effecttype",

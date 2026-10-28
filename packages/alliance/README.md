@@ -188,20 +188,17 @@ owned reader directly; the former shared recovery module is removed.
 | Former source                                       | Owned destination                               | Composition and retirement                                          |
 | --------------------------------------------------- | ----------------------------------------------- | ------------------------------------------------------------------- |
 | Services `alliance-science`                         | `services/science`, contracts and native Mapper | Required realm factory; legacy Service removed                      |
-| Rules `alliance-science`                            | `rules/science`                                 | Two bound compatibility exports described below                     |
+| Rules `alliance-science`                            | `rules/science`                                 | Compatibility exports retired in #685 through realm composition     |
 | Inline science/offer/donation/publication responses | `mappings/science`                              | Owned Service and realm-composed shared publication adapter         |
 | Aggregate science/history/donation reads and writes | `repositories/science`                          | Same transaction, allowed alliances, participant locks and ordering |
 | Repositories `alliance-recovery`                    | `repositories/science-recovery`                 | Realm recovery loop and PostgreSQL integration; legacy path removed |
 | Shared science state/write fields                   | `contracts/science`                             | Shared Contracts aggregate extends the owned interfaces             |
 
-The Rules facade retains only `allianceScienceRule` and `allianceScienceStage`,
-bound to one owned Policy instance. Its remaining direct consumers are Production
-`services/context.ts`, Rules `tests/alliance.test.ts` and Server
-`integration/alliances.test.ts`. Alliance owns retirement under #558 W20: inject the
-policy into Production and migrate these catalog tests before removing the binding.
-The former row/count exports have no remaining consumers and are removed. Shared
-membership coordination, power effects and aggregate publication still have their
-own migration work; this slice does not claim their completion.
+The former Rules facade retained only `allianceScienceRule` and
+`allianceScienceStage`, bound to the owned Policy. Its Production, catalog-test and
+Server integration consumers migrate in #685 as described under policy composition
+below. The former row/count exports were already removed. Shared power effects and
+semantic catalog definitions retain their own migration work.
 
 The 517-line science Service was reviewed against ADR-0016's size trigger. It
 coordinates one coupled donation/research lifecycle through six methods and a
@@ -260,15 +257,15 @@ receipt, outbox, save format or authority ownership changes.
 | Former source                                               | Owned destination                                          | Composition and retirement                                                                   |
 | ----------------------------------------------------------- | ---------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
 | Services `alliances` governance command tail and attributes | `services/governance`, `mappings/governance`, command enum | Required realm-composed factory after the existing membership and specialized dispatch gates |
-| Rules `alliance` policy functions                           | `rules/membership`                                         | Bound compatibility exports; existing error construction stays in Rules                      |
+| Rules `alliance` policy functions                           | `rules/membership`                                         | Compatibility exports retired in #685; realm composes existing errors                        |
 | Aggregate alliance/member/blacklist persistence             | `repositories/governance`                                  | Same transaction and operation order; retire shared adapter with W08/W20 aggregate migration |
 | Shared governance state/write fields                        | `contracts/governance`                                     | Shared Contracts aggregate extends the owned interfaces                                      |
 
-The Rules compatibility binding has direct consumers in Services `alliances`,
-Services `alliance-publication`, Rules `alliance-science`, Rules
-`tests/alliance.test.ts` and Server `src/composition/alliance.ts`. Alliance owns
-retirement under #558 W20: migrate coordinator/publication policy injection and
-catalog tests, then relocate the shared error binding. The unused free
+At the governance extraction, the Rules compatibility binding served the shared
+coordinator/publication, science binding, catalog tests and realm composition.
+Those consumers migrate through the later slices and #685, completing this facade
+retirement under #558 W20 with policy injection, catalog-test relocation and the
+realm error binding. The unused free
 `allianceCapacity` export is removed; the policy retains capacity and its default
 entry evaluation. Application/invitation lifecycle follows in #671; directory/search,
 membership mutations follow in #673, while aggregate orchestration and publication
@@ -711,6 +708,92 @@ checks, frozen install, lint, formatting and realm build pass.
 
 Deploy or roll back the complete realm artifact and lockfile. No schema, save,
 environment or client resource conversion is required. Preserve memberships,
-production checkpoints, inventories, receipts and outbox. Remaining policy bindings,
-semantic catalogs and effect ownership stay tracked under #558 W08/W14/W20.
+production checkpoints, inventories, receipts and outbox. The remaining policy
+bindings are retired below; semantic catalogs and effect ownership stay tracked
+under #558 W08/W14/W20.
 Native-device, production-load and process-authority acceptance remain separate.
+
+## Policy composition and facade retirement
+
+After #685, `apps/server/src/composition/alliance-policy.ts` constructs the owned
+membership and science policies with the existing record readers, integer checks,
+error constants and `GameError` adapter. The default code and `alliance_gameplay`
+reason remain unchanged. Alliance Services and Mappers receive these policies from
+realm factories; the implementations remain in `rules/membership` and `rules/science`.
+
+Production receives a required next-level validator through its runtime contract.
+The realm binds the current catalog to the actual science policy. Validation still
+runs only when projecting a pending research completion at or after its deadline,
+at the same position before the projected row changes. Production adds no Alliance
+workspace dependency. Persisted deadlines, rate schedules, settlement and receipts
+remain unchanged.
+
+| Retired source                 | Replacement and callers                                                            | Retirement status                                           |
+| ------------------------------ | ---------------------------------------------------------------------------------- | ----------------------------------------------------------- |
+| Rules `alliance`               | Owned membership policy and realm error/policy factories                           | All exports removed after realm and catalog-test migration  |
+| Rules `alliance-science`       | Owned science policy, injected Production validation and realm integration binding | Both bound exports removed                                  |
+| Rules `tests/alliance.test.ts` | Server `test/alliance-policy.test.ts` using actual realm factories                 | Four catalog tests and all 21 original assertions relocated |
+
+Rules has no remaining Alliance import; its direct workspace dependency and single
+lockfile entry are removed. Relocating the catalog tests removes their obsolete
+undeclared Resources entry and the Rules-to-Resources cycle entry, reducing the
+recorded baseline from 71 to 69 without changing a guardrail. All four original
+catalog tests retain 21 assertions; a composed-error test adds eight. Twenty-one
+structural comparisons verify policy bindings, production context, callback and
+relocated tests.
+
+`allianceScienceEffects` remains in Rules for profile/ranking/player-effect and
+publication consumers. Its signed-32 catalog-key arithmetic and floating-point
+accumulation differ from the local context sum and must retain a separate migration.
+Semantic catalogs and broader process authority remain #558 work. Deploy or roll
+back the complete realm artifact and lockfile with unchanged schema, saved state,
+environment and client resources; preserve memberships, research, production,
+inventories, receipts and outbox.
+
+## Alliance Heart command, publication and persistence ownership
+
+The larger #685 delivery also moves the existing `heart.send` and `heart.init`
+workflow into Alliance. `services/heart` specializes the existing Base activity
+contract with a bounded Heart context; `services/heart-publication` owns event
+validation and delivery. The policy, Mapper, response schemas, state/write/response
+contracts and command enum live beside them. Application composition supplies the
+actual record readers, recipient validation, integer checks, errors and connected
+player lookup. City retains transaction and inventory ownership.
+
+Sending validates same-alliance membership, recipient realm, inventory UUID and
+owned castle points before consuming exactly one item. It retains error `152027`
+for membership mismatch, the existing general failure code/reason, and the same
+clock and millisecond deadline. The online lookup still occurs after consumption.
+Online recipients receive the private sender notification; offline recipients with
+a castle retain a pending delivery. The native response and map notifications keep
+their field order, string/Long representation and observer deduplication. Sender
+name evaluation stays lazy for the online-recipient event.
+
+Initialization validates the pending batch, acknowledges its exact saved IDs and
+returns the same sender/effect/time fields. Persistence retains advisory lock
+`728214`, ordered point locks, owner predicates, seconds conversion at the database
+boundary, the 64-row delivery bound and the 128-owner recovery bound. Duplicate or
+stale acknowledgments reject. No extra fence or independent transaction is added.
+
+| Former source                                        | Owned destination                                                        | Integration and retirement                                                                    |
+| ---------------------------------------------------- | ------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------- |
+| Services `alliance-heart`                            | Heart command/publication Services and bounded context/runtime contracts | Realm domain construction, relay and recovery use application composition; old module removed |
+| Rules, Mappings and Validations `alliance-heart`     | `rules/heart`, `mappings/heart`, `validations/heart`                     | Actual catalog/error bindings stay in the realm; shared modules removed                       |
+| Contracts `alliance-heart` and response declarations | Owned Heart state/write and response contracts                           | City imports owned state/write contracts directly; old declarations removed                   |
+| Repositories `alliance-heart`                        | `repositories/heart` with injected recipient/integer checks              | City read/write ports and recovery retain their call positions; old module removed            |
+
+Existing wire and PostgreSQL tests migrate their imports to actual realm composition.
+Three owned persistence tests add 35 assertions for locks, bounds, write order,
+stale acknowledgments and delivery identity. Eleven structural comparisons cover
+both complete workflows, publication, all Mapper bodies/defaults, the item rule
+and schemas; three more compare complete repository methods. The native wire test
+retains nine assertions and the five disposable PostgreSQL Heart tests retain 42.
+Final package validation passes 468 tests/558,123 assertions; server validation
+passes 1,506 tests/245,728 assertions and one snapshot. The four broader PostgreSQL
+suites retain 28 tests/284 assertions. Affected workspace types, architecture
+tests/types, frozen install, lint, formatting and realm build pass. No new
+dependency, schema, migration, environment or client artifact is introduced.
+Deploy or roll back the complete realm build while retaining pending hearts, item
+receipts, world-point state and mutation outbox. This completes the existing Heart
+workflow migration; shared science effects, semantic catalogs and the remaining
+#558 process/domain work stay open.

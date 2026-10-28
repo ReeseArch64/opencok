@@ -15,3 +15,5 @@ export interface ProductionEffectProviders
 }
 
 export type ProductionWorldDecoder = (records: ReadonlyMap<string, string>) => WorldPowerEffect[];
+
+export type ProductionAllianceScienceValidator = (id: number, level: number) => void;

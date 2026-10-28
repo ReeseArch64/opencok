@@ -4,7 +4,7 @@ import type {
     AllianceHeartResponse,
     AllianceHeartLoginResponse,
     AllianceHeartNotificationResponse,
-} from "@opencok/contracts/responses/alliance-heart";
+} from "../contracts/responses/alliance-heart";
 
 export const allianceHeartSchema = z.strictObject({
     worldpoint: field.string,

@@ -14,6 +14,7 @@ import { command_receipt } from "@opencok/drizzle/schema/opencok_kingdom/command
 import { economy_posting } from "@opencok/drizzle/schema/opencok_kingdom/economy_posting";
 import { createAllianceRepository, createRealmAllianceService } from "../src/composition/alliance";
 import { createCityProductionBoundary } from "@opencok/production/repositories/city-boundary";
+import { createRealmAllianceSciencePolicy } from "../src/composition/alliance-policy";
 import { createRealmResearchDomain } from "../src/composition/research";
 import { fields, str, int, sfs, type Fields } from "@opencok/messages/sfs";
 import { cityHarness } from "./support/city";
@@ -393,9 +394,7 @@ test(
             "@opencok/drizzle/schema/opencok_kingdom/building_production"
         );
         const { decodeProductionRates } = await import("@opencok/production/mappings/production");
-        const { allianceScienceStage, allianceScienceRule } = await import(
-            "@opencok/rules/alliance-science"
-        );
+        const { allianceScienceStage, allianceScienceRule } = createRealmAllianceSciencePolicy();
         const scienceId = 251200,
             total = allianceScienceStage(allianceScienceRule(h.rules, scienceId), 0).total;
         await h.db.db

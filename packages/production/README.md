@@ -38,6 +38,11 @@ writes roll back with the economic mutation.
 The context keeps the existing effect timeline, alliance research deadlines, Hero
 building contributions, boost expiry, troop upkeep, starvation/weakness settlement and
 rate/capacity rounding. Its world decoder is injected; the calculations are unchanged.
+After #685, the next alliance-science level is validated through a required callback
+composed from the owned Alliance policy in the realm. Validation stays at the same
+point in the projected research timeline, with the same catalog, integer checks and
+errors. Production no longer imports the Rules science facade and gains no Alliance
+workspace dependency.
 The city boundary runs before/after the existing change callback in the same transaction,
 including final earned resources for demolished buildings.
 

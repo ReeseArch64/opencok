@@ -51,7 +51,7 @@ import { createRealmCosmeticRepository } from "./skin-persistence";
 import { readPrayer, writePrayer } from "@opencok/repositories/prayer";
 import { createRealmRecallTaskRepository } from "./recall-task-persistence";
 import { readRegionalRecall, writeRegionalRecall } from "@opencok/repositories/regional-recall";
-import { readAllianceHeart, writeAllianceHeart } from "@opencok/repositories/alliance-heart";
+import { readAllianceHeart, writeAllianceHeart } from "./alliance-heart";
 import { readPlayerItemGifts, writePlayerItemGifts } from "@opencok/repositories/player-item-gifts";
 import {
     readSeasonalExchange,

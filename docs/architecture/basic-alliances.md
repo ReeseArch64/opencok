@@ -162,8 +162,13 @@ queue. Leaving invalidates that player's outstanding help requests.
 After #667, Alliance owns the science Service, policies, native Mapper, bounded
 contracts and research/donation persistence and recovery reader. Realm composition
 injects actual numeric, RNG, calendar and economy collaborators. Shared aggregates
-retain their transaction and publication ordering; Production and catalog tests
-retain a tracked binding to the owned policy until their consumers migrate.
+retain their transaction and publication ordering. After #685, realm composition
+binds the owned membership/science policies directly and supplies the production
+context with a next-level validator. The same catalog check runs at the original
+research timeline boundary. Catalog-backed policy tests live in the server suite;
+the two shared Rules facades and their workspace dependency are retired. Shared
+science-effect projection retains its distinct signed-32 catalog identities and
+floating-point accumulation until its own migration.
 
 Donation offers persist their costs, contribution and progress outcomes. Opening
 an existing offer does not reroll it. A successful donation consumes resources or
@@ -236,6 +241,14 @@ profile and membership rows to identify the same alliance.
 Publication retries do not repeat economic or progression mutations. PostgreSQL
 remains authoritative when a recipient is offline; initialization reconstructs
 membership, science and available rewards from saved state.
+
+After #685, Alliance also owns the existing Heart item command, pending-delivery
+initialization and publication workflow. The realm injects native errors, recipient
+validation and connected-player lookup; City retains the inventory transaction.
+The owned repository preserves the advisory lock, point lock order, pending row
+bounds and exact acknowledgment identities. Map observers and private recipient
+notifications retain their ordering and payloads. Source relocation changes no
+Heart item identity, saved deadline or delivery authority.
 
 No new external dependency, service, environment setting or schema migration is
 required. Back up the existing kingdom database before deployment. Deploy the
