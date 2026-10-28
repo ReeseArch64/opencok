@@ -1,5 +1,6 @@
-import type { InventoryState, InventoryItem } from "@opencok/contracts/inventory";
-import type { EconomyPosting, MutationEvent } from "@opencok/contracts/mutation";
+import type { InventoryItem } from "@opencok/economy/contracts/inventory";
+import type { InventoryState } from "@opencok/contracts/inventory";
+import type { EconomyPosting, MutationEvent } from "@opencok/ledger/contracts/mutation";
 import type { Rules } from "@opencok/rules/game";
 import { continuedCostPeriod, continuedCostAmount } from "@opencok/rules/continued-cost";
 import { continuedCostSpending } from "@opencok/mappings/continued-cost";

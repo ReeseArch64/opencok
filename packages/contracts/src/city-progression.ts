@@ -4,7 +4,7 @@ import type { GeneralRankingWeights } from "@opencok/hero/contracts/generals";
 import type { WorldResourceOwnerSnapshot } from "./world-point-detail";
 import type { Row } from "./rows";
 import type { PlayerEffectSnapshot } from "./power";
-import type { ActivityEconomy } from "./timed-activity";
+import type { ActivityEconomy } from "@opencok/economy/contracts/activity-economy";
 
 export interface QuestState
 {

@@ -3,7 +3,7 @@ import { GameError } from "@opencok/errors/game";
 import { errors } from "@opencok/constants/game";
 import { resourceOwnerRuleContext } from "./world-resource-owner-context";
 import { resourceGeneralBuildingEffect } from "@opencok/hero/services/general-building-effects";
-import type { ActivityEconomy } from "@opencok/contracts/timed-activity";
+import type { ActivityEconomy } from "@opencok/economy/contracts/activity-economy";
 import type { CityProgressionStore } from "@opencok/contracts/city-progression";
 import type { Rules } from "@opencok/rules/game";
 import { cityInteger } from "@opencok/rules/city-progression";

@@ -1,5 +1,6 @@
+import type { ActivityEconomy } from "@opencok/economy/contracts/activity-economy";
 import type { Row } from "./rows";
-import type { MutationCommand } from "./mutation";
+import type { MutationCommand } from "@opencok/ledger/contracts/mutation";
 import type { TimedActivityAction } from "@opencok/enums/timed-activity-action";
 
 export interface TimedActivity
@@ -35,45 +36,6 @@ export interface PreparedActivity
 export type ActivityAction = `${TimedActivityAction}`;
 
 import type { InventoryState, InventoryPlan } from "./inventory";
-
-export interface ActivityEconomy
-{
-    event?(event: import("./mutation").MutationEvent): void;
-    takeItemGrants?(): readonly { itemId: string; count: number; }[];
-    push?(command: string, body: Uint8Array): void;
-    gold(delta: bigint): void;
-    crystal?(delta: bigint): void;
-    winPoints?(delta: bigint): void;
-    civilizationScore?(delta: bigint): void;
-    balance?(asset: string): bigint;
-    quantity?(itemId: string): number;
-    itemState?(itemId: string): import("./inventory").InventoryItem | undefined;
-    consumeItem?(uuid: string, count: number): void;
-    ownedItem?(uuid: string): { itemId: string; count: number; };
-    resource(
-        asset:
-            | "wood"
-            | "stone"
-            | "iron"
-            | "food"
-            | "silver"
-            | "woodbind"
-            | "stonebind"
-            | "ironbind"
-            | "foodbind"
-            | "chip"
-            | "diamond"
-            | "dragon_food"
-            | "dragon_gold"
-            | "sandstone"
-            | "diamondstone"
-            | "marble"
-            | "granite"
-            | "limestone",
-        delta: bigint,
-    ): void;
-    item(itemId: string, delta: number): void;
-}
 
 export interface ActivityState extends InventoryState
 {

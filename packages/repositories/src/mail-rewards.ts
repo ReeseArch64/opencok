@@ -1,5 +1,5 @@
 import type { InventoryPlan } from "@opencok/contracts/inventory";
-import type { MutationResult } from "@opencok/contracts/mutation";
+import type { MutationResult } from "@opencok/ledger/contracts/mutation";
 import type { Row } from "@opencok/contracts/rows";
 import type { MutationTransaction } from "./mutation";
 import { server_info } from "@opencok/drizzle/schema/opencok_global/server_info";

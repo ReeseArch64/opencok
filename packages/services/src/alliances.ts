@@ -31,7 +31,7 @@ import type { CreateAllianceDto } from "@opencok/dtos/create-alliance.dto";
 import { playerGameEffect } from "@opencok/rules/power-resolver";
 import { generalSkillPoints } from "@opencok/hero/services/general-power";
 import { InventoryPlanner, type InventoryEffects } from "./inventory";
-import { activityEconomy } from "./timed-activity";
+import { activityEconomy } from "@opencok/economy/services/activity-economy";
 import { AllianceScienceContext } from "./alliance-science";
 import { AllianceHelpContext } from "./alliance-help";
 import { publishAllianceGift, allianceGift } from "./alliance-gifts";

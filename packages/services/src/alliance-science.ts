@@ -10,7 +10,7 @@ import {
     allianceDonationCount,
 } from "@opencok/rules/alliance-science";
 import { rankingCalendar } from "@opencok/rules/community-ranking";
-import { activityEconomy } from "./timed-activity";
+import { activityEconomy } from "@opencok/economy/services/activity-economy";
 import type { AllianceContext } from "./alliances";
 
 const assets = ["wood", "stone", "iron", "food", "silver", "gold"] as const;

@@ -1,15 +1,12 @@
-import type { MutationCommand, MutationResult, EconomyPosting, MutationEvent } from "./mutation.ts";
+import type { InventoryItem, InventoryFields } from "@opencok/economy/contracts/inventory";
+import type {
+    MutationCommand,
+    MutationResult,
+    EconomyPosting,
+    MutationEvent,
+} from "@opencok/ledger/contracts/mutation";
 import type { Row } from "./rows.ts";
 import type { PlayerEffectSnapshot } from "./power.ts";
-
-export interface InventoryItem
-{
-    uuid: string;
-    itemId: string;
-    count: number;
-    value: number;
-    vanishTime: bigint;
-}
 
 export interface InventoryState
 {
@@ -18,12 +15,12 @@ export interface InventoryState
         kind: "use" | "compose" | "harvest",
         itemId: string,
         count: number,
-        economy: import("./timed-activity").ActivityEconomy,
+        economy: import("@opencok/economy/contracts/activity-economy").ActivityEconomy,
     ): Promise<void>;
     useEffect?(
         itemId: string,
         count: number,
-        economy: import("./timed-activity").ActivityEconomy,
+        economy: import("@opencok/economy/contracts/activity-economy").ActivityEconomy,
     ): Promise<InventoryFields>;
     profile: Row;
     resource: Row;
@@ -48,5 +45,3 @@ export type InventoryExecutor = (
     command: MutationCommand,
     plan: (state: InventoryState) => Promise<InventoryPlan>,
 ) => Promise<Buffer>;
-
-export type InventoryFields = Record<string, { type: number; value: unknown; }>;

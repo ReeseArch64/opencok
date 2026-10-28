@@ -6,11 +6,8 @@ import { refreshGeneralUnlocks } from "@opencok/hero/services/general-assignment
 import { refreshQuests } from "./quests";
 import { GameError } from "@opencok/errors/game";
 import { errors } from "@opencok/constants/game";
-import type {
-    ActivityAction,
-    ActivityEconomy,
-    TimedActivity,
-} from "@opencok/contracts/timed-activity";
+import type { ActivityEconomy } from "@opencok/economy/contracts/activity-economy";
+import type { ActivityAction, TimedActivity } from "@opencok/contracts/timed-activity";
 import type { CityProgressionStore } from "@opencok/contracts/city-progression";
 import { num } from "@opencok/contracts/rows";
 import { encode, decode } from "@opencok/messages/sfs";

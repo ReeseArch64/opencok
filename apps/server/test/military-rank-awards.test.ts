@@ -10,7 +10,7 @@ import {
 import { applyMilitaryRankAward } from "@opencok/services/military-rank-awards";
 import { CityProgressionContext } from "@opencok/services/city-progression";
 import type { CityProgressionState } from "@opencok/contracts/city-progression";
-import type { ActivityEconomy } from "@opencok/contracts/timed-activity";
+import type { ActivityEconomy } from "@opencok/economy/contracts/activity-economy";
 function fixture(clockMarker: bigint | undefined = 1n, now = 100n)
 {
     const rules = new Rules(new Map(), new Map(), new Map());

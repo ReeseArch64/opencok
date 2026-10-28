@@ -20,6 +20,8 @@
     "@opencok/messages": "workspace:*",
     "@opencok/rules": "workspace:*",
     "@opencok/validations": "workspace:*",
-    "@opencok/hero": "workspace:*"
+    "@opencok/hero": "workspace:*",
+    "@opencok/economy": "workspace:*",
+    "@opencok/ledger": "workspace:*"
   }
 }

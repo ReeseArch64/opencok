@@ -3,8 +3,8 @@ import { eventTimestamp } from "./local-events";
 import { serverFeature } from "./power-context";
 import { num, type Row } from "@opencok/contracts/rows";
 import type { Rules } from "./game";
-import type { EconomyPosting } from "@opencok/contracts/mutation";
-import type { InventoryItem } from "@opencok/contracts/inventory";
+import type { EconomyPosting } from "@opencok/ledger/contracts/mutation";
+import type { InventoryItem } from "@opencok/economy/contracts/inventory";
 import type { ContinuedCostPeriod } from "@opencok/contracts/continued-cost";
 
 export function continuedCostPeriod(

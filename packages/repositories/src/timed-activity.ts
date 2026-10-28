@@ -5,9 +5,9 @@ import { and, asc, eq, gt, or, inArray, lte, isNull, ne } from "drizzle-orm";
 import { userprofile } from "@opencok/drizzle/schema/opencok_kingdom/userprofile";
 import { queue } from "@opencok/drizzle/schema/opencok_kingdom/queue";
 import { timed_activity } from "@opencok/drizzle/schema/opencok_kingdom/timed_activity";
+import type { ActivityEconomy } from "@opencok/economy/contracts/activity-economy";
 import type {
     ActivityAction,
-    ActivityEconomy,
     ActivityExecutor,
     TimedActivity,
     PreparedActivity,
@@ -45,7 +45,7 @@ export interface ActivityPreparation
         tx: MutationTransaction,
         owner: string,
         now: bigint,
-        command: import("@opencok/contracts/mutation").MutationCommand,
+        command: import("@opencok/ledger/contracts/mutation").MutationCommand,
     ): Promise<void | bigint>;
     command(
         tx: MutationTransaction,
