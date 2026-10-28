@@ -1,6 +1,6 @@
 # Vocabulary and Code Conventions
 
-Use consistent domain vocabulary, ordinary TypeScript naming and readable layout. C# inspires block presentation, not naming or runtime semantics. [Issue #550](https://github.com/ReeseArch64/opencok/issues/550) separates readability/formatting from structural refactoring; [ADR-0003](docs/decisions/0003-adopt-dprint-oxfmt-and-oxlint.md) records the formatter decision. These conventions do not authorize new formatters, mass renaming, structural migration or unrelated rewrites. Existing public names and compatibility requirements take precedence.
+Use consistent domain vocabulary, ordinary TypeScript naming and readable layout. C# inspires block presentation only in TypeScript files, not other languages, naming or runtime semantics. [Issue #550](https://github.com/ReeseArch64/opencok/issues/550) separates readability/formatting from structural refactoring; [ADR-0003](docs/decisions/0003-adopt-dprint-oxfmt-and-oxlint.md) records the formatter decision. These conventions do not authorize new formatters, mass renaming, structural migration or unrelated rewrites. Existing public names and compatibility requirements take precedence.
 
 ## Implementation vocabulary
 
@@ -49,11 +49,11 @@ Prefer established domain terms; do not merge distinct identifiers or invent syn
 
 ## Presentation and enforcement
 
-- Maintained JS/JSX/TS/TSX and c/m module variants belong exclusively to pinned dprint: four spaces, no hard tabs, LF, double quotes, semicolons, 100 columns and trailing commas only in multiline constructs. Preserve property quoting and import/export order.
-- Oxfmt exclusively owns other supported formats, including Markdown/embedded code, with two-space indentation. Four-space source formatting is not a repository-wide rewrite. Do not manually align columns or incidentally sort imports, bindings, properties or package keys.
-- Use Allman braces for declarations, functions, methods, accessors, constructors and control flow. Every applicable control body needs braces, including single guards and `do`; Oxlint `curly` covers gaps left by dprint. Start `else`, `catch`, `finally` and `do`'s `while` continuation on new lines.
-- Arrow callback braces stay inline; objects retain expression layout. Empty blocks may remain `{}` on the next line. Let the formatter wrap conditions, arguments, generics and chains; no per-file wrapping rules. Keep `return` with its expression and parentheses around arrow-object returns.
-- Separate imports/declarations, adjacent top-level declarations, methods, control blocks, meaningful stages and final returns with one blank line; keep related fields/locals together. No decorative blank lines, minified layout or dense ternaries/callbacks hiding stages. Focused-method extraction is a separately scoped, behavior-preserving refactor.
+- Maintained TypeScript files (TS/TSX and c/m TypeScript module variants) belong exclusively to pinned dprint: four spaces, no hard tabs, LF, double quotes, semicolons, 100 columns and trailing commas only in multiline constructs. Preserve property quoting and import/export order.
+- Oxfmt exclusively owns JavaScript/JSX and c/m JavaScript module variants plus other supported formats, including Markdown/embedded code, retaining the previous two-space, same-line-brace defaults. The C#-inspired TypeScript presentation does not apply to them. Do not manually align columns or incidentally sort imports, bindings, properties or package keys.
+- In TypeScript, use Allman braces for declarations, functions, methods, accessors, constructors and control flow. Every applicable control body needs braces, including single guards and `do`; Oxlint `curly` covers gaps left by dprint. Start `else`, `catch`, `finally` and `do`'s `while` continuation on new lines.
+- In TypeScript, arrow callback braces stay inline; objects retain expression layout. Empty blocks may remain `{}` on the next line. Let the formatter wrap conditions, arguments, generics and chains; no per-file wrapping rules. Keep `return` with its expression and parentheses around arrow-object returns.
+- In TypeScript, separate imports/declarations, adjacent top-level declarations, methods, control blocks, meaningful stages and final returns with one blank line; keep related fields/locals together. No decorative blank lines, minified layout or dense ternaries/callbacks hiding stages. Focused-method extraction is a separately scoped, behavior-preserving refactor.
 - No code, documentation or suppression comments in tracked files/embedded examples. Explain intent in prose, constraints through names/types/tests; preserve required interpreter directives.
 - Lint enforces correctness with warnings as errors; semantic types require separate workspace checks. Logical-stage spacing, naming, responsibilities and compatibility require review plus relevant tests/type checks, not formatter success alone.
 
