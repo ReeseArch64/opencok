@@ -1,0 +1,52 @@
+{
+  "sourceCommit": "24b570d17cfcf5c468f80983a206ba8c6e607d7b",
+  "command": "bun --no-env-file build apps/server/src/index.ts --target bun --minify --outdir /tmp/opencok-551-profile/src --metafile=/tmp/opencok-551-profile/metafile.json",
+  "inputModules": 3427,
+  "inputBytes": 93637674,
+  "resourceInputModules": 1050,
+  "resourceInputBytes": 82206565,
+  "outputBytes": 40521802,
+  "resourceBytesInOutput": 37214382,
+  "largestContributors": [
+    {
+      "path": "packages/resources/src/catalogs/data/trigger-exchange.ts",
+      "bytesInOutput": 773907
+    },
+    {
+      "path": "packages/resources/src/catalogs/data/equipment.records0.ts",
+      "bytesInOutput": 506261
+    },
+    {
+      "path": "packages/resources/src/catalogs/data/del_exchange.records2.ts",
+      "bytesInOutput": 425826
+    },
+    {
+      "path": "packages/resources/src/catalogs/data/del_exchange.records3.ts",
+      "bytesInOutput": 417625
+    },
+    {
+      "path": "packages/resources/src/catalogs/data/del_exchange.records1.ts",
+      "bytesInOutput": 395762
+    },
+    {
+      "path": "packages/resources/src/catalogs/data/del_exchange.records6.ts",
+      "bytesInOutput": 391714
+    },
+    {
+      "path": "packages/resources/src/catalogs/data/del_exchange.records4.ts",
+      "bytesInOutput": 390836
+    },
+    {
+      "path": "packages/resources/src/catalogs/data/del_exchange.records8.ts",
+      "bytesInOutput": 384366
+    },
+    {
+      "path": "packages/resources/src/catalogs/data/del_exchange.records7.ts",
+      "bytesInOutput": 380789
+    },
+    {
+      "path": "packages/resources/src/catalogs/data/del_exchange.records5.ts",
+      "bytesInOutput": 376051
+    }
+  ]
+}

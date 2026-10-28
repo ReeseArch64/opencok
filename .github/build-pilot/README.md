@@ -6,6 +6,13 @@ is pinned in root development dependencies and the single `bun.lock`. It does
 not change the package manager, deployed runtime or application build commands.
 Production-only container installs do not need the candidate tools.
 
+The [measured report](REPORT.md), [shortlist results](results.json),
+[Rollup/SWC results](rollup-results.json) and
+[proposed ADR-0015](../../docs/decisions/0015-adopt-measured-per-application-build-selection.md)
+record the per-app recommendation and evidence limits. Both raw result files pin
+the measured source and lockfile; compiler error paths/colors are normalized before
+committing, without changing timing, memory or size measurements.
+
 ## Reproduce
 
 Use Linux with `/proc`, Python 3 and the repository's Bun 1.4.2. Install separately
