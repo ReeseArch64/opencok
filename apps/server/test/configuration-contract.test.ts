@@ -80,7 +80,6 @@ test("complete configuration wire contract survives XML loading, realm compositi
             mailStatus: unexpected,
             allianceRanking: unexpected,
             playerRanking: unexpected,
-            publicProfile: unexpected,
         };
         const expected = Object.fromEntries(
             Object.entries(wireContract).map((

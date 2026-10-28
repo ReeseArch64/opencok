@@ -1,3 +1,5 @@
+import { createRealmPublicProfileService } from "./composition/public-profile.ts";
+import { checkPublicProfileStore } from "@opencok/player/repositories/public-profile";
 import { PushPreferenceService } from "@opencok/player/services/push-preferences";
 import { setPushPreference } from "@opencok/player/repositories/push-preferences";
 import { getConfigurationByPlayerId } from "@opencok/player/repositories/push-preferences-snapshot";
@@ -464,12 +466,25 @@ export const RealmDependenciesLive = Layer.effect(
             "realm.nickname-words",
             () => loadNicknameServices((key) => cache.nicknameForbiddenWords(key)),
         );
+        const publicProfiles = observeAdapter(
+            createRealmPublicProfileService(
+                db,
+                db.databases,
+                rules,
+                config.kingdomId,
+                (kingdomId, uids) => cache.playerUpdateTimes(kingdomId, uids),
+            ),
+            "realm.PublicProfileService",
+        );
         const coordination = yield* acquireResource(
             "realm.coordination",
             async () => observeAdapter(new Coordination(config), "realm.Coordination"),
             async (coordination) => coordination.close(),
         );
-        yield* fromPromise("realm.database.start", () => db.start()).pipe(Effect.uninterruptible);
+        yield* fromPromise("realm.database.start", async () => {
+            await db.start();
+            await checkPublicProfileStore(db.kingdom.db);
+        }).pipe(Effect.uninterruptible);
         yield* fromPromise("realm.cache", () => cache.command("PING")).pipe(Effect.uninterruptible);
         yield* fromPromise("realm.coordination.start", () => coordination.start()).pipe(
             Effect.uninterruptible,
@@ -3297,6 +3312,7 @@ export const RealmDependenciesLive = Layer.effect(
                             config,
                             Date.now,
                             {
+                                publicProfile: (uid, params) => publicProfiles.get(uid, params),
                                 playerPreferences: pushPreferences,
                                 profilePreference: (uid, command, params, now) =>
                                     profilePreferences.command(uid, command, params, now),

@@ -1,8 +1,14 @@
+const readAlliance = async (): Promise<never> => {
+    throw new Error("Unexpected alliance read");
+};
 import { expect, test } from "bun:test";
 import { drizzle, type NodePgClient } from "drizzle-orm/node-postgres";
 import * as schema from "@opencok/drizzle/schema/kingdom";
 import * as globalSchema from "@opencok/drizzle/schema/global";
-import { checkPublicProfileStore, loadPublicProfile } from "@opencok/repositories/profile";
+import {
+    checkPublicProfileStore,
+    loadPublicProfile,
+} from "@opencok/player/repositories/public-profile";
 
 function fixture(
     options: {
@@ -77,7 +83,7 @@ function fixture(
 
 test("full profiles follow the global directory before reading any realm", async () => {
     const { databases, calls } = fixture();
-    const result = await loadPublicProfile(databases, 1, "2001", "observer-alliance");
+    const result = await loadPublicProfile(databases, 1, "2001", "observer-alliance", readAlliance);
     expect(result?.kingdomId).toBe(2);
     expect(result?.state.profile).toMatchObject({ uid: "2001", serverId: 2 });
     expect(calls[0]?.realm).toBe(0);
@@ -91,15 +97,18 @@ test("full profiles follow the global directory before reading any realm", async
 
 test("absent directory entries use the local realm while absent targets and nonnumeric IDs stay absent", async () => {
     const local = fixture({ server: null });
-    expect((await loadPublicProfile(local.databases, 1, "2001", ""))?.kingdomId).toBe(1);
+    expect((await loadPublicProfile(local.databases, 1, "2001", "", readAlliance))?.kingdomId).toBe(
+        1,
+    );
     expect(local.calls.every((call) => call.realm !== 2)).toBe(true);
     const missing = fixture({ missing: true });
-    expect(await loadPublicProfile(missing.databases, 1, "2001", "")).toBeUndefined();
+    expect(await loadPublicProfile(missing.databases, 1, "2001", "", readAlliance)).toBeUndefined();
     expect(missing.calls).toHaveLength(4);
     const invalid = fixture();
     for (const uid of ["", "2001@mod", "synthetic", " ", "1".repeat(41)])
     {
-        expect(await loadPublicProfile(invalid.databases, 1, uid, "")).toBeUndefined();
+        expect(await loadPublicProfile(invalid.databases, 1, uid, "", readAlliance))
+            .toBeUndefined();
     }
     expect(invalid.calls).toEqual([]);
 });
@@ -119,13 +128,13 @@ test("unconfigured and malformed directory routes never fall back to a different
     )
     {
         const { databases, calls } = fixture(options);
-        await expect(loadPublicProfile(databases, 1, "2001", "")).rejects.toThrow();
+        await expect(loadPublicProfile(databases, 1, "2001", "", readAlliance)).rejects.toThrow();
         expect(calls.every((call) => call.realm === 0)).toBe(true);
     }
     for (const options of [{ profileRealm: 1 }, { failure: "flower_ranking" }])
     {
         const { databases, calls } = fixture(options);
-        await expect(loadPublicProfile(databases, 1, "2001", "")).rejects.toThrow();
+        await expect(loadPublicProfile(databases, 1, "2001", "", readAlliance)).rejects.toThrow();
         expect(calls.every((call) => call.realm !== 1)).toBe(true);
     }
 });

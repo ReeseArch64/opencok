@@ -142,9 +142,6 @@ import { guidePlayerSummary, playerSummary } from "@opencok/mappings/players";
 import { building, gold, queue, user } from "@opencok/mappings/city";
 import { resource } from "@opencok/economy/mappings/resources";
 import { powerInfo } from "@opencok/mappings/power";
-import { publicProfileBase } from "@opencok/mappings/profile";
-import { publicProfileAlliance } from "./profile.ts";
-import { publicProfileGenerals } from "@opencok/hero/services/profile-generals";
 import { playerRanking } from "@opencok/mappings/ranking";
 import { playerRankingQuery, selectPlayerRanking } from "@opencok/rules/ranking";
 import type { PlayerRankingKind } from "@opencok/contracts/ranking";
@@ -3552,75 +3549,12 @@ export class GameService
 
     private async publicProfile(uid: string, params: Fields): Promise<Fields>
     {
-        const now = this.now();
-        const observer = this.checkProfile(await this.db.getProfileById(uid), now);
-
-        if (text(observer, "uid") !== uid)
+        if (!this.services.publicProfile)
         {
-            throw new GameError(errors.invalid);
+            throw new GameError(errors.unsupported, "public_profile");
         }
 
-        const target = params.uid;
-
-        if (!target || target.type === Type.Null)
-        {
-            throw new GameError(errors.missing);
-        }
-
-        if (target.type !== Type.String || typeof target.value !== "string")
-        {
-            throw new GameError(errors.invalid);
-        }
-
-        if (!target.value.trim())
-        {
-            throw new GameError(errors.missing);
-        }
-
-        if (!/^[0-9]{1,40}$/.test(target.value))
-        {
-            throw new GameError(errors.invalid);
-        }
-
-        const result = await this.db.publicProfile(target.value, text(observer, "allianceId"));
-
-        if (!result?.state.profile)
-        {
-            throw new GameError(errors.missing);
-        }
-
-        const { state, kingdomId } = result;
-
-        if (
-            !Number.isInteger(kingdomId)
-            || kingdomId <= 0
-            || kingdomId > 2147483647
-            || text(state.profile!, "uid") !== target.value
-            || num(state.profile!, "serverId") !== kingdomId
-        )
-        {
-            throw new GameError(errors.invalid);
-        }
-
-        if (
-            state.alliance
-            && state.alliance.withEffects
-                !== (text(observer, "allianceId") !== text(state.profile!, "allianceId"))
-        )
-        {
-            throw new GameError(errors.invalid);
-        }
-
-        const context = { kingdomId: this.config.kingdomId, version: MOBILE_CLIENT_VERSION, now };
-        const body = {
-            ...publicProfileBase(state, this.rules, context, "", kingdomId),
-            ...publicProfileGenerals(state, this.rules, now),
-            ...publicProfileAlliance(state, this.rules, kingdomId !== this.config.kingdomId),
-        };
-        const updates = await this.services.playerUpdateTimes?.(kingdomId, [target.value]);
-        body.lastUpdateTime = sfs.string(updates?.get(target.value) ?? "");
-
-        return body;
+        return this.services.publicProfile(uid, params);
     }
 
     private async power(uid: string, login = false): Promise<Fields>

@@ -57,7 +57,6 @@ import type { AllianceRankingQuery, AllianceRankingSnapshot } from "./alliance-r
 import type { Row } from "./rows.ts";
 import type { MailUpdateInspector, MailUpdateQuery, MailUpdateSnapshot } from "./mail-updates.ts";
 import type { PowerState } from "./power.ts";
-import type { RoutedPublicProfile } from "./profile.ts";
 import type { PlayerRankingQuery, PlayerRankingSnapshot } from "./ranking.ts";
 import type { ReconnectProgressState, ReconnectProgressWrite } from "./reconnect.ts";
 
@@ -197,10 +196,6 @@ export interface GameStore extends AuthenticationStore
     mailStatus(uid: string, query: MailStatusQuery): Promise<MailStatusSnapshot>;
     allianceRanking(uid: string, query: AllianceRankingQuery): Promise<AllianceRankingSnapshot>;
     playerRanking(uid: string, query: PlayerRankingQuery): Promise<PlayerRankingSnapshot>;
-    publicProfile(
-        uid: string,
-        observerAllianceId: string,
-    ): Promise<RoutedPublicProfile | undefined>;
     getPowerByPlayerId(uid: string, now: number): Promise<PowerState>;
     getPlayerSummariesByIds(uids: string[], allServers: boolean): Promise<PlayerSummary[]>;
     configurationSwitches?(): Promise<Row[] | undefined>;
@@ -240,6 +235,7 @@ export interface LoginConfigurationState
 
 export interface GameServices
 {
+    publicProfile?(uid: string, params: Fields): Promise<Fields>;
     playerPreferences?: {
         configuration(uid: string): Promise<LoginConfigurationState>;
         initialize(uid: string, rows: readonly Row[], now: number): Promise<void>;

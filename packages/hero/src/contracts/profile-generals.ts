@@ -14,3 +14,10 @@ export interface GeneralPreview
     ability: readonly GeneralAbility[];
     skills: readonly Row[];
 }
+
+export interface PublicGeneralProfile
+{
+    profile: Row | undefined;
+    generals: readonly Row[];
+    skills: readonly Row[];
+}

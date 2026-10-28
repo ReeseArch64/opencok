@@ -52,7 +52,6 @@ test("login carries the saved civilization and exact score/prestige in init.user
         mailStatus: unused,
         allianceRanking: unused,
         playerRanking: unused,
-        publicProfile: unused,
         getPowerByPlayerId: async () => emptyPowerState(state.profile!),
         getProfileById: unused,
         getAccountsByPlayerId: unused,

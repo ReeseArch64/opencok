@@ -37,7 +37,6 @@ function game(
         mailStatus: unused,
         allianceRanking: unused,
         playerRanking: unused,
-        publicProfile: unused,
         getPlayerSummariesByIds: async (uids, allServers) => {
             calls.push({ uids, allServers });
             return summaries;
