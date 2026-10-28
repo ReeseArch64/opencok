@@ -2,9 +2,9 @@ import { randomUUID } from "node:crypto";
 import { and, eq, sql } from "drizzle-orm";
 import { realm_authority } from "@opencok/drizzle/schema/opencok_kingdom/realm_authority";
 import { DependencyError } from "@opencok/errors/dependency";
-import type { Database } from "./game.ts";
+import type { DatabaseClient } from "@opencok/drizzle/contracts/database";
 
-type RealmDatabase = Database["kingdom"]["db"];
+type RealmDatabase = DatabaseClient<"kingdom">;
 
 type RealmTransaction = Parameters<Parameters<RealmDatabase["transaction"]>[0]>[0];
 

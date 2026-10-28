@@ -14,7 +14,7 @@ import type { ComebackSession } from "@opencok/contracts/comeback";
 import type { MutationResult } from "@opencok/contracts/mutation";
 import { createMutationExecutor, type MutationTransaction } from "./mutation";
 import type { RealmAuthority } from "./realm-authority";
-import type { Database } from "./game";
+import type { DatabaseClient } from "@opencok/drizzle/contracts/database";
 
 const maximum = (...values: bigint[]) =>
     values.reduce((left, right) => (left > right ? left : right), 0n);
@@ -59,7 +59,7 @@ export async function writeComebackSession(
 }
 
 export function createComebackSessions(
-    db: Database["kingdom"]["db"],
+    db: DatabaseClient<"kingdom">,
     authority: RealmAuthority,
     afterOpen?: (tx: MutationTransaction, owner: string, now: bigint) => Promise<MutationResult>,
 )

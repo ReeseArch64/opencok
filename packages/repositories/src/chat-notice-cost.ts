@@ -2,10 +2,10 @@ import { and, eq } from "drizzle-orm";
 import { command_receipt } from "@opencok/drizzle/schema/opencok_kingdom/command_receipt";
 import { economy_posting } from "@opencok/drizzle/schema/opencok_kingdom/economy_posting";
 import type { ChatNoticeCostReader } from "@opencok/contracts/chat-delivery";
-import type { Database } from "./game.ts";
+import type { DatabaseClient } from "@opencok/drizzle/contracts/database";
 
 export function createChatNoticeCostReader(
-    db: Database["kingdom"]["db"],
+    db: DatabaseClient<"kingdom">,
     realm: number,
 ): ChatNoticeCostReader
 {

@@ -15,7 +15,7 @@ import { new_general_skill } from "@opencok/drizzle/schema/opencok_kingdom/new_g
 import { kingdom_building } from "@opencok/drizzle/schema/opencok_kingdom/kingdom_building";
 import type { ReconnectMarchState } from "@opencok/contracts/reconnect";
 import type { Row } from "@opencok/contracts/rows";
-import type { Database } from "./game.ts";
+import type { DatabaseClient } from "@opencok/drizzle/contracts/database";
 
 const marchColumns = {
     uuid: world_march.uuid,
@@ -55,7 +55,7 @@ const marchColumns = {
     occupyResourceEndTime: world_march.occupyResourceEndTime,
 };
 
-type Reader = Pick<Database["kingdom"]["db"], "select">;
+type Reader = Pick<DatabaseClient<"kingdom">, "select">;
 
 const bounded = <T>(rows: T[]): T[] => {
     if (rows.length > 32767)

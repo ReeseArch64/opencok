@@ -5,10 +5,10 @@ import { mutation_outbox } from "@opencok/drizzle/schema/opencok_kingdom/mutatio
 import { command_receipt } from "@opencok/drizzle/schema/opencok_kingdom/command_receipt";
 import { decode, str } from "@opencok/messages/sfs";
 import type { ChatRepository } from "@opencok/contracts/chat";
-import type { Database } from "./game.ts";
+import type { DatabaseConnections } from "@opencok/drizzle/contracts/database";
 
 export function createChatNoticePublisher(
-    databases: Database["databases"],
+    databases: DatabaseConnections,
     repository: ChatRepository,
     now: () => Date,
 )

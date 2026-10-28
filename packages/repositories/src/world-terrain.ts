@@ -14,9 +14,9 @@ import {
 } from "@opencok/rules/world-terrain";
 import { fenceRealmTransaction, type RealmAuthority } from "./realm-authority";
 import type { MutationTransaction } from "./mutation";
-import type { Database } from "./game";
+import type { DatabaseClient } from "@opencok/drizzle/contracts/database";
 
-type RealmDatabase = Database["kingdom"]["db"];
+type RealmDatabase = DatabaseClient<"kingdom">;
 
 const identity = and(
     eq(trigger_var.type, -1),

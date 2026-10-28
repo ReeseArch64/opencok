@@ -2,9 +2,9 @@ import { eq } from "drizzle-orm";
 import { userprofile } from "@opencok/drizzle/schema/opencok_kingdom/userprofile";
 import { mailBlank } from "@opencok/rules/mail";
 import type { WorldBulletinStore } from "@opencok/contracts/world-bulletins";
-import type { Database } from "./game";
+import type { DatabaseClient } from "@opencok/drizzle/contracts/database";
 
-export function createWorldBulletinStore(db: Database["kingdom"]["db"]): WorldBulletinStore
+export function createWorldBulletinStore(db: DatabaseClient<"kingdom">): WorldBulletinStore
 {
     return {
         alliance(observer, kingdomId, now)

@@ -31,9 +31,9 @@ import { cross_throne_reward_record } from "@opencok/drizzle/schema/opencok_king
 import { and, asc, eq, gt, or } from "drizzle-orm";
 import type { PowerState, PlayerEffectSnapshot } from "@opencok/contracts/power";
 import type { Row } from "@opencok/contracts/rows";
-import type { Database } from "./game.ts";
+import type { DatabaseClient } from "@opencok/drizzle/contracts/database";
 
-export async function checkPowerStore(db: Database["kingdom"]["db"])
+export async function checkPowerStore(db: DatabaseClient<"kingdom">)
 {
     for (
         const table of [
@@ -74,7 +74,7 @@ export async function checkPowerStore(db: Database["kingdom"]["db"])
 }
 
 export function getPowerByPlayerId(
-    db: Database["kingdom"]["db"],
+    db: DatabaseClient<"kingdom">,
     uid: string,
     now: number,
 ): Promise<PowerState>
@@ -230,7 +230,7 @@ function bound<T extends { limit(value: number): unknown; }>(query: T, bounded: 
 }
 
 export async function readPlayerEffects(
-    tx: Pick<Database["kingdom"]["db"], "select">,
+    tx: Pick<DatabaseClient<"kingdom">, "select">,
     profile: Row,
     bounded = false,
 ): Promise<PlayerEffectSnapshot>

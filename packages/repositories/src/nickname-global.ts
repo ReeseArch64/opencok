@@ -4,7 +4,7 @@ import { DependencyError } from "@opencok/errors/dependency";
 import { GameError } from "@opencok/errors/game";
 import { mysqlUtf8UnicodeCandidates, mysqlUtf8UnicodeKey } from "@opencok/rules/mysql-unicode";
 import { and, DrizzleQueryError, eq, or, sql } from "drizzle-orm";
-import type { Database } from "./game.ts";
+import type { DatabaseClient } from "@opencok/drizzle/contracts/database";
 import { withAvailableNickname, type NicknameGlobalTransaction } from "./nickname-lock.ts";
 
 const nameKey = mysqlUtf8UnicodeKey("name");
@@ -158,7 +158,7 @@ export async function writeNicknameGlobal(
 }
 
 export async function commitNicknameGlobal<T>(
-    db: Database["databases"]["global"]["db"],
+    db: DatabaseClient<"global">,
     owner: string,
     name: string,
     prepare: () => Promise<T>,

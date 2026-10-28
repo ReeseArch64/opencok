@@ -2,10 +2,10 @@ import { activity } from "@opencok/drizzle/schema/opencok_kingdom/activity";
 import { userprofile } from "@opencok/drizzle/schema/opencok_kingdom/userprofile";
 import type { ActivityDirectorySnapshot } from "@opencok/contracts/activity-directory";
 import { asc, eq, gt } from "drizzle-orm";
-import type { Database } from "./game";
+import type { DatabaseClient } from "@opencok/drizzle/contracts/database";
 
 export async function readActivityDirectory(
-    db: Database["kingdom"]["db"],
+    db: DatabaseClient<"kingdom">,
     owner: string,
 ): Promise<ActivityDirectorySnapshot>
 {

@@ -11,7 +11,7 @@ import type {
     CostRankAwardStore,
 } from "@opencok/contracts/continued-cost-rewards";
 import type { MutationTransaction } from "./mutation";
-import type { Database } from "./game";
+import type { DatabaseClient } from "@opencok/drizzle/contracts/database";
 
 export function costRankAwardReader(tx: MutationTransaction, owner: string): CostRankAwardReader
 {
@@ -51,7 +51,7 @@ export async function writeCostRankAward(
 }
 
 export function createCostRankAwardStore(
-    db: Database["kingdom"]["db"],
+    db: DatabaseClient<"kingdom">,
     authority: RealmAuthority,
 ): CostRankAwardStore
 {

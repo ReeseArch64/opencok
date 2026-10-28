@@ -11,10 +11,10 @@ import type {
 } from "@opencok/hero/contracts/hero-rank-publication";
 import { cityAmount, cityInteger } from "@opencok/rules/city-progression";
 import { fenceRealmTransaction, type RealmAuthority } from "@opencok/repositories/realm-authority";
-import type { Database } from "@opencok/repositories/game";
+import type { DatabaseClient } from "@opencok/drizzle/contracts/database";
 
 export function createHeroRankSource(
-    db: Database["kingdom"]["db"],
+    db: DatabaseClient<"kingdom">,
     authority: RealmAuthority,
 ): HeroRankSource
 {
@@ -79,7 +79,7 @@ export function createHeroRankSource(
 }
 
 export function createHeroRankProjection(
-    db: Database["databases"]["global"]["db"],
+    db: DatabaseClient<"global">,
     authority: RealmAuthority,
 ): HeroRankProjection
 {

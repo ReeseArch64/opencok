@@ -11,14 +11,14 @@ import { user_weakness_building } from "@opencok/drizzle/schema/opencok_kingdom/
 import { resource_settlement } from "@opencok/drizzle/schema/opencok_kingdom/resource_settlement";
 import type { ReconnectProgressState, ReconnectProgressWrite } from "@opencok/contracts/reconnect";
 import { javaDecimal } from "@opencok/rules/java-integer";
-import type { Database } from "./game.ts";
+import type { DatabaseClient } from "@opencok/drizzle/contracts/database";
 import { fenceRealmTransaction, type RealmAuthority } from "./realm-authority.ts";
 import { readReconnectProgress } from "./reconnect-progress.ts";
 import { insertSystemMail } from "./system-mail.ts";
 import { readFriendshipMine } from "./reconnect-mine.ts";
 import type { FriendshipMine } from "@opencok/contracts/reconnect";
 
-type Transaction = Parameters<Parameters<Database["kingdom"]["db"]["transaction"]>[0]>[0];
+type Transaction = Parameters<Parameters<DatabaseClient<"kingdom">["transaction"]>[0]>[0];
 
 const integer = (value: unknown) => Number(javaDecimal(String(value ?? 0), 32));
 
@@ -443,7 +443,7 @@ export async function persistReconnectProgress(
 }
 
 export async function executeReconnectProgress<T>(
-    db: Database["kingdom"]["db"],
+    db: DatabaseClient<"kingdom">,
     authority: RealmAuthority,
     uid: string,
     now: bigint,

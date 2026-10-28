@@ -1,6 +1,6 @@
 import { user_mixed_info } from "@opencok/drizzle/schema/opencok_kingdom/user_mixed_info";
 import { mutation_outbox } from "@opencok/drizzle/schema/opencok_kingdom/mutation_outbox";
-import type { Database } from "./game";
+import type { DatabaseClient } from "@opencok/drizzle/contracts/database";
 import { randomUUID } from "node:crypto";
 import { and, desc, eq, inArray } from "drizzle-orm";
 import { activity_cost } from "@opencok/drizzle/schema/opencok_kingdom/activity_cost";
@@ -93,7 +93,7 @@ export async function writeContinuedCost(
 }
 
 export async function pendingContinuedCosts(
-    db: Database["kingdom"]["db"],
+    db: DatabaseClient<"kingdom">,
     kingdom: number,
     owner: string,
 )

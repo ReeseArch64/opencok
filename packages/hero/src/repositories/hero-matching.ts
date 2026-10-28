@@ -11,9 +11,9 @@ import type {
     HeroMatchingRegistry,
     HeroMatchingRealmStore,
 } from "@opencok/hero/contracts/hero-matching";
-import type { Database } from "@opencok/repositories/game";
+import type { DatabaseClient } from "@opencok/drizzle/contracts/database";
 
-type Global = Database["databases"]["global"]["db"];
+type Global = DatabaseClient<"global">;
 
 export function createHeroMatchingRegistry(db: Global): HeroMatchingRegistry
 {
@@ -190,7 +190,7 @@ export function createHeroMatchingRegistry(db: Global): HeroMatchingRegistry
 }
 
 export function createHeroMatchingRealmStore(
-    db: Database["kingdom"]["db"],
+    db: DatabaseClient<"kingdom">,
     authority: RealmAuthority,
     now = Date.now,
 ): HeroMatchingRealmStore

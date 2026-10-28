@@ -10,11 +10,11 @@ import { mutation_outbox } from "@opencok/drizzle/schema/opencok_kingdom/mutatio
 import { encode, sfs } from "@opencok/messages/sfs";
 import { num, text, long } from "@opencok/contracts/rows";
 import type { WorldResourceRefreshExecutor } from "@opencok/contracts/world-resource-refresh";
-import type { Database } from "./game";
+import type { DatabaseClient } from "@opencok/drizzle/contracts/database";
 import { fenceRealmTransaction, type RealmAuthority } from "./realm-authority";
 
 export function createWorldResourceRefreshExecutor(
-    db: Database["kingdom"]["db"],
+    db: DatabaseClient<"kingdom">,
     authority: RealmAuthority,
     size = 1201,
     captureTime = Date.now,

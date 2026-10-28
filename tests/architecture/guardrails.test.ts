@@ -199,3 +199,42 @@ test("runtime sources cannot transitively import offline discovery while scripts
         "offline-tool: packages/domain/src/type.ts -> packages/catalog-tools/src/entry.ts",
     ]);
 });
+
+test("repository adapters cannot depend on their broad facade through types or intermediary contracts", () => {
+    const report = new ArchitectureAudit().inspect(
+        new Map([
+            ["packages/repositories/src/game.ts", "export interface Database {}"],
+            ["packages/repositories/src/wallet.ts", "import type { Database } from \"./game\";"],
+            [
+                "packages/repositories/src/news.ts",
+                "export type State = import(\"./game\").Database;",
+            ],
+            [
+                "packages/player/src/contracts/database.ts",
+                "export type { Database } from \"@opencok/repositories/game\";",
+            ],
+            [
+                "packages/player/src/repositories/preferences.ts",
+                "import type { Database } from \"../contracts/database\";",
+            ],
+            [
+                "apps/server/src/composition.ts",
+                "import type { Database } from \"@opencok/repositories/game\";",
+            ],
+            [
+                "packages/repositories/tests/fixture.ts",
+                "import type { Database } from \"../src/game\";",
+            ],
+        ]),
+        [
+            workspace("packages/repositories"),
+            workspace("packages/player", ["@opencok/repositories"]),
+            workspace("apps/server", ["@opencok/repositories"]),
+        ],
+    );
+    expect(report.violations).toEqual([
+        "repository-facade: packages/player/src/repositories/preferences.ts -> packages/repositories/src/game.ts",
+        "repository-facade: packages/repositories/src/news.ts -> packages/repositories/src/game.ts",
+        "repository-facade: packages/repositories/src/wallet.ts -> packages/repositories/src/game.ts",
+    ]);
+});

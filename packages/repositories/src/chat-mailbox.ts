@@ -4,10 +4,10 @@ import { and, asc, desc, eq, gt, inArray, lte, or, isNull, sql } from "drizzle-o
 import { chat_mailbox_message } from "@opencok/drizzle/schema/opencok_chat/chat_mailbox_message";
 import { chat_mailbox_receipt } from "@opencok/drizzle/schema/opencok_chat/chat_mailbox_receipt";
 import { encodeChatMailbox, type ChatMailboxStore } from "@opencok/contracts/chat-mailbox";
-import type { Database } from "./game.ts";
+import type { DatabaseClient } from "@opencok/drizzle/contracts/database";
 
 export function createChatMailboxStore(
-    db: Database["databases"]["global"]["db"],
+    db: DatabaseClient<"global">,
     now = Date.now,
 ): ChatMailboxStore
 {

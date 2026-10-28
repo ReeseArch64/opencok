@@ -7,7 +7,7 @@ import { groupBuyId, groupBuyRounds } from "@opencok/rules/groupbuy";
 import { long, text } from "@opencok/contracts/rows";
 import type { GroupBuyState, GroupBuyWrite } from "@opencok/contracts/groupbuy";
 import type { MutationTransaction } from "./mutation";
-import type { Database } from "./game";
+import type { DatabaseClient } from "@opencok/drizzle/contracts/database";
 
 export async function readGroupBuy(tx: MutationTransaction, owner: string): Promise<GroupBuyState>
 {
@@ -162,7 +162,7 @@ export async function writeGroupBuy(tx: MutationTransaction, owner: string, writ
 }
 
 export async function pendingGroupBuys(
-    db: Database["kingdom"]["db"],
+    db: DatabaseClient<"kingdom">,
     after?: { id: string; round: number; owner: string; },
 )
 {

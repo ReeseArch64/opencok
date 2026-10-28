@@ -4,10 +4,10 @@ import { new_expedition } from "@opencok/drizzle/schema/opencok_global/new_exped
 import type { ExpeditionCalendarStore } from "@opencok/contracts/expedition-calendar";
 import { long, num, text } from "@opencok/contracts/rows";
 import { expeditionCalendarPhases } from "@opencok/rules/expedition-calendar";
-import type { Database } from "./game";
+import type { DatabaseClient } from "@opencok/drizzle/contracts/database";
 
 export function createExpeditionCalendarStore(
-    db: Database["databases"]["global"]["db"],
+    db: DatabaseClient<"global">,
 ): ExpeditionCalendarStore
 {
     return {

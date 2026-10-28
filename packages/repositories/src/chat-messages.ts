@@ -5,7 +5,7 @@ import { chat_event } from "@opencok/drizzle/schema/opencok_chat/chat_social";
 import type { ChatMessage, MessageInput, MessageStore } from "@opencok/contracts/chat";
 import type { ChatArchiveMessage, ChatArchiveStore } from "@opencok/contracts/chat-delivery";
 import { chatRetention } from "@opencok/rules/chat-retention";
-import type { Database } from "./game.ts";
+import type { DatabaseClient } from "@opencok/drizzle/contracts/database";
 
 export const chatUtc = (date: Date) => date.toISOString().slice(0, 23).replace("T", " ");
 
@@ -36,7 +36,7 @@ export function chatMessage(row: Row): ChatMessage
 }
 
 export function createChatMessageStore(
-    db: Database["databases"]["global"]["db"],
+    db: DatabaseClient<"global">,
     archive: ChatArchiveStore | undefined,
     clock: () => Date,
     canSend: (uid: string) => Promise<boolean>,

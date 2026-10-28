@@ -6,9 +6,9 @@ import { translationv2 } from "@opencok/drizzle/schema/opencok_kingdom/translati
 import { DependencyError } from "@opencok/errors/dependency";
 import type { MailSender, MailTranslationLookup } from "@opencok/contracts/mail";
 import { eq, inArray, sql } from "drizzle-orm";
-import type { Database } from "./game.ts";
+import type { DatabaseClient } from "@opencok/drizzle/contracts/database";
 
-type Reader = Pick<Database["kingdom"]["db"], "select">;
+type Reader = Pick<DatabaseClient<"kingdom">, "select">;
 
 const languages = [
     "en",

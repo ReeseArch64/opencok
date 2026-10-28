@@ -3,9 +3,9 @@ import { userprofile } from "@opencok/drizzle/schema/opencok_kingdom/userprofile
 import { playerinfo } from "@opencok/drizzle/schema/opencok_kingdom/playerinfo";
 import { alliance } from "@opencok/drizzle/schema/opencok_kingdom/alliance";
 import { and, eq, gt, lte, sql } from "drizzle-orm";
-import type { Database } from "./game.ts";
+import type { DatabaseClient } from "@opencok/drizzle/contracts/database";
 
-type Transaction = Parameters<Parameters<Database["kingdom"]["db"]["transaction"]>[0]>[0];
+type Transaction = Parameters<Parameters<DatabaseClient<"kingdom">["transaction"]>[0]>[0];
 
 export async function readBuildingRanking(tx: Transaction, uid: string, limit: number)
 {

@@ -3,10 +3,10 @@ import { userprofile } from "@opencok/drizzle/schema/opencok_kingdom/userprofile
 import { flower_ranking } from "@opencok/drizzle/schema/opencok_kingdom/flower_ranking";
 import { time_notice } from "@opencok/drizzle/schema/opencok_kingdom/time_notice";
 import type { FlowerRankingState } from "@opencok/contracts/flower-ranking";
-import type { Database } from "./game.ts";
+import type { DatabaseClient } from "@opencok/drizzle/contracts/database";
 
 export async function readFlowerRanking(
-    db: Database["kingdom"]["db"],
+    db: DatabaseClient<"kingdom">,
     uid: string,
     uids: readonly string[],
 ): Promise<FlowerRankingState>

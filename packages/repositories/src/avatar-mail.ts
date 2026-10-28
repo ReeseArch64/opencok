@@ -3,11 +3,11 @@ import type { AvatarMailDelivery, AvatarMailPlanner } from "@opencok/contracts/f
 import { avatar_completion } from "@opencok/drizzle/schema/opencok_kingdom/avatar_completion";
 import { userprofile } from "@opencok/drizzle/schema/opencok_kingdom/userprofile";
 import { and, eq } from "drizzle-orm";
-import type { Database } from "./game.ts";
+import type { DatabaseClient } from "@opencok/drizzle/contracts/database";
 import { insertSystemMail as insertAvatarSystemMail } from "./system-mail.ts";
 
 export function deliverAvatarMail(
-    db: Database["kingdom"]["db"],
+    db: DatabaseClient<"kingdom">,
     kingdomId: number,
     owner: string,
     sequence: number,

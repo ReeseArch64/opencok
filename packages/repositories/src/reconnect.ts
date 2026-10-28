@@ -4,10 +4,10 @@ import { user_general } from "@opencok/drizzle/schema/opencok_kingdom/user_gener
 import { user_skill } from "@opencok/drizzle/schema/opencok_kingdom/user_skill";
 import { asc, eq } from "drizzle-orm";
 import type { ReconnectBaseState } from "@opencok/contracts/reconnect";
-import type { Database } from "./game.ts";
+import type { DatabaseClient } from "@opencok/drizzle/contracts/database";
 
 export function readReconnectBase(
-    db: Database["kingdom"]["db"],
+    db: DatabaseClient<"kingdom">,
     uid: string,
 ): Promise<ReconnectBaseState>
 {

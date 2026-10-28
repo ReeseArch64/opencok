@@ -7,9 +7,9 @@ import { playerinfo } from "@opencok/drizzle/schema/opencok_kingdom/playerinfo";
 import { donate_history } from "@opencok/drizzle/schema/opencok_kingdom/donate_history";
 import { user_cemetery } from "@opencok/drizzle/schema/opencok_kingdom/user_cemetery";
 import type { CommunityRankingSnapshot } from "@opencok/contracts/community-ranking";
-import type { Database } from "./game.ts";
+import type { DatabaseClient } from "@opencok/drizzle/contracts/database";
 
-type Db = Database["kingdom"]["db"];
+type Db = DatabaseClient<"kingdom">;
 
 const owner = {
     uid: userprofile.uid,

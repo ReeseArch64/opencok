@@ -10,10 +10,10 @@ import type {
     MailDeleteQuery,
     MailDeleteSnapshot,
 } from "@opencok/contracts/mail";
-import type { Database } from "./game.ts";
+import type { DatabaseClient } from "@opencok/drizzle/contracts/database";
 
 export function deleteMail(
-    db: Database["kingdom"]["db"],
+    db: DatabaseClient<"kingdom">,
     kingdomId: number,
     uid: string,
     query: MailDeleteQuery,

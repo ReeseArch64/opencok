@@ -2,7 +2,7 @@ import { randomInt } from "node:crypto";
 import { realm_authority } from "@opencok/drizzle/schema/opencok_kingdom/realm_authority";
 import { command_receipt } from "@opencok/drizzle/schema/opencok_kingdom/command_receipt";
 import { appendMutationRecords } from "./mutation";
-import type { Database } from "./game";
+import type { DatabaseClient } from "@opencok/drizzle/contracts/database";
 import type { WorldBirthAdoption } from "@opencok/contracts/world-birth";
 import { GameError } from "@opencok/errors/game";
 import { errors } from "@opencok/constants/game";
@@ -272,7 +272,7 @@ export async function allocateWorldBirth(
 }
 
 export function createWorldBirthAdopter(
-    db: Database["kingdom"]["db"],
+    db: DatabaseClient<"kingdom">,
     authority: RealmAuthority,
     rules: WorldBirthRules,
     clock = Date.now,

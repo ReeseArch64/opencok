@@ -2,10 +2,10 @@ import { and, asc, eq, sql } from "drizzle-orm";
 import { alliance_science_upgrade } from "@opencok/drizzle/schema/opencok_kingdom/alliance_science_upgrade";
 import { alliance_member } from "@opencok/drizzle/schema/opencok_kingdom/alliance_member";
 import { userprofile } from "@opencok/drizzle/schema/opencok_kingdom/userprofile";
-import type { Database } from "./game";
+import type { DatabaseClient } from "@opencok/drizzle/contracts/database";
 
 export async function dueAllianceResearch(
-    db: Database["kingdom"]["db"],
+    db: DatabaseClient<"kingdom">,
     realm: number,
     now: bigint,
     after?: string,

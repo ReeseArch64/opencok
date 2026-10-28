@@ -24,10 +24,10 @@ import type { ChatAccessStore } from "@opencok/contracts/chat-delivery";
 import type { PlayerStateLoader } from "@opencok/contracts/chat";
 import { ChatCommandError } from "@opencok/errors/chat";
 import { chatMessage, chatUtc } from "./chat-messages.ts";
-import type { Database } from "./game.ts";
+import type { DatabaseClient } from "@opencok/drizzle/contracts/database";
 
 export function createChatSocialStore(
-    db: Database["databases"]["global"]["db"],
+    db: DatabaseClient<"global">,
     load: PlayerStateLoader,
     clock: () => Date,
     legacy?: (uid: string) => Promise<ChatLegacyRelations>,

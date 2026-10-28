@@ -22,7 +22,7 @@ import { GameError } from "@opencok/errors/game";
 import { errors } from "@opencok/constants/game";
 import { fenceRealmTransaction, type RealmAuthority } from "./realm-authority";
 import type { MutationTransaction } from "./mutation";
-import type { Database } from "./game";
+import type { DatabaseClient } from "@opencok/drizzle/contracts/database";
 
 export function expeditionAwardReader(
     tx: MutationTransaction,
@@ -111,7 +111,7 @@ export async function writeExpeditionAward(
 }
 
 export function createExpeditionAwardStore(
-    db: Database["kingdom"]["db"],
+    db: DatabaseClient<"kingdom">,
     authority: RealmAuthority,
 ): ExpeditionAwardStore
 {
@@ -313,7 +313,7 @@ export function createExpeditionAwardStore(
 }
 
 export function createExpeditionAwardStandings(
-    db: Database["databases"]["global"]["db"],
+    db: DatabaseClient<"global">,
     kingdomId: number,
 ): ExpeditionAwardStandings
 {
@@ -413,8 +413,8 @@ export function createExpeditionAwardStandings(
 }
 
 export function createExpeditionHistorySource(
-    owned: Database["kingdom"]["db"],
-    global: Database["databases"]["global"]["db"],
+    owned: DatabaseClient<"kingdom">,
+    global: DatabaseClient<"global">,
     authority: RealmAuthority,
 ): ExpeditionHistorySource
 {

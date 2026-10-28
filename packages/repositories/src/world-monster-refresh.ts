@@ -17,7 +17,7 @@ import type {
     WorldMonsterRefreshExecutor,
     WorldMonsterSupplyClock,
 } from "@opencok/contracts/world-monster-refresh";
-import type { Database } from "./game";
+import type { DatabaseClient } from "@opencok/drizzle/contracts/database";
 import { fenceRealmTransaction, type RealmAuthority } from "./realm-authority";
 
 const key = (family: WorldMonsterFamily) => `opencok.world.monsters.${family}.v1`;
@@ -100,7 +100,7 @@ function parseClock(raw: string, authority: RealmAuthority, size: number): World
 }
 
 export function createWorldMonsterRefreshExecutor(
-    db: Database["kingdom"]["db"],
+    db: DatabaseClient<"kingdom">,
     authority: RealmAuthority,
     size: number,
     captureTime = Date.now,

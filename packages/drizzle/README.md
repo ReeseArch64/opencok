@@ -17,6 +17,21 @@ copied schemas or folders. Table/field names and data contracts are preserved.
 A transaction belongs to one physical database. The architecture defines
 [persistence ownership](../../.github/ARCHITECTURE.md#151-postgresql-database-package).
 
+## Repository connection types
+
+Repository adapters import `DatabaseClient<Role>`, `DatabaseConnection<Role>` or
+`DatabaseConnections` from `@opencok/drizzle/contracts/database`. These type-only
+aliases derive directly from the existing `createDatabase`/`createDatabases`
+constructors, retaining global/kingdom schema and transaction inference.
+
+Use the client alias for query/transaction adapters, the connection alias only
+when pool/lifecycle access is required, and the collection alias for configured
+multi-database routing. Do not derive these types from the broad repository
+`Database` class: that facade composes adapters and importing it back creates
+cycles. The architecture guard also detects indirect/type-only facade imports.
+Applications may still compose the existing facade while domain extraction proceeds.
+No runtime wrapper, new database role, constructor or schema accompanies these aliases.
+
 ## Initialize the default topology
 
 The root [Docker Compose environment](../../infra/compose/README.md) starts a local

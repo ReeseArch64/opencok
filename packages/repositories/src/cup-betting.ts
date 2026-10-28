@@ -7,7 +7,7 @@ import { cityAmount, cityInteger } from "@opencok/rules/city-progression";
 import { num, text } from "@opencok/contracts/rows";
 import type { CupBettingWrite } from "@opencok/contracts/cup-betting";
 import type { MutationTransaction } from "./mutation";
-import type { Database } from "./game";
+import type { DatabaseClient } from "@opencok/drizzle/contracts/database";
 
 export async function readCupBetting(tx: MutationTransaction, owner: string)
 {
@@ -139,7 +139,7 @@ export async function writeCupBetting(
     }
 }
 
-export async function pendingCupSettlements(db: Database["kingdom"]["db"], after?: string)
+export async function pendingCupSettlements(db: DatabaseClient<"kingdom">, after?: string)
 {
     const rows = await db
         .select({
@@ -168,7 +168,7 @@ export async function pendingCupSettlements(db: Database["kingdom"]["db"], after
     return rows;
 }
 
-export function createCupScheduleStore(db: Database["kingdom"]["db"], authority: RealmAuthority)
+export function createCupScheduleStore(db: DatabaseClient<"kingdom">, authority: RealmAuthority)
 {
     return {
         async reconcile(definitions: readonly import("@opencok/contracts/rows").Row[], now: bigint)

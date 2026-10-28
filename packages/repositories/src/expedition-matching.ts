@@ -28,14 +28,14 @@ import { long, text, type Row } from "@opencok/contracts/rows";
 import { cityInteger } from "@opencok/rules/city-progression";
 import { fenceRealmTransaction, type RealmAuthority } from "./realm-authority";
 import { installExpeditionPeriod } from "./new-expedition";
-import type { Database } from "./game";
+import type { DatabaseClient } from "@opencok/drizzle/contracts/database";
 
 export function expeditionMatchingWindow(period: Row)
 {
     return expeditionCalendarPhases(period).find((row) => row.stage === 1);
 }
 
-type Global = Database["databases"]["global"]["db"];
+type Global = DatabaseClient<"global">;
 
 export function createExpeditionMatchingRegistry(db: Global): ExpeditionMatchingRegistry
 {
@@ -253,7 +253,7 @@ export function createExpeditionMatchingRegistry(db: Global): ExpeditionMatching
 }
 
 export function createExpeditionMatchingRealmStore(
-    db: Database["kingdom"]["db"],
+    db: DatabaseClient<"kingdom">,
     authority: RealmAuthority,
     now = Date.now,
     hideGm = false,

@@ -6,7 +6,7 @@ import { flower_info } from "@opencok/drizzle/schema/opencok_kingdom/flower_info
 import { fenceRealmTransaction, type RealmAuthority } from "./realm-authority";
 import type { CampaignAudience } from "@opencok/contracts/campaign-notice";
 import type { MutationTransaction } from "./mutation";
-import type { Database } from "./game";
+import type { DatabaseClient } from "@opencok/drizzle/contracts/database";
 
 export async function readCampaignProfile(tx: MutationTransaction, owner: string)
 {
@@ -34,7 +34,7 @@ export async function readCampaignProfile(tx: MutationTransaction, owner: string
 }
 
 export function createCampaignAudience(
-    db: Database["kingdom"]["db"],
+    db: DatabaseClient<"kingdom">,
     authority: RealmAuthority,
 ): CampaignAudience
 {
