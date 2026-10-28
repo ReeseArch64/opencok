@@ -2,7 +2,7 @@ import { expect, test } from "bun:test";
 import type { GameServices, GameStore } from "@opencok/contracts/game";
 import type { MailSystemQuery, MailSystemInspector, MailSender } from "@opencok/contracts/mail";
 import type { Row } from "@opencok/contracts/rows";
-import { GameService as Game } from "@opencok/services/game";
+import { createRealmGameService } from "../src/composition/game";
 import { systemMailProjection } from "@opencok/services/mail-system";
 import { fields, sfs, str, Type, type Fields, type Value } from "@opencok/messages/sfs";
 import { Rules } from "@opencok/rules/game";
@@ -52,7 +52,7 @@ function fixture()
             return { profile };
         },
     };
-    const game = new Game(
+    const game = createRealmGameService(
         store as unknown as GameStore,
         new Rules(new Map(), new Map(), new Map()),
         { kingdomId: 1 },

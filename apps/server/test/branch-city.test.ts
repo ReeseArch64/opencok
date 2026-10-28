@@ -3,7 +3,7 @@ import { branchCityDomain } from "@opencok/services/branch-city";
 import { Rules } from "@opencok/rules/game";
 import { decode, sfs, type Fields } from "@opencok/messages/sfs";
 import { cityFixture } from "./fixtures/city-progression";
-import { GameService } from "@opencok/services/game";
+import { createRealmGameService } from "../src/composition/game";
 import type { GameStore } from "@opencok/contracts/game";
 
 function setup(level: number, state: number | null = null)
@@ -75,7 +75,7 @@ test("legacy requests retain boolean wire types and do not upgrade existing hero
 
 test("branch opening is routed with native correlation and initialization stays internal", async () => {
     const calls: string[] = [];
-    const game = new GameService(
+    const game = createRealmGameService(
         {} as GameStore,
         new Rules(new Map(), new Map(), new Map()),
         { kingdomId: 1 },
@@ -115,7 +115,7 @@ test("login and reconnect publish saved branch state at the init root", async ()
         }),
         getPowerByPlayerId: async () => emptyPowerState(profile),
     } as unknown as GameStore;
-    const game = new GameService(store, h.rules, { kingdomId: 1 }, () => 1000000, {
+    const game = createRealmGameService(store, h.rules, { kingdomId: 1 }, () => 1000000, {
         cityProgression: async (_owner, command) => ({
             body: command === "branchcity.init" ? await h.run(command) : {},
             pushes: [],

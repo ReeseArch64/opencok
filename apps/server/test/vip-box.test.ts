@@ -1,7 +1,7 @@
 import { test, expect } from "bun:test";
 import { vipBoxWeighted, vipBoxIndices, vipBoxBand } from "@opencok/rules/vip-box";
 import { loadRules } from "@opencok/resources/rules";
-import { GameService } from "@opencok/services/game";
+import { createRealmGameService } from "../src/composition/game";
 import type { GameStore } from "@opencok/contracts/game";
 import { Rules } from "@opencok/rules/game";
 import { sfs } from "@opencok/messages/sfs";
@@ -20,7 +20,7 @@ test("VIP wheel uses exclusive weighted bands and validates distinct saved indic
     expect(vipBoxBand(tables, 16)).toBe(16);
 });
 test("native VIP wheel requests preserve long correlations and cannot invoke initialization", async () => {
-    const game = new GameService(
+    const game = createRealmGameService(
         {} as GameStore,
         new Rules(new Map(), new Map(), new Map()),
         { kingdomId: 1 },

@@ -7,7 +7,7 @@ import {
     towerOpen,
 } from "@opencok/rules/dragon-tower";
 import { loadRules } from "@opencok/resources/rules";
-import { GameService } from "@opencok/services/game";
+import { createRealmGameService } from "../src/composition/game";
 import type { GameStore } from "@opencok/contracts/game";
 import { Rules } from "@opencok/rules/game";
 import { sfs } from "@opencok/messages/sfs";
@@ -37,7 +37,7 @@ test("tower catalogs retain weighted monster choices, bounded virtual armies and
 });
 test("tower native commands retain correlation and internal recovery cannot be requested by players", async () => {
     const calls: string[] = [];
-    const game = new GameService(
+    const game = createRealmGameService(
         {} as GameStore,
         new Rules(new Map(), new Map(), new Map()),
         { kingdomId: 1 },

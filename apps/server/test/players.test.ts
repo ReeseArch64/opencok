@@ -1,7 +1,8 @@
 import { expect, test } from "bun:test";
 import type { GameServices, GameStore, PlayerSummary } from "@opencok/contracts/game";
 import type { Row } from "@opencok/contracts/rows";
-import { GameService as Game } from "@opencok/services/game";
+import { createRealmGameService } from "../src/composition/game";
+import type { GameService as Game } from "@opencok/services/game";
 import { playerSummary } from "@opencok/mappings/players";
 import { decode, encode, fields, sfs, type Fields, type Value } from "@opencok/messages/sfs";
 import { Rules } from "@opencok/rules/game";
@@ -57,7 +58,10 @@ function game(
         new Map(),
         1,
     );
-    return { calls, controller: new Game(db, rules, { kingdomId: 1 }, () => now, services) };
+    return {
+        calls,
+        controller: createRealmGameService(db, rules, { kingdomId: 1 }, () => now, services),
+    };
 }
 async function query(controller: Game, params: Fields = {})
 {

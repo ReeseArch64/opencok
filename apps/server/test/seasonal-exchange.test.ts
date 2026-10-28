@@ -1,7 +1,7 @@
 import { test, expect } from "bun:test";
 import { selectSeasonalRewards, seasonalExchangeRewards } from "@opencok/rules/seasonal-exchange";
 import { loadRules } from "@opencok/resources/rules";
-import { GameService } from "@opencok/services/game";
+import { createRealmGameService } from "../src/composition/game";
 import type { GameStore } from "@opencok/contracts/game";
 import { Rules } from "@opencok/rules/game";
 import { sfs } from "@opencok/messages/sfs";
@@ -17,7 +17,7 @@ test("maintained seasonal choices pin five bounded reward and cost pairs", async
     expect(() => seasonalExchangeRewards(Array(5).fill("1;-1").join("|"))).toThrow();
 });
 test("native seasonal commands preserve the client correlation", async () => {
-    const game = new GameService(
+    const game = createRealmGameService(
         {} as GameStore,
         new Rules(new Map(), new Map(), new Map()),
         { kingdomId: 1 },

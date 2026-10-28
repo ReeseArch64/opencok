@@ -19,7 +19,7 @@ Counts describe maintained TypeScript/JavaScript source under `src` and named te
 | `billing`        |                  0 / 0 | Orders, billing and provider reconciliation.                                                                                                                                                                   | Retain for confirmed scope; move real implementations in tested slices                                                                                                                                                                                                                        | Confirmed in #567/#568   |
 | `building`       |                 48 / 2 | Typed building catalogs, definition contracts, level/star evaluation and display/legacy mappings.                                                                                                              | #635 owns the catalog/evaluation boundary. Construction Services and city coordination remain W07; semantic archetypes remain W14.                                                                                                                                                            | Partial; #635            |
 | `campaigns`      |                  0 / 0 | Bounded campaign/event orchestration and publication.                                                                                                                                                          | Populate current campaign-related code; split independent event families instead of absorbing every event in the game.                                                                                                                                                                        | Proposed; pending review |
-| `city`           |                 16 / 2 | Transactional plans, dispatch, bounded snapshots and aggregate persistence coordination.                                                                                                                       | #637/#639 own runtime and persistence coordination. Shared ports/aliases, bootstrap and individual mechanic ownership remain W07–W12/W20 work.                                                                                                                                                | Partial; #637/#639       |
+| `city`           |                 20 / 3 | Transactional plans, dispatch, bounded snapshots, persistence and bootstrap coordination.                                                                                                                      | #637/#639/#641 own runtime, persistence and bootstrap coordination. Shared ports/aliases, reconnect planning and individual mechanic ownership remain W07–W12/W20 work.                                                                                                                       | Partial; #637/#639/#641  |
 | `combat`         |                  0 / 0 | Pure battle models, calculations, deterministic replay and result contracts.                                                                                                                                   | Populate only implemented/extracted mechanics; separate computation from result application. Package required where real code exists, standalone app optional.                                                                                                                                | Proposed; pending review |
 | `command`        |                  0 / 0 | Explicit command registration/routing/envelopes and execution boundary contracts.                                                                                                                              | Populate reusable routing responsibilities now mixed with generic GameService/transport; domain command behavior stays in domain Services.                                                                                                                                                    | Proposed; pending review |
 | `config`         |                  0 / 0 | Shared TypeScript/tool configuration.                                                                                                                                                                          | Retain; this is not an unused runtime package just because it lacks `src`. Do not move secrets or ambient runtime configuration here.                                                                                                                                                         | Proposed; pending review |
@@ -613,3 +613,27 @@ receipt/outbox transactions, schema and authority remain unchanged.
 The handwritten store is split by responsibility instead of expanding the former
 1,153-line module. The remaining generic state/plan ports, domain callbacks and
 bootstrap projection are still #558 work. See [city](city/README.md#aggregate-persistence-639).
+
+## City bootstrap coordination (#641)
+
+GameService delegates initialization, city-state validation and build-info projection
+to the owned city Service/Mapper through a shared structural port. Realm composition
+injects the existing power, feature and reconnect collaborators without a reverse
+city-to-Services dependency. All app-side construction uses the composed factory;
+non-bootstrap player command tests may still instantiate the generic Service.
+
+The serial mechanic initialization, recovery, push order, response precedence,
+abort boundaries, clock reads and reconnect callback remain unchanged. Existing
+building/user/equipment/research serializers remain with their current owners,
+and reconnect planning/persistence still require separate domain work. No cycle
+baseline entry is added or removed in this slice.
+
+The missing-state Controller integration moves to the application suite, preserving
+its assertions and real Service composition. Owned bootstrap tests add ordering,
+abort, state rejection, queue variants and exact-long reconnect coverage. Structural
+comparison reconstructs the full original initialization body from the extracted
+Service and Mapper and verifies the unchanged GameService workflows.
+
+This does not complete W07 or the city-related process-authority work. See
+[city](city/README.md#bootstrap-and-initialization-641) for ports, remaining callers,
+compatibility scope and rollback.

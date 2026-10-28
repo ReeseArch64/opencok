@@ -2,7 +2,7 @@ import { test, expect } from "bun:test";
 import { loadRules } from "@opencok/resources/rules";
 import { playerItemGiftTarget } from "@opencok/rules/player-item-gifts";
 import { playerItemGiftLogin } from "@opencok/mappings/player-item-gifts";
-import { GameService } from "@opencok/services/game";
+import { createRealmGameService } from "../src/composition/game";
 import type { GameStore } from "@opencok/contracts/game";
 import { Rules } from "@opencok/rules/game";
 import { sfs, Type } from "@opencok/messages/sfs";
@@ -16,7 +16,7 @@ test("gift definitions require the maintained give-item type and login uses pair
     expect(view.item_allname).toEqual({ type: Type.StringArray, value: ["Synthetic, sender"] });
 });
 test("native gift sending preserves long correlations and cannot invoke receipt delivery directly", async () => {
-    const game = new GameService(
+    const game = createRealmGameService(
         {} as GameStore,
         new Rules(new Map(), new Map(), new Map()),
         { kingdomId: 1 },

@@ -139,7 +139,7 @@ test("board fanout bounds audience pages and send concurrency and obtains fresh 
 });
 
 test("initialization replays the current board and an expired board clears only merge effects", async () => {
-    const { GameService } = await import("@opencok/services/game");
+    const { createRealmGameService } = await import("../src/composition/game");
     const { Rules } = await import("@opencok/rules/game");
     const state = {
         profile: { uid: "synthetic" },
@@ -167,7 +167,7 @@ test("initialization replays the current board and an expired board clears only 
     const snapshot = decodeMergeEffects(
         "{\"version\":1,\"effects\":[{\"id\":310,\"sourceMergeAt\":1,\"start\":2,\"end\":600002,\"value\":100}],\"notified\":[310]}",
     );
-    const game = new GameService(store, rules, { kingdomId: 1 }, () => now, {
+    const game = createRealmGameService(store, rules, { kingdomId: 1 }, () => now, {
         worldEffectBoard: async () => mergeEffectBoard(currentMergeEffects(snapshot, 1, now)),
     });
     expect((await game.initialize("synthetic")).pushes).toEqual([

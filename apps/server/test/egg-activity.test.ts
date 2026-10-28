@@ -11,7 +11,7 @@ import {
     eggActivityMissing,
 } from "@opencok/rules/egg-activity";
 import { eggActivityView, eggCollectionView } from "@opencok/mappings/egg-activity";
-import { GameService } from "@opencok/services/game";
+import { createRealmGameService } from "../src/composition/game";
 import type { GameStore } from "@opencok/contracts/game";
 import { sfs, encode, decode } from "@opencok/messages/sfs";
 import { configureEggActivity, eggActivityNow } from "./fixtures/egg-activity";
@@ -96,12 +96,18 @@ test("egg native snapshots preserve sentinel longs and collection types, exact w
 test("only the six native legacy egg commands reach the owned mutation boundary; clients cannot invoke the closed-login settlement hook", async () => {
     const rules = await loadRules();
     const seen: string[] = [];
-    const game = new GameService({} as GameStore, rules, { kingdomId: 1 }, () => eggActivityNow, {
-        cityProgression: async (_owner, command) => {
-            seen.push(command);
-            return { body: { opened: sfs.bool(false) }, pushes: [] };
+    const game = createRealmGameService(
+        {} as GameStore,
+        rules,
+        { kingdomId: 1 },
+        () => eggActivityNow,
+        {
+            cityProgression: async (_owner, command) => {
+                seen.push(command);
+                return { body: { opened: sfs.bool(false) }, pushes: [] };
+            },
         },
-    });
+    );
     for (
         const command of [
             "egg.act.info",

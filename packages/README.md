@@ -61,3 +61,7 @@ The [city package](city/README.md) owns transactional plans, snapshot/effect cre
 and command/activity coordination after #637. The realm injects existing mechanic
 callbacks. After #639, bounded snapshots and aggregate persistence are owned too;
 shared contracts and remaining mechanic migrations are tracked in W07–W12/W20.
+
+City bootstrap projection and initialization coordination are owned after #641.
+Realm composition supplies reconnect planning and existing mechanic callbacks;
+remaining shared ports and mechanic ownership are still tracked under #558.

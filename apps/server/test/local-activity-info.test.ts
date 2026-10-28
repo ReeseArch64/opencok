@@ -2,7 +2,7 @@ import { test, expect } from "bun:test";
 import { closedActivityPanels } from "@opencok/rules/local-activity-info";
 import { Rules, type Rule } from "@opencok/rules/game";
 import { loadRules } from "@opencok/resources/rules";
-import { GameService } from "@opencok/services/game";
+import { createRealmGameService } from "../src/composition/game";
 import type { GameStore } from "@opencok/contracts/game";
 import { sfs, fields } from "@opencok/messages/sfs";
 test("closed activity panels preserve native flags and exact UTC windows without activating malformed dates", () => {
@@ -60,7 +60,7 @@ test("native reward previews and closed panel queries authenticate reads without
     });
     let reads = 0,
         mutations = 0;
-    const game = new GameService(
+    const game = createRealmGameService(
         {
             getProfileById: async () => {
                 reads++;
@@ -99,7 +99,7 @@ test("native reward previews and closed panel queries authenticate reads without
     expect(profile.gold).toBe(100n);
     expect(mutations).toBe(0);
     expect(reads).toBe(7);
-    const absent = new GameService(
+    const absent = createRealmGameService(
         { getProfileById: async () => undefined } as unknown as GameStore,
         rules,
         { kingdomId: 1 },

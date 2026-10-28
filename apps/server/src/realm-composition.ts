@@ -351,7 +351,7 @@ import { Database } from "@opencok/repositories/game";
 import { Cache } from "@opencok/storage/session";
 import { Coordination } from "@opencok/storage/coordination";
 import { loadRules } from "@opencok/resources/rules";
-import { GameService } from "@opencok/services/game";
+import { createRealmGameService } from "./composition/game";
 import { WorldService } from "@opencok/services/world";
 import { createRealmChatSessionIssuer } from "@opencok/connection/realm-chat-session";
 import { MailGiftRelay } from "./mail-gift-relay.ts";
@@ -3335,7 +3335,7 @@ export const RealmDependenciesLive = Layer.effect(
             game: observeAdapter(
                 new GameController(
                     observeAdapter(
-                        new GameService(
+                        createRealmGameService(
                             db,
                             rules,
                             config,

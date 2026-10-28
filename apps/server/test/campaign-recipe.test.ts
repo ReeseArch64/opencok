@@ -1,7 +1,7 @@
 import { test, expect } from "bun:test";
 import { temporaryEffect } from "@opencok/rules/player-effects";
 import { loadRules } from "@opencok/resources/rules";
-import { GameService } from "@opencok/services/game";
+import { createRealmGameService } from "../src/composition/game";
 import type { GameStore } from "@opencok/contracts/game";
 import { sfs } from "@opencok/messages/sfs";
 test("overlap-five counters retain their original deadline and reset at the configured count", async () => {
@@ -19,7 +19,7 @@ test("overlap-five counters retain their original deadline and reset at the conf
     expect(temporaryEffect([], rules, "owner", "509877", 1000n, 4, () => 0).states[0]!.count).toBe(
         4,
     );
-    const game = new GameService({} as GameStore, rules, { kingdomId: 1 }, () => 1000, {
+    const game = createRealmGameService({} as GameStore, rules, { kingdomId: 1 }, () => 1000, {
         cityProgression: async () => ({ body: { type: sfs.int(44) }, pushes: [] }),
     });
     expect(

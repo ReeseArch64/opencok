@@ -5,7 +5,7 @@ import {
     investmentSchedule,
     localActivityConditions,
 } from "@opencok/rules/daily-investment";
-import { GameService } from "@opencok/services/game";
+import { createRealmGameService } from "../src/composition/game";
 import type { GameStore } from "@opencok/contracts/game";
 import { Rules } from "@opencok/rules/game";
 import { sfs } from "@opencok/messages/sfs";
@@ -26,7 +26,7 @@ test("investment installments use bounded binary claim flags and completed UTC d
     expect(localActivityConditions("9;1", 15, 3, 4)).toBe(false);
 });
 test("native investment commands preserve correlation and login recovery cannot be invoked publicly", async () => {
-    const game = new GameService(
+    const game = createRealmGameService(
         {} as GameStore,
         new Rules(new Map(), new Map(), new Map()),
         { kingdomId: 1 },

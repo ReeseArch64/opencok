@@ -2,7 +2,7 @@ import { expect, test } from "bun:test";
 import type { GameStore } from "@opencok/contracts/game";
 import type { MailReadQuery, MailReadSnapshot } from "@opencok/contracts/mail";
 import type { Row } from "@opencok/contracts/rows";
-import { GameService as Game } from "@opencok/services/game";
+import { createRealmGameService } from "../src/composition/game";
 import { Rules } from "@opencok/rules/game";
 import { mailReadQuery } from "@opencok/rules/mail";
 import { decode, encode, sfs, type Fields } from "@opencok/messages/sfs";
@@ -41,7 +41,9 @@ function fixture()
             return state;
         },
     };
-    const game = new Game(db, new Rules(new Map(), new Map(), new Map()), { kingdomId: 1 }, () => {
+    const game = createRealmGameService(db, new Rules(new Map(), new Map(), new Map()), {
+        kingdomId: 1,
+    }, () => {
         clocks++;
         return now;
     });

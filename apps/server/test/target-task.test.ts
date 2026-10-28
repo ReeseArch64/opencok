@@ -35,9 +35,9 @@ test("maintained target rules can assign five distinct supported tasks at the st
 });
 
 test("native target commands preserve correlation and reject internal producers", async () => {
-    const { GameService } = await import("@opencok/services/game");
+    const { createRealmGameService } = await import("../src/composition/game");
     const { Rules } = await import("@opencok/rules/game");
-    const game = new GameService(
+    const game = createRealmGameService(
         {} as import("@opencok/contracts/game").GameStore,
         new Rules(new Map(), new Map(), new Map()),
         { kingdomId: 1 },

@@ -1,7 +1,7 @@
 import { test, expect } from "bun:test";
 import { luckyChoice } from "@opencok/rules/lucky-day";
 import { Rules } from "@opencok/rules/game";
-import { GameService } from "@opencok/services/game";
+import { createRealmGameService } from "../src/composition/game";
 import type { GameStore } from "@opencok/contracts/game";
 import { sfs } from "@opencok/messages/sfs";
 test("lucky effect selection uses configured weights and rejects malformed or unknown effects", () => {
@@ -18,7 +18,7 @@ test("lucky effect selection uses configured weights and rejects malformed or un
     expect(() => luckyChoice({ effect: "1|3", effect_rate: "1|3" }, rules, () => 3)).toThrow();
 });
 test("native lucky polling retains correlation and login reconciliation is internal", async () => {
-    const game = new GameService(
+    const game = createRealmGameService(
         {} as GameStore,
         new Rules(new Map(), new Map(), new Map()),
         { kingdomId: 1 },

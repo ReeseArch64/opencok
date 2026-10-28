@@ -3,7 +3,7 @@ import { heroRankingLookup, heroSelfRanking } from "@opencok/hero/rules/hero-ran
 import { loadHeroRankingPosition } from "@opencok/hero/storage/hero-ranking";
 import { heroSelfRanking as mapResult } from "@opencok/hero/mappings/hero-ranking";
 import { Rules } from "@opencok/rules/game";
-import { GameService as Game } from "@opencok/services/game";
+import { createRealmGameService } from "../src/composition/game";
 import type { GameStore } from "@opencok/contracts/game";
 import { sfs } from "@opencok/messages/sfs";
 
@@ -100,7 +100,7 @@ test("hero self command routes only the authenticated owner's origin and retains
             };
         },
     } as unknown as GameStore;
-    const game = new Game(db, rules(), { kingdomId: 2 }, () => 1000, {
+    const game = createRealmGameService(db, rules(), { kingdomId: 2 }, () => 1000, {
         heroRankingPosition: async (query) => (query.member === "alliance" ? 5 : 2),
     });
     const response = await game.execute("self", "hero.self.rank", {
@@ -120,7 +120,7 @@ test("hero self command routes only the authenticated owner's origin and retains
 
 test("alliance event command routes the owner and exposes exact public member widths", async () => {
     const current = { uid: "self", serverId: 2, crossFightSrcServerId: 1, banFlag: 0 };
-    const game = new Game(
+    const game = createRealmGameService(
         {
             getProfileById: async () => current,
             heroInsideRanking: async (uid: string, realm: number, event: string) => {
@@ -181,7 +181,7 @@ test("hero history reads completed publications with rank rewards, deduplication
     }]]);
     const current = { uid: "self", serverId: 2, crossFightSrcServerId: 1, banFlag: 0 };
     const queried: string[][] = [];
-    const game = new Game(
+    const game = createRealmGameService(
         {
             getProfileById: async () => current,
             heroHistory: async (uid: string, realm: number, type: number, now: number) => {

@@ -4,7 +4,7 @@ import type { GameStore } from "@opencok/contracts/game";
 import type { Row } from "@opencok/contracts/rows";
 import type { AvatarVersionIntent } from "@opencok/contracts/avatar-version";
 import { createAvatarVersion } from "@opencok/services/avatar-version";
-import { GameService as Game } from "@opencok/services/game";
+import { createRealmGameService } from "../src/composition/game";
 import { Rules } from "@opencok/rules/game";
 import { avatarVersionMail } from "@opencok/rules/avatar-version";
 import { decode, encode, sfs, type Fields } from "@opencok/messages/sfs";
@@ -100,7 +100,7 @@ function fixture(mode = "1")
             reports.push(effect);
         },
     });
-    const game = new Game({} as GameStore, rules, { kingdomId: 1 }, () => now, {
+    const game = createRealmGameService({} as GameStore, rules, { kingdomId: 1 }, () => now, {
         avatarVersion: service,
     });
     return {
@@ -176,9 +176,13 @@ test("avatar allocation preserves signed-long interval multiplication in its dea
 });
 
 test("avatar allocation remains unavailable without the configured runtime provider", async () => {
-    const game = new Game({} as GameStore, new Rules(new Map(), new Map(), new Map()), {
-        kingdomId: 1,
-    });
+    const game = createRealmGameService(
+        {} as GameStore,
+        new Rules(new Map(), new Map(), new Map()),
+        {
+            kingdomId: 1,
+        },
+    );
     await expect(game.execute("1001", "user.update.picVer", {})).rejects.toMatchObject({
         code: "102192",
     });

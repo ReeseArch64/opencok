@@ -4,7 +4,7 @@ import { allianceHeartLogin, allianceHeartNotification } from "@opencok/mappings
 import { compactPoint } from "@opencok/services/world";
 import { loadRules } from "@opencok/resources/rules";
 import { sfs, Type } from "@opencok/messages/sfs";
-import { GameService } from "@opencok/services/game";
+import { createRealmGameService } from "../src/composition/game";
 import type { GameStore } from "@opencok/contracts/game";
 test("heart catalogs and native seconds, milliseconds and Java integer map fields retain their wire contracts", async () => {
     const rules = await loadRules();
@@ -25,7 +25,7 @@ test("heart catalogs and native seconds, milliseconds and Java integer map field
     const row = { id: 1, pointType: 1, sendHeartDurationTime: 2147483648n, heartType: "1" };
     expect(JSON.parse(compactPoint(row)).sendHeartDurationTime).toBe(-2147483648);
     expect(JSON.parse(compactPoint({ ...row, pointType: 0 })).heartType).toBeUndefined();
-    const game = new GameService({} as GameStore, rules, { kingdomId: 1 }, () => 1000, {
+    const game = createRealmGameService({} as GameStore, rules, { kingdomId: 1 }, () => 1000, {
         cityProgression: async () => ({ body: { worldpoint: sfs.string("4") }, pushes: [] }),
     });
     expect(

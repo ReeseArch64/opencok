@@ -1,6 +1,6 @@
 import { test, expect } from "bun:test";
 import { totemEndTime, totemFootprint, totemNeighbours } from "@opencok/rules/totem";
-import { GameService } from "@opencok/services/game";
+import { createRealmGameService } from "../src/composition/game";
 import { Rules } from "@opencok/rules/game";
 import type { GameServices, GameStore } from "@opencok/contracts/game";
 import { sfs } from "@opencok/messages/sfs";
@@ -32,7 +32,7 @@ test("native civilization and totem commands reach the mutation service with cor
             return { command, body: { success: sfs.bool(true) }, pushes: [] };
         },
     };
-    const game = new GameService(
+    const game = createRealmGameService(
         {} as GameStore,
         new Rules(new Map(), new Map(), new Map()),
         { kingdomId: 1 },

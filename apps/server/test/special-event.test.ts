@@ -3,7 +3,7 @@ import { test, expect } from "bun:test";
 import { loadRules } from "@opencok/resources/rules";
 import { specialEventWindow } from "@opencok/rules/special-event";
 import { specialEventOperation, createSpecialEventDomain } from "@opencok/services/special-event";
-import { GameService } from "@opencok/services/game";
+import { createRealmGameService } from "../src/composition/game";
 import type { GameStore } from "@opencok/contracts/game";
 import { sfs } from "@opencok/messages/sfs";
 test("special event admission preserves inclusive calendar, realm, version and test-realm gates", async () => {
@@ -32,7 +32,7 @@ test("special event admission preserves inclusive calendar, realm, version and t
 });
 test("native special-event reads retain long correlation and no client can confirm or reserve purchases", async () => {
     const rules = await loadRules(),
-        game = new GameService({} as GameStore, rules, { kingdomId: 1 }, () => 1000, {
+        game = createRealmGameService({} as GameStore, rules, { kingdomId: 1 }, () => 1000, {
             cityProgression: async () => ({ body: {}, pushes: [] }),
         });
     expect(

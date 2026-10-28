@@ -1489,7 +1489,7 @@ test(
         const { DisposableRedis } = await import("./support/redis.ts");
         const { Cache } = await import("@opencok/storage/session");
         const { Rules } = await import("@opencok/rules/game");
-        const { GameService } = await import("@opencok/services/game");
+        const { createRealmGameService } = await import("../src/composition/game");
         const { loadNicknameServices } = await import("../src/nickname.ts");
         const redis = new DisposableRedis();
         const cache = new Cache({ redisUrl: await redis.start(), kingdomId: 1, timeoutMs: 1000 });
@@ -1537,7 +1537,7 @@ test(
                 }),
             });
             const filters = await loadNicknameServices(async () => []);
-            const game = new GameService(
+            const game = createRealmGameService(
                 {
                     getProfileById: () => profile(uid),
                 } as unknown as import("@opencok/contracts/game").GameStore,

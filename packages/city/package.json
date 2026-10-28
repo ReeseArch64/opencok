@@ -24,6 +24,7 @@
     "@opencok/economy": "workspace:*",
     "@opencok/hero": "workspace:*",
     "@opencok/drizzle": "workspace:*",
-    "drizzle-orm": "0.45.4"
+    "drizzle-orm": "0.45.4",
+    "@opencok/mappings": "workspace:*"
   }
 }

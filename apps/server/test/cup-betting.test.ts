@@ -6,7 +6,7 @@ import {
     cupPayout,
     reconcileCupMatches,
 } from "@opencok/rules/cup-betting";
-import { GameService } from "@opencok/services/game";
+import { createRealmGameService } from "../src/composition/game";
 import type { GameStore } from "@opencok/contracts/game";
 import { sfs } from "@opencok/messages/sfs";
 test("cup catalog schedules retain country identities and Java float odds without accepting a premature result", async () => {
@@ -24,7 +24,7 @@ test("cup catalog schedules retain country identities and Java float odds withou
 });
 test("cup native queries retain LONG correlation and reject the internal settlement producer", async () => {
     const rules = await loadRules(),
-        game = new GameService({} as GameStore, rules, { kingdomId: 1 }, () => 1000, {
+        game = createRealmGameService({} as GameStore, rules, { kingdomId: 1 }, () => 1000, {
             cityProgression: async () => ({ body: {}, pushes: [] }),
         });
     for (

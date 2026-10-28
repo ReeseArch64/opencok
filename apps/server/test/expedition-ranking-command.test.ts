@@ -1,7 +1,7 @@
 import { expect, test } from "bun:test";
 import type { GameServices, GameStore } from "@opencok/contracts/game";
 import type { Row } from "@opencok/contracts/rows";
-import { GameService as Game } from "@opencok/services/game";
+import { createRealmGameService } from "../src/composition/game";
 import { Rules } from "@opencok/rules/game";
 import { decode, encode, sfs, type Fields } from "@opencok/messages/sfs";
 
@@ -63,7 +63,7 @@ function fixture()
         undefined,
         2,
     );
-    const game = new Game(
+    const game = createRealmGameService(
         db,
         rules,
         { kingdomId: 2 },
@@ -129,7 +129,7 @@ test("expedition rejects unauthorized owners, missing providers and malformed de
     await expect(noProvider.game.execute("self", "expedition.rank", {})).rejects.toThrow("102192");
     const wrongRealm = fixture();
     await expect(
-        new Game(
+        createRealmGameService(
             wrongRealm.db,
             wrongRealm.rules,
             { kingdomId: 1 },

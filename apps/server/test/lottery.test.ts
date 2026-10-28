@@ -1,6 +1,6 @@
 import { test, expect } from "bun:test";
 import { lotteryCondition, lotteryResourceAmount, lotterySlots } from "@opencok/rules/lottery";
-import { GameService } from "@opencok/services/game";
+import { createRealmGameService } from "../src/composition/game";
 import { Rules } from "@opencok/rules/game";
 import type { GameStore } from "@opencok/contracts/game";
 import { sfs } from "@opencok/messages/sfs";
@@ -19,7 +19,7 @@ test("lottery eligibility and reward amounts preserve server counters, unlocks a
 
 test("all native lottery commands preserve dispatch and replay correlation", async () => {
     const calls: string[] = [];
-    const game = new GameService(
+    const game = createRealmGameService(
         {} as GameStore,
         new Rules(new Map(), new Map(), new Map()),
         { kingdomId: 1 },

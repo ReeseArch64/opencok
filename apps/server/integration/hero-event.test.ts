@@ -3,7 +3,7 @@ import { eq } from "drizzle-orm";
 import { migrate } from "drizzle-orm/node-postgres/migrator";
 import { createDatabase } from "@opencok/drizzle";
 import { sfs, type Fields, type Value } from "@opencok/messages/sfs";
-import { GameService } from "@opencok/services/game";
+import { createRealmGameService } from "../src/composition/game";
 import type { GameStore } from "@opencok/contracts/game";
 import { readHeroEvents } from "@opencok/hero/repositories/hero-event";
 import { readHeroHistoryPresentation } from "@opencok/hero/repositories/hero-ranking";
@@ -135,7 +135,7 @@ async function fixture()
             },
         ]);
         const game = (realm = 1) =>
-            new GameService(
+            createRealmGameService(
                 {
                     async getProfileById(uid: string)
                     {

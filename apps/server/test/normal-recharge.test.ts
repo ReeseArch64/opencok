@@ -7,7 +7,7 @@ import {
     normalRechargeThresholds,
 } from "@opencok/rules/normal-recharge";
 import { activityOperators } from "@opencok/rules/activity-operators";
-import { GameService } from "@opencok/services/game";
+import { createRealmGameService } from "../src/composition/game";
 import type { GameStore } from "@opencok/contracts/game";
 import { sfs } from "@opencok/messages/sfs";
 const now = BigInt(Date.UTC(2030, 0, 2)),
@@ -87,11 +87,17 @@ test("normal operators use saved realm facts and the trusted paid producer remai
             { kingdomId: 1, version: "12.06.0", now: Number(now) },
         ),
     ).toEqual([]);
-    const game = new GameService({} as GameStore, rules, { kingdomId: 1 }, () => Number(now), {
-        cityProgression: async () => {
-            throw new Error("Trusted payment reached through native route");
+    const game = createRealmGameService(
+        {} as GameStore,
+        rules,
+        { kingdomId: 1 },
+        () => Number(now),
+        {
+            cityProgression: async () => {
+                throw new Error("Trusted payment reached through native route");
+            },
         },
-    });
+    );
     for (
         const command of [
             "normal.recharge.paid",

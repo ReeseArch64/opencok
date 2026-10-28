@@ -1,7 +1,7 @@
 import { expect, test } from "bun:test";
 import type { GameStore } from "@opencok/contracts/game";
 import type { Row } from "@opencok/contracts/rows";
-import { GameService as Game } from "@opencok/services/game";
+import { createRealmGameService } from "../src/composition/game";
 import { dataConfig } from "@opencok/mappings/bootstrap";
 import { Rules, type Rule } from "@opencok/rules/game";
 import { decode, encode, fields, sfs, Type } from "@opencok/messages/sfs";
@@ -383,7 +383,7 @@ test("login.dataconfig reads the authenticated profile, echoes correlation and r
         getCityByPlayerId: unused,
         getWorldByPointIds: unused,
     };
-    const result = await new Game(store, rules, { kingdomId: 2 }, () => now).execute(
+    const result = await createRealmGameService(store, rules, { kingdomId: 2 }, () => now).execute(
         "synthetic",
         "login.dataconfig",
         { _cok_: sfs.string("request"), cmdBaseTime: sfs.string("123") },
@@ -396,7 +396,7 @@ test("login.dataconfig reads the authenticated profile, echoes correlation and r
     const required = rules.items.get("kingdomskill")!;
     rules.items.delete("kingdomskill");
     await expect(
-        new Game(store, rules, { kingdomId: 2 }, () => now).execute(
+        createRealmGameService(store, rules, { kingdomId: 2 }, () => now).execute(
             "synthetic",
             "login.dataconfig",
             {},
@@ -407,7 +407,7 @@ test("login.dataconfig reads the authenticated profile, echoes correlation and r
     const rejected: (Row | undefined)[] = [undefined, { banFlag: 1 }, { banTime: BigInt(now + 1) }];
     for (const profile of rejected)
     {
-        const game = new Game(
+        const game = createRealmGameService(
             { ...store, getProfileById: async () => profile },
             rules,
             { kingdomId: 2 },

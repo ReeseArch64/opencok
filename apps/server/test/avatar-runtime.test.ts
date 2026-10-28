@@ -2,7 +2,7 @@ import { expect, test } from "bun:test";
 import { drizzle, type NodePgClient } from "drizzle-orm/node-postgres";
 import * as schema from "@opencok/drizzle/schema/kingdom";
 import { Rules, type Rule } from "@opencok/rules/game";
-import { GameService as Game } from "@opencok/services/game";
+import { createRealmGameService } from "../src/composition/game";
 import type { GameStore } from "@opencok/contracts/game";
 import type { AvatarProfileUpdate } from "@opencok/contracts/files";
 import { sfs, encode, decode, type Fields } from "@opencok/messages/sfs";
@@ -280,7 +280,7 @@ function fixture(mode = "1", chatEnabled = true)
             return new Response(body, { status, headers: { "content-type": "application/json" } });
         },
     });
-    const game = new Game({} as GameStore, rules, { kingdomId: 1 }, () => now, {
+    const game = createRealmGameService({} as GameStore, rules, { kingdomId: 1 }, () => now, {
         avatarFinish: runtime.service,
     });
     return {

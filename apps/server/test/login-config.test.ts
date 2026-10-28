@@ -1,6 +1,7 @@
 import { expect, test } from "bun:test";
 import type { CityState, GameStore, LoginConfigurationState } from "@opencok/contracts/game";
-import { GameService as Game } from "@opencok/services/game";
+import { createRealmGameService } from "../src/composition/game";
+import type { GameService as Game } from "@opencok/services/game";
 import { PushPreferenceService } from "@opencok/player/services/push-preferences";
 import type { PushPreferenceStore } from "@opencok/player/contracts/push-preferences";
 import { featureConfig, loginConfiguration } from "@opencok/mappings/bootstrap";
@@ -22,7 +23,7 @@ function createGame(
     services: NonNullable<ConstructorParameters<typeof Game>[4]> = {},
 )
 {
-    return new Game(db, rules, config, now, {
+    return createRealmGameService(db, rules, config, now, {
         ...services,
         playerPreferences: new PushPreferenceService(db as PushPreferenceStore, now),
     });

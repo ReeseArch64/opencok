@@ -14,7 +14,7 @@ import {
 } from "@opencok/repositories/avatar-version";
 import { createChatAvatarProfileStore } from "@opencok/repositories/chat-avatar-profile";
 import { createChatAvatarProfileHandler } from "@opencok/controllers/chat-avatar-profile";
-import { GameService as Game } from "@opencok/services/game";
+import { createRealmGameService } from "../src/composition/game";
 import type { GameStore } from "@opencok/contracts/game";
 import { Rules } from "@opencok/rules/game";
 import { decode, encode, sfs } from "@opencok/messages/sfs";
@@ -200,9 +200,15 @@ test(
                     },
                 });
             let live = runtime();
-            const game = new Game({} as GameStore, rules, { kingdomId: 1 }, () => now, {
-                avatarVersion: live.versionService,
-            });
+            const game = createRealmGameService(
+                {} as GameStore,
+                rules,
+                { kingdomId: 1 },
+                () => now,
+                {
+                    avatarVersion: live.versionService,
+                },
+            );
             const result = await game.execute("1001", "user.update.picVer", {
                 uid: sfs.string("1002"),
                 picVer: sfs.int(999999),

@@ -2,7 +2,7 @@ import { test, expect } from "bun:test";
 import { cycleClaims, cycleOffers, cycleDrawChoice } from "@opencok/rules/seven-day-cycle";
 import { sevenDayPurchaseOperationId } from "@opencok/services/seven-day-cycle";
 import { Rules } from "@opencok/rules/game";
-import { GameService } from "@opencok/services/game";
+import { createRealmGameService } from "../src/composition/game";
 import type { GameStore } from "@opencok/contracts/game";
 import { sfs } from "@opencok/messages/sfs";
 test("cycle catalogs use exact claim tokens, level bands and unbiased weighted choices", () => {
@@ -31,7 +31,7 @@ test("cycle catalogs use exact claim tokens, level bands and unbiased weighted c
     );
 });
 test("native cycle commands preserve long correlation while paid producers remain internal", async () => {
-    const game = new GameService(
+    const game = createRealmGameService(
         {} as GameStore,
         new Rules(new Map(), new Map(), new Map()),
         { kingdomId: 1 },

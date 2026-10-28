@@ -3,7 +3,7 @@ import type { IncomingMessage, ServerResponse } from "node:http";
 import { createHash } from "node:crypto";
 import { Effect } from "effect";
 import { EnvironmentSource } from "@opencok/env/effect";
-import { GameService as Game } from "@opencok/services/game";
+import { createRealmGameService } from "../src/composition/game";
 import { createSessionHandler, verifyForm } from "@opencok/controllers/chat-session";
 import { createTokenVerifier } from "@opencok/identity/chat-token";
 import {
@@ -68,9 +68,15 @@ function fixture(issuer?: ChatSessionIssuer, clock = () => now)
         playerRanking: unused,
     };
     return {
-        game: new Game(db, new Rules(new Map(), new Map(), new Map()), { kingdomId: 1 }, clock, {
-            chatSession: issuer,
-        }),
+        game: createRealmGameService(
+            db,
+            new Rules(new Map(), new Map(), new Map()),
+            { kingdomId: 1 },
+            clock,
+            {
+                chatSession: issuer,
+            },
+        ),
         calls,
         profile: () => profile!,
         setProfile: (value: Row | undefined) => {
