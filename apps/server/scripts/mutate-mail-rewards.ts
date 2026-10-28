@@ -1,9 +1,8 @@
-import { mkdtemp, readFile, rm } from "node:fs/promises";
-import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { readFile, rm } from "node:fs/promises";
+import { createMutationWorkspace } from "../../../.github/testing/mutation-workspace.ts";
 
 const root = new URL("../../../", import.meta.url);
-const directory = await mkdtemp(join(tmpdir(), "opencok-mail-rewards-mutations-"));
+const directory = await createMutationWorkspace("opencok-mail-rewards-mutations-");
 const mutations = [
     [
         "durable mail identity",

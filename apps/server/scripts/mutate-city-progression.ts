@@ -1,9 +1,8 @@
-import { mkdtemp, readFile, rm } from "node:fs/promises";
-import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { readFile, rm } from "node:fs/promises";
+import { createMutationWorkspace } from "../../../.github/testing/mutation-workspace.ts";
 
 const app = new URL("../", import.meta.url),
-    directory = await mkdtemp(join(tmpdir(), "opencok-city-mutations-"));
+    directory = await createMutationWorkspace("opencok-city-mutations-");
 const mutations = [
     ["integer lower bound", "rules", "result < minimum", "false"],
     ["integer upper bound", "rules", "result > maximum", "false"],

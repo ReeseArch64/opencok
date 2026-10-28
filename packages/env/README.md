@@ -71,6 +71,9 @@ local files before this package runs. External loaders must follow the same rule
 
 Tests use temporary synthetic workspaces and subprocesses to verify cwd independence,
 process precedence, missing files, required keys, validation and secret redaction.
+Bundled mutation tests use `.github/testing/mutation-workspace.ts` to create an
+isolated workspace manifest and link installed runtime dependencies. Their emitted
+tests resolve their own root without reading the source workspace's `.env`.
 
 The realm server loads its dedicated settings with `loadServerEnvironment()` from
 `@opencok/env/server`; the pure validator is `@opencok/env/server/schema`.
