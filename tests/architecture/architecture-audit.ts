@@ -105,6 +105,34 @@ export class ArchitectureAudit
             violations.add(`cycle: ${edge}`);
         }
 
+        const consumers = new Map<string, string[]>();
+
+        for (const module of modules)
+        {
+            for (const target of module.dependencies)
+            {
+                const paths = consumers.get(target) ?? [];
+                paths.push(module.path);
+                consumers.set(target, paths);
+            }
+        }
+
+        const reverse = new DependencyGraph(consumers);
+
+        for (const module of modules.filter((entry) => entry.owner === "packages/catalog-tools"))
+        {
+            for (const consumer of reverse.reachable(module.path))
+            {
+                if (
+                    /^(apps|packages)\/[^/]+\/src\//.test(consumer)
+                    && !consumer.startsWith("packages/catalog-tools/")
+                )
+                {
+                    violations.add(`offline-tool: ${consumer} -> ${module.path}`);
+                }
+            }
+        }
+
         const workspaceEdges = new Map<string, string[]>();
 
         for (const module of modules)

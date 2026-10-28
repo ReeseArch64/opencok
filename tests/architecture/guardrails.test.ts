@@ -173,3 +173,29 @@ test("JavaScript extension imports resolve maintained TypeScript while exports c
         "invalid-export:packages/example:../other/src/private.ts",
     ]);
 });
+
+test("runtime sources cannot transitively import offline discovery while scripts and tests can", () => {
+    const report = new ArchitectureAudit().inspect(
+        new Map([
+            ["apps/server/src/app.ts", "import \"../../../packages/bridge/scripts/load.ts\";"],
+            ["packages/bridge/scripts/load.ts", "import \"@opencok/catalog-tools/entry\";"],
+            [
+                "packages/domain/src/type.ts",
+                "import type { Input } from \"@opencok/catalog-tools/entry\";",
+            ],
+            ["apps/server/scripts/export.ts", "import \"@opencok/catalog-tools/entry\";"],
+            ["packages/domain/tests/discovery.test.ts", "import \"@opencok/catalog-tools/entry\";"],
+            ["packages/catalog-tools/src/entry.ts", "export type Input = string;"],
+        ]),
+        [
+            workspace("apps/server", ["@opencok/bridge", "@opencok/catalog-tools"]),
+            workspace("packages/bridge", ["@opencok/catalog-tools"]),
+            workspace("packages/domain", ["@opencok/catalog-tools"]),
+            workspace("packages/catalog-tools"),
+        ],
+    );
+    expect(report.violations).toEqual([
+        "offline-tool: apps/server/src/app.ts -> packages/catalog-tools/src/entry.ts",
+        "offline-tool: packages/domain/src/type.ts -> packages/catalog-tools/src/entry.ts",
+    ]);
+});
