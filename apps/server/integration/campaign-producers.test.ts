@@ -8,7 +8,7 @@ import { ShopService } from "@opencok/shop/services/shops";
 import { MailRewardService } from "@opencok/services/mail-rewards";
 import { createShopRepository } from "@opencok/shop/repositories/shops";
 import { createMailRewardExecutor } from "@opencok/repositories/mail-rewards";
-import { executeInventoryTransaction } from "@opencok/repositories/inventory";
+import { executeRealmInventoryTransaction } from "@opencok/repositories/inventory-runtime";
 import {
     campaignInventoryObservations,
     campaignObservationNeeded,
@@ -42,7 +42,7 @@ async function fixture()
         {
             return undefined;
         }
-        return executeInventoryTransaction(
+        return executeRealmInventoryTransaction(
             tx,
             owner,
             (state) =>

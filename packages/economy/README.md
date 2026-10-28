@@ -1,8 +1,8 @@
 # Economy
 
 `economy` owns wallet/resource balance mutations, activity economic coordination
-and inventory commands, grants, ledger, rules and responses under #611, #613,
-#615, #619, #621 and #623, part of #558 W06. Item persistence, production and
+and inventory commands, grants, ledger, rules, responses and persistence under
+#611, #613, #615, #619, #621, #623 and #625, part of #558 W06. Production and
 reservation protocols remain subsequent work. These extractions do not create a network service or a second mutation authority.
 
 ## Boundaries
@@ -149,7 +149,7 @@ introduced. Rollback uses the previous realm artifact against the same state.
 
 The ledger is 177 lines with one cohesive item/balance responsibility. The residual
 616-line Services inventory module was the next migration target; #623 below
-extracts its command behavior. Inventory persistence remains under #558.
+extracts its command behavior, followed by inventory persistence in #625.
 
 ## Inventory command ownership (#623)
 
@@ -171,9 +171,10 @@ Resource response mapping, schema and contract move with the command boundary.
 All eighteen native fields retain their order, signed bound balances, bigint
 precision, zero defaults and legacy clamping. Shared InventoryState now extends
 the owned command state only to add the cross-domain power snapshot callback.
-The existing horizontal repository still executes fenced transactions and persists
-plans, receipts, postings and outbox together. This is not complete persistence or
-process-authority migration, and the composition adapter remains tracked under #558.
+At this step the horizontal repository still executed fenced transactions and
+persisted plans, receipts, postings and outbox together. #625 moves inventory
+persistence below; the shared transaction authority and cross-domain composition
+adapters remain tracked under #558.
 
 Seven baseline command/resource tests retain 53 assertions before and after the
 move. Three additional domain tests verify feature short-circuiting, exact runtime
@@ -183,3 +184,42 @@ read order and failure propagation. Existing PostgreSQL scenarios exercise the
 factories through inventory, campaign, timed economy, continued cost, item effects,
 equipment, alliances and shops. No dependency, schema, saved-state format or writer
 authority changes; rollback uses the prior realm artifact with the same data.
+
+## Inventory persistence (#625)
+
+`repositories/inventory` owns snapshot reads, item/profile/resource/assets/cooldown
+writes, saved-identity checks and posting-chain validation. The transaction port
+and preparation callbacks live in `repositories/inventory-transaction`. The caller
+supplies the existing fenced mutation executor; the owned repository never imports
+horizontal repositories, contracts, Services or power rules.
+
+InventoryTransactionRuntime extends the owned command snapshot and merges optional
+confirmation results. The realm adapter at `repositories/inventory-runtime` outside
+economy supplies lazy power reads on the same transaction and the existing
+continued-cost event merger. Its factories are explicitly named
+createRealmInventoryExecutor and executeRealmInventoryTransaction. All maintained
+callers migrate, including shop, mail, activities, alliances and chat integration;
+the old horizontal inventory module is removed. Shared mutation/fencing ownership
+and the remaining power/event adapters are not claimed as migrated.
+
+Read and write order, owner predicates, update locks, item sorting, frozen snapshot
+copies, null defaults, currency allowlists, signed bounds, 128-entry item/cooldown
+limits and the 256-posting limit stay unchanged. Request bytes are copied before
+awaiting the executor. Preparation runs before snapshot reads; spending evidence
+and confirmation run only after write/chain validation. These operations remain
+inside one supplied transaction, including failures that occur after staged writes.
+
+Six persistence vectors pass before and after extraction with identical 84
+assertions. The transaction recorder verifies owner predicates, locking, precision,
+write order, rejection and observer timing; it does not simulate rollback. Three
+additional port tests cover request capture, callback arguments, extension and
+preparation failures, result identity and merge failure. Real PostgreSQL suites
+cover atomic rollback, replay, restart, fencing and composed economy flows; chat's
+social integration exercises the renamed realm adapter across its service boundary.
+Runtime comparison preserves the executor/transaction bodies after the explicit
+port substitutions, and every existing consumer body after factory renaming.
+
+No dependency, schema, saved-state, native wire format or process-authority change
+is introduced. Rollback uses the previous realm artifact against the same data.
+The shared mutation executor, lazy power reads and continued-cost merger remain
+real integration adapters under #558, rather than duplicated domain implementations.

@@ -12,7 +12,7 @@ import { GameError } from "@opencok/errors/game";
 import { errors, MOBILE_CLIENT_VERSION } from "@opencok/constants/game";
 import { versionAtLeast } from "@opencok/rules/availability";
 import { createMutationExecutor, appendMutationRecords } from "./mutation.ts";
-import { executeInventoryTransaction } from "./inventory.ts";
+import { executeRealmInventoryTransaction } from "@opencok/repositories/inventory-runtime";
 import type { RealmAuthority } from "./realm-authority.ts";
 import type { DatabaseClient } from "@opencok/drizzle/contracts/database";
 
@@ -188,7 +188,7 @@ export function createMailRewardExecutor(
                 }
 
                 const captured = now();
-                const result = await executeInventoryTransaction(
+                const result = await executeRealmInventoryTransaction(
                     tx,
                     owner,
                     (state) => grant(state, entry, captured),

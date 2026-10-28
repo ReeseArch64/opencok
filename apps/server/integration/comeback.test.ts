@@ -6,7 +6,7 @@ import {
     createComebackSessions,
     readComebackSession,
 } from "@opencok/repositories/comeback-session";
-import { executeInventoryTransaction } from "@opencok/repositories/inventory";
+import { executeRealmInventoryTransaction } from "@opencok/repositories/inventory-runtime";
 import { acquireRealmAuthority } from "@opencok/repositories/realm-authority";
 import { readActivityOperators } from "@opencok/repositories/activity-operators";
 import { activityOperators } from "@opencok/rules/activity-operators";
@@ -30,7 +30,7 @@ async function fixture()
         h.db.db,
         h.authority,
         (tx, owner, now) =>
-            executeInventoryTransaction(
+            executeRealmInventoryTransaction(
                 tx,
                 owner,
                 (state) =>

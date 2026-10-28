@@ -24,7 +24,7 @@ import { timed_activity } from "@opencok/drizzle/schema/opencok_kingdom/timed_ac
 import type { AllianceRepository, AllianceWrite } from "@opencok/contracts/alliance-gameplay";
 import { text, long, type Row } from "@opencok/contracts/rows";
 import { createMutationExecutor, type MutationTransaction } from "./mutation";
-import { executeInventoryTransaction } from "./inventory";
+import { executeRealmInventoryTransaction } from "@opencok/repositories/inventory-runtime";
 import type { ProgressionBoundary } from "./city-progression";
 import type { RealmAuthority } from "./realm-authority";
 import type { ActivityDomain } from "./timed-activity";
@@ -164,7 +164,7 @@ export function createAllianceRepository(
                     throw new Error("Alliance application limit exceeded");
                 }
 
-                return executeInventoryTransaction(
+                return executeRealmInventoryTransaction(
                     tx,
                     input.owner,
                     async (inventory) => {

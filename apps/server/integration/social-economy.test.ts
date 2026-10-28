@@ -12,7 +12,7 @@ import { mutation_outbox } from "@opencok/drizzle/schema/opencok_kingdom/mutatio
 import { PostboxService } from "@opencok/services/postbox";
 import { ChatNoticeService } from "@opencok/services/chat-notice";
 import { createPostboxExecutor } from "@opencok/repositories/postbox";
-import { createInventoryExecutor } from "@opencok/repositories/inventory";
+import { createRealmInventoryExecutor } from "@opencok/repositories/inventory-runtime";
 import { cleanupSocialRealm } from "@opencok/repositories/social-cleanup";
 import { acquireRealmAuthority } from "@opencok/repositories/realm-authority";
 import { sfs, str, fields, type Fields } from "@opencok/messages/sfs";
@@ -61,7 +61,7 @@ test(
                 now,
             );
             const notices = new ChatNoticeService(
-                createInventoryExecutor(h.db.db, h.authority, now),
+                createRealmInventoryExecutor(h.db.db, h.authority, now),
                 h.rules,
                 h.effects,
                 now,
