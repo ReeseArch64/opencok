@@ -2,7 +2,7 @@
 
 ## 1. Overview — Deployment Defined
 
-OpenCoK is a TypeScript monorepo with domain-owned packages and a staged transition from one gameplay writer per realm to independently fenced player/world authorities under [ADR-0017](../docs/decisions/0017-adopt-fenced-realm-process-authorities.md). Domain extraction and process separation are different migrations.
+OpenCoK is a TypeScript monorepo with domain-owned packages and a staged transition from one gameplay writer per realm to independently fenced player/world authorities following the [realm authority design](#9-authoritative-server-zookeeper-and-scaling). Domain extraction and process separation are different migrations.
 
 **Implemented:** API, realm Server, Chat and experimental Web; opt-in restricted Mail Workers and timed-activity Scheduler. `apps/server` still owns all gameplay mutations. Default persistence prepares two kingdoms with shared global state; development Compose starts one active realm server.
 
@@ -54,7 +54,11 @@ API/realm entrypoints compose concrete collaborators; packages must not import a
 
 ### Domain package migration convention
 
-[ADR-0016](../docs/decisions/0016-adopt-domain-owned-package-layout.md) places domain Controllers, Services, rules, DTOs, contracts, validations, mappings, repositories and resources under responsibility directories inside `src`. Pure entrypoints remain infrastructure-independent. Preserve direct workspace dependencies, public exports and temporary compatibility facades with tracked callers/removal conditions; no copied implementations or dependency cycles.
+Keep workspaces flat at `apps/*` and `packages/*`, with cohesive medium-sized domains and responsibility directories inside `src`: `domain`, `contracts`, `dtos`, `rules`, `services`, `validations`, `mappings`, `controllers`, `repositories`, `resources`, `bindings`, `enums` and `constants`. Create only directories with real implementations; feature-first nesting requires a consistent layout documented by the package README. Pure entrypoints must not load ORM, broker, sockets, process composition or a universal catalog registry. Domain-specific declarations may move with their owner without changing native values or wire types.
+
+Preserve direct workspace dependencies, selective public exports and source wildcard maps, including root entries/assets. Temporary facades re-export one implementation and have an owner, remaining callers and a linked removal task; no copied behavior/data. Check runtime and type-only dependency edges: existing cycle debt never authorizes new cycles. Moved tests must remain in discovery commands and pass before deleting old implementations/facades.
+
+Review packages approaching 10–15k handwritten behavioral lines or files approaching 400–600 lines, counting catalogs, schemas and tests separately. These are cohesion-review triggers, not lint limits; unrelated domains need review regardless of size. Avoid one class per package, giant Player/World/activity packages and arbitrary empty scaffolding.
 
 [Package responsibilities](../packages/README.md) and the [migration register](../packages/MIGRATION.md) distinguish confirmed dispositions, completed slices and remaining proposals. Horizontal packages still contain unmigrated workflows. Moving source neither changes realm authority nor approves a new process, schema or transport.
 
@@ -80,9 +84,17 @@ Realm composition injects clocks, catalogs, numeric projections, effects and cro
 
 World query adapters preserve original local/remote read-only snapshots; favorites/leave retain realm fencing. Population execution remains sequential by family with fence, advisory lock, captured clock and transactional outbox order. March/gathering lifecycle and multi-aggregate recovery are not completed by these extractions. Ranking publication does not acquire event finality/funding/reward authority. Share's opaque feed payloads do not establish dedicated battle-report rendering. Mail integration extraction does not migrate all gameplay mailbox/reward or avatar/postbox workflows.
 
+### Client-backed semantic definitions
+
 Maintained catalogs require no runtime XML parser, mount or `GAME_RESOURCES`. Building owns costs/prerequisites/effects/star progression; Resources exposes remaining typed tables/maps/declarations/variables/routing with an explicit flat-record compatibility adapter. Offline importers read authorized originals without modification; XML tooling is developer-only for explicit synthetic fixtures. The maintained policy dictionary ships in the server artifact, not an ignored bind mount.
 
-Under [ADR-0018](../docs/decisions/0018-adopt-client-backed-semantic-definitions.md), Hero's 109 named archetypes own semantic definitions; injected numeric bindings retain native identities and stable unknown entries. Dragon has 14 client archetypes, 13 with server configuration; Vildrin stays client-only. Do not publish unimplemented client references as playable catalogs. See [catalogs/provenance and named definitions](../packages/resources/README.md).
+Hero's 109 named archetypes own semantic definitions; injected numeric bindings retain native identities and stable unknown entries. Dragon has 14 client archetypes, 13 with server configuration; Vildrin stays client-only. Meaningful abstract bases own shared invariants/workflows, concrete classes factual archetypes, and typed curves/matrices ordinary homogeneous data—not subclasses per level, reward cell or table row. Definitions describe archetypes, not saved player instances.
+
+Use explicit properties/units, typed relationships, stable English identities and deterministic ordered rosters, with separate versioned native bindings. Preserve numeric/string/leading-zero identities, aliases, cross-version reuse and save keys. Establish names from actual native-record/entity/localization/relationship linkage and cross-check server consumers, never icon similarity, ID prefixes, guessed translations or display-name matches. Locale changes do not automatically rename or merge identities.
+
+Every catalog/family needs an owner, authoring source, client version/fingerprint and migrated/deferred/unresolved disposition. Offline discovery in `packages/catalog-tools` records safe relative provenance and deterministic collision/reference/coverage diagnostics, leaves originals byte-identical and never silently rewrites maintained source. Publish only approved metadata, not private paths/code/binaries or bulk localization. Runtime/tests/builds use maintained artifacts and synthetic fixtures without ignored inputs. Unresolved required bindings block family promotion; client-only or incomplete entries remain unavailable, never filled with invented effects, rewards or defaults.
+
+Use one authoring source per family; derive compatibility records via injected Mappers from reviewed definitions/bindings rather than editing both representations. Compare every native record/field/type/default/alias/order against parity fixtures before cutover, then migrate semantic consumers too: recreating an XML-shaped bag for raw-ID callers is not completion. Track remaining consumers/facades until dependency and coverage checks pass; unrelated startup must not load the universal registry. See [catalogs/provenance and named definitions](../packages/resources/README.md).
 
 ## 5. Domains, network and gateways
 
@@ -92,11 +104,11 @@ The [gateway](../infra/gateway/README.md) allowlists discovery, public Chat meta
 
 ## 6. PostgreSQL on Neon: writes, reads, and authority
 
-[ADR-0002](../docs/decisions/0002-adopt-postgresql-for-authoritative-state.md) makes PostgreSQL transactional authority. Global and physical per-kingdom databases remain. Target Neon read/write computes share one branch: balances, costs, preconditions and immediate reads use the writer; delay-tolerant reports may use replicas with a lag budget. Bound pools and service/realm permissions; replicas are not backups.
+[ADR-0005](../docs/decisions/0005-adopt-database-stack.md) makes PostgreSQL transactional authority. Global and physical per-kingdom databases remain. Target Neon read/write computes share one branch: balances, costs, preconditions and immediate reads use the writer; delay-tolerant reports may use replicas with a lag budget. Bound pools and service/realm permissions; replicas are not backups.
 
 ## 7. MongoDB, Redis and file storage
 
-[MongoDB](../docs/decisions/0001-adopt-mongodb-for-documents.md) owns large/versioned documents and reconstructible projections. [Redis](../docs/decisions/0005-adopt-redis-for-cache.md) owns cache/sessions/ephemeral coordination, never sole durable progress. Private media uses S3-compatible storage with local MinIO. R2 APK/Lua distribution is separate from player media and Chat attachments.
+[MongoDB](../docs/decisions/0005-adopt-database-stack.md) owns large/versioned documents and reconstructible projections. [Redis](../docs/decisions/0006-adopt-redis-and-insight.md) owns cache/sessions/ephemeral coordination, never sole durable progress. Private media uses S3-compatible storage with local MinIO. R2 APK/Lua distribution is separate from player media and Chat attachments.
 
 ## 8. Messaging: RabbitMQ and BullMQ
 
@@ -106,9 +118,9 @@ RabbitMQ/CloudAMQP remains target integration infrastructure, not an implemented
 
 **Current:** one logical realm writer; `RealmAuthority` acquires a persisted monotonic `ownerEpoch`. Transactions fence stale writers, including recovery. State, ledger postings, command receipts and outbox commit together. Membership/election or a cache lock alone is not fencing; authority loss stops mutations. Domain extraction preserves these guards and existing participant/alliance lock ordering.
 
-**Accepted split:** [ADR-0017](../docs/decisions/0017-adopt-fenced-realm-process-authorities.md) requires one initial active owner per realm and authority kind, not per character. Player owns progression, economy, inventory, owned troops and production; World owns occupancy, placement, populations and spatial march checkpoints. Each gets a distinct persisted epoch/instance, readiness and least-privilege role. Old commits and replacement acquisition must serialize. Do not share the current realm token among independent writers.
+**Accepted split:** one initial active owner per `(realm, authority kind)`, not per character. Validate owner, epoch and readiness inside every authoritative transaction, including recovery/background paths; shared schemas do not grant shared write permission. Player owns progression, economy, inventory, owned troops and production; World owns occupancy, placement, populations and spatial march checkpoints. Each gets a distinct persisted epoch/instance, readiness and least-privilege role. Old commits and replacement acquisition must serialize. Do not share the current realm token among independent writers.
 
-Cross-owner operations require registered table/aggregate/command ownership, durable factual reservations, versioned acceptance/results, pinned rule/RNG/reward outcomes and reconciliation. Carry realm, operation, participant and expected state/version. Timeouts are uncertain outcomes, not permission to release potentially consumed troops or grant again. Keep the atomic current path until equivalent protocols and database-denial/stale-writer tests pass.
+Cross-owner operations require registered table/aggregate/command ownership, durable factual reservations, versioned acceptance/results, pinned rule/RNG/reward outcomes and reconciliation. Carry realm, operation identity, participant, contract version and expected state version. World records accepted movement/checkpoints; Player applies owned releases/losses/rewards once. Define ordering, failure states and permitted compensation before separating participants. Timeouts are uncertain outcomes, not permission to release potentially consumed troops or grant again. Keep the atomic current path until equivalent protocols and database-denial/stale-writer tests pass.
 
 Transfer admission through drain/checkpoint, fenced acquisition, readiness and routing/reconnect. Increasing replicas is not safe realm scaling. Cutover/rollback must account for in-flight protocol state, not merely revert an image; marches/gathering stay together until participant recovery is verified.
 
@@ -126,7 +138,7 @@ Planned Admin submits authorized versioned commands with operator, reason, scope
 
 Current API/Server/Chat use Evlog via [Core logging](../packages/core/README.md#operational-logging) and filtered local Maple logs/traces/controlled exceptions/duration/process metrics. Gateway emits filtered access logs and HTTP metrics via Traefik OTLP; ingress tracing stays disabled to exclude URLs/client addresses. Maple is not a startup dependency and has no native automatic alerting; production capacity remains open.
 
-Exclude bodies, SQL, credentials, identities and raw exception messages/stacks. Correlate operation start/result/duration and prepared/committed/delivered effects. Operational telemetry is a projection, not durable economic audit; Evelog remains the audit concept, Elasticsearch optional derived search, and Firebase telemetry/FCM do not replace state or delivery. [ADR-0013](../docs/decisions/0013-adopt-maple-for-local-operational-observability.md) remains proposed; its recorded local rollout suspends Grafana/Loki/Prometheus/Axiom/Sentry for these signals, not proof of completed verification.
+Exclude bodies, SQL, credentials, identities and raw exception messages/stacks. Correlate operation start/result/duration and prepared/committed/delivered effects. Operational telemetry is a projection, not durable economic audit; Evelog remains the audit concept, Elasticsearch optional derived search, and Firebase telemetry/FCM do not replace state or delivery. [ADR-0004](../docs/decisions/0004-adopt-maple.md) accepts this stack and suspends Grafana/Loki/Prometheus/Axiom/Sentry for these signals; acceptance does not complete verification. Private/loopback access remains an enforcement gate: the current Compose port mapping is not itself loopback-bound.
 
 ## 13. VPS Kubernetes, delivery, and continuity
 
@@ -154,7 +166,7 @@ The maintained server now composes migrated domains over transactional PostgreSQ
 
 ### 15.4. Local TypeScript stack
 
-API/Chat/realm/Web retain Bun CLI builds with separate semantic checks; the compiler pilot and artifact CI were removed. TypeScript/Bun development decisions remain in [ADR-0011](../docs/decisions/0011-adopt-typescript-for-application-code.md)/[ADR-0009](../docs/decisions/0009-adopt-bun-for-development.md); [ADR-0010](../docs/decisions/0010-adopt-nodejs-for-production.md) is deprecated and selects no current production runtime. Effect is implemented, but [ADR-0012](../docs/decisions/0012-adopt-effect-for-service-composition.md) remains proposed. Source checks do not certify emitted artifacts/native releases.
+API/Chat/realm/Web retain Bun CLI builds with separate semantic checks; the compiler pilot and artifact CI were removed. [TypeScript](../docs/decisions/0001-adopt-typescript.md), [Bun](../docs/decisions/0002-adopt-bun.md) and [Effect](../docs/decisions/0008-adopt-effect.md) are accepted stack choices. The former Node.js production mandate remains suspended; no production runtime migration is selected. Source checks do not certify emitted artifacts/native releases.
 
 Base Compose defines API/Server/Chat, Traefik, PostgreSQL/setup, MongoDB, Redis, ZooKeeper, MinIO/CDN, Maple and inspection tools. `docker-compose.dev.yml` adds local PostgreSQL/setup, Redis and MinIO readiness ordering; omitting it does not remove base service definitions. Shared external `DATABASE_URL`/`REDIS_URL` and configured S3/CDN endpoints do not require local database/storage dependencies in base app definitions. Server outbound networking supports external providers, not verified production compatibility.
 
@@ -162,7 +174,7 @@ Base Compose defines API/Server/Chat, Traefik, PostgreSQL/setup, MongoDB, Redis,
 
 ## 16. Simulation execution and offline progress
 
-Use server time, persisted deadlines, versioned aggregates, idempotent completion and bounded catch-up, not per-player timers/unbounded replay. Independent calculations cannot bypass owner ordering/economic invariants.
+Use server time, persisted deadlines, versioned aggregates, idempotent completion and bounded catch-up, not per-player timers/unbounded replay. Starting, cancelling or accelerating work updates version/deadline atomically with related effects. Scheduler and reconnect share the same owner transition and stable operation identity; duplicate, stale or reordered discovery must neither complete early nor duplicate effects. Independent calculations cannot bypass owner ordering/economic invariants.
 
 [Scheduler](../apps/scheduler/README.md) discovers supported active legacy queues and due registrations through restricted metadata reads. Capabilities come from the owner; dispatch includes generation/version/deadline. The owner rechecks locked state, actual due time and earlier-activity ordering inside the same economic transaction. Reconnect/foreground recovery remains local even in external background mode; unsupported/failed work stays durable.
 
@@ -186,7 +198,7 @@ Target Firebase Guest/provider linking preserves internal identity and both real
 
 ## 19. Realms, partitions and operations between owners
 
-Separate realm configuration, state, leases and pools. New owner boundaries require versioned commands/results, idempotent receipts, bounded reservations and reconciliation; no informal distributed transactions or shared unrestricted SQL. Per-character partitions are not the initial ADR-0017 model. Prove wrong-owner database denial, stale-epoch rejection, crash recovery and aggregate resource budgets before activation.
+Separate realm configuration, state, leases and pools. New owner boundaries require versioned commands/results, idempotent receipts, bounded reservations and reconciliation; no informal distributed transactions or shared unrestricted SQL. Per-character partitions are not the initial [realm authority model](#9-authoritative-server-zookeeper-and-scaling). Prove wrong-owner database denial, stale-epoch rejection, crash recovery and aggregate resource budgets before activation.
 
 ## 20. Global and alliance chat: delivery, archiving, and deletion
 

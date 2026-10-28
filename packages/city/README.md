@@ -4,7 +4,7 @@ City owns `CityProgressionContext`, `CityProgressionContextFactory` and
 `CityProgressionService` after #637 under #558 W07. They coordinate a pending
 aggregate write and economic plan, load the existing effect snapshot and route
 commands or timed activity actions to injected mechanic implementations. The realm
-remains the authoritative process; this extraction does not implement ADR-0017's
+remains the authoritative process; this extraction does not implement [realm authority design](../../.github/ARCHITECTURE.md#9-authoritative-server-zookeeper-and-scaling)'s
 process topology.
 
 ## Boundaries

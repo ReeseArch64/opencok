@@ -49,7 +49,7 @@ composed locally or delegated to the Workers process.
 backed by a ManagedRuntime whose `close()` disposes the service scopes. It cleans
 up on failed startup and tolerates repeated close calls. TCP packet ordering,
 backpressure, controllers and synchronous rules remain independent of Effect. See
-[ADR-0012](../../docs/decisions/0012-adopt-effect-for-service-composition.md).
+[ADR-0008](../../docs/decisions/0008-adopt-effect.md).
 
 ## Observe local tests
 
@@ -1552,7 +1552,7 @@ The additive kingdom migration `0003_mail_update_markers.sql` creates `mail_upda
 keyed by recipient and message, with an owner/time index. Flags and markers commit
 together; failure rolls back both. Marker upserts retain the greater timestamp when
 requests arrive out of clock order. PostgreSQL supplies durable synchronization state
-under ADR-0002/0005, replacing the legacy non-atomic Redis marker write. The marker
+under ADR-0005/ADR-0006, replacing the legacy non-atomic Redis marker write. The marker
 has no mail foreign key so future deletion synchronization can retain tombstones.
 Synchronization consumers and cleanup are still pending; this slice does not emit
 mail pushes or claim reconnect synchronization is complete.
@@ -3174,7 +3174,7 @@ or invalid templates reject rather than committing an undeliverable mail intent.
 
 The owner-locked transaction commits profile version, applicable moderation state and
 an `avatar_version_update` outbox record together. This deliberately replaces the
-reference's sequential writes with atomic persistence under ADR-0002. The generated
+reference's sequential writes with atomic persistence under ADR-0005. The generated
 `0007_avatar_version_updates.sql` migration is additive and is tested in disposable
 PostgreSQL; it has not been applied to operator/player databases. It
 contains an opaque server-generated operation ID, captured version/time/configuration
@@ -4019,8 +4019,8 @@ state and sets no TTL. Missing cache state safely widens the owned selection; ca
 outages fail the fallback request. The unscoped legacy hash is not consulted.
 Existing cached cursor state therefore requires a separately reviewed scoped import;
 explicit client cursors do not require Redis. Cache loss cannot erase authoritative
-mail. This follows [ADR-0005](../../docs/decisions/0005-adopt-redis-for-cache.md) and
-[ADR-0002](../../docs/decisions/0002-adopt-postgresql-for-authoritative-state.md).
+mail. This follows [ADR-0006](../../docs/decisions/0006-adopt-redis-and-insight.md) and
+[ADR-0005](../../docs/decisions/0005-adopt-database-stack.md).
 
 The reference's shared helper also constructs private conversations discarded by
 this system-mail handler. This implementation excludes them and does not invoke their
@@ -4165,7 +4165,7 @@ fields must not be described as globally isolated rows per realm.
 
 ## Operational observability
 
-[ADR-0013](../../docs/decisions/0013-adopt-maple-for-local-operational-observability.md)
+[ADR-0004](../../docs/decisions/0004-adopt-maple.md)
 governs Evlog/OpenTelemetry export to Maple Local. Composed application operations
 and dependencies emit correlated start/result/error records and duration metrics.
 Generated effects are distinguished from committed transactions and deferred

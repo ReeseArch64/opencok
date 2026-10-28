@@ -1,6 +1,6 @@
 # Vocabulary and Code Conventions
 
-Use consistent domain vocabulary, ordinary TypeScript naming and readable layout. C# inspires block presentation, not naming or runtime semantics. [Issue #550](https://github.com/ReeseArch64/opencok/issues/550) separates readability/formatting from structural refactoring; [ADR-0014](docs/decisions/0014-adopt-dprint-for-typescript-formatting.md) records the formatter decision. These conventions do not authorize new formatters, mass renaming, structural migration or unrelated rewrites. Existing public names and compatibility requirements take precedence.
+Use consistent domain vocabulary, ordinary TypeScript naming and readable layout. C# inspires block presentation, not naming or runtime semantics. [Issue #550](https://github.com/ReeseArch64/opencok/issues/550) separates readability/formatting from structural refactoring; [ADR-0003](docs/decisions/0003-adopt-dprint-oxfmt-and-oxlint.md) records the formatter decision. These conventions do not authorize new formatters, mass renaming, structural migration or unrelated rewrites. Existing public names and compatibility requirements take precedence.
 
 ## Implementation vocabulary
 

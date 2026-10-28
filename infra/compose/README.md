@@ -346,7 +346,7 @@ overrides that previously targeted `database`, `database-setup` or `storage`.
 Redis 6.2.24 Bookworm and ZooKeeper 3.4.14 use pinned upstream images with
 configuration in Compose. Redis remains on the existing baseline; an upgrade requires
 client, command, persistence and recovery compatibility validation first.
-See [ADR-0005](../../docs/decisions/0005-adopt-redis-for-cache.md).
+See [ADR-0006](../../docs/decisions/0006-adopt-redis-and-insight.md).
 Redis command arguments retain RDB/AOF persistence, a 384 MiB limit,
 `noeviction` and disabled command slowlogs. ZooKeeper retains session timing,
 client limits, hourly snapshot cleanup and `ruok`/`srvr` health commands.
@@ -413,7 +413,7 @@ values change; do not delete the volume to rotate credentials.
 
 ## Observability
 
-[ADR-0013](../../docs/decisions/0013-adopt-maple-for-local-operational-observability.md)
+[ADR-0004](../../docs/decisions/0004-adopt-maple.md)
 selects Maple Local for server/API logs, traces, controlled errors and duration/process
 metrics. Grafana, Loki, Prometheus, Axiom and Sentry adoption is suspended for these
 signals while Maple passes the required checks. A derived `v0.3.0` image contains
@@ -526,4 +526,4 @@ database and authentication settings. The example selects local `opencok_chat`
 with `authSource=admin`. Admin-wide database browsing is disabled. Inspect `chat_archive` for archived messages; UI changes are
 local diagnostic actions and must not replace versioned repair or migration scripts.
 The service has no application dependents or gateway route and is omitted from `prod`.
-See [ADR-0003](../../docs/decisions/0003-adopt-mongo-express-for-development.md).
+See [ADR-0005](../../docs/decisions/0005-adopt-database-stack.md).

@@ -98,9 +98,9 @@ does not proxy `/chat/ws` or expose `/external/session`. See the
 [realm session contract](../server/README.md#realm-chat-sessions) for bounds and errors.
 Topic 24 implements durable cross-instance fanout, private workflows, moderation and the
 seven-day global/alliance archive. See the linked migration guide for operating limits.
-Production Node execution remains pending
-[ADR-0010](../../docs/decisions/0010-adopt-nodejs-for-production.md); the Dockerfile is
-for Bun development, matching the existing API/server images.
+Production runtime selection remains open under
+[ADR-0002](../../docs/decisions/0002-adopt-bun.md); the former Node mandate is suspended.
+The Dockerfile is for Bun development, matching the existing API/server images.
 
 Back up the global database and kingdom databases consistently. Roll back the service
 image/code and configuration together. The additive global migration described below

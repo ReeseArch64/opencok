@@ -46,7 +46,7 @@ lifecycle and restricted connections. The realm retains a default local mode usi
 the same Service; external mode removes its two local mail delivery loops while
 leaving transactional intent creation unchanged. No RealmAuthority token, Rules
 catalog or Redis connection is shared with the worker. This implements a bounded
-W15 integration slice under [ADR-0017](../../docs/decisions/0017-adopt-fenced-realm-process-authorities.md),
+W15 integration slice under [realm authority design](../../.github/ARCHITECTURE.md#9-authoritative-server-zookeeper-and-scaling),
 not separate player/world authorities or complete W11/W15 migration.
 
 ## Compatibility and deployment

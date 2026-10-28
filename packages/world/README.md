@@ -2,7 +2,7 @@
 
 [Issue #691](https://github.com/ReeseArch64/opencok/issues/691) establishes the
 implemented World package for map browsing, search, favorites and spatial utilities
-under [ADR-0016](../../docs/decisions/0016-adopt-domain-owned-package-layout.md).
+under [domain layout policy](../../.github/ARCHITECTURE.md#domain-package-migration-convention).
 The realm server retains the database, authority token and command lifecycle.
 Package ownership does not introduce a separate World process.
 
@@ -86,7 +86,7 @@ monster and territory projection collaborators. Population ownership follows in
 #695 below. Resource queries, gathering/cargo, march lifecycle, scouting and
 multi-aggregate spatial recovery remain later W10 work. Their current realm
 transactions and authority are unchanged. This delivery does not complete
-[ADR-0017](../../docs/decisions/0017-adopt-fenced-realm-process-authorities.md), W10,
+[realm authority design](../../.github/ARCHITECTURE.md#9-authoritative-server-zookeeper-and-scaling), W10,
 W18 or the full [#558](https://github.com/ReeseArch64/opencok/issues/558) inventory.
 
 ## Validation and deployment

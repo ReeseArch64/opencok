@@ -98,7 +98,7 @@ application settings.
 ## Effect application configuration
 
 API and realm composition use `@opencok/env/effect` as defined in
-[ADR-0012](../../docs/decisions/0012-adopt-effect-for-service-composition.md).
+[ADR-0008](../../docs/decisions/0008-adopt-effect.md).
 `EnvironmentLive` reads the same root file and process overrides once when its
 Layer is built, rather than at module import. `EnvironmentSource` can be replaced
 with a synthetic Layer in tests; `readEnvironment(schema)` and `databaseUrl`

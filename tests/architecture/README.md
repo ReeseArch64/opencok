@@ -1,7 +1,7 @@
 # Domain migration guardrails
 
 This shared integration suite implements the first dependency checks for
-[ADR-0016](../../docs/decisions/0016-adopt-domain-owned-package-layout.md) and
+[domain layout policy](../../.github/ARCHITECTURE.md#domain-package-migration-convention) and
 [#578](https://github.com/ReeseArch64/opencok/issues/578), under #558 W01/W05.
 It inspects maintained workspace files without importing applications, catalogs
 or private inputs. Run `bun run test:architecture` and

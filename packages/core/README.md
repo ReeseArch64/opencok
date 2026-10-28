@@ -1,7 +1,7 @@
 # Shared Effect service runtime
 
-`@opencok/core` implements the common process and resource conventions proposed in
-[ADR-0012](../../docs/decisions/0012-adopt-effect-for-service-composition.md).
+`@opencok/core` implements the common process and resource conventions accepted in
+[ADR-0008](../../docs/decisions/0008-adopt-effect.md).
 Both development services use Effect 4.0.6 from the workspace catalog.
 
 `runtime` runs a fully provided application Effect through BunRuntime. SIGINT and
@@ -16,9 +16,9 @@ itself fails. Finalizer failures propagate after remaining finalizers execute.
 64 KiB body limit and 20-second idle timeout. The listener closes before an outer
 scope releases request dependencies. Promise handlers finish before their request
 fibers can be interrupted, so shutdown cannot close dependencies underneath an
-active adapter call. Adapters must retain bounded I/O timeouts. Platform imports stay here so the future
-Node runtime transition has one application integration boundary. Existing Bun
-Redis adapters and production artifacts still require ADR-0010 work.
+active adapter call. Adapters must retain bounded I/O timeouts. Platform imports stay here as the application runtime integration boundary.
+The former Node.js production mandate is suspended; selecting a production runtime
+and verifying Redis adapters and emitted artifacts remain separate work.
 
 Application services use Context and Layer; packages never import application
 configuration. Tests can provide Layer.succeed values without loading private
@@ -35,9 +35,8 @@ server testing observable. `logging` is the shared adapter around the pinned
 `evlog@2.33.1` dependency. Composition roots call `initializeLogging(service)`;
 packages use `logEvent` and `withLogContext`. The adapter uses Node-compatible
 AsyncLocalStorage and keeps the logger dependency behind one package export.
-This preserves the Bun development and Node production boundaries in
-[ADR-0009](../../docs/decisions/0009-adopt-bun-for-development.md) and
-[ADR-0010](../../docs/decisions/0010-adopt-nodejs-for-production.md).
+This preserves the Bun development boundary in
+[ADR-0002](../../docs/decisions/0002-adopt-bun.md) without selecting a production runtime.
 
 Service entrypoints emit newline-delimited JSON with timestamp, service,
 environment, event and level. `info` records normal activity, `warn` records
@@ -69,7 +68,7 @@ operation and a controlled reason such as `connection_refused`,
 errors use `unexpected_failure`.
 
 Server and API additionally initialize the scoped OpenTelemetry SDK before their
-application resources, implementing [ADR-0013](../../docs/decisions/0013-adopt-maple-for-local-operational-observability.md).
+application resources, implementing [ADR-0004](../../docs/decisions/0004-adopt-maple.md).
 Redacted events are exported as OTLP logs; explicit spans carry the same trace/span IDs.
 Exception groups contain controlled reason/event metadata. Duration histograms, event
 counters, active operations, CPU time, resident memory and uptime use bounded dimensions.

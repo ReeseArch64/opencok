@@ -2,7 +2,7 @@
 
 This package owns ordinary and civilization research workflows extracted in
 [#643](https://github.com/ReeseArch64/opencok/issues/643), under #558 W07 and
-ADR-0016. It contains 12 source modules and one owned test file. The largest
+[domain layout policy](../../.github/ARCHITECTURE.md#domain-package-migration-convention). It contains 12 source modules and one owned test file. The largest
 handwritten implementation is below 250 lines; catalog data is not copied here.
 
 ## Ownership and composition

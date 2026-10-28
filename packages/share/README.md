@@ -1,7 +1,7 @@
 # Social sharing
 
 `@opencok/share` owns the existing social feed after #687, a package-level W08/W20
-migration under #558 and ADR-0016. The four commands are `chat.feed.send`,
+migration under #558 and [domain layout policy](../../.github/ARCHITECTURE.md#domain-package-migration-convention). The four commands are `chat.feed.send`,
 `chat.feed.get`, `chat.feed.del` and `chat.feed.notice.del`. Share accepts the
 existing opaque feed data; this does not establish a dedicated battle-report
 renderer or emulate the legacy Firebase reader.

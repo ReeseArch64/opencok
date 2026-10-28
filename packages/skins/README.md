@@ -2,7 +2,7 @@
 
 Skins owns the existing city appearance workflows after
 [#661](https://github.com/ReeseArch64/opencok/issues/661), part of #558 W08, under
-[ADR-0016](../../docs/decisions/0016-adopt-domain-owned-package-layout.md).
+[domain layout policy](../../.github/ARCHITECTURE.md#domain-package-migration-convention).
 Its 17 source modules and one test file cover city skins, bubbles and overlap
 appearances. Media uploads and player profile avatars remain with their existing
 owners; this package does not introduce a new content catalog or native identity.

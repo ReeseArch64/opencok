@@ -15,7 +15,7 @@ directory and Redis health adapter. Account pools are registered in a scope befo
 startup checks, and the HTTP scope closes before dependency scopes. Both apps use
 `@opencok/core/http` and `@opencok/core/runtime`; no per-app signal handlers or
 ambient configuration imports remain. See
-[ADR-0012](../../docs/decisions/0012-adopt-effect-for-service-composition.md).
+[ADR-0008](../../docs/decisions/0008-adopt-effect.md).
 
 ## Run
 
@@ -195,7 +195,7 @@ across restarts. No database reset or schema migration is required.
 
 ## Operational observability
 
-[ADR-0013](../../docs/decisions/0013-adopt-maple-for-local-operational-observability.md)
+[ADR-0004](../../docs/decisions/0004-adopt-maple.md)
 governs Evlog/OpenTelemetry export to Maple Local. Composed application operations
 and dependencies emit correlated start/result/error records and duration metrics.
 Generated effects are distinguished from committed transactions and deferred

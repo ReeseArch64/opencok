@@ -29,7 +29,7 @@ The workspace has 19 source modules and one owned test file. The 512-line comman
 class retains dispatch order and the shared suit-selection state; the 231-line
 forge planner owns the early-return activity preparation branch. Access, creation,
 materials, completion and workshop lifecycle have separate classes. This follows
-[ADR-0016](../../docs/decisions/0016-adopt-domain-owned-package-layout.md) without a
+[domain layout policy](../../.github/ARCHITECTURE.md#domain-package-migration-convention) without a
 single oversized workflow module or a class per native command.
 
 Equipment imports no horizontal Rules, Contracts, Mappings, Services or Repositories.
@@ -38,7 +38,7 @@ ports. Inventory projection comes from Economy. The shared weighted-choice algor
 moves to `rules/src/weighted-choice.ts`, still consumed by World, Hero, Dragon and
 events; Equipment receives it through its rule runtime. The native row-shaped plan
 and record catalogs remain transitional #558 work. Semantic definitions under
-ADR-0018 are not claimed complete.
+[semantic definition policy](../../.github/ARCHITECTURE.md#client-backed-semantic-definitions) are not claimed complete.
 
 `EquipmentRepository` receives the existing realm transaction, owner and row readers.
 It owns the equipment snapshot, bounded suit snapshot, owner checks/upserts/deletions,

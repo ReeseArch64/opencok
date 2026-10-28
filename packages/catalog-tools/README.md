@@ -1,6 +1,6 @@
 # Catalog tooling
 
-Offline tooling for [ADR-0018](../../docs/decisions/0018-adopt-client-backed-semantic-definitions.md)
+Offline tooling for [semantic definition policy](../../.github/ARCHITECTURE.md#client-backed-semantic-definitions)
 and [#598](https://github.com/ReeseArch64/opencok/issues/598) /
 [#601](https://github.com/ReeseArch64/opencok/issues/601), under #558 W13.
 The architecture suite rejects direct/transitive imports from application or domain

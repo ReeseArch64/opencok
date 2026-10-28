@@ -2,7 +2,7 @@
 
 Tasks owns ordinary/main, story, daily, legacy daily and sign-in quests after
 [#653](https://github.com/ReeseArch64/opencok/issues/653), under
-[ADR-0016](../../docs/decisions/0016-adopt-domain-owned-package-layout.md).
+[domain layout policy](../../.github/ARCHITECTURE.md#domain-package-migration-convention).
 Target missions are owned after #655, recall missions after #657 and reconnect missions after #659. Other
 event-specific workflows remain in their current owners for later #558 slices. Background work belongs to jobs.
 

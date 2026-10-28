@@ -2,7 +2,7 @@
 
 [Issue #689](https://github.com/ReeseArch64/opencok/issues/689) moves existing
 permanent boards and published projections into Ranking under
-[ADR-0016](../../docs/decisions/0016-adopt-domain-owned-package-layout.md).
+[domain layout policy](../../.github/ARCHITECTURE.md#domain-package-migration-convention).
 The realm retains command execution and authoritative state. Reading a published
 board does not own its event settlement, funding, entitlements or reward claims.
 

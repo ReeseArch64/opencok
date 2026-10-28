@@ -61,7 +61,7 @@ A naming convention does not grant new write capabilities. The realm snapshot
 repositories remain read-only. Add mutations only as separately scoped use cases
 with their required ownership, atomicity and recovery semantics. Follow the
 [package boundaries](../../.github/ARCHITECTURE.md#implemented-api-and-realm-package-boundaries)
-and [PostgreSQL decision](../../docs/decisions/0002-adopt-postgresql-for-authoritative-state.md).
+and [PostgreSQL decision](../../docs/decisions/0005-adopt-database-stack.md).
 
 Run the existing server, API and Chat tests and type checks when changing these
 ports. The Chat PostgreSQL integration suite verifies concurrent idempotent
