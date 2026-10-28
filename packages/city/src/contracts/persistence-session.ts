@@ -1,3 +1,4 @@
+import type { EquipmentRepository } from "@opencok/equipment/repositories/progression";
 import type { BuildingRepository } from "@opencok/building/repositories/progression";
 import type { TroopsRepository } from "@opencok/troops/repositories/progression";
 import type { ResearchRepository } from "@opencok/research/repositories/progression";
@@ -8,6 +9,10 @@ import type { CityPersistenceWriters } from "./persistence-writers";
 
 export interface CityPersistenceAdapters
 {
+    readonly equipment: Pick<
+        EquipmentRepository,
+        "read" | "readSuitDecompositions" | "writeEquipment"
+    >;
     readonly buildings: Pick<
         BuildingRepository,
         "read" | "readExperience" | "write" | "writeExperience" | "delete"

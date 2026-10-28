@@ -8,7 +8,7 @@ import {
     lotteryFailure,
     lotteryResourceAmount,
 } from "@opencok/rules/lottery";
-import { chooseWeight } from "@opencok/rules/equipment";
+import { chooseWeight } from "@opencok/rules/weighted-choice";
 import { cityInteger } from "@opencok/rules/city-progression";
 import { lotteryInfo } from "@opencok/mappings/lottery";
 import type { Rule } from "@opencok/rules/game";

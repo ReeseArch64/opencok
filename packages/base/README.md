@@ -20,3 +20,6 @@ and queue types used by Building and the remaining `CityCommandDomain` subclasse
 Base loads no transport or gameplay catalog. Shared Contracts re-exports these
 three types temporarily; the caller inventory and retirement criteria live in
 [the migration register](../MIGRATION.md#construction-workflows-649).
+
+Equipment and Workshop also specialize `ActivityDomain` after #651, preserving
+Workshop's additional next/acceleration hooks through its concrete class.

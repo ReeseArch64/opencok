@@ -13,7 +13,7 @@ import {
 import { num, long } from "@opencok/contracts/rows";
 import { cityInteger } from "@opencok/rules/city-progression";
 import { generalFailure } from "@opencok/hero/rules/general-progression";
-import { chooseWeight } from "@opencok/rules/equipment";
+import { chooseWeight } from "@opencok/rules/weighted-choice";
 import { generalFeatureAvailable } from "@opencok/hero/rules/new-general-content";
 import type { CityProgressionContext } from "@opencok/services/city-progression-context";
 

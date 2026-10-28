@@ -1,9 +1,10 @@
+import { createRealmEquipmentDomains } from "../src/composition/equipment";
 import { test, expect } from "bun:test";
 import { eq } from "drizzle-orm";
 import { randomUUID } from "node:crypto";
 import { sfs } from "@opencok/messages/sfs";
 import { cityHarness } from "./support/city";
-import { equipmentDomain, workshopDomain } from "@opencok/services/equipment";
+
 import { createInventoryService } from "@opencok/services/inventory-runtime";
 import { createRealmInventoryExecutor } from "@opencok/repositories/inventory-runtime";
 import { user_equip } from "@opencok/drizzle/schema/opencok_kingdom/user_equip";
@@ -11,6 +12,8 @@ import { user_item } from "@opencok/drizzle/schema/opencok_kingdom/user_item";
 import { user_building } from "@opencok/drizzle/schema/opencok_kingdom/user_building";
 import { user_mixed_info } from "@opencok/drizzle/schema/opencok_kingdom/user_mixed_info";
 import { queue } from "@opencok/drizzle/schema/opencok_kingdom/queue";
+
+const { equipment: equipmentDomain, workshop: workshopDomain } = createRealmEquipmentDomains();
 
 test(
     "equipment crafting pins results, consumes once, completes, equips, and dismantles durably",

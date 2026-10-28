@@ -1,0 +1,29 @@
+{
+  "name": "@opencok/equipment",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./*": "./src/*.ts"
+  },
+  "scripts": {
+    "check-types": "tsc --noEmit",
+    "test": "bun --no-env-file test tests"
+  },
+  "dependencies": {
+    "@opencok/base": "workspace:*",
+    "@opencok/messages": "workspace:*",
+    "@opencok/enums": "workspace:*",
+    "@opencok/errors": "workspace:*",
+    "@opencok/constants": "workspace:*",
+    "zod": "catalog:",
+    "@opencok/drizzle": "workspace:*",
+    "drizzle-orm": "0.45.4",
+    "@opencok/economy": "workspace:*",
+    "@opencok/building": "workspace:*"
+  },
+  "devDependencies": {
+    "@opencok/config": "workspace:*",
+    "@types/bun": "catalog:",
+    "typescript": "catalog:"
+  }
+}

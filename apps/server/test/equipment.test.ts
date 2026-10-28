@@ -1,9 +1,15 @@
+import {
+    createRealmEquipmentDomains,
+    createRealmEquipmentPolicy,
+} from "../src/composition/equipment";
 import { test, expect } from "bun:test";
 import { loadRules } from "@opencok/resources/rules";
-import { equipmentMaterials, equipmentColor, dismantleEquipment } from "@opencok/rules/equipment";
-import { equipmentDomain } from "@opencok/services/equipment";
+
 import { cityFixture } from "./fixtures/city-progression";
 import { sfs, Type } from "@opencok/messages/sfs";
+
+const { equipment: equipmentDomain } = createRealmEquipmentDomains();
+const { equipmentMaterials, equipmentColor, dismantleEquipment } = createRealmEquipmentPolicy();
 const rules = await loadRules();
 function fixture()
 {

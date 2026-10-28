@@ -19,6 +19,7 @@
     "@opencok/hero": "workspace:*",
     "@opencok/economy": "workspace:*",
     "@opencok/ledger": "workspace:*",
-    "@opencok/base": "workspace:*"
+    "@opencok/base": "workspace:*",
+    "@opencok/equipment": "workspace:*"
   }
 }

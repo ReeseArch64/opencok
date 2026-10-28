@@ -1,4 +1,4 @@
-import { publicEquipmentSchema } from "@opencok/validations/equipment-preview";
+import { publicEquipmentSchema } from "@opencok/equipment/validations/equipment-preview";
 import { z } from "zod";
 import type {
     PublicStatisticsResponse,

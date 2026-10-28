@@ -30,6 +30,7 @@
     "zod": "catalog:",
     "@opencok/account": "workspace:*",
     "@opencok/core": "workspace:*",
-    "@opencok/policy": "workspace:*"
+    "@opencok/policy": "workspace:*",
+    "@opencok/equipment": "workspace:*"
   }
 }

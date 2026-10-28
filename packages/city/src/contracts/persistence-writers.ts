@@ -76,11 +76,6 @@ export interface CityPersistenceWriters
     writeWorldMutation: CityWriteField<"worldMutation">;
     writeDragonProgression: CityWriteField<"dragons">;
     writeGeneralRoster: CityWriteField<"generalRoster", [now: bigint]>;
-    writeEquipment: (
-        tx: CityTransaction,
-        owner: string,
-        write: CityProgressionWrite,
-    ) => Promise<unknown>;
     writePlayerEffects: (
         tx: CityTransaction,
         owner: string,
