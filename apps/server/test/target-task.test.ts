@@ -1,8 +1,12 @@
 import { test, expect } from "bun:test";
 import { loadRules } from "@opencok/resources/rules";
-import { selectTargetTasks, targetSchedule, targetQuantity } from "@opencok/rules/target-task";
-import { targetTaskView } from "@opencok/mappings/target-task";
+import { createRealmTargetTaskPolicy } from "../src/composition/target-task";
+import { TargetTaskMapper } from "@opencok/tasks/mappings/target-task";
 import { sfs } from "@opencok/messages/sfs";
+
+const { selectTargetTasks, targetSchedule, targetQuantity } = createRealmTargetTaskPolicy();
+const { targetTaskView } = new TargetTaskMapper();
+
 test("target scheduling uses stable UTC periods and excludes the exact expiration boundary", () => {
     const config = { id: "target_quest", k1: "3", k2: "1", k3: "5", k4: "1" },
         now = BigInt(Date.UTC(2026, 9, 26, 12));

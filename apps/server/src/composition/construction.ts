@@ -17,7 +17,7 @@ import { building } from "@opencok/mappings/city";
 import { previewRewards } from "@opencok/rules/rewards";
 import { rewardPreviewArray } from "@opencok/mappings/rewards";
 import { refreshPrayerBuilding } from "@opencok/services/prayer";
-import { recordTargetTask } from "@opencok/services/target-task";
+import { recordTargetTask } from "./target-task";
 import { enrollCastleLevel } from "@opencok/services/castle-level-event";
 import { recordExpeditionScore } from "@opencok/services/new-expedition";
 

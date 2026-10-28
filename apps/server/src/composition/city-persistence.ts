@@ -58,7 +58,7 @@ import {
     writeSeasonalExchange,
 } from "@opencok/repositories/seasonal-exchange";
 import { readVipBox, writeVipBox } from "@opencok/repositories/vip-box";
-import { readTargetTasks, writeTargetTasks } from "@opencok/repositories/target-task";
+import { createRealmTargetTaskRepository } from "./target-task-persistence";
 import {
     rechargeFeedbackReader,
     writeRechargeFeedback,
@@ -145,7 +145,6 @@ const readers: CityPersistenceReaders = {
     readPlayerItemGifts,
     readSeasonalExchange,
     readVipBox,
-    readTargetTasks,
     rechargeFeedbackReader,
     readRechargeActivity,
     readOrdinaryBoxServer,
@@ -200,7 +199,6 @@ const writers: CityPersistenceWriters = {
     writePlayerItemGifts,
     writeSeasonalExchange,
     writeVipBox,
-    writeTargetTasks,
     writeRechargeFeedback,
     writeRechargeActivity,
     writeOrdinaryBox,
@@ -239,6 +237,7 @@ export function createRealmCityProgressionStore(
         buildings: new BuildingRepository(tx, owner),
         equipment: new EquipmentRepository(tx, owner, { text, num, long }),
         quests: createRealmQuestRepository(tx, owner),
+        targetTasks: createRealmTargetTaskRepository(tx, owner),
         birth: authority
             ? (rules, mode) => allocateWorldBirth(tx, authority, mapSize, rules, now, mode)
             : undefined,

@@ -1,5 +1,5 @@
 import { z } from "zod";
-import type { TargetTaskResponse } from "@opencok/contracts/responses/target-task";
+import type { TargetTaskResponse } from "../contracts/responses/target-task";
 import { field, responseValueSchema } from "@opencok/messages/validations/response";
 
 export const targetTaskSchema = z.strictObject({

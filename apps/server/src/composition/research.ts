@@ -1,6 +1,6 @@
 import { ResearchDomain } from "@opencok/research/services/research";
 import { ResearchMapper } from "@opencok/research/mappings/research";
-import { recordTargetTask } from "@opencok/services/target-task";
+import { recordTargetTask } from "./target-task";
 import { recordExpeditionScore } from "@opencok/services/new-expedition";
 
 export function createRealmResearchDomain()
