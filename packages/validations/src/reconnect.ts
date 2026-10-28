@@ -44,13 +44,10 @@ export const reconnectMineSchema = z.strictObject({
 }) satisfies z.ZodType<ReconnectMineResponse>;
 
 import { queueSchema } from "./city.ts";
-import { rewardPreviewArraySchema } from "./rewards.ts";
 import type {
     ReconnectQueuesResponse,
     ReconnectResourceResponse,
     ReconnectResourcesResponse,
-    ReconnectTaskResponse,
-    ReconnectTasksResponse,
 } from "@opencok/contracts/responses/reconnect";
 
 export const reconnectQueuesSchema = z.strictObject({
@@ -81,19 +78,3 @@ export const reconnectResourceSchema = z.strictObject({
 export const reconnectResourcesSchema = z.strictObject({
     resource: reconnectResourceSchema,
 }) satisfies z.ZodType<ReconnectResourcesResponse>;
-
-export const reconnectTaskSchema = z.strictObject({
-    id: field.string,
-    num: field.int,
-    state: field.int,
-    type: field.int,
-    currPhase: field.int.optional(),
-    maxPhase: field.int.optional(),
-    reward: rewardPreviewArraySchema.optional(),
-}) satisfies z.ZodType<ReconnectTaskResponse>;
-
-export const reconnectTasksSchema = z.strictObject({
-    task: z.array(reconnectTaskSchema).max(32767),
-    ckfTask: z.array(reconnectTaskSchema).max(32767),
-    taskCompleteNum: field.int,
-}) satisfies z.ZodType<ReconnectTasksResponse>;

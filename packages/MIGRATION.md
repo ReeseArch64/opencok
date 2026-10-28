@@ -70,7 +70,7 @@ Counts describe maintained TypeScript/JavaScript source under `src` and named te
 | `skins`          |                  0 / 0 | Proposed cosmetic definitions, ownership/application and presentation mapping.                                                                                                                                 | Populate existing city/avatar/cosmetic responsibilities only where semantically confirmed; paid media uploads stay in media, not skins.                                                                                                                                                       | Proposed; pending review |
 | `storage`        |                 23 / 0 | Current Redis, coordination, S3, ranking and other adapters.                                                                                                                                                   | Split by owned purpose: sessions/coordination, media, ranking caches and domain adapters. Avoid a universal persistence utility package.                                                                                                                                                      | Proposed; pending review |
 | `store`          |                  9 / 1 | Renamed to `shop`; owns mall/NPC trading contracts, rules, mappings, Services and repository adapters.                                                                                                         | Renamed in #568; gameplay slice and caller retirement in #593                                                                                                                                                                                                                                 | Confirmed in #567/#568   |
-| `tasks`          |                 47 / 3 | Ordinary/main, story, daily, sign-in, target and recall quests; other event missions remain in scope.                                                                                                          | Ordinary quests in #653, target in #655 and recall in #657; remaining event workflows and facades tracked by #558.                                                                                                                                                                            | Confirmed in #567/#568   |
+| `tasks`          |                 55 / 4 | Ordinary/main, story, daily, sign-in, target and recall quests; other event missions remain in scope.                                                                                                          | Ordinary quests in #653, target in #655, recall in #657 and reconnect in #659; remaining event workflows and facades tracked by #558.                                                                                                                                                         | Confirmed in #567/#568   |
 | `troops`         |                 11 / 1 | Owned troop training, healing, fortification, capacity/rules, mappings, validation and transactional adapters.                                                                                                 | #645 composes existing completion hooks and military login/reconnect projections in the realm. Named definitions, shared power/building helpers and world/march providers remain tracked.                                                                                                     | Implemented in #645      |
 | `utils`          |                  0 / 0 | Formatting tools, such as input/display masks.                                                                                                                                                                 | Retain for confirmed scope; move real implementations in tested slices                                                                                                                                                                                                                        | Confirmed in #567/#568   |
 | `validations`    |                 68 / 1 | Current mixed definition/request/media validators.                                                                                                                                                             | Move to owning domain or boundary; shared validation primitives remain small. Sharp/image processing must not become an import dependency of pure gameplay validators.                                                                                                                        | Proposed; pending review |
@@ -889,3 +889,37 @@ affected types, architecture, frozen install, lint/format and build validate the
 slice. Roll back by restoring the prior realm artifact against unchanged recall
 notes/tasks, registration, effects, inventory, receipts and outbox. No configuration,
 schema, native resource or saved-state conversion is introduced.
+
+## Reconnect missions (#659)
+
+Tasks owns reconnect planning, initial counts, visibility, native projection and
+transactional task reads/writes. Eight source modules and one test bring it to 55
+source/four tests. Economy gains the unchanged reward-preview response/schema
+leaves, avoiding a dependency from Tasks into broad Contracts or Validations.
+Mappings and Repositories add a direct Tasks workspace dependency; no new dependency
+version or workspace is introduced.
+
+The [Tasks register](tasks/README.md#reconnect-compatibility-and-retirement) lists
+remaining Rules/Mappings bindings and aggregate Repository adapters with exact
+callers and W20 removal conditions. Old task/plan/context aliases and task response/
+schema paths have no maintained consumers and are removed. The shared aggregate
+retains an owned plan import. [Economy](economy/README.md#reward-preview-wire-contracts-659)
+tracks the response alias's four callers and schema alias's five callers.
+
+Actual Java parsing/map ordering, blank checks and native preview algorithms are
+injected. Discovery, selection, signed overflow, registration/operator/building
+requirements, push order and visibility retain their previous behavior. Persistence
+retains its original transaction position, sorted read sentinel, no-claim validation,
+insert/update order and state-zero compare-and-set. Shared reconnect orchestration,
+realm fencing, resource settlement and mail sequencing remain unchanged.
+
+Thirty-five structural comparisons cover moved algorithms, helpers, all retained
+shared projections, complete aggregate read/write/retry flows, schemas/responses and
+the unchanged coordinator. The unit baseline remains 16/111; adding existing write
+rollback checks yields 21/153. Four owned tests add 19 assertions. Seven disposable
+PostgreSQL core/quests/timed-economy scenarios pass before and after with 371
+assertions, including two-realm login. Architecture tests retain the existing
+79-violation baseline with no additions. Full suites, types, lint/format and realm
+build validate the integration. Rollback replaces the realm artifact against the
+same data; no schema, save conversion or native resource changes. Performance,
+semantic catalogs and separate authority acceptance remain tracked by #558.

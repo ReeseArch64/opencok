@@ -25,6 +25,7 @@
     "@opencok/messages": "workspace:*",
     "@opencok/hero": "workspace:*",
     "@opencok/core": "workspace:*",
-    "@opencok/economy": "workspace:*"
+    "@opencok/economy": "workspace:*",
+    "@opencok/tasks": "workspace:*"
   }
 }

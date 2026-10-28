@@ -1,20 +1,11 @@
+import { ReconnectTaskMapper } from "@opencok/tasks/mappings/reconnect";
 import { signed } from "@opencok/mappings/reconnect-values";
 import { invalid } from "@opencok/mappings/reconnect-values";
-import {
-    reconnectQueuesSchema,
-    reconnectResourcesSchema,
-    reconnectTasksSchema,
-    reconnectTaskSchema,
-} from "@opencok/validations/reconnect";
-import { validateValue } from "@opencok/messages/validations/fields";
+import { reconnectQueuesSchema, reconnectResourcesSchema } from "@opencok/validations/reconnect";
 import { building, queue } from "./city.ts";
 import type { Rules } from "@opencok/rules/game";
 import { mailBlank } from "@opencok/rules/mail";
 import { text } from "@opencok/contracts/rows";
-import type { ReconnectTask, ReconnectTaskPlan } from "@opencok/contracts/reconnect";
-import type { RewardRandom } from "@opencok/contracts/rewards";
-import type { RuleContext } from "@opencok/rules/availability";
-import { visibleReconnectTasks } from "@opencok/rules/reconnect-tasks";
 import { previewRewards } from "@opencok/rules/rewards";
 import { rewardPreviewArray } from "./rewards.ts";
 import { validateFields } from "@opencok/messages/validations/fields";
@@ -293,91 +284,6 @@ function serializeReconnectResources(row: Row, showBound: boolean): Fields
     return { resource: sfs.object(result) };
 }
 
-function serializeReconnectTasks(
-    plan: ReconnectTaskPlan,
-    rules: Rules,
-    context: RuleContext,
-    random: RewardRandom,
-): { fields: Fields; pushes: readonly { command: string; fields: Fields; }[]; }
-{
-    const taskObject = (task: ReconnectTask, reward: boolean) => {
-        const fields: Fields = {
-            id: sfs.string(task.id),
-            num: sfs.int(Number(signed(task.num, 32))),
-            state: sfs.int(Number(signed(task.state, 32))),
-            type: sfs.int(Number(signed(task.type, 32))),
-        };
-
-        if (task.type === 3)
-        {
-            const maximum = rules.items.get("wb_info")?.k4;
-
-            if (maximum === undefined)
-            {
-                return invalid();
-            }
-
-            fields.currPhase = sfs.int(Number(signed(task.phase, 32)));
-            fields.maxPhase = sfs.int(Number(signed(maximum, 32)));
-        }
-
-        if (reward)
-        {
-            fields.reward = rewardPreviewArray(previewRewards(task.reward, rules, context, random));
-        }
-
-        return validateValue(reconnectTaskSchema, sfs.object(fields));
-    };
-    const group = (tasks: readonly ReconnectTask[], reward: boolean): Fields => {
-        if (tasks.length > 32767)
-        {
-            return invalid();
-        }
-
-        return {
-            task: sfs.array(
-                tasks.filter((task) => task.type !== 3).map((task) => taskObject(task, reward)),
-            ),
-            ckfTask: sfs.array(
-                tasks.filter((task) => task.type === 3).map((task) => taskObject(task, reward)),
-            ),
-        };
-    };
-    const pushes = plan.pushes.map((push) => {
-        if (push.command === "push.task.new")
-        {
-            return { command: push.command, fields: group(push.tasks, true) };
-        }
-
-        if (push.command === "push.ckf.task.complete")
-        {
-            const fields = group(push.tasks, false);
-
-            if (!push.tasks.some((task) => task.type === 1))
-            {
-                delete fields.task;
-            }
-
-            return { command: push.command, fields };
-        }
-
-        return {
-            command: push.command,
-            fields: { task: sfs.array(push.tasks.map((task) => taskObject(task, false))) },
-        };
-    });
-
-    return {
-        fields: {
-            ...group(visibleReconnectTasks(plan.tasks), true),
-            taskCompleteNum: sfs.int(
-                plan.tasks.filter((task) => !task.accepted && task.state === 2).length,
-            ),
-        },
-        pushes,
-    };
-}
-
 export function reconnectQueues(...args: Parameters<typeof serializeReconnectQueues>): Fields
 {
     return validateFields(reconnectQueuesSchema, serializeReconnectQueues(...args));
@@ -390,12 +296,9 @@ export function reconnectResources(
     return validateFields(reconnectResourcesSchema, serializeReconnectResources(...args));
 }
 
-export function reconnectTasks(
-    ...args: Parameters<typeof serializeReconnectTasks>
-): ReturnType<typeof serializeReconnectTasks>
-{
-    const result = serializeReconnectTasks(...args);
-    validateFields(reconnectTasksSchema, result.fields);
-
-    return result;
-}
+export const { reconnectTasks } = new ReconnectTaskMapper<Rules>({
+    signed,
+    invalid,
+    previewRewards,
+    rewardPreviewArray,
+});

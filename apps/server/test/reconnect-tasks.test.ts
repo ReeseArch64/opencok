@@ -1,12 +1,16 @@
+import type { ReconnectTaskContext } from "@opencok/tasks/contracts/reconnect";
 import { expect, test } from "bun:test";
+import { ReconnectTaskPolicy } from "@opencok/tasks/rules/reconnect-task";
 import {
-    reconnectTaskPlan,
-    visibleReconnectTasks,
-    type ReconnectTaskContext,
-} from "@opencok/rules/reconnect-tasks";
+    createRealmReconnectTaskPolicy,
+    createRealmReconnectTaskMapper,
+} from "../src/composition/reconnect-tasks";
 import { Rules, type Rule } from "@opencok/rules/game";
-import { reconnectTasks } from "@opencok/mappings/reconnect";
 import { decode, encode, sfs } from "@opencok/messages/sfs";
+
+const { reconnectTaskPlan } = createRealmReconnectTaskPolicy();
+const { reconnectTasks } = createRealmReconnectTaskMapper();
+const visibleReconnectTasks = ReconnectTaskPolicy.visibleReconnectTasks;
 
 const context: ReconnectTaskContext = {
     platform: "market_global",

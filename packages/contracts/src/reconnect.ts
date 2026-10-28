@@ -1,5 +1,4 @@
 import type { ReconnectTaskPlan } from "@opencok/tasks/contracts/reconnect";
-export type { ReconnectTask, ReconnectTaskPlan } from "@opencok/tasks/contracts/reconnect";
 import type { Value } from "@opencok/messages/sfs";
 import type { Row } from "./rows.ts";
 
