@@ -1,23 +1,12 @@
 import type { TargetTaskCatalog, TargetTaskContext } from "./target-context";
-import type { QuestRecordReaders } from "./runtime";
+import type { QuestRecordReaders, QuestNumericRuntime } from "./runtime";
 import type { RewardPreview, RewardRandom } from "@opencok/economy/contracts/reward-preview";
 import type { Value } from "@opencok/messages/sfs";
-
-export interface TargetTaskNumericRuntime
-{
-    cityInteger(value: unknown, minimum?: number, maximum?: number): number;
-}
-
-export interface TargetTaskPersistenceRuntime
-    extends TargetTaskNumericRuntime, Pick<QuestRecordReaders, "text" | "long">
-{
-    cityAmount(value: unknown): bigint;
-}
 
 export interface TargetTaskRuntime<
     TCatalog extends TargetTaskCatalog,
     TContext extends TargetTaskContext<TCatalog>,
-> extends TargetTaskNumericRuntime, QuestRecordReaders
+> extends QuestNumericRuntime, QuestRecordReaders
 {
     serverFeature(
         rules: TCatalog,
