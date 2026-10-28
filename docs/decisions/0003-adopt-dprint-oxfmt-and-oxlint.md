@@ -6,6 +6,10 @@ decision-makers: ReeseArch64
 
 # ADR-0003: Adopt dprint, Oxfmt and Oxlint
 
+**Current scope:** the dated TypeScript-only clarification below supersedes the
+original decision's JavaScript ownership and presentation wording. Original prose
+is retained as history, not the current JavaScript formatting requirement.
+
 ## Context
 
 OpenCoK needs deterministic formatting/correctness checks and four-space, explicit-brace
@@ -93,3 +97,32 @@ Tradeoff comparisons, not claims of additional historical trials:
   policies without establishing the required brace layout and disjoint-owner benefits.
 
 Revisit when pinned tools cannot support maintained syntax or deterministic ownership.
+
+## More Information
+
+### 2026-10-28 — TypeScript-only presentation clarification
+
+The maintainer clarified that C#-inspired presentation applies only to TypeScript
+files: TS/TSX and c/m TypeScript module variants. The earlier JS/TS ownership,
+four-space source, Allman and logical-stage presentation wording must be read with
+this narrower scope. JavaScript/JSX and c/m JavaScript module variants retain the
+previous Oxfmt presentation: two spaces and same-line braces. Other formats retain
+their existing Oxfmt settings; Markdown embedded code remains Oxfmt-owned.
+
+- **Implementation:** restrict `dprint.json` includes and `.oxfmtrc.json` exclusions
+  to `**/*.{ts,tsx,mts,cts,mtsx,ctsx}`. Restrict `.editorconfig` four-space overrides
+  and VS Code dprint ownership to TypeScript; restore JavaScript to Oxfmt. Update
+  the contribution guide and glossary. Reformat only affected JavaScript files.
+- **Unchanged:** pinned dependencies, independent correctness lint, type checking,
+  import/property order, private/generated exclusions and all other format settings.
+  No application logic or TypeScript source rewrite is authorized by this correction.
+- **Alternatives:** extending the C#-inspired style to JavaScript contradicts the
+  clarified requirement; replacing either formatter is unnecessary.
+
+#### Clarification verification
+
+- [ ] Included TypeScript paths belong only to dprint; JavaScript and other supported
+      formats belong only to Oxfmt, including editor and indentation configuration.
+- [ ] Synthetic TypeScript and JavaScript fixtures demonstrate distinct brace and
+      indentation styles; repeated formatting is idempotent and preserves syntax trees.
+- [ ] `bun run lint` and `bun run format:check` pass; no unrelated source is rewritten.
