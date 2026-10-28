@@ -4,13 +4,13 @@ import { alliance_member } from "@opencok/drizzle/schema/opencok_kingdom/allianc
 import { alliance_blacklist } from "@opencok/drizzle/schema/opencok_kingdom/alliance_blacklist";
 import type { AllianceTransaction } from "../contracts/persistence";
 import type { AllianceGovernanceWrite } from "../contracts/governance";
-import type { AllianceGovernancePersistenceRuntime } from "../contracts/governance-runtime";
+import type { AlliancePersistenceRuntime } from "../contracts/persistence-runtime";
 
 export class AllianceGovernanceRepository
 {
     public constructor(
         private readonly tx: AllianceTransaction,
-        private readonly runtime: AllianceGovernancePersistenceRuntime,
+        private readonly runtime: AlliancePersistenceRuntime,
     )
     {}
 
@@ -28,7 +28,7 @@ export class AllianceGovernanceRepository
         owner: string,
         allowed: Set<string>,
         write: AllianceGovernanceWrite,
-        text: AllianceGovernancePersistenceRuntime["text"],
+        text: AlliancePersistenceRuntime["text"],
     )
     {
         for (const row of write.alliances ?? [])
