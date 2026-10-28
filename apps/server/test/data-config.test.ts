@@ -381,7 +381,6 @@ test("login.dataconfig reads the authenticated profile, echoes correlation and r
         getPowerByPlayerId: unused,
         getAccountsByPlayerId: unused,
         getCityByPlayerId: unused,
-        getWorldByPointIds: unused,
     };
     const result = await createRealmGameService(store, rules, { kingdomId: 2 }, () => now).execute(
         "synthetic",

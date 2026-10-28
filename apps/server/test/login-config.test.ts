@@ -85,7 +85,6 @@ function store(state: LoginConfigurationState): GameStore & PushPreferenceStore
         getProfileById: unused,
         getAccountsByPlayerId: unused,
         getCityByPlayerId: unused,
-        getWorldByPointIds: unused,
     };
 }
 

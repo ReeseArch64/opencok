@@ -1,3 +1,4 @@
+import { createRealmWorldQueryService } from "./world";
 import { createRealmRankingService } from "./ranking";
 import { MilitaryMapper } from "@opencok/troops/mappings/military";
 import type { MilitaryProjection } from "@opencok/contracts/military-projection";
@@ -71,5 +72,6 @@ export function createRealmGameService(
         projectResearch,
         military,
         services.ranking ?? createRealmRankingService(db, rules, config, now, services),
+        services.worldQueries ?? createRealmWorldQueryService(config, rules, now, services),
     );
 }

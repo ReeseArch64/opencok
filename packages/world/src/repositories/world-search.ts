@@ -2,8 +2,8 @@ import type { createDatabases } from "@opencok/drizzle";
 import { userprofile } from "@opencok/drizzle/schema/opencok_kingdom/userprofile";
 import { playerinfo } from "@opencok/drizzle/schema/opencok_kingdom/playerinfo";
 import { alliance } from "@opencok/drizzle/schema/opencok_kingdom/alliance";
-import type { WorldSearchQuery, WorldSearchStore } from "@opencok/contracts/world-search";
-import type { Row } from "@opencok/contracts/rows";
+import type { WorldSearchQuery, WorldSearchStore } from "../contracts/world-search";
+import type { Row } from "../contracts/rows";
 import { DependencyError } from "@opencok/errors/dependency";
 import { and, asc, eq, ilike, ne, sql } from "drizzle-orm";
 

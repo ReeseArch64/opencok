@@ -3,7 +3,7 @@ import { z } from "zod";
 import type { MailDeletedResponse } from "@opencok/contracts/responses/mail";
 import type { WorldResourceOwnerResponse } from "@opencok/contracts/responses/world-resource-detail";
 import { mailDeletedSchema } from "@opencok/validations/mail";
-import { worldSearchSchema } from "@opencok/validations/world-search";
+import { worldSearchSchema } from "@opencok/world/validations/world-search";
 import { worldResourceOwnerSchema } from "@opencok/validations/world-resource-detail";
 import { responseFieldsSchema, responseValueSchema } from "@opencok/messages/validations/response";
 

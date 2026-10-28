@@ -6,7 +6,7 @@ import { worldpoint } from "@opencok/drizzle/schema/opencok_kingdom/worldpoint";
 import { world_interest } from "@opencok/drizzle/schema/opencok_kingdom/world_interest";
 import { alliance_member } from "@opencok/drizzle/schema/opencok_kingdom/alliance_member";
 import { alliance_territory } from "@opencok/drizzle/schema/opencok_kingdom/alliance_territory";
-import { createWorldUtilityStore } from "@opencok/repositories/world-utility";
+import { createRealmWorldUtilityStore } from "../src/composition/world";
 import { createRealmGameService } from "../src/composition/game";
 import type { GameStore } from "@opencok/contracts/game";
 import { sfs, Type, decode, encode, type Fields } from "@opencok/messages/sfs";
@@ -24,7 +24,7 @@ async function utilityHarness()
         h.rules,
         { kingdomId: 1, mapSize: 20 },
         () => h.clock.now,
-        { worldUtility: createWorldUtilityStore(h.db.db, h.authority, 20) },
+        { worldUtility: createRealmWorldUtilityStore(h.db.db, h.authority, 20) },
     );
     return { ...h, service };
 }

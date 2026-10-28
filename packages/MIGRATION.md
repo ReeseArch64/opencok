@@ -975,3 +975,18 @@ continue through their existing event coordinator. Hero, Dragon, Expedition and
 other event settlement, funding and reward ownership are outside this delivery.
 The original inventory above remains a historical baseline, not a claim that every
 ranking or event family is migrated. No schema or process authority changes.
+
+## World map browsing and spatial utilities (#691)
+
+The new implemented [World package](world/README.md) owns map/viewport, search,
+favorites and nearest/leader/leave workflows. Source responsibilities, callers and
+remaining W10/W20 boundaries are recorded in its migration register. Map persistence
+leaves the broad Database facade; search/favorite orchestration leaves GameService.
+The realm injects existing cosmetic, monster and march projections and keeps both
+the guarded database and explicit leave fence in place. No process authority or
+saved-state conversion is introduced.
+
+This package is additional to the original 64-directory inventory above. It does
+not absorb all files prefixed world: resource/gathering state, population, scouting,
+recovery and march lifecycles retain their current owners until cohesive migrations
+are verified. W10 and the separate authority protocol in W18 remain incomplete.

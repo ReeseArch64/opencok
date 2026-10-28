@@ -105,7 +105,6 @@ test("sessions correlate successful commands and every repeated failure without 
             getCityByPlayerId: async () => {
                 throw new Error("unused");
             },
-            getWorldByPointIds: async () => ({ world: undefined, points: [], hasMarches: false }),
         },
         cache: {
             command: async () => "PONG",

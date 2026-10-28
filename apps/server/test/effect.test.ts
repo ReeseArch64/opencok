@@ -61,7 +61,6 @@ const dependencies: ServerDependencies = {
         getCityByPlayerId: async () => {
             throw new Error("unused");
         },
-        getWorldByPointIds: async () => ({ world: undefined, points: [], hasMarches: false }),
     },
     cache: {
         command: async () => "PONG",

@@ -27,6 +27,7 @@
     "@opencok/validations": "workspace:*",
     "@opencok/mappings": "workspace:*",
     "@opencok/account": "workspace:*",
-    "@opencok/player": "workspace:*"
+    "@opencok/player": "workspace:*",
+    "@opencok/world": "workspace:*"
   }
 }

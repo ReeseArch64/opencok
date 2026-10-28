@@ -10,7 +10,7 @@ import { errors } from "@opencok/constants/game";
 import type { Rules } from "./game.ts";
 import { javaDecimal } from "./java-integer.ts";
 import { hashOrder } from "./power-hash-order.ts";
-import { worldSearchName } from "./world-search.ts";
+import { worldSearchName } from "@opencok/world/rules/world-search";
 import { mailBlank } from "./mail.ts";
 
 function invalid(): never

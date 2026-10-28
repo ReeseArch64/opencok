@@ -13,7 +13,6 @@
   "type": "module",
   "exports": {
     "./game": "./src/game.controller.ts",
-    "./world": "./src/world.controller.ts",
     "./*": "./src/*.ts"
   },
   "dependencies": {

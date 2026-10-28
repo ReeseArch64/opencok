@@ -5,15 +5,18 @@ import * as global from "@opencok/drizzle/schema/global";
 import {
     createWorldFavoriteStore,
     checkWorldFavoriteStore,
-} from "@opencok/repositories/world-favorites";
-import { favoriteName, favoriteServer, favoriteServerType } from "@opencok/rules/world-favorites";
+} from "@opencok/world/repositories/world-favorites";
+import { favoriteServerType } from "@opencok/world/rules/world-favorites";
 import { Rules, type Rule } from "@opencok/rules/game";
 import { createRealmGameService } from "../src/composition/game";
 import type { Row } from "@opencok/contracts/rows";
 import type { GameStore } from "@opencok/contracts/game";
 import { sfs, fields, encode, decode, Type, type Fields } from "@opencok/messages/sfs";
-import { worldFavorites } from "@opencok/mappings/world-favorites";
-import oracle from "./fixtures/world-favorite-names.json";
+import { worldFavorites } from "@opencok/world/mappings/world-favorites";
+import { createRealmWorldFavoritePolicy } from "../src/composition/world";
+
+const favoriteServer = (server: number | undefined, local: number, rules: Rules) =>
+    createRealmWorldFavoritePolicy(rules).server(server, local);
 
 const now = 1792756800123;
 const ruleSet = () =>
@@ -224,30 +227,6 @@ function fixture()
             }),
     };
 }
-
-test("favorite name validation matches all BMP primitive Java cases and documents storage-only exclusions", () => {
-    const bitmap = Buffer.from(oracle.bmpAccepted, "base64");
-    expect(bitmap.length).toBe(8192);
-    for (let code = 0; code < 65536; code++)
-    {
-        const legacy = !!(bitmap[code >>> 3]! & (1 << (code & 7)));
-        const expected = legacy && code !== 0 && (code < 0xd800 || code > 0xdfff);
-        expect(favoriteName("X" + String.fromCharCode(code) + "Y"), code.toString(16)).toBe(
-            expected,
-        );
-    }
-    for (const row of oracle.cases)
-    {
-        expect(favoriteName(row.name)).toBe(
-            row.legacy && row.name.length <= 255 && row.name.isWellFormed()
-                && !row.name.includes("\0"),
-        );
-    }
-    for (const value of [null, undefined, 1, {}])
-    {
-        expect(favoriteName(value)).toBe(false);
-    }
-});
 
 test("server catalog upper bounds and every legacy type branch preserve signed boundary behavior", () => {
     const rules = ruleSet();

@@ -126,3 +126,8 @@ published attribute/payment/consumption views after #689. The realm injects narr
 profile, feature, science and video collaborators; event settlement and rewards
 remain with their existing owners. PostgreSQL snapshots and Redis publication
 keys retain their current semantics.
+
+The [World domain](world/README.md) owns map browsing, map search, favorites and
+spatial utilities after #691. The realm injects projections and existing fencing;
+map persistence is composed directly. Specialized details, populations, march and
+gathering lifecycle remain later migrations with unchanged authority.

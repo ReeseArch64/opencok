@@ -65,8 +65,8 @@ injected owned collaborators, verify public exports and remove each unused alias
 - Services `city-cosmetics.ts` binds only ownership, target-state access and event
   encoding. `local-campaign.ts` consumes ownership/access; `anniversary.ts` consumes
   event encoding. The binding retains the legacy City context type.
-- Rules `city-cosmetics.ts` binds projection for Services `trouble.ts` and
-  `world.service.ts`.
+- Rules `city-cosmetics.ts` binds projection for Services `trouble.ts`. World map
+  projection uses the actual realm CosmeticPolicy factory after #691.
 - Mappings `city-cosmetics.ts` binds only `cityCosmeticFields` for Services
   `trouble.ts`. Update/activation response consumers now use the owned Mapper.
 - Contracts `city-cosmetics.ts` re-exports target state/write and status-change

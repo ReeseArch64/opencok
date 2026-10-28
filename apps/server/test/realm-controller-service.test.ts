@@ -1,8 +1,8 @@
 import { expect, test } from "bun:test";
 import { GameController } from "@opencok/controllers/game.controller";
-import { WorldController } from "@opencok/controllers/world.controller";
+import { WorldController } from "@opencok/world/controllers/world";
 import { createRealmGameService } from "../src/composition/game";
-import { WorldService } from "@opencok/services/world";
+import { createRealmWorldService } from "../src/composition/world";
 import { Rules } from "@opencok/rules/game";
 import { sfs } from "@opencok/messages/sfs";
 import type { GameStore } from "@opencok/contracts/game";
@@ -48,17 +48,25 @@ const store = {
             lord: undefined,
         };
     },
-    async getWorldByPointIds()
-    {
-        return { world: undefined, points: [], hasMarches: false };
-    },
 } satisfies GameStore;
 
 test("realm Controllers compose real Services and preserve missing-state rejections", async () => {
     const game = new GameController(
         createRealmGameService(store, new Rules(new Map(), new Map(), new Map()), { kingdomId: 1 }),
     );
-    const world = new WorldController(new WorldService(store, 1200, 1));
+    const world = new WorldController(
+        createRealmWorldService(
+            {
+                getWorldByPointIds: async () => ({
+                    world: undefined,
+                    points: [],
+                    hasMarches: false,
+                }),
+            },
+            1200,
+            1,
+        ),
+    );
     await expect(game.initial("missing")).rejects.toMatchObject({ code: "E100169" });
     await expect(world.get("missing", { x: sfs.int(10), y: sfs.int(10) })).rejects.toBeDefined();
 });

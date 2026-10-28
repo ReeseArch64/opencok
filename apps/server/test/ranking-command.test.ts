@@ -44,7 +44,6 @@ function fixture()
         getPowerByPlayerId: unused,
         getPlayerSummariesByIds: unused,
         getCityByPlayerId: unused,
-        getWorldByPointIds: unused,
         mailGroups: unused,
         mailBatch: unused,
         mailCategory: unused,

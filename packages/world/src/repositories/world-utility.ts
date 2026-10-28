@@ -5,13 +5,13 @@ import { worldpoint } from "@opencok/drizzle/schema/opencok_kingdom/worldpoint";
 import { world_interest } from "@opencok/drizzle/schema/opencok_kingdom/world_interest";
 import { alliance_member } from "@opencok/drizzle/schema/opencok_kingdom/alliance_member";
 import { alliance_territory } from "@opencok/drizzle/schema/opencok_kingdom/alliance_territory";
-import type { WorldUtilityStore } from "@opencok/contracts/world-utility";
+import type { WorldUtilityStore } from "../contracts/world-utility";
 import type { DatabaseClient } from "@opencok/drizzle/contracts/database";
-import { fenceRealmTransaction, type RealmAuthority } from "./realm-authority";
+import type { WorldTransactionFence } from "../contracts/persistence";
 
 export function createWorldUtilityStore(
     db: DatabaseClient<"kingdom">,
-    authority: RealmAuthority,
+    fence: WorldTransactionFence,
     size: number,
 ): WorldUtilityStore
 {
@@ -84,7 +84,7 @@ export function createWorldUtilityStore(
         async leave(owner)
         {
             await db.transaction(async (tx) => {
-                await fenceRealmTransaction(tx, authority);
+                await fence(tx);
                 const [world] = await tx.select().from(user_world).where(eq(user_world.uid, owner));
 
                 if (!world || world.worldId !== 0)

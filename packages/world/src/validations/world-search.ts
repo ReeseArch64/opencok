@@ -1,5 +1,5 @@
 import { z } from "zod";
-import type { WorldSearchResponse } from "@opencok/contracts/responses/world-search";
+import type { WorldSearchResponse } from "../contracts/responses/world-search";
 import { field } from "@opencok/messages/validations/response";
 
 const searchText = (maximum: number) =>

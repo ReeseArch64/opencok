@@ -1,7 +1,7 @@
 import { test, expect } from "bun:test";
 import { createRealmAllianceHeartPolicy } from "../src/composition/alliance-heart";
 import { AllianceHeartMapper } from "@opencok/alliance/mappings/heart";
-import { compactPoint } from "@opencok/services/world";
+import { createRealmCompactPoint } from "../src/composition/world";
 import { loadRules } from "@opencok/resources/rules";
 import { sfs, Type } from "@opencok/messages/sfs";
 import { createRealmGameService } from "../src/composition/game";
@@ -27,8 +27,9 @@ test("heart catalogs and native seconds, milliseconds and Java integer map field
     ]);
     expect(notification.time).toEqual(sfs.string("2147483648000"));
     const row = { id: 1, pointType: 1, sendHeartDurationTime: 2147483648n, heartType: "1" };
-    expect(JSON.parse(compactPoint(row)).sendHeartDurationTime).toBe(-2147483648);
-    expect(JSON.parse(compactPoint({ ...row, pointType: 0 })).heartType).toBeUndefined();
+    expect(JSON.parse(createRealmCompactPoint()(row)).sendHeartDurationTime).toBe(-2147483648);
+    expect(JSON.parse(createRealmCompactPoint()({ ...row, pointType: 0 })).heartType)
+        .toBeUndefined();
     const game = createRealmGameService({} as GameStore, rules, { kingdomId: 1 }, () => 1000, {
         cityProgression: async () => ({ body: { worldpoint: sfs.string("4") }, pushes: [] }),
     });

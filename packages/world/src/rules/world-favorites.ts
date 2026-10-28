@@ -1,7 +1,6 @@
 import { errors } from "@opencok/constants/game";
 import { GameError } from "@opencok/errors/game";
-import type { Rules } from "./game.ts";
-import { javaDecimal } from "./java-integer.ts";
+import type { WorldFavoriteCatalog } from "../contracts/runtime";
 
 export function favoriteInteger(value: unknown): value is number
 {
@@ -43,7 +42,12 @@ export function favoriteName(value: unknown): value is string
     return depth === 0;
 }
 
-export function favoriteServer(server: number | undefined, local: number, rules: Rules): number
+export function favoriteServer(
+    server: number | undefined,
+    local: number,
+    rules: WorldFavoriteCatalog,
+    javaDecimal: (raw: unknown, bits: 32 | 64) => bigint,
+): number
 {
     if (server === undefined)
     {
