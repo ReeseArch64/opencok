@@ -91,9 +91,6 @@ test("sessions correlate successful commands and every repeated failure without 
             getPowerByPlayerId: async () => {
                 throw new Error("unused");
             },
-            getConfigurationByPlayerId: async () => {
-                throw new Error("unused");
-            },
             start: async () => {},
             health: async () => {},
             close: async () => {},

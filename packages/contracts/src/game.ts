@@ -203,10 +203,7 @@ export interface GameStore extends AuthenticationStore
     ): Promise<RoutedPublicProfile | undefined>;
     getPowerByPlayerId(uid: string, now: number): Promise<PowerState>;
     getPlayerSummariesByIds(uids: string[], allServers: boolean): Promise<PlayerSummary[]>;
-    getConfigurationByPlayerId(uid: string): Promise<LoginConfigurationState>;
     configurationSwitches?(): Promise<Row[] | undefined>;
-    initializeWorldNewsPreference?(uid: string, now: number): Promise<void>;
-    setPushPreference?(uid: string, preference: PushPreference, now: number): Promise<void>;
     nicknameOccupied?(name: string): Promise<boolean>;
     updateAvatarReport?(owner: string, target: string, now: number): Promise<void>;
     celebrityDescription?(uid: string, kingdomId: number): Promise<Buffer | null>;
@@ -227,13 +224,6 @@ export interface GameStore extends AuthenticationStore
     }>;
 }
 
-export interface PushPreference
-{
-    type: number;
-    status: number;
-    audio: number;
-}
-
 export interface PlayerSummary
 {
     data: Row;
@@ -250,6 +240,11 @@ export interface LoginConfigurationState
 
 export interface GameServices
 {
+    playerPreferences?: {
+        configuration(uid: string): Promise<LoginConfigurationState>;
+        initialize(uid: string, rows: readonly Row[], now: number): Promise<void>;
+        command(uid: string, command: string, params: Fields): Promise<Fields>;
+    };
     profilePreference?(
         uid: string,
         command: string,

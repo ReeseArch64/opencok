@@ -3,7 +3,8 @@ import { drizzle, type NodePgClient } from "drizzle-orm/node-postgres";
 import { getTableColumns } from "drizzle-orm";
 import * as schema from "@opencok/drizzle/schema/kingdom";
 import { userprofile } from "@opencok/drizzle/schema/opencok_kingdom/userprofile";
-import { getConfigurationByPlayerId, readLoginSwitches } from "@opencok/repositories/game";
+import { readLoginSwitches } from "@opencok/repositories/game";
+import { getConfigurationByPlayerId } from "@opencok/player/repositories/push-preferences-snapshot";
 import { Cache } from "@opencok/storage/session";
 
 function database(

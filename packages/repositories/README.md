@@ -19,7 +19,7 @@ The old method names are removed rather than retained as parallel aliases.
 | Realm Database  | profile         | getProfileById             |
 | Realm Database  | accounts        | getAccountsByPlayerId      |
 | Realm Database  | city            | getCityByPlayerId          |
-| Realm Database  | configuration   | getConfigurationByPlayerId |
+| Player snapshot | configuration   | getConfigurationByPlayerId |
 | Realm Database  | power           | getPowerByPlayerId         |
 | Realm Database  | playerSummaries | getPlayerSummariesByIds    |
 | Realm Database  | world           | getWorldByPointIds         |
@@ -39,7 +39,11 @@ result order. Chat messages.create retains idempotency handling and the inserted
 flag; creating a session remains an insert. deleteExpired keeps the existing
 500-record bound for each message/session cleanup batch.
 
-The public snapshot helpers follow the same names: getConfigurationByPlayerId,
+`getConfigurationByPlayerId` now belongs to `@opencok/player/repositories/push-preferences-snapshot`
+with its push-state transaction. The broad Database also no longer exposes push
+initialization or writes; realm composition supplies all three player adapters (#603).
+
+The remaining public snapshot helpers follow the same names:
 getPowerByPlayerId, getLocalPlayerSummariesByIds and getPlayerSummariesByIds.
 The local player helper accepts one realm database; the aggregate helper retains
 configured cross-realm routing and input order. Lifecycle methods start, health,

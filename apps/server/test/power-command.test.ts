@@ -73,7 +73,6 @@ function fixture()
         playerRanking: unused,
         publicProfile: unused,
         getPlayerSummariesByIds: unused,
-        getConfigurationByPlayerId: unused,
         getCityByPlayerId: unused,
         getWorldByPointIds: unused,
         getPowerByPlayerId: async (uid, time) => {

@@ -3,7 +3,9 @@
 `@opencok/player` owns character-specific workflows. The first implemented slice
 is the seven saved profile preferences migrated in
 [#595](https://github.com/ReeseArch64/opencok/issues/595). Provisioning, nickname,
-public profile, push settings and progression remain later #558 migrations.
+public profile and progression remain later #558 migrations. Push preferences and
+login news initialization are also owned here after
+[#603](https://github.com/ReeseArch64/opencok/issues/603).
 
 | Entrypoint                         | Responsibility                                                      |
 | ---------------------------------- | ------------------------------------------------------------------- |
@@ -40,3 +42,36 @@ concurrent fields, invalid selectors and stale/moved/banned players. Disposable
 PostgreSQL and composed SFS tests remain in server integration `mutation-foundation`
 and `core`. Synthetic v12.06.0 wire coverage does not prove other client tracks or
 APK interoperability.
+
+## Push preferences and login initialization
+
+`PushPreferenceService` owns `pushSetting.get`, `parse.push.set` and the conditional
+world-news default used by login. `contracts/push-preferences` defines its store
+port, `dtos/update-push-preference.dto` describes the validated update, and
+`enums/push-preference-command` retains both native names. Persistence lives in
+`repositories/push-preferences-snapshot`, `repositories/push-preferences` and
+`repositories/world-news-preference`.
+
+Realm composition supplies a profile reader and the three repository adapters,
+then injects the Service as `GameServices.playerPreferences`. The generic router
+keeps command framing and login feature/switch orchestration. Its former push
+methods and the broad Database's preference methods are removed. The login
+configuration snapshot contract and shared bootstrap wire mapper/schema remain
+single shared implementations while login itself awaits migration; player uses
+the same mapper rather than duplicating default/wire logic.
+
+Reads use one repeatable-read, read-only snapshot. Serialization occurs before
+default initialization, so the first generated world-news row omits `audio` and a
+later persisted row includes it. Initialization retains the existing count and
+missing-type conditions and insert-only behavior. Explicit updates retain signed
+Int validation, default audio 1, owner row locking, realm/ban revalidation and
+insert-or-update semantics. Missing optional storage methods still reject only
+when the corresponding operation requires them.
+
+Three existing test files move with the implementation. Cross-component login,
+snapshot/switch/cache tests remain in server tests. The real PostgreSQL integration
+`apps/server/integration/push-preferences.test.ts` covers two-realm isolation,
+concurrent writes, first/saved wire shapes, owner failures, duplicate-insert rollback,
+legacy realm epoch replacement and restart persistence. It does not implement the
+new player/world authority topology from ADR-0017. Current realm fencing still
+wraps the same transactions; defaults, schema and saved rows are unchanged.

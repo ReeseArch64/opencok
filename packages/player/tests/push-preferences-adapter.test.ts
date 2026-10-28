@@ -1,9 +1,9 @@
 import { expect, test } from "bun:test";
 import { drizzle, type NodePgClient } from "drizzle-orm/node-postgres";
 import * as schema from "@opencok/drizzle/schema/kingdom";
-import { setPushPreference } from "@opencok/repositories/push-preferences";
-import { Database, initializeWorldNewsPreference } from "@opencok/repositories/game";
-import type { PushPreference } from "@opencok/contracts/game";
+import { setPushPreference } from "../src/repositories/push-preferences";
+import { initializeWorldNewsPreference } from "../src/repositories/world-news-preference";
+import type { PushPreference } from "../src/contracts/push-preferences";
 
 type Entry = PushPreference & { uid: string; };
 type Profile = { uid: string; serverId: number; banFlag: number; banTime: bigint; };
@@ -318,10 +318,10 @@ test("concurrent writes serialize selection after the owner lock and update the 
 test("the default initializer and explicit setter retain their distinct insert and update semantics", async () => {
     const instance = fixture();
     await initializeWorldNewsPreference(instance.db, "self", 2, now);
-    const context = { kingdom: { db: instance.db }, config: { kingdomId: 2 } } as Database;
-    await Database.prototype.setPushPreference.call(
-        context,
+    await setPushPreference(
+        instance.db,
         "self",
+        2,
         { type: 15, status: 1, audio: 0 },
         now,
     );

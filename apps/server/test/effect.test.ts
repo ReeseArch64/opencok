@@ -58,11 +58,6 @@ const dependencies: ServerDependencies = {
         getPowerByPlayerId: async () => {
             throw new Error("unused");
         },
-        getConfigurationByPlayerId: async () => ({
-            profile: undefined,
-            switches: [],
-            pushSettings: [],
-        }),
         getCityByPlayerId: async () => {
             throw new Error("unused");
         },

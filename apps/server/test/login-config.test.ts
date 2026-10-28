@@ -1,6 +1,8 @@
 import { expect, test } from "bun:test";
 import type { CityState, GameStore, LoginConfigurationState } from "@opencok/contracts/game";
 import { GameService as Game } from "@opencok/services/game";
+import { PushPreferenceService } from "@opencok/player/services/push-preferences";
+import type { PushPreferenceStore } from "@opencok/player/contracts/push-preferences";
 import { featureConfig, loginConfiguration } from "@opencok/mappings/bootstrap";
 import { decode, encode, fields, sfs, type Value } from "@opencok/messages/sfs";
 import { Rules } from "@opencok/rules/game";
@@ -11,6 +13,20 @@ import {
     featureAnnouncementEnabled,
     type FeatureContext,
 } from "@opencok/rules/features";
+
+function createGame(
+    db: GameStore & Partial<PushPreferenceStore>,
+    rules: Rules,
+    config: ConstructorParameters<typeof Game>[2],
+    now: () => number = Date.now,
+    services: NonNullable<ConstructorParameters<typeof Game>[4]> = {},
+)
+{
+    return new Game(db, rules, config, now, {
+        ...services,
+        playerPreferences: new PushPreferenceService(db as PushPreferenceStore, now),
+    });
+}
 
 const now = Date.UTC(2026, 9, 23, 12);
 const context: FeatureContext = {
@@ -41,7 +57,7 @@ const configuration = (): LoginConfigurationState => ({
 const unused = async (): Promise<never> => {
     throw new Error("Unexpected dependency call");
 };
-function store(state: LoginConfigurationState): GameStore
+function store(state: LoginConfigurationState): GameStore & PushPreferenceStore
 {
     return {
         mailGroups: unused,
@@ -274,7 +290,7 @@ test("account selector failure skips counter reads while an early realm match pe
     const rule = { id: "function_on7", k5: "12.6.0", k6: "bad;2", k7: "3" };
     catalog.items.set(rule.id, rule);
     let reads = 0;
-    const game = new Game(store(state), catalog, { kingdomId: 2 }, () => now, {
+    const game = createGame(store(state), catalog, { kingdomId: 2 }, () => now, {
         changeAccountCount: async () => {
             reads++;
             return "3";
@@ -302,7 +318,7 @@ test("login.other config preserves correlation and omits verification when its d
             return "3";
         },
     };
-    const game = new Game(store(state), catalog, { kingdomId: 2 }, () => now, services);
+    const game = createGame(store(state), catalog, { kingdomId: 2 }, () => now, services);
     const request = {
         config: sfs.int(0),
         _cok_: sfs.string("request"),
@@ -319,7 +335,7 @@ test("login.other config preserves correlation and omits verification when its d
     expect(result.body.cmdBaseTime?.value).toBe("42");
     expect(result.pushes).toEqual([]);
     expect(reads).toBe(1);
-    const failing = new Game(store(state), catalog, { kingdomId: 2 }, () => now, {
+    const failing = createGame(store(state), catalog, { kingdomId: 2 }, () => now, {
         changeAccountCount: unused,
     });
     const unavailable = (await failing.execute("synthetic", "login.other", request)).body;
@@ -349,13 +365,13 @@ test("army selection takes precedence over config as in the legacy deferred-logi
         items: [],
         hasMarches: false,
     };
-    const db: GameStore = {
+    const db: GameStore & Partial<PushPreferenceStore> = {
         ...store(configuration()),
         getConfigurationByPlayerId: unused,
         getPowerByPlayerId: unused,
         getCityByPlayerId: async () => state,
     };
-    const output = await new Game(db, rules(), { kingdomId: 2 }).execute(
+    const output = await createGame(db, rules(), { kingdomId: 2 }).execute(
         "synthetic",
         "login.other",
         {
@@ -389,7 +405,7 @@ test("initial and deferred login announce ordinary, account and subscription met
         items: [],
         hasMarches: false,
     };
-    const game = new Game(
+    const game = createGame(
         {
             ...store(persisted),
             getCityByPlayerId: async () => state,
@@ -421,7 +437,7 @@ test("boss availability receives the persisted player and server time rather tha
     const catalog = rules();
     catalog.features.set("worldboss", { id: "worldboss", ...base });
     const persisted = configuration();
-    const game = new Game(store(persisted), catalog, { kingdomId: 2 }, () => now, {
+    const game = createGame(store(persisted), catalog, { kingdomId: 2 }, () => now, {
         featureAvailability: (profile, instant) => {
             expect(profile.uid).toBe("synthetic");
             expect(instant).toBe(now);
@@ -446,7 +462,7 @@ test("account version failures precede counter reads and noncanonical required v
     const rule = { id: "function_on7", k5: "11.bad", k6: "2", k7: "3" };
     catalog.items.set(rule.id, rule);
     let reads = 0;
-    const game = new Game(store(configuration()), catalog, { kingdomId: 2 }, () => now, {
+    const game = createGame(store(configuration()), catalog, { kingdomId: 2 }, () => now, {
         changeAccountCount: async () => {
             reads++;
             return "3";
@@ -523,7 +539,7 @@ test("deferred account verification fetches enabled state before skipping absent
     const before = structuredClone(state);
     let reads = 0;
     let counter: string | null = "bad";
-    const game = new Game(store(state), catalog, { kingdomId: 2 }, () => now, {
+    const game = createGame(store(state), catalog, { kingdomId: 2 }, () => now, {
         changeAccountCount: async () => {
             reads++;
             return counter;
@@ -557,7 +573,7 @@ test("deferred verification reads empty, null and missing device IDs using legac
     catalog.items.set("function_on7", { k5: "12.6.0", k6: "2", k7: "2" });
     const state = configuration();
     const devices: string[] = [];
-    const game = new Game(store(state), catalog, { kingdomId: 2 }, () => now, {
+    const game = createGame(store(state), catalog, { kingdomId: 2 }, () => now, {
         changeAccountCount: async (device) => {
             devices.push(device);
             return "2";
@@ -593,7 +609,7 @@ test("failed switch reads omit both switch fields without blocking other configu
     const state = configuration();
     state.switches = undefined;
     const before = structuredClone(state);
-    const game = new Game(store(state), catalog, { kingdomId: 2 }, () => now, {
+    const game = createGame(store(state), catalog, { kingdomId: 2 }, () => now, {
         changeAccountCount: unused,
     });
     const output = decode(
@@ -627,7 +643,7 @@ test("verification failures preserve queried switches and later announcements wi
     const state = configuration();
     state.switches = [{ name: "saved", stat: null, appVersion: null }];
     const calls: string[] = [];
-    const game = new Game(store(state), catalog, { kingdomId: 2 }, () => now, {
+    const game = createGame(store(state), catalog, { kingdomId: 2 }, () => now, {
         changeAccountCount: async () => {
             calls.push("counter");
             throw new Error("unavailable");
@@ -648,7 +664,7 @@ test("verification failures preserve queried switches and later announcements wi
     expect(Object.hasOwn(output, "isVerifyChangeAccount")).toBe(false);
     expect(fields((output.funcOn!.value as Value[])[0]).onOff).toEqual(sfs.bool(true));
     expect(calls).toEqual(["counter", "announcements"]);
-    const noCounterProvider = new Game(store(state), catalog, { kingdomId: 2 }, () => now);
+    const noCounterProvider = createGame(store(state), catalog, { kingdomId: 2 }, () => now);
     expect(
         (await noCounterProvider.execute("synthetic", "login.other", { config: sfs.int(1) })).body
             .isVerifyChangeAccount,
@@ -670,7 +686,7 @@ test("required snapshot and later announcement failures remain outside the optio
             throw new Error("announcement failure");
         },
     };
-    const requiredFailure = new Game(
+    const requiredFailure = createGame(
         { ...store(state), getConfigurationByPlayerId: unused },
         catalog,
         { kingdomId: 2 },
@@ -681,7 +697,7 @@ test("required snapshot and later announcement failures remain outside the optio
         requiredFailure.execute("synthetic", "login.other", { config: sfs.int(1) }),
     ).rejects.toThrow("Unexpected dependency call");
     expect(reads).toBe(0);
-    const laterFailure = new Game(store(state), catalog, { kingdomId: 2 }, () => now, services);
+    const laterFailure = createGame(store(state), catalog, { kingdomId: 2 }, () => now, services);
     await expect(
         laterFailure.execute("synthetic", "login.other", { config: sfs.int(1) }),
     ).rejects.toThrow("announcement failure");
@@ -691,7 +707,7 @@ test("required snapshot and later announcement failures remain outside the optio
 test("world-news preference initialization is conditioned on the original saved list", async () => {
     const state = configuration();
     const initialized: string[] = [];
-    const game = new Game(
+    const game = createGame(
         {
             ...store(state),
             initializeWorldNewsPreference: async (uid, instant) => {
@@ -752,7 +768,7 @@ test("initial preference persistence precedes switches and survives later announ
             return [];
         },
     };
-    const game = new Game(db, catalog, { kingdomId: 2 }, () => now, {
+    const game = createGame(db, catalog, { kingdomId: 2 }, () => now, {
         featureAvailability: () => {
             calls.push("announcements");
             throw new Error("later failure");
@@ -786,12 +802,12 @@ test("failed or unavailable preference initialization rejects before optional sw
         },
         initializeWorldNewsPreference: unused,
     };
-    const game = new Game(db, catalog, { kingdomId: 2 }, () => now);
+    const game = createGame(db, catalog, { kingdomId: 2 }, () => now);
     await expect(game.execute("synthetic", "login.other", { config: sfs.int(1) })).rejects.toThrow(
         "Unexpected dependency call",
     );
     expect(switches).toBe(0);
-    const missing = new Game(
+    const missing = createGame(
         { ...db, initializeWorldNewsPreference: undefined },
         catalog,
         { kingdomId: 2 },
@@ -820,7 +836,7 @@ test("a switch-provider exception after preference initialization omits its fiel
             throw new Error("optional query failure");
         },
     };
-    const result = await new Game(db, rules(), { kingdomId: 2 }, () => now).execute(
+    const result = await createGame(db, rules(), { kingdomId: 2 }, () => now).execute(
         "synthetic",
         "login.other",
         { config: sfs.int(1) },

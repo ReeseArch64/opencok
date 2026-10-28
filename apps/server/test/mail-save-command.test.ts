@@ -23,7 +23,6 @@ function fixture()
         getAccountsByPlayerId: unused,
         getCityByPlayerId: unused,
         getWorldByPointIds: unused,
-        getConfigurationByPlayerId: unused,
         getPowerByPlayerId: unused,
         getPlayerSummariesByIds: unused,
         publicProfile: unused,
