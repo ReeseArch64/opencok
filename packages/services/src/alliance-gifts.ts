@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import { inventoryWeighted } from "@opencok/rules/inventory";
+import { inventoryWeighted } from "@opencok/economy/rules/inventory";
 import { sfs, str, type Fields } from "@opencok/messages/sfs";
 import { text, num, long } from "@opencok/contracts/rows";
 import { allianceFailure } from "@opencok/rules/alliance";

@@ -1,7 +1,7 @@
 import { randomInt } from "node:crypto";
 import { GameError } from "@opencok/errors/game";
 import { errors } from "@opencok/constants/game";
-import type { Rule, Rules } from "./game.ts";
+import type { InventoryCatalogs, InventoryRule } from "../contracts/inventory-catalogs.ts";
 
 export function inventoryCount(value: unknown, maximum = 2147483647): number
 {
@@ -23,7 +23,7 @@ export function inventoryInteger(value: string | undefined): number
     return inventoryCount(Number(value));
 }
 
-export function inventoryGoods(rules: Rules, id: string): Rule
+export function inventoryGoods(rules: InventoryCatalogs, id: string): InventoryRule
 {
     const rule = rules.goods.get(id);
 
@@ -35,7 +35,7 @@ export function inventoryGoods(rules: Rules, id: string): Rule
     return rule;
 }
 
-export function inventoryPrice(rule: Rule, requested: number, batch: boolean)
+export function inventoryPrice(rule: InventoryRule, requested: number, batch: boolean)
 {
     let count = inventoryCount(requested);
     const unit = inventoryInteger(rule.type === "7" ? rule.make?.split("|")[2] : rule.price);
@@ -117,7 +117,12 @@ export function inventoryWeighted(weights: ReadonlyMap<string, number>, draw = r
     throw new Error("Missing inventory outcome");
 }
 
-export function inventoryRecipe(rule: Rule, source: string, target: string, multiple: number)
+export function inventoryRecipe(
+    rule: InventoryRule,
+    source: string,
+    target: string,
+    multiple: number,
+)
 {
     if (rule.type !== "13" && rule.type !== "43")
     {

@@ -710,6 +710,7 @@
       },
       "devDependencies": {
         "@opencok/config": "workspace:*",
+        "@opencok/economy": "workspace:*",
         "@types/bun": "catalog:",
         "fast-xml-parser": "^5.0.0",
         "typescript": "catalog:",
@@ -771,6 +772,7 @@
         "@opencok/constants": "workspace:*",
         "@opencok/contracts": "workspace:*",
         "@opencok/drizzle": "workspace:*",
+        "@opencok/economy": "workspace:*",
         "@opencok/errors": "workspace:*",
         "@opencok/ledger": "workspace:*",
         "@opencok/mappings": "workspace:*",

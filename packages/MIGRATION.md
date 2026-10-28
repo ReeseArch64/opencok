@@ -360,3 +360,16 @@ small primitive package. Shared inventory/activity state and remaining planners
 stay tracked under #558. The six reviewed stale cycle edges are removed from the
 architecture baseline, 100 to 94; no new exception is added. See
 [economy](economy/README.md) and [ledger](ledger/README.md) for verification and rollback.
+
+## Pure inventory rules (#615)
+
+Economy has ten source modules and four test files after taking ownership of
+inventory count validation, goods lookup, pricing, recipes and weighted draws.
+Its narrow InventoryCatalogs port accepts the existing goods map without a reverse
+dependency on horizontal rules. All maintained callers move to the owned path and
+the original module is retired. Existing rule test behavior remains identical;
+additional catalog boundary coverage preserves native string IDs and errors.
+The resource catalog test declares economy as a development dependency and shop
+declares its direct runtime dependency. No new
+architecture exception, saved-state change or process authority is introduced.
+Full InventoryPlanner and inventory persistence remain tracked under #558.
