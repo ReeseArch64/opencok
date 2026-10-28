@@ -1,7 +1,7 @@
 import type {
     NicknameAllianceTask,
     NicknameAlliancePlan,
-} from "@opencok/contracts/nickname-change";
+} from "@opencok/contracts/nickname-alliance";
 import type { Rules } from "./game.ts";
 import { worldActivityRealmEnabled } from "./availability.ts";
 import { javaDecimal } from "./java-integer.ts";

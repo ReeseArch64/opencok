@@ -1,7 +1,7 @@
-import type { AvatarSystemMail } from "./files.ts";
-import type { Row } from "./rows.ts";
-import type { ChatNicknamePublisher } from "./chat-nickname.ts";
-import type { SharedUserProjector, SharedUserPublisher } from "./shared-user.ts";
+import type { NicknameAlliancePlanner } from "@opencok/contracts/nickname-alliance";
+import type { Row } from "@opencok/contracts/rows";
+import type { ChatNicknamePublisher } from "@opencok/contracts/chat-nickname";
+import type { SharedUserProjector, SharedUserPublisher } from "@opencok/contracts/shared-user";
 
 export interface NicknameChangeRecord
 {
@@ -107,21 +107,3 @@ export interface NicknameChangeConfiguration
     price(): unknown;
     refundRatio(profile: Row): Promise<number>;
 }
-
-export interface NicknameAllianceTask
-{
-    readonly id: string;
-    readonly num: bigint | null;
-    readonly state: number | null;
-}
-
-export interface NicknameAlliancePlan
-{
-    readonly updates: readonly NicknameAllianceTask[];
-    readonly complete: boolean;
-}
-
-export type NicknameAlliancePlanner = (
-    tasks: readonly NicknameAllianceTask[],
-    stem: string,
-) => NicknameAlliancePlan & { readonly mail: AvatarSystemMail | null; };

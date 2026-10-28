@@ -1,3 +1,4 @@
+import { nicknameChangePayment } from "@opencok/player/repositories/nickname-change";
 import { test, expect } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { eq } from "drizzle-orm";
@@ -169,7 +170,7 @@ test(
             );
             const replacement = await acquireRealmAuthority(h.db.db, 1, () => true),
                 next = new ContinuedCostFinalityService(
-                    createCostRankingFacts(h.db.db, replacement),
+                    createCostRankingFacts(h.db.db, replacement, nicknameChangePayment),
                     createCostFinalityOwned(h.db.db, replacement),
                     createCostFinalityShared(h.global.db, replacement),
                     () => h.clock.now,
@@ -234,7 +235,7 @@ test(
             await h.db.db.delete(facts);
             await h.db.db.delete(ownedScores);
             const recovery = new ContinuedCostFinalityService(
-                createCostRankingFacts(h.db.db, h.authority),
+                createCostRankingFacts(h.db.db, h.authority, nicknameChangePayment),
                 h.owned,
                 h.shared,
                 () => h.clock.now,

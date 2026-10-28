@@ -6,8 +6,8 @@ is the seven saved profile preferences migrated in
 login news initialization moved here in
 [#603](https://github.com/ReeseArch64/opencok/issues/603), followed by realm
 character provisioning in [#609](https://github.com/ReeseArch64/opencok/issues/609).
-Public profile queries and snapshots move in #627 below. Nickname and progression
-remain later #558 migrations.
+Public profile queries/snapshots moved in #627, celebrity descriptions in #629 and
+nickname workflows in #631 below. Remaining progression ownership stays tracked by #558.
 
 | Entrypoint                         | Responsibility                                                      |
 | ---------------------------------- | ------------------------------------------------------------------- |
@@ -192,3 +192,48 @@ primitives retain their current paths pending the corresponding #558 migrations.
 No schema, description-byte conversion, authority or process change is introduced.
 Deploy or roll back the realm artifact against the same stored descriptions.
 Physical-client rendering and production load remain untested.
+
+## Nickname checks, changes and recovery (#631)
+
+`NicknameService` owns `user.check.nickName` and `user.modify.nickName`. It receives
+profile/occupation reads, observer validation, loaded word/reserved-name filters,
+the durable change callback and a clock through narrow ports. Checks retain the
+clock after the profile read; paid changes capture it before the read. Generic
+GameService delegates both commands; GameStore/Database no longer expose occupation.
+
+Player owns check/change rules, response schemas/mappings, records and notification
+contracts, global name locks/occupation, global nickname writes, realm payment records
+and their recovery/delivery operations. Canonical global account resolution belongs
+to account and is shared with chat through app-injected identity lookup. Ranking
+backfill receives the owned payment decoder through a narrow witness port; it does
+not import player. The alliance task rule/delivery uses its own small shared contract
+instead of the complete nickname store. Shared length/character/encoding primitives
+retain their current paths because Dragon and other domains still use them.
+
+`composition/nickname-persistence` injects the existing cost-fact writer, system-mail
+writer and shared-user reader into the original transactions. `composition/nickname`
+binds the query/command Service. The existing app recovery/notification workflow,
+authority readiness check, CN1 preparation, timeouts and delivery order stay in place.
+
+Preserved behavior includes validation/filter order, Java/Unicode comparison, global
+name locks, item/gold debits and ratio-based refunds, operation receipts, ambiguous
+alias rejection, pending-effect bits, per-effect retries and notification stages.
+No transaction is split, no writer moves between processes and no stored operation
+format changes. Existing pending operations remain recoverable and no second debit
+is introduced by replay. The account lookup keeps its original errors and row locks.
+
+The original fourteen test suites retain 107 cases and 30946 assertions. Seven
+focused suites and their two byte-identical vector fixtures move into player.
+Twenty-one runtime comparisons cover moved implementations and explicit adapter
+substitutions. PostgreSQL integrations exercise nickname recovery/refunds, chat and
+Redis delivery, alliance/shared-user effects, continued-cost witnesses/finality and
+replaced owners; chat persistence and composed realm startup are also checked.
+The architecture baseline drops from 94 to 92 by retiring two resolved violations;
+no new exception is added. Player has 43 source modules and 20 test files.
+
+Player declares account, core and policy as production workspace dependencies;
+policy moves from its previous development-only declaration. Chat declares account
+for its injected identity lookup. No dependency version changes. Deploy or roll back
+realm/chat artifacts together against the same schema and operation records. No new
+configuration, data conversion or downtime procedure is needed. Physical native
+clients and production-load measurements remain outside this slice.

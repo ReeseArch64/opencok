@@ -1,3 +1,4 @@
+import { nicknameAccountUid } from "@opencok/account/repositories/nickname-identity";
 import { createChatDiscovery } from "@opencok/connection/chat-discovery";
 import { createHandler } from "@opencok/api/handler";
 import { SocketClient } from "./support/chat.ts";
@@ -245,7 +246,11 @@ test(
             const url = new URL(`postgres://127.0.0.1:${pg.options.port}/postgres`);
             url.username = String(pg.options.user);
             url.password = String(pg.options.password);
-            chatRepository = createChatRepository({ databaseUrl: url.toString(), topology });
+            chatRepository = createChatRepository({
+                nicknameAccountUid,
+                databaseUrl: url.toString(),
+                topology,
+            });
             const startChat = async (port = 0) => {
                 if (port === 0)
                 {

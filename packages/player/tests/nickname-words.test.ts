@@ -1,6 +1,6 @@
+import { checkNickname } from "@opencok/player/rules/nickname-check";
 import { expect, test } from "bun:test";
 import { containsNicknameBadWords } from "@opencok/policy/rules/nickname-words";
-import { checkNickname } from "@opencok/rules/nickname";
 
 test("nickname checks consume the actual word matcher before global occupation", async () => {
     let occupied = 0;

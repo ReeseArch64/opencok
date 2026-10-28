@@ -1,6 +1,7 @@
+import { nicknameChangePayment } from "@opencok/player/repositories/nickname-change";
+import { createRealmNicknameChangeStore } from "../src/composition/nickname-persistence.ts";
 import { account_new } from "@opencok/drizzle/schema/opencok_global/account_new";
 import { usermapping } from "@opencok/drizzle/schema/opencok_global/usermapping";
-import { createNicknameChangeStore } from "@opencok/repositories/nickname-change";
 import { confirmedNicknameCost } from "@opencok/services/continued-cost-spending";
 import { test, expect } from "bun:test";
 import { randomUUID } from "node:crypto";
@@ -176,7 +177,7 @@ test(
             );
             const replacement = await acquireRealmAuthority(h.db.db, 1, () => true);
             const next = new ContinuedCostRankingService(
-                createCostRankingFacts(h.db.db, replacement),
+                createCostRankingFacts(h.db.db, replacement, nicknameChangePayment),
                 createCostRankingRegistry(h.global.db, replacement),
                 h.rules,
                 [1, 2],
@@ -346,7 +347,7 @@ test(
             await h.global.db
                 .insert(usermapping)
                 .values({ gameUid: "owner", mappingType: "name", mappingValue: "Synthetic" });
-            const store = createNicknameChangeStore(
+            const store = createRealmNicknameChangeStore(
                     {
                         global: h.global,
                         getKingdom: (id) => {
@@ -418,7 +419,7 @@ test("a refunded nickname reservation does not become confirmed competitive spen
             { gameUid: "owner", mappingType: "name", mappingValue: "Synthetic" },
             { gameUid: "occupied", mappingType: "name", mappingValue: "Taken Name" },
         ]);
-        const store = createNicknameChangeStore(
+        const store = createRealmNicknameChangeStore(
             {
                 global: h.global,
                 getKingdom: (id) => {

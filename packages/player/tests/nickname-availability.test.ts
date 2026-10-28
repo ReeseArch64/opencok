@@ -1,8 +1,7 @@
 import { expect, test } from "bun:test";
 import { drizzle, type NodePgClient } from "drizzle-orm/node-postgres";
 import * as schema from "@opencok/drizzle/schema/global";
-import { Database } from "@opencok/repositories/game";
-import { nicknameOccupied } from "@opencok/repositories/nickname";
+import { nicknameOccupied } from "@opencok/player/repositories/nickname";
 import { mysqlUtf8UnicodeCandidates, mysqlUtf8UnicodeKey } from "@opencok/rules/mysql-unicode";
 
 type Mapping = { uid: string; type: string; value: string | null; active?: number | null; };
@@ -61,11 +60,10 @@ function fixture(mappings: Mapping[] = [], accounts: Account[] = [])
         },
     };
     const db = drizzle(client as unknown as NodePgClient, { schema });
-    const repository = { databases: { global: { db } } } as Database;
     return {
         db,
         queries,
-        occupied: (name: string) => Database.prototype.nicknameOccupied.call(repository, name),
+        occupied: (name: string) => nicknameOccupied(db, name),
         fail: (stage: "mapping" | "account", error: unknown) => {
             failure = { stage, error };
         },

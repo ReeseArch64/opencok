@@ -1,3 +1,4 @@
+import { nicknameAccountUid } from "@opencok/account/repositories/nickname-identity";
 import { chat_shield } from "@opencok/drizzle/schema/opencok_kingdom/chat_shield";
 import { verifySocialTransports } from "./support/social";
 import { realmChatDeliveries } from "@opencok/services/realm-chat-delivery";
@@ -113,8 +114,8 @@ test(
                     events: import("@opencok/contracts/chat-delivery").ChatDeliveryEvent[],
                 ) => realmChatDeliveries(first!, realm, owners, events),
             };
-            first = createChatRepository(config);
-            second = createChatRepository(config);
+            first = createChatRepository({ ...config, nicknameAccountUid });
+            second = createChatRepository({ ...config, nicknameAccountUid });
             const social = createChatSocialService(first.social!);
             const command = (
                 owner: string,
@@ -333,6 +334,7 @@ test(
             await pg.restart();
             databases = createDatabases(pg.options);
             first = createChatRepository({
+                nicknameAccountUid,
                 ...config,
                 databaseUrl:
                     `postgres://postgres:${pg.options.password}@127.0.0.1:${pg.options.port}/opencok_global`,
@@ -349,6 +351,7 @@ test(
             ).toMatchObject([{ friendUid: "bob", stat: 2 }]);
             time = new Date();
             second = createChatRepository({
+                nicknameAccountUid,
                 ...config,
                 databaseUrl:
                     `postgres://postgres:${pg.options.password}@127.0.0.1:${pg.options.port}/opencok_global`,

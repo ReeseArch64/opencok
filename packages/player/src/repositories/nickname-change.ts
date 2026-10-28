@@ -1,5 +1,5 @@
+import type { NicknamePersistenceRuntime } from "../contracts/nickname-persistence.ts";
 import { outgoingTrace } from "@opencok/core/operation";
-import { captureCostFact } from "./continued-cost-facts";
 import { user_building } from "@opencok/drizzle/schema/opencok_kingdom/user_building";
 import { mutation_outbox } from "@opencok/drizzle/schema/opencok_kingdom/mutation_outbox";
 import { drizzle } from "drizzle-orm/node-postgres";
@@ -19,14 +19,14 @@ import type {
     NicknameNotificationDelivery,
     NicknameNotificationPublisher,
     NicknameNotification,
-} from "@opencok/contracts/nickname-change";
+} from "@opencok/player/contracts/nickname-change";
 import type { Row } from "@opencok/contracts/rows";
 import {
     nicknameGoldDebit,
     nicknameGoldRefund,
     nicknameItemDebit,
     type NicknameGoldBalances,
-} from "@opencok/rules/nickname-change";
+} from "@opencok/player/rules/nickname-change";
 import { javaDecimal } from "@opencok/rules/java-integer";
 import { nicknameTrim } from "@opencok/rules/nickname";
 import { mysqlUtf8UnicodeKey } from "@opencok/rules/mysql-unicode";
@@ -34,10 +34,9 @@ import { errors } from "@opencok/constants/game";
 import { GameError } from "@opencok/errors/game";
 import { DependencyError } from "@opencok/errors/dependency";
 import { withAvailableNickname, withNicknameLock } from "./nickname-lock.ts";
-import { writeNicknameGlobal, nicknameAccountUid } from "./nickname-global.ts";
-import { readSharedUserProfile } from "./shared-user.ts";
+import { writeNicknameGlobal } from "./nickname-global.ts";
+import { nicknameAccountUid } from "@opencok/account/repositories/nickname-identity";
 import { user_alliance_task } from "@opencok/drizzle/schema/opencok_kingdom/user_alliance_task";
-import { insertSystemMail } from "./system-mail.ts";
 import { account_new } from "@opencok/drizzle/schema/opencok_global/account_new";
 
 const balanceKeys = [
@@ -173,7 +172,9 @@ function restoredBalances(value: unknown): NicknameGoldBalances
     ) as unknown as NicknameGoldBalances;
 }
 
-export function nicknameChangePayment(record: NicknameChangeRecord): Payment
+export function nicknameChangePayment(
+    record: Pick<NicknameChangeRecord, "payment" | "responseGold" | "state">,
+): Payment
 {
     if (typeof record.payment !== "string" || Buffer.byteLength(record.payment) > 8192)
     {
@@ -405,6 +406,7 @@ export function createNicknameChangeStore(
     databases: Pick<Databases, "getKingdom" | "global">,
     kingdomId: number,
     configuration: NicknameChangeConfiguration,
+    runtime: NicknamePersistenceRuntime,
     notifications?: NicknameNotificationDelivery,
 ): NicknameChangeStore
 {
@@ -1003,7 +1005,7 @@ export function createNicknameChangeStore(
 
                 if (event.type === "continuedcost.spend")
                 {
-                    await captureCostFact(
+                    await runtime.captureCostFact(
                         tx,
                         {
                             kingdomId,
@@ -1197,7 +1199,7 @@ export function createNicknameChangeStore(
 
                     if (result.mail !== null)
                     {
-                        await insertSystemMail(tx, result.mail, uid, stem, createdAt);
+                        await runtime.insertSystemMail(tx, result.mail, uid, stem, createdAt);
                     }
 
                     const changed = await tx
@@ -1371,7 +1373,7 @@ export function createNicknameChangeStore(
                                 return false;
                             }
 
-                            const row = await readSharedUserProfile(tx, uid, kingdomId);
+                            const row = await runtime.readSharedUserProfile(tx, uid, kingdomId);
                             const canonical = await nicknameAccountUid(global, uid);
                             const [account] = await global
                                 .select({

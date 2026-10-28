@@ -1,12 +1,8 @@
+import { checkNickname } from "@opencok/player/rules/nickname-check";
 import { expect, test } from "bun:test";
 import { createHash } from "node:crypto";
 import { javaGbkLength } from "@opencok/rules/java-gbk";
-import {
-    checkNickname,
-    nicknameCharactersAllowed,
-    nicknameLength,
-    nicknameTrim,
-} from "@opencok/rules/nickname";
+import { nicknameCharactersAllowed, nicknameLength, nicknameTrim } from "@opencok/rules/nickname";
 import vectors from "./fixtures/nickname-vectors.json";
 
 const text = (hex: string) => Buffer.from(hex, "hex").swap16().toString("utf16le");

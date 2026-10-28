@@ -5,7 +5,7 @@ import {
     nicknameGoldRefund,
     nicknameItemDebit,
     type NicknameGoldBalances,
-} from "@opencok/rules/nickname-change";
+} from "@opencok/player/rules/nickname-change";
 import vectors from "./fixtures/nickname-refund-vectors.json";
 
 const initial: Readonly<NicknameGoldBalances> = Object.freeze({

@@ -1,7 +1,10 @@
 import type { ChatNicknamePublisher } from "@opencok/contracts/chat-nickname";
-import { createNicknameChangeStore } from "@opencok/repositories/nickname-change";
-import { nicknameNotification, nicknameChangeReply } from "@opencok/mappings/nickname-change";
-import type { NicknameChangeConfiguration } from "@opencok/contracts/nickname-change";
+import { createRealmNicknameChangeStore } from "./composition/nickname-persistence.ts";
+import {
+    nicknameNotification,
+    nicknameChangeReply,
+} from "@opencok/player/mappings/nickname-change";
+import type { NicknameChangeConfiguration } from "@opencok/player/contracts/nickname-change";
 import type { RealmNotifications } from "@opencok/connection/notifications";
 import type { createDatabases } from "@opencok/drizzle";
 import type { Rules } from "@opencok/rules/game";
@@ -59,7 +62,7 @@ export function createNicknameChangeRuntime(options: {
 
         return delivered;
     };
-    const store = createNicknameChangeStore(
+    const store = createRealmNicknameChangeStore(
         options.databases,
         options.kingdomId,
         {

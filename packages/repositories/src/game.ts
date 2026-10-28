@@ -90,7 +90,6 @@ import { user_lord } from "@opencok/drizzle/schema/opencok_kingdom/user_lord";
 import { user_mine } from "@opencok/drizzle/schema/opencok_kingdom/user_mine";
 import { switches } from "@opencok/drizzle/schema/opencok_kingdom/switches";
 import { parse_info } from "@opencok/drizzle/schema/opencok_kingdom/parse_info";
-import { nicknameOccupied } from "./nickname.ts";
 import { celebrity } from "@opencok/drizzle/schema/opencok_kingdom/celebrity";
 import { usermapping } from "@opencok/drizzle/schema/opencok_global/usermapping";
 import { DependencyError } from "@opencok/errors/dependency";
@@ -533,11 +532,6 @@ export class Database implements GameStore, FriendshipMineStore
     activityOperators(uid: string, now: number)
     {
         return readActivityOperators(this.kingdom.db, uid, now);
-    }
-
-    nicknameOccupied(name: string): Promise<boolean>
-    {
-        return nicknameOccupied(this.databases.global.db, name);
     }
 
     getPowerByPlayerId(uid: string, now: number)

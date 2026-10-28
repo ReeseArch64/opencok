@@ -1,6 +1,6 @@
 import { expect, test } from "bun:test";
 import { nicknameAllianceTask } from "@opencok/rules/nickname-alliance";
-import type { NicknameAllianceTask } from "@opencok/contracts/nickname-change";
+import type { NicknameAllianceTask } from "@opencok/contracts/nickname-alliance";
 import type { Rules } from "@opencok/rules/game";
 
 const now = 1792756800123;

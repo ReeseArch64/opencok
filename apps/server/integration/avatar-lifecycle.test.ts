@@ -1,3 +1,4 @@
+import { nicknameAccountUid } from "@opencok/account/repositories/nickname-identity";
 import { createAvatarTickets } from "@opencok/storage/avatar-tickets";
 import { DisposableAvatarStorage } from "../../api/integration/support/minio.ts";
 import { createHandler as createFiles } from "@opencok/api/files";
@@ -246,7 +247,11 @@ test(
             const url = new URL(`postgres://127.0.0.1:${pg.options.port}/postgres`);
             url.username = String(pg.options.user);
             url.password = String(pg.options.password);
-            chatRepository = createChatRepository({ databaseUrl: url.toString(), topology });
+            chatRepository = createChatRepository({
+                nicknameAccountUid,
+                databaseUrl: url.toString(),
+                topology,
+            });
             chat = createChatApp({
                 repository: chatRepository,
                 signingSecret: "synthetic-profile-secret",
