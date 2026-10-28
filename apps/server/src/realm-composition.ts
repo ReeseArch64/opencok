@@ -1,3 +1,7 @@
+import { PushPreferenceService } from "@opencok/player/services/push-preferences";
+import { setPushPreference } from "@opencok/player/repositories/push-preferences";
+import { getConfigurationByPlayerId } from "@opencok/player/repositories/push-preferences-snapshot";
+import { initializeWorldNewsPreference } from "@opencok/player/repositories/world-news-preference";
 import { ProfilePreferenceService } from "@opencok/player/services/profile-preferences";
 import { updateProfilePreference } from "@opencok/player/repositories/profile-preferences";
 import { planInventoryGrants } from "@opencok/services/inventory";
@@ -377,6 +381,17 @@ export const RealmDependenciesLive = Layer.effect(
             "realm.database",
             async () => observeAdapter(new Database(config), "realm.Database"),
             (db) => db.close(),
+        );
+        const pushPreferences = observeAdapter(
+            new PushPreferenceService({
+                getProfileById: (uid) => db.getProfileById(uid),
+                getConfigurationByPlayerId: (uid) => getConfigurationByPlayerId(db.kingdom.db, uid),
+                initializeWorldNewsPreference: (uid, now) =>
+                    initializeWorldNewsPreference(db.kingdom.db, uid, config.kingdomId, now),
+                setPushPreference: (uid, preference, now) =>
+                    setPushPreference(db.kingdom.db, uid, config.kingdomId, preference, now),
+            }),
+            "realm.PushPreferenceService",
         );
         const profilePreferences = observeAdapter(
             new ProfilePreferenceService({
@@ -3282,6 +3297,7 @@ export const RealmDependenciesLive = Layer.effect(
                             config,
                             Date.now,
                             {
+                                playerPreferences: pushPreferences,
                                 profilePreference: (uid, command, params, now) =>
                                     profilePreferences.command(uid, command, params, now),
                                 timed: async (owner, command, params) => {

@@ -602,6 +602,7 @@
         "@opencok/contracts": "workspace:*",
         "@opencok/drizzle": "workspace:*",
         "@opencok/errors": "workspace:*",
+        "@opencok/mappings": "workspace:*",
         "@opencok/messages": "workspace:*",
         "drizzle-orm": "0.45.4",
       },

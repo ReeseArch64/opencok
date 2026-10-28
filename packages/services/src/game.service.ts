@@ -32,7 +32,6 @@ import { militarySnapshot } from "@opencok/mappings/military";
 import { researchData } from "@opencok/mappings/research";
 import { changeNickname } from "./nickname-command.ts";
 import type { CreateWorldFavoriteDto } from "@opencok/dtos/world-favorites/create-world-favorite.dto";
-import type { UpdatePushPreferenceDto } from "@opencok/dtos/profile/update-push-preference.dto";
 import { decodeFightRanking, decodePlayoffTeams } from "./battle-ranking.ts";
 import { fightRanking, playoffRanking } from "@opencok/mappings/battle-ranking";
 import { battleRankingOpen } from "@opencok/rules/battle-ranking";
@@ -157,12 +156,7 @@ import { dragonAttackEffect } from "@opencok/rules/power-resolver";
 import { worldPowerEffects } from "@opencok/rules/power-world";
 import type { Rules } from "@opencok/rules/game";
 import { GameError } from "@opencok/errors/game";
-import {
-    errors,
-    MOBILE_CLIENT_VERSION,
-    PUSH_SETTING_COUNT,
-    WORLD_NEWS_PUSH_TYPE,
-} from "@opencok/constants/game";
+import { errors, MOBILE_CLIENT_VERSION } from "@opencok/constants/game";
 import {
     accountVerificationEnabled,
     accountVerificationRequired,
@@ -176,7 +170,6 @@ import {
     settingConfig,
     loginConfigurationPreferences,
     loginSwitches,
-    pushPreferences,
 } from "@opencok/mappings/bootstrap";
 
 const playerRankingKinds = {
@@ -1155,10 +1148,13 @@ export class GameService
                 body = await this.services.profilePreference(uid, command, params, this.now());
                 break;
             case "pushSetting.get":
-                body = await this.getPushPreferences(uid);
-                break;
             case "parse.push.set":
-                body = await this.setPushPreference(uid, params);
+                if (!this.services.playerPreferences)
+                {
+                    throw new GameError(errors.unsupported);
+                }
+
+                body = await this.services.playerPreferences.command(uid, command, params);
                 break;
             case "world.get.detail":
                 if (!this.services.worldPointDetail)
@@ -3814,11 +3810,18 @@ export class GameService
 
     private async configuration(uid: string): Promise<Fields>
     {
-        const state = await this.db.getConfigurationByPlayerId(uid);
+        const preferences = this.services.playerPreferences;
+
+        if (!preferences)
+        {
+            throw new GameError(errors.unsupported, "config_record");
+        }
+
+        const state = await preferences.configuration(uid);
         const profile = this.checkProfile(state.profile);
         const context = this.featureContext(profile);
         const result = loginConfigurationPreferences(this.rules, state);
-        await this.initializeWorldNewsPreference(uid, state.pushSettings, context.now);
+        await preferences.initialize(uid, state.pushSettings, context.now);
 
         try
         {
@@ -3855,22 +3858,6 @@ export class GameService
         Object.assign(result, featureConfig(this.rules, context));
 
         return result;
-    }
-
-    private async initializeWorldNewsPreference(uid: string, rows: readonly Row[], now: number)
-    {
-        if (
-            rows.length < PUSH_SETTING_COUNT
-            && !rows.some((row) => num(row, "type") === WORLD_NEWS_PUSH_TYPE)
-        )
-        {
-            if (!this.db.initializeWorldNewsPreference)
-            {
-                throw new GameError(errors.unsupported, "config_record");
-            }
-
-            await this.db.initializeWorldNewsPreference(uid, now);
-        }
     }
 
     private async nicknameCheck(uid: string, params: Fields): Promise<Fields>
@@ -3911,44 +3898,6 @@ export class GameService
             length: sfs.int(result.length),
             remainLength: sfs.int(result.remainLength),
         };
-    }
-
-    private async getPushPreferences(uid: string): Promise<Fields>
-    {
-        const state = await this.db.getConfigurationByPlayerId(uid);
-        const now = this.now();
-        this.checkProfile(state.profile, now);
-        const pushSetting = pushPreferences(state.pushSettings);
-        await this.initializeWorldNewsPreference(uid, state.pushSettings, now);
-
-        return { pushSetting };
-    }
-
-    private async setPushPreference(uid: string, params: Fields): Promise<Fields>
-    {
-        const audio = wireInt(params, "audio", 1);
-        const type = wireInt(params, "type");
-        const status = wireInt(params, "status");
-
-        if (
-            [type, status, audio].some(
-                (value) => !Number.isInteger(value) || value < -2147483648 || value > 2147483647,
-            )
-        )
-        {
-            throw new GameError(errors.invalid);
-        }
-
-        if (!this.db.setPushPreference)
-        {
-            throw new GameError(errors.unsupported);
-        }
-
-        await this.profile(uid);
-        const dto: UpdatePushPreferenceDto = { type, status, audio };
-        await this.db.setPushPreference(uid, dto, this.now());
-
-        return {};
     }
 
     private async otherLogin(uid: string, params: Fields): Promise<Fields>

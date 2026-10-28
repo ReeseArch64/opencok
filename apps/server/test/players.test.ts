@@ -43,7 +43,6 @@ function game(
             return summaries;
         },
         getAccountsByPlayerId: unused,
-        getConfigurationByPlayerId: unused,
         getPowerByPlayerId: unused,
         getCityByPlayerId: unused,
         getWorldByPointIds: unused,

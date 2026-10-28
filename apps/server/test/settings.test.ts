@@ -31,7 +31,6 @@ test("setting.xml preserves IDs, string values, Unicode, and correlation through
         playerRanking: unused,
         publicProfile: unused,
         getPlayerSummariesByIds: unused,
-        getConfigurationByPlayerId: unused,
         getPowerByPlayerId: unused,
     };
     const game = new Game(store, rules, { kingdomId: 1 });
@@ -114,7 +113,6 @@ test("build.info uses the injected clock for buildings and queue previews withou
         playerRanking: unused,
         publicProfile: unused,
         getPlayerSummariesByIds: unused,
-        getConfigurationByPlayerId: unused,
         getPowerByPlayerId: unused,
         getAccountsByPlayerId: unused,
         getCityByPlayerId: async () => state,

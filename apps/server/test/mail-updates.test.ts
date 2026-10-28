@@ -336,7 +336,6 @@ test("authenticated mail update command preserves optional time correlation and 
         getAccountsByPlayerId: unused,
         getCityByPlayerId: unused,
         getWorldByPointIds: unused,
-        getConfigurationByPlayerId: unused,
         getPowerByPlayerId: unused,
         getPlayerSummariesByIds: unused,
         publicProfile: unused,
