@@ -151,7 +151,7 @@ The server binds TCP to `0.0.0.0:9933` and health HTTP to `0.0.0.0:18090`.
 These listener values are fixed in code and are not environment settings. The map
 size is also fixed at 1201 and dependency exchanges use a 5000 ms timeout.
 
-The root [Compose stack](../../infra/compose/README.md) starts this server, the
+The root [Compose stack](../../infra/README.md) starts this server, the
 shared discovery API, gateway, PostgreSQL, Redis, ZooKeeper and MinIO CDN. It mounts the XML
 directory read-only and uses a container-specific database URL. For direct Bun
 execution, provide reachable PostgreSQL/Redis/ZooKeeper endpoints separately. Run
@@ -4168,7 +4168,7 @@ governs Evlog/OpenTelemetry export to Maple Local. Composed application operatio
 and dependencies emit correlated start/result/error records and duration metrics.
 Generated effects are distinguished from committed transactions and deferred
 delivery. See the [shared contract](../../packages/core/README.md#operational-logging)
-and [Compose runbook](../../infra/compose/README.md#observability) for the dashboard,
+and [Compose runbook](../../infra/README.md#observability) for the dashboard,
 configuration, credentials and retention/alerting limitations.
 
 ## Population recovery composition

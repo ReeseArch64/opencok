@@ -67,7 +67,7 @@ or global database. Startup also checks actual database permissions before openi
 the health listener or admitting delivery. Misconfigured or administrative roles
 must fail closed. PostgreSQL grants enforce the write boundary; an application
 configuration label alone does not establish it. See the
-[Compose deployment guide](../../infra/compose/README.md) for provisioning and
+[Compose deployment guide](../../infra/README.md) for provisioning and
 local deployment.
 
 If Chat delivery was active in the realm, configure its endpoint in Workers before

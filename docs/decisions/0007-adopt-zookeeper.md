@@ -57,7 +57,7 @@ proof that an authoritative write is permitted.
 This catalog does not change coordination code, dependencies, images or data.
 Future work must retain authority checks while separately reviewing operations.
 
-- **Affected paths**: `packages/storage/src/coordination.ts`, `packages/storage/src/timeout.ts`, `packages/env/src/server.schema.ts`, `apps/server/src/config.ts`, `apps/server/src/realm-composition.ts`, `packages/repositories/src/realm-authority.ts`, `apps/server/test/realm-authority.test.ts`, `apps/server/integration/`, `docker-compose.yml`, `infra/compose/README.md`, `tests/stack/compose.test.ts`.
+- **Affected paths**: `packages/storage/src/coordination.ts`, `packages/storage/src/timeout.ts`, `packages/env/src/server.schema.ts`, `apps/server/src/config.ts`, `apps/server/src/realm-composition.ts`, `packages/repositories/src/realm-authority.ts`, `apps/server/test/realm-authority.test.ts`, `apps/server/integration/`, `docker-compose.yml`, `infra/README.md`, `tests/stack/compose.test.ts`.
 - **Dependencies**: Record existing `node-zookeeper-client@1.1.3`, `@types/node-zookeeper-client@0.2.13` and `zookeeper:3.4.14`. No new dependency or version change; security/support and protocol/session compatibility must be reviewed before any upgrade or production use.
 - **Configuration**: Preserve `GAME_ZOOKEEPER`, validated realm-specific paths and dependency timeouts. Retain private internal networking, named volumes, session timing and bounded client behavior; do not expose coordination endpoints through game ingress.
 - **Patterns to follow**: `Coordination.start/ready/close`, zero adapter retries with bounded startup, `acquireResource` ownership in realm composition, then `acquireRealmAuthority` and `fenceRealmDatabase` in PostgreSQL.
@@ -88,7 +88,7 @@ Every item is an unchecked follow-up gate; no runtime results are claimed here.
 ## More Information
 
 Grounding: [current authority semantics](../../.github/ARCHITECTURE.md#9-authoritative-server-zookeeper-and-scaling)
-and [local persistence/recovery](../../infra/compose/README.md#persistence-and-recovery).
+and [local persistence/recovery](../../infra/README.md#persistence-and-recovery).
 The architecture records the separately accepted authority target; this ADR adds
 no new gameplay ownership design. Revisit on unsupported dependencies, session/fencing
 failures or a reviewed change in deployment topology.

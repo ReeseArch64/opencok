@@ -16,7 +16,7 @@ start Chat, PostgreSQL and the existing global/kingdom migrations. The local sta
 configures API discovery and realm session issuance automatically and publishes Chat
 on port 8083. The advertised WebSocket URL is fixed at
 `ws://192.168.1.104:8083/chat/ws` in code; see the
-[stack guide](../../infra/compose/README.md). To run Chat on the host instead, stop
+[stack guide](../../infra/README.md). To run Chat on the host instead, stop
 the Compose Chat service, configure the root `.env` or process environment, and run
 `bun run --cwd apps/chat start`.
 
@@ -73,7 +73,7 @@ message bodies, player identities or credentials. Existing shared database
 instrumentation contributes dependency spans. The exporter starts before application
 resources and flushes after resource cleanup, including startup failure. Maple
 availability does not gate Chat readiness. Without an OTLP endpoint, console logging
-continues. See the [local Maple guide](../../infra/compose/README.md#observability).
+continues. See the [local Maple guide](../../infra/README.md#observability).
 
 ## Validation and limits
 

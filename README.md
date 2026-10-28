@@ -141,7 +141,7 @@ and `observability` selects only Maple from the base file. Production supplies a
 external `REDIS_URL` and `DATABASE_URL` without the dev override, with database
 provisioning and migrations handled separately. Redis remains pinned to the existing 6.2.24 Bookworm baseline pending
 compatibility validation before any upgrade; see the
-[stack guide](infra/compose/README.md#external-redis-and-deployment-separation). The setup jobs apply
+[stack guide](infra/README.md#external-redis-and-deployment-separation). The setup jobs apply
 PostgreSQL migrations and import the CDN; API/server and gateway wait for their
 prerequisites. Development credentials and exposed inspection ports are for a
 controlled local environment, not a public production deployment.
@@ -165,7 +165,7 @@ Named volumes preserve databases, objects and tool state across service recreati
 Back up databases, buckets, keys and configuration consistently before migrations;
 rolling back an image does not reverse committed SQL migrations. Do not remove
 volumes or reset player state to repair a configuration error. The
-[local stack guide](infra/compose/README.md) covers startup, recovery and direct
+[local stack guide](infra/README.md) covers startup, recovery and direct
 host/container settings.
 
 ## Optional services and integrations

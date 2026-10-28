@@ -97,7 +97,7 @@ are never printed. Transactional audit remains independent of telemetry availabi
 `OTEL_SLOW_OPERATION_MS` defaults to 1000 ms and emits `operation_slow` for unfinished async
 work. Maple Local stores logs, traces, exceptions and metrics but provides no automatic
 alert scheduler. Its UI runs at `http://127.0.0.1:4318` in Compose; see the
-[runbook](../../infra/compose/README.md#observability) for credentials, queries and recovery.
+[runbook](../../infra/README.md#observability) for credentials, queries and recovery.
 Server/API/Maple container logs rotate at 20 MiB with five files.
 
 Run `bun run --cwd packages/core test:maple` for an isolated real-container integration

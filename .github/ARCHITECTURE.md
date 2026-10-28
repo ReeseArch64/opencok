@@ -170,7 +170,7 @@ API/Chat/realm/Web retain Bun CLI builds with separate semantic checks; the comp
 
 Base Compose defines API/Server/Chat, Traefik, PostgreSQL/setup, MongoDB, Redis, ZooKeeper, MinIO/CDN, Maple and inspection tools. `docker-compose.dev.yml` adds local PostgreSQL/setup, Redis and MinIO readiness ordering; omitting it does not remove base service definitions. Shared external `DATABASE_URL`/`REDIS_URL` and configured S3/CDN endpoints do not require local database/storage dependencies in base app definitions. Server outbound networking supports external providers, not verified production compatibility.
 
-`dev` includes Chat (direct WebSocket port 8083); `all` includes tools; `devops`, `database` and `redis` select their respective tools/dependencies. [Mail Workers](../infra/compose/README.md#opt-in-mail-integration-workers) and [Scheduler](../infra/compose/README.md#opt-in-timed-activity-scheduler) use explicit opt-in overlays/profiles, not automatic extra gameplay writers. See the [local stack guide](../infra/compose/README.md) for exact configuration/cutover. Local containers do not prove Kubernetes readiness.
+`dev` includes Chat (direct WebSocket port 8083); `all` includes tools; `devops`, `database` and `redis` select their respective tools/dependencies. [Mail Workers](../infra/README.md#mail-integration-workers) and [Scheduler](../infra/README.md#timed-activity-scheduler) are defined in the main Compose with the `all`, `dev` and `prod` profiles plus their service-specific aliases. They retain restricted integration responsibilities. See the [local stack guide](../infra/README.md) for exact configuration/cutover. Local containers do not prove Kubernetes readiness.
 
 ## 16. Simulation execution and offline progress
 
@@ -218,7 +218,7 @@ Use [contribution requirements](CONTRIBUTING.md#required-implementation-tests): 
 
 ## 23. Development environment and administrative tools
 
-The [Compose guide](../infra/compose/README.md) governs local operation. pgAdmin, Redis Insight, Portainer, Mongo Express and gateway administration are private operator/development surfaces, never public game APIs. Preserve named volumes/ignored authorized inputs; configuration alone does not prove network isolation or grant production access.
+The [Compose guide](../infra/README.md) governs local operation. pgAdmin, Redis Insight, Portainer, Mongo Express and gateway administration are private operator/development surfaces, never public game APIs. Preserve named volumes/ignored authorized inputs; configuration alone does not prove network isolation or grant production access.
 
 ## 24. Operational goals, capacity and incidents
 

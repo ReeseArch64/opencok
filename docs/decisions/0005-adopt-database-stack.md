@@ -57,7 +57,7 @@ change, production runtime, deployment, install or data migration is selected he
 This plan describes separately authorized follow-up work, not changes performed
 by accepting this catalog record.
 
-- **Affected paths**: `packages/drizzle/src/`, `packages/drizzle/migrations/`, `packages/drizzle/tests/`, `packages/mongoose/package.json`, `packages/mongoose/src/chat-archive.ts`, `apps/chat/`, `packages/env/src/database.schema.ts`, `docker-compose.yml`, `infra/compose/README.md`, `tests/stack/compose.test.ts`.
+- **Affected paths**: `packages/drizzle/src/`, `packages/drizzle/migrations/`, `packages/drizzle/tests/`, `packages/mongoose/package.json`, `packages/mongoose/src/chat-archive.ts`, `apps/chat/`, `packages/env/src/database.schema.ts`, `docker-compose.yml`, `infra/README.md`, `tests/stack/compose.test.ts`.
 - **Dependencies**: Record existing `pg@8.23.1`, `drizzle-orm@0.45.4`, `drizzle-kit@0.31.11`, `postgres:17.11-bookworm`, `mongo:8.0.34`, `mongo-express:1.0.2` and `dpage/pgadmin4:9.18`. No dependency changes now. Select and pin a compatible Mongoose release in the separately reviewed migration; do not infer a version from the workspace name or remove the existing driver prematurely.
 - **Configuration**: Preserve validated global/kingdom routing, server-only credentials and bounded pools. Retain `MONGO_URI` for the current Compose inspection connection and `PGADMIN_DEFAULT_EMAIL`/`PGADMIN_DEFAULT_PASSWORD`; do not introduce parallel environment files or commit values.
 - **Patterns to follow**: `packages/drizzle/src/client.ts` ownership and role-specific migrations; `packages/repositories/src/realm-authority.ts` and `mutation.ts` fencing/transactions; the existing `ChatArchiveStore` contract and versioned archive upserts.
@@ -89,6 +89,6 @@ All criteria below are follow-up gates, not evidence of execution in this record
 
 Provenance: database/tool choices previously recorded as ADR-0001 through
 ADR-0004. See [database ownership](../../packages/drizzle/README.md),
-[local operation](../../infra/compose/README.md) and architecture sections 6, 7,
+[local operation](../../infra/README.md) and architecture sections 6, 7,
 9 and 23. Revisit unsupported dependencies, failed compatibility gates or an
 inability to preserve the authority/document boundary; no performance claim is made.

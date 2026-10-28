@@ -17,7 +17,7 @@ Combine `--profile dev --profile devops` to start
 the development stack with administration tools.
 Chat runs as its own service. Media runs inside the API using the five S3 settings
 and shared Redis authorization; there is no Files container or media overlay. See the
-[API guide](../../apps/api/README.md#avatar-media). MinIO and `minio-setup` provide the
+[API guide](../apps/api/README.md#avatar-media). MinIO and `minio-setup` provide the
 client CDN alongside the TypeScript API/server, gateway, PostgreSQL, Redis and
 ZooKeeper.
 
@@ -58,13 +58,13 @@ secret. Compose passes both by default. After updating this configuration or its
 root `.env` override, recreate the server with the command above; a restart alone
 does not enable renames in an existing container. Existing accounts, inventories
 and rename receipts are preserved. Custom deployments must configure the endpoint
-explicitly as described in [Profile and preferences](../../apps/server/PROFILE_PREFERENCES.md#activation-and-recovery).
+explicitly as described in [Profile and preferences](../apps/server/PROFILE_PREFERENCES.md#activation-and-recovery).
 
 Gameplay catalogs are included as readable TypeScript in `packages/resources/src/catalogs`.
 The nickname filter is bundled as `packages/policy/src/resources/data/badwords.json`.
 The server has no resource volume and does not require the ignored reference tree.
 Rebuild and recreate it after catalog edits; see the
-[catalog guide](../../packages/resources/README.md). Original private references
+[catalog guide](../packages/resources/README.md). Original private references
 remain ignored and outside runtime images.
 
 The CDN source is `data/cdn/data`, containing the extracted `cok.eleximg.com`
@@ -80,12 +80,14 @@ docker compose -f docker-compose.yml -f docker-compose.dev.yml --profile dev ps 
 docker compose -f docker-compose.yml -f docker-compose.dev.yml --profile all up --build -d --wait
 ```
 
-PostgreSQL setup applies pending Drizzle migrations to the global database and both
-kingdom databases. API/server/Chat wait for setup and their dependencies. MinIO setup
+PostgreSQL setup is built from `build.dockerfile_inline` in `docker-compose.yml`,
+using the pinned Bun image, frozen production dependencies and the non-root `bun`
+user. Compose must support inline Dockerfiles. Setup applies pending Drizzle
+migrations to the global database and both kingdom databases. API/server/Chat wait for setup and their dependencies. MinIO setup
 imports the CDN; the development override makes the gateway wait for successful
 CDN setup in addition to API/server health. The base gateway uses `CDN_URL` from
 the root `.env` and has no MinIO dependency. Set an external HTTP(S) origin for
-production, preserving the storage path layout in the [gateway guide](../gateway/README.md).
+production, preserving the storage path layout in the [gateway guide](gateway/README.md).
 The one-shot jobs exit with code zero after completion.
 
 ## Direct development values
@@ -198,7 +200,7 @@ interfaces. Restrict network access with host firewall rules when necessary. It 
 Bun's existing server, including `/api/ping`, rather than a static-only bundle.
 Supply the three already prepared images in `apps/web/assets/`, mounted read-only;
 the bind mount refuses to create a missing directory. See the
-[Web guide](../../apps/web/README.md#local-assets). Compose does not extract private
+[Web guide](../apps/web/README.md#local-assets). Compose does not extract private
 assets. The existing fixed gateway health target is unchanged.
 
 ```sh
@@ -237,7 +239,7 @@ Base Compose runs the implemented Workers process for realm `1`, using
 `opencok_kingdom_1` and `opencok_global`. The `mail-workers` profile alias remains
 available alongside `all`, `dev` and `prod`. Server and Workers use the same fixed
 realm/database identities in `docker-compose.yml`; no separate overlay is needed.
-Read the [Workers guide](../../apps/workers/README.md) for restricted-role
+Read the [Workers guide](../apps/workers/README.md) for restricted-role
 provisioning, exact grants, bindings, failure recovery and measured limits.
 
 Provision the intended realm/global databases and their migrations first, then run
@@ -286,7 +288,7 @@ For rollback, stop/drain Workers and Server, explicitly override
 `MAIL_INTEGRATION_MODE` to `local` on Server, and restart only Server.
 Retain the Chat key configuration needed by that Server version and preserve
 queues/receipts for uncertain-outcome replay. Follow the full
-[cutover sequence](../../apps/workers/README.md#cutover-and-rollback).
+[cutover sequence](../apps/workers/README.md#cutover-and-rollback).
 No production deployment or native client repackaging is performed by this change.
 
 ## Timed-activity Scheduler
@@ -295,7 +297,7 @@ Base Compose runs Scheduler and selects external timed-activity discovery for
 realm `1`, using `opencok_kingdom_1`. The `scheduler` profile alias remains available
 alongside `all`, `dev` and `prod`. Server, Scheduler and Workers share the fixed
 realm/database identities in `docker-compose.yml`; no separate overlay is needed.
-Read the [Scheduler guide](../../apps/scheduler/README.md) for the complete
+Read the [Scheduler guide](../apps/scheduler/README.md) for the complete
 twelve-type scope, legacy restoration, restricted-role provisioner, health semantics
 and remaining deadline families.
 
@@ -395,7 +397,7 @@ overrides that previously targeted `database`, `database-setup` or `storage`.
 Redis 6.2.24 Bookworm and ZooKeeper 3.4.14 use pinned upstream images with
 configuration in Compose. Redis remains on the existing baseline; an upgrade requires
 client, command, persistence and recovery compatibility validation first.
-See [ADR-0006](../../docs/decisions/0006-adopt-redis-and-insight.md).
+See [ADR-0006](../docs/decisions/0006-adopt-redis-and-insight.md).
 Redis command arguments retain RDB/AOF persistence, a 384 MiB limit,
 `noeviction` and disabled command slowlogs. ZooKeeper retains session timing,
 client limits, hourly snapshot cleanup and `ruok`/`srvr` health commands.
@@ -455,19 +457,19 @@ Topic 24 adds authenticated `mongo:8.0.34` on the internal network with the
 `mongodb-data` volume and no host port. Chat uses `MONGO_URI`; local initialization
 uses the local MongoDB development credentials. The Chat entrypoint uses the fixed
 consumer ID `chat-local` for the single Compose instance; additional instances need
-distinct IDs supplied through application composition. Read the [social chat deployment guide](../../docs/social-chat-migration.md)
+distinct IDs supplied through application composition. Read the [social chat deployment guide](../docs/social-chat-migration.md)
 for migration order, archive outage behavior, original expiry, rollback and synthetic
 acceptance. Existing MongoDB volumes keep their initialized credentials when environment
 values change; do not delete the volume to rotate credentials.
 
 ## Observability
 
-[ADR-0004](../../docs/decisions/0004-adopt-maple.md)
+[ADR-0004](../docs/decisions/0004-adopt-maple.md)
 selects Maple Local for server/API logs, traces, controlled errors and duration/process
 metrics. Grafana, Loki, Prometheus, Axiom and Sentry adoption is suspended for these
 signals while Maple passes the required checks. A derived `v0.3.0` image contains
 OTLP HTTP ingest, the query API, embedded ClickHouse and the bundled offline dashboard.
-It applies the guarded [WebAssembly CSP workaround](../observability/maple/README.md)
+It applies the guarded [WebAssembly CSP workaround](observability/maple/README.md)
 to the versioned official image with an executable checksum guard; currently only the
 verified Linux amd64 build is supported.
 It uses `maple-data:/data`; no second database or hosted Maple account is required.
@@ -511,7 +513,7 @@ network controls when the development machine is reachable by other devices.
 Server, API and Chat send OTLP to `http://maple:4318`. Chat initializes its exporter
 before opening application resources and flushes after closing them on shutdown or
 startup failure. The gateway sends filtered access logs and HTTP metrics through
-Traefik's native OTLP exporters; see the [gateway guide](../gateway/README.md).
+Traefik's native OTLP exporters; see the [gateway guide](gateway/README.md).
 For applications run outside Compose,
 set `OTEL_EXPORTER_OTLP_ENDPOINT=http://127.0.0.1:4318` and the same ingest key.
 The telemetry export interval is fixed at 1000 ms in code.
@@ -575,4 +577,4 @@ database and authentication settings. The example selects local `opencok_chat`
 with `authSource=admin`. Admin-wide database browsing is disabled. Inspect `chat_archive` for archived messages; UI changes are
 local diagnostic actions and must not replace versioned repair or migration scripts.
 The service has no application dependents or gateway route and is omitted from `prod`.
-See [ADR-0005](../../docs/decisions/0005-adopt-database-stack.md).
+See [ADR-0005](../docs/decisions/0005-adopt-database-stack.md).
