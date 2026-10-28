@@ -3,12 +3,18 @@ import { planChatSocial } from "./chat-social-plan.ts";
 import type { ChatSocialCommand, ChatSocialStore } from "@opencok/contracts/chat-social";
 import { chatSocialParams } from "@opencok/validations/chat-social";
 import { ChatCommandError } from "@opencok/errors/chat";
+import type { ShareFeedPlanner } from "@opencok/share/contracts/runtime";
+import type { ShareFeedNormalizer } from "@opencok/share/contracts/envelope";
 
 export const chatSocialCommands: readonly ChatSocialCommand[] = Object.values(ChatSocialAction);
 
 export class ChatSocialService
 {
-    public constructor(private readonly store: ChatSocialStore)
+    public constructor(
+        private readonly store: ChatSocialStore,
+        private readonly share: ShareFeedPlanner,
+        private readonly normalizeFeed: ShareFeedNormalizer,
+    )
     {}
 
     public async execute(owner: string, command: ChatSocialCommand, params: unknown, key: unknown)
@@ -50,19 +56,11 @@ export class ChatSocialService
             duration: (value.time ?? 3600) * 1000,
             sequence,
             limit: value.count ?? 100,
-            feedId: value.fid ?? value.id ?? "",
-            feedType: value.type ?? 0,
-            feedData: value.data ?? "",
-            feedAuth: value.auth ?? "self",
-            notices: value.notices?.split(",").filter(Boolean) ?? [],
-            localId: value.localid ?? "",
+            ...this.normalizeFeed(value),
         };
 
-        return this.store.execute(operation, (tx) => planChatSocial(operation, tx));
+        return this.store.execute(operation, (tx) => planChatSocial(operation, tx, this.share));
     }
 }
 
-export function createChatSocialService(store: ChatSocialStore): ChatSocialService
-{
-    return new ChatSocialService(store);
-}
+export type ChatSocialServiceFactory = (store: ChatSocialStore) => ChatSocialService;

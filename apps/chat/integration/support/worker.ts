@@ -1,5 +1,5 @@
 import { nicknameAccountUid } from "@opencok/account/repositories/nickname-identity";
-import { createChatRepository } from "@opencok/repositories/chat";
+import { createChatRepository } from "../../src/composition/chat-persistence";
 import { realmChatDeliveries } from "@opencok/services/realm-chat-delivery";
 import { isRecord } from "@opencok/contracts/chat";
 import { createChatApp } from "../../src/app";

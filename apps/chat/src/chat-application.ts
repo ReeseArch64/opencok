@@ -4,7 +4,8 @@ import type { CommandContext, WebSocketGateway } from "@opencok/contracts/chat";
 import { ChatDeliveryService } from "@opencok/services/chat-delivery";
 import { ChatMaintenanceService } from "@opencok/services/chat-maintenance.service";
 import { ChatSessionService } from "@opencok/services/chat-session.service";
-import { ChatSocialService, chatSocialCommands } from "@opencok/services/chat-social";
+import { chatSocialCommands } from "@opencok/services/chat-social";
+import { createChatSocialService } from "./composition/share";
 import { RealmSocialService } from "@opencok/services/realm-social";
 import { ChatMailboxController } from "@opencok/controllers/chat-mailbox";
 import { ChatAvatarProfileController } from "@opencok/controllers/chat-avatar-profile";
@@ -59,7 +60,7 @@ export class ChatApplication
         const sessionStore = repository.sessions;
         const messages = repository.messages;
         const authorizeRoom = new ChatRoomAccessAuthorizer(repository).authorize;
-        const social = repository.social ? new ChatSocialService(repository.social) : null;
+        const social = repository.social ? createChatSocialService(repository.social) : null;
         const isReady = () => this.maintenance?.isReady() ?? false;
         const roomOptions = { authorizeRoom, messages, access: repository.access };
         const controllers = [
@@ -117,7 +118,7 @@ export class ChatApplication
             isReady,
             socialHandler: social
                 ? new RealmSocialController(
-                    new RealmSocialService(repository, isReady),
+                    new RealmSocialService(repository, isReady, createChatSocialService),
                     signingSecret,
                 )
                     .handle

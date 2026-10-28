@@ -62,6 +62,7 @@
         "@opencok/mongoose": "workspace:*",
         "@opencok/repositories": "workspace:*",
         "@opencok/services": "workspace:*",
+        "@opencok/share": "workspace:*",
       },
       "devDependencies": {
         "@opencok/config": "workspace:*",
@@ -370,6 +371,7 @@
         "@opencok/ledger": "workspace:*",
         "@opencok/mail": "workspace:*",
         "@opencok/messages": "workspace:*",
+        "@opencok/share": "workspace:*",
         "@opencok/skins": "workspace:*",
         "@opencok/tasks": "workspace:*",
       },
@@ -810,6 +812,7 @@
         "@opencok/mappings": "workspace:*",
         "@opencok/messages": "workspace:*",
         "@opencok/rules": "workspace:*",
+        "@opencok/share": "workspace:*",
         "@opencok/tasks": "workspace:*",
         "drizzle-orm": "0.45.4",
       },
@@ -900,6 +903,7 @@
         "@opencok/messages": "workspace:*",
         "@opencok/policy": "workspace:*",
         "@opencok/rules": "workspace:*",
+        "@opencok/share": "workspace:*",
         "@opencok/skins": "workspace:*",
         "@opencok/tasks": "workspace:*",
         "@opencok/validations": "workspace:*",
@@ -912,6 +916,11 @@
     },
     "packages/share": {
       "name": "@opencok/share",
+      "dependencies": {
+        "@opencok/drizzle": "workspace:*",
+        "drizzle-orm": "0.45.4",
+        "zod": "catalog:",
+      },
       "devDependencies": {
         "@opencok/config": "workspace:*",
         "@types/bun": "catalog:",
@@ -1033,6 +1042,7 @@
         "@opencok/errors": "workspace:*",
         "@opencok/hero": "workspace:*",
         "@opencok/messages": "workspace:*",
+        "@opencok/share": "workspace:*",
         "sharp": "^0.34.0",
         "zod": "catalog:",
       },

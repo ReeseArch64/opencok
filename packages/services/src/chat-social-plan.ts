@@ -4,14 +4,15 @@ import type {
     ChatSocialTransaction,
     ChatSocialResponse,
     SocialRelation,
-    SocialFeed,
 } from "@opencok/contracts/chat-social";
 import { ChatCommandError } from "@opencok/errors/chat";
+import type { ShareFeedPlanner } from "@opencok/share/contracts/runtime";
 import { contactTransition, requireRoomRole } from "@opencok/rules/chat-social";
 
 export async function planChatSocial(
     input: ChatSocialOperation,
     tx: ChatSocialTransaction,
+    share: ShareFeedPlanner,
 ): Promise<ChatSocialResponse>
 {
     const { actor, target, now } = tx;
@@ -64,13 +65,6 @@ export async function planChatSocial(
                 ),
             100 + type,
         );
-    const feedAccess = (row: SocialFeed) =>
-        row.owner === input.owner
-        || (row.realm === actor.serverId
-            && !!row.alliance
-            && row.alliance === actor.allianceId
-            && actor.allianceId === actor.membershipAllianceId);
-
     if (input.command === "chat.room.invitee")
     {
         return { members: tx.invitees };
@@ -320,129 +314,9 @@ export async function planChatSocial(
         return {};
     }
 
-    if (input.command === "chat.feed.send")
+    if (share.handles(input.command))
     {
-        if (
-            (!input.body && input.feedType !== 101)
-            || input.notices.length > 50
-            || input.notices.some((uid) => !/^[a-zA-Z0-9_-]{1,40}$/.test(uid))
-        )
-        {
-            throw new ChatCommandError("invalid_message");
-        }
-
-        const alliance = input.feedAuth === "alliance"
-                && actor.allianceId
-                && actor.membershipAllianceId === actor.allianceId
-            ? actor.allianceId
-            : "";
-
-        if (input.feedAuth === "alliance" && !alliance)
-        {
-            throw new ChatCommandError("invalid_room");
-        }
-
-        let parent: string | null = null;
-
-        if ([101, 102].includes(input.feedType))
-        {
-            const original = await tx.feed(input.feedId);
-
-            if (!original || original.parent || !feedAccess(original))
-            {
-                throw new ChatCommandError("feed_permission_denied");
-            }
-
-            parent = original.id;
-        }
-
-        const id = `${input.owner}${now}${randomUUID().slice(0, 8)}`;
-        const body = {
-            id,
-            time: Number(now),
-            type: input.feedType,
-            msg: input.body,
-            data: input.feedData,
-            sender: input.owner,
-            fid: parent ?? "",
-            status: 1,
-            authority: alliance ? { alliance } : { owner: input.owner },
-        };
-        await tx.putFeed({
-            id,
-            owner: input.owner,
-            realm: actor.serverId,
-            alliance,
-            parent,
-            type: input.feedType,
-            body,
-            createdAt: now,
-            expiresAt: now + 30n * 86_400_000n,
-            deletedAt: null,
-        });
-
-        for (const uid of new Set(input.notices))
-        {
-            const state = tx.players.get(uid);
-
-            if (
-                !state
-                || !alliance
-                || state.allianceId !== alliance
-                || state.membershipAllianceId !== alliance
-                || (await tx.blocked(input.owner, uid))
-            )
-            {
-                continue;
-            }
-
-            await tx.feedNotice(uid, id);
-            await event("push.chat.feed.notice", { id }, uid);
-        }
-
-        return { id, ...(input.localId ? { localid: input.localId } : {}) };
-    }
-
-    if (input.command === "chat.feed.del")
-    {
-        const feed = await tx.feed(input.feedId);
-
-        if (!feed || (feed.owner !== input.owner && !(actor.gmFlag && actor.moderationAllowed)))
-        {
-            throw new ChatCommandError("feed_permission_denied");
-        }
-
-        await tx.removeFeed(feed.id);
-
-        return {};
-    }
-
-    if (input.command === "chat.feed.notice.del")
-    {
-        await tx.removeFeedNotices(input.owner, input.ids);
-
-        return {};
-    }
-
-    if (input.command === "chat.feed.get")
-    {
-        const feed = [];
-
-        for (
-            const row of await tx.feeds(
-                input.owner,
-                actor.serverId,
-                actor.allianceId === actor.membershipAllianceId ? (actor.allianceId ?? "") : "",
-            )
-        )
-        {
-            if (feedAccess(row) && !(await tx.blocked(input.owner, row.owner)))
-            {
-                feed.push(row.body);
-            }
-        }
-
-        return { feed };
+        return share.execute(input, tx);
     }
 
     if (input.command === "chat.room.mk")

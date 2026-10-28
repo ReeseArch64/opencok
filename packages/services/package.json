@@ -35,6 +35,7 @@
     "@opencok/equipment": "workspace:*",
     "@opencok/tasks": "workspace:*",
     "@opencok/skins": "workspace:*",
-    "@opencok/alliance": "workspace:*"
+    "@opencok/alliance": "workspace:*",
+    "@opencok/share": "workspace:*"
   }
 }

@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { shareFeedFields } from "@opencok/share/validations/feed";
 
 const identifier = z
     .string()
@@ -13,13 +14,13 @@ const text = (length: number) =>
         .refine((value) => value.isWellFormed() && !value.includes("\0"));
 
 export const chatSocialParams = z.object({
-    fid: text(100).optional(),
-    type: z.number().int().min(0).max(102).optional(),
-    data: text(4000).optional(),
-    auth: z.enum(["alliance", "self"]).optional(),
-    notices: text(4100).optional(),
+    fid: shareFeedFields.fid,
+    type: shareFeedFields.type,
+    data: shareFeedFields.data,
+    auth: shareFeedFields.auth,
+    notices: shareFeedFields.notices,
     ids: text(10100).optional(),
-    localid: text(100).optional(),
+    localid: shareFeedFields.localid,
     allianceId: identifier.optional(),
     uid: z.union([identifier, z.array(identifier).max(100)]).optional(),
     reportUid: identifier.optional(),

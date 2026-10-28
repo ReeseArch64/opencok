@@ -23,6 +23,7 @@
     "@opencok/hero": "workspace:*",
     "@opencok/economy": "workspace:*",
     "@opencok/constants": "workspace:*",
-    "@opencok/equipment": "workspace:*"
+    "@opencok/equipment": "workspace:*",
+    "@opencok/share": "workspace:*"
   }
 }
