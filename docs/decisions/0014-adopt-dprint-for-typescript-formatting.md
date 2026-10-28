@@ -12,8 +12,8 @@ decision-makers: ReeseArch64
 explicit-brace, C#-inspired presentation while preserving TypeScript semantics.
 ADR-0008 selected Oxfmt and two spaces. The installed Oxfmt 0.74.0 can change
 indentation but exposes no Allman brace option. A measured three-file
-[pilot](../../.github/formatting-pilot/README.md) compares actual output, tradeoffs,
-idempotence, syntax trees and automatic semicolon insertion behavior.
+pilot compared actual output, tradeoffs, idempotence, syntax trees and automatic
+semicolon insertion behavior. Its files and reports are retained in Git history.
 
 ReeseArch64 explicitly approved the summarized dprint proposal and migration in
 the implementation session on 2026-10-27, after reviewing the pilot findings.
@@ -63,24 +63,25 @@ in both owners, normal TypeScript names, public contracts and behavior.
   overrides. Root commands and CI provide the authoritative shared check.
 - The broad mechanical baseline creates merge conflict risk; keep it independently
   revertible and rebase active branches after integration.
-- Isolated TypeScript 5.9.3 in the pilot supplies its familiar AST API; it does not
-  replace the workspace TypeScript 7 compiler or become a production dependency.
+- Isolated TypeScript 5.9.3 in the original pilot supplied its familiar AST API;
+  it did not replace the workspace TypeScript 7 compiler or become a production dependency.
 
 ## Implementation Plan
 
 - **Affected paths**: `dprint.json`, `.oxfmtrc.json`, `.oxlintrc.json`,
   `.editorconfig`, `.vscode/settings.json`, `.vscode/extensions.json`, `package.json`,
-  `bun.lock`, `.github/CONTRIBUTING.md`, `.github/workflows/code-quality.yml`,
-  `.github/formatting-pilot/`, and writable maintained JS/TS source.
+  `bun.lock`, `.github/CONTRIBUTING.md`, `.github/workflows/code-quality.yml`
+  and writable maintained JS/TS source.
 - **Dependencies**: pin dprint 0.64.3 and @dprint/typescript 0.96.1; retain Vite+,
-  Oxlint and root TypeScript versions. Keep the pilot lockfile isolated.
+  Oxlint and root TypeScript versions. The original isolated pilot dependencies
+  and lockfile have been removed.
 - **Migration**: deliver pilot/decision first, then dependent tooling and baseline
   commits. Insert mandatory braces separately from the formatter rewrite. Compare
   every changed baseline source AST against its original; preserve import/property
   order and syntax-sensitive returns. Never force-add ignored files.
 - **Editor/CI**: four-space JS/TS EditorConfig overrides; dprint language-specific
   VS Code formatter with Oxfmt for other languages. Frozen dependency installation,
-  root lint/format checks and pilot regression checks in CI. Retain existing root
+  root lint/format checks in CI. Retain existing root
   command names and correctness policy.
 - **Follow-ups**: separate scoped issues for avatar orchestration and postbox
   workflows in `packages/services/src/game.service.ts`; require constructor
@@ -111,8 +112,10 @@ in both owners, normal TypeScript names, public contracts and behavior.
 
 ## More Information
 
-The pilot report records exact versions, output excerpts, reproduction commands,
-AST normalization limits and rollout boundaries. Revisit if pinned releases stop
-supporting maintained syntax or editor/CI ownership cannot remain deterministic.
+The original pilot report, retained in Git history, records exact versions, output
+excerpts, reproduction commands, AST normalization limits and rollout boundaries.
+Revisit if pinned releases stop supporting maintained syntax or editor/CI ownership
+cannot remain deterministic.
 
-- **2026-10-27 implementation evidence**: [Migration validation](../../.github/formatting-pilot/MIGRATION.md) records 4,143 matching source ASTs, formatting idempotence, editor LSP/CLI equivalence, all 27 implemented workspace type checks, 1,809 expanded tests and 858 Drizzle/hook tests passing. Structural work is tracked separately in #552 and #553.
+- **2026-10-27 implementation evidence**: the historical migration report records 4,143 matching source ASTs, formatting idempotence, editor LSP/CLI equivalence, all 27 implemented workspace type checks, 1,809 expanded tests and 858 Drizzle/hook tests passing. Structural work is tracked separately in #552 and #553.
+- **Pilot removal**: the project owner requested complete removal of the experimental project, its local dependencies and its CI steps. The checked pilot and migration evidence above is historical, not current recurring CI coverage. This decision remains accepted: the root dprint/Oxfmt configuration, Oxlint brace rules, editor integration and normal lint/format checks remain in place. Do not recreate the pilot as part of routine implementation.

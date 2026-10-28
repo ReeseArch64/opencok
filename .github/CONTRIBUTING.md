@@ -36,7 +36,7 @@ Oxlint and Oxfmt versions bundled with `vite-plus` and the pinned dprint CLI and
 TypeScript plugin from the root lockfile. Configure lint in `.oxlintrc.json`,
 JS/TS formatting in `dprint.json`, and other formatting in `.oxfmtrc.json`.
 [ADR-0014](../docs/decisions/0014-adopt-dprint-for-typescript-formatting.md) records
-the confirmed policy and [pilot evidence](formatting-pilot/README.md).
+the confirmed policy and historical validation summary.
 
 Run these commands from the repository root before submitting changes:
 
