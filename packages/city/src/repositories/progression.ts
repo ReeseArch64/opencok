@@ -33,6 +33,7 @@ export class CityProgressionRepository implements CityProgressionStore
             readers: adapters.readers,
             research: adapters.research,
             troops: adapters.troops,
+            buildings: adapters.buildings,
             writers: adapters.writers,
             birth: adapters.birth,
             alliance: "",

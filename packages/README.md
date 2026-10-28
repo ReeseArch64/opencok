@@ -76,3 +76,7 @@ The [troops domain](troops/README.md) owns training, healing and fortification
 workflows, military policies/projections and transaction-bound persistence after
 #645. The realm injects scoring and projection collaborators; shared helper and
 world/march dependencies remain tracked in its ownership register.
+
+Building also owns typed persistence after #647. The realm injects the current
+transaction; City retains legacy row adaptation and cross-mechanic ordering while
+construction workflows migrate separately.

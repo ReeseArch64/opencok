@@ -1,10 +1,9 @@
+import type { UpdateBuildingDto } from "@opencok/building/dtos/update-building.dto";
 import { user_general } from "@opencok/drizzle/schema/opencok_kingdom/user_general";
 import { user_skill } from "@opencok/drizzle/schema/opencok_kingdom/user_skill";
 import { new_general } from "@opencok/drizzle/schema/opencok_kingdom/new_general";
 import { and, eq, inArray } from "drizzle-orm";
 import { userprofile } from "@opencok/drizzle/schema/opencok_kingdom/userprofile";
-import { user_building } from "@opencok/drizzle/schema/opencok_kingdom/user_building";
-import { user_building_exp } from "@opencok/drizzle/schema/opencok_kingdom/user_building_exp";
 import { playerinfo } from "@opencok/drizzle/schema/opencok_kingdom/playerinfo";
 import { queue } from "@opencok/drizzle/schema/opencok_kingdom/queue";
 import type { CityProgressionWrite } from "@opencok/contracts/city-progression";
@@ -21,9 +20,8 @@ export class CityAggregateWriter
         const { tx, owner, now, writers } = session;
         for (const row of write.buildings ?? [])
         {
-            const value = {
+            const value: UpdateBuildingDto = {
                 uuid: text(row, "uuid"),
-                uid: owner,
                 itemId: num(row, "itemId"),
                 pos: num(row, "pos"),
                 level: num(row, "level"),
@@ -38,24 +36,7 @@ export class CityAggregateWriter
                 unlockFlag: num(row, "unlockFlag"),
                 costUnlockTimes: num(row, "costUnlockTimes"),
             };
-            const [existing] = await tx
-                .select({ uid: user_building.uid })
-                .from(user_building)
-                .where(eq(user_building.uuid, value.uuid));
-
-            if (existing && existing.uid !== owner)
-            {
-                throw new Error("Foreign building");
-            }
-
-            await tx
-                .insert(user_building)
-                .values(value)
-                .onConflictDoUpdate({
-                    target: user_building.uuid,
-                    set: value,
-                    setWhere: eq(user_building.uid, owner),
-                });
+            await session.buildings.write(value);
         }
 
         for (const row of write.skills ?? [])
@@ -170,13 +151,7 @@ export class CityAggregateWriter
 
         if (write.buildingExperience)
         {
-            await tx
-                .insert(user_building_exp)
-                .values({ uid: owner, ...write.buildingExperience })
-                .onConflictDoUpdate({
-                    target: user_building_exp.uid,
-                    set: write.buildingExperience,
-                });
+            await session.buildings.writeExperience(write.buildingExperience);
         }
 
         if (write.deletedBuildings?.length)
@@ -191,14 +166,7 @@ export class CityAggregateWriter
                         inArray(new_general.buildingUuid, [...write.deletedBuildings]),
                     ),
                 );
-            await tx
-                .delete(user_building)
-                .where(
-                    and(
-                        eq(user_building.uid, owner),
-                        inArray(user_building.uuid, [...write.deletedBuildings]),
-                    ),
-                );
+            await session.buildings.delete(write.deletedBuildings);
         }
     };
 }

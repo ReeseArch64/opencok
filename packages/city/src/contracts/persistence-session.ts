@@ -1,3 +1,4 @@
+import type { BuildingRepository } from "@opencok/building/repositories/progression";
 import type { TroopsRepository } from "@opencok/troops/repositories/progression";
 import type { ResearchRepository } from "@opencok/research/repositories/progression";
 import type { CityProgressionState } from "@opencok/contracts/city-progression";
@@ -7,6 +8,10 @@ import type { CityPersistenceWriters } from "./persistence-writers";
 
 export interface CityPersistenceAdapters
 {
+    readonly buildings: Pick<
+        BuildingRepository,
+        "read" | "readExperience" | "write" | "writeExperience" | "delete"
+    >;
     readonly troops: Pick<
         TroopsRepository,
         | "readArmies"
