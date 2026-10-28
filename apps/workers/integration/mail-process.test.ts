@@ -324,7 +324,7 @@ test(
             try
             {
                 await realm.query(`GRANT mail_audit_escalation TO ${h.roles[0]!.kingdom}`);
-                await expect(check()).rejects.toThrow("Unsafe mail worker database role");
+                await expect(check()).rejects.toThrow("Unsafe database service role");
             }
             finally
             {
@@ -351,7 +351,7 @@ test(
                 await realm.query(
                     "CREATE FUNCTION public.mail_audit_escape() RETURNS integer LANGUAGE sql SECURITY DEFINER AS 'SELECT 1'",
                 );
-                await expect(check()).rejects.toThrow("Unsafe mail worker database role");
+                await expect(check()).rejects.toThrow("Unsafe database service role");
             }
             finally
             {
@@ -378,7 +378,7 @@ test(
                 await realm.query(
                     `GRANT CREATE ON SCHEMA opencok_kingdom TO ${h.roles[0]!.kingdom}`,
                 );
-                await expect(check()).rejects.toThrow("Unsafe mail worker database role");
+                await expect(check()).rejects.toThrow("Unsafe database service role");
             }
             finally
             {

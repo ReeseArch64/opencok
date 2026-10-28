@@ -8,6 +8,8 @@ export interface ServerConfig
     avatarChat?: { url: string; signingSecret: string; };
     avatarFiles?: { origin: string; };
     nicknameChat?: { url: string; signingSecret: string; };
+    activitySchedulerMode?: "local" | "external";
+    activitySchedulerSecret?: string;
     mailIntegrationMode?: "local" | "external";
     mailChat?: { url: string; signingSecret: string; };
     chatSession?: { url: string; signingSecret: string; };

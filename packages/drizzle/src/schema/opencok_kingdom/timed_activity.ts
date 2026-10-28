@@ -31,6 +31,7 @@ export const timed_activity = opencok_kingdom.table(
             .on(table.queueId)
             .where(sql`"status" = 0`),
         index("timed_activity_due").on(table.status, table.dueAt),
+        index("timed_activity_due_cursor").on(table.status, table.dueAt, table.id),
         index("timed_activity_owner").on(table.ownerId),
         check(
             "timed_activity_state",

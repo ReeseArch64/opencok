@@ -361,6 +361,7 @@ export async function unregisteredActivities(
         .select({
             uuid: queue.uuid,
             ownerId: queue.ownerId,
+            type: queue.type,
             itemId: queue.itemId,
             startTime: queue.startTime,
             updateTime: queue.updateTime,

@@ -38,6 +38,8 @@ export const config = Effect.gen(function*()
         chatInterval: 1,
         feedMaxCount: 3,
         mailTranslationEnabled: settings.GAME_MAIL_TRANSLATION,
+        activitySchedulerMode: settings.ACTIVITY_SCHEDULER_MODE,
+        activitySchedulerSecret: settings.ACTIVITY_SCHEDULER_SECRET,
         mailIntegrationMode: settings.MAIL_INTEGRATION_MODE,
         crossSearchEnabled: true,
         port: 9933,

@@ -1,3 +1,4 @@
+import { activityDeadlinePath } from "@opencok/queues/contracts/deadline";
 import { provisionPath } from "@opencok/contracts/provisioning";
 import { createServer, type Socket } from "node:net";
 import { Effect } from "effect";
@@ -101,6 +102,13 @@ export function listenServer(config: ConnectionConfig, dependencies: ServerDepen
             { host: config.host, port: config.healthPort },
             (request) => {
                 const path = new URL(request.url).pathname;
+
+                if (path === activityDeadlinePath)
+                {
+                    return ready() && dependencies.activityDeadlines
+                        ? dependencies.activityDeadlines(request)
+                        : new Response(null, { status: 503 });
+                }
 
                 if (path === provisionPath)
                 {

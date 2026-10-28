@@ -240,6 +240,67 @@ that Server version and preserve queues/receipts for uncertain-outcome replay.
 Follow the full [cutover sequence](../../apps/workers/README.md#cutover-and-rollback).
 No production deployment or native client repackaging is performed by this change.
 
+## Opt-in timed-activity Scheduler
+
+[`activity-scheduler.yml`](activity-scheduler.yml) adds the real Scheduler and
+selects external timed-activity discovery for one Server realm. The default stack
+keeps its local activity loop. Read the [Scheduler guide](../../apps/scheduler/README.md)
+for the complete twelve-type scope, legacy restoration, restricted-role provisioner,
+health semantics and remaining deadline families.
+
+Apply kingdom migration `0045_timed_activity_discovery.sql` in an operator-planned
+window first: its regular index build can block writes and adds storage/write
+maintenance cost. Then run the operator-only provisioner
+with a fresh restricted role and protected realm binding. Supply these values in
+the private Compose environment:
+
+| Variable                          | Scope                                                   |
+| --------------------------------- | ------------------------------------------------------- |
+| `SCHEDULER_KINGDOM_ID`            | Realm shared by Server and Scheduler                    |
+| `SCHEDULER_KINGDOM_DATABASE_NAME` | Actual realm database expected by both                  |
+| `SCHEDULER_DATABASE_URL`          | Read-only role bound to that realm/database             |
+| `ACTIVITY_SCHEDULER_SECRET`       | Distinct realm deadline key, shared only with its owner |
+
+The key must differ from game, provisioning and Chat credentials; use a different
+key for each realm. Administrative provisioning URLs/passwords do not belong in
+the Scheduler container. The overlay adds no migration/setup dependency and the
+runtime never creates roles or repairs grants.
+
+Build matching artifacts before cutover:
+
+```sh
+docker compose -f docker-compose.yml -f infra/compose/activity-scheduler.yml --profile scheduler build server scheduler
+```
+
+Normal base-stack interpolation values are still required. Do not print resolved
+Compose configuration with real credentials. The image uses the pinned Bun
+runtime and a non-root user. Its health port 18092 remains inside the network;
+the overlay publishes no new host port. The owner endpoint is reached through
+Server's existing internal HTTP port 18090. The internal network must reach the
+realm database, owner and telemetry; external services require an explicit
+operator-controlled network path, which this overlay does not create or verify.
+
+After deploying matching protocol support in local mode, stop and drain the old
+Server global loop and any existing Scheduler. Start Server with the overlay's
+external mode and realm identity, then start Scheduler with the same overlay and
+`scheduler` profile. Verify current-owner capability checks, restricted-role
+readiness, actual deadline lateness and backlog progress. Scheduler readiness
+requires the owner to answer successfully. Foreground/reconnect recovery stays
+local to Server throughout the external mode.
+
+The overlay sets a two-connection pool, one-second delay between completed passes,
+64 candidates per phase, four attempts per owner, five-second operation timeout
+and 45-second graceful stop allowance. The owner retains every gameplay mutation
+and its existing transaction fence. These are deployment bounds, not measured
+production SLOs. All queue/activity rows and economic receipts survive cutover.
+
+For rollback, stop/drain Scheduler and Server, remove this overlay to restore local
+activity discovery, and restart Server. Retain compatible protocol support and
+all persisted activities, legacy queues, receipts and outbox entries. A lost HTTP
+response may follow a committed owner transaction; replay the same durable
+operation rather than resetting a queue or granting rewards again. This change
+performs no production deployment and does not complete the other W16 deadlines.
+
 ## External Redis and deployment separation
 
 Both Redis consumers (API, including media tickets, and realm/server sessions) use

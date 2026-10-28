@@ -6,7 +6,7 @@ type Dependencies = ConstructorParameters<typeof ActivityRecoveryJob>;
 
 function saved(uuid = "old")
 {
-    return { uuid, ownerId: "owner", itemId: "item", startTime: 11n, updateTime: 22n };
+    return { uuid, ownerId: "owner", type: 0, itemId: "item", startTime: 11n, updateTime: 22n };
 }
 
 function due(id = "due")

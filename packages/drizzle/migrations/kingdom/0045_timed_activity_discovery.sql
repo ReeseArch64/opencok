@@ -1,0 +1,1 @@
+CREATE INDEX "timed_activity_due_cursor" ON "opencok_kingdom"."timed_activity" USING btree ("status","dueAt","id");
