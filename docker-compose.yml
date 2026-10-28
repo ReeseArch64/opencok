@@ -282,7 +282,6 @@ services:
       REDIS_URL: ${REDIS_URL}
       GAME_ZOOKEEPER: zookeeper:2181
       GAME_SECRET: ${GAME_SECRET}
-      PROVISIONING_SIGNING_SECRET: ${PROVISIONING_SIGNING_SECRET:?Provisioning signing secret required}
       ACTIVITY_SCHEDULER_MODE: external
       ACTIVITY_SCHEDULER_SECRET: ${ACTIVITY_SCHEDULER_SECRET}
       MAIL_INTEGRATION_MODE: external
@@ -320,10 +319,6 @@ services:
     networks: [opencok-internal-network, opencok-external-network]
     environment:
       NODE_ENV: ${NODE_ENV}
-      FIREBASE_PROJECT_ID: ${FIREBASE_PROJECT_ID:?Firebase project required}
-      PROVISIONING_SIGNING_SECRET: ${PROVISIONING_SIGNING_SECRET:?Provisioning signing secret required}
-      API_PROVISIONING_REALMS: ${API_PROVISIONING_REALMS:?Trusted realm endpoints required}
-      GOOGLE_APPLICATION_CREDENTIALS: /run/opencok/firebase.json
       OTEL_EXPORTER_OTLP_ENDPOINT: http://maple:4318
       MAPLE_LOCAL_INGEST_KEY: ${MAPLE_LOCAL_INGEST_KEY}
       DATABASE_URL: ${DATABASE_URL}
@@ -338,13 +333,6 @@ services:
       S3_SECRET_ACCESS_KEY: ${S3_SECRET_ACCESS_KEY}
       REDIS_URL: ${REDIS_URL}
       GAME_PUBLIC_HOST: ${GAME_PUBLIC_HOST}
-    volumes:
-      - type: bind
-        source: ${FIREBASE_CREDENTIALS_FILE:?Local Firebase credentials file required}
-        target: /run/opencok/firebase.json
-        read_only: true
-        bind:
-          create_host_path: false
     logging:
       driver: json-file
       options:
@@ -386,7 +374,7 @@ services:
     profiles: [all, dev, database]
     networks: [opencok-internal-network, opencok-external-network]
     environment:
-      ME_CONFIG_MONGODB_URL: ${MONGO_URI:?Set MONGO_URI for Mongo Express}
+      ME_CONFIG_MONGODB_URL: ${MONGO_URI}
       ME_CONFIG_MONGODB_ENABLE_ADMIN: "false"
       ME_CONFIG_BASICAUTH: "true"
       ME_CONFIG_BASICAUTH_USERNAME: admin
@@ -514,7 +502,7 @@ services:
     profiles: [all, dev, prod]
     networks: [opencok-internal-network, opencok-external-network]
     environment:
-      NODE_ENV: ${NODE_ENV:-production}
+      NODE_ENV: ${NODE_ENV}
     ports:
       - 5173:5173
     volumes:

@@ -214,24 +214,16 @@ the external network without depending on local PostgreSQL/setup.
 
 ## API character provisioning
 
-Base Compose configures Firebase-backed character provisioning directly on API and
-Server. Supply these values in the private Compose environment before starting
-the stack; `.env.example` contains placeholders and the default realm endpoint:
+Firebase-backed character provisioning is disabled in the default Compose stack.
+The API/Server provisioning bindings and service-account mount are omitted, and
+`.env.example` does not require Firebase values or a credentials file. Existing
+backend schemas, identity verification and account/realm provisioning code remain
+available for a future explicitly configured deployment. The unconfigured public
+character-creation route returns unavailable; existing-account discovery remains enabled.
 
-| Variable                      | Scope                                                        |
-| ----------------------------- | ------------------------------------------------------------ |
-| `FIREBASE_PROJECT_ID`         | Firebase project used to verify identities                   |
-| `FIREBASE_CREDENTIALS_FILE`   | Existing local service-account JSON file                     |
-| `PROVISIONING_SIGNING_SECRET` | Signing key shared by API and Server, at least 32 characters |
-| `API_PROVISIONING_REALMS`     | JSON realm IDs and trusted `/_internal/characters` endpoints |
-
-The default endpoint is `http://server:18090/_internal/characters` for realm `1`.
-API receives the credentials file at `/run/opencok/firebase.json` through a
-read-only bind mount with automatic host-path creation disabled. The file remains
-local and must exist before API starts; do not commit it. Server receives only the
-provisioning signing key. API retains external network access for Firebase.
-The credentials and provisioning variables are required during Compose interpolation,
-including commands that select another profile. No separate provisioning overlay is needed.
+Follow [#703](https://github.com/ReeseArch64/opencok/issues/703) for the client
+identity bridge, credential setup, signed realm requests, idempotent creation,
+validation and recovery work required before restoring this integration.
 
 ## Mail integration Workers
 
@@ -266,8 +258,8 @@ Build matching artifacts before cutover:
 docker compose --profile mail-workers build server chat mail-workers
 ```
 
-This command requires the base-stack interpolation values, including API
-provisioning values, as well as the private worker values above. Do not print
+This command requires the base-stack interpolation values and the private worker
+values above. Do not print
 resolved Compose configuration with real credentials. The Workers image uses the
 pinned Bun runtime and a non-root user. Its health listener uses port 18091 inside
 the container, without a published host port. The internal network must reach
@@ -321,7 +313,7 @@ Build matching artifacts before cutover:
 docker compose --profile scheduler build server scheduler
 ```
 
-Base-stack interpolation values, including API provisioning values, are required.
+Base-stack interpolation values are required.
 Do not print resolved Compose configuration with real credentials. The image uses
 the pinned Bun runtime and a non-root user. Its health port 18092 remains inside
 the network, without a published host port. The owner endpoint is reached through
