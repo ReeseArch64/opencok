@@ -6,7 +6,7 @@ import type { RealmSocialExecutor } from "@opencok/contracts/realm-social";
 import { sfs, str, encode, fields, type Fields } from "@opencok/messages/sfs";
 import { inventoryReplay } from "@opencok/mappings/inventory";
 import { InventoryPlanner, type InventoryEffects } from "./inventory.ts";
-import { activityEconomy } from "./timed-activity.ts";
+import { activityEconomy } from "@opencok/economy/services/activity-economy";
 import { friendshipMineView } from "@opencok/rules/reconnect-mine";
 import { inventoryWeighted } from "@opencok/rules/inventory";
 import { cityInteger } from "@opencok/rules/city-progression";

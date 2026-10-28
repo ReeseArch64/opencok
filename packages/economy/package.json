@@ -10,10 +10,12 @@
     "test": "bun --no-env-file test tests"
   },
   "dependencies": {
-    "@opencok/contracts": "workspace:*",
     "@opencok/drizzle": "workspace:*",
     "@opencok/ledger": "workspace:*",
-    "drizzle-orm": "0.45.4"
+    "drizzle-orm": "0.45.4",
+    "@opencok/constants": "workspace:*",
+    "@opencok/errors": "workspace:*",
+    "@opencok/messages": "workspace:*"
   },
   "devDependencies": {
     "@opencok/config": "workspace:*",

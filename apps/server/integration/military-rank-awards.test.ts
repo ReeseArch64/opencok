@@ -16,7 +16,7 @@ import {
 import { CityProgressionContext } from "@opencok/services/city-progression";
 import { applyMilitaryRankAward } from "@opencok/services/military-rank-awards";
 import type { MilitaryRankAward } from "@opencok/contracts/military-rank-awards";
-import type { ActivityEconomy } from "@opencok/contracts/timed-activity";
+import type { ActivityEconomy } from "@opencok/economy/contracts/activity-economy";
 import { encode, decode, sfs, fields } from "@opencok/messages/sfs";
 import { cityHarness } from "./support/city";
 async function fixture()

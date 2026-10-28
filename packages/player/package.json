@@ -25,6 +25,7 @@
     "drizzle-orm": "0.45.4",
     "@opencok/mappings": "workspace:*",
     "@opencok/rules": "workspace:*",
-    "@opencok/validations": "workspace:*"
+    "@opencok/validations": "workspace:*",
+    "@opencok/ledger": "workspace:*"
   }
 }

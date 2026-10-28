@@ -1,7 +1,7 @@
 import { inventoryEvent, mergeInventoryResponses } from "@opencok/mappings/inventory";
 import { readContinuedCostSpending, continuedCostSpending } from "@opencok/mappings/continued-cost";
 import { cityAmount } from "@opencok/rules/city-progression";
-import type { MutationResult, MutationEvent } from "@opencok/contracts/mutation";
+import type { MutationResult, MutationEvent } from "@opencok/ledger/contracts/mutation";
 
 export function mergeInventoryConfirmation(
     base: MutationResult,

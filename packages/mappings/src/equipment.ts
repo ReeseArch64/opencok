@@ -1,5 +1,5 @@
 import { inventoryItem } from "./bootstrap";
-import type { InventoryItem } from "@opencok/contracts/inventory";
+import type { InventoryItem } from "@opencok/economy/contracts/inventory";
 import type { Rules } from "@opencok/rules/game";
 import { publicEquipment } from "./profile";
 import { sfs, type Fields } from "@opencok/messages/sfs";

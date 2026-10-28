@@ -19,6 +19,8 @@
     "@opencok/errors": "workspace:*",
     "@opencok/enums": "workspace:*",
     "@opencok/hero": "workspace:*",
-    "@opencok/policy": "workspace:*"
+    "@opencok/policy": "workspace:*",
+    "@opencok/economy": "workspace:*",
+    "@opencok/ledger": "workspace:*"
   }
 }

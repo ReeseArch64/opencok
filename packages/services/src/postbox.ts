@@ -13,7 +13,7 @@ import { cityInteger } from "@opencok/rules/city-progression";
 import { previewRewards } from "@opencok/rules/rewards";
 import { inventoryReplay } from "@opencok/mappings/inventory";
 import { InventoryPlanner, type InventoryEffects } from "./inventory.ts";
-import { activityEconomy } from "./timed-activity.ts";
+import { activityEconomy } from "@opencok/economy/services/activity-economy";
 
 export const postboxCommands = [
     "post.box.put",

@@ -1,5 +1,5 @@
 import type { DatabaseClient } from "@opencok/drizzle/contracts/database";
-import type { MutationCommand, MutationResult } from "@opencok/contracts/mutation";
+import type { MutationCommand, MutationResult } from "@opencok/ledger/contracts/mutation";
 
 type RealmDatabase = DatabaseClient<"kingdom">;
 

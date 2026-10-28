@@ -44,7 +44,7 @@ export interface RedPacketExpiryStore
         now: bigint,
         refund: (packet: Row) => {
             mail: import("./files").AvatarSystemMail;
-            event: import("./mutation").MutationEvent;
+            event: import("@opencok/ledger/contracts/mutation").MutationEvent;
         } | null,
     ): Promise<number>;
 }

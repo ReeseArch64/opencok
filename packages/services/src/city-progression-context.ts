@@ -4,7 +4,8 @@ import type { HeroScoreAction } from "@opencok/hero/contracts/hero-score";
 import { GameError } from "@opencok/errors/game";
 import { errors } from "@opencok/constants/game";
 import { unitPower } from "@opencok/rules/military";
-import type { ActivityEconomy, TimedActivity } from "@opencok/contracts/timed-activity";
+import type { ActivityEconomy } from "@opencok/economy/contracts/activity-economy";
+import type { TimedActivity } from "@opencok/contracts/timed-activity";
 import type {
     CityProgressionState,
     CityProgressionWrite,

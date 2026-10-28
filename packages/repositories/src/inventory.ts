@@ -7,7 +7,7 @@ import { user_building } from "@opencok/drizzle/schema/opencok_kingdom/user_buil
 import { userprofile } from "@opencok/drizzle/schema/opencok_kingdom/userprofile";
 import { user_resource } from "@opencok/drizzle/schema/opencok_kingdom/user_resource";
 import type { InventoryExecutor } from "@opencok/contracts/inventory";
-import type { EconomyPosting } from "@opencok/contracts/mutation";
+import type { EconomyPosting } from "@opencok/ledger/contracts/mutation";
 import { validatePosting } from "@opencok/ledger/posting";
 import { createMutationExecutor, type MutationTransaction } from "./mutation.ts";
 import { readPlayerEffects } from "./power.ts";
@@ -23,7 +23,7 @@ export interface InventoryPreparation
         itemId: string,
         count: number,
         now: bigint,
-        economy: import("@opencok/contracts/timed-activity").ActivityEconomy,
+        economy: import("@opencok/economy/contracts/activity-economy").ActivityEconomy,
     ): Promise<void>;
     before?(tx: MutationTransaction, owner: string, now: bigint): Promise<void>;
     useEffect?(
@@ -32,8 +32,8 @@ export interface InventoryPreparation
         itemId: string,
         count: number,
         now: bigint,
-        economy: import("@opencok/contracts/timed-activity").ActivityEconomy,
-    ): Promise<import("@opencok/contracts/inventory").InventoryFields>;
+        economy: import("@opencok/economy/contracts/activity-economy").ActivityEconomy,
+    ): Promise<import("@opencok/economy/contracts/inventory").InventoryFields>;
 }
 
 export function createInventoryExecutor(
@@ -87,7 +87,7 @@ export async function executeInventoryTransaction(
     recordAction?: import("@opencok/contracts/inventory").InventoryState["recordAction"],
     confirmed?: (
         plan: import("@opencok/contracts/inventory").InventoryPlan,
-    ) => Promise<import("@opencok/contracts/mutation").MutationResult | undefined>,
+    ) => Promise<import("@opencok/ledger/contracts/mutation").MutationResult | undefined>,
 )
 {
     const [assets] = await tx.select().from(user_assets).where(eq(user_assets.uid, owner));

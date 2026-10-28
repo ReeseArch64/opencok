@@ -1,5 +1,5 @@
 import type { profileAssets, resourceAssets } from "../constants/assets";
-import type { MutationEvent } from "@opencok/contracts/mutation";
+import type { MutationEvent } from "@opencok/ledger/contracts/mutation";
 
 export type EconomyAsset =
     | `profile.${(typeof profileAssets)[number]}`

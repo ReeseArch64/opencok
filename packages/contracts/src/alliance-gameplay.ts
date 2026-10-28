@@ -1,6 +1,6 @@
 import type { Row } from "./rows";
 import type { InventoryPlan, InventoryState } from "./inventory";
-import type { MutationCommand } from "./mutation";
+import type { MutationCommand } from "@opencok/ledger/contracts/mutation";
 
 export interface AllianceSelection
 {

@@ -4,7 +4,7 @@ import { sfs, str, type Fields } from "@opencok/messages/sfs";
 import { text, num, long } from "@opencok/contracts/rows";
 import { allianceFailure } from "@opencok/rules/alliance";
 import { cityInteger } from "@opencok/rules/city-progression";
-import { activityEconomy } from "./timed-activity";
+import { activityEconomy } from "@opencok/economy/services/activity-economy";
 import type { AllianceContext } from "./alliances";
 
 export function allianceGift(c: AllianceContext, command: string, params: Fields): Fields

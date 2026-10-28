@@ -5,7 +5,7 @@ import { continuedCostSpending, readContinuedCostSpending } from "@opencok/mappi
 import { continuedCostOperation } from "@opencok/services/continued-cost";
 import { GameService } from "@opencok/services/game";
 import type { GameStore } from "@opencok/contracts/game";
-import type { EconomyPosting } from "@opencok/contracts/mutation";
+import type { EconomyPosting } from "@opencok/ledger/contracts/mutation";
 import { sfs, encode, decode } from "@opencok/messages/sfs";
 test("confirmed cost classification counts actual negative gold pools, speed quantities and both resource pools", async () => {
     const rules = await loadRules(),

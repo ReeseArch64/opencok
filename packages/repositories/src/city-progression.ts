@@ -85,7 +85,7 @@ import type {
     CityProgressionState,
     CityProgressionWrite,
 } from "@opencok/contracts/city-progression";
-import type { ActivityEconomy } from "@opencok/contracts/timed-activity";
+import type { ActivityEconomy } from "@opencok/economy/contracts/activity-economy";
 import { text, num, long, type Row } from "@opencok/contracts/rows";
 import type { MutationTransaction } from "./mutation";
 import { readPlayerEffects } from "./power";

@@ -12,7 +12,7 @@ import { encode, sfs } from "@opencok/messages/sfs";
 import { text, num, long } from "@opencok/contracts/rows";
 import type { TotemEffectStore, TotemProgressionWrite } from "@opencok/contracts/totem";
 import { restoreTotemConfiguration } from "@opencok/rules/totem";
-import type { ActivityEconomy } from "@opencok/contracts/timed-activity";
+import type { ActivityEconomy } from "@opencok/economy/contracts/activity-economy";
 import { insertSystemMail } from "./system-mail";
 import { writePlayerEffects } from "./player-effects";
 import type { ProgressionBoundary } from "./city-progression";

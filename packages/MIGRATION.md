@@ -46,7 +46,7 @@ Counts describe maintained TypeScript/JavaScript source under `src` and named te
 | `i18n`           |                  0 / 0 | Localization-key resolution and typed references for actual consumers.                                                                                                                                         | Defer any unimplemented capability until a concrete consumer/use case is approved. Distinguish runtime localization from offline client-name discovery. Do not ship private client localization bundles or use locale text as persistent identity. | Proposed; pending review |
 | `identity`       |                 14 / 0 | Authentication, tickets, signing and trusted identity boundaries.                                                                                                                                              | Retain and bound; move account lifecycle out. Preserve purpose separation, expiry, authorization and optional integration behavior.                                                                                                                | Proposed; pending review |
 | `kvk`            |                  0 / 0 | Cross-realm gameplay protocols and approved KvK mechanics.                                                                                                                                                     | Defer any unimplemented capability until a concrete consumer/use case is approved. Define with maintainer; populate only supported code. Existing unsupported cross-realm behavior must remain unsupported until its owner/protocol exists.        | Proposed; pending review |
-| `ledger`         |                  1 / 0 | Transaction posting contracts and economic audit primitives.                                                                                                                                                   | Extend current posting code for genuine shared invariants; do not turn it into a separate network balance service by default.                                                                                                                      | Proposed; pending review |
+| `ledger`         |                  2 / 1 | Mutation/receipt/outbox contracts, posting validation and owned tests after #613.                                                                                                                              | Extend current posting code for genuine shared invariants; do not turn it into a separate network balance service by default.                                                                                                                      | Proposed; pending review |
 | `mappings`       |                108 / 1 | Current global serializers/projections.                                                                                                                                                                        | Redistribute by domain and protocol; no global mapper index importing every mechanic. Preserve field types/order and conditional omission.                                                                                                         | Proposed; pending review |
 | `messages`       |                  9 / 0 | Existing SFS framing, Java/legacy encoding and binary semantics.                                                                                                                                               | Retain or deliberately rename `protocol-sfs`; not a broker package. Keep numerical and field-order compatibility.                                                                                                                                  | Proposed; pending review |
 | `middlewares`    |                  0 / 0 | HTTP/transport interception, including request context.                                                                                                                                                        | Retain for confirmed scope; move real implementations in tested slices                                                                                                                                                                             | Confirmed in #567/#568   |
@@ -342,3 +342,21 @@ Domain tests cover valid and invalid plans; the existing cross-component Postgre
 mutation foundation integration remains in server tests. See [economy](economy/README.md)
 for boundaries, verification and rollback. Inventory, reservations and the remaining
 economic consumers still require extraction; this is not completion of W06.
+
+## Activity economic coordination and contracts (#613)
+
+Economy now has eight source modules and two test files: the balance foundation
+plus InventoryItem/InventoryFields, ActivityEconomy, the ActivityLedger port and
+the extracted debit/activity adapter. Eleven existing Services use the domain
+adapter. The original functions retain their behavior; InventoryPlanner adds two
+saved-balance readers using the original row conversion. No economy source/test
+imports horizontal contracts or Services.
+
+Ledger owns the original shared mutation command/result/posting/event interfaces
+and its unchanged posting-boundary test. All maintained type consumers migrate;
+`contracts/mutation` and the former inventory/activity type exports are retired.
+This removes the reverse ledger-to-contracts dependency while keeping ledger a
+small primitive package. Shared inventory/activity state and remaining planners
+stay tracked under #558. The six reviewed stale cycle edges are removed from the
+architecture baseline, 100 to 94; no new exception is added. See
+[economy](economy/README.md) and [ledger](ledger/README.md) for verification and rollback.

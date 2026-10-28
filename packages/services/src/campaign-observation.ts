@@ -1,12 +1,12 @@
 import { InventoryPlanner, type InventoryEffects } from "./inventory";
-import { activityEconomy } from "./timed-activity";
+import { activityEconomy } from "@opencok/economy/services/activity-economy";
 import { encode } from "@opencok/messages/sfs";
 import { campaignObservationFields } from "@opencok/mappings/campaign-observation";
 import { campaignTimestamp } from "@opencok/rules/local-campaign";
 import { cityInteger } from "@opencok/rules/city-progression";
 import type { CampaignObservation } from "@opencok/contracts/campaign-observation";
 import type { InventoryPlan, InventoryState } from "@opencok/contracts/inventory";
-import type { ActivityEconomy } from "@opencok/contracts/timed-activity";
+import type { ActivityEconomy } from "@opencok/economy/contracts/activity-economy";
 import type { Rules } from "@opencok/rules/game";
 
 export function campaignInventoryObservations(

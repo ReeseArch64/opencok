@@ -8,7 +8,7 @@ import { command_receipt } from "@opencok/drizzle/schema/opencok_kingdom/command
 import { economy_posting } from "@opencok/drizzle/schema/opencok_kingdom/economy_posting";
 import { mutation_outbox } from "@opencok/drizzle/schema/opencok_kingdom/mutation_outbox";
 import { userprofile } from "@opencok/drizzle/schema/opencok_kingdom/userprofile";
-import type { MutationCommand, MutationResult } from "@opencok/contracts/mutation";
+import type { MutationCommand, MutationResult } from "@opencok/ledger/contracts/mutation";
 import { validatePosting } from "@opencok/ledger/posting";
 import { fenceRealmTransaction, type RealmAuthority } from "./realm-authority.ts";
 import type { DatabaseClient } from "@opencok/drizzle/contracts/database";

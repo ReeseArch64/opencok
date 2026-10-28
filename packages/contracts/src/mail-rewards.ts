@@ -1,5 +1,5 @@
 import type { InventoryPlan, InventoryState } from "./inventory.ts";
-import type { MutationCommand } from "./mutation.ts";
+import type { MutationCommand } from "@opencok/ledger/contracts/mutation";
 import type { Row } from "./rows.ts";
 
 export interface MailRewardSelection
