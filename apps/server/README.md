@@ -4181,3 +4181,62 @@ Import operation keys remain `world-import:<id>` and due keys remain
 funding and committed notifications remain owned by the existing repositories and
 domain services. This is a composition refactor under #558; it does not introduce
 new world/player ownership or change recovery policy.
+
+## Synthetic production performance baseline
+
+`scripts/benchmark-realm-production.ts` records the first production-domain W02
+baseline for #558. It uses the existing two-player city fixture, authoritative
+Services/repositories and a disposable PostgreSQL 17.11 container. Run from the
+repository root with Docker available, using an output directory outside the
+checkout:
+
+```sh
+benchmark_dir=$(mktemp -d /tmp/opencok-production-baseline-XXXXXX)
+bun --no-env-file apps/server/scripts/benchmark-realm-production.ts "$benchmark_dir/report.json" 100 > "$benchmark_dir/run.log" 2>&1
+```
+
+The command requires an explicit output filename; the optional operation count
+defaults to 100 and accepts 10–1000. It never reads a configured database URL:
+the city fixture generates container credentials and binds a random localhost
+port. It removes its own container in cleanup. Reports contain aggregate metrics
+and fixture metadata, without credentials, SQL text or player payloads. Keep raw
+reports/logs outside Git; publish selected measurements with the revision and
+limitations in the corresponding PR. Repeat in separate fresh processes on an
+otherwise idle host before comparing revisions.
+
+After two unmeasured settlement warmups, the fixed-order scenarios measure
+sequential `build.collect`, 16 concurrent fresh collections on one owner,
+16 concurrent fresh collections split across two owners, 16 concurrent retries
+of one persisted receipt, and a seven-day production settlement for both owners.
+The eight-connection workload pool and separate one-connection observer make
+contention visible. The script verifies fresh collection receipt counts,
+increased collected wood, byte-identical encoded replay bodies, unchanged
+resources/accounts/receipts after retries, and settlement to the synthetic clock
+without automatic resource collection. Preparatory `resource.settle` receipts
+are distinct from the measured command receipts.
+
+Each phase reports nearest-rank operation p50/p95/p99/max, throughput, Bun
+CPU/RSS/heap, event-loop delay, SQL call counts/round-trip time, pool acquisition
+time and sampled PostgreSQL lock waiters/pool queue depth. SQL timing includes
+network and client overhead; summed overlapping durations are not wall time or
+database CPU. Acquisition includes connection creation as well as queueing.
+Sampling waits at least 10 ms between database observations, can miss short
+waits, and does not measure exact lock duration. Event-loop histograms also use
+10 ms resolution; empty histograms report null percentiles. Operation latency
+begins at invocation under closed-loop concurrency, excluding external queueing.
+
+Import time/memory covers the city harness module graph in a fresh Bun process;
+setup separately includes container startup, migrations, rules and fixture data.
+This is not isolated catalog memory or full realm startup. Structured logging
+uses 100% sampling to redirected stdout with no telemetry exporter. Measurement,
+sampling and logging overhead remain part of the result. Process CPU/RSS excludes
+PostgreSQL and other applications; RSS peaks are sampled. Two catch-up operations
+do not establish tail-latency SLOs. Independent trials, open-loop transport load,
+world jobs, combat, restart/two-realm recovery, native clients and deployment
+comparisons remain W02/W21 work; this baseline does not close #558 or claim a
+performance improvement.
+
+`integration/benchmark-metrics.test.ts` checks quantiles and instruments a
+disposable database to verify callback/Promise calls, failures, lock sampling,
+pool contention, cleanup and failure propagation. The benchmark changes no
+runtime composition, gameplay rule, persistence schema or deployment setting.
