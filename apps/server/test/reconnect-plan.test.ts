@@ -213,10 +213,10 @@ test("repair notifications and invalid serialization are planned before any writ
 });
 
 test("user.lv ignores target input, preserves correlation, and returns only a committed owner result", async () => {
-    const { GameService: Game } = await import("@opencok/services/game");
+    const { createRealmGameService } = await import("../src/composition/game");
     const { state, rules, context, services } = fixture();
     let committed = false;
-    const game = new Game(
+    const game = createRealmGameService(
         {} as import("@opencok/contracts/game").GameStore,
         rules,
         { kingdomId: 1 },
@@ -248,7 +248,7 @@ test("user.lv ignores target input, preserves correlation, and returns only a co
 });
 
 test("login with an existing march and non-building queue reaches the full reconnect snapshot", async () => {
-    const { GameService: Game } = await import("@opencok/services/game");
+    const { createRealmGameService } = await import("../src/composition/game");
     const { state, rules, context, services } = fixture();
     state.world = { worldId: 0 };
     rules.roles.set("100101", { id: "100101", player_exp: "100" });
@@ -278,7 +278,7 @@ test("login with an existing march and non-building queue reaches the full recon
             world: { worldId: 0 },
         }),
     } as unknown as import("@opencok/contracts/game").GameStore;
-    const game = new Game(store, rules, { kingdomId: 1 }, () => context.now, {
+    const game = createRealmGameService(store, rules, { kingdomId: 1 }, () => context.now, {
         ...services,
         cityProgression: async (_owner, command) => ({
             body: command === "general.init"
@@ -338,10 +338,10 @@ test("login with an existing march and non-building queue reaches the full recon
 });
 
 test("an oversized correlated response fails inside the transaction planner", async () => {
-    const { GameService: Game } = await import("@opencok/services/game");
+    const { createRealmGameService } = await import("../src/composition/game");
     const { state, rules, context, services } = fixture();
     let committed = false;
-    const game = new Game(
+    const game = createRealmGameService(
         {} as import("@opencok/contracts/game").GameStore,
         rules,
         { kingdomId: 1 },

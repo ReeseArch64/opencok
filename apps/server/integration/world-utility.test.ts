@@ -7,7 +7,7 @@ import { world_interest } from "@opencok/drizzle/schema/opencok_kingdom/world_in
 import { alliance_member } from "@opencok/drizzle/schema/opencok_kingdom/alliance_member";
 import { alliance_territory } from "@opencok/drizzle/schema/opencok_kingdom/alliance_territory";
 import { createWorldUtilityStore } from "@opencok/repositories/world-utility";
-import { GameService } from "@opencok/services/game";
+import { createRealmGameService } from "../src/composition/game";
 import type { GameStore } from "@opencok/contracts/game";
 import { sfs, Type, decode, encode, type Fields } from "@opencok/messages/sfs";
 import { cityHarness } from "./support/city";
@@ -19,7 +19,7 @@ async function utilityHarness()
         { uid: "owner", pointId: 211, worldId: 0, lastCityDefTime: 0n },
         { uid: "other", pointId: 99, worldId: 0, lastCityDefTime: 0n },
     ]);
-    const service = new GameService(
+    const service = createRealmGameService(
         {} as GameStore,
         h.rules,
         { kingdomId: 1, mapSize: 20 },

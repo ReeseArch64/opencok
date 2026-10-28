@@ -4,7 +4,7 @@ import * as schema from "@opencok/drizzle/schema/kingdom";
 import * as globalSchema from "@opencok/drizzle/schema/global";
 import { readMailCategory } from "@opencok/repositories/mail-category";
 import { Database } from "@opencok/repositories/game";
-import { GameService as Game } from "@opencok/services/game";
+import { createRealmGameService } from "../src/composition/game";
 import { Rules } from "@opencok/rules/game";
 import { mailCategoryProjection } from "@opencok/services/mail-category";
 import type { MailCategoryQuery, MailListEntry } from "@opencok/contracts/mail";
@@ -366,7 +366,7 @@ test("game command reaches category SQL through the production repository adapte
         databases: f.databases,
         config: { kingdomId: 1 },
     });
-    const game = new Game(
+    const game = createRealmGameService(
         repository,
         new Rules(new Map(), new Map(), new Map()),
         { kingdomId: 1 },
@@ -389,7 +389,7 @@ test("game command reaches category SQL through the production repository adapte
         config: { kingdomId: 1 },
     });
     await expect(
-        new Game(
+        createRealmGameService(
             other,
             new Rules(new Map(), new Map(), new Map()),
             { kingdomId: 1 },
@@ -445,7 +445,7 @@ test("chat command resolves public senders and translations through readers boun
         databases: f.databases,
         config: { kingdomId: 1 },
     });
-    const game = new Game(
+    const game = createRealmGameService(
         repository,
         new Rules(new Map(), new Map(), new Map()),
         { kingdomId: 1 },

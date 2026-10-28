@@ -48,8 +48,8 @@ callers. The aliases are owned by this migration and their retirement is tracked
 remaining source consumers are listed in the migration register.
 
 This shared state/plan contract is transitional infrastructure. It does not assign
-all referenced mechanics to city. The aggregate store is owned after #639; bootstrap
-projection and individual mechanic migrations remain incomplete. No process completion
+all referenced mechanics to city. The aggregate store is owned after #639 and bootstrap coordination after #641;
+individual mechanic and reconnect-planner migrations remain incomplete. No process completion
 is inferred from the existence of this coordinator.
 
 ## Compatibility, tests and rollout
@@ -109,3 +109,45 @@ verifies that a branch-city write has occurred before a foreign aggregate reject
 then observes rollback outside the transaction. Existing mechanics, recovery and SFS
 suites verify broader consumers. The production boundary still wraps effect changes;
 production-account deletion still follows building deletion in the same transaction.
+
+## Bootstrap and initialization (#641)
+
+City owns `CityBootstrapService` for state validation and serial initialization,
+plus `CityBootstrapMapper` for queue variants, initial city/world fields and the
+settled reconnect projection. The Service invokes existing mechanic callbacks in
+the original order; their rule implementations and reconnect persistence remain
+with their current owners. The Mapper preserves merge precedence, wire types,
+long precision, queue sentinels and clock evaluation order.
+
+`apps/server/src/composition/game.ts` composes the owned runtime, existing mapper
+functions and reconnect planner. It supplies the original feature gate and null
+CN1 environment to the planner. Power and feature projection hooks are bound by
+GameService so the existing login behavior and instance configuration remain in
+use. Constructing these objects performs no queries or clock reads.
+
+The broad GameService retains only bootstrap delegation through the structural
+`contracts/city-bootstrap.ts` port. Its optional constructor factory supports
+isolated non-bootstrap command tests; callers that need `initial`, `initialize`,
+`build.info` or city-backed `other.login` must use realm composition or inject a
+bootstrap factory. The app and its tests use `createRealmGameService`. Player
+package tests that exercise unrelated preference/description commands still
+construct the generic Service directly. The remaining Controller/GameService
+entrypoints are tracked by #558 W20; no duplicate bootstrap implementation remains.
+
+The shared city-state port and domain serializers still under `mappings` are
+transitional dependencies, not assignments of building, research, equipment or
+player semantics to city. Their remaining vertical migrations belong to W06–W12.
+The bootstrap Service and Mapper are each below 300 lines. City imports no
+horizontal Services or Repositories and introduces no dependency cycle.
+
+Owned tests cover recovery and notification order, response precedence, exact
+civilization longs, cancellation, missing/banned state, queue variants and settled
+reconnect identity/correlation. The prior missing-state Controller integration
+moves to the app test suite alongside composition; the Controller unit test still
+checks delegation. Structural comparisons cover the four unchanged state/projection methods, the
+reconstructed complete initialize flow, the reconnect adapter and projection/hook
+bindings, plus all 50 unchanged GameService methods after explicit delegate substitutions.
+
+Deploy or roll back the realm artifact against the same schema. No migration,
+new setting, authority change or native-client artifact is required. Native-device
+acceptance and production-load measurement remain separate verification work.

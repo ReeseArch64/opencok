@@ -1,6 +1,6 @@
 import { test, expect } from "bun:test";
 import { shippingInvestmentAward } from "@opencok/rules/shipping-investment";
-import { GameService } from "@opencok/services/game";
+import { createRealmGameService } from "../src/composition/game";
 import type { GameStore } from "@opencok/contracts/game";
 import { Rules } from "@opencok/rules/game";
 import { sfs } from "@opencok/messages/sfs";
@@ -20,7 +20,7 @@ test("shipping prize selection honors all weight bands and the exclusive upper r
     expect(() => shippingInvestmentAward({ ...rule, Range: "10;10|30;40" }, () => 0)).toThrow();
 });
 test("native shipping investment commands retain correlation", async () => {
-    const game = new GameService(
+    const game = createRealmGameService(
         {} as GameStore,
         new Rules(new Map(), new Map(), new Map()),
         { kingdomId: 1 },

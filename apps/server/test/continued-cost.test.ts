@@ -3,7 +3,7 @@ import { loadRules } from "@opencok/resources/rules";
 import { continuedCostAmount, continuedCostClaims } from "@opencok/rules/continued-cost";
 import { continuedCostSpending, readContinuedCostSpending } from "@opencok/mappings/continued-cost";
 import { continuedCostOperation } from "@opencok/services/continued-cost";
-import { GameService } from "@opencok/services/game";
+import { createRealmGameService } from "../src/composition/game";
 import type { GameStore } from "@opencok/contracts/game";
 import type { EconomyPosting } from "@opencok/ledger/contracts/mutation";
 import { sfs, encode, decode } from "@opencok/messages/sfs";
@@ -73,7 +73,7 @@ test("durable cost evidence retains long quantities, exclusive bounds and determ
 });
 test("native continued-cost endpoints retain long correlation and cannot submit synthetic spending", async () => {
     const rules = await loadRules(),
-        game = new GameService({} as GameStore, rules, { kingdomId: 1 }, () => 1000, {
+        game = createRealmGameService({} as GameStore, rules, { kingdomId: 1 }, () => 1000, {
             cityProgression: async () => ({ body: {}, pushes: [] }),
         });
     for (

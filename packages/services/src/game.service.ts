@@ -1,3 +1,5 @@
+import { planReconnectProgress, validateReconnectResult } from "./reconnect-progress.ts";
+import type { CityBootstrapFactory, CityBootstrapRuntime } from "@opencok/contracts/city-bootstrap";
 import { HeroEventService } from "@opencok/hero/services/hero-event";
 import { checkGameProfile } from "./game-profile";
 import { activityDirectory } from "@opencok/mappings/activity-directory";
@@ -27,9 +29,7 @@ import { nativeChatCommands } from "./chat-native";
 import { postboxCommands } from "./postbox";
 import { chatSocialCommands } from "./chat-social";
 import { UPLOAD_PATH } from "@opencok/contracts/files";
-import { equipment as equipmentFields } from "@opencok/mappings/equipment";
 import { militarySnapshot } from "@opencok/mappings/military";
-import { researchData } from "@opencok/mappings/research";
 import type { CreateWorldFavoriteDto } from "@opencok/dtos/world-favorites/create-world-favorite.dto";
 import { decodeFightRanking, decodePlayoffTeams } from "./battle-ranking.ts";
 import { fightRanking, playoffRanking } from "@opencok/mappings/battle-ranking";
@@ -124,11 +124,10 @@ import { allianceRanking } from "@opencok/mappings/alliance-ranking";
 import { allianceRankingQuery, selectAllianceRanking } from "@opencok/rules/alliance-ranking";
 import type { AllianceRankingKind } from "@opencok/contracts/alliance-ranking";
 import type { ServerConfig } from "@opencok/contracts/server";
-import type { CityState, GameServices, GameStore } from "@opencok/contracts/game";
+import type { GameServices, GameStore } from "@opencok/contracts/game";
 import { long, num, text, type Row } from "@opencok/contracts/rows";
 import {
     sfs,
-    fields,
     Type,
     int as wireInt,
     str as wireString,
@@ -136,7 +135,6 @@ import {
     type Value,
 } from "@opencok/messages/sfs";
 import { guidePlayerSummary, playerSummary } from "@opencok/mappings/players";
-import { building, gold, queue, user } from "@opencok/mappings/city";
 import { resource } from "@opencok/economy/mappings/resources";
 import { powerInfo } from "@opencok/mappings/power";
 import { playerRanking } from "@opencok/mappings/ranking";
@@ -145,7 +143,6 @@ import type { PlayerRankingKind } from "@opencok/contracts/ranking";
 import { calculatePlayerPower } from "@opencok/rules/power";
 import { powerContext, decodeWorldPowerEffects } from "./power.ts";
 import { generalSkillPoints } from "@opencok/hero/services/general-power";
-import { planReconnectProgress, validateReconnectResult } from "./reconnect-progress.ts";
 import { serverFeature } from "@opencok/rules/power-context";
 import { dragonAttackEffect } from "@opencok/rules/power-resolver";
 import { worldPowerEffects } from "@opencok/rules/power-world";
@@ -186,8 +183,6 @@ type GameConfig =
     >
     & { mapSize?: number; };
 
-type ReadyCity = CityState & { profile: Row; resource: Row; };
-
 export interface Result
 {
     body: Fields;
@@ -196,6 +191,8 @@ export interface Result
 
 export class GameService
 {
+    private readonly bootstrap?: CityBootstrapRuntime;
+
     constructor(
         readonly db: GameStore,
         readonly rules: Rules,
@@ -203,125 +200,23 @@ export class GameService
         readonly now = Date.now,
         readonly services: GameServices = {},
         readonly heroes = new HeroEventService(db, rules, config, now, services),
+        createBootstrap?: CityBootstrapFactory,
     )
-    {}
-
-    private async state(uid: string): Promise<ReadyCity>
     {
-        const state = await this.db.getCityByPlayerId(uid, this.now());
-
-        if (!state.profile || !state.resource)
-        {
-            throw new GameError(errors.missing);
-        }
-
-        if (
-            long(state.profile, "banTime") > BigInt(this.now())
-            || num(state.profile, "banFlag") !== 0
-        )
-        {
-            throw new GameError(errors.invalid);
-        }
-
-        return { ...state, profile: state.profile, resource: state.resource };
+        this.bootstrap = createBootstrap?.({
+            power: (uid) => this.power(uid, true),
+            features: (profile) => featureConfig(this.rules, this.featureContext(profile)),
+        });
     }
 
-    private queueFields(q: Row, state: ReadyCity, helped = true, now = this.now()): Fields
+    private city(): CityBootstrapRuntime
     {
-        const target = state.buildings.find((b) => text(b, "uuid") === text(q, "itemId"));
-
-        if ([1, 8, 9, 10, 17].includes(num(q, "type")) && text(q, "itemId"))
+        if (!this.bootstrap)
         {
-            return queue(
-                q,
-                { itemId: sfs.string(text(q, "itemId")), allId: sfs.string(text(q, "itemId")) },
-                helped,
-            );
+            throw new GameError(errors.unsupported, "city_progression");
         }
 
-        if ([2, 3].includes(num(q, "type")) && text(q, "itemId"))
-        {
-            return queue(q, { itemId: sfs.string(text(q, "itemId")) }, helped);
-        }
-
-        if (num(q, "type") === 6 && text(q, "itemId"))
-        {
-            return queue(q, { itemId: sfs.string(text(q, "itemId")) }, helped);
-        }
-
-        if (num(q, "type") === 11 && text(q, "itemId"))
-        {
-            const row = state.equipment?.find((row) => row.uuid === q.itemId);
-
-            return queue(
-                q,
-                row
-                    ? {
-                        itemId: sfs.string(text(row, "itemId")),
-                        cost: sfs.string(text(row, "cost")),
-                    }
-                    : {},
-                helped,
-            );
-        }
-
-        if (num(q, "type") === 12 && text(q, "itemId"))
-        {
-            return queue(
-                q,
-                {
-                    itemId: sfs.string(text(q, "itemId").split(";")[0] ?? ""),
-                    allId: sfs.string(text(q, "itemId")),
-                    para: sfs.int(num(q, "para")),
-                },
-                helped,
-            );
-        }
-
-        if (num(q, "type") !== 0 && text(q, "itemId"))
-        {
-            throw new GameError(errors.unsupported, "queue_kind");
-        }
-
-        return queue(q, target ? building(target, this.rules, true, now) : {}, helped);
-    }
-
-    private info(state: ReadyCity): Fields
-    {
-        const now = this.now();
-
-        return {
-            building: sfs.array(
-                state.buildings.map((b) => sfs.object(building(b, this.rules, false, now))),
-            ),
-            buildingQueue: sfs.array(
-                state.queues
-                    .filter((q) => num(q, "type") === 0)
-                    .map((q) => sfs.object(this.queueFields(q, state, true, now))),
-            ),
-            resource: sfs.object(resource(state.resource)),
-            gold: sfs.long(gold(state.profile)),
-            ...(state.sciences && this.rules.power.sciences?.size
-                ? { science: researchData(state.sciences, state.queues, this.rules) }
-                : {}),
-        };
-    }
-
-    private initialWorld(world: Row): Fields
-    {
-        return {
-            m: sfs.array(),
-            enemy: sfs.array(),
-            point: sfs.int(num(world, "pointId")),
-            cityDefValue: sfs.int(num(world, "cityDefValue")),
-            gridType: sfs.int(num(world, "gridType")),
-            ft: sfs.long(long(world, "fireTime")),
-            lastCityDefTime: sfs.long(long(world, "lastCityDefTime")),
-            stamina: sfs.int(num(world, "attMonsterStamina")),
-            lastStaminaTime: sfs.long(long(world, "lastStaminaTime")),
-            resSearchCount: sfs.int(num(world, "resSearchCount")),
-            maxSearchCount: sfs.int(Number(this.rules.items.get("shake")?.k10 ?? 0)),
-        };
+        return this.bootstrap;
     }
 
     async initial(uid: string): Promise<Fields>
@@ -331,220 +226,7 @@ export class GameService
 
     async initialize(uid: string, correlation: Fields = {}, signal?: AbortSignal): Promise<Result>
     {
-        signal?.throwIfAborted();
-
-        const cityProgression = async (owner: string, command: string, params: Fields) => {
-            signal?.throwIfAborted();
-
-            const result = await this.services.cityProgression?.(owner, command, params);
-            signal?.throwIfAborted();
-
-            return result;
-        };
-        const businessMan = await this.services.hotItemBusinessMan?.();
-        const eggActivity = await cityProgression(uid, "egg.activity.init", {});
-        const normalRecharge = await cityProgression(uid, "normal.recharge.init", {});
-        const comeback = await cityProgression(uid, "comeback.init", {});
-        const prayer = await cityProgression(uid, "prayer.init", {});
-        const recallTasks = await cityProgression(uid, "recall.task.init", {});
-        const regionalRecall = await cityProgression(uid, "region.recall.init", {});
-        const hearts = await cityProgression(uid, "heart.init", {});
-        const gifts = await cityProgression(uid, "gift.init", {});
-        const worldRecovery = await cityProgression(uid, "world.tick", {});
-        const treasureMaps = await cityProgression(uid, "treasuremap.init", {});
-        signal?.throwIfAborted();
-        await this.services.reconcileAlliance?.(uid);
-        signal?.throwIfAborted();
-        await this.services.reconcileTimed?.(uid);
-        const effects = await cityProgression(uid, "effects.init", {});
-        const quest = await cityProgression(uid, "quest.init", {});
-        const equipment = await cityProgression(uid, "equipment.init", {});
-        const generals = await cityProgression(uid, "general.init", {});
-        const dragons = await cityProgression(uid, "dragon.init", {});
-        const civilization = await cityProgression(uid, "civilization.science.data.init", {});
-        const dragonTower = await cityProgression(uid, "dragontower.init", {});
-        const vipBox = await cityProgression(uid, "vip.box.init", {});
-        const targets = await cityProgression(uid, "target.init", {});
-        const recharge = await cityProgression(uid, "new.sercum.init", {});
-        const boxes = await cityProgression(uid, "ordinary.box.init", {});
-        const cycle = await cityProgression(uid, "sevenday.init", {});
-        const branchCity = await cityProgression(uid, "branchcity.init", {});
-        const investment = await cityProgression(uid, "invest.init", {});
-        const castleLevel = await cityProgression(uid, "castle.event.init", {});
-        const luckyDay = await cityProgression(uid, "luckyday.init", {});
-        const campaign = await cityProgression(uid, "campaign.init", {});
-        const lottery = await cityProgression(uid, "lottery.init", {});
-        const totems = await cityProgression(uid, "totem.init", {});
-        const alliance = await this.services.alliance?.(uid, "alliance.init", {});
-        signal?.throwIfAborted();
-        const state = await this.state(uid);
-        const world = state.world;
-
-        if (!world || num(world, "worldId") !== 0 || (state.hasMarches && !this.services.reconnect))
-        {
-            throw new GameError(errors.unsupported, "world_state");
-        }
-
-        const expeditionActivity = await this.services.expeditionActivity?.(uid);
-        const playerInfo = await this.power(uid, true);
-        const body: Fields = {
-            playerInfo: sfs.object(playerInfo),
-            equip: sfs.array(
-                (state.equipment ?? [])
-                    .filter((row) => num(row, "on") !== 2)
-                    .map((row) => sfs.object(equipmentFields(row))),
-            ),
-            ...(businessMan ? { businessMan: sfs.object(businessMan) } : {}),
-            ...normalRecharge?.body,
-            ...comeback?.body,
-            ...prayer?.body,
-            ...recallTasks?.body,
-            ...regionalRecall?.body,
-            ...hearts?.body,
-            ...gifts?.body,
-            ...treasureMaps?.body,
-            ...equipment?.body,
-            ...(generals?.body.data ? fields(generals.body.data) : {}),
-            ...dragons?.body,
-            ...dragonTower?.body,
-            ...vipBox?.body,
-            ...luckyDay?.body,
-            ...recharge?.body,
-            ...totems?.body,
-            ...branchCity?.body,
-            ...lottery?.body,
-            ...civilization?.body,
-            ...alliance?.body,
-            ...effects?.body,
-            ...quest?.body,
-            ...serverClock(this.now(), 0),
-            ...featureConfig(this.rules, this.featureContext(state.profile)),
-            ...this.info(state),
-            user: sfs.object(
-                user(state.profile, this.rules, this.config.kingdomId, state.civilizationPrestige),
-            ),
-            newAccount: sfs.bool(false),
-            queue: sfs.array(
-                this.services.reconnect
-                    ? []
-                    : state.queues.map((q) => sfs.object(this.queueFields(q, state))),
-            ),
-            world: sfs.object(this.initialWorld(world)),
-            serverTime: sfs.long(this.now()),
-            ...expeditionActivity,
-        };
-        const initialPushes = [
-            eggActivity,
-            prayer,
-            recallTasks,
-            regionalRecall,
-            hearts,
-            gifts,
-            worldRecovery,
-            effects,
-            quest,
-            equipment,
-            generals,
-            dragons,
-            dragonTower,
-            vipBox,
-            luckyDay,
-            castleLevel,
-            investment,
-            cycle,
-            boxes,
-            recharge,
-            targets,
-            civilization,
-            campaign,
-            lottery,
-            totems,
-            alliance,
-        ].flatMap((result) => result?.pushes ?? []);
-
-        if (this.services.worldEffectBoard)
-        {
-            initialPushes.push({
-                command: "world.effect.push",
-                body: await this.services.worldEffectBoard(),
-            });
-        }
-
-        signal?.throwIfAborted();
-
-        if (!this.services.reconnect)
-        {
-            return { body, pushes: initialPushes };
-        }
-
-        const now = this.now();
-        const context = { kingdomId: this.config.kingdomId, version: MOBILE_CLIENT_VERSION, now };
-
-        return this.services.reconnect(uid, now, async (progress) => {
-            signal?.throwIfAborted();
-            const planned = await planReconnectProgress(
-                progress,
-                this.rules,
-                context,
-                this.services,
-                {
-                    specialServer: serverFeature(this.rules, "araf_mode", context),
-                    cn1: null,
-                },
-            );
-
-            if (!progress.world || num(progress.world, "worldId") !== 0)
-            {
-                throw new GameError(errors.unsupported, "world_state");
-            }
-
-            const buildings = progress.buildings.map((row) => {
-                const refresh = planned.write.buildingRefreshes.find((entry) =>
-                    entry.uuid === row.uuid
-                );
-
-                return refresh ? { ...row, refreshTime: refresh.refreshTime } : { ...row };
-            });
-            const prestige = progress.effects.prestige.find(
-                (row) => num(row, "civilizationType") === num(progress.profile, "civilizationType"),
-            );
-            planned.result.body = {
-                ...body,
-                ...this.info({
-                    ...state,
-                    profile: progress.profile,
-                    resource: { ...progress.resource, ...planned.write.resource },
-                    buildings,
-                    queues: [...progress.queues],
-                    sciences: [...progress.effects.sciences],
-                }),
-                ...planned.result.body,
-                user: sfs.object(
-                    user(
-                        progress.profile,
-                        this.rules,
-                        this.config.kingdomId,
-                        prestige ? long(prestige, "prestigeValue") : 0n,
-                    ),
-                ),
-                world: sfs.object({
-                    ...this.initialWorld(progress.world),
-                    m: planned.result.body.worldMarch!,
-                }),
-            };
-            planned.result.pushes = [...initialPushes, ...planned.result.pushes];
-
-            if (correlation._cok_)
-            {
-                planned.result.body._cok_ = correlation._cok_;
-            }
-
-            validateReconnectResult(planned.result, "init");
-
-            signal?.throwIfAborted();
-
-            return planned;
-        });
+        return this.city().initialize(uid, correlation, signal);
     }
 
     async execute(uid: string, command: string, params: Fields): Promise<Result>
@@ -1223,7 +905,7 @@ export class GameService
                 body = await this.otherLogin(uid, params);
                 break;
             case "build.info":
-                body = this.info(await this.state(uid));
+                body = this.city().info(await this.city().state(uid));
                 break;
             case "get.user.info.multi":
                 await this.profile(uid);
@@ -3802,7 +3484,7 @@ export class GameService
             }
         }
 
-        const state = await this.state(uid);
+        const state = await this.city().state(uid);
 
         if (params.army)
         {

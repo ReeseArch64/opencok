@@ -7,7 +7,7 @@ import {
 import { expeditionScoreText } from "@opencok/mappings/new-expedition";
 import { loadRules } from "@opencok/resources/rules";
 import { Rules } from "@opencok/rules/game";
-import { GameService } from "@opencok/services/game";
+import { createRealmGameService } from "../src/composition/game";
 import type { GameStore } from "@opencok/contracts/game";
 import { sfs } from "@opencok/messages/sfs";
 test("expedition schedules use contiguous saved deadlines and source floating point and display rules", async () => {
@@ -54,7 +54,7 @@ test("expedition schedules use contiguous saved deadlines and source floating po
 });
 test("native expedition query and claim requests retain correlation without exposing score producers", async () => {
     const calls: string[] = [];
-    const game = new GameService(
+    const game = createRealmGameService(
         {} as GameStore,
         new Rules(new Map(), new Map(), new Map()),
         { kingdomId: 1 },

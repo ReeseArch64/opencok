@@ -5,7 +5,7 @@ import {
 } from "@opencok/storage/published-ranking";
 import { attributeRanking, publishedRanking } from "@opencok/mappings/published-ranking";
 import { decode, encode, sfs } from "@opencok/messages/sfs";
-import { GameService as Game } from "@opencok/services/game";
+import { createRealmGameService } from "../src/composition/game";
 import { Rules } from "@opencok/rules/game";
 import type { GameStore } from "@opencok/contracts/game";
 
@@ -96,7 +96,7 @@ function fixture()
             return 1;
         },
     } as unknown as GameStore;
-    const game = new Game(db, rules, { kingdomId: 1 }, () => 1000, {
+    const game = createRealmGameService(db, rules, { kingdomId: 1 }, () => 1000, {
         publishedGlobalRanking: async (kind) => {
             calls.push(kind);
             return entries;

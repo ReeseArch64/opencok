@@ -1,6 +1,6 @@
 import { decodeWorldResourceArmy } from "@opencok/messages/world-resource-army";
 import armyVectors from "./fixtures/world-resource-army-vectors.json";
-import { GameService as Game } from "@opencok/services/game";
+import { createRealmGameService } from "../src/composition/game";
 import type { GameStore } from "@opencok/contracts/game";
 import { Rules } from "@opencok/rules/game";
 import { Type } from "@opencok/messages/sfs";
@@ -722,7 +722,7 @@ function remoteCommandFixture()
     const rules = new Rules(new Map(), new Map(), new Map());
     rules.items.set("lost_battle", { k3: "1", k4: "2" });
     let clocks = 0;
-    const game = new Game(
+    const game = createRealmGameService(
         {} as GameStore,
         rules,
         { kingdomId: 1 },

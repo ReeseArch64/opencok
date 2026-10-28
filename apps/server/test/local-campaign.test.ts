@@ -5,7 +5,7 @@ import {
     campaignRefresh,
     campaignTimestamp,
 } from "@opencok/rules/local-campaign";
-import { GameService } from "@opencok/services/game";
+import { createRealmGameService } from "../src/composition/game";
 import { Rules } from "@opencok/rules/game";
 import type { GameStore } from "@opencok/contracts/game";
 import { sfs } from "@opencok/messages/sfs";
@@ -25,7 +25,7 @@ test("campaign arithmetic preserves signed longs and UTC refresh boundaries", ()
 
 test("anniversary public commands preserve correlation and reject internal event injection", async () => {
     const commands: string[] = [];
-    const game = new GameService(
+    const game = createRealmGameService(
         {} as GameStore,
         new Rules(new Map(), new Map(), new Map()),
         { kingdomId: 1 },

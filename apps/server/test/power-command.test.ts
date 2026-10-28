@@ -2,7 +2,7 @@ import { expect, test } from "bun:test";
 import type { GameStore } from "@opencok/contracts/game";
 import type { PowerState } from "@opencok/contracts/power";
 import type { Row } from "@opencok/contracts/rows";
-import { GameService as Game } from "@opencok/services/game";
+import { createRealmGameService } from "../src/composition/game";
 import { Rules } from "@opencok/rules/game";
 import { decode, encode, fields, sfs } from "@opencok/messages/sfs";
 
@@ -80,7 +80,7 @@ function fixture()
         },
     };
     let clockCalls = 0;
-    const game = new Game(db, rules, { kingdomId: 1 }, () => now + clockCalls++);
+    const game = createRealmGameService(db, rules, { kingdomId: 1 }, () => now + clockCalls++);
     return { game, db, rules, state, calls, clockCalls: () => clockCalls };
 }
 

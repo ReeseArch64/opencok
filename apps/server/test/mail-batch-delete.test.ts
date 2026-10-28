@@ -5,7 +5,7 @@ import { deleteMailCategories, deleteMailType } from "@opencok/repositories/mail
 import { mailCategoryDeleteQuery, mailTypeDeleteQuery } from "@opencok/rules/mail-batch-delete";
 import type { GameStore } from "@opencok/contracts/game";
 import type { MailCategoryDeleteCount } from "@opencok/contracts/mail";
-import { GameService as Game } from "@opencok/services/game";
+import { createRealmGameService } from "../src/composition/game";
 import { Rules } from "@opencok/rules/game";
 import { decode, encode, sfs, type Fields } from "@opencok/messages/sfs";
 
@@ -319,7 +319,9 @@ function command()
     };
     return {
         app,
-        game: new Game(db, new Rules(new Map(), new Map(), new Map()), { kingdomId: 1 }, () => now),
+        game: createRealmGameService(db, new Rules(new Map(), new Map(), new Map()), {
+            kingdomId: 1,
+        }, () => now),
     };
 }
 

@@ -6,7 +6,7 @@ import {
     groupBuyRounds,
     groupBuyTiers,
 } from "@opencok/rules/groupbuy";
-import { GameService } from "@opencok/services/game";
+import { createRealmGameService } from "../src/composition/game";
 import { groupBuyOperation } from "@opencok/services/groupbuy";
 import type { GameStore } from "@opencok/contracts/game";
 import { sfs } from "@opencok/messages/sfs";
@@ -27,7 +27,7 @@ test("group-buy rounds preserve midnight anchoring, configured count, cutoff and
 });
 test("only the native group-buy query is exposed and it retains LONG correlation", async () => {
     const rules = await loadRules(),
-        game = new GameService({} as GameStore, rules, { kingdomId: 1 }, () => 1000, {
+        game = createRealmGameService({} as GameStore, rules, { kingdomId: 1 }, () => 1000, {
             cityProgression: async () => ({ body: {}, pushes: [] }),
         });
     expect(

@@ -11,7 +11,7 @@ import {
     playerSearchRemoteBudget,
     sharedSearchProfile,
 } from "@opencok/rules/player-search";
-import { GameService as Game } from "@opencok/services/game";
+import { createRealmGameService } from "../src/composition/game";
 import type { GameStore } from "@opencok/contracts/game";
 import type { Row } from "@opencok/contracts/rows";
 import { Rules } from "@opencok/rules/game";
@@ -225,7 +225,7 @@ function fixture(cross = true)
     } as unknown as Parameters<typeof createPlayerSearchStore>[0];
     const store = createPlayerSearchStore(topology, 1),
         rules = ruleSet();
-    const game = new Game(
+    const game = createRealmGameService(
         {} as GameStore,
         rules,
         { kingdomId: 1, crossSearchEnabled: cross },

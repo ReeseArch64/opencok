@@ -9,7 +9,7 @@ import {
     recallOutbound,
     completeMarchReturn,
 } from "@opencok/rules/world-march-lifecycle";
-import { GameService } from "@opencok/services/game";
+import { createRealmGameService } from "../src/composition/game";
 import type { GameStore } from "@opencok/contracts/game";
 import { sfs } from "@opencok/messages/sfs";
 test("opposing trouble durations subtract until the existing status is exhausted, then replace it", async () => {
@@ -86,7 +86,7 @@ test("only an explicit trouble march permits no troops and it cannot gather carg
 });
 test("trouble native commands retain long correlation and reject forged arrival producers", async () => {
     const rules = await loadRules(),
-        game = new GameService({} as GameStore, rules, { kingdomId: 1 }, () => 1000, {
+        game = createRealmGameService({} as GameStore, rules, { kingdomId: 1 }, () => 1000, {
             cityProgression: async () => ({ body: {}, pushes: [] }),
         });
     for (const command of ["get.trouble.list", "trouble.speed"])

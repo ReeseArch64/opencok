@@ -4,7 +4,7 @@ import type { GameStore } from "@opencok/contracts/game";
 import { activity } from "@opencok/drizzle/schema/opencok_kingdom/activity";
 import { userprofile } from "@opencok/drizzle/schema/opencok_kingdom/userprofile";
 import { readActivityDirectory } from "@opencok/repositories/activity-directory";
-import { GameService } from "@opencok/services/game";
+import { createRealmGameService } from "../src/composition/game";
 import { sfs, type Fields, type Value } from "@opencok/messages/sfs";
 import { cityHarness } from "./support/city";
 
@@ -30,7 +30,8 @@ test(
                     (await h.db.db.select().from(userprofile).where(eq(userprofile.uid, uid)))[0],
                 activityDirectory: (uid: string) => readActivityDirectory(h.db.db, uid),
             } as Pick<GameStore, "getProfileById" | "activityDirectory"> as GameStore;
-            const game = () => new GameService(store, h.rules, { kingdomId: 1 }, () => h.clock.now);
+            const game = () =>
+                createRealmGameService(store, h.rules, { kingdomId: 1 }, () => h.clock.now);
             const before = await h.db.db.select().from(activity).orderBy(activity.id);
             const result = await game().execute("owner", "act.ls", {
                 _cok_: sfs.long(9007199254740993n),

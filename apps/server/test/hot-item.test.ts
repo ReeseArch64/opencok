@@ -11,7 +11,7 @@ import {
     type HotItemFilter,
 } from "@opencok/rules/hot-item";
 import { hotItemView, hotBestItemView, hotBusinessManView } from "@opencok/mappings/hot-item";
-import { GameService } from "@opencok/services/game";
+import { createRealmGameService } from "../src/composition/game";
 import { fields, sfs, encode, decode, type Fields } from "@opencok/messages/sfs";
 import type { GameStore } from "@opencok/contracts/game";
 import type { Rule } from "@opencok/rules/game";
@@ -205,7 +205,7 @@ test("eligibility checks respect owned inventory, resource totals, active score 
 });
 test("native get/refresh/buy commands reach the owned progression service and retain correlation", async () => {
     const seen: string[] = [];
-    const service = new GameService(
+    const service = createRealmGameService(
         {} as GameStore,
         new Rules(new Map(), new Map(), new Map()),
         { kingdomId: 1 },
@@ -340,7 +340,7 @@ test("businessman login shares the realm calendar, keeps its board until the nex
         new Map([["100100", { id: "100100", player_exp: "100" }]]),
         new Map(),
     );
-    const game = new GameService(store, basic, { kingdomId: 1 }, () => now, {
+    const game = createRealmGameService(store, basic, { kingdomId: 1 }, () => now, {
         hotItemBusinessMan: async () => calendar.current()!.body,
     });
     expect(fields((await game.initialize("synthetic")).body.businessMan)).toEqual(current.body);

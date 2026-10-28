@@ -3,7 +3,7 @@ import { drizzle, type NodePgClient } from "drizzle-orm/node-postgres";
 import { getTableColumns } from "drizzle-orm";
 import { userprofile } from "@opencok/drizzle/schema/opencok_kingdom/userprofile";
 import { Database } from "@opencok/repositories/game";
-import { GameService as Game } from "@opencok/services/game";
+import { createRealmGameService } from "../src/composition/game";
 import type { Row } from "@opencok/contracts/rows";
 import type { CityState, GameStore } from "@opencok/contracts/game";
 import { user } from "@opencok/mappings/city";
@@ -63,7 +63,7 @@ test("login carries the saved civilization and exact score/prestige in init.user
         },
     };
     const initial = decode(
-        encode(await new Game(store, rules(), { kingdomId: 1 }).initial("synthetic")),
+        encode(await createRealmGameService(store, rules(), { kingdomId: 1 }).initial("synthetic")),
     );
     expect(fields(initial.user)).toMatchObject({
         civilization_type: sfs.int(3),
@@ -223,7 +223,7 @@ test("a failed prestige read rolls back instead of reporting a false saved value
 test("abandoned login stops before the next initialization stage", async () => {
     const controller = new AbortController();
     const calls: string[] = [];
-    const game = new Game({} as GameStore, rules(), { kingdomId: 1 }, () => 0, {
+    const game = createRealmGameService({} as GameStore, rules(), { kingdomId: 1 }, () => 0, {
         cityProgression: async (_owner, command) => {
             calls.push(command);
             controller.abort();

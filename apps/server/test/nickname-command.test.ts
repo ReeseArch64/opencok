@@ -6,7 +6,7 @@ import { join } from "node:path";
 import { tmpdir } from "node:os";
 import type { GameServices, GameStore } from "@opencok/contracts/game";
 import type { Row } from "@opencok/contracts/rows";
-import { GameService as Game } from "@opencok/services/game";
+import { createRealmGameService } from "../src/composition/game";
 import { Rules } from "@opencok/rules/game";
 import { decode, encode, sfs, type Fields } from "@opencok/messages/sfs";
 import { loadNicknameServices } from "../src/nickname.ts";
@@ -45,7 +45,7 @@ function fixture(services?: GameServices)
             return blocked;
         },
     };
-    const game = new Game(
+    const game = createRealmGameService(
         store as unknown as GameStore,
         new Rules(new Map(), new Map(), new Map()),
         { kingdomId: 2 },

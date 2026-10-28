@@ -6,7 +6,7 @@ import type {
     MailDeleteSnapshot,
 } from "@opencok/contracts/mail";
 import type { Row } from "@opencok/contracts/rows";
-import { GameService as Game } from "@opencok/services/game";
+import { createRealmGameService } from "../src/composition/game";
 import { Rules } from "@opencok/rules/game";
 import { decode, encode, sfs, type Fields } from "@opencok/messages/sfs";
 
@@ -45,7 +45,9 @@ function fixture()
             return state;
         },
     };
-    const game = new Game(db, new Rules(new Map(), new Map(), new Map()), { kingdomId: 1 }, () => {
+    const game = createRealmGameService(db, new Rules(new Map(), new Map(), new Map()), {
+        kingdomId: 1,
+    }, () => {
         clocks++;
         return now;
     });

@@ -1,7 +1,7 @@
 import { test, expect } from "bun:test";
 import { arenaArmySelection, arenaRankDelta } from "@opencok/rules/arena";
 import { Rules } from "@opencok/rules/game";
-import { GameService } from "@opencok/services/game";
+import { createRealmGameService } from "../src/composition/game";
 import type { GameStore } from "@opencok/contracts/game";
 import { sfs } from "@opencok/messages/sfs";
 
@@ -29,7 +29,7 @@ test("arena selections retain virtual roster deltas and enforce canonical identi
 
 test("native arena requests retain correlation while match and result messages remain internal", async () => {
     const calls: string[] = [];
-    const game = new GameService(
+    const game = createRealmGameService(
         {} as GameStore,
         new Rules(new Map(), new Map(), new Map()),
         { kingdomId: 1 },

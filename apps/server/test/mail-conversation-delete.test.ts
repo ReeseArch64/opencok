@@ -1,5 +1,5 @@
 import { expect, test } from "bun:test";
-import { GameService as Game } from "@opencok/services/game";
+import { createRealmGameService } from "../src/composition/game";
 import { Rules } from "@opencok/rules/game";
 import type { GameStore } from "@opencok/contracts/game";
 import type {
@@ -13,7 +13,7 @@ function app(enabled = true)
     const deleted: MailConversationDeleteQuery[] = [],
         read: MailConversationReadQuery[] = [];
     const profile = { uid: "self", serverId: 1, banFlag: 0 };
-    const game = new Game(
+    const game = createRealmGameService(
         {
             mailConversationDelete: async (uid: string, query: MailConversationDeleteQuery) => {
                 expect(uid).toBe("self");

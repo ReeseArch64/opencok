@@ -1,7 +1,7 @@
 import { expect, test } from "bun:test";
 import type { GameStore, GameServices } from "@opencok/contracts/game";
 import type { Row } from "@opencok/contracts/rows";
-import { GameService as Game } from "@opencok/services/game";
+import { createRealmGameService } from "../src/composition/game";
 import { decode, encode, fields, sfs, type Fields, type Value } from "@opencok/messages/sfs";
 import { Rules } from "@opencok/rules/game";
 import { Cache } from "@opencok/storage/session";
@@ -54,7 +54,7 @@ function fixture()
         globalCelebrityRanking: (rankType) => cache.globalCelebrityRanking(rankType),
     };
     const config = { kingdomId: 2 };
-    const game = new Game(
+    const game = createRealmGameService(
         store as unknown as GameStore,
         new Rules(new Map(), new Map(), new Map()),
         config,

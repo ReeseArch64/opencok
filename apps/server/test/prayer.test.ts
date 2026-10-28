@@ -1,7 +1,7 @@
 import { test, expect } from "bun:test";
 import { prayerHit, prayerSteel } from "@opencok/rules/prayer";
 import { loadRules } from "@opencok/resources/rules";
-import { GameService } from "@opencok/services/game";
+import { createRealmGameService } from "../src/composition/game";
 import type { GameStore } from "@opencok/contracts/game";
 import { sfs } from "@opencok/messages/sfs";
 test("prayer first-hit and weighted intervals preserve reference boundaries and float steel arithmetic", () => {
@@ -17,7 +17,7 @@ test("prayer first-hit and weighted intervals preserve reference boundaries and 
 });
 test("native prayer reads and actions preserve long correlation and keep item-credit and login producers internal", async () => {
     const rules = await loadRules(),
-        game = new GameService({} as GameStore, rules, { kingdomId: 1 }, () => 1000, {
+        game = createRealmGameService({} as GameStore, rules, { kingdomId: 1 }, () => 1000, {
             cityProgression: async () => ({ body: {}, pushes: [] }),
         });
     for (const command of ["user.pray.info", "user.pray"])

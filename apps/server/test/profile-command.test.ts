@@ -10,7 +10,7 @@ import type {
     RoutedPublicProfile,
 } from "@opencok/player/contracts/public-profile";
 import type { Row } from "@opencok/contracts/rows";
-import { GameService as Game } from "@opencok/services/game";
+import { createRealmGameService } from "../src/composition/game";
 import { Rules } from "@opencok/rules/game";
 import { decode, encode, fields, sfs, type Value } from "@opencok/messages/sfs";
 
@@ -132,7 +132,7 @@ function fixture(remote = false)
         playerUpdateTimes: async (id, uids) => services.playerUpdateTimes?.(id, uids),
     }, clock);
     services.publicProfile = (uid, params) => profile.get(uid, params);
-    const game = new Game(db, rules, { kingdomId: 1 }, clock, services);
+    const game = createRealmGameService(db, rules, { kingdomId: 1 }, clock, services);
     return {
         state,
         route,
