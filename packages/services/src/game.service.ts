@@ -165,12 +165,12 @@ import {
 import {
     dataConfig,
     featureConfig,
-    inventoryItem,
     serverClock,
     settingConfig,
     loginConfigurationPreferences,
     loginSwitches,
 } from "@opencok/mappings/bootstrap";
+import { inventoryItem } from "@opencok/economy/mappings/inventory-item";
 
 const playerRankingKinds = {
     "server.rank": "power",

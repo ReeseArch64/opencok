@@ -1,4 +1,4 @@
-import { inventoryEvent, mergeInventoryResponses } from "@opencok/mappings/inventory";
+import { inventoryEvent, mergeInventoryResponses } from "@opencok/economy/mappings/inventory";
 import { readContinuedCostSpending, continuedCostSpending } from "@opencok/mappings/continued-cost";
 import { cityAmount } from "@opencok/rules/city-progression";
 import type { MutationResult, MutationEvent } from "@opencok/ledger/contracts/mutation";

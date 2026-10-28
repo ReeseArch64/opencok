@@ -10,7 +10,7 @@ import { expeditionFailure } from "@opencok/rules/new-expedition";
 import { javaMailBytes } from "@opencok/rules/avatar-mail";
 import { avatarMailPush } from "@opencok/mappings/avatar-mail";
 import { expeditionDistribution } from "@opencok/mappings/new-expedition";
-import { inventoryReplay } from "@opencok/mappings/inventory";
+import { inventoryReplay } from "@opencok/economy/mappings/inventory";
 import type { Rules } from "@opencok/rules/game";
 
 export const expeditionTreasuryCommands = [

@@ -1,4 +1,4 @@
-import { inventoryItem } from "./bootstrap";
+import { inventoryItem } from "@opencok/economy/mappings/inventory-item";
 import type { InventoryItem } from "@opencok/economy/contracts/inventory";
 import type { Rules } from "@opencok/rules/game";
 import { publicEquipment } from "./profile";

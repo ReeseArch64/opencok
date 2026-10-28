@@ -20,6 +20,7 @@
     "sharp": "^0.34.0",
     "@opencok/messages": "workspace:*",
     "zod": "catalog:",
-    "@opencok/hero": "workspace:*"
+    "@opencok/hero": "workspace:*",
+    "@opencok/economy": "workspace:*"
   }
 }

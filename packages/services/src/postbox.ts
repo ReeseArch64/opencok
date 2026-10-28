@@ -1,5 +1,5 @@
 import { postboxRelation as relation, postboxMessage as mail } from "@opencok/mappings/postbox";
-import { inventoryItem } from "@opencok/mappings/bootstrap";
+import { inventoryItem } from "@opencok/economy/mappings/inventory-item";
 import { rewardPreviewArray } from "@opencok/mappings/rewards";
 import type { RewardPreview } from "@opencok/contracts/rewards";
 import { randomUUID, randomInt } from "node:crypto";
@@ -11,7 +11,7 @@ import { sfs, str, encode, type Fields } from "@opencok/messages/sfs";
 import type { Rules } from "@opencok/rules/game";
 import { cityInteger } from "@opencok/rules/city-progression";
 import { previewRewards } from "@opencok/rules/rewards";
-import { inventoryReplay } from "@opencok/mappings/inventory";
+import { inventoryReplay } from "@opencok/economy/mappings/inventory";
 import { InventoryPlanner, type InventoryEffects } from "./inventory.ts";
 import { activityEconomy } from "@opencok/economy/services/activity-economy";
 

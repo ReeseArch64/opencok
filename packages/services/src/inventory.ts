@@ -1,6 +1,6 @@
 import { confirmedContinuedCost } from "./continued-cost-spending";
 import { activityEconomy } from "@opencok/economy/services/activity-economy";
-import type { InventoryCommandResponse } from "@opencok/contracts/responses/inventory";
+import type { InventoryCommandResponse } from "@opencok/economy/contracts/responses/inventory";
 import {
     inventoryPurchase,
     inventoryUse,
@@ -10,7 +10,7 @@ import {
     inventoryEvent,
     inventoryResponse,
     inventoryReplay,
-} from "@opencok/mappings/inventory";
+} from "@opencok/economy/mappings/inventory";
 import type { MutationEvent, EconomyPosting } from "@opencok/ledger/contracts/mutation";
 import { randomUUID } from "node:crypto";
 import type { InventoryItem } from "@opencok/economy/contracts/inventory";
@@ -23,7 +23,7 @@ import { long, num, text } from "@opencok/contracts/rows";
 import { errors, MOBILE_CLIENT_VERSION } from "@opencok/constants/game";
 import { GameError } from "@opencok/errors/game";
 import { Type, sfs, encode, decode, fields, str, int, type Fields } from "@opencok/messages/sfs";
-import { inventoryItem } from "@opencok/mappings/bootstrap";
+import { inventoryItem } from "@opencok/economy/mappings/inventory-item";
 import { resource } from "@opencok/mappings/city";
 import type { Rules } from "@opencok/rules/game";
 import {

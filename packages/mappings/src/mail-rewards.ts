@@ -1,6 +1,6 @@
 import { long, num, text, type Row } from "@opencok/contracts/rows";
 import { decode, encode, fields, sfs, str, type Fields, type Value } from "@opencok/messages/sfs";
-import { inventoryResponse } from "./inventory.ts";
+import { inventoryResponse } from "@opencok/economy/mappings/inventory";
 
 export function combineMailRewards(responses: readonly Buffer[], ids: readonly string[]): Buffer
 {

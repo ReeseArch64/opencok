@@ -1,16 +1,16 @@
 import { randomUUID } from "node:crypto";
 import type { MailRewardExecutor } from "@opencok/contracts/mail-rewards";
 import type { InventoryPlan, InventoryState } from "@opencok/contracts/inventory";
-import type { InventoryCommandResponse } from "@opencok/contracts/responses/inventory";
+import type { InventoryCommandResponse } from "@opencok/economy/contracts/responses/inventory";
 import { long, text, type Row } from "@opencok/contracts/rows";
 import { sfs, str, encode, Type, type Fields } from "@opencok/messages/sfs";
 import { GameError } from "@opencok/errors/game";
 import { errors } from "@opencok/constants/game";
 import type { Rules } from "@opencok/rules/game";
 import { mailRewardEntries, mailRewardSelection } from "@opencok/rules/mail-rewards";
-import { inventoryItem } from "@opencok/mappings/bootstrap";
+import { inventoryItem } from "@opencok/economy/mappings/inventory-item";
 import { resource } from "@opencok/mappings/city";
-import { inventoryResponse, inventoryReplay } from "@opencok/mappings/inventory";
+import { inventoryResponse, inventoryReplay } from "@opencok/economy/mappings/inventory";
 import { combineMailRewards, mailRewardEvent } from "@opencok/mappings/mail-rewards";
 import { planInventoryGrants } from "./inventory.ts";
 

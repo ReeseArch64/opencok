@@ -294,44 +294,44 @@ export interface GameServices
         owner: string,
         command: string,
         params: Fields,
-    ): Promise<import("./responses/inventory.ts").InventoryCommandResponse>;
+    ): Promise<import("@opencok/economy/contracts/responses/inventory").InventoryCommandResponse>;
     shop?(
         owner: string,
         command: string,
         params: Fields,
-    ): Promise<import("./responses/inventory.ts").InventoryCommandResponse>;
+    ): Promise<import("@opencok/economy/contracts/responses/inventory").InventoryCommandResponse>;
     mailReward?(
         owner: string,
         command: string,
         params: Fields,
-    ): Promise<import("./responses/inventory.ts").InventoryCommandResponse>;
+    ): Promise<import("@opencok/economy/contracts/responses/inventory").InventoryCommandResponse>;
     timed?(
         owner: string,
         command: string,
         params: Fields,
-    ): Promise<import("./responses/inventory.ts").InventoryCommandResponse>;
+    ): Promise<import("@opencok/economy/contracts/responses/inventory").InventoryCommandResponse>;
     reconcileAlliance?(owner: string): Promise<void>;
     alliance?(
         owner: string,
         command: string,
         params: Fields,
-    ): Promise<import("./responses/inventory.ts").InventoryCommandResponse>;
+    ): Promise<import("@opencok/economy/contracts/responses/inventory").InventoryCommandResponse>;
     cityProgression?(
         owner: string,
         command: string,
         params: Fields,
-    ): Promise<import("./responses/inventory.ts").InventoryCommandResponse>;
+    ): Promise<import("@opencok/economy/contracts/responses/inventory").InventoryCommandResponse>;
     production?(
         owner: string,
         command: string,
         params: Fields,
-    ): Promise<import("./responses/inventory.ts").InventoryCommandResponse>;
+    ): Promise<import("@opencok/economy/contracts/responses/inventory").InventoryCommandResponse>;
     reconcileTimed?(owner: string): Promise<void>;
     inventory?(
         owner: string,
         command: string,
         params: Fields,
-    ): Promise<import("./responses/inventory.ts").InventoryCommandResponse>;
+    ): Promise<import("@opencok/economy/contracts/responses/inventory").InventoryCommandResponse>;
     nicknameChange?(
         owner: string,
         operationId: string,
@@ -357,17 +357,17 @@ export interface GameServices
         owner: string,
         command: string,
         params: Fields,
-    ): Promise<import("./responses/inventory.ts").InventoryCommandResponse>;
+    ): Promise<import("@opencok/economy/contracts/responses/inventory").InventoryCommandResponse>;
     notice?(
         owner: string,
         command: string,
         params: Fields,
-    ): Promise<import("./responses/inventory.ts").InventoryCommandResponse>;
+    ): Promise<import("@opencok/economy/contracts/responses/inventory").InventoryCommandResponse>;
     postbox?(
         owner: string,
         command: string,
         params: Fields,
-    ): Promise<import("./responses/inventory.ts").InventoryCommandResponse>;
+    ): Promise<import("@opencok/economy/contracts/responses/inventory").InventoryCommandResponse>;
     chatSession?: ChatSessionIssuer;
     social?: import("./realm-social.ts").RealmSocialExecutor;
     expeditionRanking?(limit: number): Promise<readonly ExpeditionRankingEntry[] | undefined>;
