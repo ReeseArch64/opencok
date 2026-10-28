@@ -4182,6 +4182,33 @@ funding and committed notifications remain owned by the existing repositories an
 domain services. This is a composition refactor under #558; it does not introduce
 new world/player ownership or change recovery policy.
 
+## Timed activity recovery composition
+
+`ActivityRecoveryJob` owns the legacy-queue import and due-activity cursors
+previously held inside realm composition. The existing periodic fiber and
+command/reconnect paths share this instance. Background selection remains one
+64-entry page per phase; owner-specific calls select up to 256 entries without
+reading or advancing background cursors. Full background pages advance their
+cursor before processing; short pages reset it. A replacement instance restarts
+discovery from the beginning, relying on persisted activities and receipts.
+
+Each call checks realm readiness, imports supported legacy queues, then captures
+the clock and selects supported due activities. Restore identities retain the
+SHA-256 digest of queue UUID, owner, item, start and update timestamps joined by
+colons. Completion retains `finish:<activityId>:<version>` and the original SFS
+queue/activity/version fields. Per-entry failures keep their original log events;
+selection/readiness failures propagate to the existing caller. A requested
+`stopQueue` breaks completion before that entry and leaves later entries for
+another pass, preserving command-specific transition ordering.
+
+This W04 slice of #558 leaves Effect scope, sleep, readiness, database queries,
+transaction fencing and authority in the realm. It does not create a scheduler,
+change deadlines or alter rewards/costs. Unit tests cover selection, ordering,
+failure isolation, cursors and stable operation identities. Disposable integration
+tests restore a legacy construction queue without charging twice, preserve its
+command target, and race background/owner recovery across job replacement to
+verify one completion receipt and one level increase.
+
 ## Synthetic production performance baseline
 
 `scripts/benchmark-realm-production.ts` records the first production-domain W02
