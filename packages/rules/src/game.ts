@@ -3,8 +3,8 @@ import type {
     BuildingLevelDefinition,
     BuildingResource,
     BuildingState,
-} from "@opencok/contracts/building";
-import { buildingLevel, nextBuildingLevel } from "./building.ts";
+} from "@opencok/building/contracts/building";
+import { buildingLevel, nextBuildingLevel } from "@opencok/building/rules/levels";
 import { GameError } from "@opencok/errors/game";
 import { errors, MOBILE_CLIENT_VERSION } from "@opencok/constants/game";
 import { ruleAvailable } from "./availability.ts";

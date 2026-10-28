@@ -14,7 +14,6 @@
   },
   "type": "module",
   "exports": {
-    "./buildings": "./src/buildings/index.ts",
     "./definitions": "./src/catalog-definitions.ts",
     "./fixtures": "./src/xml-fixtures.ts",
     "./catalogs/*": "./src/catalogs/types/*.ts",
@@ -31,6 +30,7 @@
     "@opencok/hero": "workspace:*",
     "@opencok/constants": "workspace:*",
     "@opencok/dragon": "workspace:*",
-    "@opencok/policy": "workspace:*"
+    "@opencok/policy": "workspace:*",
+    "@opencok/building": "workspace:*"
   }
 }

@@ -131,7 +131,7 @@ bun run --cwd packages/catalog-tools import:buildings /authorized/building.xml
 
 These commands overwrite the existing maintained destinations: `resources/src`
 (catalog data/types, registry, codecs and provenance), `hero/src/resources/catalogs/types`,
-and `resources/src/buildings`. The general importer removes obsolete files in its
+and `building/src/resources/buildings`. The general importer removes obsolete files in its
 three generated catalog/type directories as before. Do not use those directories
 for unrelated files. Originals are read-only; neither command rewrites input XML.
 The general importer requires the complete catalog directory declared by
@@ -153,7 +153,7 @@ bun run --cwd packages/catalog-tools import:buildings /authorized/building.xml /
 Formatting and review remain required before publishing generated output. Existing
 converter mechanics are preserved; this relocation does not make all catalogs
 semantic authoring sources or provide atomic rollback of an interrupted import.
-The resource fixture parser and building compatibility mapper remain in resources
+The fixture parser remains in resources; the building compatibility mapper belongs to building
 for existing consumers; runtime code has no import back into catalog-tools.
 
 Synthetic generation tests compare 22 files against SHA-256 baselines captured

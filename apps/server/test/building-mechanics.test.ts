@@ -1,7 +1,7 @@
 import { expect, test } from "bun:test";
-import { createBuildingCatalog } from "@opencok/resources/buildings";
-import { buildingLevel, nextBuildingLevel } from "@opencok/rules/building";
-import type { BuildingLevelDefinition } from "@opencok/contracts/building";
+import { createBuildingCatalog } from "@opencok/building/resources/buildings/index";
+import { buildingLevel, nextBuildingLevel } from "@opencok/building/rules/levels";
+import type { BuildingLevelDefinition } from "@opencok/building/contracts/building";
 import { Rules } from "@opencok/rules/game";
 import { building } from "@opencok/mappings/city";
 import { reconnectResourceOutput } from "@opencok/rules/reconnect-task-counts";

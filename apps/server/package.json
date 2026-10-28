@@ -43,6 +43,7 @@
     "@opencok/messages": "workspace:*",
     "drizzle-orm": "0.45.4",
     "@opencok/ledger": "workspace:*",
-    "@opencok/account": "workspace:*"
+    "@opencok/account": "workspace:*",
+    "@opencok/building": "workspace:*"
   }
 }

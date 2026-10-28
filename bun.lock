@@ -101,6 +101,7 @@
       "devDependencies": {
         "@opencok/account": "workspace:*",
         "@opencok/api": "workspace:*",
+        "@opencok/building": "workspace:*",
         "@opencok/config": "workspace:*",
         "@opencok/drizzle": "workspace:*",
         "@opencok/identity": "workspace:*",
@@ -201,6 +202,11 @@
     },
     "packages/building": {
       "name": "@opencok/building",
+      "dependencies": {
+        "@opencok/constants": "workspace:*",
+        "@opencok/enums": "workspace:*",
+        "@opencok/errors": "workspace:*",
+      },
       "devDependencies": {
         "@opencok/config": "workspace:*",
         "@types/bun": "catalog:",
@@ -218,6 +224,7 @@
     "packages/catalog-tools": {
       "name": "@opencok/catalog-tools",
       "devDependencies": {
+        "@opencok/building": "workspace:*",
         "@opencok/config": "workspace:*",
         "@opencok/constants": "workspace:*",
         "@opencok/dragon": "workspace:*",
@@ -557,6 +564,7 @@
     "packages/mappings": {
       "name": "@opencok/mappings",
       "dependencies": {
+        "@opencok/building": "workspace:*",
         "@opencok/constants": "workspace:*",
         "@opencok/contracts": "workspace:*",
         "@opencok/economy": "workspace:*",
@@ -727,6 +735,7 @@
     "packages/resources": {
       "name": "@opencok/resources",
       "dependencies": {
+        "@opencok/building": "workspace:*",
         "@opencok/constants": "workspace:*",
         "@opencok/contracts": "workspace:*",
         "@opencok/dragon": "workspace:*",
@@ -746,6 +755,7 @@
     "packages/rules": {
       "name": "@opencok/rules",
       "dependencies": {
+        "@opencok/building": "workspace:*",
         "@opencok/constants": "workspace:*",
         "@opencok/contracts": "workspace:*",
         "@opencok/economy": "workspace:*",
@@ -764,6 +774,7 @@
     "packages/services": {
       "name": "@opencok/services",
       "dependencies": {
+        "@opencok/building": "workspace:*",
         "@opencok/constants": "workspace:*",
         "@opencok/contracts": "workspace:*",
         "@opencok/dtos": "workspace:*",
