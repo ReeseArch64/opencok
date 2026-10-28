@@ -6,10 +6,10 @@ import { SourceFacts } from "./source-facts.ts";
 
 test("file roles distinguish data, schemas, test fixtures and documentation without assigning semantic identities", () => {
     const classifier = new FileClassification();
-    expect(classifier.role("packages/resources/src/buildings/00123.ts")).toBe(
+    expect(classifier.role("packages/building/src/resources/buildings/00123.ts")).toBe(
         InventoryFileRole.Catalog,
     );
-    expect(classifier.role("packages/resources/src/buildings/lookup.ts")).toBe(
+    expect(classifier.role("packages/building/src/resources/buildings/lookup.ts")).toBe(
         InventoryFileRole.Source,
     );
     expect(classifier.role("packages/resources/src/catalogs/types/a.ts")).toBe(

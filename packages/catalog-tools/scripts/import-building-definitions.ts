@@ -12,7 +12,7 @@ if (!path)
 
 const directory = process.argv[3]
     ? pathToFileURL(resolve(process.argv[3]) + "/")
-    : new URL("../../resources/src/buildings/", import.meta.url);
+    : new URL("../../building/src/resources/buildings/", import.meta.url);
 
 await validateImportDestinations(path, [fileURLToPath(directory)]);
 await writeBuildingModules(await Bun.file(path).text(), directory);

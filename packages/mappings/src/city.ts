@@ -3,7 +3,7 @@ import {
     buildingRequirements,
     buildingItemCosts,
     buildingUnlockValues,
-} from "./building.ts";
+} from "@opencok/building/mappings/display";
 import { validateFields } from "@opencok/messages/validations/fields";
 import { buildingSchema, queueSchema, userSchema } from "@opencok/validations/city";
 

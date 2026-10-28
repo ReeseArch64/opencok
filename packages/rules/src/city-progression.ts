@@ -5,7 +5,7 @@ import type {
     CityProgressionState,
     ProgressionActivityData,
 } from "@opencok/contracts/city-progression";
-import type { BuildingState } from "@opencok/contracts/building";
+import type { BuildingState } from "@opencok/building/contracts/building";
 import { num, long, text, type Row } from "@opencok/contracts/rows";
 import type { Rules } from "./game";
 

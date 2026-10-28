@@ -1,7 +1,7 @@
 import {
     importBuildingCatalog,
     importBuildingDefinition,
-} from "@opencok/resources/buildings/import";
+} from "@opencok/building/mappings/legacy-definition";
 import { expect, test } from "bun:test";
 import type { PowerContext, PowerSnapshot } from "@opencok/contracts/power";
 import { calculatePlayerPower } from "@opencok/rules/power";

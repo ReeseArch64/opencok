@@ -28,7 +28,21 @@ async function snapshot(directory: string): Promise<[string, string][]>
     return entries.sort(([left], [right]) => left < right ? -1 : left > right ? 1 : 0);
 }
 
-test("relocated generators preserve pre-move bytes across catalog kinds, aliases and named records", async () => {
+function originalBuildingOutput(entries: [string, string][]): [string, string][]
+{
+    const contract = "@opencok/building/contracts/building";
+    expect(entries.filter(([, source]) => source.includes(contract))).toHaveLength(3);
+    expect(entries.some(([, source]) => source.includes("@opencok/contracts/building"))).toBe(
+        false,
+    );
+
+    return entries.map(([path, source]) => [
+        path,
+        source.replaceAll(contract, "@opencok/contracts/building"),
+    ]);
+}
+
+test("generators preserve catalog bytes and building data after the owned contract import changes", async () => {
     const directory = await mkdtemp(join(tmpdir(), "opencok-import-generation-"));
     const resources = join(directory, "resources");
     const heroTypes = join(directory, "hero-types");
@@ -50,7 +64,7 @@ test("relocated generators preserve pre-move bytes across catalog kinds, aliases
             "70935498eab4d4542728ac009e5f5106da2d40fca9dce34b4e27c4a14ece9903",
         );
         expect(buildingOutput).toHaveLength(5);
-        expect(digest(JSON.stringify(buildingOutput))).toBe(
+        expect(digest(JSON.stringify(originalBuildingOutput(buildingOutput)))).toBe(
             "5f12648b72c91f3d6479ff736f7d1018dcb4780e17464aa22b7c0dec2ffd12d9",
         );
         const records = output.find(([path]) => path === "catalogs/data/item.records0.ts")![1];
@@ -98,7 +112,7 @@ test("CLI supports isolated output from another directory and rejects a partial 
         const imported = await run("import-building-definitions", [input, "buildings"]);
         expect(imported.code).toBe(0);
         expect(imported.stdout).toContain("2 building levels across 2 building types");
-        expect(digest(JSON.stringify(await snapshot(output)))).toBe(
+        expect(digest(JSON.stringify(originalBuildingOutput(await snapshot(output))))).toBe(
             "5f12648b72c91f3d6479ff736f7d1018dcb4780e17464aa22b7c0dec2ffd12d9",
         );
         expect(await readFile(input, "utf8")).toBe(buildingXml);

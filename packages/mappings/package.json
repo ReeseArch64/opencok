@@ -22,6 +22,7 @@
     "@opencok/validations": "workspace:*",
     "@opencok/hero": "workspace:*",
     "@opencok/economy": "workspace:*",
-    "@opencok/ledger": "workspace:*"
+    "@opencok/ledger": "workspace:*",
+    "@opencok/building": "workspace:*"
   }
 }

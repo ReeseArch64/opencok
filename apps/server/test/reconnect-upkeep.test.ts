@@ -1,4 +1,4 @@
-import { importBuildingCatalog } from "@opencok/resources/buildings/import";
+import { importBuildingCatalog } from "@opencok/building/mappings/legacy-definition";
 import { expect, test } from "bun:test";
 import type { Row } from "@opencok/contracts/rows";
 import { Rules, type Rule } from "@opencok/rules/game";

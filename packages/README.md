@@ -52,3 +52,7 @@ reservation workflows remain tracked separately.
 The [production domain](production/README.md) is implemented in #633 for building
 accumulation, collection/boosts, effect schedules and atomic city settlement. It uses
 app-injected economic and world adapters; wider W07 city ownership remains in progress.
+
+The [building package](building/README.md) owns typed catalogs, definition contracts,
+level/star evaluation and mappings after #635. Construction workflows and city
+coordination remain tracked under W07; semantic archetypes remain W14 work.

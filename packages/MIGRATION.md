@@ -17,7 +17,7 @@ Counts describe maintained TypeScript/JavaScript source under `src` and named te
 | `api-contracts`  |                  0 / 0 | Versioned HTTP API requests/responses and boundary validators.                                                                                                                                                 | Populate HTTP-specific contracts; keep domain ports local and integration envelopes separately owned. Avoid duplicating the entire domain model.                                                                                                                                              | Proposed; pending review |
 | `base`           |                  0 / 0 | Domain base classes. Populate only from concrete domain needs.                                                                                                                                                 | Retain for confirmed scope; move real implementations in tested slices                                                                                                                                                                                                                        | Confirmed in #567/#568   |
 | `billing`        |                  0 / 0 | Orders, billing and provider reconciliation.                                                                                                                                                                   | Retain for confirmed scope; move real implementations in tested slices                                                                                                                                                                                                                        | Confirmed in #567/#568   |
-| `building`       |                  0 / 0 | Named building definitions, prerequisites, costs, levels, stars and construction policies/use cases.                                                                                                           | Populate current building/construction code and typed catalogs; city coordinates the aggregate. Do not keep this empty while `services/construction` owns everything.                                                                                                                         | Proposed; pending review |
+| `building`       |                 48 / 2 | Typed building catalogs, definition contracts, level/star evaluation and display/legacy mappings.                                                                                                              | #635 owns the catalog/evaluation boundary. Construction Services and city coordination remain W07; semantic archetypes remain W14.                                                                                                                                                            | Partial; #635            |
 | `campaigns`      |                  0 / 0 | Bounded campaign/event orchestration and publication.                                                                                                                                                          | Populate current campaign-related code; split independent event families instead of absorbing every event in the game.                                                                                                                                                                        | Proposed; pending review |
 | `city`           |                  0 / 0 | City aggregate/context, cross-mechanic atomic coordination and bootstrap projection.                                                                                                                           | Populate existing CityProgressionContext/Factory/coordinator pieces. Delegate buildings, research, military, equipment and production to their packages.                                                                                                                                      | Proposed; pending review |
 | `combat`         |                  0 / 0 | Pure battle models, calculations, deterministic replay and result contracts.                                                                                                                                   | Populate only implemented/extracted mechanics; separate computation from result application. Package required where real code exists, standalone app optional.                                                                                                                                | Proposed; pending review |
@@ -93,7 +93,7 @@ These candidates use existing modules and confirmed meanings. They are review un
 
 ## Catalog and command review
 
-The reproducible inventory records maintained files, current workspace owners and reverse import evidence. Future owners remain explicitly unreviewed until each vertical slice records its decision. Catalog membership is declared in `enums/src/gameplay-catalog.ts`; building definitions additionally live under `resources/src/buildings`. Native catalog identifiers remain distinct from semantic identities. Never invent a class or English identity from an opaque ID.
+The reproducible inventory records maintained files, current workspace owners and reverse import evidence. Future owners remain explicitly unreviewed until each vertical slice records its decision. Catalog membership is declared in `enums/src/gameplay-catalog.ts`; building definitions additionally live under `building/src/resources/buildings`. Native catalog identifiers remain distinct from semantic identities. Never invent a class or English identity from an opaque ID.
 
 Gameplay command ownership is spread across GameService dispatch, domain command lists, Controllers and enums. Record declaration/dispatch evidence and unresolved registrations before claiming complete command coverage; a string found in source does not prove a working handler. Test-to-source import paths identify candidate suites, not complete behavioral coverage.
 
@@ -540,3 +540,22 @@ fourteen runtime comparisons supplement integration coverage of city/effect cons
 No dependency version, database schema, checkpoint format or authority changes. Broader
 W07 ownership and W14 named definitions remain incomplete. See
 [production](production/README.md) for contracts, validation and rollback.
+
+## Building catalog and evaluation ownership (#635)
+
+Building owns the former building contracts, level/star rules, display mapping,
+legacy-record adapter and the complete typed building catalog. The resource loader,
+central Rules, city serialization, construction and test consumers use owned paths;
+the old horizontal modules and resource export are removed. Catalog-tools retains
+authoring orchestration with the new default directory and contract import.
+
+The 48 source modules consist of 41 numeric data modules and seven small contract,
+rule, mapper and indexing modules. The original catalog tests move into building,
+with boundary cases added separately; root package tests include them. All 50 moved
+files (including the original test and provenance) compare identically after import
+normalization. The generator keeps the original byte digest after normalizing only
+its contract import. No dependency cycle exception or runtime policy change is added.
+
+Construction workflows, cross-mechanic city coordination and named archetypes remain
+open under #558. Ownership does not establish completion of W07 or W14. See
+[building](building/README.md) for source mapping, compatibility and rollback.

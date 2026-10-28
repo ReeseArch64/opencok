@@ -23,6 +23,7 @@
     "fast-xml-parser": "^5.0.0",
     "zod": "catalog:",
     "@opencok/enums": "workspace:*",
-    "@opencok/hero": "workspace:*"
+    "@opencok/hero": "workspace:*",
+    "@opencok/building": "workspace:*"
   }
 }
