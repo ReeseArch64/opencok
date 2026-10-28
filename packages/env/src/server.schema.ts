@@ -1,7 +1,13 @@
 import { z } from "zod";
 import { blankToUndefined, validateEnvironment } from "./validation";
 
-import { databaseName, redisUrl, realmSettings, chatUrl } from "./service.schema";
+import {
+    databaseName,
+    redisUrl,
+    realmSettings,
+    chatUrl,
+    chatMailboxSecrets,
+} from "./service.schema";
 
 export const serverSchema = z
     .object({
@@ -58,6 +64,9 @@ export const serverSchema = z
             (value) => (value === "" ? undefined : value),
             z.string().min(1).optional(),
         ),
+        CHAT_MAILBOX_SECRETS: chatMailboxSecrets,
+        CHAT_MAILBOX_SECRET: z.preprocess(blankToUndefined, z.string().min(1).optional()),
+        MAIL_INTEGRATION_MODE: z.enum(["local", "external"]).default("local"),
         GAME_MAIL_TRANSLATION: z
             .enum(["true", "false"])
             .default("true")

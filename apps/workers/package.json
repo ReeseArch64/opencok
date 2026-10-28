@@ -1,0 +1,34 @@
+{
+  "name": "@opencok/workers",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "bun --no-env-file src/index.ts",
+    "dev": "bun --no-env-file --watch src/index.ts",
+    "check-types": "tsc --noEmit",
+    "test": "bun --no-env-file test ./test",
+    "test:integration": "bun --no-env-file test integration",
+    "build": "bun build src/index.ts --target bun --minify --outdir dist/src",
+    "provision:mail": "bun --no-env-file scripts/provision-mail-roles.ts"
+  },
+  "devDependencies": {
+    "@opencok/config": "workspace:*",
+    "@types/bun": "catalog:",
+    "typescript": "catalog:",
+    "@types/pg": "8.23.1",
+    "@opencok/repositories": "workspace:*",
+    "@opencok/server": "workspace:*",
+    "@opencok/controllers": "workspace:*",
+    "@opencok/rules": "workspace:*",
+    "drizzle-orm": "0.45.4"
+  },
+  "dependencies": {
+    "@opencok/mail": "workspace:*",
+    "@opencok/core": "workspace:*",
+    "@opencok/env": "workspace:*",
+    "@opencok/drizzle": "workspace:*",
+    "@opencok/connection": "workspace:*",
+    "effect": "catalog:",
+    "pg": "8.23.1"
+  }
+}

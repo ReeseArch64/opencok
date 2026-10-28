@@ -90,8 +90,12 @@ The [tasks domain](tasks/README.md) owns ordinary/main, story, daily and sign-in
 quests after #653, including rules, reward progression, native mapping and
 transactional persistence. Target missions follow in #655, recall missions in #657 and reconnect planning/counts/projection/persistence in #659; other event workflows
 remain later slices.
-The new [mail workspace](mail/README.md) owns only the unchanged system-mail leaf
-contract needed by rollover rewards; avatar/postbox workflows remain #552/#553.
+The [Mail domain](mail/README.md) owns the unchanged system-mail leaf contract
+needed by rollover rewards, gift-opening projection and committed Chat mailbox
+intent delivery. Its bounded integration Service runs locally in the realm or in
+the restricted Workers application. Global gift projection updates only its two
+owned fields; there is no global gift-log realm column. Gameplay mailbox/reward
+mutations and avatar/postbox workflows remain with their current owners.
 
 The [Skins domain](skins/README.md) owns existing city skin/bubble/overlap ownership,
 activation, projection, notification and transactional persistence after #661.

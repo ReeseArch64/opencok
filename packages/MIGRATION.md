@@ -1037,3 +1037,36 @@ partial W02 evidence; they do not establish production performance or justify a
 worker backend. W10 still includes gathering/cargo, scouting, march lifecycle and
 multi-aggregate recovery. W18 authority protocols and the full #558 inventory
 remain incomplete.
+
+## Mail integration delivery and Workers (W15)
+
+Tracked by [#697](https://github.com/ReeseArch64/opencok/issues/697) under #558.
+
+Mail now owns the existing gift-opening relay, Chat mailbox intent relay and their
+unchanged structural update/publisher contracts. The horizontal gift implementation,
+chat delivery export, old Server MailGiftRelay and two Database facade methods are
+retired. Intent creation remains in the current gameplay transaction. Shared Chat
+encoding/store contracts retain a documented type facade until their consumers
+migrate under W20; system-mail facade retirement remains separately tracked.
+
+The implemented `apps/workers` process composes actual restricted PostgreSQL clients,
+Mail queues and signed Chat publication. Server local mode uses the same owned
+integration Service; external mode suppresses those two local loops. Workers own
+integration acknowledgment and global gift-opening projection only. The global
+log has no kingdom column, so restricted realm queue access is distinct from the
+explicit global ownership of `isOpened` and `receiveTime`. No RealmAuthority, Rules,
+Redis or gameplay write capability is shared with the worker.
+
+Gift global commit precedes realm acknowledgment. Chat applies its own deduplicated
+update before HTTP acknowledgment and realm deletion. Durable queues survive lost
+responses, drain and process death. The [Workers guide](../apps/workers/README.md)
+records grants, startup rejection, resource/health bounds, rollback and verification.
+Topology measurements compare archived parent delivery modules with current local
+and isolated delivery, using the same current producer/receiver fixture. They do
+not represent the complete historical application or establish a speedup.
+
+This is the first concrete W15 integration process boundary under ADR-0017. W11
+mailbox/reward ownership, other workers, scheduler duties, player/world authorities,
+shared runtime/data boundaries and the rest of #558 remain incomplete. Operator-owned access bindings are additive provisioning
+metadata; no gameplay schema, reward grant, saved identity or client payload
+conversion is introduced.

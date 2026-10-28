@@ -24,7 +24,8 @@ export const config = Effect.gen(function*()
         mailChat: settings.CHAT_URL
             ? {
                 url: new URL("/_internal/mailbox", settings.CHAT_URL).href,
-                signingSecret: settings.CHAT_SECRET!,
+                signingSecret: settings.CHAT_MAILBOX_SECRETS?.[settings.KINGDOM_ID]
+                    ?? settings.CHAT_MAILBOX_SECRET ?? settings.CHAT_SECRET!,
             }
             : undefined,
         chatSession: settings.CHAT_URL
@@ -37,6 +38,7 @@ export const config = Effect.gen(function*()
         chatInterval: 1,
         feedMaxCount: 3,
         mailTranslationEnabled: settings.GAME_MAIL_TRANSLATION,
+        mailIntegrationMode: settings.MAIL_INTEGRATION_MODE,
         crossSearchEnabled: true,
         port: 9933,
         healthPort: 18090,

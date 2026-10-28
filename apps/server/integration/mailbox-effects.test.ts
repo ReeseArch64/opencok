@@ -2,18 +2,18 @@ import { afterAll, beforeAll, expect, test } from "bun:test";
 import { readFile } from "node:fs/promises";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { migrate } from "drizzle-orm/node-postgres/migrator";
-import type { Pool } from "pg";
+
 import { DisposablePostgres } from "../../../packages/drizzle/tests/support/postgres.ts";
 import { createChatMailboxStore } from "../../../packages/repositories/src/chat-mailbox.ts";
 import { markMailConversationRead } from "../../../packages/repositories/src/mail-conversation-read.ts";
 import { deleteMailConversations } from "../../../packages/repositories/src/mail-conversation-delete.ts";
-import { relayMailChat } from "../../../packages/repositories/src/mail-chat-intents.ts";
+import { relayMailChat } from "@opencok/mail/repositories/chat-relay";
 import { mailConversationReadQuery } from "../../../packages/rules/src/mail-conversation-read.ts";
 import type { Database } from "../../../packages/repositories/src/game.ts";
 import * as schema from "../../../packages/drizzle/src/schema/kingdom.ts";
 
 const postgres = new DisposablePostgres();
-let pool: Pool;
+let pool: Awaited<ReturnType<DisposablePostgres["start"]>>;
 let realm: Database["kingdom"]["db"];
 let consumer: ReturnType<typeof createChatMailboxStore>;
 const now = 100000;

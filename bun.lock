@@ -93,6 +93,7 @@
         "@opencok/errors": "workspace:*",
         "@opencok/hero": "workspace:*",
         "@opencok/ledger": "workspace:*",
+        "@opencok/mail": "workspace:*",
         "@opencok/mappings": "workspace:*",
         "@opencok/player": "workspace:*",
         "@opencok/policy": "workspace:*",
@@ -135,6 +136,29 @@
       "devDependencies": {
         "@opencok/config": "workspace:*",
         "@types/bun": "catalog:",
+        "typescript": "catalog:",
+      },
+    },
+    "apps/workers": {
+      "name": "@opencok/workers",
+      "dependencies": {
+        "@opencok/connection": "workspace:*",
+        "@opencok/core": "workspace:*",
+        "@opencok/drizzle": "workspace:*",
+        "@opencok/env": "workspace:*",
+        "@opencok/mail": "workspace:*",
+        "effect": "catalog:",
+        "pg": "8.23.1",
+      },
+      "devDependencies": {
+        "@opencok/config": "workspace:*",
+        "@opencok/controllers": "workspace:*",
+        "@opencok/repositories": "workspace:*",
+        "@opencok/rules": "workspace:*",
+        "@opencok/server": "workspace:*",
+        "@types/bun": "catalog:",
+        "@types/pg": "8.23.1",
+        "drizzle-orm": "0.45.4",
         "typescript": "catalog:",
       },
     },
@@ -644,6 +668,10 @@
     },
     "packages/mail": {
       "name": "@opencok/mail",
+      "dependencies": {
+        "@opencok/drizzle": "workspace:*",
+        "drizzle-orm": "0.45.4",
+      },
       "devDependencies": {
         "@opencok/config": "workspace:*",
         "@types/bun": "catalog:",
@@ -1533,6 +1561,8 @@
     "@opencok/web": ["@opencok/web@workspace:apps/web"],
 
     "@opencok/webhooks": ["@opencok/webhooks@workspace:packages/webhooks"],
+
+    "@opencok/workers": ["@opencok/workers@workspace:apps/workers"],
 
     "@opencok/world": ["@opencok/world@workspace:packages/world"],
 

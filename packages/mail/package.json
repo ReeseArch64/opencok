@@ -12,5 +12,9 @@
   "type": "module",
   "exports": {
     "./*": "./src/*.ts"
+  },
+  "dependencies": {
+    "@opencok/drizzle": "workspace:*",
+    "drizzle-orm": "0.45.4"
   }
 }

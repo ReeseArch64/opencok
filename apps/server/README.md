@@ -41,8 +41,9 @@ share `@opencok/core/http` and `@opencok/core/runtime`.
 `src/realm-application.ts` owns the Promise-compatible runtime and its shutdown;
 `src/server.ts` preserves the existing imports and `startServer` entrypoint. Context
 service classes live in separate `realm-dependencies.ts`, `realm-rules.ts` and
-`realm-server.ts` modules. Avatar, avatar-version and mail-gift relay classes use
-the shared abstract polling and cursor workers in `packages/core`.
+`realm-server.ts` modules. Avatar and avatar-version relay classes use the shared
+abstract polling and cursor workers in `packages/core`. Mail integration delivery uses the owned Mail Service,
+composed locally or delegated to the Workers process.
 
 `startServer(config)` remains a Promise boundary for embedded/integration callers,
 backed by a ManagedRuntime whose `close()` disposes the service scopes. It cleans
@@ -138,7 +139,10 @@ requires the remaining service settings through its process environment.
 | `KINGDOM_DATABASE_NAME` | Defaults to `opencok_kingdom_<KINGDOM_ID>`.                                                                                            |
 | `GLOBAL_DATABASE_NAME`  | Defaults to `opencok_global`.                                                                                                          |
 | `CHAT_URL`              | Optional shared Chat HTTP(S) origin; enables session issuance, nickname delivery and mailbox effects.                                  |
+| `MAIL_INTEGRATION_MODE` | `local` by default; `external` disables only the realm gift-opening and Chat mailbox delivery loops.                                   |
 | `CHAT_SECRET`           | Required when the session URL is configured; must match the maintained chat service.                                                   |
+| `CHAT_MAILBOX_SECRET`   | Optional mailbox fallback for unmapped realms; otherwise uses `CHAT_SECRET`.                                                           |
+| `CHAT_MAILBOX_SECRETS`  | Optional JSON realm-to-key map matching Chat; a mapped realm uses only its selected key.                                               |
 | `API_URL`               | Optional internal API HTTP(S) origin; unset disables avatar grants.                                                                    |
 | `GAME_SECRET`           | Required private secret matching the legacy mobile login issuer.                                                                       |
 | `REDIS_URL`             | Shared API/realm URL; defaults to `redis://127.0.0.1:6379/0` outside Compose. Set the local Compose URL or an external production URL. |
@@ -1594,7 +1598,8 @@ version. Startup verifies the outbox and required global `mail_gift_log` columns
 The migration was generated and structurally checked without execution; all existing
 table definitions and rows are preserved. No new dependency is required.
 
-After database readiness, a scoped relay processes up to 100 pending records per pass,
+In default local mode, after database readiness the owned Mail relay processes up
+to 100 pending records per pass,
 using `FOR UPDATE SKIP LOCKED` in a realm transaction. A separate global transaction
 sets `isOpened = 1` and `receiveTime` to the event's opening time, matching mail ID,
 send time and recipient. It never inserts a missing global log or changes reward/thanks
@@ -1604,8 +1609,11 @@ Only after global commit does the relay remove the locked realm records. There i
 no cross-database atomicity: failure or a crash before realm acknowledgment leaves
 records available for replay, which writes the same values again.
 
-Passes run immediately on startup and then five seconds after each completion or
-failure. One process never overlaps passes; other processes skip locked records.
+Local passes run immediately on startup and then five seconds after each completion
+or failure. Each queue has no overlapping pass; other processes skip locked records.
+`MAIL_INTEGRATION_MODE=external` removes both realm delivery loops and requires the
+[Workers application](../workers/README.md) to consume the committed queues. It does
+not change intent production, mailbox acknowledgments or gameplay authority.
 The existing database query timeouts bound individual operations. Failures emit only
 the `mail_gift_relay_failed` event and kingdom number, retaining pending entries for
 retry. Shutdown cancels the next timer and awaits the active pass before the database
@@ -1616,9 +1624,10 @@ retry. Pending records survive mail deletion, which is why no mail foreign key i
 Synthetic units cover individual/batch differences, gift/null/invalid statuses,
 owner/realm checks, atomic rollback, full-width timestamps, global commit ambiguity,
 acknowledgment failures, missing logs, repeat delivery, bounded scheduling and shutdown.
-They use fake SQL clients and an injected scheduler, without sockets, real services,
-applied migrations, integration/E2E or ADB. Real PostgreSQL lock/concurrency behavior
-and client rendering remain unverified. Content/list reads, category/conversation deletion, chat-mail variants
+The original synthetic units use fake SQL clients and an injected scheduler. The
+later Workers integration suite adds disposable PostgreSQL, signed HTTP and real
+child-process lifecycle coverage; see its guide for the exact scenarios and limits.
+Native client rendering remains unverified. Content/list reads, category/conversation deletion, chat-mail variants
 and synchronization readers/marker cleanup still need migration.
 
 ## Mailbox update synchronization
@@ -4137,6 +4146,22 @@ Branch-city NPC rewards remain outside this visibility correction.
 login restoration. `integration/branch-city.test.ts` checks PostgreSQL
 persistence, retries and reward-counter preservation using a disposable realm.
 Native APK rendering and other client tracks require separate device validation.
+
+## Mail integration process boundary
+
+`MAIL_INTEGRATION_MODE=local` composes the two Mail delivery queues in the existing
+realm lifecycle. `external` skips their creation; it does not acquire a different
+realm authority, stop transactional intent creation or automatically start a
+replacement process. The same owned relays preserve global-commit-before-realm-ack
+and signed Chat receipt-before-ack ordering.
+
+The [Workers guide](../workers/README.md) defines restricted credentials, health,
+resource limits and explicit drain/cutover/rollback. Stop and drain the old local
+consumer before activating the external one; reverse the sequence when returning
+to local mode. Retain every pending queue row and Chat replay receipt. A failed
+worker delays integration delivery while the realm continues to own gameplay.
+The global gift projection has no kingdom column, and its two mutable integration
+fields must not be described as globally isolated rows per realm.
 
 ## Operational observability
 
