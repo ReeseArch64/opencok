@@ -1,7 +1,4 @@
-import type {
-    CharacterResponse,
-    ProvisionReceiptResponse as ProvisionReceipt,
-} from "./responses/provisioning";
+import type { ProvisionReceiptResponse as ProvisionReceipt } from "./responses/provisioning";
 
 export type {
     CharacterResponse,
@@ -37,19 +34,6 @@ export interface CharacterReservation extends CharacterInput
     name: string;
     createdAt: number;
     preset: string;
-}
-
-export interface ProvisioningStore
-{
-    reserve(
-        identity: VerifiedIdentity,
-        input: CharacterInput,
-    ): Promise<{ reservation: CharacterReservation; ready: boolean; }>;
-    activate(
-        identity: VerifiedIdentity,
-        reservation: CharacterReservation,
-        receipt: ProvisionReceipt,
-    ): Promise<CharacterResponse>;
 }
 
 export interface CharacterSeed

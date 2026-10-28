@@ -1,3 +1,4 @@
+import type { ProvisioningController } from "@opencok/account/controllers/provisioning";
 import { observedFetch } from "@opencok/core/fetch";
 import { reservationJson } from "@opencok/mappings/provisioning";
 import { signProvisioning, verifyProvisioning } from "@opencok/identity/provisioning";
@@ -7,10 +8,7 @@ import {
     reservationSchema,
     provisionReceiptSchema,
 } from "@opencok/validations/provisioning";
-import type {
-    ProvisioningController,
-    CharacterProvisioningController,
-} from "@opencok/controllers/provisioning";
+import type { CharacterProvisioningController } from "@opencok/controllers/provisioning";
 import { HttpError } from "@opencok/errors/http";
 
 async function limitedBody(

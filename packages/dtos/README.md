@@ -22,3 +22,7 @@ Read queries, deletion selections and response data are contracts rather than
 DTOs. Mobile response interfaces use the `Response` suffix and live under
 `@opencok/contracts/responses/<domain>`, preserving existing field names,
 optionality, signed numeric widths and wire order.
+
+The account creation input now lives at
+`@opencok/account/dtos/create-character.dto`; the former `provisioning` alias and
+horizontal class are retired with all callers migrated in #607.

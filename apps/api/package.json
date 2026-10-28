@@ -14,14 +14,13 @@
     "@opencok/api": "workspace:*",
     "@opencok/connection": "workspace:*",
     "@opencok/env": "workspace:*",
-    "@opencok/repositories": "workspace:*",
     "@opencok/storage": "workspace:*",
     "effect": "catalog:",
     "@opencok/core": "workspace:*",
     "@opencok/contracts": "workspace:*",
     "@opencok/controllers": "workspace:*",
     "@opencok/identity": "workspace:*",
-    "@opencok/services": "workspace:*"
+    "@opencok/account": "workspace:*"
   },
   "devDependencies": {
     "@opencok/config": "workspace:*",

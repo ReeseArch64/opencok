@@ -4,7 +4,7 @@ import {
     publicServer,
     type ServerDirectory,
 } from "@opencok/storage/server-directory";
-import type { Account, AccountReader } from "@opencok/contracts/account";
+import type { Account, AccountReader } from "@opencok/account/contracts/account";
 
 export class Discovery
 {

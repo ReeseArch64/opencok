@@ -17,7 +17,7 @@ import { mutation_outbox } from "@opencok/drizzle/schema/opencok_kingdom/mutatio
 import { mail } from "@opencok/drizzle/schema/opencok_kingdom/mail";
 import { acquireRealmAuthority } from "@opencok/repositories/realm-authority";
 import { createCharacterCreator } from "@opencok/repositories/character-provisioning";
-import { createProvisioningStore } from "@opencok/repositories/provisioning";
+import { createProvisioningStore } from "@opencok/account/repositories/provisioning";
 import { CharacterProvisioningService } from "@opencok/services/provisioning";
 import { loadRules } from "@opencok/resources/rules";
 import { worldBirthArea } from "@opencok/rules/world-birth";

@@ -1,8 +1,8 @@
 import { observeAdapter } from "@opencok/core/operation";
 import { Cache } from "@opencok/storage/session";
 import { firebaseIdentity } from "@opencok/identity/firebase";
-import { ProvisioningService } from "@opencok/services/provisioning";
-import { ProvisioningController } from "@opencok/controllers/provisioning";
+import { ProvisioningService } from "@opencok/account/services/provisioning";
+import { ProvisioningController } from "@opencok/account/controllers/provisioning";
 import { provisioningHandler, realmProvisioner } from "@opencok/connection/provisioning";
 import { BODY_LIMIT } from "@opencok/contracts/files";
 import { createFiles } from "./files.ts";
@@ -15,7 +15,7 @@ import { serveHttp } from "@opencok/core/http";
 import { ApiRequestHandler } from "@opencok/api/api-request-handler";
 import { ApiRouter } from "@opencok/api/api-router";
 import { ServerDirectory } from "@opencok/storage/server-directory";
-import { AccountStore } from "@opencok/repositories/account";
+import { AccountStore } from "@opencok/account/repositories/account";
 import { DiscoveryRedis } from "@opencok/storage/discovery-redis";
 
 import { ApiDependencies } from "./api-dependencies.ts";
