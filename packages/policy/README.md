@@ -29,13 +29,17 @@ database authority, filtering algorithm, deadline or content changes here.
 
 ## Compatibility and migration
 
-The five old `rules/{nickname-words,nickname-reserved,java-nickname-characters}`
-and `resources/{nickname-words,nickname-reserved}` modules are temporary re-exports.
-Maintained application/service/test consumers now import policy directly; retirement
-is tracked by [#590](https://github.com/ReeseArch64/opencok/issues/590). The broader
-`rules/nickname` entrypoint retains a `nicknameTrim` re-export for its own validation
-and current repository/celebrity consumers until player nickname extraction.
-There is no duplicate implementation or copy of the dictionary.
+The five former `rules/{nickname-words,nickname-reserved,java-nickname-characters}`
+and `resources/{nickname-words,nickname-reserved}` paths are retired in
+[#590](https://github.com/ReeseArch64/opencok/issues/590). All maintained
+application/service/test consumers use policy directly; import/architecture checks
+confirm that no caller requires the removed facades. Use the selective exports
+listed above when updating a source consumer from an older checkout.
+
+The broader `rules/nickname` entrypoint still exposes `nicknameTrim` for its own
+validation and current repository/celebrity consumers until player nickname
+extraction under #558. It delegates to the one policy implementation. This does
+not retain any of the five retired module paths or duplicate the dictionary.
 
 The adapter's default asset is `./data/badwords.json` relative to its module.
 The server build therefore copies the exact dictionary to `dist/src/data`, beside
