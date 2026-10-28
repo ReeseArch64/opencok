@@ -192,7 +192,7 @@ export class CitySnapshotReader
             vipBox: command?.startsWith("vip.box.")
                 ? await readers.readVipBox(tx, owner)
                 : undefined,
-            targetTask: await readers.readTargetTasks(tx, owner),
+            targetTask: await session.targetTasks.readTargetTasks(),
             rechargeFeedback: command === "pay.recharge.ui.state" || command === "feedback.paid"
                 ? readers.rechargeFeedbackReader(tx, owner)
                 : undefined,

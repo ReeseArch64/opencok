@@ -12,7 +12,7 @@ import {
     reconnectResourceOutput,
     reconnectTaskInitialCount,
 } from "@opencok/rules/reconnect-task-counts";
-import { recordTargetTask } from "@opencok/services/target-task";
+import { recordTargetTask } from "./target-task";
 import { recordCampaignUse } from "@opencok/services/local-campaign";
 import { javaMailBytes } from "@opencok/rules/avatar-mail";
 import { idleDeadline } from "@opencok/rules/timed-activity";

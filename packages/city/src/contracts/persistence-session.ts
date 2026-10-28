@@ -1,3 +1,4 @@
+import type { TargetTaskRepository } from "@opencok/tasks/repositories/target-task";
 import type { QuestRepository } from "@opencok/tasks/repositories/progression";
 import type { EquipmentRepository } from "@opencok/equipment/repositories/progression";
 import type { BuildingRepository } from "@opencok/building/repositories/progression";
@@ -10,6 +11,7 @@ import type { CityPersistenceWriters } from "./persistence-writers";
 
 export interface CityPersistenceAdapters
 {
+    readonly targetTasks: Pick<TargetTaskRepository, "readTargetTasks" | "writeTargetTasks">;
     readonly quests: Pick<QuestRepository, "readTasks" | "readQuests" | "writeQuests">;
     readonly equipment: Pick<
         EquipmentRepository,

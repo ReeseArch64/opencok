@@ -1,7 +1,7 @@
 import { TrainingDomain } from "@opencok/troops/services/training";
 import { HospitalDomain } from "@opencok/troops/services/hospital";
 import { FortificationDomain } from "@opencok/troops/services/fortifications";
-import { recordTargetTask } from "@opencok/services/target-task";
+import { recordTargetTask } from "./target-task";
 import { recordExpeditionScore } from "@opencok/services/new-expedition";
 
 export function createRealmTrainingDomain()

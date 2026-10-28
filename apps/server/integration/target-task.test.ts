@@ -1,11 +1,9 @@
 import { test, expect } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { eq, sql } from "drizzle-orm";
-import {
-    createTargetTaskDomain,
-    targetTaskPurchaseOperationId,
-    publishTargetTaskMutation,
-} from "@opencok/services/target-task";
+import { createRealmTargetTaskDomain as createTargetTaskDomain } from "../src/composition/target-task";
+import { TargetTaskPaymentIdentity } from "@opencok/tasks/rules/target-payment";
+import { TargetTaskPublicationService } from "@opencok/tasks/services/target-publication";
 import { createRealmTrainingDomain } from "../src/composition/troops";
 import { user_target_task } from "@opencok/drizzle/schema/opencok_kingdom/user_target_task";
 import { user_target_task_notes } from "@opencok/drizzle/schema/opencok_kingdom/user_target_task_notes";
@@ -13,8 +11,11 @@ import { user_item } from "@opencok/drizzle/schema/opencok_kingdom/user_item";
 import { userprofile } from "@opencok/drizzle/schema/opencok_kingdom/userprofile";
 import { mail } from "@opencok/drizzle/schema/opencok_kingdom/mail";
 import { sfs, encode, type Fields } from "@opencok/messages/sfs";
-import type { TargetTaskPaymentGateway } from "@opencok/contracts/target-task";
+import type { TargetTaskPaymentGateway } from "@opencok/tasks/contracts/target-task";
 import { cityHarness } from "./support/city";
+
+const { targetTaskPurchaseOperationId } = new TargetTaskPaymentIdentity();
+const { publishTargetTaskMutation } = new TargetTaskPublicationService();
 
 const trainingDomain = createRealmTrainingDomain();
 

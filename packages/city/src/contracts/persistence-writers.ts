@@ -49,7 +49,6 @@ export interface CityPersistenceWriters
     writePlayerItemGifts: CityWriteField<"playerItemGifts">;
     writeSeasonalExchange: CityWriteField<"seasonalExchange">;
     writeVipBox: CityWriteField<"vipBox">;
-    writeTargetTasks: CityWriteField<"targetTask">;
     writeRechargeFeedback: CityWriteField<"rechargeFeedback", [now: bigint]>;
     writeRechargeActivity: CityWriteField<"rechargeActivity">;
     writeOrdinaryBox: CityWriteField<"ordinaryBox">;
