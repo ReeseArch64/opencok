@@ -311,7 +311,9 @@ test(
                     .where(eq(building_production.buildingId, "owner-413000"))
             )[0]!;
             expect(checkpoint.settledAt).toBe(activity.dueAt);
-            const { decodeProductionRates } = await import("@opencok/mappings/production");
+            const { decodeProductionRates } = await import(
+                "@opencok/production/mappings/production"
+            );
             const next = decodeProductionRates(checkpoint.rates)[0]!;
             const expected = ((activity.dueAt - started) * 120000000n + 3600000n * next.perHour)
                 / 3600000000000n;

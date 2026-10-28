@@ -1,6 +1,6 @@
 import { sfs, type Fields } from "@opencok/messages/sfs";
-import type { ProductionRate } from "@opencok/contracts/timed-activity";
-import { validateProductionRate } from "@opencok/rules/timed-activity";
+import type { ProductionRate } from "@opencok/production/contracts/production";
+import { validateProductionRate } from "@opencok/production/rules/settlement";
 
 export function encodeProductionRates(rates: readonly ProductionRate[]): string
 {

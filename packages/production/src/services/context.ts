@@ -1,6 +1,6 @@
 import type { ReconnectProgressState, ReconnectProgressWrite } from "@opencok/contracts/reconnect";
-import type { ProductionRate } from "@opencok/contracts/timed-activity";
-import type { GameServices } from "@opencok/contracts/game";
+import type { ProductionRate } from "@opencok/production/contracts/production";
+import type { ProductionEffectProviders, ProductionWorldDecoder } from "../contracts/runtime.ts";
 import { long, num, type Row } from "@opencok/contracts/rows";
 import type { Rules } from "@opencok/rules/game";
 import { MOBILE_CLIENT_VERSION } from "@opencok/constants/game";
@@ -11,8 +11,7 @@ import { reconnectWeaknessPlan } from "@opencok/rules/reconnect-weakness";
 import { playerGameEffect } from "@opencok/rules/power-resolver";
 import { worldPowerEffects } from "@opencok/rules/power-world";
 import { serverFeature } from "@opencok/rules/power-context";
-import { productionScale } from "@opencok/rules/timed-activity";
-import { decodeWorldPowerEffects } from "./power";
+import { productionScale } from "@opencok/production/rules/settlement";
 import { generalSkillPoints } from "@opencok/hero/services/general-power";
 import { allianceScienceRule } from "@opencok/rules/alliance-science";
 import { resourceGeneralBuildingEffect } from "@opencok/hero/services/general-building-effects";
@@ -21,7 +20,8 @@ export async function productionContext(
     state: ReconnectProgressState,
     rules: Rules,
     now: bigint,
-    services: Pick<GameServices, "worldPowerEffects" | "emperorVersion">,
+    services: ProductionEffectProviders,
+    decodeWorldPowerEffects: ProductionWorldDecoder,
 )
 {
     if (!services.worldPowerEffects)

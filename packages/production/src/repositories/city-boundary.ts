@@ -1,15 +1,15 @@
 import { and, eq, inArray } from "drizzle-orm";
 import { user_building } from "@opencok/drizzle/schema/opencok_kingdom/user_building";
 import { building_production } from "@opencok/drizzle/schema/opencok_kingdom/building_production";
-import type { ProductionAccount } from "@opencok/contracts/timed-activity";
+import type { ProductionAccount } from "@opencok/production/contracts/production";
 import { text, long, type Row } from "@opencok/contracts/rows";
-import type { ProgressionBoundary } from "./city-progression";
-import { changeProductionInTransaction, type ProductionPreparation } from "./production";
+import type { ProductionChangeBoundary, ProductionPreparation } from "../contracts/persistence.ts";
+import { changeProductionInTransaction } from "./production.ts";
 
 export function createCityProductionBoundary(
     preparation: ProductionPreparation,
     asset: (building: Row) => string | undefined,
-): ProgressionBoundary
+): ProductionChangeBoundary
 {
     return async (tx, owner, now, change, deleted, economy) => {
         const rates = await preparation.prepare(tx, owner, now);

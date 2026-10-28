@@ -1,3 +1,8 @@
+import {
+    createRealmProductionService,
+    planRealmProductionContext,
+    createRealmProductionExecutor,
+} from "../src/composition/production.ts";
 import { expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { eq, sql } from "drizzle-orm";
@@ -17,16 +22,12 @@ import {
 } from "@opencok/repositories/timed-activity";
 import { user_item } from "@opencok/drizzle/schema/opencok_kingdom/user_item";
 import { readReconnectProgress } from "@opencok/repositories/reconnect-progress";
-import { productionContext } from "@opencok/services/production-context";
 import { createMutationExecutor } from "@opencok/repositories/mutation";
-import {
-    createProductionExecutor,
-    changeProductionInTransaction,
-} from "@opencok/repositories/production";
+import { changeProductionInTransaction } from "@opencok/production/repositories/production";
 import { acquireRealmAuthority } from "@opencok/repositories/realm-authority";
 import { TimedActivityService } from "@opencok/services/timed-activity";
-import { ProductionService } from "@opencok/services/production";
-import { idleDeadline, productionScale } from "@opencok/rules/timed-activity";
+import { idleDeadline } from "@opencok/rules/timed-activity";
+import { productionScale } from "@opencok/production/rules/settlement";
 import { loadRules } from "@opencok/resources/rules";
 import { encode, sfs } from "@opencok/messages/sfs";
 import { DisposablePostgres } from "../../../packages/drizzle/tests/support/postgres";
@@ -95,7 +96,7 @@ test(
             let now = 1000;
             const authority = await acquireRealmAuthority(db.db, 1, () => true);
             const sourceContext = await db.db.transaction(async (tx) =>
-                productionContext(
+                planRealmProductionContext(
                     await readReconnectProgress(tx, "owner", 1, BigInt(now)),
                     rules,
                     BigInt(now),
@@ -306,8 +307,8 @@ test(
                             : [{ at: from, perHour: 100n * productionScale, capacity: 1000n }];
                 },
             };
-            let production = new ProductionService(
-                createProductionExecutor(db.db, authority, preparation, () => now),
+            let production = createRealmProductionService(
+                createRealmProductionExecutor(db.db, authority, preparation, () => now),
                 rules,
                 effects,
             );
@@ -346,8 +347,8 @@ test(
             await pg.restart();
             db = createDatabase("kingdom", { ...pg.options, database: "timed", max: 8 });
             const next = await acquireRealmAuthority(db.db, 1, () => true);
-            production = new ProductionService(
-                createProductionExecutor(db.db, next, preparation, () => now),
+            production = createRealmProductionService(
+                createRealmProductionExecutor(db.db, next, preparation, () => now),
                 rules,
                 effects,
             );
@@ -358,8 +359,8 @@ test(
                 operationId: sfs.string(randomUUID()),
             });
             expect((await db.db.select().from(user_resource))[0]!.wood).toBe(200n);
-            const stale = new ProductionService(
-                createProductionExecutor(db.db, authority, preparation, () => now),
+            const stale = createRealmProductionService(
+                createRealmProductionExecutor(db.db, authority, preparation, () => now),
                 rules,
                 effects,
             );

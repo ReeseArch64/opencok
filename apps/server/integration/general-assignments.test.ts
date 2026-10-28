@@ -10,7 +10,7 @@ import { user_building } from "@opencok/drizzle/schema/opencok_kingdom/user_buil
 import { userprofile } from "@opencok/drizzle/schema/opencok_kingdom/userprofile";
 import { user_item } from "@opencok/drizzle/schema/opencok_kingdom/user_item";
 import { building_production } from "@opencok/drizzle/schema/opencok_kingdom/building_production";
-import { decodeProductionRates } from "@opencok/mappings/production";
+import { decodeProductionRates } from "@opencok/production/mappings/production";
 import { cityHarness } from "./support/city";
 
 test(

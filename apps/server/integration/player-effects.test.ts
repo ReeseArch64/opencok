@@ -1,4 +1,4 @@
-import { decodeProductionRates } from "@opencok/mappings/production";
+import { decodeProductionRates } from "@opencok/production/mappings/production";
 import { test, expect } from "bun:test";
 import { eq } from "drizzle-orm";
 import { randomUUID } from "node:crypto";

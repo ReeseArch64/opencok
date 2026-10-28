@@ -1,7 +1,10 @@
+import {
+    createRealmProductionService,
+    planRealmProductionContext,
+    createRealmProductionExecutor,
+} from "../../src/composition/production.ts";
 import { createTotemEffectStore } from "@opencok/repositories/totem";
 import { settleTotemEffects } from "@opencok/services/totem";
-import { ProductionService } from "@opencok/services/production";
-import { createProductionExecutor } from "@opencok/repositories/production";
 import { randomUUID } from "node:crypto";
 import { cityQueueCommands } from "@opencok/rules/city-command";
 import { activityTransitionInstant } from "@opencok/repositories/timed-activity";
@@ -15,11 +18,10 @@ import { queue } from "@opencok/drizzle/schema/opencok_kingdom/queue";
 import { timed_activity } from "@opencok/drizzle/schema/opencok_kingdom/timed_activity";
 import { createActivityExecutor, type ActivityDomain } from "@opencok/repositories/timed-activity";
 import { createCityProgressionStore } from "@opencok/repositories/city-progression";
-import { createCityProductionBoundary } from "@opencok/repositories/city-production";
+import { createCityProductionBoundary } from "@opencok/production/repositories/city-boundary";
 import { readReconnectProgress } from "@opencok/repositories/reconnect-progress";
 import { persistReconnectProgress } from "@opencok/repositories/reconnect-write";
 import { acquireRealmAuthority } from "@opencok/repositories/realm-authority";
-import { productionContext } from "@opencok/services/production-context";
 import { createCityProgressionHandlers, type CityDomain } from "@opencok/services/city-progression";
 import { constructionDomain } from "@opencok/services/construction";
 import { TimedActivityService } from "@opencok/services/timed-activity";
@@ -142,7 +144,7 @@ export async function cityHarness(
             )
             {
                 const state = await readReconnectProgress(tx, owner, 1, at);
-                const planned = await productionContext(state, rules, at, {
+                const planned = await planRealmProductionContext(state, rules, at, {
                     worldPowerEffects: async () => new Map<string, string>(),
                     emperorVersion: async () => null,
                 });
@@ -258,8 +260,8 @@ export async function cityHarness(
             connection: { ...pg.options, database: "city" },
             rules,
             service,
-            production: new ProductionService(
-                createProductionExecutor(db.db, authority, preparation, () => now),
+            production: createRealmProductionService(
+                createRealmProductionExecutor(db.db, authority, preparation, () => now),
                 rules,
                 effects,
             ),

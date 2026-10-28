@@ -1,8 +1,8 @@
+import { planRealmProductionContext } from "../src/composition/production.ts";
 import { user_building } from "@opencok/drizzle/schema/opencok_kingdom/user_building";
 import { createCityProgressionHandlers } from "@opencok/services/city-progression";
 import { createCityProgressionStore } from "@opencok/repositories/city-progression";
-import { createCityProductionBoundary } from "@opencok/repositories/city-production";
-import { productionContext } from "@opencok/services/production-context";
+import { createCityProductionBoundary } from "@opencok/production/repositories/city-boundary";
 import { readReconnectProgress } from "@opencok/repositories/reconnect-progress";
 import { persistReconnectProgress } from "@opencok/repositories/reconnect-write";
 import { num, text } from "@opencok/contracts/rows";
@@ -162,7 +162,7 @@ test(
                     async prepare(tx, owner, at)
                     {
                         const snapshot = await readReconnectProgress(tx, owner, 1, at);
-                        const plan = await productionContext(snapshot, h.rules, at, {
+                        const plan = await planRealmProductionContext(snapshot, h.rules, at, {
                             worldPowerEffects: async () => new Map<string, string>(),
                             emperorVersion: async () => null,
                         });

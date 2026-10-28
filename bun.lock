@@ -89,6 +89,7 @@
         "@opencok/mappings": "workspace:*",
         "@opencok/player": "workspace:*",
         "@opencok/policy": "workspace:*",
+        "@opencok/production": "workspace:*",
         "@opencok/repositories": "workspace:*",
         "@opencok/resources": "workspace:*",
         "@opencok/rules": "workspace:*",
@@ -659,6 +660,25 @@
       "dependencies": {
         "@opencok/constants": "workspace:*",
         "@opencok/errors": "workspace:*",
+      },
+      "devDependencies": {
+        "@opencok/config": "workspace:*",
+        "@types/bun": "catalog:",
+        "typescript": "catalog:",
+      },
+    },
+    "packages/production": {
+      "name": "@opencok/production",
+      "dependencies": {
+        "@opencok/constants": "workspace:*",
+        "@opencok/contracts": "workspace:*",
+        "@opencok/drizzle": "workspace:*",
+        "@opencok/economy": "workspace:*",
+        "@opencok/hero": "workspace:*",
+        "@opencok/ledger": "workspace:*",
+        "@opencok/messages": "workspace:*",
+        "@opencok/rules": "workspace:*",
+        "drizzle-orm": "0.45.4",
       },
       "devDependencies": {
         "@opencok/config": "workspace:*",
@@ -1266,6 +1286,8 @@
     "@opencok/player": ["@opencok/player@workspace:packages/player"],
 
     "@opencok/policy": ["@opencok/policy@workspace:packages/policy"],
+
+    "@opencok/production": ["@opencok/production@workspace:packages/production"],
 
     "@opencok/queues": ["@opencok/queues@workspace:packages/queues"],
 
