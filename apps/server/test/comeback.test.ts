@@ -9,7 +9,7 @@ import {
     comebackPayNodes,
 } from "@opencok/rules/comeback";
 import { comebackDomain } from "@opencok/services/comeback";
-import { CityProgressionContext } from "@opencok/services/city-progression";
+import { CityProgressionContext } from "@opencok/city/services/context";
 import { fields, sfs, decode, int, type Value } from "@opencok/messages/sfs";
 import { cityFixture } from "./fixtures/city-progression";
 import type { ComebackState } from "@opencok/contracts/comeback";

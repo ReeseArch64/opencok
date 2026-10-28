@@ -8,7 +8,7 @@ import { expedition_progress } from "@opencok/drizzle/schema/opencok_kingdom/exp
 import { userprofile } from "@opencok/drizzle/schema/opencok_kingdom/userprofile";
 import { command_receipt } from "@opencok/drizzle/schema/opencok_kingdom/command_receipt";
 import { sfs, encode, int } from "@opencok/messages/sfs";
-import type { CityDomain } from "@opencok/services/city-progression";
+import type { CityDomain } from "@opencok/city/contracts/domain";
 import { cityHarness } from "./support/city";
 
 const trustedProducer: CityDomain = {

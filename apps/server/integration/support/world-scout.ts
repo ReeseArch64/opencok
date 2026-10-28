@@ -7,7 +7,7 @@ import { user_army } from "@opencok/drizzle/schema/opencok_kingdom/user_army";
 import { user_building } from "@opencok/drizzle/schema/opencok_kingdom/user_building";
 import { worldpoint } from "@opencok/drizzle/schema/opencok_kingdom/worldpoint";
 import { sfs, type Fields } from "@opencok/messages/sfs";
-import type { CityDomain } from "@opencok/services/city-progression";
+import type { CityDomain } from "@opencok/city/contracts/domain";
 
 export async function scoutHarness(extra: readonly CityDomain[] = [])
 {

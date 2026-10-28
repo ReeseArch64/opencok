@@ -2,11 +2,26 @@
   "name": "@opencok/city",
   "private": true,
   "scripts": {
-    "check-types": "tsc --noEmit"
+    "check-types": "tsc --noEmit",
+    "test": "bun --no-env-file test tests"
   },
   "devDependencies": {
     "@opencok/config": "workspace:*",
     "@types/bun": "catalog:",
     "typescript": "catalog:"
+  },
+  "type": "module",
+  "exports": {
+    "./*": "./src/*.ts"
+  },
+  "dependencies": {
+    "@opencok/contracts": "workspace:*",
+    "@opencok/rules": "workspace:*",
+    "@opencok/enums": "workspace:*",
+    "@opencok/errors": "workspace:*",
+    "@opencok/constants": "workspace:*",
+    "@opencok/messages": "workspace:*",
+    "@opencok/economy": "workspace:*",
+    "@opencok/hero": "workspace:*"
   }
 }

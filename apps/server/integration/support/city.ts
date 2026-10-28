@@ -22,7 +22,8 @@ import { createCityProductionBoundary } from "@opencok/production/repositories/c
 import { readReconnectProgress } from "@opencok/repositories/reconnect-progress";
 import { persistReconnectProgress } from "@opencok/repositories/reconnect-write";
 import { acquireRealmAuthority } from "@opencok/repositories/realm-authority";
-import { createCityProgressionHandlers, type CityDomain } from "@opencok/services/city-progression";
+import { createRealmCityProgressionHandlers } from "../../src/composition/city.ts";
+import type { CityDomain } from "@opencok/city/contracts/domain";
 import { constructionDomain } from "@opencok/services/construction";
 import { TimedActivityService } from "@opencok/services/timed-activity";
 import { idleDeadline } from "@opencok/rules/timed-activity";
@@ -192,7 +193,7 @@ export async function cityHarness(
                 return basePreparation.prepare(tx, owner, at);
             },
         };
-        const handlers = createCityProgressionHandlers(
+        const handlers = createRealmCityProgressionHandlers(
             (tx: Parameters<typeof readReconnectProgress>[0], owner, at) =>
                 createCityProgressionStore(tx, owner, at, boundary, mapSize, authority),
             [constructionDomain, ...extra],

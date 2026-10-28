@@ -15,7 +15,7 @@ import { userprofile } from "@opencok/drizzle/schema/opencok_kingdom/userprofile
 import { alliance_member } from "@opencok/drizzle/schema/opencok_kingdom/alliance_member";
 import { mutation_outbox } from "@opencok/drizzle/schema/opencok_kingdom/mutation_outbox";
 import { mail } from "@opencok/drizzle/schema/opencok_kingdom/mail";
-import type { CityDomain } from "@opencok/services/city-progression";
+import type { CityDomain } from "@opencok/city/contracts/domain";
 import { cityHarness } from "./support/city";
 const producer: CityDomain = {
     commands: ["hero.synthetic.action"],

@@ -22,7 +22,7 @@ import { userprofile } from "@opencok/drizzle/schema/opencok_kingdom/userprofile
 import { user_item } from "@opencok/drizzle/schema/opencok_kingdom/user_item";
 import { mail } from "@opencok/drizzle/schema/opencok_kingdom/mail";
 import { sfs, decode } from "@opencok/messages/sfs";
-import type { CityDomain } from "@opencok/services/city-progression";
+import type { CityDomain } from "@opencok/city/contracts/domain";
 const spender: CityDomain = {
     commands: ["synthetic.spend"],
     types: [],

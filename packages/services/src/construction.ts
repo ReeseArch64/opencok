@@ -33,7 +33,7 @@ import {
 } from "@opencok/rules/city-progression";
 import { idleDeadline } from "@opencok/rules/timed-activity";
 import { cityCommands } from "@opencok/rules/city-command";
-import { CityProgressionContext } from "./city-progression-context.ts";
+import type { CityProgressionContext } from "./city-progression-context.ts";
 import type { CityDomain } from "./city-domain.ts";
 
 function definition(context: CityProgressionContext, row: Row)

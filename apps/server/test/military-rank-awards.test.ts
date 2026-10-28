@@ -8,7 +8,7 @@ import {
     militaryRankCents,
 } from "@opencok/rules/military-rank-awards";
 import { applyMilitaryRankAward } from "@opencok/services/military-rank-awards";
-import { CityProgressionContext } from "@opencok/services/city-progression";
+import { CityProgressionContext } from "@opencok/city/services/context";
 import type { CityProgressionState } from "@opencok/contracts/city-progression";
 import type { ActivityEconomy } from "@opencok/economy/contracts/activity-economy";
 function fixture(clockMarker: bigint | undefined = 1n, now = 100n)

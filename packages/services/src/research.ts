@@ -26,7 +26,7 @@ import {
     progressionActivityData,
 } from "@opencok/rules/city-progression";
 import { idleDeadline } from "@opencok/rules/timed-activity";
-import { CityProgressionContext } from "./city-progression-context.ts";
+import type { CityProgressionContext } from "./city-progression-context.ts";
 import type { CityDomain } from "./city-domain.ts";
 
 const commands = ["science.data.init", "science.research", "science.directly"];

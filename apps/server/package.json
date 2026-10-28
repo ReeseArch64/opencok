@@ -31,7 +31,8 @@
     "@opencok/player": "workspace:*",
     "@opencok/economy": "workspace:*",
     "@opencok/ledger": "workspace:*",
-    "@opencok/production": "workspace:*"
+    "@opencok/production": "workspace:*",
+    "@opencok/city": "workspace:*"
   },
   "devDependencies": {
     "@opencok/api": "workspace:*",

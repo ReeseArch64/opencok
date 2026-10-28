@@ -9,7 +9,7 @@ import { expeditionPanels } from "@opencok/mappings/new-expedition";
 import { publishExpeditionPhaseNotification } from "@opencok/services/expedition-phase";
 import { recordExpeditionScore } from "@opencok/services/new-expedition";
 import { sfs, fields, encode, type Fields } from "@opencok/messages/sfs";
-import type { CityProgressionContext } from "@opencok/services/city-progression";
+import type { CityProgressionContext } from "@opencok/city/services/context";
 test("unmatched expedition views retain waiting or matching while validated owned manifests supply active stages", async () => {
     const rules = await loadRules(),
         now = BigInt(Date.UTC(2040, 0, 1)),

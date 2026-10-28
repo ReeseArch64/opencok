@@ -18,7 +18,7 @@ import { userprofile } from "@opencok/drizzle/schema/opencok_kingdom/userprofile
 import { user_resource } from "@opencok/drizzle/schema/opencok_kingdom/user_resource";
 import { user_building } from "@opencok/drizzle/schema/opencok_kingdom/user_building";
 import { sfs, encode } from "@opencok/messages/sfs";
-import type { CityDomain } from "@opencok/services/city-progression";
+import type { CityDomain } from "@opencok/city/contracts/domain";
 import type { Rules } from "@opencok/rules/game";
 import { cityHarness } from "./city";
 const spender: CityDomain = {

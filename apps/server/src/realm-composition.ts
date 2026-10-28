@@ -1,3 +1,4 @@
+import { createRealmCityProgressionHandlers } from "./composition/city";
 import {
     createRealmProductionService,
     planRealmProductionContext,
@@ -277,7 +278,7 @@ import { FortificationDomain } from "@opencok/services/fortifications";
 import { ResearchDomain } from "@opencok/services/research";
 import { createCityProgressionStore } from "@opencok/repositories/city-progression";
 import { createCityProductionBoundary } from "@opencok/production/repositories/city-boundary";
-import { CityProgressionService } from "@opencok/services/city-progression.service";
+import type { CityProgressionService } from "@opencok/city/services/progression";
 import { ConstructionDomain } from "@opencok/services/construction";
 import { num, text } from "@opencok/contracts/rows";
 import {
@@ -905,7 +906,7 @@ export const RealmDependenciesLive = Layer.effect(
             "realm.createGoldEggsRanks",
         );
         const city: CityProgressionService<MutationTransaction> = observeAdapter(
-            new CityProgressionService(
+            createRealmCityProgressionHandlers(
                 (tx: Parameters<typeof readReconnectProgress>[0], owner, now) =>
                     observeAdapter(
                         createCityProgressionStore(
