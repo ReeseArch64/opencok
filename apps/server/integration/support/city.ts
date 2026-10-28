@@ -17,7 +17,7 @@ import { playerinfo } from "@opencok/drizzle/schema/opencok_kingdom/playerinfo";
 import { queue } from "@opencok/drizzle/schema/opencok_kingdom/queue";
 import { timed_activity } from "@opencok/drizzle/schema/opencok_kingdom/timed_activity";
 import { createActivityExecutor, type ActivityDomain } from "@opencok/repositories/timed-activity";
-import { createCityProgressionStore } from "@opencok/repositories/city-progression";
+import { createRealmCityProgressionStore } from "../../src/composition/city-persistence.ts";
 import { createCityProductionBoundary } from "@opencok/production/repositories/city-boundary";
 import { readReconnectProgress } from "@opencok/repositories/reconnect-progress";
 import { persistReconnectProgress } from "@opencok/repositories/reconnect-write";
@@ -195,7 +195,7 @@ export async function cityHarness(
         };
         const handlers = createRealmCityProgressionHandlers(
             (tx: Parameters<typeof readReconnectProgress>[0], owner, at) =>
-                createCityProgressionStore(tx, owner, at, boundary, mapSize, authority),
+                createRealmCityProgressionStore(tx, owner, at, boundary, mapSize, authority),
             [constructionDomain, ...extra],
             rules,
             effects,

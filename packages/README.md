@@ -59,4 +59,5 @@ coordination remain tracked under W07; semantic archetypes remain W14 work.
 
 The [city package](city/README.md) owns transactional plans, snapshot/effect creation
 and command/activity coordination after #637. The realm injects existing mechanic
-callbacks; shared contracts and remaining mechanic migrations are tracked in W07/W20.
+callbacks. After #639, bounded snapshots and aggregate persistence are owned too;
+shared contracts and remaining mechanic migrations are tracked in W07–W12/W20.

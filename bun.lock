@@ -243,12 +243,14 @@
       "dependencies": {
         "@opencok/constants": "workspace:*",
         "@opencok/contracts": "workspace:*",
+        "@opencok/drizzle": "workspace:*",
         "@opencok/economy": "workspace:*",
         "@opencok/enums": "workspace:*",
         "@opencok/errors": "workspace:*",
         "@opencok/hero": "workspace:*",
         "@opencok/messages": "workspace:*",
         "@opencok/rules": "workspace:*",
+        "drizzle-orm": "0.45.4",
       },
       "devDependencies": {
         "@opencok/config": "workspace:*",
