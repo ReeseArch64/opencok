@@ -4,6 +4,7 @@ import { createHash } from "node:crypto";
 import { XMLParser, XMLValidator } from "fast-xml-parser";
 import { GameplayCatalog } from "@opencok/enums/gameplay-catalog";
 import { writeCatalogModules, type CatalogSource } from "../src/generators/catalog-modules.ts";
+import { validateImportDestinations } from "../src/resources/import-destinations.ts";
 import type { SourceElement } from "../src/mappings/catalog-conversion.ts";
 
 const directory = process.argv[2];
@@ -56,8 +57,17 @@ async function* sources(): AsyncIterable<CatalogSource>
         };
     }
 }
-await writeCatalogModules(sources(), {
+
+const destinations = {
     resources: process.argv[3] ?? new URL("../../resources/src/", import.meta.url).pathname,
     heroTypes: process.argv[4]
         ?? new URL("../../hero/src/resources/catalogs/types/", import.meta.url).pathname,
-});
+};
+
+await validateImportDestinations(directory, [
+    destinations.resources,
+    join(destinations.resources, "catalogs", "data"),
+    join(destinations.resources, "catalogs", "types"),
+    destinations.heroTypes,
+]);
+await writeCatalogModules(sources(), destinations);

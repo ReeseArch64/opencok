@@ -142,7 +142,8 @@ For isolated output review, pass both resource and Hero type destinations to the
 general importer, or one building destination to the building importer. Paths are
 relative to the command's current working directory; defaults are resolved from
 the tool location. Supplying only one general-import destination fails before
-writing. Destinations should be separate from authorized inputs.
+writing. Destinations must be separate from authorized inputs. Both CLIs reject overlapping
+input/output paths, resolving existing symbolic links before any generation.
 
 ```sh
 bun run --cwd packages/catalog-tools import:catalogs /authorized/xml /tmp/review/resources /tmp/review/hero-types
