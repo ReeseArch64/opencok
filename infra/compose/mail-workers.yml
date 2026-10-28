@@ -6,18 +6,16 @@ services:
       KINGDOM_DATABASE_NAME: ${MAIL_WORKER_KINGDOM_DATABASE_NAME:?Mail worker kingdom database required}
       GLOBAL_DATABASE_NAME: ${MAIL_WORKER_GLOBAL_DATABASE_NAME:-opencok_global}
       CHAT_MAILBOX_SECRET: ${MAIL_WORKER_CHAT_SECRET:?Realm mailbox signing key required}
+  scheduler:
+    environment:
+      KINGDOM_ID: ${MAIL_WORKER_KINGDOM_ID:?Mail worker kingdom required}
+      KINGDOM_DATABASE_NAME: ${MAIL_WORKER_KINGDOM_DATABASE_NAME:?Mail worker kingdom database required}
   chat:
     environment:
       CHAT_MAILBOX_SECRETS: ${CHAT_MAILBOX_SECRETS:?Per-realm mailbox signing keys required}
   mail-workers:
-    build:
-      context: .
-      dockerfile: apps/workers/Dockerfile
     profiles: [mail-workers]
-    restart: unless-stopped
-    networks: [opencok-internal-network]
     environment:
-      MAIL_INTEGRATION_MODE: external
       KINGDOM_ID: ${MAIL_WORKER_KINGDOM_ID:?Mail worker kingdom required}
       KINGDOM_DATABASE_NAME: ${MAIL_WORKER_KINGDOM_DATABASE_NAME:?Mail worker kingdom database required}
       GLOBAL_DATABASE_NAME: ${MAIL_WORKER_GLOBAL_DATABASE_NAME:-opencok_global}
@@ -25,30 +23,3 @@ services:
       MAIL_WORKER_GLOBAL_URL: ${MAIL_WORKER_GLOBAL_URL:?Restricted global URL required}
       CHAT_URL: ${MAIL_WORKER_CHAT_URL:?Private Chat URL required}
       MAIL_WORKER_CHAT_SECRET: ${MAIL_WORKER_CHAT_SECRET:?Realm mailbox signing key required}
-      MAIL_WORKER_HEALTH_HOST: 0.0.0.0
-      MAIL_WORKER_HEALTH_PORT: 18091
-      MAIL_WORKER_TIMEOUT_MS: 5000
-      MAIL_WORKER_POLL_MS: 5000
-      MAIL_WORKER_KINGDOM_POOL: 2
-      MAIL_WORKER_GLOBAL_POOL: 1
-      OTEL_EXPORTER_OTLP_ENDPOINT: http://maple:4318
-      MAPLE_LOCAL_INGEST_KEY: ${MAPLE_LOCAL_INGEST_KEY}
-    stop_grace_period: 45s
-    logging:
-      driver: json-file
-      options:
-        max-size: 20m
-        max-file: "5"
-    healthcheck:
-      test:
-        [
-          CMD,
-          bun,
-          --no-env-file,
-          -e,
-          "fetch('http://127.0.0.1:18091/health/ready').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
-        ]
-      interval: 5s
-      timeout: 3s
-      start_period: 15s
-      retries: 12

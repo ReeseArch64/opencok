@@ -20,6 +20,20 @@ services:
       postgres-setup:
         condition: service_completed_successfully
 
+  scheduler:
+    depends_on:
+      postgres-setup:
+        condition: service_completed_successfully
+      server:
+        condition: service_healthy
+
+  mail-workers:
+    depends_on:
+      postgres-setup:
+        condition: service_completed_successfully
+      chat:
+        condition: service_healthy
+
   pgadmin:
     depends_on:
       postgres-setup:

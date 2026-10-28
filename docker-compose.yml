@@ -270,6 +270,10 @@ services:
       REDIS_URL: ${REDIS_URL}
       GAME_ZOOKEEPER: zookeeper:2181
       GAME_SECRET: ${GAME_SECRET}
+      ACTIVITY_SCHEDULER_MODE: external
+      ACTIVITY_SCHEDULER_SECRET: ${ACTIVITY_SCHEDULER_SECRET}
+      MAIL_INTEGRATION_MODE: external
+      CHAT_MAILBOX_SECRET: ${MAIL_WORKER_CHAT_SECRET}
       CHAT_URL: ${CHAT_URL}
       CHAT_SECRET: ${CHAT_SECRET}
     depends_on:
@@ -389,6 +393,7 @@ services:
       CHAT_KINGDOM_DATABASES: 1:opencok_kingdom_1,2:opencok_kingdom_2
       MONGO_URI: ${MONGO_URI}
       CHAT_SECRET: ${CHAT_SECRET}
+      CHAT_MAILBOX_SECRETS: ${CHAT_MAILBOX_SECRETS}
     ports:
       - 8083:8083
     healthcheck:
@@ -403,6 +408,114 @@ services:
       interval: 5s
       timeout: 3s
       start_period: 10s
+      retries: 12
+
+  scheduler:
+    build:
+      context: .
+      dockerfile: apps/scheduler/Dockerfile
+    profiles: [all, dev, prod, scheduler]
+    restart: unless-stopped
+    networks: [opencok-internal-network, opencok-external-network]
+    environment:
+      ACTIVITY_SCHEDULER_MODE: external
+      ACTIVITY_SCHEDULER_SECRET: ${ACTIVITY_SCHEDULER_SECRET}
+      KINGDOM_ID: 1
+      KINGDOM_DATABASE_NAME: opencok_kingdom_1
+      SCHEDULER_DATABASE_URL: ${SCHEDULER_DATABASE_URL}
+      SCHEDULER_OWNER_URL: http://server:18090
+      SCHEDULER_HEALTH_HOST: 0.0.0.0
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://maple:4318
+      MAPLE_LOCAL_INGEST_KEY: ${MAPLE_LOCAL_INGEST_KEY}
+    stop_grace_period: 45s
+    logging:
+      driver: json-file
+      options:
+        max-size: 20m
+        max-file: "5"
+    healthcheck:
+      test:
+        [
+          CMD,
+          bun,
+          --no-env-file,
+          -e,
+          "fetch('http://127.0.0.1:18092/health/ready').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
+        ]
+      interval: 5s
+      timeout: 3s
+      start_period: 15s
+      retries: 12
+
+  mail-workers:
+    build:
+      context: .
+      dockerfile: apps/workers/Dockerfile
+    profiles: [all, dev, prod, mail-workers]
+    restart: unless-stopped
+    networks: [opencok-internal-network, opencok-external-network]
+    environment:
+      MAIL_INTEGRATION_MODE: external
+      KINGDOM_ID: 1
+      KINGDOM_DATABASE_NAME: opencok_kingdom_1
+      GLOBAL_DATABASE_NAME: opencok_global
+      MAIL_WORKER_KINGDOM_URL: ${MAIL_WORKER_KINGDOM_URL}
+      MAIL_WORKER_GLOBAL_URL: ${MAIL_WORKER_GLOBAL_URL}
+      CHAT_URL: http://chat:8083
+      MAIL_WORKER_CHAT_SECRET: ${MAIL_WORKER_CHAT_SECRET}
+      MAIL_WORKER_HEALTH_HOST: 0.0.0.0
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://maple:4318
+      MAPLE_LOCAL_INGEST_KEY: ${MAPLE_LOCAL_INGEST_KEY}
+    stop_grace_period: 45s
+    logging:
+      driver: json-file
+      options:
+        max-size: 20m
+        max-file: "5"
+    healthcheck:
+      test:
+        [
+          CMD,
+          bun,
+          --no-env-file,
+          -e,
+          "fetch('http://127.0.0.1:18091/health/ready').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
+        ]
+      interval: 5s
+      timeout: 3s
+      start_period: 15s
+      retries: 12
+
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+    restart: unless-stopped
+    profiles: [all, dev, prod]
+    networks: [opencok-internal-network, opencok-external-network]
+    environment:
+      NODE_ENV: ${NODE_ENV:-production}
+    ports:
+      - 5173:5173
+    volumes:
+      - type: bind
+        source: ./apps/web/assets
+        target: /workspace/apps/web/assets
+        read_only: true
+        bind:
+          create_host_path: false
+    healthcheck:
+      test:
+        [
+          CMD,
+          bun,
+          --no-env-file,
+          -e,
+          "fetch('http://127.0.0.1:5173/').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
+        ]
+      interval: 5s
+      timeout: 3s
+      start_period: 15s
       retries: 12
 
   gateway:

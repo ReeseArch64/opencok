@@ -24,6 +24,23 @@ Open <http://localhost:5173> on the host, or
 <http://192.168.1.104:5173> on the LAN. The Bun process must be able to reach
 `http://192.168.1.104/_health.php`.
 
+## Docker Compose
+
+The root Compose file includes `web` in profiles `all`, `dev` and `prod`.
+The container serves the existing Bun application on <http://localhost:5173>,
+including `/api/ping`. Port 5173 is published on all host interfaces as requested;
+restrict access with host firewall rules when necessary.
+
+Supply the three prepared images in `apps/web/assets/` before starting. Compose
+mounts that directory read-only and does not create it, extract client assets or
+package private images into the container image. Missing images prevent the page
+from bundling correctly. The fixed gateway health target remains unchanged and
+must be reachable from the container for the ping result to be online.
+
+```sh
+docker compose --profile dev up -d --build web
+```
+
 ## Local assets
 
 `assets:prepare` writes only three images to Git-ignored `apps/web/assets/`:
@@ -69,8 +86,7 @@ does not implement accounts, authentication, gameplay, WebSockets or the game
 protocol. Future browser transport compatibility needs investigation before
 any server, service or gateway changes are proposed.
 
-No server, game service, database or deployment configuration is changed by
-this application.
+This application does not change game authority, database state or client protocol.
 
 ## Checks
 
