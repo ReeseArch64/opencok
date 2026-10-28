@@ -1,3 +1,8 @@
+import type {
+    MutationTransaction,
+    ProductionPreparation,
+    ProductionPersistenceRuntime,
+} from "../contracts/persistence.ts";
 import { and, asc, eq } from "drizzle-orm";
 import { building_production } from "@opencok/drizzle/schema/opencok_kingdom/building_production";
 import { user_building } from "@opencok/drizzle/schema/opencok_kingdom/user_building";
@@ -5,44 +10,28 @@ import type {
     ProductionAccount,
     ProductionExecutor,
     ProductionRate,
-} from "@opencok/contracts/timed-activity";
-import type { Row } from "@opencok/contracts/rows";
+} from "@opencok/production/contracts/production";
 import { long, text } from "@opencok/contracts/rows";
-import { encodeProductionRates, decodeProductionRates } from "@opencok/mappings/production";
-import { changeProductionRate, settleProduction } from "@opencok/rules/timed-activity";
-import { createMutationExecutor, type MutationTransaction } from "./mutation";
-import { executeRealmInventoryTransaction } from "@opencok/repositories/inventory-runtime";
-import type { DatabaseClient } from "@opencok/drizzle/contracts/database";
-import type { RealmAuthority } from "./realm-authority";
-
-export interface ProductionPreparation
-{
-    recordAction?:
-        import("@opencok/economy/repositories/inventory-transaction").InventoryPreparation[
-            "recordAction"
-        ];
-    prepare(
-        tx: MutationTransaction,
-        owner: string,
-        now: bigint,
-    ): Promise<(building: Row, from: bigint) => Promise<readonly ProductionRate[]>>;
-}
+import {
+    encodeProductionRates,
+    decodeProductionRates,
+} from "@opencok/production/mappings/production";
+import { changeProductionRate, settleProduction } from "@opencok/production/rules/settlement";
 
 export function createProductionExecutor(
-    db: DatabaseClient<"kingdom">,
-    authority: RealmAuthority,
+    runtime: ProductionPersistenceRuntime,
     preparation: ProductionPreparation,
     now = Date.now,
 ): ProductionExecutor
 {
-    const execute = createMutationExecutor(db, authority, now);
+    const execute = runtime.execute;
 
     return (command, plan) =>
         execute(command, async (tx) => {
             const captured = BigInt(now());
             const rates = await preparation.prepare(tx, command.owner, captured);
 
-            return executeRealmInventoryTransaction(
+            return runtime.inventory(
                 tx,
                 command.owner,
                 async (inventory) => {

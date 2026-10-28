@@ -6,7 +6,7 @@ import { lucky_day } from "@opencok/drizzle/schema/opencok_kingdom/lucky_day";
 import { server_info } from "@opencok/drizzle/schema/opencok_kingdom/server_info";
 import { building_production } from "@opencok/drizzle/schema/opencok_kingdom/building_production";
 import { economy_posting } from "@opencok/drizzle/schema/opencok_kingdom/economy_posting";
-import { decodeProductionRates } from "@opencok/mappings/production";
+import { decodeProductionRates } from "@opencok/production/mappings/production";
 import { sfs, fields } from "@opencok/messages/sfs";
 import { cityHarness } from "./support/city";
 async function fixture(failure = false)

@@ -48,3 +48,7 @@ through each subsequent slice.
 by #558 W06 after #611. It owns existing asset contracts and the transactional
 adapter, while ledger remains a shared validation primitive. Inventory and later
 reservation workflows remain tracked separately.
+
+The [production domain](production/README.md) is implemented in #633 for building
+accumulation, collection/boosts, effect schedules and atomic city settlement. It uses
+app-injected economic and world adapters; wider W07 city ownership remains in progress.

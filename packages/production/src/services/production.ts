@@ -1,18 +1,18 @@
+import { activityInstant } from "@opencok/rules/timed-activity";
 import { activityEconomy } from "@opencok/economy/services/activity-economy";
-import { productionBoost } from "@opencok/mappings/production";
+import { productionBoost } from "@opencok/production/mappings/production";
 import { randomUUID } from "node:crypto";
-import type { ProductionExecutor, ProductionAccount } from "@opencok/contracts/timed-activity";
+import type {
+    ProductionExecutor,
+    ProductionAccount,
+} from "@opencok/production/contracts/production";
 import { long, num, text, type Row } from "@opencok/contracts/rows";
-import {
-    settleProduction,
-    changeProductionRate,
-    activityInstant,
-} from "@opencok/rules/timed-activity";
+import { settleProduction, changeProductionRate } from "@opencok/production/rules/settlement";
 import type { Rules } from "@opencok/rules/game";
 import { sfs, encode, str, type Fields } from "@opencok/messages/sfs";
 import { inventoryReplay } from "@opencok/economy/mappings/inventory";
 import { resource } from "@opencok/economy/mappings/resources";
-import { createInventoryPlanner, type InventoryEffects } from "@opencok/services/inventory-runtime";
+import type { ProductionPlanner } from "../contracts/runtime.ts";
 import { debit } from "@opencok/economy/services/activity-economy";
 
 const assets = ["wood", "stone", "iron", "food"] as const;
@@ -24,7 +24,7 @@ export class ProductionService
     constructor(
         readonly execute: ProductionExecutor,
         readonly rules: Rules,
-        readonly effects: InventoryEffects,
+        readonly planner: ProductionPlanner,
     )
     {}
 
@@ -56,12 +56,7 @@ export class ProductionService
         const response = await this.execute(
             { owner, requestId, command, request: encode(request) },
             async (state) => {
-                const ledger = createInventoryPlanner(
-                    state,
-                    this.rules,
-                    this.effects,
-                    Number(state.now),
-                );
+                const ledger = this.planner(state, Number(state.now));
                 const selected = command === "production.settle"
                     ? state.buildings.filter((row) => this.asset(row) !== undefined)
                     : state.buildings.filter((row) => row.uuid === str(params, "uuid"));

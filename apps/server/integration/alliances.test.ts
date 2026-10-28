@@ -13,7 +13,7 @@ import { timed_activity } from "@opencok/drizzle/schema/opencok_kingdom/timed_ac
 import { command_receipt } from "@opencok/drizzle/schema/opencok_kingdom/command_receipt";
 import { economy_posting } from "@opencok/drizzle/schema/opencok_kingdom/economy_posting";
 import { createAllianceRepository } from "@opencok/repositories/alliance-gameplay";
-import { createCityProductionBoundary } from "@opencok/repositories/city-production";
+import { createCityProductionBoundary } from "@opencok/production/repositories/city-boundary";
 import { AllianceService } from "@opencok/services/alliances";
 import { researchDomain } from "@opencok/services/research";
 import { fields, str, int, sfs, type Fields } from "@opencok/messages/sfs";
@@ -389,7 +389,7 @@ test(
         const { building_production } = await import(
             "@opencok/drizzle/schema/opencok_kingdom/building_production"
         );
-        const { decodeProductionRates } = await import("@opencok/mappings/production");
+        const { decodeProductionRates } = await import("@opencok/production/mappings/production");
         const { allianceScienceStage, allianceScienceRule } = await import(
             "@opencok/rules/alliance-science"
         );
