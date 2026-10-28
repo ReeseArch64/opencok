@@ -39,3 +39,4 @@ This index bootstraps the ADR practice without introducing an extra technology d
 - [ADR-0012: Adopt Effect for API and realm service composition](0012-adopt-effect-for-service-composition.md) — proposed
 - [ADR-0013: Adopt Maple for local operational observability](0013-adopt-maple-for-local-operational-observability.md) — proposed
 - [ADR-0014: Adopt dprint for TypeScript formatting](0014-adopt-dprint-for-typescript-formatting.md) — accepted
+- [ADR-0015: Adopt measured per-application build selection](0015-adopt-measured-per-application-build-selection.md) — proposed
