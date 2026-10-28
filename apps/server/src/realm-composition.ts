@@ -1,3 +1,4 @@
+import { ActivityRecoveryJob } from "./activity-recovery-job.ts";
 import { WorldMarchRecoveryJob } from "./world-march-recovery-job.ts";
 import { WorldPopulationJob } from "./world-population-job.ts";
 import { logEvent } from "@opencok/core/logging";
@@ -257,7 +258,6 @@ import { TrainingDomain } from "@opencok/services/training";
 import { HospitalDomain } from "@opencok/services/hospital";
 import { FortificationDomain } from "@opencok/services/fortifications";
 import { ResearchDomain } from "@opencok/services/research";
-import { createHash } from "node:crypto";
 import { createCityProgressionStore } from "@opencok/repositories/city-progression";
 import { createCityProductionBoundary } from "@opencok/repositories/city-production";
 import { CityProgressionService } from "@opencok/services/city-progression.service";
@@ -2400,92 +2400,19 @@ export const RealmDependenciesLive = Layer.effect(
             ),
             "realm.ProductionService",
         );
-        let importCursor: string | undefined;
-        let recoveryCursor: { dueAt: bigint; id: string; } | undefined;
-        const recoverActivities = async (owner?: string, stopQueue?: string) => {
-            authority.assertReady();
-            const pending = await unregisteredActivities(
-                db.kingdom.db,
-                [...activityDomains.keys()],
-                owner ? 256 : 64,
-                owner,
-                owner ? undefined : importCursor,
-            );
-
-            if (!owner)
-            {
-                importCursor = pending.length === 64 ? pending.at(-1)!.uuid : undefined;
-            }
-
-            for (const saved of pending)
-            {
-                const operationId = "restore:"
-                    + observeAdapter(createHash("sha256"), "realm.createHash")
-                        .update(
-                            [
-                                saved.uuid,
-                                saved.ownerId,
-                                saved.itemId,
-                                String(saved.startTime),
-                                String(saved.updateTime),
-                            ].join(":"),
-                        )
-                        .digest("hex");
-
-                try
-                {
-                    await activities.restore(saved.ownerId, operationId, saved.uuid);
-                }
-                catch
-                {
-                    logEvent(
-                        "activity_import_failed",
-                        { kingdom: config.kingdomId, outcome: "failure" },
-                        "error",
-                    );
-                }
-            }
-
-            const due = await dueActivities(
-                db.kingdom.db,
-                [...activityDomains.keys()],
-                BigInt(Date.now()),
-                owner ? 256 : 64,
-                owner,
-                owner ? undefined : recoveryCursor,
-            );
-
-            if (!owner)
-            {
-                recoveryCursor = due.length === 64 ? due.at(-1) : undefined;
-            }
-
-            for (const activity of due)
-            {
-                if (activity.queueId === stopQueue)
-                {
-                    break;
-                }
-
-                try
-                {
-                    await activities.command(activity.ownerId, "queue.finish", {
-                        uuid: sfs.string(activity.queueId),
-                        activityId: sfs.string(activity.id),
-                        version: sfs.int(activity.version),
-                        operationId: sfs.string(`finish:${activity.id}:${activity.version}`),
-                    });
-                }
-                catch
-                {
-                    logEvent(
-                        "activity_recovery_failed",
-                        { kingdom: config.kingdomId, outcome: "failure" },
-                        "error",
-                    );
-                }
-            }
-        };
+        const activityRecovery = new ActivityRecoveryJob(
+            () => authority.assertReady(),
+            () => [...activityDomains.keys()],
+            (types, limit, owner, after) =>
+                unregisteredActivities(db.kingdom.db, types, limit, owner, after),
+            (types, now, limit, owner, after) =>
+                dueActivities(db.kingdom.db, types, now, limit, owner, after),
+            (owner, operationId, queueId) => activities.restore(owner, operationId, queueId),
+            (owner, command, params) => activities.command(owner, command, params),
+            (event) => logEvent(event, { kingdom: config.kingdomId, outcome: "failure" }, "error"),
+        );
+        const recoverActivities = (owner?: string, stopQueue?: string) =>
+            activityRecovery.run(owner, stopQueue);
         yield* Effect.tryPromise({
             try: () => observeJob("realm.hero_calendar_recovery", recoverHeroCalendar),
             catch: () => new Error("Hero calendar recovery unavailable"),
