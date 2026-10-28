@@ -5,7 +5,7 @@ import { anniversaryDomain } from "@opencok/services/anniversary";
 import {
     cosmeticInteractionParticipants,
     publishCosmeticInteractionMutation,
-} from "@opencok/services/city-cosmetics";
+} from "../src/composition/skins";
 import { Database } from "@opencok/repositories/game";
 import { WorldService } from "@opencok/services/world";
 import { user_item } from "@opencok/drizzle/schema/opencok_kingdom/user_item";

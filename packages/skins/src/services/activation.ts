@@ -1,23 +1,47 @@
-import { CityCommandDomain } from "./city-command-domain.ts";
-import { randomInt } from "node:crypto";
+import { ActivityDomain } from "@opencok/base/domain/activity-domain";
 import { encode, str } from "@opencok/messages/sfs";
-import { long, num, text } from "@opencok/contracts/rows";
-import { cityInteger } from "@opencok/rules/city-progression";
-import { campaignFailure } from "@opencok/rules/local-campaign";
-import { serverFeature } from "@opencok/rules/power-context";
-import { temporaryEffect } from "@opencok/rules/player-effects";
-import { avatarActivationResponse } from "@opencok/mappings/city-cosmetics";
-import { cosmeticInteractionEvent } from "./city-cosmetics";
-import { CampaignPlanner } from "./local-campaign";
-import type { CityDomain } from "./city-domain.ts";
+import type { CosmeticCatalog, CosmeticContext } from "../contracts/context";
+import type { CosmeticActivationRuntime } from "../contracts/runtime";
+import { CosmeticMapper } from "../mappings/cosmetics";
+import { CosmeticEventMapper } from "../mappings/interaction";
+import { CosmeticCommand } from "../enums/command";
+import { CosmeticKind } from "../enums/kind";
 
-export class AvatarActivationDomain extends CityCommandDomain
+export class AvatarActivationDomain<
+    TCatalog extends CosmeticCatalog,
+    TContext extends CosmeticContext<TCatalog>,
+> extends ActivityDomain<TContext>
 {
-    public readonly commands: CityDomain["commands"] = ["avatar.activate"];
+    public readonly commands = [CosmeticCommand.Activate];
+    public readonly types: readonly number[] = [];
 
-    public readonly types: CityDomain["types"] = [];
+    public constructor(
+        private readonly runtime: CosmeticActivationRuntime<TCatalog, TContext>,
+        private readonly mapper: CosmeticMapper,
+        private readonly events: CosmeticEventMapper<TCatalog, TContext>,
+    )
+    {
+        super();
+    }
 
-    public readonly prepare: CityDomain["prepare"] = async (context, _command, params) => {
+    public readonly prepare: ActivityDomain<TContext>["prepare"] = async (
+        context,
+        _command,
+        params,
+    ) => {
+        const {
+            long,
+            num,
+            text,
+            cityInteger,
+            serverFeature,
+            temporaryEffect,
+            randomInt,
+            recordCampaignEvent,
+        } = this.runtime;
+        const campaignFailure: () => never = this.runtime.campaignFailure;
+        const { avatarActivationResponse } = this.mapper;
+        const { cosmeticInteractionEvent } = this.events;
         const id = str(params, "avatarId"),
             rule = context.rules.power.statuses?.get(id),
             target = context.state.cosmeticTarget;
@@ -25,7 +49,11 @@ export class AvatarActivationDomain extends CityCommandDomain
 
         if (
             !rule?.subgroup
-            || !["100", "105", "200"].includes(rule.type2 ?? "")
+            || ![
+                String(CosmeticKind.City),
+                String(CosmeticKind.Bubble),
+                String(CosmeticKind.Overlap),
+            ].includes(rule.type2 ?? "")
             || target?.uid !== context.owner
             || target.realm !== context.rules.kingdomId
             || !serverFeature(context.rules, "avatar", {
@@ -54,7 +82,7 @@ export class AvatarActivationDomain extends CityCommandDomain
             campaignFailure();
         }
 
-        new CampaignPlanner(context).event(59, id);
+        recordCampaignEvent(context, 59, id);
         const before = context.write.states ?? context.state.effects.states,
             plan = temporaryEffect(
                 before,
@@ -106,9 +134,7 @@ export class AvatarActivationDomain extends CityCommandDomain
         return { response: encode(body), event: cosmeticInteractionEvent(context, body) };
     };
 
-    public readonly apply: CityDomain["apply"] = async () => {
-        campaignFailure();
+    public readonly apply: ActivityDomain<TContext>["apply"] = async () => {
+        this.runtime.campaignFailure();
     };
 }
-
-export const avatarActivationDomain: CityDomain = new AvatarActivationDomain();

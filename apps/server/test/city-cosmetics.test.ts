@@ -1,9 +1,13 @@
 import { test, expect } from "bun:test";
 import { temporaryEffect } from "@opencok/rules/player-effects";
-import { cityCosmeticProjection } from "@opencok/rules/city-cosmetics";
-import { cosmeticInteractionParticipants } from "@opencok/services/city-cosmetics";
+import { createRealmCosmeticPolicy } from "../src/composition/skins";
+
+import { cosmeticInteractionParticipants } from "../src/composition/skins";
 import { loadRules } from "@opencok/resources/rules";
 import { sfs } from "@opencok/messages/sfs";
+
+const { cityCosmeticProjection } = createRealmCosmeticPolicy();
+
 test("city cosmetic projection prioritizes temporary trouble effects and retains Java signed seconds", async () => {
     const rules = await loadRules();
     const rows = [

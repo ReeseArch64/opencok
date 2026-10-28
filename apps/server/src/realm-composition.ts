@@ -65,7 +65,7 @@ import {
     settleRedPacketExpiry,
 } from "@opencok/services/red-packets";
 import { ExchangeActivityDomain } from "@opencok/services/exchange-activity";
-import { AvatarActivationDomain } from "@opencok/services/avatar-activation";
+import { createRealmAvatarActivationDomain } from "./composition/skins";
 import {
     campaignInventoryObservations,
     campaignObservationNeeded,
@@ -193,7 +193,7 @@ import { pendingContinuedCosts } from "@opencok/repositories/continued-cost";
 import {
     cosmeticInteractionParticipants,
     publishCosmeticInteractionMutation,
-} from "@opencok/services/city-cosmetics";
+} from "./composition/skins";
 import {
     TroubleDomain,
     deliverWorldTroubles,
@@ -1032,7 +1032,10 @@ export const RealmDependenciesLive = Layer.effect(
                     observeAdapter(new ExpeditionDomain(), "realm.ExpeditionDomain"),
                     observeAdapter(new ExpeditionPhaseDomain(), "realm.ExpeditionPhaseDomain"),
                     observeAdapter(new AnniversaryDomain(), "realm.AnniversaryDomain"),
-                    observeAdapter(new AvatarActivationDomain(), "realm.AvatarActivationDomain"),
+                    observeAdapter(
+                        createRealmAvatarActivationDomain(),
+                        "realm.AvatarActivationDomain",
+                    ),
                     observeAdapter(new ArenaDomain(), "realm.ArenaDomain"),
                     observeAdapter(createRealmTrainingDomain(), "realm.TrainingDomain"),
                     observeAdapter(createRealmHospitalDomain(), "realm.HospitalDomain"),

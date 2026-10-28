@@ -36,12 +36,6 @@ export interface CityPersistenceWriters
     writeContinuedCost: CityWriteField<"continuedCost">;
     writeContinuedCostHide: CityWriteField<"continuedCostHide">;
     writeTrouble: CityWriteField<"troubleHistory">;
-    writeCosmeticTarget: (
-        tx: CityTransaction,
-        owner: string,
-        target: string | undefined,
-        write: NonNullable<CityProgressionWrite["cosmeticTarget"]>,
-    ) => Promise<unknown>;
     writePrayer: CityWriteField<"prayer">;
     writeRegionalRecall: CityWriteField<"regionalRecall">;
     writeAllianceHeart: CityWriteField<"allianceHeart">;

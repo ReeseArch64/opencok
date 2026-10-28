@@ -37,6 +37,7 @@ export class CityProgressionRepository implements CityProgressionStore
             equipment: adapters.equipment,
             quests: adapters.quests,
             targetTasks: adapters.targetTasks,
+            cosmetics: adapters.cosmetics,
             recallTasks: adapters.recallTasks,
             writers: adapters.writers,
             birth: adapters.birth,

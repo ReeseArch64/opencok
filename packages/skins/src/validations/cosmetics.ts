@@ -3,7 +3,7 @@ import { field } from "@opencok/messages/validations/response";
 import type {
     CityCosmeticResponse,
     CityCosmeticUpdateResponse,
-} from "@opencok/contracts/responses/city-cosmetics";
+} from "../contracts/responses/cosmetics";
 
 const status = z.strictObject({ sid: field.int, set: field.int, count: field.int.optional() });
 

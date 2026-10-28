@@ -192,3 +192,11 @@ After #657, the injected `RecallTaskRepository` owns recall notes/task persisten
 and the conditional preferred registration-country read. City preserves its position
 and command gate in the aggregate snapshot/writer. Current legacy context/domain
 aliases have 51/56 consumers; Tasks tracks the remaining callback/type facades.
+
+After #661, `CosmeticRepository` owns target/profile/world lookup, locked cosmetic
+states/ownership and the existing target writes. The realm injects it into City;
+the session forwards it to the same conditional snapshot and mechanic-writer
+positions. Actor/target authority, transaction and other mechanics remain unchanged.
+Avatar activation uses Skins' structural context and Base lifecycle, leaving 51/55
+legacy City context/domain consumers. Shared cosmetic aggregate aliases are tracked
+in [Skins](../skins/README.md#source-ownership-and-compatibility).
