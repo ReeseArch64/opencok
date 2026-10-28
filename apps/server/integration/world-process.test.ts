@@ -17,7 +17,7 @@ import { receive_item } from "@opencok/drizzle/schema/opencok_kingdom/receive_it
 import { realm_authority } from "@opencok/drizzle/schema/opencok_kingdom/realm_authority";
 import { acquireRealmAuthority } from "@opencok/repositories/realm-authority";
 import { createCharacterCreator } from "@opencok/repositories/character-provisioning";
-import { createProvisioningStore } from "@opencok/repositories/provisioning";
+import { createProvisioningStore } from "@opencok/account/repositories/provisioning";
 import { CharacterProvisioningService } from "@opencok/services/provisioning";
 import { loadRules } from "@opencok/resources/rules";
 import { fields, sfs, str, Type, type Fields } from "@opencok/messages/sfs";

@@ -1,3 +1,4 @@
+import type { ProvisioningStore } from "@opencok/account/contracts/provisioning";
 import { expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { provisionHash } from "@opencok/rules/provisioning";
@@ -7,9 +8,9 @@ import {
     provisioningHandler,
     realmProvisioner,
 } from "@opencok/connection/provisioning";
-import { ProvisioningService } from "@opencok/services/provisioning";
+import { ProvisioningService } from "@opencok/account/services/provisioning";
 import { HttpError } from "@opencok/errors/http";
-import type { CharacterReservation, ProvisioningStore } from "@opencok/contracts/provisioning";
+import type { CharacterReservation } from "@opencok/contracts/provisioning";
 
 const reservation: CharacterReservation = {
     identityId: randomUUID(),

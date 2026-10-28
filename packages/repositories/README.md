@@ -31,7 +31,7 @@ The old method names are removed rather than retained as parallel aliases.
 | Chat repository | loadPlayerState | getPlayerStateById         |
 | Chat repository | cleanup         | deleteExpired              |
 
-AccountStore.getAll retains the mapping type/value and bound-account filters,
+`AccountStore`, now owned by `@opencok/account/repositories/account`, retains the mapping type/value and bound-account filters,
 active-account rules and time ordering. Chat sessions.getById receives the existing
 SHA-256 token hash primary key, never a raw token. Chat messages.getAll and
 getAllByRange retain their room/time predicates, 100-message limit and chronological
@@ -83,3 +83,11 @@ explicit test fixtures can still use it. This boundary is checked by the
 two shop adapters. Query code, SQL, locking, transactions and runtime exports are
 unchanged. Remaining domain ownership and genuine dependency cycles are tracked
 under #558; this type-only change does not complete those migrations.
+
+## Global account ownership
+
+Global discovery reads and reservation/activation transactions belong to
+[`account`](../account/README.md) after #607. The former `account` and `provisioning`
+repository paths are retired with all callers migrated. Realm character creation
+remains here until its player-domain slice; global account linkage and realm seeds
+must keep their separate transaction ownership.

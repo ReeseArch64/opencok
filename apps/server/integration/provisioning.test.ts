@@ -1,3 +1,4 @@
+import { ProvisioningController } from "@opencok/account/controllers/provisioning";
 import { seedSyntheticWorldBirth } from "./support/world-birth";
 import { user_army } from "@opencok/drizzle/schema/opencok_kingdom/user_army";
 import { user_hospital } from "@opencok/drizzle/schema/opencok_kingdom/user_hospital";
@@ -19,12 +20,10 @@ import { game_identity } from "@opencok/drizzle/schema/opencok_global/game_ident
 import { character_provisioning } from "@opencok/drizzle/schema/opencok_global/character_provisioning";
 import { acquireRealmAuthority } from "@opencok/repositories/realm-authority";
 import { createCharacterCreator } from "@opencok/repositories/character-provisioning";
-import { createProvisioningStore } from "@opencok/repositories/provisioning";
-import { CharacterProvisioningService, ProvisioningService } from "@opencok/services/provisioning";
-import {
-    CharacterProvisioningController,
-    ProvisioningController,
-} from "@opencok/controllers/provisioning";
+import { createProvisioningStore } from "@opencok/account/repositories/provisioning";
+import { CharacterProvisioningService } from "@opencok/services/provisioning";
+import { ProvisioningService } from "@opencok/account/services/provisioning";
+import { CharacterProvisioningController } from "@opencok/controllers/provisioning";
 import {
     characterProvisioningHandler,
     provisioningHandler,

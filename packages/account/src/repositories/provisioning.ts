@@ -1,10 +1,11 @@
+import type { ProvisioningStore } from "../contracts/provisioning";
 import { randomBytes, randomUUID } from "node:crypto";
 import { and, eq, sql } from "drizzle-orm";
 import { game_identity } from "@opencok/drizzle/schema/opencok_global/game_identity";
 import { character_provisioning } from "@opencok/drizzle/schema/opencok_global/character_provisioning";
 import { account_new } from "@opencok/drizzle/schema/opencok_global/account_new";
 import { usermapping } from "@opencok/drizzle/schema/opencok_global/usermapping";
-import type { CharacterReservation, ProvisioningStore } from "@opencok/contracts/provisioning";
+import type { CharacterReservation } from "@opencok/contracts/provisioning";
 import { HttpError } from "@opencok/errors/http";
 import { starterVersion } from "@opencok/contracts/provisioning";
 import { provisionHash } from "@opencok/rules/provisioning";
