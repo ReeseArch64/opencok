@@ -1,4 +1,4 @@
-import type { AccountReader } from "@opencok/contracts/account";
+import type { AccountReader } from "@opencok/account/contracts/account";
 import type { ChatDiscovery } from "@opencok/contracts/chat";
 import type { ServerDirectory } from "@opencok/storage/server-directory";
 

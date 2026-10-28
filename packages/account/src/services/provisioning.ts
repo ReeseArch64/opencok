@@ -1,8 +1,8 @@
-import type { CreateCharacterDto } from "@opencok/dtos/provisioning";
+import type { ProvisioningStore } from "../contracts/provisioning";
+import type { CreateCharacterDto } from "../dtos/create-character.dto";
 import type {
     CharacterResponse,
     IdentityVerifier,
-    ProvisioningStore,
     RealmProvisioner,
 } from "@opencok/contracts/provisioning";
 import {

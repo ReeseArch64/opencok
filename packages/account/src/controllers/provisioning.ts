@@ -1,5 +1,5 @@
-import type { CreateCharacterDto } from "@opencok/dtos/provisioning";
-import type { ProvisioningService } from "@opencok/services/provisioning";
+import type { CreateCharacterDto } from "../dtos/create-character.dto";
+import type { ProvisioningService } from "../services/provisioning";
 
 export class ProvisioningController
 {

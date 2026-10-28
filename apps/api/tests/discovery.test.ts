@@ -2,7 +2,7 @@ import { expect, test } from "bun:test";
 import { Discovery } from "@opencok/api/discovery";
 import { ServerDirectory, publicServer } from "@opencok/storage/server-directory";
 import { phpJson, requestParameters } from "@opencok/api/compat";
-import type { Account, AccountReader } from "@opencok/contracts/account";
+import type { Account, AccountReader } from "@opencok/account/contracts/account";
 import type { Config } from "../src/config";
 import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";

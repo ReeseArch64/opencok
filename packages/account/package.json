@@ -2,11 +2,25 @@
   "name": "@opencok/account",
   "private": true,
   "scripts": {
-    "check-types": "tsc --noEmit"
+    "check-types": "tsc --noEmit",
+    "test": "bun --no-env-file test tests",
+    "test:integration": "bun --no-env-file test integration"
   },
   "devDependencies": {
     "@opencok/config": "workspace:*",
     "@types/bun": "catalog:",
     "typescript": "catalog:"
+  },
+  "type": "module",
+  "exports": {
+    "./*": "./src/*.ts"
+  },
+  "dependencies": {
+    "@opencok/contracts": "workspace:*",
+    "@opencok/drizzle": "workspace:*",
+    "@opencok/errors": "workspace:*",
+    "@opencok/rules": "workspace:*",
+    "@opencok/validations": "workspace:*",
+    "drizzle-orm": "0.45.4"
   }
 }

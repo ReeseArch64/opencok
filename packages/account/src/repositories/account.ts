@@ -5,7 +5,7 @@ import { usermapping } from "@opencok/drizzle/schema/opencok_global/usermapping"
 import { userbindmapping } from "@opencok/drizzle/schema/opencok_global/userbindmapping";
 import { and, asc, eq, inArray, isNull, or, sql } from "drizzle-orm";
 import { DependencyError } from "@opencok/errors/dependency";
-import type { Account, AccountReader } from "@opencok/contracts/account";
+import type { Account, AccountReader } from "../contracts/account";
 
 export interface AccountStoreConfig
 {

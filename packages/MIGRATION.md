@@ -10,7 +10,7 @@ Counts describe maintained TypeScript/JavaScript source under `src` and named te
 
 | Original package | Current source / tests | Responsibility                                                                                                                                                                                                 | Disposition and boundary                                                                                                                                                                                                                           | Review                   |
 | ---------------- | ---------------------: | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------ |
-| `account`        |                  0 / 0 | Global account lifecycle and account-to-character linkage.                                                                                                                                                     | Populate from current provisioning/global-account workflows; keep authentication cryptography in `identity` and character initialization in `player`.                                                                                              | Proposed; pending review |
+| `account`        |                  7 / 2 | Global account reads, lifecycle and account-to-character linkage.                                                                                                                                              | Implemented reservation/activation and discovery slice in #607; authentication remains in identity and realm character initialization awaits player migration.                                                                                     | Implemented in #607      |
 | `alliance`       |                  0 / 0 | Membership, permissions, help, gifts, research and alliance coordination.                                                                                                                                      | Populate from current alliance Services/Rules/Repositories/Contracts/Mappers; split `alliance-territory` or `alliance-events` if cohesion/size requires. Preserve participant-lock ordering and shared research effects.                           | Proposed; pending review |
 | `api`            |                  8 / 0 | Existing HTTP routing/compatibility adapters.                                                                                                                                                                  | Retain as bounded API adapter package or move app-only routing into `apps/api`; move media/auth use cases to owners. Do not make it a second application layer containing all domains.                                                             | Proposed; pending review |
 | `api-client`     |                  0 / 0 | Typed clients for real public/internal API contracts.                                                                                                                                                          | Defer any unimplemented capability until a concrete consumer/use case is approved. Populate only for actual consumers and implemented endpoints, not speculative SDKs; no database imports.                                                        | Proposed; pending review |
@@ -304,3 +304,14 @@ their runtime imports remain intact.
 This is a dependency foundation for W06-W12, not completion of their domain
 ownership or retirement of the broad runtime facade. The remaining baseline debt
 and the full package/file/catalog/command disposition remain #558 work.
+
+## Global account provisioning (#607)
+
+Seven source modules now belong to `account`: reader/store contracts, create DTO,
+Controller, Service, account reader and global reservation repository. All callers
+migrate and their horizontal predecessors are retired. The API no longer depends
+directly on horizontal Services or repositories. Shared account/realm protocol,
+validation and hash implementations remain single sources; realm seeds and grants
+remain in their existing owner pending the player slice. See [account](account/README.md)
+for preserved behavior, dependencies, tests and rollback. This does not complete
+all W06 domains or introduce ADR-0017 process ownership.

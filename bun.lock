@@ -27,6 +27,7 @@
     "apps/api": {
       "name": "@opencok/api-service",
       "dependencies": {
+        "@opencok/account": "workspace:*",
         "@opencok/api": "workspace:*",
         "@opencok/connection": "workspace:*",
         "@opencok/contracts": "workspace:*",
@@ -34,8 +35,6 @@
         "@opencok/core": "workspace:*",
         "@opencok/env": "workspace:*",
         "@opencok/identity": "workspace:*",
-        "@opencok/repositories": "workspace:*",
-        "@opencok/services": "workspace:*",
         "@opencok/storage": "workspace:*",
         "effect": "catalog:",
       },
@@ -96,6 +95,7 @@
         "effect": "catalog:",
       },
       "devDependencies": {
+        "@opencok/account": "workspace:*",
         "@opencok/api": "workspace:*",
         "@opencok/config": "workspace:*",
         "@opencok/drizzle": "workspace:*",
@@ -122,6 +122,14 @@
     },
     "packages/account": {
       "name": "@opencok/account",
+      "dependencies": {
+        "@opencok/contracts": "workspace:*",
+        "@opencok/drizzle": "workspace:*",
+        "@opencok/errors": "workspace:*",
+        "@opencok/rules": "workspace:*",
+        "@opencok/validations": "workspace:*",
+        "drizzle-orm": "0.45.4",
+      },
       "devDependencies": {
         "@opencok/config": "workspace:*",
         "@types/bun": "catalog:",
@@ -139,6 +147,7 @@
     "packages/api": {
       "name": "@opencok/api",
       "dependencies": {
+        "@opencok/account": "workspace:*",
         "@opencok/contracts": "workspace:*",
         "@opencok/core": "workspace:*",
         "@opencok/errors": "workspace:*",
@@ -251,6 +260,7 @@
     "packages/connection": {
       "name": "@opencok/connection",
       "dependencies": {
+        "@opencok/account": "workspace:*",
         "@opencok/constants": "workspace:*",
         "@opencok/contracts": "workspace:*",
         "@opencok/controllers": "workspace:*",

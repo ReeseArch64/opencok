@@ -21,6 +21,7 @@
     "@opencok/identity": "workspace:*",
     "@opencok/validations": "workspace:*",
     "busboy": "^1.6.0",
-    "@opencok/core": "workspace:*"
+    "@opencok/core": "workspace:*",
+    "@opencok/account": "workspace:*"
   }
 }
