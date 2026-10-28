@@ -92,7 +92,7 @@ and the emitted loading flow; it is not a browser rendering/screenshot test.
 Keep semantic workspace checking separate, including web's existing `check:types`
 command. Required local checks are `bun run lint`, `bun run format:check`, each
 affected workspace's type/test commands and the above artifact checks. Preserve
-Bun's separate mutation instrumentation and run:
+Bun's separate mutation instrumentation and isolated workspace fixture, then run:
 
 ```sh
 bun --no-env-file apps/server/scripts/mutate-auth.ts
