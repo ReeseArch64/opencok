@@ -122,7 +122,7 @@ bun --no-env-file test packages/core/tests packages/city/tests apps/server/test/
 The tests cover TCP response order and field types, replacement during unfinished work,
 disconnect during authentication, cancellation between recovery phases, serial progression
 and push order, reconnect projection, and OTLP export with independent packet traces.
-The focused run passed 58 tests with 426 assertions. Three meaningful mutations were detected:
+The focused run passed 59 tests with 429 assertions. Three meaningful mutations were detected:
 removing the previous-session drain, conflating cancellation with timeout, and removing
 bootstrap cancellation barriers. Removing only a redundant post-phase barrier survived,
 since the next phase still checks cancellation before work.

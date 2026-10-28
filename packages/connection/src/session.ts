@@ -314,6 +314,10 @@ export function createSessionHandler(
                 }
                 catch (error)
                 {
+                    const cancellationReason = closeReason === "peer_closed"
+                        ? "connection_closed"
+                        : closeReason;
+
                     report(
                         "login_rejected",
                         {
@@ -321,7 +325,7 @@ export function createSessionHandler(
                             durationMs: Math.round(performance.now() - started),
                             outcome: "failure",
                             reason: initialization.signal.aborted
-                                ? closeReason === "peer_closed" ? "connection_closed" : closeReason
+                                ? cancellationReason
                                 : error instanceof LoginError
                                 ? error.reason
                                 : error instanceof GameError

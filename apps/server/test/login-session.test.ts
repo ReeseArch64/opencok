@@ -10,6 +10,7 @@ import { envelope, fields, sfs, str, type Fields } from "@opencok/messages/sfs";
 async function harness(
     initialize: ServerDependencies["game"]["initialize"],
     authenticateWait: () => Promise<void> = async () => {},
+    profileOpenWait: () => Promise<void> = async () => {},
 )
 {
     const claims = new Map<string, string>();
@@ -43,7 +44,7 @@ async function harness(
             refresh: async () => true,
         },
         profileSessions: {
-            open: async () => {},
+            open: profileOpenWait,
             close: async (_owner: string, session: string) => {
                 closed.push(session);
             },
@@ -77,6 +78,7 @@ async function harness(
     }
 
     const connect = async () => {
+        const accepted = once(server, "connection");
         const socket = createConnection(address.port, "127.0.0.1");
         const packets: Fields[] = [];
         const reader = new FrameReader();
@@ -120,7 +122,10 @@ async function harness(
                 }),
             ),
         );
-        return { socket, packets, initialized, loginResult };
+        const [serverSocket] = await accepted;
+        const disconnected = new Promise<void>((resolve) => serverSocket.once("close", resolve));
+
+        return { socket, packets, initialized, loginResult, disconnected };
     };
     const close = async () => {
         const closing = [...sockets].map((socket) => {
@@ -328,8 +333,7 @@ test("disconnect during authentication prevents session claiming and initializat
         const client = await h.connect();
         await entered.promise;
         client.socket.destroy();
-        await once(client.socket, "close");
-        await Bun.sleep(10);
+        await client.disconnected;
         authentication.resolve();
     }
     finally
@@ -341,4 +345,40 @@ test("disconnect during authentication prevents session claiming and initializat
     expect(initializations).toBe(0);
     expect(h.claims.size).toBe(0);
     expect(h.closed).toHaveLength(0);
+});
+
+test("disconnect during profile-session opening prevents initialization and releases the claim", async () => {
+    const entered = Promise.withResolvers<void>();
+    const opening = Promise.withResolvers<void>();
+    let initializations = 0;
+    const h = await harness(
+        async () => {
+            initializations++;
+
+            return { body: {}, pushes: [] };
+        },
+        async () => {},
+        async () => {
+            entered.resolve();
+            await opening.promise;
+        },
+    );
+
+    try
+    {
+        const client = await h.connect();
+        await entered.promise;
+        client.socket.destroy();
+        await client.disconnected;
+        opening.resolve();
+    }
+    finally
+    {
+        opening.resolve();
+        await h.close();
+    }
+
+    expect(initializations).toBe(0);
+    expect(h.claims.size).toBe(0);
+    expect(h.closed).toHaveLength(1);
 });
