@@ -1,3 +1,4 @@
+import type { InventoryLedgerState } from "@opencok/economy/contracts/inventory-ledger";
 import type { InventoryItem, InventoryFields } from "@opencok/economy/contracts/inventory";
 import type {
     MutationCommand,
@@ -8,9 +9,8 @@ import type {
 import type { Row } from "./rows.ts";
 import type { PlayerEffectSnapshot } from "./power.ts";
 
-export interface InventoryState
+export interface InventoryState extends InventoryLedgerState
 {
-    assets?: Row;
     recordAction?(
         kind: "use" | "compose" | "harvest",
         itemId: string,
@@ -22,9 +22,6 @@ export interface InventoryState
         count: number,
         economy: import("@opencok/economy/contracts/activity-economy").ActivityEconomy,
     ): Promise<InventoryFields>;
-    profile: Row;
-    resource: Row;
-    items: readonly InventoryItem[];
     cooldowns: ReadonlyMap<string, bigint>;
     buildings: readonly Row[];
     effects(): Promise<PlayerEffectSnapshot>;
