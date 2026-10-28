@@ -387,3 +387,18 @@ prototype keys and original field identity/order remain unchanged. Zod uses the
 already pinned catalog version. Domain-specific response schemas and mappings
 remain with their current owners until their own slices migrate. See
 [messages](messages/README.md) for boundaries, parity evidence and rollback.
+
+## Inventory response ownership (#619)
+
+Economy now has fourteen source modules and five test files, including inventory
+response mappings, the shared login/grant item mapper, item schema and response
+contracts. Every maintained consumer uses the domain paths. The old inventory
+mapping/response modules and bootstrap item exports are removed. Existing saved-row
+conversions are preserved at the compatibility boundary and goods lookups use the
+owned narrow catalog port. Shared protocol checks use messages; economy has no
+reverse dependency on horizontal mappings, validations or rules. Validations declares
+its actual dependency on the owned item schema. Zod uses the existing catalog version.
+
+Before/after vectors verify fields, errors, precise balances, replay and push order.
+No schema, save rewrite, native format or authority change occurs. Full inventory
+planning and persistence remain under #558; see [economy](economy/README.md).

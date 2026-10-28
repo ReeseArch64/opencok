@@ -10,7 +10,6 @@ import {
     loginConfigurationSchema,
     settingConfigSchema,
     armySnapshotSchema,
-    inventoryItemSchema,
 } from "@opencok/validations/bootstrap";
 
 import { sfs, Type, type Fields, type Value } from "@opencok/messages/sfs";
@@ -249,33 +248,6 @@ function serializeArmySnapshot(row: Row, rules: Rules): Fields
     return out;
 }
 
-function serializeInventoryItem(row: Row, rules: Rules): Fields
-{
-    const rule = rules.goods.get(text(row, "itemId").trim());
-
-    if (!rule)
-    {
-        throw new GameError(errors.unsupported);
-    }
-
-    const out: Fields = {
-        uuid: sfs.string(text(row, "uuid")),
-        itemId: sfs.string(text(row, "itemId")),
-        count: sfs.int(num(row, "count")),
-        vanishTime: sfs.long(long(row, "vanishTime")),
-    };
-
-    for (let i = 1; i < 10; i++)
-    {
-        if (rule[`para${i}`])
-        {
-            out[`para${i}`] = sfs.string(rule[`para${i}`]!);
-        }
-    }
-
-    return out;
-}
-
 export function serverClock(...args: Parameters<typeof serializeServerClock>): Fields
 {
     return validateFields(serverClockSchema, serializeServerClock(...args));
@@ -321,9 +293,4 @@ export function settingConfig(...args: Parameters<typeof serializeSettingConfig>
 export function armySnapshot(...args: Parameters<typeof serializeArmySnapshot>): Fields
 {
     return validateFields(armySnapshotSchema, serializeArmySnapshot(...args));
-}
-
-export function inventoryItem(...args: Parameters<typeof serializeInventoryItem>): Fields
-{
-    return validateFields(inventoryItemSchema, serializeInventoryItem(...args));
 }

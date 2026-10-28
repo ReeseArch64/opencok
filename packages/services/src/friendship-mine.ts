@@ -1,10 +1,10 @@
 import { reconnectMine } from "@opencok/mappings/reconnect";
-import { inventoryItem } from "@opencok/mappings/bootstrap";
+import { inventoryItem } from "@opencok/economy/mappings/inventory-item";
 import { randomUUID, randomInt } from "node:crypto";
 import type { FriendshipMineExecutor } from "@opencok/contracts/friendship-mine";
 import type { RealmSocialExecutor } from "@opencok/contracts/realm-social";
 import { sfs, str, encode, fields, type Fields } from "@opencok/messages/sfs";
-import { inventoryReplay } from "@opencok/mappings/inventory";
+import { inventoryReplay } from "@opencok/economy/mappings/inventory";
 import { InventoryPlanner, type InventoryEffects } from "./inventory.ts";
 import { activityEconomy } from "@opencok/economy/services/activity-economy";
 import { friendshipMineView } from "@opencok/rules/reconnect-mine";

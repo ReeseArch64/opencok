@@ -10,7 +10,7 @@ import {
 } from "@opencok/rules/timed-activity";
 import type { Rules } from "@opencok/rules/game";
 import { sfs, encode, str, type Fields } from "@opencok/messages/sfs";
-import { inventoryReplay } from "@opencok/mappings/inventory";
+import { inventoryReplay } from "@opencok/economy/mappings/inventory";
 import { resource } from "@opencok/mappings/city";
 import { InventoryPlanner, type InventoryEffects } from "./inventory";
 import { debit } from "@opencok/economy/services/activity-economy";

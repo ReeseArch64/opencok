@@ -1,7 +1,7 @@
 # Economy
 
 `economy` owns wallet/resource balance mutations, activity economic coordination
-and pure inventory rules under #611, #613 and #615, part of #558 W06. Full inventory
+and inventory rules/responses under #611, #613, #615 and #619, part of #558 W06. Full inventory
 planning, item persistence, production and reservation protocols remain subsequent
 work. These extractions do not create a network service or a second mutation authority.
 
@@ -97,3 +97,26 @@ An additional catalog test verifies exact string identities (including `001`
 versus `1`), row identity, missing/malformed IDs and the original error. Rule
 function bodies and native IDs are unchanged. No SQL, transaction, authority,
 client package or saved-state change is involved; rollback uses the previous artifact.
+
+## Inventory response boundary (#619)
+
+`mappings/inventory` owns purchase/use/composition responses, changed-item lists,
+posting events, durable response encoding/replay and chained push merging.
+`mappings/inventory-item` owns the login and grant item projection;
+`validations/inventory` and `contracts/responses/inventory` own its schema and
+plain response contracts. All callers use the owned paths; old horizontal module
+paths and bootstrap item exports are retired.
+
+The item mapper accepts saved row fields at the compatibility boundary and the
+narrow goods catalog port. Its String/Number/BigInt conversions inline the exact
+previous row-helper operations and defaults. Catalog lookup trims itemId as before,
+while the output retains the saved string. Only truthy para1 through para9 are
+emitted, in their original order. Generic wire/schema validation comes from
+messages; economy does not depend on horizontal mappings, rules or validations.
+
+Four tests pass with the same 32 assertions before and after extraction. They cover
+native field order, leading-zero IDs, bigint precision, null/string saved values,
+invalid rows, purchase/use/composition shapes, receipt operation IDs, event balances,
+primary-body preservation and ordered chained pushes. Schema and response types
+retain their shapes. Existing planner/transaction ownership, saved data and process
+authority remain unchanged; rollback uses the prior artifact.
