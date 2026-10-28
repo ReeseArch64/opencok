@@ -1,7 +1,7 @@
 import { expect, test } from "bun:test";
 import { loadRules } from "@opencok/resources/rules";
 import type { ScoutParticipant, WorldScoutTarget } from "@opencok/contracts/world-scout-report";
-import type { CityProgressionContext } from "@opencok/services/city-progression";
+import type { CityProgressionContext } from "@opencok/city/services/context";
 import { scoutDetectReport, scoutBarbarianReport } from "@opencok/services/world-scout-report";
 import { scoutApproximate, scoutBarbarianArmy } from "@opencok/rules/world-scout-report";
 import { encodeScoutReport } from "@opencok/mappings/world-scout-report";

@@ -243,7 +243,7 @@ test("native get/refresh/buy commands reach the owned progression service and re
 
 test("curated draws retain bounded distinct persisted offer identities across varied random choices", async () => {
     const { createHotItemDomain } = await import("@opencok/services/hot-item");
-    const { CityProgressionContext } = await import("@opencok/services/city-progression");
+    const { CityProgressionContext } = await import("@opencok/city/services/context");
     const rules = await loadRules();
     for (let seed = 1; seed <= 64; seed++)
     {

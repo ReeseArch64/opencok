@@ -4,7 +4,7 @@ import {
     scoutExpeditionEffect,
     scoutWatchtower,
 } from "@opencok/services/world-scout-runtime";
-import type { CityProgressionContext } from "@opencok/services/city-progression";
+import type { CityProgressionContext } from "@opencok/city/services/context";
 import savedMarch from "./fixtures/reconnect-march-army.json";
 import {
     decodeWorldMarchSpeedEffects,

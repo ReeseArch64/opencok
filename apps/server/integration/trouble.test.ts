@@ -1,6 +1,6 @@
 import { planRealmProductionContext } from "../src/composition/production.ts";
 import { user_building } from "@opencok/drizzle/schema/opencok_kingdom/user_building";
-import { createCityProgressionHandlers } from "@opencok/services/city-progression";
+import { createRealmCityProgressionHandlers } from "../src/composition/city.ts";
 import { createCityProgressionStore } from "@opencok/repositories/city-progression";
 import { createCityProductionBoundary } from "@opencok/production/repositories/city-boundary";
 import { readReconnectProgress } from "@opencok/repositories/reconnect-progress";
@@ -187,7 +187,7 @@ test(
                         ][rule.effects.productionResourceId ?? -1];
                 },
             );
-            const handlers = createCityProgressionHandlers(
+            const handlers = createRealmCityProgressionHandlers(
                 (tx: Parameters<typeof readReconnectProgress>[0], owner, at) =>
                     createCityProgressionStore(tx, owner, at, boundary),
                 [troubleDomain],

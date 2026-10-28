@@ -56,3 +56,7 @@ app-injected economic and world adapters; wider W07 city ownership remains in pr
 The [building package](building/README.md) owns typed catalogs, definition contracts,
 level/star evaluation and mappings after #635. Construction workflows and city
 coordination remain tracked under W07; semantic archetypes remain W14 work.
+
+The [city package](city/README.md) owns transactional plans, snapshot/effect creation
+and command/activity coordination after #637. The realm injects existing mechanic
+callbacks; shared contracts and remaining mechanic migrations are tracked in W07/W20.

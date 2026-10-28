@@ -4,7 +4,7 @@ import { eq, and } from "drizzle-orm";
 import { createEggActivityDomain } from "@opencok/services/egg-activity";
 import { createActivityExecutor, type ActivityDomain } from "@opencok/repositories/timed-activity";
 import { createCityProgressionStore } from "@opencok/repositories/city-progression";
-import { createCityProgressionHandlers } from "@opencok/services/city-progression";
+import { createRealmCityProgressionHandlers } from "../src/composition/city.ts";
 import { TimedActivityService } from "@opencok/services/timed-activity";
 import { acquireRealmAuthority } from "@opencok/repositories/realm-authority";
 import type { MutationTransaction } from "@opencok/repositories/mutation";
@@ -46,7 +46,7 @@ async function fixture()
     const restart = async () => {
         const authority = await acquireRealmAuthority(h.db.db, 1, () => true),
             effects = { world: async () => new Map<number, number>(), emperor: async () => null };
-        const handlers = createCityProgressionHandlers(
+        const handlers = createRealmCityProgressionHandlers(
             (tx, owner, at) =>
                 createCityProgressionStore(
                     tx as MutationTransaction,

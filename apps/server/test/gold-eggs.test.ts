@@ -15,7 +15,7 @@ import {
 } from "@opencok/rules/gold-eggs";
 import { goldEggsCellsView, goldEggsRankingView } from "@opencok/mappings/gold-eggs";
 import { pinGoldEggRewards } from "../../../packages/services/src/gold-eggs-rewards";
-import type { CityProgressionContext } from "@opencok/services/city-progression";
+import type { CityProgressionContext } from "@opencok/city/services/context";
 import { sfs, fields, encode, decode, type Value } from "@opencok/messages/sfs";
 import { configureGoldEggs, goldEggsNow } from "./fixtures/gold-eggs";
 

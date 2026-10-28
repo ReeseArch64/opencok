@@ -1,7 +1,7 @@
 import type { CityProgressionState } from "@opencok/contracts/city-progression";
 import { cityAmount, cityInteger } from "@opencok/rules/city-progression";
 import type { Rules } from "@opencok/rules/game";
-import { CityProgressionContext } from "@opencok/services/city-progression";
+import { CityProgressionContext } from "@opencok/city/services/context";
 
 export function cityFixture(rules: Rules, effect: (id: number) => number = () => 0)
 {

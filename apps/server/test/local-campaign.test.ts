@@ -68,7 +68,7 @@ test("login with no configured campaign catalogs leaves state untouched and keep
         economy: {},
         state: {},
         write: {},
-    } as import("@opencok/services/city-progression").CityProgressionContext;
+    } as import("@opencok/city/services/context").CityProgressionContext;
     const initialized = await anniversaryDomain.prepare(context, "campaign.init", {});
     expect(decode(Buffer.from(initialized.response))).toEqual({});
     expect(context.write).toEqual({});

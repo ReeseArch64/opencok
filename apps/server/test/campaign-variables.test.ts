@@ -6,7 +6,7 @@ import {
     CampaignPlanner,
     campaignVariableFields,
 } from "../../../packages/services/src/local-campaign";
-import type { CityProgressionContext } from "@opencok/services/city-progression";
+import type { CityProgressionContext } from "@opencok/city/services/context";
 test("every maintained numeric campaign declaration is available by its exact scope without changing stored state", async () => {
     const rules = await loadRules(),
         context = {
