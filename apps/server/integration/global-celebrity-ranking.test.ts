@@ -1,7 +1,7 @@
 import { expect, test } from "bun:test";
 import { createDatabase } from "@opencok/drizzle";
 import { server_info } from "@opencok/drizzle/schema/opencok_global/server_info";
-import { readNormalRankingRealm } from "../../../packages/repositories/src/ranking-realm.ts";
+import { readNormalRankingRealm } from "@opencok/ranking/repositories/ranking-realm";
 import { migrateDatabase } from "../../../packages/drizzle/scripts/migrate.ts";
 import { DisposablePostgres } from "../../../packages/drizzle/tests/support/postgres.ts";
 import { Cache } from "@opencok/storage/session";

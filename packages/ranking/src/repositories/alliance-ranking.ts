@@ -5,10 +5,7 @@ import { alliance_vedio } from "@opencok/drizzle/schema/opencok_kingdom/alliance
 import { userprofile } from "@opencok/drizzle/schema/opencok_kingdom/userprofile";
 import { playerinfo } from "@opencok/drizzle/schema/opencok_kingdom/playerinfo";
 import { eq, gt, inArray, sql, sum } from "drizzle-orm";
-import type {
-    AllianceRankingQuery,
-    AllianceRankingSnapshot,
-} from "@opencok/contracts/alliance-ranking";
+import type { AllianceRankingQuery, AllianceRankingSnapshot } from "../contracts/alliance-ranking";
 import type { DatabaseClient } from "@opencok/drizzle/contracts/database";
 
 export function readAllianceRanking(

@@ -120,3 +120,9 @@ native envelope fields, validation, persistence and expiration after #687. Chat
 injects the domain through its existing transaction and process boundaries. Opaque
 feed content does not establish a dedicated battle-report rendering workflow;
 remaining client/provider integration stays explicit.
+
+The [Ranking domain](ranking/README.md) owns permanent player/alliance boards and
+published attribute/payment/consumption views after #689. The realm injects narrow
+profile, feature, science and video collaborators; event settlement and rewards
+remain with their existing owners. PostgreSQL snapshots and Redis publication
+keys retain their current semantics.

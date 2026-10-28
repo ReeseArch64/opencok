@@ -21,12 +21,15 @@ import {
     readHeroHistory,
     readHeroHistoryPresentation,
 } from "@opencok/hero/repositories/hero-ranking";
-import { user_mixed_info } from "@opencok/drizzle/schema/opencok_kingdom/user_mixed_info";
+import { readRankingPrivacy } from "@opencok/ranking/repositories/privacy";
 import { reportAvatar } from "./avatar-report.ts";
 import { pic_upload_record } from "@opencok/drizzle/schema/opencok_kingdom/pic_upload_record";
 import { readSystemMail } from "./mail-system.ts";
 import { readMailBatch } from "./mail-batch.ts";
-import { readNormalRankingRealm, readCrossRankingRealm } from "./ranking-realm.ts";
+import {
+    readNormalRankingRealm,
+    readCrossRankingRealm,
+} from "@opencok/ranking/repositories/ranking-realm";
 import { readMailUpdates } from "./mail-updates.ts";
 import type { MailUpdateInspector, MailUpdateQuery } from "@opencok/contracts/mail-updates";
 import { markMailConversationRead } from "./mail-conversation-read.ts";
@@ -72,8 +75,8 @@ import { relayMailGiftOpenings } from "./mail-gift-relay.ts";
 import { mail_update } from "@opencok/drizzle/schema/opencok_kingdom/mail_update";
 import { saveMail } from "./mail-save.ts";
 import { material_cost_ranking } from "@opencok/drizzle/schema/opencok_kingdom/material_cost_ranking";
-import { readAllianceRanking } from "./alliance-ranking.ts";
-import type { AllianceRankingQuery } from "@opencok/contracts/alliance-ranking";
+import { readAllianceRanking } from "@opencok/ranking/repositories/alliance-ranking";
+import type { AllianceRankingQuery } from "@opencok/ranking/contracts/alliance-ranking";
 import { createDatabases } from "@opencok/drizzle";
 import { account_new } from "@opencok/drizzle/schema/opencok_global/account_new";
 import { userprofile } from "@opencok/drizzle/schema/opencok_kingdom/userprofile";
@@ -111,8 +114,8 @@ import { checkPlayerSummaryStore, getPlayerSummariesByIds } from "./players.ts";
 import { checkPowerStore, getPowerByPlayerId } from "./power.ts";
 import { loadFriendshipMine } from "./reconnect-mine.ts";
 import type { FriendshipMine, FriendshipMineStore } from "@opencok/contracts/reconnect";
-import type { PlayerRankingQuery } from "@opencok/contracts/ranking";
-import { readPlayerRanking } from "./ranking.ts";
+import type { PlayerRankingQuery } from "@opencok/ranking/contracts/ranking";
+import { readPlayerRanking } from "@opencok/ranking/repositories/ranking";
 
 type GameRepositoryConfig = Pick<
     ServerConfig,
@@ -130,21 +133,9 @@ export class Database implements GameStore, FriendshipMineStore
     readonly databases;
     readonly kingdom;
 
-    async rankingPrivacy(uid: string, kind: "payment" | "consumption"): Promise<number>
+    rankingPrivacy(uid: string, kind: "payment" | "consumption"): Promise<number>
     {
-        if (!uid || uid.length > 40 || (kind !== "payment" && kind !== "consumption"))
-        {
-            throw new Error("Invalid ranking privacy request");
-        }
-
-        const column = kind === "payment" ? user_mixed_info.payHide : user_mixed_info.costHide;
-        const rows = await this.kingdom.db
-            .select({ hide: column })
-            .from(user_mixed_info)
-            .where(eq(user_mixed_info.uid, uid))
-            .limit(1);
-
-        return rows[0]?.hide ?? 0;
+        return readRankingPrivacy(this.kingdom.db, uid, kind);
     }
 
     battleRankingState(uid: string, now: number)

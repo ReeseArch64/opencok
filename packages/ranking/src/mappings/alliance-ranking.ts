@@ -1,14 +1,11 @@
 import { validateFields } from "@opencok/messages/validations/fields";
-import { allianceRankingSchema } from "@opencok/validations/alliance-ranking";
-import type {
-    AllianceRankingKind,
-    AllianceRankingResult,
-} from "@opencok/contracts/alliance-ranking";
-import { text } from "@opencok/contracts/rows";
+import { createAllianceRankingSchema } from "../validations/alliance-ranking";
+import type { AllianceRankingKind, AllianceRankingResult } from "../contracts/alliance-ranking";
+import { text } from "../contracts/rows";
 import { sfs, type Fields, type Value } from "@opencok/messages/sfs";
 import { GameError } from "@opencok/errors/game";
 import { errors } from "@opencok/constants/game";
-import { allianceVideo } from "./profile-alliance.ts";
+import type { Row } from "../contracts/rows";
 
 function invalid(): never
 {
@@ -87,6 +84,7 @@ function aggregate(value: unknown): Value
 function serializeAllianceRanking(
     kind: AllianceRankingKind,
     ranking: AllianceRankingResult,
+    allianceVideo: (row: Row) => Fields,
 ): Fields
 {
     const fields: Fields = {
@@ -141,7 +139,13 @@ function serializeAllianceRanking(
     return fields;
 }
 
-export function allianceRanking(...args: Parameters<typeof serializeAllianceRanking>): Fields
+export function createAllianceRankingMapper(
+    allianceVideo: (row: Row) => Fields,
+    videoSchema: Parameters<typeof createAllianceRankingSchema>[0],
+): (kind: AllianceRankingKind, ranking: AllianceRankingResult) => Fields
 {
-    return validateFields(allianceRankingSchema, serializeAllianceRanking(...args));
+    const schema = createAllianceRankingSchema(videoSchema);
+
+    return (kind, ranking) =>
+        validateFields(schema, serializeAllianceRanking(kind, ranking, allianceVideo));
 }

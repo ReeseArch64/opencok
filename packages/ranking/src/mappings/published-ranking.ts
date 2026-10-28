@@ -1,9 +1,6 @@
 import { decodeLegacyJsonObject } from "@opencok/messages/legacy-json";
 import { sfs, Type, type Fields } from "@opencok/messages/sfs";
-import {
-    publishedRankingSchema,
-    attributeRankingSchema,
-} from "@opencok/validations/published-ranking";
+import { publishedRankingSchema, attributeRankingSchema } from "../validations/published-ranking";
 import { validateFields } from "@opencok/messages/validations/fields";
 
 function rows(entries: readonly string[], maximum: number): Fields[]

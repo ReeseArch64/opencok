@@ -52,7 +52,6 @@ import {
     throneRankingOpen,
 } from "@opencok/mappings/throne-ranking";
 import { versionAtLeast } from "@opencok/rules/availability";
-import { attributeRanking, publishedRanking } from "@opencok/mappings/published-ranking";
 import { reportAvatar } from "./avatar-report.ts";
 import { systemMailProjection } from "./mail-system.ts";
 import { javaDecimal } from "@opencok/rules/java-integer";
@@ -121,9 +120,6 @@ import { expeditionRanking } from "@opencok/mappings/expedition-ranking";
 import { expeditionRankingLimit, selectExpeditionRanking } from "@opencok/rules/expedition-ranking";
 import { decodeExpeditionRanking } from "./expedition-ranking.ts";
 import { allianceCommands } from "@opencok/alliance/constants/commands";
-import { allianceRanking } from "@opencok/mappings/alliance-ranking";
-import { allianceRankingQuery, selectAllianceRanking } from "@opencok/rules/alliance-ranking";
-import type { AllianceRankingKind } from "@opencok/contracts/alliance-ranking";
 import type { ServerConfig } from "@opencok/contracts/server";
 import type { GameServices, GameStore } from "@opencok/contracts/game";
 import { long, num, text, type Row } from "@opencok/contracts/rows";
@@ -138,9 +134,6 @@ import {
 import { guidePlayerSummary, playerSummary } from "@opencok/mappings/players";
 import { resource } from "@opencok/economy/mappings/resources";
 import { powerInfo } from "@opencok/mappings/power";
-import { playerRanking } from "@opencok/mappings/ranking";
-import { playerRankingQuery, selectPlayerRanking } from "@opencok/rules/ranking";
-import type { PlayerRankingKind } from "@opencok/contracts/ranking";
 import { calculatePlayerPower } from "@opencok/rules/power";
 import { powerContext, decodeWorldPowerEffects } from "./power.ts";
 import { generalSkillPoints } from "@opencok/hero/services/general-power";
@@ -215,12 +208,23 @@ export class GameService
             fortification: missingMilitaryProjection,
             snapshot: missingMilitaryProjection,
         },
+        readonly ranking = services.ranking,
     )
     {
         this.bootstrap = createBootstrap?.({
             power: (uid) => this.power(uid, true),
             features: (profile) => featureConfig(this.rules, this.featureContext(profile)),
         });
+    }
+
+    private rankings()
+    {
+        if (!this.ranking)
+        {
+            throw new GameError(errors.unsupported, "ranking");
+        }
+
+        return this.ranking;
     }
 
     private city(): CityBootstrapRuntime
@@ -995,7 +999,7 @@ export class GameService
                 break;
             case "alliance.rank":
             case "kill.al.rank":
-                body = await this.allianceRanking(
+                body = await this.rankings().allianceRanking(
                     uid,
                     command === "alliance.rank" ? "power" : "kills",
                 );
@@ -1048,11 +1052,11 @@ export class GameService
                 body = await this.heroes.heroSelfRanking(uid, params);
                 break;
             case "attributeRank.info":
-                body = await this.attributeRanking(uid, params);
+                body = await this.rankings().attributeRanking(uid, params);
                 break;
             case "paytotal.ranking":
             case "continuedcost.ranking":
-                body = await this.publishedRanking(
+                body = await this.rankings().publishedRanking(
                     uid,
                     command === "paytotal.ranking" ? "payment" : "consumption",
                 );
@@ -1065,7 +1069,7 @@ export class GameService
             case "level.rank":
             case "building.rank":
             case "silver.contribute.rank":
-                body = await this.ranking(uid, playerRankingKinds[command]);
+                body = await this.rankings().ranking(uid, playerRankingKinds[command]);
                 break;
             default:
                 throw new GameError(errors.unsupported);
@@ -2990,82 +2994,6 @@ export class GameService
         return body;
     }
 
-    private async publishedRanking(uid: string, kind: "payment" | "consumption"): Promise<Fields>
-    {
-        const now = this.now();
-        const profile = this.checkProfile(await this.db.getProfileById(uid), now);
-
-        if (profile.uid !== uid || num(profile, "serverId") !== this.config.kingdomId)
-        {
-            throw new GameError(errors.invalid);
-        }
-
-        const key = kind === "payment" ? "new_rank_recharge" : "new_rank_cost";
-
-        if (
-            !serverFeature(this.rules, key, {
-                kingdomId: this.config.kingdomId,
-                version: MOBILE_CLIENT_VERSION,
-                now,
-            })
-        )
-        {
-            return {};
-        }
-
-        if (!versionAtLeast(MOBILE_CLIENT_VERSION, this.rules.features.get(key)!.version!))
-        {
-            return {};
-        }
-
-        if (!this.services.publishedGlobalRanking || !this.db.rankingPrivacy)
-        {
-            throw new GameError(errors.unsupported, "ranking");
-        }
-
-        const hide = await this.db.rankingPrivacy(uid, kind);
-
-        return publishedRanking(await this.services.publishedGlobalRanking(kind), uid, hide);
-    }
-
-    private async attributeRanking(uid: string, params: Fields): Promise<Fields>
-    {
-        if (this.config.kingdomId > 999999)
-        {
-            return {};
-        }
-
-        if (!this.db.normalRankingRealm)
-        {
-            throw new GameError(errors.unsupported, "ranking");
-        }
-
-        if (!(await this.db.normalRankingRealm()))
-        {
-            return {};
-        }
-
-        const type = wireInt(params, "rankType");
-        const profile = this.checkProfile(await this.db.getProfileById(uid), this.now());
-
-        if (profile.uid !== uid || num(profile, "serverId") !== this.config.kingdomId)
-        {
-            throw new GameError(errors.invalid);
-        }
-
-        if (![0, 1, 2].includes(type))
-        {
-            return {};
-        }
-
-        if (!this.services.attributeRanking)
-        {
-            throw new GameError(errors.unsupported, "ranking");
-        }
-
-        return attributeRanking(await this.services.attributeRanking(type), type);
-    }
-
     private async dragonRanking(uid: string, params: Fields): Promise<Fields>
     {
         const profile = this.checkProfile(await this.db.getProfileById(uid), this.now());
@@ -3192,44 +3120,6 @@ export class GameService
         return expeditionRanking(
             selectExpeditionRanking(uid, limit, decodeExpeditionRanking(entries)),
         );
-    }
-
-    private async allianceRanking(uid: string, kind: AllianceRankingKind): Promise<Fields>
-    {
-        if (this.rules.kingdomId !== this.config.kingdomId)
-        {
-            throw new GameError(errors.unsupported, "ranking");
-        }
-
-        const query = allianceRankingQuery(kind, this.rules, this.now());
-        const snapshot = await this.db.allianceRanking(uid, query);
-        const profile = this.checkProfile(snapshot.profile, query.now);
-
-        if (profile.uid !== uid || num(profile, "serverId") !== this.config.kingdomId)
-        {
-            throw new GameError(errors.invalid);
-        }
-
-        return allianceRanking(kind, selectAllianceRanking(query, snapshot, this.rules));
-    }
-
-    private async ranking(uid: string, kind: PlayerRankingKind): Promise<Fields>
-    {
-        if (this.rules.kingdomId !== this.config.kingdomId)
-        {
-            throw new GameError(errors.unsupported, "ranking");
-        }
-
-        const query = playerRankingQuery(kind, this.rules, this.now());
-        const snapshot = await this.db.playerRanking(uid, query);
-        const profile = this.checkProfile(snapshot.profile, query.now);
-
-        if (profile.uid !== uid || num(profile, "serverId") !== this.config.kingdomId)
-        {
-            throw new GameError(errors.invalid);
-        }
-
-        return playerRanking(kind, selectPlayerRanking(uid, query, snapshot));
     }
 
     private async publicProfile(uid: string, params: Fields): Promise<Fields>

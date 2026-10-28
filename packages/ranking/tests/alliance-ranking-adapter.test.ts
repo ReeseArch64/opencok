@@ -1,11 +1,11 @@
 import { expect, test } from "bun:test";
 import { drizzle, type NodePgClient } from "drizzle-orm/node-postgres";
 import * as schema from "@opencok/drizzle/schema/kingdom";
-import { readAllianceRanking } from "@opencok/repositories/alliance-ranking";
+import { readAllianceRanking } from "@opencok/ranking/repositories/alliance-ranking";
 import type {
     AllianceRankingKind,
     AllianceRankingQuery,
-} from "@opencok/contracts/alliance-ranking";
+} from "@opencok/ranking/contracts/alliance-ranking";
 
 const now = 1792756800000;
 function database(

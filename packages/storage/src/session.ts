@@ -14,7 +14,10 @@ import {
     loadHeroHistoryPublication,
 } from "@opencok/hero/storage/hero-ranking";
 import type { HeroRankingLookup } from "@opencok/hero/contracts/hero-ranking";
-import { loadAttributeRanking, loadPublishedGlobalRanking } from "./published-ranking.ts";
+import {
+    loadAttributeRanking,
+    loadPublishedGlobalRanking,
+} from "@opencok/ranking/storage/published-ranking";
 import { loadDragonRanking } from "./dragon-ranking.ts";
 import type { DragonRankingRange } from "@opencok/contracts/dragon-ranking";
 import { publishPlayerUpdate } from "./player-update.ts";

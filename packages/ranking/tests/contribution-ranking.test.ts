@@ -1,20 +1,16 @@
 import { expect, test } from "bun:test";
-import type { Row } from "@opencok/contracts/rows";
-import { Rules } from "@opencok/rules/game";
-import { playerRankingQuery, selectPlayerRanking } from "@opencok/rules/ranking";
-import { playerRanking } from "@opencok/mappings/ranking";
+import type { Row } from "@opencok/ranking/contracts/rows";
+import { playerRankingQuery, selectPlayerRanking } from "@opencok/ranking/rules/ranking";
+import { playerRanking } from "@opencok/ranking/mappings/ranking";
 import { decode, encode, sfs } from "@opencok/messages/sfs";
 
 const now = 1792756800000;
 function rules(k4 = "3")
 {
-    return new Rules(
-        new Map(),
-        new Map(),
-        new Map(),
-        undefined,
-        new Map([["ranking", { k2: "8", k4 }]]),
-    );
+    return {
+        items: new Map([["ranking", { k2: "8", k4 }]]),
+        configuration: {},
+    };
 }
 function row(uid: string, changes: Row = {}): Row
 {

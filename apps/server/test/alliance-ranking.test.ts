@@ -1,10 +1,25 @@
 import { expect, test } from "bun:test";
-import type { AllianceRankingSnapshot } from "@opencok/contracts/alliance-ranking";
 import type { Row } from "@opencok/contracts/rows";
 import { Rules } from "@opencok/rules/game";
-import { allianceRankingQuery, selectAllianceRanking } from "@opencok/rules/alliance-ranking";
-import { allianceRanking } from "@opencok/mappings/alliance-ranking";
+import {
+    createRealmAllianceRankingPolicy,
+    createRealmAllianceRankingMapper,
+} from "../src/composition/ranking";
+import type {
+    AllianceRankingKind,
+    AllianceRankingQuery,
+    AllianceRankingSnapshot,
+} from "@opencok/ranking/contracts/alliance-ranking";
 import { decode, encode, sfs } from "@opencok/messages/sfs";
+
+const allianceRanking = createRealmAllianceRankingMapper();
+const allianceRankingQuery = (kind: AllianceRankingKind, catalog: Rules, now: number) =>
+    createRealmAllianceRankingPolicy(catalog).query(kind, now);
+const selectAllianceRanking = (
+    query: AllianceRankingQuery,
+    snapshot: AllianceRankingSnapshot,
+    catalog: Rules,
+) => createRealmAllianceRankingPolicy(catalog).select(query, snapshot);
 
 const now = 1792756800000;
 function rules(limit = "2")

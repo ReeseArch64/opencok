@@ -122,6 +122,13 @@ implementation and verification tracked separately.
 | `policy`                                                         | Pure content matching, bounded file/worker adapters and the maintained nickname/description dictionary.                                                          |
 | `repositories`, `drizzle`, `storage`                             | Owned transactional state, schemas, Redis/ZooKeeper and S3 adapters.                                                                                             |
 
+The [Ranking domain](../packages/ranking/README.md) owns permanent player/alliance
+boards and published attribute/payment/consumption views. Realm composition injects
+profile, clock, feature, science and video collaborators. Event finality, funding
+and reward authority remain with their current owners; consumption publication
+continues through the existing event coordinator. PostgreSQL snapshot isolation,
+Redis publication keys and client wire contracts are unchanged.
+
 The nickname/description word list is versioned in
 `packages/policy/src/resources/data/badwords.json` and included in the server artifact.
 It does not depend on the ignored reference tree or a Compose bind mount.
