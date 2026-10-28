@@ -262,7 +262,7 @@ import { createPostboxExecutor } from "@opencok/repositories/postbox";
 import { createRealmSocialExecutor } from "@opencok/connection/realm-social";
 import { createAvatarTickets } from "@opencok/storage/avatar-tickets";
 import { GeneralDrawDomain } from "@opencok/hero/services/general-draws";
-import { allianceStableId } from "@opencok/services/alliances";
+import { AllianceIdentity } from "@opencok/alliance/services/identity";
 import { createRealmAllianceService } from "./composition/alliance";
 import { createAllianceRepository } from "@opencok/repositories/alliance-gameplay";
 import { AllianceScienceRecoveryReader } from "@opencok/alliance/repositories/science-recovery";
@@ -1106,7 +1106,7 @@ export const RealmDependenciesLive = Layer.effect(
                     await alliances.command(saved.owner, "alliance.tick", {
                         operationId: sfs.string(
                             "alliance-research:"
-                                + allianceStableId(
+                                + AllianceIdentity.stableId(
                                     `${saved.allianceId}:${saved.scienceId}:${saved.startTime}:${saved.needTime}:${
                                         saved.accelerate?.toString("hex") ?? ""
                                     }`,

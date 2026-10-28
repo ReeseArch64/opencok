@@ -107,6 +107,6 @@ follow in #667; governance commands, membership policies and alliance/member/bla
 persistence follow in #669. Applications, invitations and their messages follow in
 #671. Creation and member entry/removal follow in #673. Queries and native snapshots
 follow in #675. Publication and its transactional reader follow in #677; execution
-context and dispatch follow in #679. Outer mutation coordination and aggregate
-persistence remain subsequent slices. Remaining policy bindings have
+context and dispatch follow in #679. Mutation coordination, request validation
+and event/identity mapping follow in #681. Aggregate persistence remains a subsequent slice. Remaining policy bindings have
 tracked retirement tasks.

@@ -41,7 +41,11 @@ import type { AllianceHelpContext } from "@opencok/alliance/contracts/help";
 import type { Rules } from "@opencok/rules/game";
 import type { AllianceRepository, AllianceState } from "@opencok/contracts/alliance-gameplay";
 import type { InventoryEffects } from "@opencok/services/inventory-runtime";
-import { AllianceService, allianceStableId } from "@opencok/services/alliances";
+import { AllianceService } from "@opencok/alliance/services/alliance";
+import { AllianceIdentity } from "@opencok/alliance/services/identity";
+import { AllianceCommandValidation } from "@opencok/alliance/validations/command";
+import { AllianceMutationMapper } from "@opencok/alliance/mappings/mutation";
+import { createInventoryPlanner } from "@opencok/services/inventory-runtime";
 import { AlliancePublicationService } from "@opencok/alliance/services/publication";
 import { AlliancePublicationMapper } from "@opencok/alliance/mappings/publication";
 import { AlliancePublicationRepository } from "@opencok/alliance/repositories/publication";
@@ -162,7 +166,10 @@ export function createRealmAllianceMembership(
         context,
         runtime,
         new AllianceMembershipPolicy({ ...runtime, cityInteger }),
-        new AllianceMembershipMapper({ allianceFailure, allianceStableId }),
+        new AllianceMembershipMapper({
+            allianceFailure,
+            allianceStableId: AllianceIdentity.stableId,
+        }),
     );
 }
 
@@ -251,13 +258,31 @@ export function createRealmAllianceService(
     forbidden: (value: string) => boolean | Promise<boolean> = () => false,
 )
 {
+    const runtime = {
+        text,
+        num,
+        long,
+        cityInteger,
+        allianceFailure,
+        errors,
+        randomUUID,
+        createInventoryPlanner,
+        unsupportedFailure: (): never => {
+            throw new GameError(errors.unsupported);
+        },
+    };
+    const policy = new AllianceMembershipPolicy(runtime);
+
     return new AllianceService(
         repository,
         rules,
         effects,
         createRealmAllianceContext,
         createRealmAllianceGifts,
-        forbidden,
+        runtime,
+        new AllianceCommandValidation(runtime, policy, forbidden),
+        new AllianceMutationMapper(runtime),
+        policy,
     );
 }
 
