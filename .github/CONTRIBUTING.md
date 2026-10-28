@@ -131,6 +131,21 @@ Existing centralized packages remain compatibility locations during migration.
 Validate at the mapping or application boundary and preserve mobile wire types
 and field order.
 
+## Required pre-PR review
+
+After completing every implementation and before opening its pull request, run
+the [code-review skill](../.agents/skills/code-review/SKILL.md) against the originating
+GitHub issue and its acceptance criteria. Pin the review baseline to the intended
+PR base and review both axes: Standards and Spec. For stacked changes, use the
+immediate parent branch as the base and the issue scope assigned to that PR.
+
+Resolve blocking findings and rerun the review after corrections or subsequent
+implementation changes, before opening or updating the PR. Include the reviewed
+baseline, issue reference, results for both axes and any remaining limitations in
+the PR's validation evidence. If the issue or acceptance criteria are unavailable,
+resolve that gap before proceeding; skipping the Spec review does not satisfy this
+requirement. Automated checks and the later GitHub review do not replace this step.
+
 ## Commits
 
 Before completing any task that changes tracked project content, review and
