@@ -443,9 +443,8 @@ test("outbox publication uses current members and preserves pending unrelated ev
     await h.allianceCommand("al.apply", { allianceId: sfs.string(id) }, "other");
     await h.allianceCommand("al.acceptapply", { playerId: sfs.string("other") });
     const { relayMutationEvent } = await import("@opencok/repositories/mutation");
-    const { publishAllianceMutation } = await import("../src/composition/alliance");
-    const { createAlliancePublicationReader } = await import(
-        "@opencok/repositories/alliance-publication"
+    const { publishAllianceMutation, createAlliancePublicationReader } = await import(
+        "../src/composition/alliance"
     );
     const { mutation_outbox } = await import(
         "@opencok/drizzle/schema/opencok_kingdom/mutation_outbox"

@@ -1,22 +1,27 @@
-import { AllianceScienceRepository } from "@opencok/alliance/repositories/science";
-import { AllianceHelpRepository } from "@opencok/alliance/repositories/help";
+import { AllianceScienceRepository } from "./science";
+import { AllianceHelpRepository } from "./help";
 import { and, eq, inArray } from "drizzle-orm";
 import { alliance } from "@opencok/drizzle/schema/opencok_kingdom/alliance";
 import { alliance_member } from "@opencok/drizzle/schema/opencok_kingdom/alliance_member";
 import { userprofile } from "@opencok/drizzle/schema/opencok_kingdom/userprofile";
 import { queue } from "@opencok/drizzle/schema/opencok_kingdom/queue";
 import type { DatabaseClient } from "@opencok/drizzle/contracts/database";
-import { fenceRealmTransaction, type RealmAuthority } from "./realm-authority";
+import type { AllianceTransaction } from "../contracts/persistence";
 
-export function createAlliancePublicationReader(
-    db: DatabaseClient<"kingdom">,
-    authority: RealmAuthority,
-)
+export class AlliancePublicationRepository
 {
-    return async (id: string, players: readonly string[] = []) => {
-        return db.transaction(
+    public constructor(
+        private readonly db: DatabaseClient<"kingdom">,
+        private readonly kingdomId: number,
+        private readonly fence: (tx: AllianceTransaction) => Promise<void>,
+    )
+    {}
+
+    public async read(id: string, players: readonly string[] = [])
+    {
+        return this.db.transaction(
             async (tx) => {
-                await fenceRealmTransaction(tx, authority);
+                await this.fence(tx);
                 const [record] = await tx.select().from(alliance).where(eq(alliance.uid, id));
                 const members = await tx
                     .select({
@@ -37,7 +42,7 @@ export function createAlliancePublicationReader(
                     .where(
                         and(
                             eq(alliance_member.allianceId, id),
-                            eq(userprofile.serverId, authority.kingdomId),
+                            eq(userprofile.serverId, this.kingdomId),
                         ),
                     );
                 const queues = members.length
@@ -61,7 +66,7 @@ export function createAlliancePublicationReader(
                         .where(
                             and(
                                 inArray(userprofile.uid, [...players]),
-                                eq(userprofile.serverId, authority.kingdomId),
+                                eq(userprofile.serverId, this.kingdomId),
                             ),
                         )
                     : [];
@@ -70,5 +75,5 @@ export function createAlliancePublicationReader(
             },
             { isolationLevel: "repeatable read" },
         );
-    };
+    }
 }

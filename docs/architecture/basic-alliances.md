@@ -84,6 +84,22 @@ and the existing database-plus-memory pagination remain unchanged. The former
 single-consumer shared mapper and response declaration are removed. This changes
 source ownership without introducing process authority or saved-state changes.
 
+## Publication ownership
+
+After #677, Alliance owns the mutation publication Service, dedicated native Mapper,
+snapshot contracts and publication repository. Realm composition supplies existing
+record/policy/science-effect behavior, Help/Science Mappers and the authority fence.
+The reader retains repeatable-read isolation and fences before its first query;
+current realm/profile/member checks and ordered reads are unchanged.
+
+Delivery revalidates leave events against current profiles, handles missing alliances
+and activity rewards before ordinary member updates, and preserves per-member
+update/join/leadership/help/science ordering. Its payload remains distinct from query
+snapshots. Failures propagate to the existing outbox relay. The former shared
+publication modules are removed after realm and integration callers migrate.
+Effects and aggregate ownership remain later #558 work; no new authority process,
+worker or persistence contract is introduced by this extraction.
+
 ## Queue assistance
 
 After #663, the [Alliance package](../../packages/alliance/README.md) owns help
