@@ -47,7 +47,7 @@ import {
     writeContinuedCostHide,
 } from "@opencok/repositories/continued-cost";
 import { readTrouble, writeTrouble } from "@opencok/repositories/trouble";
-import { readCosmeticTarget, writeCosmeticTarget } from "@opencok/repositories/city-cosmetics";
+import { createRealmCosmeticRepository } from "./skin-persistence";
 import { readPrayer, writePrayer } from "@opencok/repositories/prayer";
 import { createRealmRecallTaskRepository } from "./recall-task-persistence";
 import { readRegionalRecall, writeRegionalRecall } from "@opencok/repositories/regional-recall";
@@ -137,7 +137,6 @@ const readers: CityPersistenceReaders = {
     readGroupBuy,
     readContinuedCost,
     readTrouble,
-    readCosmeticTarget,
     readPrayer,
     readRegionalRecall,
     readAllianceHeart,
@@ -190,7 +189,6 @@ const writers: CityPersistenceWriters = {
     writeContinuedCost,
     writeContinuedCostHide,
     writeTrouble,
-    writeCosmeticTarget,
     writePrayer,
     writeRegionalRecall,
     writeAllianceHeart,
@@ -236,6 +234,7 @@ export function createRealmCityProgressionStore(
         equipment: new EquipmentRepository(tx, owner, { text, num, long }),
         quests: createRealmQuestRepository(tx, owner),
         targetTasks: createRealmTargetTaskRepository(tx, owner),
+        cosmetics: createRealmCosmeticRepository(tx, owner),
         recallTasks: createRealmRecallTaskRepository(tx, owner),
         birth: authority
             ? (rules, mode) => allocateWorldBirth(tx, authority, mapSize, rules, now, mode)

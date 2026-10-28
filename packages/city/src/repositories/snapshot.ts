@@ -139,8 +139,7 @@ export class CitySnapshotReader
             profile,
             resource,
             cosmeticTarget: command === "trigger.activity" || command === "avatar.activate"
-                ? (session.cosmeticTarget = await readers.readCosmeticTarget(
-                    tx,
+                ? (session.cosmeticTarget = await session.cosmetics.readCosmeticTarget(
                     request,
                     command === "avatar.activate" ? owner : undefined,
                 ))

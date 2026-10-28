@@ -22,9 +22,7 @@ export class CityMechanicWriter
 
         if (write.cosmeticTarget)
         {
-            await writers.writeCosmeticTarget(
-                tx,
-                owner,
+            await session.cosmetics.writeCosmeticTarget(
                 session.cosmeticTarget?.uid,
                 write.cosmeticTarget,
             );

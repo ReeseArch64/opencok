@@ -1,3 +1,4 @@
+import type { CosmeticRepository } from "@opencok/skins/repositories/cosmetics";
 import type { RecallTaskRepository } from "@opencok/tasks/repositories/recall-task";
 import type { TargetTaskRepository } from "@opencok/tasks/repositories/target-task";
 import type { QuestRepository } from "@opencok/tasks/repositories/progression";
@@ -12,6 +13,7 @@ import type { CityPersistenceWriters } from "./persistence-writers";
 
 export interface CityPersistenceAdapters
 {
+    readonly cosmetics: Pick<CosmeticRepository, "readCosmeticTarget" | "writeCosmeticTarget">;
     readonly recallTasks: Pick<RecallTaskRepository, "readRecallTasks" | "writeRecallTasks">;
     readonly targetTasks: Pick<TargetTaskRepository, "readTargetTasks" | "writeTargetTasks">;
     readonly quests: Pick<QuestRepository, "readTasks" | "readQuests" | "writeQuests">;

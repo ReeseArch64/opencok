@@ -33,6 +33,7 @@
     "@opencok/building": "workspace:*",
     "@opencok/base": "workspace:*",
     "@opencok/equipment": "workspace:*",
-    "@opencok/tasks": "workspace:*"
+    "@opencok/tasks": "workspace:*",
+    "@opencok/skins": "workspace:*"
   }
 }

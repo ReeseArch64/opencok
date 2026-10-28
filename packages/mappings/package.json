@@ -25,6 +25,7 @@
     "@opencok/ledger": "workspace:*",
     "@opencok/building": "workspace:*",
     "@opencok/equipment": "workspace:*",
-    "@opencok/tasks": "workspace:*"
+    "@opencok/tasks": "workspace:*",
+    "@opencok/skins": "workspace:*"
   }
 }

@@ -99,6 +99,7 @@
         "@opencok/rules": "workspace:*",
         "@opencok/services": "workspace:*",
         "@opencok/shop": "workspace:*",
+        "@opencok/skins": "workspace:*",
         "@opencok/storage": "workspace:*",
         "@opencok/tasks": "workspace:*",
         "@opencok/troops": "workspace:*",
@@ -267,6 +268,7 @@
         "@opencok/messages": "workspace:*",
         "@opencok/research": "workspace:*",
         "@opencok/rules": "workspace:*",
+        "@opencok/skins": "workspace:*",
         "@opencok/tasks": "workspace:*",
         "@opencok/troops": "workspace:*",
         "drizzle-orm": "0.45.4",
@@ -354,6 +356,7 @@
         "@opencok/ledger": "workspace:*",
         "@opencok/mail": "workspace:*",
         "@opencok/messages": "workspace:*",
+        "@opencok/skins": "workspace:*",
         "@opencok/tasks": "workspace:*",
       },
       "devDependencies": {
@@ -638,6 +641,7 @@
         "@opencok/ledger": "workspace:*",
         "@opencok/messages": "workspace:*",
         "@opencok/rules": "workspace:*",
+        "@opencok/skins": "workspace:*",
         "@opencok/tasks": "workspace:*",
         "@opencok/validations": "workspace:*",
       },
@@ -852,6 +856,7 @@
         "@opencok/hero": "workspace:*",
         "@opencok/ledger": "workspace:*",
         "@opencok/policy": "workspace:*",
+        "@opencok/skins": "workspace:*",
         "@opencok/tasks": "workspace:*",
       },
       "devDependencies": {
@@ -879,6 +884,7 @@
         "@opencok/messages": "workspace:*",
         "@opencok/policy": "workspace:*",
         "@opencok/rules": "workspace:*",
+        "@opencok/skins": "workspace:*",
         "@opencok/tasks": "workspace:*",
         "@opencok/validations": "workspace:*",
       },
@@ -920,6 +926,13 @@
     },
     "packages/skins": {
       "name": "@opencok/skins",
+      "dependencies": {
+        "@opencok/base": "workspace:*",
+        "@opencok/drizzle": "workspace:*",
+        "@opencok/messages": "workspace:*",
+        "drizzle-orm": "0.45.4",
+        "zod": "catalog:",
+      },
       "devDependencies": {
         "@opencok/config": "workspace:*",
         "@types/bun": "catalog:",

@@ -1,9 +1,10 @@
 import { test, expect } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { eq } from "drizzle-orm";
-import { avatarActivationDomain } from "@opencok/services/avatar-activation";
+import { createRealmAvatarActivationDomain } from "../src/composition/skins";
+
 import { anniversaryDomain } from "@opencok/services/anniversary";
-import { publishCosmeticInteractionMutation } from "@opencok/services/city-cosmetics";
+import { publishCosmeticInteractionMutation } from "../src/composition/skins";
 import { avatar_storage } from "@opencok/drizzle/schema/opencok_kingdom/avatar_storage";
 import { user_state } from "@opencok/drizzle/schema/opencok_kingdom/user_state";
 import { trigger_var } from "@opencok/drizzle/schema/opencok_kingdom/trigger_var";
@@ -12,6 +13,9 @@ import { user_world } from "@opencok/drizzle/schema/opencok_kingdom/user_world";
 import { mutation_outbox } from "@opencok/drizzle/schema/opencok_kingdom/mutation_outbox";
 import { sfs, type Fields, type Value } from "@opencok/messages/sfs";
 import { cityHarness } from "./support/city";
+
+const avatarActivationDomain = createRealmAvatarActivationDomain();
+
 async function fixture()
 {
     const h = await cityHarness([anniversaryDomain, avatarActivationDomain]);

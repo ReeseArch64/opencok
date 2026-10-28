@@ -92,3 +92,9 @@ transactional persistence. Target missions follow in #655, recall missions in #6
 remain later slices.
 The new [mail workspace](mail/README.md) owns only the unchanged system-mail leaf
 contract needed by rollover rewards; avatar/postbox workflows remain #552/#553.
+
+The [Skins domain](skins/README.md) owns existing city skin/bubble/overlap ownership,
+activation, projection, notification and transactional persistence after #661.
+Realm factories inject campaign, effect and numeric collaborators; remaining
+campaign/trouble/world bindings have explicit retirement conditions. Media uploads
+and profile-avatar workflows remain with their existing owners.
