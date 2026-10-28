@@ -1,10 +1,10 @@
-import type { NicknameChangeStore } from "@opencok/contracts/nickname-change";
+import type { NicknameAllianceStore } from "@opencok/contracts/nickname-alliance";
 import type { Rules } from "@opencok/rules/game";
 import { nicknameAllianceTask } from "@opencok/rules/nickname-alliance";
 import { avatarMailFromTemplate } from "@opencok/rules/avatar-mail";
 
 export function createNicknameAllianceDelivery(options: {
-    store: Pick<NicknameChangeStore, "deliverAlliance">;
+    store: NicknameAllianceStore;
     rules: Pick<Rules, "items" | "configuration" | "mail">;
     kingdomId: number;
     resolveMailReward?: (rewardId: string, owner: string) => string | null;

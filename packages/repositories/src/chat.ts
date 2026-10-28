@@ -37,6 +37,7 @@ import type { ChatRepository } from "@opencok/contracts/chat";
 const utc = (date: Date) => date.toISOString().slice(0, 23).replace("T", " ");
 
 export function createChatRepository(config: {
+    nicknameAccountUid: Parameters<typeof createChatNicknameStore>[1];
     databaseUrl: string;
     topology?: DatabaseTopology;
     now?: () => Date;
@@ -86,7 +87,7 @@ export function createChatRepository(config: {
         },
         mailbox: createChatMailboxStore(db, () => (config.now?.() ?? new Date()).getTime()),
         profiles: createChatAvatarProfileStore(db),
-        nicknames: createChatNicknameStore(db),
+        nicknames: createChatNicknameStore(db, config.nicknameAccountUid),
         sessions: {
             async revoke(uid)
             {

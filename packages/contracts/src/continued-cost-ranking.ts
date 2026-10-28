@@ -34,3 +34,20 @@ export interface CostRankingRegistry
     write(period: CostRankingPeriod, rows: readonly CostRankingScore[], now: bigint): Promise<void>;
     board(id: string): Promise<readonly string[] | undefined>;
 }
+
+export type CostNicknameBalanceKey =
+    | "gold"
+    | "paidGold"
+    | "paidSpecialGold"
+    | "dmmGold"
+    | "dmmPaidGold"
+    | "dmmPaidSpecialGold";
+
+export type CostNicknamePaymentDecoder = (
+    record: { payment: string; responseGold: bigint | null; state: string; },
+) => { kind: "item"; } | {
+    kind: "gold";
+    pendingEvent?: { id: string; type: string; payload: string; };
+    before: Readonly<Record<CostNicknameBalanceKey, string>>;
+    after: Readonly<Record<CostNicknameBalanceKey, string>>;
+};

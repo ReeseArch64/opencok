@@ -1,27 +1,8 @@
-import {
-    nicknameTrim,
-    validateNicknameText as validateText,
-} from "@opencok/policy/rules/nickname-text";
-import { errors } from "@opencok/constants/game";
-import { GameError } from "@opencok/errors/game";
+import { validateNicknameText as validateText } from "@opencok/policy/rules/nickname-text";
 import { javaGbkLength } from "./java-gbk.ts";
 import { mailBlank } from "./mail.ts";
 
 export { nicknameTrim } from "@opencok/policy/rules/nickname-text";
-
-export interface NicknameCheck
-{
-    occupied: number;
-    exist: number;
-    length: number;
-    remainLength: number;
-}
-
-export interface NicknameCheckProviders
-{
-    containsBadWords(name: string): boolean | Promise<boolean>;
-    occupied(name: string): Promise<boolean>;
-}
 
 export function nicknameLength(text: string): number
 {
@@ -62,44 +43,4 @@ export function nicknameCharactersAllowed(text: string): boolean
     }
 
     return depth === 0;
-}
-
-export async function checkNickname(
-    raw: string,
-    type: number,
-    providers: NicknameCheckProviders,
-): Promise<NicknameCheck>
-{
-    validateText(raw);
-
-    if (!Number.isInteger(type) || type < -2147483648 || type > 2147483647)
-    {
-        throw new GameError(errors.invalid);
-    }
-
-    const name = nicknameTrim(raw);
-    const length = nicknameLength(name);
-    const reportedLength = length + raw.split(" ").length - 1;
-    const result: NicknameCheck = {
-        occupied: 0,
-        exist: mailBlank(raw) || name.startsWith("(") ? -1 : 0,
-        length: reportedLength,
-        remainLength: 16 - reportedLength,
-    };
-
-    if (length < 3 || length > 16 || !nicknameCharactersAllowed(name))
-    {
-        result.exist = -1;
-    }
-    else if (await providers.containsBadWords(name))
-    {
-        result.exist = -1;
-    }
-    else if (type === 0 && (await providers.occupied(name)))
-    {
-        result.exist = -1;
-        result.occupied = 1;
-    }
-
-    return result;
 }

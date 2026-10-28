@@ -1,5 +1,5 @@
 import { nickname_change } from "@opencok/drizzle/schema/opencok_kingdom/nickname_change";
-import { nicknameChangePayment } from "./nickname-change";
+import type { CostNicknamePaymentDecoder } from "@opencok/contracts/continued-cost-ranking";
 import { and, eq, isNull, isNotNull, or, sql } from "drizzle-orm";
 import { continued_cost_fact as facts } from "@opencok/drizzle/schema/opencok_kingdom/continued_cost_fact";
 import { continued_cost_period as periods } from "@opencok/drizzle/schema/opencok_kingdom/continued_cost_period";
@@ -19,6 +19,7 @@ export { createCostRankingRegistry } from "./continued-cost-ranking-global";
 export function createCostRankingFacts(
     db: DatabaseClient<"kingdom">,
     authority: RealmAuthority,
+    nicknameChangePayment: CostNicknamePaymentDecoder,
 ): CostRankingFacts
 {
     let caughtUp = false;

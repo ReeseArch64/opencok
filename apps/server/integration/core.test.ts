@@ -1,3 +1,4 @@
+import { nicknameAccountUid } from "@opencok/account/repositories/nickname-identity";
 import { configureEggActivity } from "../test/fixtures/egg-activity";
 import { configureGoldEggs } from "../test/fixtures/gold-eggs";
 import type { DeliveredGiftProof } from "@opencok/contracts/paid-gifts";
@@ -281,7 +282,11 @@ test("PostgreSQL SFS login, city and map preserve state and isolate both realms"
         const url = new URL(`postgres://127.0.0.1:${pg.options.port}/postgres`);
         url.username = String(pg.options.user);
         url.password = String(pg.options.password);
-        chatRepository = createChatRepository({ databaseUrl: url.toString(), topology });
+        chatRepository = createChatRepository({
+            nicknameAccountUid,
+            databaseUrl: url.toString(),
+            topology,
+        });
         chat = createChatApp({
             repository: chatRepository,
             signingSecret: "synthetic-profile-secret",

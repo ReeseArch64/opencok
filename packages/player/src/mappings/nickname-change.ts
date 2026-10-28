@@ -1,7 +1,7 @@
 import type {
     NicknameChangeRecord,
     NicknameNotification,
-} from "@opencok/contracts/nickname-change";
+} from "@opencok/player/contracts/nickname-change";
 import { sfs, type Fields } from "@opencok/messages/sfs";
 import {
     nicknameItemDeleteSchema,
@@ -9,7 +9,7 @@ import {
     nicknameMobileGoldSchema,
     nicknameDmmGoldSchema,
     nicknameChangeReplySchema,
-} from "@opencok/validations/nickname-change";
+} from "@opencok/player/validations/nickname-change";
 import type { Rules } from "@opencok/rules/game";
 import { mailBlank } from "@opencok/rules/mail";
 import { validateFields } from "@opencok/messages/validations/fields";

@@ -2,9 +2,9 @@ import { expect, test } from "bun:test";
 import { drizzle, type NodePgClient } from "drizzle-orm/node-postgres";
 import { sql } from "drizzle-orm";
 import * as schema from "@opencok/drizzle/schema/global";
-import { withAvailableNickname } from "@opencok/repositories/nickname-lock";
-import { nicknameOccupied } from "@opencok/repositories/nickname";
-import { validateNicknameChange } from "@opencok/rules/nickname-change";
+import { withAvailableNickname } from "@opencok/player/repositories/nickname-lock";
+import { nicknameOccupied } from "@opencok/player/repositories/nickname";
+import { validateNicknameChange } from "@opencok/player/rules/nickname-change";
 
 function deferred()
 {

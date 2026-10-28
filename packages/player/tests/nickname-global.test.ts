@@ -1,8 +1,8 @@
 import { expect, test } from "bun:test";
 import { drizzle, type NodePgClient } from "drizzle-orm/node-postgres";
 import * as schema from "@opencok/drizzle/schema/global";
-import { commitNicknameGlobal } from "@opencok/repositories/nickname-global";
-import { nicknameGoldDebit } from "@opencok/rules/nickname-change";
+import { commitNicknameGlobal } from "@opencok/player/repositories/nickname-global";
+import { nicknameGoldDebit } from "@opencok/player/rules/nickname-change";
 
 type Account = {
     uid: string;

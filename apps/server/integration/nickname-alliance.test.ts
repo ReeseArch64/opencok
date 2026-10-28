@@ -10,7 +10,7 @@ import { mail } from "@opencok/drizzle/schema/opencok_kingdom/mail";
 import { mail_contents } from "@opencok/drizzle/schema/opencok_kingdom/mail_contents";
 import { mail_group } from "@opencok/drizzle/schema/opencok_kingdom/mail_group";
 import { createRealmNotifications } from "@opencok/connection/notifications";
-import type { NicknameAllianceTask } from "@opencok/contracts/nickname-change";
+import type { NicknameAllianceTask } from "@opencok/contracts/nickname-alliance";
 import type { Rules } from "@opencok/rules/game";
 import { createNicknameChangeRuntime } from "../src/nickname-change.ts";
 import { migrateDatabase } from "../../../packages/drizzle/scripts/migrate.ts";

@@ -50,6 +50,7 @@
     "apps/chat": {
       "name": "@opencok/chat",
       "dependencies": {
+        "@opencok/account": "workspace:*",
         "@opencok/connection": "workspace:*",
         "@opencok/contracts": "workspace:*",
         "@opencok/controllers": "workspace:*",
@@ -630,13 +631,16 @@
     "packages/player": {
       "name": "@opencok/player",
       "dependencies": {
+        "@opencok/account": "workspace:*",
         "@opencok/constants": "workspace:*",
         "@opencok/contracts": "workspace:*",
+        "@opencok/core": "workspace:*",
         "@opencok/drizzle": "workspace:*",
         "@opencok/errors": "workspace:*",
         "@opencok/ledger": "workspace:*",
         "@opencok/mappings": "workspace:*",
         "@opencok/messages": "workspace:*",
+        "@opencok/policy": "workspace:*",
         "@opencok/rules": "workspace:*",
         "@opencok/validations": "workspace:*",
         "drizzle-orm": "0.45.4",
@@ -644,7 +648,6 @@
       },
       "devDependencies": {
         "@opencok/config": "workspace:*",
-        "@opencok/policy": "workspace:*",
         "@opencok/resources": "workspace:*",
         "@opencok/services": "workspace:*",
         "@types/bun": "catalog:",

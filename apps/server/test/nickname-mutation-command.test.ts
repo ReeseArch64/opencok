@@ -1,5 +1,8 @@
+import { NicknameService } from "@opencok/player/services/nickname";
+import type { NicknameRuntime } from "@opencok/player/contracts/nickname-service";
+import { checkGameProfile } from "@opencok/services/game-profile";
 import { expect, test } from "bun:test";
-import type { GameServices, GameStore } from "@opencok/contracts/game";
+import type { GameStore } from "@opencok/contracts/game";
 import type { Row } from "@opencok/contracts/rows";
 import { GameService } from "@opencok/services/game";
 import { Rules } from "@opencok/rules/game";
@@ -11,7 +14,8 @@ function fixture()
     const calls: string[] = [];
     let profile: Row | undefined = { uid: "self", serverId: 1, banTime: 0n, banFlag: 0 };
     let forbidden = false;
-    const services: GameServices = {
+    const services: NicknameRuntime = {
+        checkProfile: checkGameProfile,
         nicknameForbidden: async (name) => {
             calls.push(`reserved:${name}`);
             return forbidden;
@@ -44,7 +48,7 @@ function fixture()
         new Rules(new Map(), new Map(), new Map()),
         { kingdomId: 1 },
         () => 1000,
-        services,
+        { nickname: new NicknameService(db, 1, services, () => 1000) },
     );
     return {
         calls,

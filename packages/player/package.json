@@ -10,8 +10,7 @@
     "@types/bun": "catalog:",
     "typescript": "catalog:",
     "@opencok/services": "workspace:*",
-    "@opencok/resources": "workspace:*",
-    "@opencok/policy": "workspace:*"
+    "@opencok/resources": "workspace:*"
   },
   "type": "module",
   "exports": {
@@ -28,6 +27,9 @@
     "@opencok/rules": "workspace:*",
     "@opencok/validations": "workspace:*",
     "@opencok/ledger": "workspace:*",
-    "zod": "catalog:"
+    "zod": "catalog:",
+    "@opencok/account": "workspace:*",
+    "@opencok/core": "workspace:*",
+    "@opencok/policy": "workspace:*"
   }
 }

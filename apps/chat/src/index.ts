@@ -1,3 +1,4 @@
+import { nicknameAccountUid } from "@opencok/account/repositories/nickname-identity";
 import { realmChatDeliveries } from "@opencok/services/realm-chat-delivery";
 import { initializeLogging, initializeTelemetry, logEvent } from "@opencok/core/logging";
 import { loadChatEnvironment } from "@opencok/env/chat";
@@ -46,6 +47,7 @@ try
     logEvent("starting", { service: "chat" });
     archive = config.MONGO_URI ? createChatArchiveStore(config.MONGO_URI) : undefined;
     repository = createChatRepository({
+        nicknameAccountUid,
         renderRealmEvents: (realm, owners, events) =>
             realmChatDeliveries(repository!, realm, owners, events),
         archive,

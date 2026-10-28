@@ -4,10 +4,13 @@ import { account_new } from "@opencok/drizzle/schema/opencok_global/account_new"
 import { nickname_change_receipt } from "@opencok/drizzle/schema/opencok_global/nickname_change_receipt";
 import { validChatNickname, type ChatNicknameStore } from "@opencok/contracts/chat-nickname";
 import type { DatabaseClient } from "@opencok/drizzle/contracts/database";
-import { nicknameAccountUid } from "./nickname-global.ts";
 
 export function createChatNicknameStore(
     db: DatabaseClient<"global">,
+    nicknameAccountUid: (
+        tx: Pick<DatabaseClient<"global">, "select">,
+        owner: string,
+    ) => Promise<string>,
 ): ChatNicknameStore
 {
     return {

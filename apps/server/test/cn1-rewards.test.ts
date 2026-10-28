@@ -4,7 +4,10 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { cn1RewardRatio, type Cn1SessionState } from "@opencok/rules/cn1-rewards";
 import { Rules } from "@opencok/rules/game";
-import { nicknameGoldRefund, type NicknameGoldBalances } from "@opencok/rules/nickname-change";
+import {
+    nicknameGoldRefund,
+    type NicknameGoldBalances,
+} from "@opencok/player/rules/nickname-change";
 import { loadRules } from "@opencok/resources/rules";
 import vectors from "./fixtures/cn1-reward-vectors.json";
 

@@ -1,3 +1,6 @@
+import { createRealmNicknameService } from "../src/composition/nickname.ts";
+import { nicknameAccountUid } from "@opencok/account/repositories/nickname-identity";
+import { createRealmNicknameChangeStore } from "../src/composition/nickname-persistence.ts";
 import { afterAll, beforeAll, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import type { AddressInfo } from "node:net";
@@ -18,11 +21,8 @@ import { createChatApp } from "../../chat/src/app.ts";
 import { createRealmNotifications } from "@opencok/connection/notifications";
 import { decode, encode, sfs, type Fields } from "@opencok/messages/sfs";
 import { createNicknameChangeRuntime } from "../src/nickname-change.ts";
-import {
-    createNicknameChangeStore,
-    nicknameChangePayment,
-} from "@opencok/repositories/nickname-change";
-import type { NicknameChangeConfiguration } from "@opencok/contracts/nickname-change";
+import { nicknameChangePayment } from "@opencok/player/repositories/nickname-change";
+import type { NicknameChangeConfiguration } from "@opencok/player/contracts/nickname-change";
 import { migrateDatabase } from "../../../packages/drizzle/scripts/migrate.ts";
 import { DisposablePostgres } from "../../../packages/drizzle/tests/support/postgres.ts";
 
@@ -45,7 +45,7 @@ const configuration: NicknameChangeConfiguration = {
     },
 };
 const store = (kingdomId = 1, config = configuration) =>
-    createNicknameChangeStore(databases, kingdomId, config);
+    createRealmNicknameChangeStore(databases, kingdomId, config);
 const realm = (id = 1) => databases.getKingdom(id);
 const profile = async (uid: string, id = 1) =>
     (await realm(id).db.select().from(userprofile).where(eq(userprofile.uid, uid)))[0]!;
@@ -739,6 +739,7 @@ test(
         const uid = await seed({ items: 3 }),
             outsider = await seed({ items: 1 });
         const repository = createChatRepository({
+            nicknameAccountUid,
             databaseUrl:
                 `postgres://postgres:${pg.options.password}@127.0.0.1:${pg.options.port}/nickname_global`,
             topology,
@@ -1493,6 +1494,7 @@ test(
         const redis = new DisposableRedis();
         const cache = new Cache({ redisUrl: await redis.start(), kingdomId: 1, timeoutMs: 1000 });
         const repository = createChatRepository({
+            nicknameAccountUid,
             databaseUrl:
                 `postgres://postgres:${pg.options.password}@127.0.0.1:${pg.options.port}/nickname_global`,
             topology,
@@ -1542,7 +1544,15 @@ test(
                 rules,
                 { kingdomId: 1 },
                 () => now,
-                { ...filters, nicknameChange: runtime.command },
+                {
+                    nickname: createRealmNicknameService(
+                        { getProfileById: () => profile(uid) },
+                        databases,
+                        1,
+                        { ...filters, nicknameChange: runtime.command },
+                        () => now,
+                    ),
+                },
             );
             const operationId = randomUUID();
             const params = {

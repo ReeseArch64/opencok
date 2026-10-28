@@ -1,3 +1,5 @@
+import { NicknameService } from "@opencok/player/services/nickname";
+import { checkGameProfile } from "@opencok/services/game-profile";
 import { expect, test } from "bun:test";
 import { mkdtemp, writeFile, rm } from "node:fs/promises";
 import { join } from "node:path";
@@ -48,7 +50,13 @@ function fixture(services?: GameServices)
         new Rules(new Map(), new Map(), new Map()),
         { kingdomId: 2 },
         () => 1000,
-        providers,
+        {
+            ...providers,
+            nickname: new NicknameService(store, 2, {
+                ...providers,
+                checkProfile: checkGameProfile,
+            }, () => 1000),
+        },
     );
     return {
         game,
