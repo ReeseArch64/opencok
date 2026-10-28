@@ -11,7 +11,7 @@ import {
     inventoryResponse,
     inventoryReplay,
 } from "@opencok/economy/mappings/inventory";
-import type { MutationEvent, EconomyPosting } from "@opencok/ledger/contracts/mutation";
+import { InventoryLedger } from "@opencok/economy/domain/inventory-ledger";
 import { randomUUID } from "node:crypto";
 import type { InventoryItem } from "@opencok/economy/contracts/inventory";
 import type {
@@ -186,168 +186,16 @@ export class InventoryService
     }
 }
 
-export class InventoryPlanner
+export class InventoryPlanner extends InventoryLedger<InventoryState, Rules>
 {
-    readonly domainEvents: MutationEvent[] = [];
-    readonly items: InventoryItem[];
-    readonly changed = new Map<string, InventoryItem>();
-    readonly postings: EconomyPosting[] = [];
-
-    post(asset: string, before: bigint, after: bigint, reason: string)
-    {
-        this.postings.push({
-            account: text(this.state.profile, "uid"),
-            asset,
-            before,
-            after,
-            reason,
-        });
-    }
-
-    readonly profile: Record<string, bigint> = {};
-    readonly assets: Record<string, bigint> = {};
-    readonly resources: Record<string, bigint> = {};
-    readonly cooldowns = new Map<string, bigint>();
-    readonly pushes: InventoryCommandResponse["pushes"] = [];
-    campaignPostingCursor = 0;
-
     constructor(
-        readonly state: InventoryState,
-        readonly rules: Rules,
+        state: InventoryState,
+        rules: Rules,
         readonly effects: InventoryEffects,
-        readonly now: number,
+        now: number,
     )
     {
-        if (!Number.isSafeInteger(now) || now < 0)
-        {
-            throw new Error("Invalid inventory clock");
-        }
-
-        this.items = state.items.map((item) => ({ ...item }));
-    }
-
-    valid(item: InventoryItem)
-    {
-        return item.vanishTime === 0n || item.vanishTime > BigInt(this.now);
-    }
-
-    own(uuid: string)
-    {
-        const item = this.items.find((item) => item.uuid === uuid);
-
-        if (!item || !this.valid(item))
-        {
-            throw new GameError("E100166");
-        }
-
-        return item;
-    }
-
-    add(itemId: string, count: number, value = 0)
-    {
-        const rule = inventoryGoods(this.rules, itemId);
-        inventoryCount(count);
-        let item = rule.overlap === "1"
-            ? undefined
-            : this.items.find(
-                (item) => item.itemId === itemId && item.value === value && this.valid(item),
-            );
-
-        if (!item)
-        {
-            item = { uuid: randomUUID(), itemId, count: 0, value, vanishTime: 0n };
-            this.items.push(item);
-        }
-
-        const next = inventoryCount(item.count + count);
-        this.post(`item.${item.uuid}`, BigInt(item.count), BigInt(next), "inventory.grant");
-        item.count = next;
-
-        if (rule.time_type === "1" && rule.vanishTime)
-        {
-            item.vanishTime = BigInt(this.now) + BigInt(inventoryInteger(rule.vanishTime)) * 60000n;
-        }
-
-        this.changed.set(item.uuid, item);
-
-        return item;
-    }
-
-    take(item: InventoryItem, count: number)
-    {
-        inventoryCount(count);
-
-        if (!this.valid(item) || item.count < count)
-        {
-            throw new GameError("E100165");
-        }
-
-        this.post(
-            `item.${item.uuid}`,
-            BigInt(item.count),
-            BigInt(item.count - count),
-            "inventory.consume",
-        );
-        item.count -= count;
-        this.changed.set(item.uuid, item);
-    }
-
-    spendItems(id: string, count: number)
-    {
-        inventoryCount(count);
-
-        for (const item of this.items)
-        {
-            if (item.itemId !== id || item.value !== 0 || !this.valid(item) || item.count <= 0)
-            {
-                continue;
-            }
-
-            const take = Math.min(count, item.count);
-            this.take(item, take);
-            count -= take;
-
-            if (!count)
-            {
-                return;
-            }
-        }
-
-        throw new GameError("E100165");
-    }
-
-    pools()
-    {
-        return text(this.state.profile, "pf") === "dmm"
-            ? ["dmmGold", "dmmPaidSpecialGold", "dmmPaidGold"]
-            : ["gold", "paidSpecialGold", "paidGold"];
-    }
-
-    balance(key: string)
-    {
-        return this.profile[key] ?? long(this.state.profile, key);
-    }
-
-    resourceBalance(asset: string)
-    {
-        return long(this.state.resource, asset);
-    }
-
-    assetBalance(asset: string)
-    {
-        return long(this.state.assets ?? {}, asset);
-    }
-
-    total()
-    {
-        const total = this.pools().reduce((sum, key) => sum + this.balance(key), 0n);
-
-        if (total < 0n || total > 9223372036854775807n)
-        {
-            throw new GameError(errors.invalid);
-        }
-
-        return total;
+        super(state, rules, now);
     }
 
     buy(itemId: string, requested: number, params: Fields)
