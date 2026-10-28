@@ -10,10 +10,12 @@ Applications and invitations follow in [#671](https://github.com/ReeseArch64/ope
 Creation and membership follow in [#673](https://github.com/ReeseArch64/opencok/issues/673).
 Queries and snapshots follow in [#675](https://github.com/ReeseArch64/opencok/issues/675).
 Publication follows in [#677](https://github.com/ReeseArch64/opencok/issues/677).
-Its sixty-nine source modules and eight test files cover help, gifts, research,
+Execution context and dispatch follow in [#679](https://github.com/ReeseArch64/opencok/issues/679).
+Its seventy-five source modules and nine test files cover help, gifts, research,
 donations, governance, applications/invitations, creation/membership, queries,
-snapshots, publication, native mapping and transactional persistence/recovery.
-Effects and the broad coordinator remain subsequent domain slices.
+snapshots, publication, context/dispatch, native mapping and transactional
+persistence/recovery. The outer mutation coordinator and aggregate repository
+remain subsequent domain slices.
 
 ## Responsibilities and composition
 
@@ -535,3 +537,66 @@ environment or client packaging changes. Keep pending outbox events, committed
 receipts, current memberships and player progress. Effects, aggregate orchestration,
 transaction discovery and semantic catalogs remain #558 work. Native-device,
 production-load and separate process-authority acceptance remain open.
+
+## Execution context and specialized dispatch
+
+`services/context` owns the per-command Alliance execution context. Bounded
+contracts compose existing domain state/write facets, catalog requirements,
+ledger operations, runtime collaborators and subdomain factories. The context
+holds its own pending writes and production markers; it does not import broad
+Contracts, Rules, Services or Hero packages. Shared aggregate contracts retain
+the actual inventory binding while extending the owned context fields.
+
+Realm composition constructs the context with existing Services, membership
+policy, record readers, integer/failure handling and activity-economy adapter.
+The outer coordinator uses one required factory at both ordinary-command and
+trusted-gift construction sites. Its mutation plans, receipts, deterministic
+identities and outbox payloads remain unchanged. The former shared context class
+has no remaining consumers and is removed without a facade.
+
+Pending member writes override saved rows with the same player ID. Membership
+still requires the current profile to identify the same alliance and a valid
+rank; pending foreign/cleared membership cannot fall back to the old row. Alliance
+reads prefer pending writes, while `list` intentionally retains saved members for
+its existing callers. Castle identity, exact power, cost debits, default arguments
+and local science arithmetic are preserved. Snapshot/membership/science delegation
+passes the same context and retains shared production markers.
+
+The actual player-effect adapter stays in realm composition: load inventory
+effects, compute general skill points, await world effects, await emperor effects,
+then evaluate the existing player rule with version 12.06.0 and current time.
+The context retains the finite-result check and error propagation. Local alliance
+science summation remains separate from the existing power-effect calculation;
+this extraction does not replace either arithmetic policy.
+
+Dispatch retains recovery, initialization, creation, queries and application
+operations before the general membership gate. Science, help, gifts and governance
+retain their original order after that gate. Existing subdomain Services still
+own their command-specific admission and workflow. No validation or authority
+check is broadened by context composition.
+
+| Former source                                   | Owned destination                                | Integration and retirement                                                                                                |
+| ----------------------------------------------- | ------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------- |
+| Services `alliances` context and dispatch class | `services/context` and bounded context contracts | Required realm-composed factory at both coordinator call sites; shared class removed                                      |
+| Shared aggregate selection/state/write facets   | `contracts/context-state`                        | Shared aggregate extends owned fields and supplies concrete inventory; retire with outer coordinator/repository migration |
+| Inline broad player-effect composition          | `apps/server/src/composition/alliance.ts`        | Actual inventory/general/world/emperor adapters injected; finite guard remains in owned context                           |
+
+Seven context tests add 71 assertions for pending overlays, profile/rank binding,
+exact power, costs, science arithmetic, effect failure handling, dispatch gates and
+default delegation. All Alliance tests total 61 tests/597 assertions; root package
+tests total 454 tests/557,984 assertions. Twenty-nine structural and wiring
+comparisons cover moved methods/defaults, effect evaluation order, initial writes,
+complete outer coordinator methods, command registry, stable identity, factory
+wiring and aggregate contracts. The four disposable PostgreSQL suites retain
+28 tests/284 assertions; server tests retain 1,501 tests/245,699 assertions.
+Five affected workspace type checks, architecture tests/types, lint, formatting,
+frozen install and build pass. The architecture baseline remains 71 violations.
+
+Shared aggregate contracts still serve Services `alliances`, Repositories
+`alliance-gameplay` and realm composition. Alliance owns retirement with their
+remaining #558 W08/W20 migration. Generic catalogs and cross-domain effect rules
+retain separate ownership work; this slice does not complete W14 or process
+separation. Deploy or roll back the complete realm artifact with unchanged schema,
+saves, environment and client resources. Preserve memberships, production,
+inventory, receipts and outbox; native-device and production-load acceptance
+remain separate.

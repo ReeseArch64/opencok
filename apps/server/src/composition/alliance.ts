@@ -1,3 +1,6 @@
+import { AllianceContext } from "@opencok/alliance/services/context";
+import { playerGameEffect } from "@opencok/rules/power-resolver";
+import { generalSkillPoints } from "@opencok/hero/services/general-power";
 import { AllianceQueryService } from "@opencok/alliance/services/queries";
 import { AllianceSnapshotService } from "@opencok/alliance/services/snapshot";
 import { AllianceQueryMapper } from "@opencok/alliance/mappings/queries";
@@ -36,7 +39,7 @@ import { AllianceHelpPolicy } from "@opencok/alliance/rules/help-generation";
 import { AllianceHelpMapper } from "@opencok/alliance/mappings/help";
 import type { AllianceHelpContext } from "@opencok/alliance/contracts/help";
 import type { Rules } from "@opencok/rules/game";
-import type { AllianceRepository } from "@opencok/contracts/alliance-gameplay";
+import type { AllianceRepository, AllianceState } from "@opencok/contracts/alliance-gameplay";
 import type { InventoryEffects } from "@opencok/services/inventory-runtime";
 import { AllianceService, allianceStableId } from "@opencok/services/alliances";
 import { AlliancePublicationService } from "@opencok/alliance/services/publication";
@@ -190,6 +193,57 @@ export function createRealmAllianceSnapshot(context: AllianceSnapshotContext)
     );
 }
 
+export function createRealmAllianceContext(
+    owner: string,
+    state: AllianceState,
+    rules: Rules,
+    ledger: RealmInventoryPlanner,
+    effects: InventoryEffects,
+)
+{
+    const runtime = {
+        text,
+        num,
+        long,
+        cityInteger,
+        allianceFailure,
+        errors,
+        activityEconomy,
+        effect: async (id: number) => {
+            const effectState = await state.inventory.effects();
+
+            return playerGameEffect(
+                effectState,
+                rules,
+                { kingdomId: rules.kingdomId, version: "12.06.0", now: Number(state.now) },
+                generalSkillPoints(effectState.generals),
+                await effects.world(),
+                await effects.emperor(),
+                id as Parameters<typeof playerGameEffect>[6],
+            );
+        },
+    };
+
+    return new AllianceContext(
+        owner,
+        state,
+        rules,
+        ledger,
+        runtime,
+        new AllianceMembershipPolicy(runtime),
+        {
+            help: createRealmAllianceHelp,
+            gifts: createRealmAllianceGifts,
+            science: createRealmAllianceScience,
+            governance: createRealmAllianceGovernance,
+            applicationsFactory: createRealmAllianceApplications,
+            membershipFactory: createRealmAllianceMembership,
+            queriesFactory: createRealmAllianceQueries,
+            snapshotFactory: createRealmAllianceSnapshot,
+        },
+    );
+}
+
 export function createRealmAllianceService(
     repository: AllianceRepository,
     rules: Rules,
@@ -201,14 +255,8 @@ export function createRealmAllianceService(
         repository,
         rules,
         effects,
-        createRealmAllianceHelp,
+        createRealmAllianceContext,
         createRealmAllianceGifts,
-        createRealmAllianceScience,
-        createRealmAllianceGovernance,
-        createRealmAllianceApplications,
-        createRealmAllianceMembership,
-        createRealmAllianceQueries,
-        createRealmAllianceSnapshot,
         forbidden,
     );
 }

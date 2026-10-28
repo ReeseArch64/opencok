@@ -100,6 +100,23 @@ publication modules are removed after realm and integration callers migrate.
 Effects and aggregate ownership remain later #558 work; no new authority process,
 worker or persistence contract is introduced by this extraction.
 
+## Execution context ownership
+
+After #679, Alliance owns its per-command context and specialized dispatch. Realm
+composition injects bounded runtime/policy collaborators and the existing domain
+factories. The outer mutation coordinator uses the composed factory for ordinary
+commands and trusted gifts. Pending writes, production markers, profile/member
+binding, defaults, exact power, cost debits and local science arithmetic retain
+their existing behavior.
+
+The player-effect adapter stays in realm composition and preserves inventory,
+general, world and emperor evaluation order; the context rejects nonfinite results.
+Recovery/initialization/creation/query/application dispatch still precedes the
+general membership gate. Other domain commands follow it. Shared aggregate
+contracts extend owned fields while retaining the actual inventory binding until
+the outer coordinator and transactional aggregate migrate. No saved-state,
+receipt, outbox or process-authority boundary changes.
+
 ## Queue assistance
 
 After #663, the [Alliance package](../../packages/alliance/README.md) owns help
