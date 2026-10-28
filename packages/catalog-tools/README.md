@@ -57,7 +57,7 @@ multiline value. Ambiguity in a required key blocks that binding. Unselected key
 and unparsed lines remain input metadata, not evidence about unrelated families.
 
 Read limits are 16 MiB for manifests, 32 MiB for server inventories, 64 MiB for XML
-and 16 MiB for localization. Reads use read-only handles, regular-file checks and
+and 16 MiB for localization. Reads use read-only, nonblocking handles, regular-file checks and
 size/time checks for changes during reading. These limits bound inputs, not total
 parser memory; the XML adapter currently materializes the complete parsed document.
 One local v12.06.0 Dragon run over a 45,887,280-byte database and 5,066,543-byte
@@ -111,3 +111,6 @@ suite. Synthetic fixtures exercise CLI immutability, diagnostics, deterministic
 reports, exact ID types/order, aliases, variants, broken/cyclic links, duplicates,
 version/fingerprint mismatch and unavailable entries. The Dragon roster test uses
 maintained public facts only, so CI requires no private files.
+
+On POSIX, the FIFO regression test requires `mkfifo` and verifies rejection without
+a writer. Windows skips that test because it does not expose POSIX named pipes.

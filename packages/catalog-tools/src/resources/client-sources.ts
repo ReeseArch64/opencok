@@ -1,3 +1,4 @@
+import { constants } from "node:fs";
 import { createHash } from "node:crypto";
 import { open } from "node:fs/promises";
 import { XMLParser, XMLValidator } from "fast-xml-parser";
@@ -8,7 +9,7 @@ export const digest = (value: string | Uint8Array) =>
 
 export async function readBounded(path: string, limit: number): Promise<Buffer>
 {
-    const file = await open(path, "r").catch(() => {
+    const file = await open(path, constants.O_RDONLY | constants.O_NONBLOCK).catch(() => {
         throw new Error("Unable to read input");
     });
 
