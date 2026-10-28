@@ -1,4 +1,4 @@
-import type { InventoryPlan } from "@opencok/contracts/inventory";
+import type { InventoryPlan } from "@opencok/economy/contracts/inventory-planning";
 import type { MutationResult } from "@opencok/ledger/contracts/mutation";
 import type { Row } from "@opencok/contracts/rows";
 import type { MutationTransaction } from "./mutation";

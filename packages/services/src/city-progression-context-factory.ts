@@ -9,7 +9,7 @@ import type { Rules } from "@opencok/rules/game";
 import { cityInteger } from "@opencok/rules/city-progression";
 import { playerGameEffect } from "@opencok/rules/power-resolver";
 import { generalSkillPoints } from "@opencok/hero/services/general-power";
-import type { InventoryEffects } from "./inventory";
+import type { InventoryEffects } from "@opencok/services/inventory-runtime";
 import { CityProgressionContext } from "./city-progression-context.ts";
 
 export class CityProgressionContextFactory<T>

@@ -1,4 +1,4 @@
-import { planInventoryGrants } from "@opencok/services/inventory";
+import { planRealmInventoryGrants } from "@opencok/services/inventory-runtime";
 import { randomUUID } from "node:crypto";
 import { migrate } from "drizzle-orm/node-postgres/migrator";
 import { createDatabase } from "@opencok/drizzle";
@@ -92,12 +92,12 @@ export async function shopHarness()
         const shops = new ShopService(
             createShopRepository(db.db, authority, now),
             rules,
-            planInventoryGrants,
+            planRealmInventoryGrants,
         );
         const trade = new TradeService(
             createTradeExecutor(db.db, authority, now),
             rules,
-            planInventoryGrants,
+            planRealmInventoryGrants,
         );
         let database = db;
         return {

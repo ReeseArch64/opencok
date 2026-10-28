@@ -2,7 +2,6 @@ import { z } from "zod";
 import type {
     BuildingResponse,
     QueueResponse,
-    ResourceResponse,
     UserResponse,
 } from "@opencok/contracts/responses/city";
 import { field, responseFieldsSchema } from "@opencok/messages/validations/response";
@@ -62,27 +61,6 @@ export const queueSchema = z
         totalTime: field.long,
     })
     .extend({ itemObj: responseFieldsSchema }) satisfies z.ZodType<QueueResponse>;
-
-export const resourceSchema = z.strictObject({
-    wood: field.long,
-    wood_bind: field.long,
-    stone: field.long,
-    stone_bind: field.long,
-    iron: field.long,
-    iron_bind: field.long,
-    food: field.long,
-    food_bind: field.long,
-    silver: field.int,
-    chip: field.int,
-    diamond: field.int,
-    sandstone: field.int,
-    diamondstone: field.int,
-    marble: field.int,
-    granite: field.int,
-    limestone: field.int,
-    dragonFood: field.int,
-    dragonGold: field.int,
-}) satisfies z.ZodType<ResourceResponse>;
 
 export const userSchema = z.strictObject({
     buildcode: field.string,

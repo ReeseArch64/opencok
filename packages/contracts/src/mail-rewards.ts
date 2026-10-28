@@ -1,4 +1,5 @@
-import type { InventoryPlan, InventoryState } from "./inventory.ts";
+import type { InventoryState } from "./inventory.ts";
+import type { InventoryPlan } from "@opencok/economy/contracts/inventory-planning";
 import type { MutationCommand } from "@opencok/ledger/contracts/mutation";
 import type { Row } from "./rows.ts";
 

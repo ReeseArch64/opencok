@@ -1,4 +1,4 @@
-import { planInventoryGrants } from "@opencok/services/inventory";
+import { planRealmInventoryGrants } from "@opencok/services/inventory-runtime";
 import { expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { eq } from "drizzle-orm";
@@ -225,7 +225,7 @@ test(
                     return result;
                 },
                 h.rules,
-                planInventoryGrants,
+                planRealmInventoryGrants,
             );
             const id = randomUUID();
             const params = { operationId: sfs.string(id) };
@@ -266,7 +266,7 @@ test(
             const restored = new TradeService(
                 createTradeExecutor(h.db.db, next, h.now),
                 h.rules,
-                planInventoryGrants,
+                planRealmInventoryGrants,
             );
             h.rules.trades.clear();
             const replay = await restored.command("buyer", "trade.exchange", params);
@@ -275,7 +275,7 @@ test(
             const stale = new TradeService(
                 createTradeExecutor(h.db.db, h.authority, h.now),
                 h.rules,
-                planInventoryGrants,
+                planRealmInventoryGrants,
             );
             await expect(stale.command("buyer", "trade.exchange", params)).rejects.toThrow();
             await expect(stale.command("buyer", "trade.exchange", {})).rejects.toThrow();
@@ -300,7 +300,7 @@ test(
             const restored = new TradeService(
                 createTradeExecutor(h.db.db, h.authority, h.now),
                 h.rules,
-                planInventoryGrants,
+                planRealmInventoryGrants,
             );
             const loaded = await restored.command("buyer", "trade.info", {});
             expect(loaded.body.trade).toEqual(original.body.trade);

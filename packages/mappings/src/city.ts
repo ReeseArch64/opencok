@@ -5,7 +5,7 @@ import {
     buildingUnlockValues,
 } from "./building.ts";
 import { validateFields } from "@opencok/messages/validations/fields";
-import { buildingSchema, queueSchema, resourceSchema, userSchema } from "@opencok/validations/city";
+import { buildingSchema, queueSchema, userSchema } from "@opencok/validations/city";
 
 import { sfs, type Fields } from "@opencok/messages/sfs";
 import { long, num, text, type Row } from "@opencok/contracts/rows";
@@ -142,38 +142,6 @@ function serializeQueue(row: Row, item: Fields = {}, helped = true): Fields
     return result;
 }
 
-function serializeResource(row: Row): Fields
-{
-    const result: Fields = {};
-
-    for (const key of ["wood", "stone", "iron", "food"])
-    {
-        result[key] = sfs.long(long(row, key) < 0n ? 0n : long(row, key));
-        result[`${key}_bind`] = sfs.long(long(row, `${key}bind`));
-    }
-
-    for (
-        const key of [
-            "silver",
-            "chip",
-            "diamond",
-            "sandstone",
-            "diamondstone",
-            "marble",
-            "granite",
-            "limestone",
-        ]
-    )
-    {
-        result[key] = sfs.int(Math.max(0, num(row, key)));
-    }
-
-    result.dragonFood = sfs.int(num(row, "dragon_food"));
-    result.dragonGold = sfs.int(num(row, "dragon_gold"));
-
-    return result;
-}
-
 export function gold(profile: Row)
 {
     return long(profile, "gold") + long(profile, "paidGold") + long(profile, "paidSpecialGold");
@@ -255,11 +223,6 @@ export function building(...args: Parameters<typeof serializeBuilding>): Fields
 export function queue(...args: Parameters<typeof serializeQueue>): Fields
 {
     return validateFields(queueSchema, serializeQueue(...args));
-}
-
-export function resource(...args: Parameters<typeof serializeResource>): Fields
-{
-    return validateFields(resourceSchema, serializeResource(...args));
 }
 
 export function user(...args: Parameters<typeof serializeUser>): Fields

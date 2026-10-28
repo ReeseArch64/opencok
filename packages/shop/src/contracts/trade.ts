@@ -1,4 +1,5 @@
-import type { InventoryPlan, InventoryState } from "@opencok/contracts/inventory";
+import type { InventoryState } from "@opencok/contracts/inventory";
+import type { InventoryPlan } from "@opencok/economy/contracts/inventory-planning";
 import type { MutationCommand } from "@opencok/ledger/contracts/mutation";
 
 export interface TradeState

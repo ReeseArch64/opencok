@@ -4,7 +4,7 @@ import { randomUUID } from "node:crypto";
 import { sfs } from "@opencok/messages/sfs";
 import { cityHarness } from "./support/city";
 import { equipmentDomain, workshopDomain } from "@opencok/services/equipment";
-import { InventoryService } from "@opencok/services/inventory";
+import { createInventoryService } from "@opencok/services/inventory-runtime";
 import { createInventoryExecutor } from "@opencok/repositories/inventory";
 import { user_equip } from "@opencok/drizzle/schema/opencok_kingdom/user_equip";
 import { user_item } from "@opencok/drizzle/schema/opencok_kingdom/user_item";
@@ -21,7 +21,7 @@ test(
             await h.db.db
                 .insert(user_building)
                 .values({ uid: "owner", uuid: "forge", itemId: 429000, level: 1, pos: 12 });
-            const inventory = new InventoryService(
+            const inventory = createInventoryService(
                 createInventoryExecutor(h.db.db, h.authority, () => h.clock.now),
                 h.rules,
                 h.effects,

@@ -23,7 +23,11 @@ import {
 import type { Rules } from "@opencok/rules/game";
 import { encode, decode, sfs, str, int, ProtocolError, type Fields } from "@opencok/messages/sfs";
 import { queue as queueView } from "@opencok/mappings/city";
-import { InventoryPlanner, type InventoryEffects } from "./inventory";
+import {
+    createInventoryPlanner,
+    type RealmInventoryPlanner,
+    type InventoryEffects,
+} from "@opencok/services/inventory-runtime";
 
 export class TimedActivityService
 {
@@ -750,12 +754,12 @@ export class TimedActivityService
         params: Fields,
         apply: (
             state: ActivityState,
-            ledger: InventoryPlanner,
+            ledger: RealmInventoryPlanner,
         ) => Promise<{
             queues: readonly Row[];
             activities: readonly TimedActivity[];
             body: Fields;
-            ledger: InventoryPlanner;
+            ledger: RealmInventoryPlanner;
             event?: Uint8Array | null;
         }>,
     )
@@ -779,7 +783,7 @@ export class TimedActivityService
                 participants: this.participants?.(owner, command, params),
             },
             async (state) => {
-                const ledger = new InventoryPlanner(
+                const ledger = createInventoryPlanner(
                     state,
                     this.rules,
                     this.effects,

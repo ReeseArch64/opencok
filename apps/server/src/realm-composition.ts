@@ -4,7 +4,7 @@ import { getConfigurationByPlayerId } from "@opencok/player/repositories/push-pr
 import { initializeWorldNewsPreference } from "@opencok/player/repositories/world-news-preference";
 import { ProfilePreferenceService } from "@opencok/player/services/profile-preferences";
 import { updateProfilePreference } from "@opencok/player/repositories/profile-preferences";
-import { planInventoryGrants } from "@opencok/services/inventory";
+import { planRealmInventoryGrants } from "@opencok/services/inventory-runtime";
 import { ActivityRecoveryJob } from "./activity-recovery-job.ts";
 import { WorldMarchRecoveryJob } from "./world-march-recovery-job.ts";
 import { WorldPopulationJob } from "./world-population-job.ts";
@@ -301,7 +301,7 @@ import {
     createInventoryExecutor,
     executeInventoryTransaction,
 } from "@opencok/repositories/inventory";
-import { InventoryService } from "@opencok/services/inventory";
+import { createInventoryService } from "@opencok/services/inventory-runtime";
 import { decodeWorldPowerEffects } from "@opencok/services/power";
 import { worldPowerEffects } from "@opencok/rules/power-world";
 import { checkMutationStore, createMutationExecutor } from "@opencok/repositories/mutation";
@@ -2813,7 +2813,7 @@ export const RealmDependenciesLive = Layer.effect(
                     "realm.createTradeExecutor",
                 ),
                 rules,
-                planInventoryGrants,
+                planRealmInventoryGrants,
             ),
             "realm.TradeService",
         );
@@ -2882,7 +2882,7 @@ export const RealmDependenciesLive = Layer.effect(
                     "realm.createShopRepository",
                 ),
                 rules,
-                planInventoryGrants,
+                planRealmInventoryGrants,
             ),
             "realm.ShopService",
         );
@@ -3127,7 +3127,7 @@ export const RealmDependenciesLive = Layer.effect(
         }
 
         const inventory = observeAdapter(
-            new InventoryService(
+            createInventoryService(
                 observeAdapter(
                     createInventoryExecutor(db.kingdom.db, authority, Date.now, {
                         before: async (tx, owner, now) => {

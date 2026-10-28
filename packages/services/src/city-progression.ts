@@ -1,6 +1,6 @@
 import type { CityProgressionStore } from "@opencok/contracts/city-progression";
 import type { Rules } from "@opencok/rules/game";
-import type { InventoryEffects } from "./inventory";
+import type { InventoryEffects } from "@opencok/services/inventory-runtime";
 import type { CityDomain } from "./city-domain.ts";
 import { CityProgressionService } from "./city-progression.service.ts";
 
