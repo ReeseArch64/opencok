@@ -7,7 +7,7 @@ import { errors } from "@opencok/constants/game";
 import { sfs, encode, str, int, Type, type Fields } from "@opencok/messages/sfs";
 import type { Rules } from "@opencok/rules/game";
 import { shopAvailable, shopInteger, shopLimit, shopPrice } from "@opencok/shop/rules/shops";
-import { inventoryCount } from "@opencok/rules/inventory";
+import { inventoryCount } from "@opencok/economy/rules/inventory";
 import { shopOffer } from "@opencok/shop/mappings/shops";
 import { inventoryItem } from "@opencok/mappings/bootstrap";
 import { inventoryResponse, inventoryReplay, inventoryEvent } from "@opencok/mappings/inventory";

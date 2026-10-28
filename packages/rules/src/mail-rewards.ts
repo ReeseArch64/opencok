@@ -1,7 +1,7 @@
 import type { MailRewardEntry, MailRewardSelection } from "@opencok/contracts/mail-rewards";
 import { GameError } from "@opencok/errors/game";
 import { errors } from "@opencok/constants/game";
-import { inventoryCount } from "./inventory.ts";
+import { inventoryCount } from "@opencok/economy/rules/inventory";
 
 export function mailRewardSelection(
     uid: string | undefined,

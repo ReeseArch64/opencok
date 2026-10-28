@@ -34,7 +34,7 @@ import {
     inventoryPairs,
     inventoryRecipe,
     inventoryWeighted,
-} from "@opencok/rules/inventory";
+} from "@opencok/economy/rules/inventory";
 import { serverFeature } from "@opencok/rules/power-context";
 import { playerGameEffect } from "@opencok/rules/power-resolver";
 import { generalSkillPoints } from "@opencok/hero/services/general-power";

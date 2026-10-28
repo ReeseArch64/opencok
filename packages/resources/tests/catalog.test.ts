@@ -30,7 +30,7 @@ test("bundled rules load for both realms and isolate mutable indexes", async () 
 test("changing typed item pricing reaches server rules without an XML conversion", async () => {
     const { spyOn } = await import("bun:test");
     const { loadRules } = await import("../src/rules.ts");
-    const { inventoryPrice } = await import("@opencok/rules/inventory");
+    const { inventoryPrice } = await import("@opencok/economy/rules/inventory");
     const goods = await loadCatalog(GameplayCatalog.Goods);
     const originalPrice = goods.records.find((record) => record.id === 200001)?.price;
     const edited = {

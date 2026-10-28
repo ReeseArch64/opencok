@@ -5,7 +5,7 @@ import {
     inventoryPrice,
     inventoryRecipe,
     inventoryWeighted,
-} from "@opencok/rules/inventory";
+} from "@opencok/economy/rules/inventory";
 
 test("catalog prices distinguish bundles, fallback, batch and material costs without overflow", () => {
     const rule = { price: "10", sales: "2;15|5;30" };

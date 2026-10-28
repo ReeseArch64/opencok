@@ -8,7 +8,7 @@ import { inventoryReplay } from "@opencok/mappings/inventory";
 import { InventoryPlanner, type InventoryEffects } from "./inventory.ts";
 import { activityEconomy } from "@opencok/economy/services/activity-economy";
 import { friendshipMineView } from "@opencok/rules/reconnect-mine";
-import { inventoryWeighted } from "@opencok/rules/inventory";
+import { inventoryWeighted } from "@opencok/economy/rules/inventory";
 import { cityInteger } from "@opencok/rules/city-progression";
 import { num, long, text } from "@opencok/contracts/rows";
 import type { Rules } from "@opencok/rules/game";

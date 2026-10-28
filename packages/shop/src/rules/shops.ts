@@ -4,7 +4,7 @@ import { errors, MOBILE_CLIENT_VERSION } from "@opencok/constants/game";
 import { GameError } from "@opencok/errors/game";
 import type { Rule, Rules } from "@opencok/rules/game";
 import { versionAtLeast, featureRealmEnabled } from "@opencok/rules/availability";
-import { inventoryCount } from "@opencok/rules/inventory";
+import { inventoryCount } from "@opencok/economy/rules/inventory";
 
 export function shopInteger(value: string | undefined, fallback = 0): number
 {
