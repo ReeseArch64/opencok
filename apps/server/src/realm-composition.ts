@@ -1,3 +1,4 @@
+import { createRealmCelebrityDescriptionService } from "./composition/celebrity-description.ts";
 import { createRealmPublicProfileService } from "./composition/public-profile.ts";
 import { checkPublicProfileStore } from "@opencok/player/repositories/public-profile";
 import { PushPreferenceService } from "@opencok/player/services/push-preferences";
@@ -465,6 +466,15 @@ export const RealmDependenciesLive = Layer.effect(
         const nicknameServices = yield* fromPromise(
             "realm.nickname-words",
             () => loadNicknameServices((key) => cache.nicknameForbiddenWords(key)),
+        );
+        const celebrityDescriptions = observeAdapter(
+            createRealmCelebrityDescriptionService(
+                db,
+                db.databases,
+                config.kingdomId,
+                nicknameServices,
+            ),
+            "realm.CelebrityDescriptionService",
         );
         const publicProfiles = observeAdapter(
             createRealmPublicProfileService(
@@ -3312,6 +3322,7 @@ export const RealmDependenciesLive = Layer.effect(
                             config,
                             Date.now,
                             {
+                                celebrityDescription: celebrityDescriptions,
                                 publicProfile: (uid, params) => publicProfiles.get(uid, params),
                                 playerPreferences: pushPreferences,
                                 profilePreference: (uid, command, params, now) =>

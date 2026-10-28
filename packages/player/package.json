@@ -10,7 +10,8 @@
     "@types/bun": "catalog:",
     "typescript": "catalog:",
     "@opencok/services": "workspace:*",
-    "@opencok/resources": "workspace:*"
+    "@opencok/resources": "workspace:*",
+    "@opencok/policy": "workspace:*"
   },
   "type": "module",
   "exports": {

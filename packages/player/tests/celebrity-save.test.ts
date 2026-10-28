@@ -1,6 +1,7 @@
+import { CelebrityDescriptionService } from "@opencok/player/services/celebrity-description";
 import { expect, test } from "bun:test";
 import { drizzle, type NodePgClient } from "drizzle-orm/node-postgres";
-import { saveCelebrityDescription } from "@opencok/repositories/celebrity";
+import { saveCelebrityDescription } from "@opencok/player/repositories/celebrity-description";
 import { GameService as Game } from "@opencok/services/game";
 import { Rules } from "@opencok/rules/game";
 import { NicknameWordFilter } from "@opencok/policy/resources/nickname-words";
@@ -160,6 +161,7 @@ function fixture(initial = new Map<string, Buffer | null>())
             return filter.filter(text);
         },
     };
+    services.celebrityDescription = new CelebrityDescriptionService(store, 1, services);
     const game = new Game(
         store as unknown as GameStore,
         new Rules(new Map(), new Map(), new Map()),

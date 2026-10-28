@@ -162,3 +162,33 @@ Zod is now a direct dependency using the existing workspace catalog version for 
 moved schemas; no dependency version changes. There is no configuration, schema,
 saved-data or process-authority change. Rollback uses the previous realm artifact
 against the same data.
+
+## Celebrity descriptions (#629)
+
+`CelebrityDescriptionService` owns `celebrity.desc.get` and `celebrity.desc.save`
+through narrow store and filter ports. The realm factory injects profile reads,
+owned PostgreSQL adapters and the already loaded content filter. GameService only
+routes both commands; GameStore and Database no longer expose description methods.
+The generic Database startup table inventory still checks celebrity readiness.
+
+Reads preserve the requested realm, authenticated local observer checks, celebrity
+eligibility, canonical UID matching and ambiguity rejection. Decoding retains strict
+UTF-8, Java trimming/blank semantics and the 65535-byte bound. Saves preserve the
+owner-only target, gmFlag 11 gate before input/filter checks, locked profile
+revalidation, canonical existing-row selection, filtering order and Java byte
+encoding. Existing rows update explicitly; absent rows insert under the owner lock.
+Exceptions roll back and do not automatically retry.
+
+Both original command/repository test suites move into player and retain all sixteen
+scenarios and 321 assertions. They still compose the generic command router, so
+correlation fields and empty push lists remain covered. A disposable two-realm
+PostgreSQL test exercises the actual app factory, cross-realm reads, owned writes,
+filter failure rollback, stale eligibility revalidation, unrelated-row preservation
+and persistence through restart. Existing SFS core integration covers app startup.
+
+The test suites declare policy as a direct workspace development dependency; no
+version or production dependency changes. Shared Unicode, Java encoding and trim
+primitives retain their current paths pending the corresponding #558 migrations.
+No schema, description-byte conversion, authority or process change is introduced.
+Deploy or roll back the realm artifact against the same stored descriptions.
+Physical-client rendering and production load remain untested.
