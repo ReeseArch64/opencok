@@ -5,7 +5,6 @@ import type {
     CityProgressionState,
     ProgressionActivityData,
 } from "@opencok/contracts/city-progression";
-import type { BuildingState } from "@opencok/building/contracts/building";
 import { num, long, text, type Row } from "@opencok/contracts/rows";
 import type { Rules } from "./game";
 
@@ -269,96 +268,6 @@ export function cityPrestige(
         0,
         ...prestiges.map((row) => newGeneralPrestigeLevel(row.civilizationType, prestiges, rules)),
     );
-}
-
-export function checkCityBuildingRequirements(
-    state: CityProgressionState,
-    rule: BuildingState,
-    rules: Rules,
-)
-{
-    if (rule.limit === 1)
-    {
-        throw new GameError(errors.buildingLimited, "city_progression");
-    }
-
-    for (const requirement of rule.requiredBuildings ?? [])
-    {
-        if (
-            !state.buildings.some(
-                (row) =>
-                    num(row, "itemId") === requirement.buildingId
-                    && cityLevel(row) >= requirement.level,
-            )
-        )
-        {
-            throw new GameError(errors.resource, "city_progression");
-        }
-    }
-
-    for (const requirement of rule.requiredStarBuildings ?? [])
-    {
-        const base = Math.trunc(requirement.levelId / 100) * 100,
-            star = requirement.levelId % 100;
-
-        if (
-            state.buildings.filter((row) => num(row, "itemId") === base && num(row, "star") >= star)
-                .length < requirement.quantity
-        )
-        {
-            throw new GameError(errors.resource, "city_progression");
-        }
-    }
-
-    if (
-        (rule.civilizationLevel ?? 0)
-            > (num(state.profile, "civilizationType") === 0 ? 0 : cityPrestige(state, rules))
-    )
-    {
-        throw new GameError(errors.prestige, "city_progression");
-    }
-}
-
-export function checkCityPosition(
-    state: CityProgressionState,
-    rules: Rules,
-    pos: number,
-    itemId: string,
-)
-{
-    cityInteger(pos);
-    const rule = [...rules.positions.values()].find((row) => Number(row.position) === pos);
-
-    if (!rule || !(rule.building?.split(";") ?? []).includes(itemId))
-    {
-        throw new GameError(errors.invalid, "city_progression");
-    }
-
-    const opened = text(state.profile, "openedPos").split(/[;|,]/).includes(String(pos));
-
-    if (rule.unlock !== "1" && !opened)
-    {
-        throw new GameError(errors.locked, "city_progression");
-    }
-}
-
-export function cityQueueType(itemId: number): number | undefined
-{
-    return (
-        {
-            403000: 6,
-            411000: 3,
-            416000: 2,
-            423000: 1,
-            424000: 8,
-            425000: 9,
-            426000: 10,
-            429000: 11,
-            436000: 16,
-            439000: 17,
-            440000: 18,
-        } as Record<number, number>
-    )[itemId];
 }
 
 export function citySpeedGold(rules: Rules, durationMs: bigint, troops = false): bigint

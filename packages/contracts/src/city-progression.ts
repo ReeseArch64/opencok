@@ -1,3 +1,4 @@
+export type { ProgressionActivityData } from "@opencok/economy/contracts/progression-activity";
 import type { GeneralWrite } from "@opencok/hero/contracts/generals";
 import type { GeneralRoster } from "@opencok/hero/contracts/generals";
 import type { GeneralRankingWeights } from "@opencok/hero/contracts/generals";
@@ -232,23 +233,4 @@ export interface CityProgressionStore
         request?: Uint8Array,
     ): Promise<CityProgressionState>;
     update(write: CityProgressionWrite, economy: ActivityEconomy): Promise<void>;
-}
-
-export interface ProgressionActivityData
-{
-    schema: 1;
-    kind:
-        | "civilization"
-        | "upgrade"
-        | "destroy"
-        | "research"
-        | "train"
-        | "heal"
-        | "fort"
-        | "equipment"
-        | "material";
-    costs: Record<string, string>;
-    items: Record<string, number>;
-    target?: { level: number; star: number; progress: number; };
-    units?: Record<string, number>;
 }

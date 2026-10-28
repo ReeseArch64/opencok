@@ -1,3 +1,4 @@
+import { buildingQueueType as cityQueueType } from "@opencok/building/rules/queues";
 import { GameError } from "@opencok/errors/game";
 import { errors } from "@opencok/constants/game";
 import type { CityProgressionState } from "@opencok/contracts/city-progression";
@@ -7,7 +8,6 @@ import {
     cityAmount,
     cityInteger,
     cityLevel,
-    cityQueueType,
     cityAssets,
     reducedCityCost,
     type CityAsset,
