@@ -110,12 +110,9 @@ bun run --cwd apps/api test
 bun run --cwd apps/chat test
 bun run --cwd apps/chat test:integration
 bun --no-env-file test apps/server/integration/chat-lifecycle.test.ts
-bun --no-env-file apps/chat/scripts/mutate-chat.ts
 bun run lint
 bun run format:check
 ```
 
-The mutation check removes established-session validation and expired-recipient
-filtering in temporary bundles; both mutants must fail tests. Original sources
-are not modified. APK/emulator execution and client screenshots are intentionally
-not part of this acceptance.
+The standalone mutation harness has been removed. APK/emulator execution and
+client screenshots are intentionally not part of this acceptance.

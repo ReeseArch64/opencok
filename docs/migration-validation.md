@@ -2238,9 +2238,9 @@ Synthetic unit and PostgreSQL integration coverage verifies duplicate and concur
 claims, next-day continuation, beginner equipment rewards, quest asset postings,
 point budgets and prerequisites, VIP thresholds, status expiry and production-rate
 boundaries, pinned crafts, equip/dismantle conservation, workshop chaining, legacy
-quantity recovery, and acceleration limits. The player progression mutation suite
-must reject removed budget, tree, expiry, material, equipped-power, and terminal
-claim-state checks. The native 12.06.0 APK has not been exercised for these commands.
+quantity recovery, and acceleration limits. The standalone player progression
+mutation suite has been removed. The native 12.06.0 APK has not been exercised
+for these commands.
 
 ## Gameplay topic 23: basic alliances
 

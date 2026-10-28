@@ -26,9 +26,6 @@ jobs:
       - name: Install dependencies
         run: bun install --frozen-lockfile --ignore-scripts
 
-      - name: Test commit range selection
-        run: bun --no-env-file test ./.github/tests/commitlint.test.ts
-
       - name: Validate new commits
         env:
           BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}

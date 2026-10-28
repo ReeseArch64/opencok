@@ -6,6 +6,18 @@ decision-makers: ReeseArch64
 
 # ADR-0015: Adopt measured per-application build selection
 
+## Current applicability
+
+The project owner requested removal of the compiler evaluation infrastructure,
+its artifact CI workflow and the dependent standalone mutation harnesses. They
+are no longer maintained or available for reproduction in the current tree.
+The historical measurements remain in Git history; do not recreate the removed
+infrastructure from this proposal. Its status remains proposed, not accepted.
+The formatting policy in ADR-0014 and the maintained application builds are unchanged.
+
+The implementation plan and checked evidence below describe the original evaluation,
+not current CI coverage or authorization to restore it.
+
 ## Context and Problem Statement
 
 [Issue #551](https://github.com/ReeseArch64/opencok/issues/551) asks whether another
@@ -27,8 +39,8 @@ without selecting another runtime or rewriting gameplay.
 ## Decision
 
 Retain the maintained Bun 1.4.2 CLI build for API, Chat, server and web. Evaluate
-each application separately when reconsidering this choice. The measured evidence,
-failures and limitations are in the [build report](../../.github/build-pilot/REPORT.md).
+each application separately when reconsidering this choice. The original measured
+evidence, failures and limitations are retained in Git history.
 This is a recommendation pending human acceptance; no new production runtime is
 selected. [ADR-0009](0009-adopt-bun-for-development.md) and
 [ADR-0011](0011-adopt-typescript-for-application-code.md) remain active, while the
@@ -65,10 +77,10 @@ resource changes, a database migration or a production deployment through this A
 
 ## Implementation Plan
 
-- **Affected paths**: `.github/build-pilot/`, root `package.json` and `bun.lock`,
+- **Original scope**: root `package.json` and `bun.lock`,
   `packages/env/src/load.ts`, `packages/env/tests/load.test.ts`, the environment
-  guide, `.github/testing/`, `.github/workflows/build-artifacts.yml` and
-  `apps/{server,chat}/scripts/mutate-*.ts`.
+  guide and the now-removed evaluation scripts, artifact CI workflow and
+  standalone mutation harnesses.
 - **Dependencies**: Keep Bun 1.4.2 and TypeScript 7.0.2. Pin evaluation-only
   `esbuild@0.28.2`, `rolldown@1.2.15`, `rollup@4.65.1`, `@swc/core@1.16.20`,
   `@rollup/plugin-node-resolve@16.0.3`, `@rollup/plugin-commonjs@29.0.3` and
@@ -130,14 +142,13 @@ resource changes, a database migration or a production deployment through this A
 
 ## More Information
 
-The [pilot protocol and official references](../../.github/build-pilot/README.md)
-describe exact settings, retained OS caches, sampled memory and frontend exceptions.
-The report separates compiler measurements from installation, type checking,
-container transfer/startup and deployment size. Source-map files stay local to
-diagnostic outputs and are not uploaded as CI artifacts.
+The original protocol, references and report are retained in Git history rather
+than the current tree. They describe evaluation settings, retained OS caches,
+sampled memory and frontend exceptions, separating compiler measurements from
+installation, type checking, container transfer/startup and deployment size.
 
-Local verification evidence is recorded in the report. These checked verification
-items describe executed synthetic checks, not human acceptance or deployment.
+These checked verification items describe historical synthetic checks, not current
+CI coverage, human acceptance or deployment.
 
 Revisit when a measured app exceeds its agreed build budget, a candidate fixes the
 observed compatibility failures, the entry graph changes materially, or a separately

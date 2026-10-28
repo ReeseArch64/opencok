@@ -3844,11 +3844,10 @@ still be implemented before the migration can be declared complete.
 bun run --cwd apps/server check-types
 bun run --cwd apps/server test
 bun run --cwd packages/env test
-bun run --cwd apps/server test:mutations
 bun run --cwd apps/server test:integration
 ```
 
-The realm CI job reserves twenty-five minutes for the complete type, unit, mutation
+The realm CI job reserves twenty-five minutes for the complete type, unit
 and disposable-service integration checks. The expanded PostgreSQL suite can take
 about ten minutes by itself. New runs cancel superseded runs for the same pull
 request or branch; the latest run still executes every check.
@@ -4113,8 +4112,7 @@ crafting/wearing/upgrades/dismantling, set extraction, and workshop jobs use the
 existing player transaction and durable operation receipts. Workshop continuation
 and material acceleration have domain hooks in the timed activity service.
 
-Run `bun run test:player-progression-mutations` alongside the normal server tests.
-The corresponding synthetic integration suites use disposable PostgreSQL and
+Run the normal server tests. The corresponding synthetic integration suites use disposable PostgreSQL and
 maintained catalogs; they do not distribute or execute private reference inputs.
 
 ## Left castle area visibility

@@ -124,8 +124,7 @@ separate debit/credit legs, bonus effects, DMM pools, lost response recovery,
 PostgreSQL restart and stale-owner rejection. `integration/core.test.ts` exercises
 authenticated SFS item use, session replay, conflicting correlation and rejected
 public grants across two realms. `test/inventory.test.ts` pins price, recipe and
-weighted-outcome boundaries. `scripts/mutate-inventory.ts` verifies those tests kill
-removed gold debits, item conservation, expiration and durable replay guards.
+weighted-outcome boundaries.
 
 Validation targets v12.06.0 server contracts. Native APK rendering and other client
 tracks are untested. Synthetic transport evidence does not certify them.

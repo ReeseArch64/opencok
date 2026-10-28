@@ -171,8 +171,6 @@ SFS integration also reconciles reconnect postings and rejects a preference writ
 from a still-connected server after its persisted epoch is superseded.
 
 Run server units/integrations, Drizzle schema/snapshot/database suites, affected
-workspace type checks, root lint and formatting. Critical mutation checks run with
-`bun --no-env-file apps/server/scripts/mutate-foundation.ts`; temporary bundles
-remove stale-owner enforcement, replay, payload binding and the signed delta rule.
-Each mutant must fail against disposable databases. No production or APK testing
-is part of this foundation acceptance.
+workspace type checks, root lint and formatting. The standalone mutation harness
+has been removed; it is no longer an available verification command. No production
+or APK testing is part of this foundation acceptance.
