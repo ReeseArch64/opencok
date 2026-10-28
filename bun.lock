@@ -202,6 +202,19 @@
         "typescript": "catalog:",
       },
     },
+    "packages/catalog-tools": {
+      "name": "@opencok/catalog-tools",
+      "devDependencies": {
+        "@opencok/config": "workspace:*",
+        "@opencok/constants": "workspace:*",
+        "@opencok/dragon": "workspace:*",
+        "@opencok/resources": "workspace:*",
+        "@types/bun": "catalog:",
+        "fast-xml-parser": "^5.0.0",
+        "typescript": "catalog:",
+        "zod": "catalog:",
+      },
+    },
     "packages/city": {
       "name": "@opencok/city",
       "devDependencies": {
@@ -1123,6 +1136,8 @@
     "@opencok/building": ["@opencok/building@workspace:packages/building"],
 
     "@opencok/campaigns": ["@opencok/campaigns@workspace:packages/campaigns"],
+
+    "@opencok/catalog-tools": ["@opencok/catalog-tools@workspace:packages/catalog-tools"],
 
     "@opencok/chat": ["@opencok/chat@workspace:apps/chat"],
 

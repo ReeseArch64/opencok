@@ -2,7 +2,7 @@
 
 Parent: [#558](https://github.com/ReeseArch64/opencok/issues/558). Convention: [ADR-0016](../docs/decisions/0016-adopt-domain-owned-package-layout.md).
 
-This register accounts for all 64 original package directories, including four retired packages and the store-to-shop rename. The current tree has 60 package workspaces. Confirmed entries reproduce maintainer decisions; proposed entries require disposition review. No proposed row claims completed extraction, service deployment or verified client support.
+This register accounts for all 64 original package directories, including four retired packages and the store-to-shop rename. The current tree has 61 package workspaces, including the implemented offline `catalog-tools` workspace added in #598. Confirmed entries reproduce maintainer decisions; proposed entries require disposition review. No proposed row claims completed extraction, service deployment or verified client support.
 
 ## Existing package disposition review
 
@@ -205,3 +205,18 @@ proposal received separate semantic review. Provisioning, nicknames, public prof
 push settings, progression, shared inventory and actual process/DB fencing remain
 tracked by #558. Existing row-level ownership checks are preserved, not presented
 as proof of the future authority design.
+
+## Offline client binding discovery (#598)
+
+`catalog-tools` is the first implemented additional package from #558's proposed
+bounded destinations. It owns read-only discovery, input validation, linkage and
+coverage diagnostics, a CLI and synthetic tests under ADR-0018. It has no composing
+runtime app or production dependencies; its parser/toolchain versions already
+exist in the workspace. Existing resource importers have not moved yet.
+
+The discovery manifest lives with the `dragon` domain and covers its complete
+existing named base roster, including unavailable Vildrin. Other catalog families,
+all maintained-file semantic assignments, cross-release semantic review and final
+consumer cutovers remain pending. The generic tool reports every unassigned catalog
+and row in its supplied inventory; a partial inventory cannot establish W01 or W14
+completion. No client source or bulk localization is versioned or needed in CI.
