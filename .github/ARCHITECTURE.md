@@ -111,6 +111,7 @@ implementation and verification tracked separately.
 | `player`                                                         | Profiles, descriptions, preferences, nicknames and character provisioning, with app-injected integration collaborators.                               |
 | `production`                                                     | Building resource accumulation, collection/boosts, effect schedules and atomic city settlement, with app-injected runtime adapters.                   |
 | `building`                                                       | Typed building catalogs, level/star contracts and rules, display and legacy-record mappings; construction coordination remains horizontal.            |
+| `city`                                                           | Transactional plans, snapshot/effect factory and command/activity coordination; realm-injected mechanic callbacks preserve atomic writes.             |
 | `shop`                                                           | In-game mall and NPC trading contracts, pure rules, Services, offer mappings and transactional adapters; inventory planning is injected by the realm. |
 | `policy`                                                         | Pure content matching, bounded file/worker adapters and the maintained nickname/description dictionary.                                               |
 | `repositories`, `drizzle`, `storage`                             | Owned transactional state, schemas, Redis/ZooKeeper and S3 adapters.                                                                                  |
@@ -187,10 +188,12 @@ owns the Promise-compatible runtime lifetime. Relay classes specialize the share
 `PollingWorker` and `CursorWorker` lifecycle implementations in core. These classes
 preserve the existing Effect ownership model and protocol execution order.
 
-`CityProgressionService` owns city command routing and timed-activity dispatch.
+`packages/city` owns `CityProgressionService` for city command routing and timed-activity dispatch.
 `CityProgressionContextFactory` loads the transactional state and effect snapshot;
 `CityProgressionContext` owns the pending write and economy plan. Their structural
-domain contract lives in `city-domain.ts`. Construction, research, military,
+domain contract is generic in `contracts/city-domain.ts`; existing mechanic signatures
+use temporary type-only Services aliases. Realm composition injects world-context and
+campaign/quest/Hero/expedition callbacks before the same aggregate update. Construction, research, military,
 equipment, quests and event domain classes specialize `CityCommandDomain`. Configured
 domains receive gateways, random sources and world size through constructors; their
 factory entrypoints preserve the same contract for existing callers. The realm

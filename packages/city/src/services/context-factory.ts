@@ -1,7 +1,6 @@
 import { generalDrawPeriod } from "@opencok/hero/rules/general-draws";
 import { GameError } from "@opencok/errors/game";
 import { errors } from "@opencok/constants/game";
-import { resourceOwnerRuleContext } from "./world-resource-owner-context";
 import { resourceGeneralBuildingEffect } from "@opencok/hero/services/general-building-effects";
 import type { ActivityEconomy } from "@opencok/economy/contracts/activity-economy";
 import type { CityProgressionStore } from "@opencok/contracts/city-progression";
@@ -9,15 +8,16 @@ import type { Rules } from "@opencok/rules/game";
 import { cityInteger } from "@opencok/rules/city-progression";
 import { playerGameEffect } from "@opencok/rules/power-resolver";
 import { generalSkillPoints } from "@opencok/hero/services/general-power";
-import type { InventoryEffects } from "@opencok/services/inventory-runtime";
-import { CityProgressionContext } from "./city-progression-context.ts";
+import type { CityEffects, CityOwnerRuleContext } from "../contracts/runtime";
+import { CityProgressionContext } from "./context";
 
 export class CityProgressionContextFactory<T>
 {
     public constructor(
         private readonly store: (tx: T, owner: string, now: bigint) => CityProgressionStore,
         private readonly rules: Rules,
-        private readonly effects: InventoryEffects,
+        private readonly effects: CityEffects,
+        private readonly resourceOwnerRuleContext: CityOwnerRuleContext,
     )
     {}
 
@@ -102,7 +102,7 @@ export class CityProgressionContextFactory<T>
                     playerGameEffect(
                         snapshot.effects,
                         rules,
-                        resourceOwnerRuleContext(snapshot, {
+                        this.resourceOwnerRuleContext(snapshot, {
                             kingdomId: rules.kingdomId,
                             now: Number(at),
                         }),

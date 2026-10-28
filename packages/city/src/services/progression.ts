@@ -1,24 +1,15 @@
+import type { CityContextProvider, CityProgressionHooks } from "../contracts/runtime";
 import { TimedActivityAction } from "@opencok/enums/timed-activity-action";
-import { flushHeroScore } from "@opencok/hero/services/hero-score";
-import { flushExpeditionScores } from "./new-expedition";
-import { refreshCampaignGrants } from "./local-campaign";
-import { refreshGeneralUnlocks } from "@opencok/hero/services/general-assignments";
-import { refreshQuests } from "./quests";
 import { GameError } from "@opencok/errors/game";
 import { errors } from "@opencok/constants/game";
 import type { ActivityEconomy } from "@opencok/economy/contracts/activity-economy";
 import type { ActivityAction, TimedActivity } from "@opencok/contracts/timed-activity";
-import type { CityProgressionStore } from "@opencok/contracts/city-progression";
 import { num } from "@opencok/contracts/rows";
 import { encode, decode } from "@opencok/messages/sfs";
-import type { Rules } from "@opencok/rules/game";
-import type { InventoryEffects } from "@opencok/services/inventory-runtime";
-import type { CityDomain } from "./city-domain.ts";
-import { CityProgressionContextFactory } from "./city-progression-context-factory.ts";
+import type { CityDomain } from "../contracts/domain";
 
 export class CityProgressionService<T>
 {
-    private readonly contexts: CityProgressionContextFactory<T>;
     public readonly domains = new Map<
         number,
         (
@@ -31,14 +22,11 @@ export class CityProgressionService<T>
     >();
 
     public constructor(
-        store: (tx: T, owner: string, now: bigint) => CityProgressionStore,
+        private readonly contexts: CityContextProvider<T>,
         private readonly domainList: readonly CityDomain[],
-        rules: Rules,
-        effects: InventoryEffects,
+        private readonly hooks: CityProgressionHooks,
     )
     {
-        this.contexts = new CityProgressionContextFactory(store, rules, effects);
-
         for (const domain of this.domainList)
         {
             for (const type of domain.types)
@@ -62,16 +50,16 @@ export class CityProgressionService<T>
                     }
 
                     const body = await domain.apply(plan, action, activity);
-                    refreshCampaignGrants(plan);
+                    this.hooks.refreshCampaignGrants(plan);
 
                     if (action === TimedActivityAction.Finish && activity.type === 0)
                     {
-                        refreshGeneralUnlocks(plan);
+                        this.hooks.refreshGeneralUnlocks(plan);
                     }
 
                     if (action === TimedActivityAction.Finish)
                     {
-                        refreshQuests(plan, {
+                        this.hooks.refreshQuests(plan, {
                             legacy: activity.type === 0 ? 3 : activity.type === 6 ? 12 : undefined,
                             daily: activity.type === 0 ? 26 : activity.type === 6 ? 27 : undefined,
                             main: activity.type === 0 ? 31 : undefined,
@@ -114,15 +102,15 @@ export class CityProgressionService<T>
 
                             return sum + Math.max(0, num(row, key) - num(prior ?? {}, key));
                         }, 0);
-                        refreshQuests(plan, {
+                        this.hooks.refreshQuests(plan, {
                             main: activity.type === 2 ? 22 : activity.type === 3 ? 44 : 2,
                             count: quantity,
                             key: activity.itemId,
                         });
                     }
 
-                    await flushExpeditionScores(plan);
-                    await flushHeroScore(plan);
+                    await this.hooks.flushExpeditionScores(plan);
+                    await this.hooks.flushHeroScore(plan);
                     await repository.update(plan.write, economy);
 
                     return encode(body);
@@ -147,8 +135,8 @@ export class CityProgressionService<T>
 
         const { repository, plan } = await this.contexts.create(tx, activity.ownerId, now, economy);
         await domain.accelerate(plan, activity, remaining);
-        await flushExpeditionScores(plan);
-        await flushHeroScore(plan);
+        await this.hooks.flushExpeditionScores(plan);
+        await this.hooks.flushHeroScore(plan);
         await repository.update(plan.write, economy);
     };
 
@@ -167,8 +155,8 @@ export class CityProgressionService<T>
 
         const { repository, plan } = await this.contexts.create(tx, activity.ownerId, now, economy);
         const result = await domain.next(plan, activity);
-        await flushExpeditionScores(plan);
-        await flushHeroScore(plan);
+        await this.hooks.flushExpeditionScores(plan);
+        await this.hooks.flushHeroScore(plan);
         await repository.update(plan.write, economy);
 
         return result;
@@ -200,15 +188,15 @@ export class CityProgressionService<T>
             params,
         );
         const result = await domain.prepare(plan, command, decode(Buffer.from(params)));
-        refreshCampaignGrants(plan);
+        this.hooks.refreshCampaignGrants(plan);
 
         if (!domain.commands.includes("task.reward.get"))
         {
-            refreshQuests(plan);
+            this.hooks.refreshQuests(plan);
         }
 
-        await flushExpeditionScores(plan);
-        await flushHeroScore(plan);
+        await this.hooks.flushExpeditionScores(plan);
+        await this.hooks.flushHeroScore(plan);
         await repository.update(plan.write, economy);
 
         return result;

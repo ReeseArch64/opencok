@@ -16,7 +16,7 @@ import { createCityProductionBoundary } from "@opencok/production/repositories/c
 import { createCityProgressionStore } from "@opencok/repositories/city-progression";
 import { readReconnectProgress } from "@opencok/repositories/reconnect-progress";
 import { persistReconnectProgress } from "@opencok/repositories/reconnect-write";
-import { createCityProgressionHandlers } from "@opencok/services/city-progression";
+import { createRealmCityProgressionHandlers } from "../src/composition/city.ts";
 import { TimedActivityService } from "@opencok/services/timed-activity";
 import { dragonProgressionDomain } from "@opencok/services/dragon-progression";
 import { civilizationScienceDomain } from "@opencok/services/civilization-science";
@@ -137,7 +137,7 @@ function resumed(
             ? undefined
             : ["wood", "stone", "iron", "food"][rule.effects.productionResourceId ?? -1];
     });
-    const handlers = createCityProgressionHandlers(
+    const handlers = createRealmCityProgressionHandlers(
         (tx: Parameters<typeof createCityProgressionStore>[0], owner, at) =>
             createCityProgressionStore(tx, owner, at, boundary, 1200, authority),
         domains,

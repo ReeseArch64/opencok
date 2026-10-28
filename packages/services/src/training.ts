@@ -27,7 +27,7 @@ import {
     reserveTroops,
 } from "@opencok/rules/military";
 import { idleDeadline } from "@opencok/rules/timed-activity";
-import { CityProgressionContext } from "./city-progression-context.ts";
+import type { CityProgressionContext } from "./city-progression-context.ts";
 import type { CityDomain } from "./city-domain.ts";
 
 export function militaryBoolean(params: Fields, name: string, fallback = false)

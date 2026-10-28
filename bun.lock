@@ -78,6 +78,7 @@
     "apps/server": {
       "name": "@opencok/server",
       "dependencies": {
+        "@opencok/city": "workspace:*",
         "@opencok/connection": "workspace:*",
         "@opencok/contracts": "workspace:*",
         "@opencok/controllers": "workspace:*",
@@ -239,6 +240,16 @@
     },
     "packages/city": {
       "name": "@opencok/city",
+      "dependencies": {
+        "@opencok/constants": "workspace:*",
+        "@opencok/contracts": "workspace:*",
+        "@opencok/economy": "workspace:*",
+        "@opencok/enums": "workspace:*",
+        "@opencok/errors": "workspace:*",
+        "@opencok/hero": "workspace:*",
+        "@opencok/messages": "workspace:*",
+        "@opencok/rules": "workspace:*",
+      },
       "devDependencies": {
         "@opencok/config": "workspace:*",
         "@types/bun": "catalog:",

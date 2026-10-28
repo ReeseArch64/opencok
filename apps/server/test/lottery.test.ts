@@ -56,7 +56,7 @@ test("login omits an unconfigured lottery while public draws still reject", asyn
         economy: {},
         state: {},
         write: {},
-    } as import("@opencok/services/city-progression").CityProgressionContext;
+    } as import("@opencok/city/services/context").CityProgressionContext;
     const initialized = await lotteryDomain.prepare(context, "lottery.init", {});
     expect(decode(Buffer.from(initialized.response))).toEqual({});
     expect(context.write).toEqual({});

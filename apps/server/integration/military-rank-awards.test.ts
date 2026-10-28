@@ -13,7 +13,7 @@ import {
     militaryRankAwardReader,
     writeMilitaryRankAward,
 } from "@opencok/repositories/military-rank-awards";
-import { CityProgressionContext } from "@opencok/services/city-progression";
+import { CityProgressionContext } from "@opencok/city/services/context";
 import { applyMilitaryRankAward } from "@opencok/services/military-rank-awards";
 import type { MilitaryRankAward } from "@opencok/contracts/military-rank-awards";
 import type { ActivityEconomy } from "@opencok/economy/contracts/activity-economy";
