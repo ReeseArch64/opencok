@@ -17,7 +17,8 @@
     "@opencok/drizzle": "workspace:*",
     "drizzle-orm": "0.45.4",
     "@opencok/economy": "workspace:*",
-    "@opencok/mail": "workspace:*"
+    "@opencok/mail": "workspace:*",
+    "zod": "catalog:"
   },
   "devDependencies": {
     "@opencok/config": "workspace:*",

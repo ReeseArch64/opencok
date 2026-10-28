@@ -3,8 +3,8 @@
 Tasks owns ordinary/main, story, daily, legacy daily and sign-in quests after
 [#653](https://github.com/ReeseArch64/opencok/issues/653), under
 [ADR-0016](../../docs/decisions/0016-adopt-domain-owned-package-layout.md).
-Target tasks, recall and event-specific mission workflows remain in their current
-owners for later #558 slices. Background work belongs to jobs.
+Target missions are owned after #655. Recall and other event-specific mission
+workflows remain in their current owners for later #558 slices. Background work belongs to jobs.
 
 ## Responsibilities and composition
 
@@ -77,3 +77,67 @@ unchanged initialization stages versus 9,252 simulated unfiltered writes; this i
 not a production latency claim. Native-device and production-load acceptance remain
 separate. Deploy or roll back the realm artifact against the same persisted quests,
 mail, inventory, receipts and outbox; no data conversion is required.
+
+## Target missions (#655)
+
+Target missions add 17 source modules and one test file, bringing Tasks to 36 source
+modules and two test files. Access reads the existing pending state; progression
+owns target recording and period recovery; rewards own repeated native reward
+aggregation and claims. `TargetTaskDomain` owns the five existing commands and uses
+the same optional verified payment gateway. `TargetTaskPolicy` owns schedule,
+weighted/fixed selection and quantity bounds. The payment identity class retains
+the canonical owner/event hash; publication validates and sends the same owned
+payload to `push.target.task`.
+
+The native Mapper, response interfaces and Zod schema move together. Domain enums
+retain exact command names; the supported native type set remains explicit pending
+semantic definition work. Services remain below 350 lines individually. Numeric,
+feature, recall, native reward and mail algorithms are actual injected collaborators,
+not copied implementations. Realm composition for construction, research, troops
+and ordinary quests now receives the owned bound progress callback from
+`apps/server/src/composition/target-task.ts`.
+
+`TargetTaskRepository` receives the current transaction and owner through
+`composition/target-task-persistence.ts`. Notes and task rows retain their lock
+order, 65-row read sentinel/64-row limit, server opening timestamp, owner and period
+validation, reset order and missing-row rejection. City delegates at the original
+snapshot/write positions. Expired rewards still use the same quest mail plan and
+transaction. No payment provider or authority is created; absent gateway remains
+closed, and accepted proofs retain owner/event, exchange and time checks.
+
+### Target source ownership
+
+| Former module                                                                                             | Owned destination                                                                          | Composition and verification                                          |
+| --------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ | --------------------------------------------------------------------- |
+| `services/src/target-task.ts`                                                                             | `services/target-{access,rewards,progression,task,publication}` and `rules/target-payment` | Realm target factory/publication; target and recall app/PG suites     |
+| `rules/src/target-task.ts`                                                                                | `rules/target-task`, `constants/target-types`, `validations/target-failure`                | Injected numeric policy; target/operator app and owned policy tests   |
+| `repositories/src/target-task.ts`                                                                         | `repositories/target-task`                                                                 | Realm persistence factory and City adapter; target/consumer PG suites |
+| `contracts/src/target-task.ts`                                                                            | `contracts/target-task` plus bounded target context/runtime ports                          | Shared type facade; affected workspace types                          |
+| `contracts/src/responses/target-task.ts`, `validations/src/target-task.ts`, `mappings/src/target-task.ts` | Tasks response contract, validation and Mapper                                             | Owned/app wire tests and realm target command composition             |
+
+### Target compatibility and retirement
+
+Tasks owns these temporary bindings under #558 W20. Migrate their listed consumers,
+verify exports and remove the facade when no maintained import needs it:
+
+- `services/src/target-task.ts` exports only the bound `recordTargetTask` callback.
+  Remaining callers are shared Services `quests.ts` and `world-march-runtime.ts`.
+  Their eventual runtime ports must receive the existing owned callback. The
+  adapter still consumes the legacy City context type.
+- `rules/src/target-task.ts` exports only bound `targetSchedule`, consumed by
+  `rules/src/activity-operators.ts`. Remove it when operator composition injects
+  the owned schedule policy or its numeric runtime.
+- `contracts/src/target-task.ts` re-exports state/write/payment declarations.
+  `contracts/src/city-progression.ts` embeds state and write through import-type
+  expressions. No external named payment-gateway alias import remains. Remove this
+  facade with the aggregate-contract and public-export audit.
+
+The former target Repository, Mapper, validation and response paths are removed
+after all callers migrate. Thirty structural comparisons preserve original bodies,
+five declarations, schema, constants, command order and complete City flows. The
+existing 10-test/64-assertion unit and eight-test/63-assertion PostgreSQL baselines
+cover target/recall/operator behavior, paid/replayed claims and expiry mail. Five
+owned tests add 33 assertions for selection, progress gates/clamps, identity bounds,
+wire validation and publication. Rollback uses the previous artifact against the
+same target notes/tasks, mail, inventory, receipts and outbox; no data conversion,
+configuration change or production-performance claim is introduced.

@@ -215,7 +215,8 @@ import {
 import { pendingPlayerItemGiftOwners } from "@opencok/repositories/player-item-gifts";
 import { SeasonalExchangeDomain } from "@opencok/services/seasonal-exchange";
 import { VipBoxDomain } from "@opencok/services/vip-box";
-import { TargetTaskDomain, publishTargetTaskMutation } from "@opencok/services/target-task";
+import { createRealmTargetTaskDomain } from "./composition/target-task";
+import { TargetTaskPublicationService } from "@opencok/tasks/services/target-publication";
 import { RechargeFeedbackDomain } from "@opencok/services/recharge-feedback";
 import { RechargeActivityDomain } from "@opencok/services/recharge-activity";
 import { OrdinaryBoxDomain } from "@opencok/services/ordinary-box";
@@ -368,6 +369,8 @@ import { initialFriendshipMine } from "@opencok/rules/reconnect-mine";
 import { RealmDependencies } from "./realm-dependencies.ts";
 import { RealmRules } from "./realm-rules.ts";
 import { RealmServer } from "./realm-server.ts";
+
+const { publishTargetTaskMutation } = new TargetTaskPublicationService();
 
 export const RealmRulesLive = Layer.effect(
     RealmRules,
@@ -1022,7 +1025,7 @@ export const RealmDependenciesLive = Layer.effect(
                     observeAdapter(new ComebackDomain(), "realm.ComebackDomain"),
                     observeAdapter(new HotItemDomain(), "realm.HotItemDomain"),
                     observeAdapter(new VipBoxDomain(), "realm.VipBoxDomain"),
-                    observeAdapter(new TargetTaskDomain(), "realm.TargetTaskDomain"),
+                    observeAdapter(createRealmTargetTaskDomain(), "realm.TargetTaskDomain"),
                     observeAdapter(new LuckyDayDomain(), "realm.LuckyDayDomain"),
                     observeAdapter(new CastleLevelEventDomain(), "realm.CastleLevelEventDomain"),
                     observeAdapter(new LotteryDomain(), "realm.LotteryDomain"),

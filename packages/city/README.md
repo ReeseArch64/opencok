@@ -182,3 +182,8 @@ City keeps their aggregate ordering and original before-state cloning. Ordinary
 quest commands specialize Base directly; the legacy context/domain aliases now
 have 51/58 consumers. Shared quest refresh callers still use the tracked adapter
 in [Tasks](../tasks/README.md#compatibility-and-retirement).
+
+After #655, `TargetTaskRepository` owns target notes/task reads and writes. City
+preserves their position in the aggregate transaction; the realm supplies the same
+numeric adapters and owner. Legacy context/domain aliases now have 51/57 consumers;
+the remaining target callback adapter is tracked in the Tasks retirement register.

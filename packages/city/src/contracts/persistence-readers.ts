@@ -55,7 +55,6 @@ export interface CityPersistenceReaders
     readPlayerItemGifts: CityReadField<"playerItemGifts", [command: string, request?: Uint8Array]>;
     readSeasonalExchange: CityReadField<"seasonalExchange">;
     readVipBox: CityReadField<"vipBox">;
-    readTargetTasks: CityReadField<"targetTask">;
     rechargeFeedbackReader: CityReadFactory<"rechargeFeedback">;
     readRechargeActivity: CityReadField<"rechargeActivity">;
     readOrdinaryBoxServer: (

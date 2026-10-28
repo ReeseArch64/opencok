@@ -132,7 +132,7 @@ export class CityMechanicWriter
 
         if (write.targetTask)
         {
-            await writers.writeTargetTasks(tx, owner, write.targetTask);
+            await session.targetTasks.writeTargetTasks(write.targetTask);
         }
 
         if (write.redPackets)
