@@ -5,7 +5,7 @@ import {
     castleEventOpen,
 } from "@opencok/rules/castle-level-event";
 import { Rules } from "@opencok/rules/game";
-import { GameService } from "@opencok/services/game";
+import { createRealmGameService } from "../src/composition/game";
 import type { GameStore } from "@opencok/contracts/game";
 import { sfs } from "@opencok/messages/sfs";
 test("castle entitlements preserve numeric sharding and bound automatic mail to the native realm age", () => {
@@ -22,7 +22,7 @@ test("castle entitlements preserve numeric sharding and bound automatic mail to 
     expect(castleEventOpen(rules, { kingdomId: 1, version: "12.06.0", now: 0 })).toBe(false);
 });
 test("castle actions retain native correlation and recovery commands remain internal", async () => {
-    const game = new GameService(
+    const game = createRealmGameService(
         {} as GameStore,
         new Rules(new Map(), new Map(), new Map()),
         { kingdomId: 1 },

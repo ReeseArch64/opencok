@@ -3,7 +3,7 @@ import { expect, test } from "bun:test";
 import { loadRules } from "@opencok/resources/rules";
 import { activityOperators } from "@opencok/rules/activity-operators";
 import { activityOperatorsView } from "@opencok/mappings/activity-operators";
-import { GameService } from "@opencok/services/game";
+import { createRealmGameService } from "../src/composition/game";
 import type { GameStore } from "@opencok/contracts/game";
 import { encode, decode, fields, sfs, type Value } from "@opencok/messages/sfs";
 import { configureOperators, operatorSnapshot, operatorsNow } from "./fixtures/activity-operators";
@@ -144,7 +144,7 @@ test("activity.operators reaches its read-only owned snapshot, preserves native 
     const rules = await loadRules();
     configureOperators(rules);
     const calls: { owner: string; now: number; }[] = [];
-    const game = new GameService(
+    const game = createRealmGameService(
         {
             async activityOperators(owner: string, now: number)
             {

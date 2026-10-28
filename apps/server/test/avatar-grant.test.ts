@@ -1,7 +1,7 @@
 import { expect, test } from "bun:test";
 import { Effect } from "effect";
 import { EnvironmentSource } from "@opencok/env/effect";
-import { GameService as Game } from "@opencok/services/game";
+import { createRealmGameService } from "../src/composition/game";
 import { Rules, type Rule } from "@opencok/rules/game";
 import { avatarSequence, avatarMinimumLevel, checkAvatarRecord } from "@opencok/rules/avatar";
 import { createAvatarFiles } from "@opencok/connection/avatar-files";
@@ -102,7 +102,9 @@ function fixture()
         },
     };
     const db = new Proxy({}, { get: () => unused }) as GameStore;
-    const game = new Game(db, rules(), { kingdomId: 1 }, () => now, { avatar: service });
+    const game = createRealmGameService(db, rules(), { kingdomId: 1 }, () => now, {
+        avatar: service,
+    });
     return {
         game,
         service,
@@ -470,7 +472,9 @@ test("authenticated avatar URL renewal signs current realm profiles without uplo
         ["1002", { ...f.profile, uid: "1002", picVer: 2999999 }],
     ]);
     const db = { getProfileById: async (uid: string) => profiles.get(uid) } as GameStore;
-    const game = new Game(db, rules(), { kingdomId: 1 }, () => now, { avatar: f.service });
+    const game = createRealmGameService(db, rules(), { kingdomId: 1 }, () => now, {
+        avatar: f.service,
+    });
     for (const target of ["1001", "1002"])
     {
         const response = await game.execute("1001", "user.avatar.url", {

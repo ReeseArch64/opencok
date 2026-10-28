@@ -2,7 +2,7 @@ import { expect, test } from "bun:test";
 import { drizzle, type NodePgClient } from "drizzle-orm/node-postgres";
 import * as kingdom from "@opencok/drizzle/schema/kingdom";
 import { createWorldPointDetailStore } from "@opencok/repositories/world-point-detail";
-import { GameService as Game } from "@opencok/services/game";
+import { createRealmGameService } from "../src/composition/game";
 import { Rules } from "@opencok/rules/game";
 import type { GameStore } from "@opencok/contracts/game";
 import type { Row } from "@opencok/contracts/rows";
@@ -298,7 +298,7 @@ function fixture()
     const rules = new Rules(new Map(), new Map(), new Map());
     rules.world.neutralResources = new Map([["monster", { gather_time: "2" }]]);
     rules.world.fieldMonsters = new Map([["monster", { NPC: "1", Gift: "100" }]]);
-    const game = new Game({} as GameStore, rules, { kingdomId: 1 }, () => now, {
+    const game = createRealmGameService({} as GameStore, rules, { kingdomId: 1 }, () => now, {
         worldPointDetail: store,
         worldPowerEffects: async () => {
             state.worldCalls++;
@@ -558,7 +558,7 @@ test("repository validates selector results and runtime checks full correlated f
     const bad: WorldPointDetailStore = {
         read: async () => ({ ...original, exploration: undefined }),
     };
-    const game = new Game({} as GameStore, f.rules, { kingdomId: 1 }, () => now, {
+    const game = createRealmGameService({} as GameStore, f.rules, { kingdomId: 1 }, () => now, {
         worldPointDetail: bad,
     });
     await expect(
@@ -729,7 +729,7 @@ test("neutral lookup failures and inconsistent selected rows fail visibly in the
     const missing: WorldPointDetailStore = {
         read: async () => ({ ...snapshot, neutralResource: undefined }),
     };
-    const game = new Game({} as GameStore, f.rules, { kingdomId: 1 }, () => now, {
+    const game = createRealmGameService({} as GameStore, f.rules, { kingdomId: 1 }, () => now, {
         worldPointDetail: missing,
     });
     await expect(
@@ -948,9 +948,15 @@ test("barbarian point command reads saved troop state and returns public power w
 test("barbarian regeneration samples server time at projection and respects full recovery and future attacks", async () => {
     const f = barbarianFixture();
     let clocks = 0;
-    const game = new Game({} as GameStore, f.rules, { kingdomId: 1 }, () => now + clocks++ * 1000, {
-        worldPointDetail: f.store,
-    });
+    const game = createRealmGameService(
+        {} as GameStore,
+        f.rules,
+        { kingdomId: 1 },
+        () => now + clocks++ * 1000,
+        {
+            worldPointDetail: f.store,
+        },
+    );
     expect(
         (await game.execute("observer", "world.get.detail", { point: sfs.int(701) })).body
             .barbarionPower,

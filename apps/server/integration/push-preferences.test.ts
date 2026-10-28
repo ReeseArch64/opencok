@@ -9,7 +9,7 @@ import { PushPreferenceService } from "@opencok/player/services/push-preferences
 import { getConfigurationByPlayerId } from "@opencok/player/repositories/push-preferences-snapshot";
 import { initializeWorldNewsPreference } from "@opencok/player/repositories/world-news-preference";
 import { setPushPreference } from "@opencok/player/repositories/push-preferences";
-import { GameService } from "@opencok/services/game";
+import { createRealmGameService } from "../src/composition/game";
 import type { GameStore } from "@opencok/contracts/game";
 import { Rules } from "@opencok/rules/game";
 import { fields, sfs, type Fields, type Value } from "@opencok/messages/sfs";
@@ -96,7 +96,7 @@ test(
                         setPushPreference(database.db, uid, realm, input, instant),
                 }, () => now);
 
-                return new GameService(
+                return createRealmGameService(
                     { getProfileById: profile } as unknown as GameStore,
                     new Rules(new Map(), new Map(), new Map()),
                     { kingdomId: realm },

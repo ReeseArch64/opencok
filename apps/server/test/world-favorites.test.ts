@@ -8,7 +8,7 @@ import {
 } from "@opencok/repositories/world-favorites";
 import { favoriteName, favoriteServer, favoriteServerType } from "@opencok/rules/world-favorites";
 import { Rules, type Rule } from "@opencok/rules/game";
-import { GameService as Game } from "@opencok/services/game";
+import { createRealmGameService } from "../src/composition/game";
 import type { Row } from "@opencok/contracts/rows";
 import type { GameStore } from "@opencok/contracts/game";
 import { sfs, fields, encode, decode, Type, type Fields } from "@opencok/messages/sfs";
@@ -186,7 +186,7 @@ function fixture()
         globalDb = drizzle(globalClient as unknown as NodePgClient, { schema: global });
     const store = createWorldFavoriteStore(db, globalDb, 1),
         rules = ruleSet();
-    const game = new Game({} as GameStore, rules, { kingdomId: 1 }, () => clock++, {
+    const game = createRealmGameService({} as GameStore, rules, { kingdomId: 1 }, () => clock++, {
         worldFavorites: store,
     });
     return {

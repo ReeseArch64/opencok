@@ -4,7 +4,7 @@ import { checkGameProfile } from "@opencok/services/game-profile";
 import { expect, test } from "bun:test";
 import type { GameStore } from "@opencok/contracts/game";
 import type { Row } from "@opencok/contracts/rows";
-import { GameService } from "@opencok/services/game";
+import { createRealmGameService } from "../src/composition/game";
 import { Rules } from "@opencok/rules/game";
 import { sfs, type Fields } from "@opencok/messages/sfs";
 
@@ -43,7 +43,7 @@ function fixture()
         },
     };
     const db = { getProfileById: async () => profile } as unknown as GameStore;
-    const game = new GameService(
+    const game = createRealmGameService(
         db,
         new Rules(new Map(), new Map(), new Map()),
         { kingdomId: 1 },

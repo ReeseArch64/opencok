@@ -2,7 +2,7 @@ import { expect, test } from "bun:test";
 import type { GameStore } from "@opencok/contracts/game";
 import type { Row } from "@opencok/contracts/rows";
 import type { PlayerRankingQuery, PlayerRankingSnapshot } from "@opencok/contracts/ranking";
-import { GameService as Game } from "@opencok/services/game";
+import { createRealmGameService } from "../src/composition/game";
 import { Rules } from "@opencok/rules/game";
 import { decode, encode, sfs } from "@opencok/messages/sfs";
 
@@ -67,7 +67,7 @@ function fixture()
         undefined,
         new Map([["ranking", { k2: "2", k4: "2" }]]),
     );
-    const game = new Game(db, rules, { kingdomId: 1 }, () => {
+    const game = createRealmGameService(db, rules, { kingdomId: 1 }, () => {
         clockReads++;
         return now;
     });

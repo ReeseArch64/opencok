@@ -2,7 +2,7 @@ import { expect, test } from "bun:test";
 import { eq } from "drizzle-orm";
 import { cityHarness } from "./support/city";
 import { createWorldScoutStore } from "@opencok/repositories/world-scout";
-import { GameService } from "@opencok/services/game";
+import { createRealmGameService } from "../src/composition/game";
 import type { GameStore } from "@opencok/contracts/game";
 import { worldFootprint } from "@opencok/rules/world-march-runtime";
 import { sfs, decode, encode } from "@opencok/messages/sfs";
@@ -59,7 +59,7 @@ async function harness()
             }
         }
         let effects = new Map<string, string>();
-        const game = new GameService(
+        const game = createRealmGameService(
             {} as GameStore,
             h.rules,
             { kingdomId: 1, mapSize: 1200 },

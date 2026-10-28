@@ -1,7 +1,7 @@
 import { importBuildingDefinition } from "@opencok/building/mappings/legacy-definition";
 import { expect, test } from "bun:test";
 import type { CityState, GameStore } from "@opencok/contracts/game";
-import { GameService as Game } from "@opencok/services/game";
+import { createRealmGameService } from "../src/composition/game";
 import { settingConfig } from "@opencok/mappings/bootstrap";
 import { Rules } from "@opencok/rules/game";
 import { decode, encode, fields, sfs, type Value } from "@opencok/messages/sfs";
@@ -32,7 +32,7 @@ test("setting.xml preserves IDs, string values, Unicode, and correlation through
         getPlayerSummariesByIds: unused,
         getPowerByPlayerId: unused,
     };
-    const game = new Game(store, rules, { kingdomId: 1 });
+    const game = createRealmGameService(store, rules, { kingdomId: 1 });
     const result = await game.execute("synthetic-player", "setting.xml", {
         _cok_: sfs.string("correlation"),
         cmdBaseTime: sfs.string("42"),
@@ -117,7 +117,7 @@ test("build.info uses the injected clock for buildings and queue previews withou
         getWorldByPointIds: unused,
     };
     let now = Date.UTC(2026, 9, 23, 12);
-    const game = new Game(store, rules, { kingdomId: 1 }, () => now);
+    const game = createRealmGameService(store, rules, { kingdomId: 1 }, () => now);
     const output = (await game.execute("synthetic-player", "build.info", {})).body;
     expect(fields((output.building!.value as Value[])[0]).starMax?.value).toBe(1);
     const queue = fields((output.buildingQueue!.value as Value[])[0]);

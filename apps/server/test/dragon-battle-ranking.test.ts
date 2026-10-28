@@ -1,7 +1,7 @@
 import { expect, test } from "bun:test";
 import type { GameServices, GameStore } from "@opencok/contracts/game";
 import type { Row } from "@opencok/contracts/rows";
-import { GameService as Game } from "@opencok/services/game";
+import { createRealmGameService } from "../src/composition/game";
 import { decode, encode, fields, sfs, type Fields, type Value } from "@opencok/messages/sfs";
 import { Rules } from "@opencok/rules/game";
 import { dragonRankingRanges } from "@opencok/rules/dragon-ranking";
@@ -62,7 +62,7 @@ function fixture()
             return profile;
         },
     };
-    const game = new Game(
+    const game = createRealmGameService(
         store as unknown as GameStore,
         new Rules(new Map(), new Map(), new Map()),
         { kingdomId: 2 },

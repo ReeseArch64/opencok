@@ -1,7 +1,7 @@
 import { expect, test } from "bun:test";
 import { loadThroneRankingPeriod } from "@opencok/storage/throne-ranking";
 import { throneRanking, throneRankingBoard } from "@opencok/mappings/throne-ranking";
-import { GameService as Game } from "@opencok/services/game";
+import { createRealmGameService } from "../src/composition/game";
 import type { GameStore } from "@opencok/contracts/game";
 import { Rules } from "@opencok/rules/game";
 import { sfs, fields, type Value } from "@opencok/messages/sfs";
@@ -59,7 +59,7 @@ test("throne dispatch gates paired realms and skips closed peers without request
             return { period, rows };
         },
     } as unknown as GameStore;
-    const game = new Game(db, rules, { kingdomId: 1 }, () => 1000, {
+    const game = createRealmGameService(db, rules, { kingdomId: 1 }, () => 1000, {
         throneRankingPeriod: async (realm) =>
             realm === 1 ? undefined : { index: 7, info: "{\"isCrossOpen\":false}" },
     });

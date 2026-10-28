@@ -2,7 +2,7 @@ import { loadRules } from "@opencok/resources/rules";
 import { test, expect } from "bun:test";
 import { feedbackPrice, feedbackWindow } from "@opencok/rules/recharge-feedback";
 import { Rules } from "@opencok/rules/game";
-import { GameService } from "@opencok/services/game";
+import { createRealmGameService } from "../src/composition/game";
 import type { GameStore } from "@opencok/contracts/game";
 import { sfs } from "@opencok/messages/sfs";
 test("feedback derives exact nominal cents from consistent catalogs and honors inclusive dated controls", () => {
@@ -29,7 +29,7 @@ test("feedback derives exact nominal cents from consistent catalogs and honors i
     expect(feedbackWindow(rules, { ...context, now: context.now + 1 })?.active).toBe(false);
 });
 test("native feedback queries retain correlation and paid callbacks cannot be invoked publicly", async () => {
-    const game = new GameService(
+    const game = createRealmGameService(
         {} as GameStore,
         new Rules(new Map(), new Map(), new Map()),
         { kingdomId: 1 },

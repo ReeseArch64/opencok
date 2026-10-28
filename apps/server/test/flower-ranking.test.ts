@@ -79,7 +79,7 @@ test("flower rows hydrate current profiles, skip missing identities and preserve
 });
 
 test("flower command routes local presentation to the origin and reads visibility from the executing realm", async () => {
-    const { GameService: Game } = await import("@opencok/services/game");
+    const { createRealmGameService } = await import("../src/composition/game");
     const { Rules } = await import("@opencok/rules/game");
     const rules = new Rules(new Map(), new Map(), new Map());
     rules.items.set("ranking", { k2: "2" });
@@ -101,7 +101,7 @@ test("flower command routes local presentation to the origin and reads visibilit
             };
         },
     } as unknown as import("@opencok/contracts/game").GameStore;
-    const game = new Game(db, rules, { kingdomId: 2 }, () => now, {
+    const game = createRealmGameService(db, rules, { kingdomId: 2 }, () => now, {
         flowerRankingPublication: async (realm, uid, limit, global) => {
             expect([realm, uid, limit, global]).toEqual([1, "self", 2, true]);
             return { local: ["{\"uid\":\"self\",\"scoreVal\":3}"], selfRank: 1, global: [] };

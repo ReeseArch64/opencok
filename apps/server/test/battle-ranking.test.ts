@@ -1,5 +1,5 @@
 import { expect, test } from "bun:test";
-import { GameService as Game } from "@opencok/services/game";
+import { createRealmGameService } from "../src/composition/game";
 import { Rules } from "@opencok/rules/game";
 import type { GameStore } from "@opencok/contracts/game";
 import type { BattleRankingState } from "@opencok/contracts/battle-ranking";
@@ -71,7 +71,7 @@ test("fight ranking scopes participants to the authenticated encounter and never
             fightPlayerMap: { secret: { id: "secret", state: 1 } },
         },
     ]);
-    const game = new Game(
+    const game = createRealmGameService(
         { battleRankingState: async () => state } as unknown as GameStore,
         rules(),
         { kingdomId: 1 },
@@ -111,7 +111,7 @@ test("playoff query pairs champions, promotes the owner's match and preserves ti
     const state = snapshot();
     state.profile!.allianceId = "t6";
     state.tickets = ["t7"];
-    const game = new Game(
+    const game = createRealmGameService(
         { battleRankingState: async () => state } as unknown as GameStore,
         rules(),
         { kingdomId: 1 },

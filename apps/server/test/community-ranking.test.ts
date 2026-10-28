@@ -134,7 +134,7 @@ test("cemetery rankings retain candidate self positions, skipped metadata and 49
 });
 
 test("community commands retain authenticated membership, type selectors and correlation", async () => {
-    const { GameService: Game } = await import("@opencok/services/game");
+    const { createRealmGameService } = await import("../src/composition/game");
     const { Rules } = await import("@opencok/rules/game");
     const state = snapshot();
     state.profile = { uid: "self", serverId: 1, allianceId: "alliance", banFlag: 0 };
@@ -151,7 +151,7 @@ test("community commands retain authenticated membership, type selectors and cor
             return { ...state, ownItems: 0, rows: [] };
         },
     } as unknown as import("@opencok/contracts/game").GameStore;
-    const game = new Game(
+    const game = createRealmGameService(
         store,
         new Rules(new Map(), new Map(), new Map()),
         { kingdomId: 1 },

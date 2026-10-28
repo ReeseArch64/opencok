@@ -4,7 +4,7 @@ import { cityHarness } from "./support/city";
 import { DisposableRedis } from "./support/redis";
 import { Cache } from "@opencok/storage/session";
 import { createWorldBulletinStore } from "@opencok/repositories/world-bulletins";
-import { GameService } from "@opencok/services/game";
+import { createRealmGameService } from "../src/composition/game";
 import type { GameStore } from "@opencok/contracts/game";
 import { sfs, decode, encode } from "@opencok/messages/sfs";
 import { userprofile } from "@opencok/drizzle/schema/opencok_kingdom/userprofile";
@@ -32,7 +32,7 @@ async function harness()
             "{\"private\":\"other alliance\"}",
         );
         await cache.command("RPUSH", "WORLD_BATTLE_BULLETIN_2A", "{\"private\":\"other realm\"}");
-        const game = new GameService(
+        const game = createRealmGameService(
             {} as GameStore,
             h.rules,
             { kingdomId: 1 },
@@ -148,7 +148,7 @@ test(
         const h = await harness();
         try
         {
-            const missing = new GameService(
+            const missing = createRealmGameService(
                 {} as GameStore,
                 h.rules,
                 { kingdomId: 1 },

@@ -248,6 +248,7 @@
         "@opencok/enums": "workspace:*",
         "@opencok/errors": "workspace:*",
         "@opencok/hero": "workspace:*",
+        "@opencok/mappings": "workspace:*",
         "@opencok/messages": "workspace:*",
         "@opencok/rules": "workspace:*",
         "drizzle-orm": "0.45.4",

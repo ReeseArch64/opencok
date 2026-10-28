@@ -1,7 +1,7 @@
 import { expect, test } from "bun:test";
 import { eq } from "drizzle-orm";
 import { readActivityOperators } from "@opencok/repositories/activity-operators";
-import { GameService } from "@opencok/services/game";
+import { createRealmGameService } from "../src/composition/game";
 import type { GameStore } from "@opencok/contracts/game";
 import { server_info } from "@opencok/drizzle/schema/opencok_kingdom/server_info";
 import { userprofile } from "@opencok/drizzle/schema/opencok_kingdom/userprofile";
@@ -54,7 +54,7 @@ test(
                 resource: await h.db.db.select().from(user_resource),
                 items: await h.db.db.select().from(user_item),
             };
-            const game = new GameService(
+            const game = createRealmGameService(
                 {
                     activityOperators: (owner, at) => readActivityOperators(h.db.db, owner, at),
                 } as GameStore,

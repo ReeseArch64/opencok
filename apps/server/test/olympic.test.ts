@@ -1,7 +1,7 @@
 import { test, expect } from "bun:test";
 import { loadRules } from "@opencok/resources/rules";
 import { olympicDefinitions, olympicDisplayedPool, olympicPayout } from "@opencok/rules/olympic";
-import { GameService } from "@opencok/services/game";
+import { createRealmGameService } from "../src/composition/game";
 import type { GameStore } from "@opencok/contracts/game";
 import { sfs } from "@opencok/messages/sfs";
 test("Olympic rules preserve tax normalization, integer pool growth and the zero-pool reward cap", async () => {
@@ -25,7 +25,7 @@ test("Olympic rules preserve tax normalization, integer pool growth and the zero
 });
 test("Olympic public queries preserve LONG correlation and cannot publish or settle a result", async () => {
     const rules = await loadRules(),
-        game = new GameService({} as GameStore, rules, { kingdomId: 1 }, () => 1000, {
+        game = createRealmGameService({} as GameStore, rules, { kingdomId: 1 }, () => 1000, {
             cityProgression: async () => ({ body: {}, pushes: [] }),
         });
     for (const command of ["Olympic.question.info", "Olympic.bet.info", "Olympic.reward"])

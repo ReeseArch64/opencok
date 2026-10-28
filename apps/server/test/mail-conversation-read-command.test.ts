@@ -5,7 +5,7 @@ import type {
     MailConversationReadQuery,
     MailConversationReadSnapshot,
 } from "@opencok/contracts/mail";
-import { GameService as Game } from "@opencok/services/game";
+import { createRealmGameService } from "../src/composition/game";
 import { Database } from "@opencok/repositories/game";
 import { Rules } from "@opencok/rules/game";
 import { decode, encode, sfs, type Fields } from "@opencok/messages/sfs";
@@ -45,7 +45,7 @@ function fixture()
             return state;
         },
     };
-    const game = new Game(
+    const game = createRealmGameService(
         db,
         new Rules(new Map(), new Map(), new Map()),
         { kingdomId: 1 },

@@ -5,7 +5,7 @@ import type {
     AllianceRankingQuery,
     AllianceRankingSnapshot,
 } from "@opencok/contracts/alliance-ranking";
-import { GameService as Game } from "@opencok/services/game";
+import { createRealmGameService } from "../src/composition/game";
 import { Rules } from "@opencok/rules/game";
 import { decode, encode, sfs } from "@opencok/messages/sfs";
 
@@ -65,7 +65,7 @@ function fixture()
         undefined,
         new Map([["ranking", { k1: "2" }]]),
     );
-    const game = new Game(db, rules, { kingdomId: 1 }, () => {
+    const game = createRealmGameService(db, rules, { kingdomId: 1 }, () => {
         clocks++;
         return now;
     });
@@ -134,7 +134,7 @@ test("alliance commands reject invalid owners, wrong realms, configuration and d
     expect(malformed.calls).toEqual([]);
     const wrongRealm = fixture();
     await expect(
-        new Game(wrongRealm.db, wrongRealm.rules, { kingdomId: 2 }).execute(
+        createRealmGameService(wrongRealm.db, wrongRealm.rules, { kingdomId: 2 }).execute(
             "owner",
             "alliance.rank",
             {},

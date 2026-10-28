@@ -1,12 +1,12 @@
 import { test, expect } from "bun:test";
-import { GameService } from "@opencok/services/game";
+import { createRealmGameService } from "../src/composition/game";
 import type { GameStore } from "@opencok/contracts/game";
 import { Rules } from "@opencok/rules/game";
 import { alchemistInfo } from "@opencok/mappings/alchemist";
 import { sfs, encode, decode } from "@opencok/messages/sfs";
 test("alchemist retains the native multihandler correlation and dedicated info fields", async () => {
     const calls: string[] = [];
-    const game = new GameService(
+    const game = createRealmGameService(
         {} as GameStore,
         new Rules(new Map(), new Map(), new Map()),
         { kingdomId: 1 },

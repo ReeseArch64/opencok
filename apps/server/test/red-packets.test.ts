@@ -1,4 +1,4 @@
-import { GameService } from "@opencok/services/game";
+import { createRealmGameService } from "../src/composition/game";
 import { Rules } from "@opencok/rules/game";
 import type { GameStore } from "@opencok/contracts/game";
 import { sfs } from "@opencok/messages/sfs";
@@ -95,7 +95,7 @@ test("paid producer identities bind owner provider and order independently and r
 
 test("native packet commands preserve correlation while trusted paid producers and internal event injection stay unreachable", async () => {
     const routed: string[] = [],
-        game = new GameService(
+        game = createRealmGameService(
             {} as GameStore,
             new Rules(new Map(), new Map(), new Map()),
             { kingdomId: 1 },

@@ -4,7 +4,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { Effect, Layer } from "effect";
 import type { GameStore } from "@opencok/contracts/game";
-import { GameService as Game } from "@opencok/services/game";
+import { createRealmGameService } from "../src/composition/game";
 import { EnvironmentSource } from "@opencok/env/effect";
 import { decode, encode, fields, sfs, Type } from "@opencok/messages/sfs";
 import { loadRules } from "@opencok/resources/rules";
@@ -99,7 +99,7 @@ test("complete configuration wire contract survives XML loading, realm compositi
             {
                 const settings = await Effect.runPromise(config.pipe(Effect.provide(source)));
                 const rules = await loadRules(directory, settings.kingdomId);
-                const game = new Game(store, rules, settings, () => now);
+                const game = createRealmGameService(store, rules, settings, () => now);
                 const response = await game.execute("synthetic", "login.dataconfig", {
                     uid: sfs.string("untrusted"),
                     kingdomId: sfs.int(99),
@@ -128,11 +128,12 @@ test("complete configuration wire contract survives XML loading, realm compositi
                     expect(encoded).toEqual(previous);
                 }
                 previous = encoded;
-                const expired = await new Game(store, rules, settings, () => now + 1).execute(
-                    "synthetic",
-                    "login.dataconfig",
-                    {},
-                );
+                const expired = await createRealmGameService(store, rules, settings, () => now + 1)
+                    .execute(
+                        "synthetic",
+                        "login.dataconfig",
+                        {},
+                    );
                 expect(fields(expired.body.dataConfig).monster_count).toEqual(sfs.int(100));
                 const optional = [
                     "followFB",

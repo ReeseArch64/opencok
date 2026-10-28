@@ -9,7 +9,7 @@ import type {
     MailTranslationLookup,
 } from "@opencok/contracts/mail";
 import type { Row } from "@opencok/contracts/rows";
-import { GameService as Game } from "@opencok/services/game";
+import { createRealmGameService } from "../src/composition/game";
 import { Rules } from "@opencok/rules/game";
 import { decode, encode, fields, sfs, type Fields, type Value } from "@opencok/messages/sfs";
 import { mailListEntry, mailCategoryNow as now } from "./fixtures/mail-category.ts";
@@ -71,7 +71,7 @@ function fixture()
     };
     const config = { kingdomId: 1, mailTranslationEnabled: true };
     const services: GameServices = {};
-    const game = new Game(
+    const game = createRealmGameService(
         db,
         new Rules(new Map(), new Map(), new Map()),
         config,

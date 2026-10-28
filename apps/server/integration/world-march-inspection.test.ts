@@ -2,7 +2,7 @@ import { expect, test } from "bun:test";
 import { eq } from "drizzle-orm";
 import { cityHarness } from "./support/city";
 import { createWorldMarchInspectionStore } from "@opencok/repositories/world-march-inspection";
-import { GameService } from "@opencok/services/game";
+import { createRealmGameService } from "../src/composition/game";
 import type { GameStore } from "@opencok/contracts/game";
 import { encodeWorldMarchArmy } from "@opencok/messages/world-resource-army";
 import { sfs, encode, decode, type Fields } from "@opencok/messages/sfs";
@@ -71,7 +71,7 @@ async function harness()
             armyInfo: army,
             collectSpd: 1.25,
         });
-        const game = new GameService(
+        const game = createRealmGameService(
             {} as GameStore,
             h.rules,
             { kingdomId: 1 },

@@ -4,7 +4,7 @@ import { militaryRankingGroup } from "@opencok/rules/military-ranking";
 import { loadMilitaryRanking } from "@opencok/storage/military-ranking";
 import { militaryRanking } from "@opencok/mappings/military-ranking";
 import { sfs, fields, type Value } from "@opencok/messages/sfs";
-import { GameService as Game } from "@opencok/services/game";
+import { createRealmGameService } from "../src/composition/game";
 import type { GameStore } from "@opencok/contracts/game";
 
 const entry = {
@@ -78,7 +78,7 @@ test("military handler reads published ranks without invoking settlement and rej
         getProfileById: async () => ({ uid: "self", serverId: 1, banFlag: 0 }),
     } as unknown as GameStore;
     const calls: number[][] = [];
-    const game = new Game(db, rules, { kingdomId: 1 }, () => 1000, {
+    const game = createRealmGameService(db, rules, { kingdomId: 1 }, () => 1000, {
         militaryRanking: async (type, group) => {
             calls.push([type, group]);
             return [JSON.stringify(entry)];

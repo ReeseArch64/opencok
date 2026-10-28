@@ -3,7 +3,7 @@ import { drizzle, type NodePgClient } from "drizzle-orm/node-postgres";
 import * as schema from "@opencok/drizzle/schema/kingdom";
 import type { GameStore } from "@opencok/contracts/game";
 import type { MailUpdateEntry } from "@opencok/contracts/mail-updates";
-import { GameService as Game } from "@opencok/services/game";
+import { createRealmGameService } from "../src/composition/game";
 import { mailUpdateCursor, mailUpdatesProjection } from "@opencok/services/mail-updates";
 import { readMailUpdates } from "@opencok/repositories/mail-updates";
 import { Rules } from "@opencok/rules/game";
@@ -356,7 +356,7 @@ test("authenticated mail update command preserves optional time correlation and 
             return { profile };
         },
     };
-    const game = new Game(
+    const game = createRealmGameService(
         db,
         new Rules(new Map(), new Map(), new Map()),
         { kingdomId: 1 },

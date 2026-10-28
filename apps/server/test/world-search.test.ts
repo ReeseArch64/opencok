@@ -4,7 +4,7 @@ import * as kingdom from "@opencok/drizzle/schema/kingdom";
 import { createWorldSearchStore, checkWorldSearchStore } from "@opencok/repositories/world-search";
 import { worldSearchOffset, worldSearchName } from "@opencok/rules/world-search";
 import { worldSearch } from "@opencok/mappings/world-search";
-import { GameService as Game } from "@opencok/services/game";
+import { createRealmGameService } from "../src/composition/game";
 import { Rules } from "@opencok/rules/game";
 import type { GameStore, GameServices } from "@opencok/contracts/game";
 import type { Row } from "@opencok/contracts/rows";
@@ -189,7 +189,7 @@ function fixture()
         },
     } as unknown as Databases;
     const store = createWorldSearchStore(topology, 1);
-    const game = new Game(
+    const game = createRealmGameService(
         {} as GameStore,
         new Rules(new Map(), new Map(), new Map()),
         { kingdomId: 1 },
@@ -536,7 +536,7 @@ test("repository captures input before awaiting and validates direct caller boun
 
 test("command revalidates injected adapter identity and realm and bounds the correlated wire response", async () => {
     const make = (services: GameServices) =>
-        new Game(
+        createRealmGameService(
             {} as GameStore,
             new Rules(new Map(), new Map(), new Map()),
             { kingdomId: 1 },

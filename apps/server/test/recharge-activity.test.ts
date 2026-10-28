@@ -2,7 +2,7 @@ import { test, expect } from "bun:test";
 import { rechargeActivityWindow } from "@opencok/rules/recharge-activity";
 import { rechargeActivityLogin } from "@opencok/mappings/recharge-activity";
 import { Rules } from "@opencok/rules/game";
-import { GameService } from "@opencok/services/game";
+import { createRealmGameService } from "../src/composition/game";
 import type { GameStore } from "@opencok/contracts/game";
 import { sfs, encode, decode } from "@opencok/messages/sfs";
 test("recharge periods retain exact inclusive UTC boundaries, realm ages and native long totals", () => {
@@ -34,7 +34,7 @@ test("recharge periods retain exact inclusive UTC boundaries, realm ages and nat
     expect(decode(encode(mapped)).newSerCumRechargeTotal).toEqual(sfs.long(9007199254740993n));
 });
 test("native recharge actions preserve correlation and accepted-event producers remain internal", async () => {
-    const game = new GameService(
+    const game = createRealmGameService(
         {} as GameStore,
         new Rules(new Map(), new Map(), new Map()),
         { kingdomId: 1 },

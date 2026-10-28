@@ -7,7 +7,7 @@ import {
     setBoxCounter,
     boxSelection,
 } from "@opencok/rules/ordinary-box";
-import { GameService } from "@opencok/services/game";
+import { createRealmGameService } from "../src/composition/game";
 import type { GameStore } from "@opencok/contracts/game";
 import { Rules } from "@opencok/rules/game";
 import { sfs } from "@opencok/messages/sfs";
@@ -80,7 +80,7 @@ test("ordinary box choices use both catalog weights and lucky-day alternatives",
     ).toThrow();
 });
 test("native table queries preserve correlation while direct box mutation is internal", async () => {
-    const game = new GameService(
+    const game = createRealmGameService(
         {} as GameStore,
         new Rules(new Map(), new Map(), new Map()),
         { kingdomId: 1 },

@@ -1,5 +1,5 @@
 import { expect, test } from "bun:test";
-import { GameService } from "@opencok/services/game";
+import { createRealmGameService } from "../src/composition/game";
 import type { GameStore } from "@opencok/contracts/game";
 import { Rules } from "@opencok/rules/game";
 import { generalRequest } from "@opencok/hero/mappings/generals";
@@ -52,7 +52,7 @@ test("native hero action names reach the existing owner transaction and retain r
         cmdBaseTime: sfs.long(1000n),
     };
     const original = structuredClone(input);
-    const game = new GameService(
+    const game = createRealmGameService(
         {} as GameStore,
         new Rules(new Map(), new Map(), new Map()),
         { kingdomId: 1 },
@@ -89,9 +89,13 @@ test("canonical requests and direct purchase stay intact while spoofed and unkno
     expect(generalRequest("newgeneral", params)).toEqual({ command: "newgeneral", params });
     expect(generalRequest("newgeneral.buy", params)).toEqual({ command: "newgeneral.buy", params });
     expect(() => generalRequest("newgeneral.resettalent", params)).toThrow();
-    const game = new GameService({} as GameStore, new Rules(new Map(), new Map(), new Map()), {
-        kingdomId: 1,
-    });
+    const game = createRealmGameService(
+        {} as GameStore,
+        new Rules(new Map(), new Map(), new Map()),
+        {
+            kingdomId: 1,
+        },
+    );
     for (
         const command of ["newgeneral.admin", "newgeneral.activatetalent.extra", "constructor.info"]
     )
