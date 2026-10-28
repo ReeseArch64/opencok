@@ -1,7 +1,8 @@
-export interface WkServerDefinition {
-  readonly "id": number;
-  readonly "value": number;
-  readonly "time": number;
+export interface WkServerDefinition
+{
+    readonly "id": number;
+    readonly "value": number;
+    readonly "time": number;
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";

@@ -3,17 +3,18 @@ import { seasonalExchangeSchema } from "@opencok/validations/seasonal-exchange";
 import { validateFields } from "./validation";
 
 export function seasonalExchangeView(
-  level: number,
-  refreshTime: bigint,
-  flushTimes: number,
-  rewards: readonly Fields[],
-  receiveLevels: string,
-): Fields {
-  return validateFields(seasonalExchangeSchema, {
-    level: sfs.int(level),
-    refreshTime: sfs.long(refreshTime),
-    flushTimes: sfs.int(flushTimes),
-    rewards: sfs.array(rewards.map((row) => sfs.object(row))),
-    receiveLevels: sfs.string(receiveLevels),
-  });
+    level: number,
+    refreshTime: bigint,
+    flushTimes: number,
+    rewards: readonly Fields[],
+    receiveLevels: string,
+): Fields
+{
+    return validateFields(seasonalExchangeSchema, {
+        level: sfs.int(level),
+        refreshTime: sfs.long(refreshTime),
+        flushTimes: sfs.int(flushTimes),
+        rewards: sfs.array(rewards.map((row) => sfs.object(row))),
+        receiveLevels: sfs.string(receiveLevels),
+    });
 }

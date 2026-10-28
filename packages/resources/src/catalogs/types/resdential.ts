@@ -1,6 +1,7 @@
-export interface ResdentialDefinition {
-  readonly "id": number;
-  readonly "areaId": readonly number[];
+export interface ResdentialDefinition
+{
+    readonly "id": number;
+    readonly "areaId": readonly number[];
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";

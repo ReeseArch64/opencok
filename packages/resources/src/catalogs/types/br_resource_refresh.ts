@@ -1,8 +1,9 @@
-export interface BrResourceRefreshDefinition {
-  readonly "id": number;
-  readonly "range": readonly number[];
-  readonly "quantity": number;
-  readonly "build": number;
+export interface BrResourceRefreshDefinition
+{
+    readonly "id": number;
+    readonly "range": readonly number[];
+    readonly "quantity": number;
+    readonly "build": number;
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";

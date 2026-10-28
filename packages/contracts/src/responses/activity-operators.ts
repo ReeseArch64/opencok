@@ -1,4 +1,5 @@
-export interface ActivityOperatorResponse {
-  id: number;
-  endTime: bigint;
+export interface ActivityOperatorResponse
+{
+    id: number;
+    endTime: bigint;
 }

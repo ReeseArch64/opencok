@@ -1,6 +1,7 @@
-export interface HouseDefinition {
-  readonly "id": number;
-  readonly "army": number;
+export interface HouseDefinition
+{
+    readonly "id": number;
+    readonly "army": number;
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";

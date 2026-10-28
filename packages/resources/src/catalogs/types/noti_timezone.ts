@@ -1,6 +1,7 @@
-export interface NotiTimezoneDefinition {
-  readonly "country": string;
-  readonly "time": number;
+export interface NotiTimezoneDefinition
+{
+    readonly "country": string;
+    readonly "time": number;
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";

@@ -1,7 +1,8 @@
-export interface AllianceBossControlDefinition {
-  readonly "id": number;
-  readonly "openday": readonly number[];
-  readonly "bossid": readonly number[];
+export interface AllianceBossControlDefinition
+{
+    readonly "id": number;
+    readonly "openday": readonly number[];
+    readonly "bossid": readonly number[];
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";

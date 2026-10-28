@@ -23,96 +23,108 @@ import { ApiDependencies } from "./api-dependencies.ts";
 export { ApiDependencies } from "./api-dependencies.ts";
 
 export const ApiDependenciesLive = Layer.effect(
-  ApiDependencies,
-  Effect.gen(function* () {
-    const config = yield* ApiConfig;
-    const accounts = yield* acquireResource(
-      "api.accounts",
-      async () => observeAdapter(new AccountStore(config), "api.AccountStore"),
-      (store) => store.close(),
-    );
-    const directory = observeAdapter(new ServerDirectory(config), "api.ServerDirectory");
-    const redis = observeAdapter(new DiscoveryRedis(config), "api.DiscoveryRedis");
-    yield* fromPromise("api.directory", () => directory.read()).pipe(Effect.uninterruptible);
-    yield* fromPromise("api.accounts.start", () => accounts.start()).pipe(Effect.uninterruptible);
-    yield* fromPromise("api.redis", () => redis.health()).pipe(Effect.uninterruptible);
-    const identity = config.provisioning
-      ? yield* acquireResource(
-          "api.identity",
-          async () =>
-            observeAdapter(await firebaseIdentity(config.provisioning!.projectId), "api.identity"),
-          (value) => value.close(),
-        )
-      : undefined;
-
-    return {
-      provisioning:
-        identity && config.provisioning
-          ? provisioningHandler(
-              observeAdapter(
-                new ProvisioningController(
-                  observeAdapter(
-                    new ProvisioningService(
-                      identity,
-                      accounts.provisioning(),
-                      new Map(
-                        config.provisioning.realms.map((realm) => [
-                          realm.id,
-                          realmProvisioner(
-                            realm.url,
-                            config.provisioning!.secret,
-                            config.timeoutMs,
-                          ),
-                        ]),
-                      ),
+    ApiDependencies,
+    Effect.gen(function*()
+    {
+        const config = yield* ApiConfig;
+        const accounts = yield* acquireResource(
+            "api.accounts",
+            async () => observeAdapter(new AccountStore(config), "api.AccountStore"),
+            (store) => store.close(),
+        );
+        const directory = observeAdapter(new ServerDirectory(config), "api.ServerDirectory");
+        const redis = observeAdapter(new DiscoveryRedis(config), "api.DiscoveryRedis");
+        yield* fromPromise("api.directory", () => directory.read()).pipe(Effect.uninterruptible);
+        yield* fromPromise("api.accounts.start", () => accounts.start()).pipe(
+            Effect.uninterruptible,
+        );
+        yield* fromPromise("api.redis", () => redis.health()).pipe(Effect.uninterruptible);
+        const identity = config.provisioning
+            ? yield* acquireResource(
+                "api.identity",
+                async () =>
+                    observeAdapter(
+                        await firebaseIdentity(config.provisioning!.projectId),
+                        "api.identity",
                     ),
-                    "api.ProvisioningService",
-                  ),
-                ),
-                "api.ProvisioningController",
-              ),
+                (value) => value.close(),
             )
-          : undefined,
-      files: config.filesEnabled
-        ? yield* observeAdapter(
-            createFiles((name, ...args) =>
-              observeAdapter(new Cache(config), "api.Cache").command(name, ...args),
-            ),
-            "api.createFiles",
-          )
-        : undefined,
-      accounts,
-      directory,
-      redis,
-      chatDiscovery: config.chatUrl
-        ? observeAdapter(
-            createChatDiscovery({
-              origin: config.chatUrl,
-              timeoutMs: config.timeoutMs,
-            }),
-            "api.createChatDiscovery",
-          )
-        : undefined,
-    };
-  }),
+            : undefined;
+
+        return {
+            provisioning: identity && config.provisioning
+                ? provisioningHandler(
+                    observeAdapter(
+                        new ProvisioningController(
+                            observeAdapter(
+                                new ProvisioningService(
+                                    identity,
+                                    accounts.provisioning(),
+                                    new Map(
+                                        config.provisioning.realms.map((realm) => [
+                                            realm.id,
+                                            realmProvisioner(
+                                                realm.url,
+                                                config.provisioning!.secret,
+                                                config.timeoutMs,
+                                            ),
+                                        ]),
+                                    ),
+                                ),
+                                "api.ProvisioningService",
+                            ),
+                        ),
+                        "api.ProvisioningController",
+                    ),
+                )
+                : undefined,
+            files: config.filesEnabled
+                ? yield* observeAdapter(
+                    createFiles((name, ...args) =>
+                        observeAdapter(new Cache(config), "api.Cache").command(name, ...args)
+                    ),
+                    "api.createFiles",
+                )
+                : undefined,
+            accounts,
+            directory,
+            redis,
+            chatDiscovery: config.chatUrl
+                ? observeAdapter(
+                    createChatDiscovery({
+                        origin: config.chatUrl,
+                        timeoutMs: config.timeoutMs,
+                    }),
+                    "api.createChatDiscovery",
+                )
+                : undefined,
+        };
+    }),
 );
 
-export const createApp = Effect.gen(function* () {
-  const { accounts, directory, redis, chatDiscovery, files, provisioning } = yield* ApiDependencies;
+export const createApp = Effect.gen(function*()
+{
+    const { accounts, directory, redis, chatDiscovery, files, provisioning } =
+        yield* ApiDependencies;
 
-  return new ApiRequestHandler(
-    new ApiRouter({ accounts, directory, redis, chatDiscovery, files, provisioning }),
-  );
+    return new ApiRequestHandler(
+        new ApiRouter({ accounts, directory, redis, chatDiscovery, files, provisioning }),
+    );
 });
 
-export const serveApi = Effect.gen(function* () {
-  const config = yield* ApiConfig;
-  const app = yield* createApp;
-  const server = yield* serveHttp(
-    { ...config, maxRequestBodySize: config.filesEnabled ? BODY_LIMIT : 65536, idleTimeout: 15 },
-    app.fetch,
-  );
-  logEvent("listening", { host: config.host, port: server.port, outcome: "success" });
+export const serveApi = Effect.gen(function*()
+{
+    const config = yield* ApiConfig;
+    const app = yield* createApp;
+    const server = yield* serveHttp(
+        {
+            ...config,
+            maxRequestBodySize: config.filesEnabled ? BODY_LIMIT : 65536,
+            idleTimeout: 15,
+        },
+        app.fetch,
+    );
+    logEvent("listening", { host: config.host, port: server.port, outcome: "success" });
 
-  return server;
+    return server;
 });

@@ -4,5 +4,5 @@ import { field } from "@opencok/validations/response";
 import { generalInfoSchema } from "@opencok/hero/validations/profile-generals";
 
 export const reconnectGeneralsSchema = z.strictObject({
-  userGenerals: z.array(generalInfoSchema.extend({ abilityIndex: field.int })).max(32767),
+    userGenerals: z.array(generalInfoSchema.extend({ abilityIndex: field.int })).max(32767),
 }) satisfies z.ZodType<ReconnectGeneralsResponse>;

@@ -5,9 +5,10 @@ import { requireEnvironment } from "./validation";
 export const env = parseDatabaseEnvironment(loadEnvironment(process.env));
 
 export function requireEnv<K extends keyof DatabaseEnvironment>(
-  key: K,
-): NonNullable<DatabaseEnvironment[K]> {
-  return requireEnvironment(env, key);
+    key: K,
+): NonNullable<DatabaseEnvironment[K]>
+{
+    return requireEnvironment(env, key);
 }
 
 export { EnvironmentError } from "./validation";

@@ -4,7 +4,7 @@ import type { CatalogTable } from "../../catalog-model.ts";
 import { records as records0 } from "./equipmentRandomPower.records0.ts";
 
 export const catalog: CatalogTable<EquipmentRandomPowerDefinition> = {
-  "kind": CatalogKind.Table,
-  "records": [...records0],
-  "sections": [{ "id": "equipmentRandomPower", "start": 0, "count": 124 }],
+    "kind": CatalogKind.Table,
+    "records": [...records0],
+    "sections": [{ "id": "equipmentRandomPower", "start": 0, "count": 124 }],
 };

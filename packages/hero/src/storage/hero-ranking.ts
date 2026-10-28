@@ -1,6 +1,6 @@
 import type {
-  HeroRankingLookup,
-  HeroHistoryPublication,
+    HeroRankingLookup,
+    HeroHistoryPublication,
 } from "@opencok/hero/contracts/hero-ranking";
 import { DependencyError } from "@opencok/errors/dependency";
 
@@ -12,62 +12,75 @@ end
 return rank`;
 
 export async function loadHeroRankingPosition(
-  command: (name: string, ...args: string[]) => Promise<unknown>,
-  query: HeroRankingLookup,
-): Promise<number> {
-  if (
-    !query.member ||
-    query.member.length > 255 ||
-    query.keys.length < 1 ||
-    query.keys.length > 4096 ||
-    query.keys.some(
-      (key) =>
-        !/^(HERO_PERSON_RANK|HERO_ALLIANCE_RANK|KINGDOM_PERSON_RANK|KINGDOM_ALLIANCE_RANK)_\d+_.+_-?\d+$/.test(
-          key,
-        ) || key.length > 400,
+    command: (name: string, ...args: string[]) => Promise<unknown>,
+    query: HeroRankingLookup,
+): Promise<number>
+{
+    if (
+        !query.member
+        || query.member.length > 255
+        || query.keys.length < 1
+        || query.keys.length > 4096
+        || query.keys.some(
+            (key) =>
+                !/^(HERO_PERSON_RANK|HERO_ALLIANCE_RANK|KINGDOM_PERSON_RANK|KINGDOM_ALLIANCE_RANK)_\d+_.+_-?\d+$/
+                    .test(
+                        key,
+                    ) || key.length > 400,
+        )
     )
-  )
-    {throw new DependencyError("hero ranking input");}
+    {
+        throw new DependencyError("hero ranking input");
+    }
 
-  const result = await command(
-    "EVAL",
-    lookup,
-    String(query.keys.length),
-    ...query.keys,
-    query.member,
-  );
+    const result = await command(
+        "EVAL",
+        lookup,
+        String(query.keys.length),
+        ...query.keys,
+        query.member,
+    );
 
-  if (
-    (typeof result !== "number" && typeof result !== "string") ||
-    !/^\d+$/.test(String(result)) ||
-    Number(result) > 5001
-  )
-    {throw new DependencyError("hero ranking result");}
+    if (
+        (typeof result !== "number" && typeof result !== "string")
+        || !/^\d+$/.test(String(result))
+        || Number(result) > 5001
+    )
+    {
+        throw new DependencyError("hero ranking result");
+    }
 
-  return Number(result);
+    return Number(result);
 }
 
 export async function loadHeroHistoryPublication(
-  command: (name: string, ...args: string[]) => Promise<unknown>,
-  keys: readonly string[],
-  alliance: boolean,
-): Promise<readonly HeroHistoryPublication[]> {
-  if (
-    keys.length > 10 ||
-    keys.some(
-      (key) =>
-        !/^(HERO_PERSON_RANK|HERO_ALLIANCE_RANK|KINGDOM_PERSON_RANK|KINGDOM_ALLIANCE_RANK)_\d+_.+_-?\d+$/.test(
-          key,
-        ) || key.length > 400,
+    command: (name: string, ...args: string[]) => Promise<unknown>,
+    keys: readonly string[],
+    alliance: boolean,
+): Promise<readonly HeroHistoryPublication[]>
+{
+    if (
+        keys.length > 10
+        || keys.some(
+            (key) =>
+                !/^(HERO_PERSON_RANK|HERO_ALLIANCE_RANK|KINGDOM_PERSON_RANK|KINGDOM_ALLIANCE_RANK)_\d+_.+_-?\d+$/
+                    .test(
+                        key,
+                    ) || key.length > 400,
+        )
     )
-  )
-    {throw new DependencyError("hero history input");}
+    {
+        throw new DependencyError("hero history input");
+    }
 
-  if (!keys.length) {return [];}
+    if (!keys.length)
+    {
+        return [];
+    }
 
-  const result = await command(
-    "EVAL",
-    `local result = {}
+    const result = await command(
+        "EVAL",
+        `local result = {}
 for _, key in ipairs(KEYS) do
   local members = redis.call('ZRANGE', key, 0, 9)
   local alliances = {}
@@ -79,83 +92,103 @@ for _, key in ipairs(KEYS) do
   table.insert(result, {members, alliances})
 end
 return result`,
-    String(keys.length),
-    ...keys,
-    alliance ? "1" : "0",
-  );
+        String(keys.length),
+        ...keys,
+        alliance ? "1" : "0",
+    );
 
-  if (!Array.isArray(result) || result.length !== keys.length)
-    {throw new DependencyError("hero history result");}
-
-  let bytes = 0;
-
-  return result.map((value) => {
-    if (!Array.isArray(value) || value.length !== 2) {throw new DependencyError("hero history row");}
-
-    const [members, alliances] = value;
-
-    if (
-      !Array.isArray(members) ||
-      members.length > 10 ||
-      members.some((id) => typeof id !== "string" || !id || id.length > 255) ||
-      new Set(members).size !== members.length ||
-      !Array.isArray(alliances) ||
-      alliances.length !== (alliance ? members.length : 0)
-    )
-      {throw new DependencyError("hero history members");}
-
-    for (const raw of alliances) {
-      if (raw !== null && typeof raw !== "string")
-        {throw new DependencyError("hero history metadata");}
-
-      bytes += typeof raw === "string" ? new TextEncoder().encode(raw).length : 0;
-
-      if (bytes > 1048576) {throw new DependencyError("hero history size");}
+    if (!Array.isArray(result) || result.length !== keys.length)
+    {
+        throw new DependencyError("hero history result");
     }
 
-    return { members, alliances };
-  });
+    let bytes = 0;
+
+    return result.map((value) => {
+        if (!Array.isArray(value) || value.length !== 2)
+        {
+            throw new DependencyError("hero history row");
+        }
+
+        const [members, alliances] = value;
+
+        if (
+            !Array.isArray(members)
+            || members.length > 10
+            || members.some((id) => typeof id !== "string" || !id || id.length > 255)
+            || new Set(members).size !== members.length
+            || !Array.isArray(alliances)
+            || alliances.length !== (alliance ? members.length : 0)
+        )
+        {
+            throw new DependencyError("hero history members");
+        }
+
+        for (const raw of alliances)
+        {
+            if (raw !== null && typeof raw !== "string")
+            {
+                throw new DependencyError("hero history metadata");
+            }
+
+            bytes += typeof raw === "string" ? new TextEncoder().encode(raw).length : 0;
+
+            if (bytes > 1048576)
+            {
+                throw new DependencyError("hero history size");
+            }
+        }
+
+        return { members, alliances };
+    });
 }
 
 export async function publishHeroRanking(
-  command: (name: string, ...args: string[]) => Promise<unknown>,
-  kingdomId: number,
-  rows: readonly import("@opencok/hero/contracts/hero-rank-publication").HeroRankVersionedScore[],
-): Promise<void> {
-  if (!rows.length) {return;}
+    command: (name: string, ...args: string[]) => Promise<unknown>,
+    kingdomId: number,
+    rows: readonly import("@opencok/hero/contracts/hero-rank-publication").HeroRankVersionedScore[],
+): Promise<void>
+{
+    if (!rows.length)
+    {
+        return;
+    }
 
-  if (
-    rows.length > 64 ||
-    new Set(rows.map((row) => `${row.rankKey}:${row.member}`)).size !== rows.length ||
-    rows.some(
-      (row) =>
-        row.kingdomId !== kingdomId ||
-        typeof row.ownerEpoch !== "bigint" ||
-        typeof row.sequence !== "bigint" ||
-        typeof row.endTime !== "bigint" ||
-        row.ownerEpoch <= 0n ||
-        row.ownerEpoch > 9223372036854775807n ||
-        row.sequence <= 0n ||
-        row.sequence > 9223372036854775807n ||
-        row.endTime <= 0n ||
-        row.endTime > 9223372036854775807n ||
-        !row.member ||
-        row.member.length > 40 ||
-        !Number.isInteger(row.score) ||
-        row.score < -2147483648 ||
-        row.score > 2147483647 ||
-        !/^(HERO_PERSON_RANK|HERO_ALLIANCE_RANK|KINGDOM_PERSON_RANK|KINGDOM_ALLIANCE_RANK)_\d+_[0-9|]+_-?\d+$/.test(
-          row.rankKey,
-        ) ||
-        row.rankKey.length > 400 ||
-        (row.metadata !== null && Buffer.byteLength(row.metadata) > 8192),
+    if (
+        rows.length > 64
+        || new Set(rows.map((row) => `${row.rankKey}:${row.member}`)).size !== rows.length
+        || rows.some(
+            (row) =>
+                row.kingdomId !== kingdomId
+                || typeof row.ownerEpoch !== "bigint"
+                || typeof row.sequence !== "bigint"
+                || typeof row.endTime !== "bigint"
+                || row.ownerEpoch <= 0n
+                || row.ownerEpoch > 9223372036854775807n
+                || row.sequence <= 0n
+                || row.sequence > 9223372036854775807n
+                || row.endTime <= 0n
+                || row.endTime > 9223372036854775807n
+                || !row.member
+                || row.member.length > 40
+                || !Number.isInteger(row.score)
+                || row.score < -2147483648
+                || row.score > 2147483647
+                || !/^(HERO_PERSON_RANK|HERO_ALLIANCE_RANK|KINGDOM_PERSON_RANK|KINGDOM_ALLIANCE_RANK)_\d+_[0-9|]+_-?\d+$/
+                    .test(
+                        row.rankKey,
+                    )
+                || row.rankKey.length > 400
+                || (row.metadata !== null && Buffer.byteLength(row.metadata) > 8192),
+        )
     )
-  )
-    {throw new DependencyError("hero rank publication input");}
+    {
+        throw new DependencyError("hero rank publication input");
+    }
 
-  const result = await command(
-    "EVAL",
-    `local function less(a,b)
+    const result = await command(
+        "EVAL",
+        `local function less(a,b)
   if string.len(a) ~= string.len(b) then return string.len(a) < string.len(b) end
   return a < b
 end
@@ -191,21 +224,24 @@ for _,row in ipairs(data) do
   end
 end
 return 1`,
-    "0",
-    JSON.stringify(
-      rows.map((row) => ({
-        realm: String(row.kingdomId),
-        epoch: row.ownerEpoch.toString(),
-        sequence: row.sequence.toString(),
-        key: row.rankKey,
-        versions: `opencok:hero:versions:${row.rankKey}`,
-        member: row.member,
-        score: row.score,
-        metadata: row.metadata ?? false,
-        expires: (row.endTime / 1000n + 864000n).toString(),
-      })),
-    ),
-  );
+        "0",
+        JSON.stringify(
+            rows.map((row) => ({
+                realm: String(row.kingdomId),
+                epoch: row.ownerEpoch.toString(),
+                sequence: row.sequence.toString(),
+                key: row.rankKey,
+                versions: `opencok:hero:versions:${row.rankKey}`,
+                member: row.member,
+                score: row.score,
+                metadata: row.metadata ?? false,
+                expires: (row.endTime / 1000n + 864000n).toString(),
+            })),
+        ),
+    );
 
-  if (Number(result) !== 1) {throw new DependencyError("hero rank publication result");}
+    if (Number(result) !== 1)
+    {
+        throw new DependencyError("hero rank publication result");
+    }
 }

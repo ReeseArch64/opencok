@@ -1,7 +1,8 @@
-export interface WishDefinition {
-  readonly "id": number;
-  readonly "dialog": number | readonly number[];
-  readonly "rewards": number;
+export interface WishDefinition
+{
+    readonly "id": number;
+    readonly "dialog": number | readonly number[];
+    readonly "rewards": number;
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";

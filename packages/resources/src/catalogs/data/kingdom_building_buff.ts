@@ -4,7 +4,7 @@ import type { CatalogTable } from "../../catalog-model.ts";
 import { records as records0 } from "./kingdom_building_buff.records0.ts";
 
 export const catalog: CatalogTable<KingdomBuildingBuffDefinition> = {
-  "kind": CatalogKind.Table,
-  "records": [...records0],
-  "sections": [{ "id": "kingdom_building_buff", "start": 0, "count": 7 }],
+    "kind": CatalogKind.Table,
+    "records": [...records0],
+    "sections": [{ "id": "kingdom_building_buff", "start": 0, "count": 7 }],
 };

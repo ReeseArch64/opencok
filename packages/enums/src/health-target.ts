@@ -1,3 +1,4 @@
-export enum HealthTarget {
-  HttpGateway = "http-gateway",
+export enum HealthTarget
+{
+    HttpGateway = "http-gateway",
 }

@@ -1,29 +1,33 @@
-export interface MutationCommand {
-  expiresAt?: bigint;
-  participants?: readonly string[];
-  owner: string;
-  requestId: string;
-  command: string;
-  request: Uint8Array;
+export interface MutationCommand
+{
+    expiresAt?: bigint;
+    participants?: readonly string[];
+    owner: string;
+    requestId: string;
+    command: string;
+    request: Uint8Array;
 }
 
-export interface EconomyPosting {
-  account: string;
-  asset: string;
-  before: bigint;
-  after: bigint;
-  reason: string;
+export interface EconomyPosting
+{
+    account: string;
+    asset: string;
+    before: bigint;
+    after: bigint;
+    reason: string;
 }
 
-export interface MutationEvent {
-  expiresAt?: bigint;
-  id: string;
-  type: string;
-  payload: Uint8Array;
+export interface MutationEvent
+{
+    expiresAt?: bigint;
+    id: string;
+    type: string;
+    payload: Uint8Array;
 }
 
-export interface MutationResult {
-  response: Uint8Array;
-  postings?: readonly EconomyPosting[];
-  events?: readonly MutationEvent[];
+export interface MutationResult
+{
+    response: Uint8Array;
+    postings?: readonly EconomyPosting[];
+    events?: readonly MutationEvent[];
 }

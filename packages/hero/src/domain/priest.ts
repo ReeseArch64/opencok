@@ -6,66 +6,67 @@ import { HeroTalentTree } from "@opencok/enums/hero-talent-tree";
 import type { HeroDefinition } from "../contracts/hero-definition.ts";
 import { Hero } from "./hero.ts";
 
-export class Priest extends Hero {
-  public readonly identity = HeroIdentity.Priest;
-  public readonly name = "Priest";
-  public readonly gender = HeroGender.Male;
-  public readonly recruitment: HeroDefinition["recruitment"] = {
-    available: true,
-    cost: { item: HeroItem.PriestFragment, quantity: 3000 },
-    initialQuality: 1,
-  };
-  public readonly progression: HeroDefinition["progression"] = {
-    initialLevel: 1,
-    maximumLevel: 100,
-    automatedGrantLevelLimit: 100,
-    talentPointDivisor: 1,
-    breakthroughs: this.freeBreakthroughs(HeroItem.PriestFragment, 5),
-  };
-  public readonly stars: HeroDefinition["stars"] = {
-    initial: 1,
-    maximum: 3,
-    initialSkills: [HeroSkill.PriestPrimaryExpansion],
-    upgrades: [
-      { stars: 2, cost: { item: HeroItem.PriestFragment, quantity: 6000 }, skills: [] },
-      {
-        stars: 3,
-        cost: { item: HeroItem.PriestFragment, quantity: 30000 },
-        skills: [HeroSkill.PriestTheHolyLight],
-      },
-      { stars: 4, cost: { item: HeroItem.PriestFragment, quantity: 30000 }, skills: [] },
-      { stars: 5, cost: { item: HeroItem.PriestFragment, quantity: 60000 }, skills: [] },
-    ],
-  };
-  public readonly talentTrees: HeroDefinition["talentTrees"] = [HeroTalentTree.PriestCombat];
-  public readonly refinement = this.standardRefinement(HeroItem.PriestFragment, [
-    {
-      position: 1,
-      refinementItemQuantity: 0,
-      requiredLevel: 1,
-      requiredStars: 1,
-      unlockCost: { item: HeroItem.HeroBadge, quantity: 0 },
-    },
-    {
-      position: 2,
-      refinementItemQuantity: 0,
-      requiredLevel: 1,
-      requiredStars: 1,
-      unlockCost: { item: HeroItem.HeroBadge, quantity: 0 },
-    },
-    {
-      position: 3,
-      refinementItemQuantity: 0,
-      requiredLevel: 30,
-      requiredStars: 1,
-      unlockCost: { item: HeroItem.HeroBadge, quantity: 1 },
-    },
-    {
-      position: 4,
-      refinementItemQuantity: 0,
-      requiredStars: 3,
-      unlockCost: { item: HeroItem.HeroBadge, quantity: 1 },
-    },
-    { position: 5, refinementItemQuantity: 0 },
-  ]);
+export class Priest extends Hero
+{
+    public readonly identity = HeroIdentity.Priest;
+    public readonly name = "Priest";
+    public readonly gender = HeroGender.Male;
+    public readonly recruitment: HeroDefinition["recruitment"] = {
+        available: true,
+        cost: { item: HeroItem.PriestFragment, quantity: 3000 },
+        initialQuality: 1,
+    };
+    public readonly progression: HeroDefinition["progression"] = {
+        initialLevel: 1,
+        maximumLevel: 100,
+        automatedGrantLevelLimit: 100,
+        talentPointDivisor: 1,
+        breakthroughs: this.freeBreakthroughs(HeroItem.PriestFragment, 5),
+    };
+    public readonly stars: HeroDefinition["stars"] = {
+        initial: 1,
+        maximum: 3,
+        initialSkills: [HeroSkill.PriestPrimaryExpansion],
+        upgrades: [
+            { stars: 2, cost: { item: HeroItem.PriestFragment, quantity: 6000 }, skills: [] },
+            {
+                stars: 3,
+                cost: { item: HeroItem.PriestFragment, quantity: 30000 },
+                skills: [HeroSkill.PriestTheHolyLight],
+            },
+            { stars: 4, cost: { item: HeroItem.PriestFragment, quantity: 30000 }, skills: [] },
+            { stars: 5, cost: { item: HeroItem.PriestFragment, quantity: 60000 }, skills: [] },
+        ],
+    };
+    public readonly talentTrees: HeroDefinition["talentTrees"] = [HeroTalentTree.PriestCombat];
+    public readonly refinement = this.standardRefinement(HeroItem.PriestFragment, [
+        {
+            position: 1,
+            refinementItemQuantity: 0,
+            requiredLevel: 1,
+            requiredStars: 1,
+            unlockCost: { item: HeroItem.HeroBadge, quantity: 0 },
+        },
+        {
+            position: 2,
+            refinementItemQuantity: 0,
+            requiredLevel: 1,
+            requiredStars: 1,
+            unlockCost: { item: HeroItem.HeroBadge, quantity: 0 },
+        },
+        {
+            position: 3,
+            refinementItemQuantity: 0,
+            requiredLevel: 30,
+            requiredStars: 1,
+            unlockCost: { item: HeroItem.HeroBadge, quantity: 1 },
+        },
+        {
+            position: 4,
+            refinementItemQuantity: 0,
+            requiredStars: 3,
+            unlockCost: { item: HeroItem.HeroBadge, quantity: 1 },
+        },
+        { position: 5, refinementItemQuantity: 0 },
+    ]);
 }

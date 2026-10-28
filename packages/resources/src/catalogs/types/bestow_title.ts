@@ -1,6 +1,7 @@
-export interface BestowTitleDefinition {
-  readonly "id": number;
-  readonly "statusId": number;
+export interface BestowTitleDefinition
+{
+    readonly "id": number;
+    readonly "statusId": number;
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";

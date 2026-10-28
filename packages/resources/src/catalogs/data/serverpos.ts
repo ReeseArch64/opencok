@@ -11,16 +11,16 @@ import { records as records6 } from "./serverpos.records6.ts";
 import { records as records7 } from "./serverpos.records7.ts";
 
 export const catalog: CatalogTable<ServerposDefinition> = {
-  "kind": CatalogKind.Table,
-  "records": [
-    ...records0,
-    ...records1,
-    ...records2,
-    ...records3,
-    ...records4,
-    ...records5,
-    ...records6,
-    ...records7,
-  ],
-  "sections": [{ "id": "serverpos", "start": 0, "count": 5930 }],
+    "kind": CatalogKind.Table,
+    "records": [
+        ...records0,
+        ...records1,
+        ...records2,
+        ...records3,
+        ...records4,
+        ...records5,
+        ...records6,
+        ...records7,
+    ],
+    "sections": [{ "id": "serverpos", "start": 0, "count": 5930 }],
 };

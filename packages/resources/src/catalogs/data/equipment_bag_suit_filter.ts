@@ -4,7 +4,7 @@ import type { CatalogTable } from "../../catalog-model.ts";
 import { records as records0 } from "./equipment_bag_suit_filter.records0.ts";
 
 export const catalog: CatalogTable<EquipmentBagSuitFilterDefinition> = {
-  "kind": CatalogKind.Table,
-  "records": [...records0],
-  "sections": [{ "id": "equipment_bag_suit_filter", "start": 0, "count": 22 }],
+    "kind": CatalogKind.Table,
+    "records": [...records0],
+    "sections": [{ "id": "equipment_bag_suit_filter", "start": 0, "count": 22 }],
 };

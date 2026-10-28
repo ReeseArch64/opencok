@@ -1,7 +1,8 @@
-export interface QuestMarkDefinition {
-  readonly "quest": string;
-  readonly "id": number;
-  readonly "order": number;
+export interface QuestMarkDefinition
+{
+    readonly "quest": string;
+    readonly "id": number;
+    readonly "order": number;
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";

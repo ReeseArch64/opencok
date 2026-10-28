@@ -6,64 +6,77 @@ import { HeroTalentTree } from "@opencok/enums/hero-talent-tree";
 import type { HeroDefinition } from "../contracts/hero-definition.ts";
 import { Hero } from "./hero.ts";
 
-export class ShieldOfEmpire extends Hero {
-  public readonly identity = HeroIdentity.ShieldOfEmpire;
-  public readonly name = "Shield of Empire";
-  public readonly gender = HeroGender.Male;
-  public readonly recruitment: HeroDefinition["recruitment"] = {
-    available: true,
-    cost: { item: HeroItem.ShieldOfEmpireFragment, quantity: 3000 },
-    initialQuality: 1,
-  };
-  public readonly progression: HeroDefinition["progression"] = {
-    initialLevel: 1,
-    maximumLevel: 100,
-    automatedGrantLevelLimit: 100,
-    talentPointDivisor: 1,
-    breakthroughs: this.freeBreakthroughs(HeroItem.ShieldOfEmpireFragment, 5),
-  };
-  public readonly stars: HeroDefinition["stars"] = {
-    initial: 1,
-    maximum: 3,
-    initialSkills: [HeroSkill.ShieldOfEmpireInfantryHealth],
-    upgrades: [
-      { stars: 2, cost: { item: HeroItem.ShieldOfEmpireFragment, quantity: 6000 }, skills: [] },
-      {
-        stars: 3,
-        cost: { item: HeroItem.ShieldOfEmpireFragment, quantity: 15000 },
-        skills: [HeroSkill.ShieldOfEmpireAgainstInfantry],
-      },
-      { stars: 4, cost: { item: HeroItem.ShieldOfEmpireFragment, quantity: 30000 }, skills: [] },
-      { stars: 5, cost: { item: HeroItem.ShieldOfEmpireFragment, quantity: 60000 }, skills: [] },
-    ],
-  };
-  public readonly talentTrees: HeroDefinition["talentTrees"] = [
-    HeroTalentTree.ShieldOfEmpireCombat,
-  ];
-  public readonly refinement = this.standardRefinement(HeroItem.ShieldOfEmpireFragment, [
-    {
-      position: 1,
-      refinementItemQuantity: 1,
-      requiredLevel: 1,
-      unlockCost: { item: HeroItem.HeroBadge, quantity: 0 },
-    },
-    {
-      position: 2,
-      refinementItemQuantity: 1,
-      requiredLevel: 1,
-      unlockCost: { item: HeroItem.HeroBadge, quantity: 0 },
-    },
-    {
-      position: 3,
-      refinementItemQuantity: 1,
-      requiredLevel: 30,
-      unlockCost: { item: HeroItem.HeroBadge, quantity: 1 },
-    },
-    {
-      position: 4,
-      refinementItemQuantity: 0,
-      unlockCost: { item: HeroItem.HeroBadge, quantity: 1 },
-    },
-    { position: 5, refinementItemQuantity: 0 },
-  ]);
+export class ShieldOfEmpire extends Hero
+{
+    public readonly identity = HeroIdentity.ShieldOfEmpire;
+    public readonly name = "Shield of Empire";
+    public readonly gender = HeroGender.Male;
+    public readonly recruitment: HeroDefinition["recruitment"] = {
+        available: true,
+        cost: { item: HeroItem.ShieldOfEmpireFragment, quantity: 3000 },
+        initialQuality: 1,
+    };
+    public readonly progression: HeroDefinition["progression"] = {
+        initialLevel: 1,
+        maximumLevel: 100,
+        automatedGrantLevelLimit: 100,
+        talentPointDivisor: 1,
+        breakthroughs: this.freeBreakthroughs(HeroItem.ShieldOfEmpireFragment, 5),
+    };
+    public readonly stars: HeroDefinition["stars"] = {
+        initial: 1,
+        maximum: 3,
+        initialSkills: [HeroSkill.ShieldOfEmpireInfantryHealth],
+        upgrades: [
+            {
+                stars: 2,
+                cost: { item: HeroItem.ShieldOfEmpireFragment, quantity: 6000 },
+                skills: [],
+            },
+            {
+                stars: 3,
+                cost: { item: HeroItem.ShieldOfEmpireFragment, quantity: 15000 },
+                skills: [HeroSkill.ShieldOfEmpireAgainstInfantry],
+            },
+            {
+                stars: 4,
+                cost: { item: HeroItem.ShieldOfEmpireFragment, quantity: 30000 },
+                skills: [],
+            },
+            {
+                stars: 5,
+                cost: { item: HeroItem.ShieldOfEmpireFragment, quantity: 60000 },
+                skills: [],
+            },
+        ],
+    };
+    public readonly talentTrees: HeroDefinition["talentTrees"] = [
+        HeroTalentTree.ShieldOfEmpireCombat,
+    ];
+    public readonly refinement = this.standardRefinement(HeroItem.ShieldOfEmpireFragment, [
+        {
+            position: 1,
+            refinementItemQuantity: 1,
+            requiredLevel: 1,
+            unlockCost: { item: HeroItem.HeroBadge, quantity: 0 },
+        },
+        {
+            position: 2,
+            refinementItemQuantity: 1,
+            requiredLevel: 1,
+            unlockCost: { item: HeroItem.HeroBadge, quantity: 0 },
+        },
+        {
+            position: 3,
+            refinementItemQuantity: 1,
+            requiredLevel: 30,
+            unlockCost: { item: HeroItem.HeroBadge, quantity: 1 },
+        },
+        {
+            position: 4,
+            refinementItemQuantity: 0,
+            unlockCost: { item: HeroItem.HeroBadge, quantity: 1 },
+        },
+        { position: 5, refinementItemQuantity: 0 },
+    ]);
 }

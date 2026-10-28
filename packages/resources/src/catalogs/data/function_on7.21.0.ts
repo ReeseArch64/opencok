@@ -6,7 +6,7 @@ import { records as records1 } from "./function_on7.21.0.records1.ts";
 import { records as records2 } from "./function_on7.21.0.records2.ts";
 
 export const catalog: CatalogTable<FunctionOn7210Definition> = {
-  "kind": CatalogKind.Table,
-  "records": [...records0, ...records1, ...records2],
-  "sections": [{ "id": "function_on", "start": 0, "count": 1906 }],
+    "kind": CatalogKind.Table,
+    "records": [...records0, ...records1, ...records2],
+    "sections": [{ "id": "function_on", "start": 0, "count": 1906 }],
 };

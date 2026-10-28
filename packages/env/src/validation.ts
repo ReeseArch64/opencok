@@ -1,42 +1,52 @@
 import { z } from "zod";
 
-export class EnvironmentError extends Error {
-  constructor(
-    readonly keys: readonly string[],
-    reason: "invalid" | "missing" = "invalid",
-  ) {
-    super(
-      `${reason === "missing" ? "Missing" : "Invalid"} environment configuration: ${keys.join(", ")}`,
-    );
-    this.name = "EnvironmentError";
-  }
+export class EnvironmentError extends Error
+{
+    constructor(
+        readonly keys: readonly string[],
+        reason: "invalid" | "missing" = "invalid",
+    )
+    {
+        super(
+            `${reason === "missing" ? "Missing" : "Invalid"} environment configuration: ${
+                keys.join(", ")
+            }`,
+        );
+        this.name = "EnvironmentError";
+    }
 }
 
 export const blankToUndefined = (value: unknown) =>
-  typeof value === "string" ? value.trim() || undefined : value;
+    typeof value === "string" ? value.trim() || undefined : value;
 
 export function validateEnvironment<T extends z.ZodType>(
-  schema: T,
-  source: Readonly<Record<string, string | undefined>>,
-): z.output<T> {
-  const result = schema.safeParse(source);
+    schema: T,
+    source: Readonly<Record<string, string | undefined>>,
+): z.output<T>
+{
+    const result = schema.safeParse(source);
 
-  if (!result.success) {
-    const keys = [...new Set(result.error.issues.map((issue) => String(issue.path[0])))];
+    if (!result.success)
+    {
+        const keys = [...new Set(result.error.issues.map((issue) => String(issue.path[0])))];
 
-    throw new EnvironmentError(Object.freeze(keys));
-  }
+        throw new EnvironmentError(Object.freeze(keys));
+    }
 
-  return result.data;
+    return result.data;
 }
 
 export function requireEnvironment<E extends object, K extends keyof E>(
-  environment: E,
-  key: K,
-): NonNullable<E[K]> {
-  const value = environment[key];
+    environment: E,
+    key: K,
+): NonNullable<E[K]>
+{
+    const value = environment[key];
 
-  if (value === undefined || value === null) {throw new EnvironmentError([String(key)], "missing");}
+    if (value === undefined || value === null)
+    {
+        throw new EnvironmentError([String(key)], "missing");
+    }
 
-  return value as NonNullable<E[K]>;
+    return value as NonNullable<E[K]>;
 }

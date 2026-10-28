@@ -1,8 +1,9 @@
-export interface GrowthFundDefinition {
-  readonly "id": number;
-  readonly "type": number;
-  readonly "level": number;
-  readonly "reward": number;
+export interface GrowthFundDefinition
+{
+    readonly "id": number;
+    readonly "type": number;
+    readonly "level": number;
+    readonly "reward": number;
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";

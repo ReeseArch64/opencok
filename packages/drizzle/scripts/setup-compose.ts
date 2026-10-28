@@ -8,29 +8,34 @@ url.username = env.POSTGRES_USER;
 url.password = requireEnv("POSTGRES_PASSWORD");
 const config = { connectionString: url.toString(), options: "-c timezone=UTC" };
 const admin = new Pool(config);
-try {
-  const topology = await setupDatabases(admin, config);
-  await writeFile(
-    "/configuration/servers.json",
-    JSON.stringify({
-      Servers: {
-        "1": {
-          Name: "OpenCok local PostgreSQL",
-          Group: "OpenCok",
-          Host: "postgres",
-          Port: 5432,
-          MaintenanceDB: "postgres",
-          Username: env.POSTGRES_USER,
-          SSLMode: "prefer",
-        },
-      },
-    }),
-    { mode: 0o644 },
-  );
-  console.log(`Initialized global database and ${topology.kingdoms.length} kingdoms`);
-} catch {
-  console.error("Database initialization failed; verify PostgreSQL credentials and migrations");
-  process.exitCode = 1;
-} finally {
-  await admin.end();
+try
+{
+    const topology = await setupDatabases(admin, config);
+    await writeFile(
+        "/configuration/servers.json",
+        JSON.stringify({
+            Servers: {
+                "1": {
+                    Name: "OpenCok local PostgreSQL",
+                    Group: "OpenCok",
+                    Host: "postgres",
+                    Port: 5432,
+                    MaintenanceDB: "postgres",
+                    Username: env.POSTGRES_USER,
+                    SSLMode: "prefer",
+                },
+            },
+        }),
+        { mode: 0o644 },
+    );
+    console.log(`Initialized global database and ${topology.kingdoms.length} kingdoms`);
+}
+catch
+{
+    console.error("Database initialization failed; verify PostgreSQL credentials and migrations");
+    process.exitCode = 1;
+}
+finally
+{
+    await admin.end();
 }

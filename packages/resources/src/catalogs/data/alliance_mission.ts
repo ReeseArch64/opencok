@@ -4,7 +4,7 @@ import type { CatalogTable } from "../../catalog-model.ts";
 import { records as records0 } from "./alliance_mission.records0.ts";
 
 export const catalog: CatalogTable<AllianceMissionDefinition> = {
-  "kind": CatalogKind.Table,
-  "records": [...records0],
-  "sections": [{ "id": "alliance_mission", "start": 0, "count": 49 }],
+    "kind": CatalogKind.Table,
+    "records": [...records0],
+    "sections": [{ "id": "alliance_mission", "start": 0, "count": 49 }],
 };

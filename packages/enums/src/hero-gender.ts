@@ -1,4 +1,5 @@
-export enum HeroGender {
-  Female = "female",
-  Male = "male",
+export enum HeroGender
+{
+    Female = "female",
+    Male = "male",
 }

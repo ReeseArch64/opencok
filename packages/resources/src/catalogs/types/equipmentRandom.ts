@@ -1,15 +1,16 @@
-export interface EquipmentRandomDefinition {
-  readonly "id": number;
-  readonly "effect": readonly (readonly number[])[];
-  readonly "rate": readonly number[];
-  readonly "valueType": readonly number[];
-  readonly "dialog": readonly number[];
-  readonly "value0": readonly number[];
-  readonly "value1": readonly number[];
-  readonly "value2": readonly number[];
-  readonly "value3": readonly number[];
-  readonly "value4": readonly number[];
-  readonly "value5": readonly number[];
+export interface EquipmentRandomDefinition
+{
+    readonly "id": number;
+    readonly "effect": readonly (readonly number[])[];
+    readonly "rate": readonly number[];
+    readonly "valueType": readonly number[];
+    readonly "dialog": readonly number[];
+    readonly "value0": readonly number[];
+    readonly "value1": readonly number[];
+    readonly "value2": readonly number[];
+    readonly "value3": readonly number[];
+    readonly "value4": readonly number[];
+    readonly "value5": readonly number[];
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";

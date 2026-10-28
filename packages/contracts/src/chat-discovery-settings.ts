@@ -1,4 +1,5 @@
-export interface ChatDiscoverySettings {
-  websocketUrl: string;
-  isReady?: () => boolean;
+export interface ChatDiscoverySettings
+{
+    websocketUrl: string;
+    isReady?: () => boolean;
 }

@@ -1,7 +1,8 @@
-export interface AccumulateDefinition {
-  readonly "id": number;
-  readonly "Node": number;
-  readonly "Gift": number;
+export interface AccumulateDefinition
+{
+    readonly "id": number;
+    readonly "Node": number;
+    readonly "Gift": number;
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";
