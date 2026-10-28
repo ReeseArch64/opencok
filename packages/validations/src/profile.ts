@@ -5,7 +5,7 @@ import type {
     PublicEquipmentResponse,
     PublicProfileBaseResponse,
 } from "@opencok/contracts/responses/profile";
-import { field } from "./response.ts";
+import { field } from "@opencok/messages/validations/response";
 import { playerStatisticsSchema } from "./power.ts";
 
 export const publicStatisticsSchema = z.union([

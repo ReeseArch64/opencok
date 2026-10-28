@@ -3,7 +3,7 @@ import type {
     PublishedRankingResponse,
     AttributeRankingResponse,
 } from "@opencok/contracts/responses/published-ranking";
-import { responseFieldsSchema, field } from "./response.ts";
+import { responseFieldsSchema, field } from "@opencok/messages/validations/response";
 
 export const publishedRankingSchema = z.strictObject({
     rankList: z.array(responseFieldsSchema).max(100),

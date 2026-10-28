@@ -3,7 +3,7 @@ import {
     playerItemGiftSchema,
     playerItemGiftLoginSchema,
 } from "@opencok/validations/player-item-gifts";
-import { validateFields } from "./validation";
+import { validateFields } from "@opencok/messages/validations/fields";
 
 export function playerItemGiftView(): Fields
 {

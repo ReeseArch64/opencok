@@ -1,7 +1,7 @@
 import { sfs, type Fields } from "@opencok/messages/sfs";
 import { num, type Row } from "@opencok/contracts/rows";
 import { prayerSchema, prayerLoginSchema, prayerItemSchema } from "@opencok/validations/prayer";
-import { validateFields } from "./validation";
+import { validateFields } from "@opencok/messages/validations/fields";
 
 export function prayerView(
     row: Row,

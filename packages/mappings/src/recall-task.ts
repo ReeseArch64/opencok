@@ -1,6 +1,6 @@
 import { sfs, type Fields } from "@opencok/messages/sfs";
 import { recallTaskSchema, recallTaskClaimSchema } from "@opencok/validations/recall-task";
-import { validateFields } from "./validation";
+import { validateFields } from "@opencok/messages/validations/fields";
 
 export function recallTaskView(tasks: readonly Fields[], openedAt?: bigint)
 {

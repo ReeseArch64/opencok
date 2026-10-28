@@ -3,7 +3,7 @@ import type { Rules } from "@opencok/rules/game";
 import { sfs, type Fields } from "@opencok/messages/sfs";
 import type { CityCosmeticResponse } from "@opencok/contracts/responses/city-cosmetics";
 import { cityCosmeticSchema, cityCosmeticUpdateSchema } from "@opencok/validations/city-cosmetics";
-import { validateFields } from "./validation";
+import { validateFields } from "@opencok/messages/validations/fields";
 
 export function cityCosmeticFields(value: CityCosmeticResponse): Fields
 {

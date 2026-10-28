@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { field } from "./response";
+import { field } from "@opencok/messages/validations/response";
 import type { SpecialEventResponse } from "@opencok/contracts/responses/special-event";
 
 export const specialEventSchema = z.strictObject({

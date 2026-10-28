@@ -5,7 +5,7 @@ import type {
 import { decodeLegacyJsonObject } from "@opencok/messages/legacy-json";
 import { sfs, Type, type Fields } from "@opencok/messages/sfs";
 import { flowerRankingSchema } from "@opencok/validations/flower-ranking";
-import { validateFields } from "./validation.ts";
+import { validateFields } from "@opencok/messages/validations/fields";
 import { javaDecimal } from "@opencok/rules/java-integer";
 
 export function flowerRankingEntries(entries: readonly string[]): { uid: string; score: number; }[]

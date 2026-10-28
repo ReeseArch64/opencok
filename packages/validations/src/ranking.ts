@@ -1,6 +1,6 @@
 import { z } from "zod";
 import type { PlayerRankingResponse } from "@opencok/contracts/responses/ranking";
-import { field } from "./response.ts";
+import { field } from "@opencok/messages/validations/response";
 
 export const playerRankingSchema = z.strictObject({
     selfRanking: field.int.optional(),

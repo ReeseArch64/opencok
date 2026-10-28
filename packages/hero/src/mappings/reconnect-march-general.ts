@@ -1,7 +1,7 @@
 import { string } from "@opencok/mappings/reconnect-march-values";
 import { long } from "@opencok/mappings/reconnect-march-values";
 import { integer } from "@opencok/mappings/reconnect-march-values";
-import { validateFields } from "@opencok/mappings/validation";
+import { validateFields } from "@opencok/messages/validations/fields";
 import { reconnectMarchGeneralSchema } from "@opencok/hero/validations/reconnect-march-general";
 import type { Row } from "@opencok/contracts/rows";
 import type { SavedMarchArmy } from "@opencok/messages/world-resource-army";

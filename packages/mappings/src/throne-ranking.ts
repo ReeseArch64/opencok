@@ -3,7 +3,7 @@ import { decodeLegacyJsonObject } from "@opencok/messages/legacy-json";
 import { sfs, Type, type Fields } from "@opencok/messages/sfs";
 import { javaDecimal } from "@opencok/rules/java-integer";
 import { throneRankingBoardSchema, throneRankingSchema } from "@opencok/validations/throne-ranking";
-import { validateFields } from "./validation.ts";
+import { validateFields } from "@opencok/messages/validations/fields";
 
 export function throneRankingBoard(
     snapshot: ThroneRankingSnapshot,

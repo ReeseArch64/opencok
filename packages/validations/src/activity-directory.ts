@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { field } from "./response";
+import { field } from "@opencok/messages/validations/response";
 import type { ActivityDirectoryResponse } from "@opencok/contracts/responses/activity-directory";
 
 export const activityDirectorySchema = z.strictObject({

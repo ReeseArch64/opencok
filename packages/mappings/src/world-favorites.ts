@@ -1,4 +1,4 @@
-import { validateFields } from "./validation.ts";
+import { validateFields } from "@opencok/messages/validations/fields";
 import { worldFavoritesSchema } from "@opencok/validations/world-favorites";
 
 import type { WorldFavoriteList } from "@opencok/contracts/world-favorites";

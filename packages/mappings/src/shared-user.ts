@@ -5,7 +5,7 @@ import { sharedSearchProfile } from "@opencok/rules/player-search";
 import { sharedUserInfoSchema } from "@opencok/validations/shared-user";
 import { Type, type Fields } from "@opencok/messages/sfs";
 import { playerSearchEntry } from "./player-search.ts";
-import { validateFields } from "./validation.ts";
+import { validateFields } from "@opencok/messages/validations/fields";
 
 const keys = [
     "uid",

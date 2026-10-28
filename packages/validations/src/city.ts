@@ -5,7 +5,7 @@ import type {
     ResourceResponse,
     UserResponse,
 } from "@opencok/contracts/responses/city";
-import { field, responseFieldsSchema } from "./response.ts";
+import { field, responseFieldsSchema } from "@opencok/messages/validations/response";
 
 export const buildingSchema = z.strictObject({
     uuid: field.string,

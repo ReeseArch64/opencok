@@ -4,7 +4,7 @@ import {
     allianceHeartLoginSchema,
     allianceHeartNotificationSchema,
 } from "@opencok/validations/alliance-heart";
-import { validateFields } from "./validation";
+import { validateFields } from "@opencok/messages/validations/fields";
 
 export function allianceHeartView(point: number)
 {

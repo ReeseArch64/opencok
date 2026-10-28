@@ -1,4 +1,4 @@
-import { validateFields } from "./validation.ts";
+import { validateFields } from "@opencok/messages/validations/fields";
 import { avatarMailPushSchema } from "@opencok/validations/avatar-mail";
 
 import type { AvatarSystemMail } from "@opencok/contracts/files";

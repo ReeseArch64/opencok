@@ -12,7 +12,7 @@ import {
     resourceDonationRankingSchema,
     cemeteryRankingSchema,
 } from "@opencok/validations/community-ranking";
-import { validateFields } from "./validation.ts";
+import { validateFields } from "@opencok/messages/validations/fields";
 
 const int = (value: unknown) => Number(javaDecimal(String(value ?? 0), 32));
 

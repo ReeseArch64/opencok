@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { field } from "@opencok/validations/response";
+import { field } from "@opencok/messages/validations/response";
 import type { ReconnectMarchGeneralResponse } from "@opencok/hero/contracts/responses/reconnect-march-general";
 
 export const reconnectMarchGeneralSchema = z.strictObject({

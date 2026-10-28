@@ -3,7 +3,7 @@ import type {
     PlayerSearchEntryResponse,
     PlayerSearchResponse,
 } from "@opencok/contracts/responses/player-search";
-import { field } from "./response.ts";
+import { field } from "@opencok/messages/validations/response";
 
 export const playerSearchEntrySchema = z.strictObject({
     uid: field.string,

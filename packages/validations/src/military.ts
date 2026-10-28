@@ -3,7 +3,7 @@ import type {
     WoundedTroopsResponse,
     FortificationResponse,
 } from "@opencok/contracts/responses/military";
-import { field } from "./response";
+import { field } from "@opencok/messages/validations/response";
 
 export const woundedTroopsSchema = z.strictObject({
     id: field.string,

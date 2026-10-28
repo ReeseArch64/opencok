@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { field } from "@opencok/validations/response";
+import { field } from "@opencok/messages/validations/response";
 import { rewardPreviewArraySchema } from "@opencok/validations/rewards";
 import type {
     HeroEventEntryResponse,

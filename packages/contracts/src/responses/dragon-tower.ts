@@ -1,4 +1,4 @@
-import type { ResponseValue } from "./value";
+import type { ResponseValue } from "@opencok/messages/contracts/response-value";
 
 export interface DragonTowerArmyResponse
 {

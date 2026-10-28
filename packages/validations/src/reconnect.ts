@@ -5,7 +5,7 @@ import type {
     ReconnectArmiesResponse,
     ReconnectMineResponse,
 } from "@opencok/contracts/responses/reconnect";
-import { field } from "./response.ts";
+import { field } from "@opencok/messages/validations/response";
 
 export const reconnectBalancesSchema = z.strictObject({
     gold: field.long,

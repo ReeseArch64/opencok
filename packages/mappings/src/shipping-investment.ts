@@ -2,7 +2,7 @@ import { javaHashMapOrder } from "@opencok/rules/java-hash-map-order";
 import type { ShippingInvestmentResponse } from "@opencok/contracts/responses/shipping-investment";
 import { sfs, type Fields } from "@opencok/messages/sfs";
 import { shippingInvestmentSchema } from "@opencok/validations/shipping-investment";
-import { validateFields } from "./validation";
+import { validateFields } from "@opencok/messages/validations/fields";
 
 export function shippingInvestmentView(row: ShippingInvestmentResponse): Fields
 {

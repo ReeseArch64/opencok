@@ -3,7 +3,7 @@ import type {
     PlayerSummaryResponse,
     GuidePlayerSummaryResponse,
 } from "@opencok/contracts/responses/players";
-import { field } from "./response.ts";
+import { field } from "@opencok/messages/validations/response";
 
 export const playerSummarySchema = z.strictObject({
     lastUpdateTime: field.string,

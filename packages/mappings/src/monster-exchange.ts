@@ -1,6 +1,6 @@
 import { sfs, type Fields } from "@opencok/messages/sfs";
 import { monsterExchangeSchema } from "@opencok/validations/monster-exchange";
-import { validateFields } from "./validation";
+import { validateFields } from "@opencok/messages/validations/fields";
 
 export function monsterExchangeView(
     level: number,

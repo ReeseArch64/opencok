@@ -1,7 +1,7 @@
 import { sfs, type Fields } from "@opencok/messages/sfs";
 import type { SevenDayCycleResponse } from "@opencok/contracts/responses/seven-day-cycle";
 import { sevenDayCycleSchema } from "@opencok/validations/seven-day-cycle";
-import { validateFields } from "./validation";
+import { validateFields } from "@opencok/messages/validations/fields";
 
 export function sevenDayCycleView(row: SevenDayCycleResponse): Fields
 {

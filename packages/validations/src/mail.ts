@@ -4,7 +4,7 @@ import type {
     MailSaveResponse,
     MailStatusResponse,
 } from "@opencok/contracts/responses/mail";
-import { field, responseRecord } from "./response.ts";
+import { field, responseRecord } from "@opencok/messages/validations/response";
 
 export const mailDeletedSchema = z.strictObject({
     delete: field.int,

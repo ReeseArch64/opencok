@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { field } from "./response";
+import { field } from "@opencok/messages/validations/response";
 import { rewardPreviewArraySchema } from "./rewards";
 import type { GroupBuyResponse } from "@opencok/contracts/responses/groupbuy";
 

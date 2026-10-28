@@ -1,7 +1,7 @@
 import { expect, test } from "bun:test";
 import { mailDeleted } from "@opencok/mappings/mail";
 import { worldResourceOwner } from "@opencok/mappings/world-resource-detail";
-import { validateFields } from "../src/validation.ts";
+import { validateFields } from "@opencok/messages/validations/fields";
 import { worldResourceOwnerSchema } from "@opencok/validations/world-resource-detail";
 import { Type, encode, sfs } from "@opencok/messages/sfs";
 

@@ -1,4 +1,4 @@
-import { validateFields } from "./validation.ts";
+import { validateFields } from "@opencok/messages/validations/fields";
 import { mailDeletedSchema, mailSaveSchema, mailStatusSchema } from "@opencok/validations/mail";
 
 import type { MailSaveResult, MailStatusResult } from "@opencok/contracts/mail";

@@ -1,4 +1,4 @@
-import { validateFields } from "./validation.ts";
+import { validateFields } from "@opencok/messages/validations/fields";
 import { playerStatisticsSchema, powerInfoSchema } from "@opencok/validations/power";
 
 import type { PlayerPower } from "@opencok/contracts/power";

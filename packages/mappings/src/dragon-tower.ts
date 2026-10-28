@@ -1,4 +1,4 @@
-import { validateFields } from "./validation";
+import { validateFields } from "@opencok/messages/validations/fields";
 import {
     towerArmySchema,
     towerUserSchema,

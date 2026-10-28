@@ -1,6 +1,6 @@
 import { z } from "zod";
 import type { DragonRankingResponse } from "@opencok/contracts/responses/dragon-ranking";
-import { field } from "./response.ts";
+import { field } from "@opencok/messages/validations/response";
 
 export const dragonRankingSchema = z.strictObject({
     rank: z

@@ -1,6 +1,6 @@
 import { z } from "zod";
 import type { SharedUserInfoResponse } from "@opencok/contracts/responses/shared-user";
-import { field } from "./response.ts";
+import { field } from "@opencok/messages/validations/response";
 
 export const sharedUserInfoSchema = z.strictObject({
     uid: field.string.min(1),

@@ -1,6 +1,6 @@
 import { sfs, type Fields } from "@opencok/messages/sfs";
 import { vipBoxSchema } from "@opencok/validations/vip-box";
-import { validateFields } from "./validation";
+import { validateFields } from "@opencok/messages/validations/fields";
 import type { VipBoxNoticeResponse } from "@opencok/contracts/responses/vip-box";
 
 export function vipBoxNotice(row: VipBoxNoticeResponse): Fields

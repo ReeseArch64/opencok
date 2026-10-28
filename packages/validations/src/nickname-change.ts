@@ -6,7 +6,7 @@ import type {
     NicknameDmmGoldResponse,
     NicknameChangeReplyResponse,
 } from "@opencok/contracts/responses/nickname-change";
-import { field } from "./response.ts";
+import { field } from "@opencok/messages/validations/response";
 
 export const nicknameItemDeleteSchema = z.strictObject({
     uuid: field.string,

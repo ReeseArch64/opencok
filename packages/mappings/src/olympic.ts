@@ -1,7 +1,7 @@
 import { sfs, type Fields } from "@opencok/messages/sfs";
 import { num, long, text, type Row } from "@opencok/contracts/rows";
 import { olympicQuestionSchema, olympicBetSchema } from "@opencok/validations/olympic";
-import { validateFields } from "./validation";
+import { validateFields } from "@opencok/messages/validations/fields";
 
 export function olympicQuestionView(row: Row, count: bigint, type: number, amount: bigint): Fields
 {
