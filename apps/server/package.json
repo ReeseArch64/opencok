@@ -10,7 +10,7 @@
     "test:integration": "bun --no-env-file test integration",
     "avatar:moderate": "bun --no-env-file scripts/moderate-avatar.ts",
     "world:import": "bun --no-env-file scripts/import-world-terrain.ts",
-    "build": "bun build src/index.ts --target bun --minify --outdir dist/src && mkdir -p dist/data && cp ../../packages/resources/data/badwords.json dist/data/badwords.json"
+    "build": "bun build src/index.ts --target bun --minify --outdir dist/src && mkdir -p dist/src/data && cp ../../packages/policy/src/resources/data/badwords.json dist/src/data/badwords.json"
   },
   "dependencies": {
     "@opencok/connection": "workspace:*",
@@ -25,7 +25,8 @@
     "@opencok/rules": "workspace:*",
     "@opencok/mappings": "workspace:*",
     "@opencok/services": "workspace:*",
-    "@opencok/hero": "workspace:*"
+    "@opencok/hero": "workspace:*",
+    "@opencok/policy": "workspace:*"
   },
   "devDependencies": {
     "@opencok/api": "workspace:*",

@@ -1,7 +1,7 @@
 # Nickname word catalog
 
 `badwords.json` is the maintained UTF-8 array of blocked terms used by nickname
-validation and celebrity-description filtering. It ships with the resources
+validation and celebrity-description filtering. It ships with the policy
 package and the server image. No external TXT, `GAME_RESOURCES` sibling directory,
 working-directory assumption or Compose volume is required.
 

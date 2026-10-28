@@ -2,7 +2,7 @@ import { CityCommandDomain } from "./city-command-domain.ts";
 import { paidGiftEvidence, redPacketInfo, redPacketRecord } from "@opencok/mappings/red-packets";
 import { avatarMailPush } from "@opencok/mappings/avatar-mail";
 import type { AvatarSystemMail } from "@opencok/contracts/files";
-import { containsNicknameBadWords } from "@opencok/rules/nickname-words";
+import { containsNicknameBadWords } from "@opencok/policy/rules/nickname-words";
 import { javaMailBytes } from "@opencok/rules/avatar-mail";
 import type { Rules } from "@opencok/rules/game";
 import type { RedPacketExpiryStore } from "@opencok/contracts/paid-gifts";

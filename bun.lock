@@ -85,6 +85,7 @@
         "@opencok/env": "workspace:*",
         "@opencok/hero": "workspace:*",
         "@opencok/mappings": "workspace:*",
+        "@opencok/policy": "workspace:*",
         "@opencok/repositories": "workspace:*",
         "@opencok/resources": "workspace:*",
         "@opencok/rules": "workspace:*",
@@ -587,6 +588,10 @@
     },
     "packages/policy": {
       "name": "@opencok/policy",
+      "dependencies": {
+        "@opencok/constants": "workspace:*",
+        "@opencok/errors": "workspace:*",
+      },
       "devDependencies": {
         "@opencok/config": "workspace:*",
         "@types/bun": "catalog:",
@@ -638,6 +643,7 @@
         "@opencok/dragon": "workspace:*",
         "@opencok/enums": "workspace:*",
         "@opencok/hero": "workspace:*",
+        "@opencok/policy": "workspace:*",
         "@opencok/rules": "workspace:*",
       },
       "devDependencies": {
@@ -655,6 +661,7 @@
         "@opencok/enums": "workspace:*",
         "@opencok/errors": "workspace:*",
         "@opencok/hero": "workspace:*",
+        "@opencok/policy": "workspace:*",
       },
       "devDependencies": {
         "@opencok/config": "workspace:*",
@@ -674,6 +681,7 @@
         "@opencok/identity": "workspace:*",
         "@opencok/mappings": "workspace:*",
         "@opencok/messages": "workspace:*",
+        "@opencok/policy": "workspace:*",
         "@opencok/rules": "workspace:*",
         "@opencok/validations": "workspace:*",
       },

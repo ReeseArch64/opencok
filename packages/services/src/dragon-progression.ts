@@ -16,7 +16,7 @@ import {
 } from "@opencok/rules/dragon-progression";
 import { cityInteger, cityAmount, cityPrestige, cityAssets } from "@opencok/rules/city-progression";
 import { nicknameLength, nicknameCharactersAllowed } from "@opencok/rules/nickname";
-import { containsNicknameBadWords } from "@opencok/rules/nickname-words";
+import { containsNicknameBadWords } from "@opencok/policy/rules/nickname-words";
 import { dragonView, dragonSkillView } from "@opencok/mappings/dragon-progression";
 import { rewardPreviewArray } from "@opencok/mappings/rewards";
 import { chooseWeight } from "@opencok/rules/equipment";

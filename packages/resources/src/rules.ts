@@ -1,4 +1,4 @@
-import nicknameWords from "../data/badwords.json";
+import nicknameWords from "@opencok/policy/resources/data/badwords.json";
 import { createBuildingCatalog } from "./buildings/index.ts";
 import { importBuildingCatalog } from "./buildings/import.ts";
 import { GameplayCatalog } from "@opencok/enums/gameplay-catalog";
