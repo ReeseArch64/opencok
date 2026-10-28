@@ -85,3 +85,9 @@ The [equipment domain](equipment/README.md) owns equipment and workshop workflow
 forge/material rules, native/public projections, schema and persistence after #651.
 The realm injects numeric and quest collaborators. Shared weighted choice stays in
 Rules, and three tracked creation/projection adapters serve remaining callers.
+
+The [tasks domain](tasks/README.md) owns ordinary/main, story, daily and sign-in
+quests after #653, including rules, reward progression, native mapping and
+transactional persistence. Target/recall/event missions remain later slices.
+The new [mail workspace](mail/README.md) owns only the unchanged system-mail leaf
+contract needed by rollover rewards; avatar/postbox workflows remain #552/#553.

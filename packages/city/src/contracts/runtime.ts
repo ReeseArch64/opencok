@@ -2,7 +2,7 @@ import type { ActivityEconomy } from "@opencok/economy/contracts/activity-econom
 import type { CityProgressionStore } from "@opencok/contracts/city-progression";
 import type { WorldResourceOwnerSnapshot } from "@opencok/contracts/world-point-detail";
 import type { RuleContext } from "@opencok/rules/availability";
-import type { QuestAction } from "@opencok/rules/quests";
+import type { QuestAction } from "@opencok/tasks/contracts/action";
 import type { CityProgressionContext } from "../services/context";
 
 export interface CityEffects

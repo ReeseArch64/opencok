@@ -2,7 +2,7 @@
 
 Parent: [#558](https://github.com/ReeseArch64/opencok/issues/558). Convention: [ADR-0016](../docs/decisions/0016-adopt-domain-owned-package-layout.md).
 
-This register accounts for all 64 original package directories, including four retired packages and the store-to-shop rename. The current tree has 65 package workspaces, including `catalog-tools` (#598), `economy` (#611), `production` (#633) `research` (#643) and `equipment` (#651). Confirmed entries reproduce maintainer decisions; proposed entries require disposition review. No proposed row claims completed extraction, service deployment or verified client support.
+This register accounts for all 64 original package directories, including four retired packages and the store-to-shop rename. The current tree has 66 package workspaces, including `catalog-tools` (#598), `economy` (#611), `production` (#633), `research` (#643), `equipment` (#651) and `mail` (#653). Confirmed entries reproduce maintainer decisions; proposed entries require disposition review. No proposed row claims completed extraction, service deployment or verified client support.
 
 ## Existing package disposition review
 
@@ -70,7 +70,7 @@ Counts describe maintained TypeScript/JavaScript source under `src` and named te
 | `skins`          |                  0 / 0 | Proposed cosmetic definitions, ownership/application and presentation mapping.                                                                                                                                 | Populate existing city/avatar/cosmetic responsibilities only where semantically confirmed; paid media uploads stay in media, not skins.                                                                                                                                                       | Proposed; pending review |
 | `storage`        |                 23 / 0 | Current Redis, coordination, S3, ranking and other adapters.                                                                                                                                                   | Split by owned purpose: sessions/coordination, media, ranking caches and domain adapters. Avoid a universal persistence utility package.                                                                                                                                                      | Proposed; pending review |
 | `store`          |                  9 / 1 | Renamed to `shop`; owns mall/NPC trading contracts, rules, mappings, Services and repository adapters.                                                                                                         | Renamed in #568; gameplay slice and caller retirement in #593                                                                                                                                                                                                                                 | Confirmed in #567/#568   |
-| `tasks`          |                  0 / 0 | Player quests, event missions and related progression. Background work belongs to jobs, not this package; no new jobs workspace is implied.                                                                    | Retain for confirmed scope; move real implementations in tested slices                                                                                                                                                                                                                        | Confirmed in #567/#568   |
+| `tasks`          |                 19 / 1 | Ordinary/main, story, daily and sign-in quests; event missions remain in scope.                                                                                                                                | Implemented ordinary quest slice in #653; remaining target/recall/event workflows and facades tracked by #558.                                                                                                                                                                                | Confirmed in #567/#568   |
 | `troops`         |                 11 / 1 | Owned troop training, healing, fortification, capacity/rules, mappings, validation and transactional adapters.                                                                                                 | #645 composes existing completion hooks and military login/reconnect projections in the realm. Named definitions, shared power/building helpers and world/march providers remain tracked.                                                                                                     | Implemented in #645      |
 | `utils`          |                  0 / 0 | Formatting tools, such as input/display masks.                                                                                                                                                                 | Retain for confirmed scope; move real implementations in tested slices                                                                                                                                                                                                                        | Confirmed in #567/#568   |
 | `validations`    |                 68 / 1 | Current mixed definition/request/media validators.                                                                                                                                                             | Move to owning domain or boundary; shared validation primitives remain small. Sharp/image processing must not become an import dependency of pure gameplay validators.                                                                                                                        | Proposed; pending review |
@@ -576,8 +576,8 @@ as their callers move into domains and narrow their contracts. Current callers:
   packages/services/src/: `anniversary`, `castle-level-event`, `city-command-domain`, `city-cosmetics`, `city-defense`, `city-domain`, `civilization-castle`, `comeback`, `continued-cost`, `daily-investment`, `dragon-progression`, `dragon-tower`, `egg-activity`, `gold-eggs-rewards`, `gold-eggs`, `groupbuy`, `hot-item`, `local-campaign`, `lottery`, `military-rank-awards`, `minstrel`, `new-expedition`, `normal-recharge`, `player-effects`, `prayer`, `progression-rewards`, `quests`, `recall-task`, `red-packets`, `seven-day-cycle`, `target-task`, `totem`, `treasure-excavation`, `treasure-map-state`, `treasure-map`, `trouble`, `world-march-companions`, `world-march-runtime`, `world-scout-report`, `world-scout-runtime`, `world-shared-rewards`.
   packages/hero/src/: `services/general-assignments`, `services/general-combat`, `services/general-draws`, `services/general-recovery`, `services/general-skills`, `services/general-turntable`, `services/generals`, `services/hero-score`, `services/legacy-general`, `services/legacy-generals`.
 
-- `services/src/city-domain.ts` (59 type consumers):
-  packages/services/src/: `activity-reward`, `alchemist`, `alliance-heart`, `anniversary`, `arena`, `avatar-activation`, `branch-city`, `castle-level-event`, `city-defense`, `civilization-castle`, `comeback`, `continued-cost-rewards`, `continued-cost`, `cup-betting`, `daily-investment`, `dragon-progression`, `dragon-talents`, `dragon-tower`, `egg-activity`, `exchange-activity`, `expedition-phase`, `expedition-stage-rewards`, `fragment-exchange`, `gold-eggs`, `groupbuy`, `hot-item`, `lottery`, `lucky-day`, `minstrel`, `monster-exchange`, `new-expedition`, `normal-recharge`, `olympic`, `ordinary-box`, `player-effects`, `player-item-gifts`, `prayer`, `quests`, `recall-task`, `recharge-activity`, `recharge-feedback`, `red-packets`, `regional-recall`, `seasonal-exchange`, `seven-day-cycle`, `shipping-investment`, `special-event`, `target-task`, `totem`, `treasure-map`, `trouble`, `vip-box`, `workshop`, `world-march-runtime`, `world-recreation`, `world-use`.
+- `services/src/city-domain.ts` (58 type consumers):
+  packages/services/src/: `activity-reward`, `alchemist`, `alliance-heart`, `anniversary`, `arena`, `avatar-activation`, `branch-city`, `castle-level-event`, `city-defense`, `civilization-castle`, `comeback`, `continued-cost-rewards`, `continued-cost`, `cup-betting`, `daily-investment`, `dragon-progression`, `dragon-talents`, `dragon-tower`, `egg-activity`, `exchange-activity`, `expedition-phase`, `expedition-stage-rewards`, `fragment-exchange`, `gold-eggs`, `groupbuy`, `hot-item`, `lottery`, `lucky-day`, `minstrel`, `monster-exchange`, `new-expedition`, `normal-recharge`, `olympic`, `ordinary-box`, `player-effects`, `player-item-gifts`, `prayer`, `recall-task`, `recharge-activity`, `recharge-feedback`, `red-packets`, `regional-recall`, `seasonal-exchange`, `seven-day-cycle`, `shipping-investment`, `special-event`, `target-task`, `totem`, `treasure-map`, `trouble`, `vip-box`, `world-march-runtime`, `world-recreation`, `world-use`.
   packages/hero/src/: `services/general-draws`, `services/generals`, `services/hero-ranking-rewards`, `services/hero-score`.
 
 The shared `CityProgressionPlan<TRules>` declares the existing structural methods;
@@ -750,9 +750,9 @@ Current direct consumers of the moved names:
   `packages/research/src/services/`: `completion`.
   `packages/rules/src/`: `city-progression`.
 
-- `packages/contracts/src/rewards.ts` (12 consumers):
+- `packages/contracts/src/rewards.ts` (10 consumers):
   `packages/mappings/src/`: `local-activity-info`, `normal-recharge`, `reconnect`, `rewards`.
-  `packages/rules/src/`: `merge-campaign`, `player-effects`, `quests`, `reconnect-tasks`, `rewards`.
+  `packages/rules/src/`: `merge-campaign`, `player-effects`, `rewards`.
   `packages/services/src/`: `postbox`, `progression-rewards`, `reconnect-progress`.
 
 At #649 the legacy Services context/domain aliases had 53/61 consumers: construction
@@ -804,3 +804,33 @@ Deploy the rebuilt realm against the same schema and saved equipment/suit/materi
 queue/activity, receipt and outbox state. Rollback restores the prior artifact; no
 configuration, native-resource or player-data conversion is introduced. Native-device,
 production-load and remaining W08 domain acceptance are not claimed by this slice.
+
+## Ordinary quest ownership (#653)
+
+Tasks now owns 19 source modules and one test file for main/story/daily/legacy-daily
+and sign-in workflows. Former Services, Rules, Mappings and Repository quest bodies
+move together into injected classes; the app composes their actual collaborators.
+City delegates the same task/quest reads and writes within its existing transaction.
+A new Mail workspace holds only the existing system-mail declaration required by
+rollover rewards; its old Contracts export remains a type-only facade.
+
+[Tasks](tasks/README.md#compatibility-and-retirement) and
+[Mail](mail/README.md#compatibility-and-retirement) list every remaining facade,
+owner, direct consumer and #558 W20 removal condition. The Services quest adapter
+has nine consumers; the system-mail alias has 22 external consumers plus local
+avatar declarations. Quest state/write aliases remain embedded in the shared City
+aggregate. Reconnect algorithm/context ownership and semantic definitions remain
+unfinished. Target, recall and event-specific missions remain later W08/W09 slices.
+
+The legacy context/domain aliases now have 51/58 direct consumers. Reward-preview
+aliases have 10 consumers after Tasks adopts the owned Economy contract and the
+reconnect context moves. Architecture baseline stays at 79 violations, with no new
+cycle or exception. The new Mail leaf brings the workspace total to 66.
+
+Validation compares 27 original structures and retains the app baseline of eight
+unit tests/19 assertions and 15 PostgreSQL tests/115 assertions across quests,
+anniversary and merge campaign. Four owned tests add 27 assertions. The existing
+synthetic nine-stage benchmark retains zero writes for unchanged quest state;
+production performance and native-device compatibility are not inferred from it.
+No configuration, schema, saved identity or authoritative writer changes. Deploy
+or roll back the realm artifact against the same quest/mail/receipt/outbox data.

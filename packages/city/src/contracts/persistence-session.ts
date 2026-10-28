@@ -1,3 +1,4 @@
+import type { QuestRepository } from "@opencok/tasks/repositories/progression";
 import type { EquipmentRepository } from "@opencok/equipment/repositories/progression";
 import type { BuildingRepository } from "@opencok/building/repositories/progression";
 import type { TroopsRepository } from "@opencok/troops/repositories/progression";
@@ -9,6 +10,7 @@ import type { CityPersistenceWriters } from "./persistence-writers";
 
 export interface CityPersistenceAdapters
 {
+    readonly quests: Pick<QuestRepository, "readTasks" | "readQuests" | "writeQuests">;
     readonly equipment: Pick<
         EquipmentRepository,
         "read" | "readSuitDecompositions" | "writeEquipment"

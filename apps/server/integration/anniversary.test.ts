@@ -2,7 +2,7 @@ import { test, expect } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { eq, and } from "drizzle-orm";
 import { anniversaryDomain } from "@opencok/services/anniversary";
-import { questsDomain } from "@opencok/services/quests";
+import { createRealmQuestsDomain } from "../src/composition/quests";
 import { createInventoryService } from "@opencok/services/inventory-runtime";
 import { createRealmInventoryExecutor } from "@opencok/repositories/inventory-runtime";
 import { trigger_var } from "@opencok/drizzle/schema/opencok_kingdom/trigger_var";
@@ -10,6 +10,8 @@ import { user_item } from "@opencok/drizzle/schema/opencok_kingdom/user_item";
 import { user_resource } from "@opencok/drizzle/schema/opencok_kingdom/user_resource";
 import { sfs, encode, fields, type Fields } from "@opencok/messages/sfs";
 import { cityHarness } from "./support/city";
+
+const questsDomain = createRealmQuestsDomain();
 
 async function fixture()
 {

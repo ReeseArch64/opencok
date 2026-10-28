@@ -1,12 +1,15 @@
+import { createRealmQuestRepository } from "../src/composition/quest-persistence";
 import { test, expect } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { eq } from "drizzle-orm";
 import { cityHarness } from "./support/city";
-import { questsDomain } from "@opencok/services/quests";
+import { createRealmQuestsDomain } from "../src/composition/quests";
 import { user_14day_login } from "@opencok/drizzle/schema/opencok_kingdom/user_14day_login";
 import { user_story_task } from "@opencok/drizzle/schema/opencok_kingdom/user_story_task";
 import { user_task } from "@opencok/drizzle/schema/opencok_kingdom/user_task";
 import { sfs } from "@opencok/messages/sfs";
+
+const questsDomain = createRealmQuestsDomain();
 
 test("quest claims are durable, concurrent, replayable, and isolated by owner", async () => {
     const h = await cityHarness([questsDomain]);
@@ -133,9 +136,8 @@ test(
         try
         {
             const { sql } = await import("drizzle-orm");
-            const { writeQuests } = await import("@opencok/repositories/quests");
             await h.db.db.transaction(async (tx) => {
-                await writeQuests(tx, "owner", {
+                await createRealmQuestRepository(tx, "owner").writeQuests({
                     tasks: Array.from({ length: 600 }, (_, id) => ({
                         uid: "owner",
                         id: `synthetic-${id}`,
@@ -159,7 +161,7 @@ test(
             const settled = await snapshot();
             await expect(
                 h.db.db.transaction(async (tx) => {
-                    await writeQuests(tx, "owner", {
+                    await createRealmQuestRepository(tx, "owner").writeQuests({
                         tasks: [{ uid: "owner", id: "rollback-only", type: 3, state: 1, num: 1 }],
                         story: [{ uid: "owner", id: 2147483648, type: 1, state: 1, num: 1 }],
                     });

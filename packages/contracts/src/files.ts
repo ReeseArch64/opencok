@@ -1,3 +1,5 @@
+import type { AvatarSystemMail } from "@opencok/mail/contracts/system-mail";
+export type { AvatarSystemMail } from "@opencok/mail/contracts/system-mail";
 import type { Row } from "./rows.ts";
 
 export const FILE_LIMIT = 2097152;
@@ -117,22 +119,6 @@ export interface AvatarCompletionRecord
     committedAt: bigint;
     effects: string;
     pendingEffects: number;
-}
-
-export interface AvatarSystemMail
-{
-    uid: string;
-    owner: string;
-    fromName: string;
-    title: string;
-    type: 2 | 9 | 15;
-    contents: Uint8Array;
-    extra: Uint8Array | null;
-    rewardId: string | null;
-    rewardStatus: 0 | 1;
-    reply: number;
-    itemIdFlag?: 0 | 1;
-    createTime: bigint;
 }
 
 export type AvatarMailPlanner = (

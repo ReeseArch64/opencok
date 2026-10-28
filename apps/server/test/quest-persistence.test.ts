@@ -1,7 +1,11 @@
+import { createRealmQuestRepository } from "../src/composition/quest-persistence";
 import { expect, test } from "bun:test";
-import { changedQuestRows, writeQuests } from "@opencok/repositories/quests";
+import { QuestChanges } from "@opencok/tasks/rules/changes";
+import { num } from "@opencok/contracts/rows";
 import type { MutationTransaction } from "@opencok/repositories/mutation";
 import type { Row } from "@opencok/contracts/rows";
+
+const { changedQuestRows } = new QuestChanges({ num });
 
 test("quest deltas preserve claims and distinguish daily types and resets", () => {
     const before = [
@@ -49,7 +53,7 @@ test("nine unchanged initialization stages avoid 9252 redundant quest writes", a
         },
     } as unknown as MutationTransaction;
     const write = { tasks, story };
-    await writeQuests(tx, "owner", write);
+    await createRealmQuestRepository(tx, "owner").writeQuests(write);
     expect(calls.map((batch) => batch.length)).toEqual([256, 256, 256, 187, 73]);
     calls.length = 0;
     const before = {
@@ -67,18 +71,21 @@ test("nine unchanged initialization stages avoid 9252 redundant quest writes", a
     };
     for (let stage = 0; stage < 9; stage++)
     {
-        await writeQuests(tx, "owner", structuredClone(write), before);
+        await createRealmQuestRepository(tx, "owner").writeQuests(structuredClone(write), before);
     }
     expect(calls).toHaveLength(0);
     const changed = structuredClone(write);
     changed.tasks[0]!.state = 1;
-    await writeQuests(tx, "owner", changed, before);
+    await createRealmQuestRepository(tx, "owner").writeQuests(changed, before);
     expect(calls).toEqual([[changed.tasks[0]!]]);
 });
 
 test("invalid rows are rejected before filtering or batching", async () => {
     const row = { uid: "other", id: "1", state: 0, num: 0 };
     await expect(
-        writeQuests({} as MutationTransaction, "owner", { tasks: [row] }, { tasks: [row] }),
+        createRealmQuestRepository({} as MutationTransaction, "owner").writeQuests(
+            { tasks: [row] },
+            { tasks: [row] },
+        ),
     ).rejects.toThrow("Invalid quest write");
 });

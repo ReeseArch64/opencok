@@ -1,3 +1,5 @@
+import type { ReconnectTaskCountState } from "@opencok/tasks/contracts/reconnect";
+export type { ReconnectTaskCountState } from "@opencok/tasks/contracts/reconnect";
 import type { Row } from "@opencok/contracts/rows";
 import type { Rule, Rules } from "./game.ts";
 import { javaDecimal } from "./java-integer.ts";
@@ -26,19 +28,6 @@ export function reconnectContainsBuildings(
     return requirements.every((requirement) =>
         buildings.some((building) => matches(building, requirement))
     );
-}
-
-export interface ReconnectTaskCountState
-{
-    profile: Row;
-    buildings: readonly Row[];
-    armies: readonly Row[];
-    equipment: readonly Row[];
-    scienceLevels: ReadonlyMap<string, number>;
-    resourceOutput: ReadonlyMap<number, number>;
-    playerInfo: Row | undefined;
-    prestigeLevel: number;
-    civilizationCastle: Row | undefined;
 }
 
 export function reconnectResourceOutput(

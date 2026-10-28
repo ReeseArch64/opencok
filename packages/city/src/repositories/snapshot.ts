@@ -6,7 +6,6 @@ import { userprofile } from "@opencok/drizzle/schema/opencok_kingdom/userprofile
 import { user_resource } from "@opencok/drizzle/schema/opencok_kingdom/user_resource";
 import { playerinfo } from "@opencok/drizzle/schema/opencok_kingdom/playerinfo";
 import { queue } from "@opencok/drizzle/schema/opencok_kingdom/queue";
-import { user_task } from "@opencok/drizzle/schema/opencok_kingdom/user_task";
 import { user_achievement } from "@opencok/drizzle/schema/opencok_kingdom/user_achievement";
 import { user_glory_info } from "@opencok/drizzle/schema/opencok_kingdom/user_glory_info";
 import type { CityProgressionStore } from "@opencok/contracts/city-progression";
@@ -59,7 +58,7 @@ export class CitySnapshotReader
         }
 
         const skills = await tx.select().from(user_skill).where(eq(user_skill.ownerId, owner));
-        const tasks = await tx.select().from(user_task).where(eq(user_task.uid, owner));
+        const tasks = await session.quests.readTasks();
         const achievements = await tx
             .select()
             .from(user_achievement)
@@ -88,7 +87,7 @@ export class CitySnapshotReader
             ? await readers.readWorldMutationState(tx, owner, request, mapSize, command)
             : undefined;
 
-        const quests = await readers.readQuests(tx, owner, profile, now);
+        const quests = await session.quests.readQuests(profile, now);
         session.questBefore = structuredClone({ tasks, quests });
 
         return {

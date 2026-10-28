@@ -1,9 +1,14 @@
 import { describe, test, expect } from "bun:test";
 import { loadRules } from "@opencok/resources/rules";
-import { progressQuests, questPeriod } from "@opencok/rules/quests";
-import { questsDomain } from "@opencok/services/quests";
+import { questPeriod } from "@opencok/tasks/rules/period";
+import { createRealmQuestPolicy } from "../src/composition/quests";
+import { createRealmQuestsDomain } from "../src/composition/quests";
 import { sfs, decode } from "@opencok/messages/sfs";
 import { cityFixture } from "./fixtures/city-progression";
+
+const { progressQuests } = createRealmQuestPolicy();
+
+const questsDomain = createRealmQuestsDomain();
 const rules = await loadRules();
 function fixture()
 {
