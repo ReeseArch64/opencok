@@ -306,3 +306,35 @@ test("reconnect projection retains transaction identity, settled state, correlat
     expect(fields(result.body.user).civilization_prestige).toEqual(sfs.long(9007199254740997n));
     expect(result.pushes.map((push) => push.command)).toEqual(["quest", "reconnected"]);
 });
+
+test("cancellation after alliance recovery prevents state hydration", async () => {
+    const controller = new AbortController();
+    const h = fixture({
+        alliance: async () => {
+            controller.abort();
+
+            return { body: {}, pushes: [] };
+        },
+    });
+
+    await expect(h.service.initialize("owner", {}, controller.signal)).rejects.toMatchObject({
+        name: "AbortError",
+    });
+    expect(h.calls).toEqual([]);
+});
+
+test("cancellation during expedition reads prevents power calculation", async () => {
+    const controller = new AbortController();
+    const h = fixture({
+        expeditionActivity: async () => {
+            controller.abort();
+
+            return {};
+        },
+    });
+
+    await expect(h.service.initialize("owner", {}, controller.signal)).rejects.toMatchObject({
+        name: "AbortError",
+    });
+    expect(h.calls).toEqual(["state"]);
+});

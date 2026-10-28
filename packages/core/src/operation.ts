@@ -11,6 +11,11 @@ export function observeServerOperation<T>(operation: string, run: () => T, field
     return observeOperation(operation, run, fields, SpanKind.SERVER);
 }
 
+export function observeRootServerOperation<T>(operation: string, run: () => T): T
+{
+    return context.with(ROOT_CONTEXT, () => observeServerOperation(operation, run));
+}
+
 export function observeDependencyOperation<T>(
     operation: string,
     run: () => T,

@@ -22,6 +22,7 @@ export class CityBootstrapService implements CityBootstrapRuntime
         private readonly hooks: CityBootstrapHooks,
         private readonly mapper: CityBootstrapMapper,
         private readonly reconnect: CityBootstrapReconnect,
+        private readonly observe: <T>(phase: string, run: () => T) => T = (_phase, run) => run(),
     )
     {}
 
@@ -58,15 +59,19 @@ export class CityBootstrapService implements CityBootstrapRuntime
     {
         signal?.throwIfAborted();
 
-        const cityProgression = async (owner: string, command: string, params: Fields) => {
+        const phase = async <T>(name: string, run: () => Promise<T>): Promise<T> => {
             signal?.throwIfAborted();
-
-            const result = await this.services.cityProgression?.(owner, command, params);
+            const result = await this.observe(`login.initialize.${name}`, run);
             signal?.throwIfAborted();
 
             return result;
         };
-        const businessMan = await this.services.hotItemBusinessMan?.();
+        const cityProgression = (owner: string, command: string, params: Fields) =>
+            phase(command, async () => this.services.cityProgression?.(owner, command, params));
+        const businessMan = await phase(
+            "merchant",
+            async () => this.services.hotItemBusinessMan?.(),
+        );
         const eggActivity = await cityProgression(uid, "egg.activity.init", {});
         const normalRecharge = await cityProgression(uid, "normal.recharge.init", {});
         const comeback = await cityProgression(uid, "comeback.init", {});
@@ -78,9 +83,9 @@ export class CityBootstrapService implements CityBootstrapRuntime
         const worldRecovery = await cityProgression(uid, "world.tick", {});
         const treasureMaps = await cityProgression(uid, "treasuremap.init", {});
         signal?.throwIfAborted();
-        await this.services.reconcileAlliance?.(uid);
+        await phase("reconcile_alliance", async () => this.services.reconcileAlliance?.(uid));
         signal?.throwIfAborted();
-        await this.services.reconcileTimed?.(uid);
+        await phase("reconcile_timed", async () => this.services.reconcileTimed?.(uid));
         const effects = await cityProgression(uid, "effects.init", {});
         const quest = await cityProgression(uid, "quest.init", {});
         const equipment = await cityProgression(uid, "equipment.init", {});
@@ -100,9 +105,12 @@ export class CityBootstrapService implements CityBootstrapRuntime
         const campaign = await cityProgression(uid, "campaign.init", {});
         const lottery = await cityProgression(uid, "lottery.init", {});
         const totems = await cityProgression(uid, "totem.init", {});
-        const alliance = await this.services.alliance?.(uid, "alliance.init", {});
+        const alliance = await phase(
+            "alliance",
+            async () => this.services.alliance?.(uid, "alliance.init", {}),
+        );
         signal?.throwIfAborted();
-        const state = await this.state(uid);
+        const state = await phase("state", async () => this.state(uid));
         const world = state.world;
 
         if (!world || num(world, "worldId") !== 0 || (state.hasMarches && !this.services.reconnect))
@@ -110,35 +118,42 @@ export class CityBootstrapService implements CityBootstrapRuntime
             throw new GameError(errors.unsupported, "world_state");
         }
 
-        const expeditionActivity = await this.services.expeditionActivity?.(uid);
-        const playerInfo = await this.hooks.power(uid);
-        const body = this.mapper.initial(state, world, {
-            playerInfo,
-            businessMan,
-            expeditionActivity,
-            normalRecharge,
-            comeback,
-            prayer,
-            recallTasks,
-            regionalRecall,
-            hearts,
-            gifts,
-            treasureMaps,
-            equipment,
-            dragons,
-            dragonTower,
-            vipBox,
-            luckyDay,
-            recharge,
-            totems,
-            branchCity,
-            lottery,
-            civilization,
-            alliance,
-            effects,
-            quest,
-            generals,
-        });
+        const expeditionActivity = await phase(
+            "expedition",
+            async () => this.services.expeditionActivity?.(uid),
+        );
+        const playerInfo = await phase("power", async () => this.hooks.power(uid));
+        const body = this.observe(
+            "login.initialize.mapping",
+            () =>
+                this.mapper.initial(state, world, {
+                    playerInfo,
+                    businessMan,
+                    expeditionActivity,
+                    normalRecharge,
+                    comeback,
+                    prayer,
+                    recallTasks,
+                    regionalRecall,
+                    hearts,
+                    gifts,
+                    treasureMaps,
+                    equipment,
+                    dragons,
+                    dragonTower,
+                    vipBox,
+                    luckyDay,
+                    recharge,
+                    totems,
+                    branchCity,
+                    lottery,
+                    civilization,
+                    alliance,
+                    effects,
+                    quest,
+                    generals,
+                }),
+        );
         const initialPushes = [
             eggActivity,
             prayer,
@@ -172,7 +187,7 @@ export class CityBootstrapService implements CityBootstrapRuntime
         {
             initialPushes.push({
                 command: "world.effect.push",
-                body: await this.services.worldEffectBoard(),
+                body: await phase("world_effects", async () => this.services.worldEffectBoard!()),
             });
         }
 
@@ -186,35 +201,39 @@ export class CityBootstrapService implements CityBootstrapRuntime
         const now = this.now();
         const context = { kingdomId: this.config.kingdomId, version: MOBILE_CLIENT_VERSION, now };
 
-        return this.services.reconnect(uid, now, async (progress) => {
-            signal?.throwIfAborted();
-            const planned = await this.reconnect.plan(progress, context);
+        return phase(
+            "reconnect",
+            async () =>
+                this.services.reconnect!(uid, now, async (progress) => {
+                    signal?.throwIfAborted();
+                    const planned = await this.reconnect.plan(progress, context);
 
-            if (!progress.world || num(progress.world, "worldId") !== 0)
-            {
-                throw new GameError(errors.unsupported, "world_state");
-            }
+                    if (!progress.world || num(progress.world, "worldId") !== 0)
+                    {
+                        throw new GameError(errors.unsupported, "world_state");
+                    }
 
-            planned.result.body = this.mapper.reconnected(
-                state,
-                progress,
-                progress.world,
-                planned.write,
-                body,
-                planned.result.body,
-            );
-            planned.result.pushes = [...initialPushes, ...planned.result.pushes];
+                    planned.result.body = this.mapper.reconnected(
+                        state,
+                        progress,
+                        progress.world,
+                        planned.write,
+                        body,
+                        planned.result.body,
+                    );
+                    planned.result.pushes = [...initialPushes, ...planned.result.pushes];
 
-            if (correlation._cok_)
-            {
-                planned.result.body._cok_ = correlation._cok_;
-            }
+                    if (correlation._cok_)
+                    {
+                        planned.result.body._cok_ = correlation._cok_;
+                    }
 
-            this.reconnect.validate(planned.result, "init");
+                    this.reconnect.validate(planned.result, "init");
 
-            signal?.throwIfAborted();
+                    signal?.throwIfAborted();
 
-            return planned;
-        });
+                    return planned;
+                }),
+        );
     }
 }

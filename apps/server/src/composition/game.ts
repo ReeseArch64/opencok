@@ -1,3 +1,4 @@
+import { observeOperation } from "@opencok/core/operation";
 import { createRealmWorldPointDetailService } from "./world-detail";
 import { createRealmWorldQueryService } from "./world";
 import { createRealmRankingService } from "./ranking";
@@ -70,6 +71,7 @@ export function createRealmGameService(
                         ),
                     validate: validateReconnectResult,
                 },
+                observeOperation,
             ),
         projectResearch,
         military,
