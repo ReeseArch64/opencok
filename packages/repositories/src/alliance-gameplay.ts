@@ -1,5 +1,5 @@
+import { AllianceQueryRepository } from "@opencok/alliance/repositories/queries";
 import { AllianceMembershipRepository } from "@opencok/alliance/repositories/membership";
-import { AllianceMembershipCommand } from "@opencok/alliance/enums/membership-command";
 import { AllianceApplicationsRepository } from "@opencok/alliance/repositories/applications";
 import { AllianceGovernanceRepository } from "@opencok/alliance/repositories/governance";
 import { AllianceScienceRepository } from "@opencok/alliance/repositories/science";
@@ -7,7 +7,7 @@ import { AllianceGiftRepository } from "@opencok/alliance/repositories/gifts";
 import { AllianceHelpRepository } from "@opencok/alliance/repositories/help";
 import { AllianceApplicationsMapper } from "@opencok/alliance/mappings/applications";
 import { mail } from "@opencok/drizzle/schema/opencok_kingdom/mail";
-import { and, asc, eq, inArray, or, sql } from "drizzle-orm";
+import { and, asc, eq, inArray, or } from "drizzle-orm";
 import { alliance } from "@opencok/drizzle/schema/opencok_kingdom/alliance";
 import { alliance_member } from "@opencok/drizzle/schema/opencok_kingdom/alliance_member";
 import { alliance_apply } from "@opencok/drizzle/schema/opencok_kingdom/alliance_apply";
@@ -211,75 +211,18 @@ export function createAllianceRepository(
                                 tx,
                                 selection.mailId,
                             ),
-                            directory: selection.key !== undefined && !selection.searchPlayers
-                                ? await tx
-                                    .select()
-                                    .from(alliance)
-                                    .where(
-                                        input.command === "al.abbr"
-                                            ? sql`lower(${alliance.abbr})=${selection.key.toLowerCase()}`
-                                            : ["al.name", "al.checkname"].includes(input.command)
-                                            ? sql`lower(${alliance.alliancename})=${selection.key.toLowerCase()}`
-                                            : input.command === AllianceMembershipCommand.Create
-                                            ? sql`lower(${alliance.abbr})=${
-                                                [...selection.key].slice(0, 3).join("")
-                                                    .toLowerCase()
-                                            }`
-                                            : or(
-                                                sql`position(${selection.key.toLowerCase()} in lower(${alliance.alliancename})) > 0`,
-                                                sql`position(${selection.key.toLowerCase()} in lower(${alliance.abbr})) > 0`,
-                                            ),
-                                    )
-                                    .orderBy(asc(alliance.uid))
-                                    .limit(selection.pageSize ?? 10)
-                                    .offset(
-                                        ((selection.page ?? 1) - 1) * (selection.pageSize ?? 10),
-                                    )
-                                : [],
-                            directoryTotal: selection.key !== undefined && !selection.searchPlayers
-                                ? BigInt(
-                                    (
-                                        await tx
-                                            .select({ total: sql<string>`count(*)::text` })
-                                            .from(alliance)
-                                            .where(
-                                                or(
-                                                    sql`position(${selection.key.toLowerCase()} in lower(${alliance.alliancename})) > 0`,
-                                                    sql`position(${selection.key.toLowerCase()} in lower(${alliance.abbr})) > 0`,
-                                                ),
-                                            )
-                                    )[0]!.total,
-                                )
-                                : 0n,
-                            candidates: selection.searchPlayers
-                                ? await tx
-                                    .select({
-                                        uid: userprofile.uid,
-                                        name: userprofile.name,
-                                        pic: userprofile.pic,
-                                        picVer: userprofile.picVer,
-                                        picfraId: userprofile.picfraId,
-                                        lang: userprofile.lang,
-                                        power: playerinfo.power,
-                                        offLineTime: userprofile.offLineTime,
-                                    })
-                                    .from(userprofile)
-                                    .innerJoin(playerinfo, eq(playerinfo.uid, userprofile.uid))
-                                    .where(
-                                        and(
-                                            eq(userprofile.serverId, authority.kingdomId),
-                                            sql`coalesce(${userprofile.allianceId},'')=''`,
-                                            sql`coalesce(${userprofile.banFlag},0)=0`,
-                                            sql`coalesce(${userprofile.banTime},0)<=${at}`,
-                                            sql`position(${
-                                                (selection.key ?? "").toLowerCase()
-                                            } in lower(${userprofile.name}))>0`,
-                                        ),
-                                    )
-                                    .orderBy(asc(userprofile.uid))
-                                    .limit(10)
-                                    .offset(((selection.page ?? 1) - 1) * 10)
-                                : [],
+                            directory: await AllianceQueryRepository.directory(
+                                tx,
+                                input.command,
+                                selection,
+                            ),
+                            directoryTotal: await AllianceQueryRepository.total(tx, selection),
+                            candidates: await AllianceQueryRepository.candidates(
+                                tx,
+                                selection,
+                                authority.kingdomId,
+                                at,
+                            ),
                             blacklist: await AllianceGovernanceRepository.readBlacklist(tx, groups),
                         });
                         const apply = async () => {
