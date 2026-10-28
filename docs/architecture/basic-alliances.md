@@ -34,6 +34,18 @@ Realm-local directory and candidate searches use parameter-bound SQL and bounded
 pages. Cross-kingdom membership, global directory ownership, territory and war
 orchestration remain separate systems.
 
+## Governance ownership
+
+After #669, the [Alliance package](../../packages/alliance/README.md) owns governance
+commands, membership/permission policies, native governance mapping and
+alliance/member/blacklist persistence. Realm composition supplies the actual
+readers, validation and error behavior. The shared coordinator delegates after its
+existing membership gate; aggregate persistence retains creation allowance
+expansion, advisory locks, participant checks and original operation order.
+Leave/kick/dissolve decisions use the existing member-removal port. Membership
+lifecycle, applications, invitations and aggregate publication remain subsequent
+#558 slices. This extraction changes no realm authority or saved-state contract.
+
 ## Queue assistance
 
 After #663, the [Alliance package](../../packages/alliance/README.md) owns help
