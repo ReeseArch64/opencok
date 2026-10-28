@@ -54,7 +54,6 @@ export class QuestProgression<
         const write = context.write;
         const previous = write.quests;
         const state = {
-            ...context.state,
             tasks: previous?.tasks ?? context.state.tasks,
             quests: {
                 ...context.state.quests,

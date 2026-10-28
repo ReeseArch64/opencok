@@ -22,6 +22,7 @@ export class CityProgressionRepository implements CityProgressionStore
         boundary: CityProductionBoundary,
         adapters: CityPersistenceAdapters,
         mapSize = 1200,
+        projectInitialization = true,
     )
     {
         const session: CityPersistenceSession = {
@@ -43,7 +44,7 @@ export class CityProgressionRepository implements CityProgressionStore
             birth: adapters.birth,
             alliance: "",
         };
-        const snapshot = new CitySnapshotReader(session);
+        const snapshot = new CitySnapshotReader(session, projectInitialization);
         const writer = new CityPlanWriter(session);
         const world = new CityWorldTargets(session);
         this.getState = snapshot.getState;

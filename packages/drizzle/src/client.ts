@@ -2,6 +2,7 @@ import { drizzle } from "drizzle-orm/node-postgres";
 import { getTableName, is, Table } from "drizzle-orm";
 import { Pool, type PoolConfig } from "pg";
 import { observePostgresClient } from "./observed-client";
+import { observePostgresPool } from "./observed-pool";
 import { logEvent } from "@opencok/core/logging";
 import { observeTransaction } from "@opencok/core/transaction";
 import type { DatabaseRole } from "./roles";
@@ -24,6 +25,7 @@ export function createDatabase<T extends DatabaseRole>(role: T, config: PoolConf
     }
 
     const pool = new Pool({ ...config, options: `${config.options ?? ""} -c timezone=UTC` });
+    observePostgresPool(pool, role);
     const tables = new Set(
         Object.values(schemas[role])
             .filter((value) => is(value, Table))

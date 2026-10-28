@@ -200,3 +200,99 @@ positions. Actor/target authority, transaction and other mechanics remain unchan
 Avatar activation uses Skins' structural context and Base lifecycle, leaving 51/55
 legacy City context/domain consumers. Shared cosmetic aggregate aliases are tracked
 in [Skins](../skins/README.md#source-ownership-and-compatibility).
+
+## Login query projections (#560)
+
+`CityInitializationReader` hydrates the 21 commands enumerated in
+`src/enums/initialization-command.ts`. Every projection includes the current
+profile, resources, statistics, buildings, sciences, armies, equipment, tasks and
+quests because the shared quest refresh consumes these inputs. Profile/resources
+and optional statistics use one typed one-to-one join. Collections remain separate
+and retain the existing readers, ownership predicates and bounds. Each command
+adds its own mechanic state. VIP box, investment and effect initialization still
+load the authoritative effect snapshot; other selected commands perform no effect
+calculation and skip the external world/emperor reads.
+
+The returned projection rejects access to an unloaded field. An unloaded collection
+is never represented as an empty authoritative collection. Quest refresh explicitly
+builds its contracted input instead of spreading unrelated city fields. Unknown
+commands, ordinary mutations, timed transitions and the remaining initialization
+commands use the original aggregate. The factory requests that complete aggregate
+when the economy has pending item grants or cannot prove their absence, preserving
+the campaign hooks after offline settlement. Inspecting pending grants does not
+consume them or advance the ledger cursor.
+
+There is no reuse across commits, owners, kingdoms or captured times. Bootstrap
+mutation order, the previous-session drain, session token comparisons, receipts,
+production boundaries and PostgreSQL fencing remain unchanged. Composition can
+set `projectInitialization` to `false` to compare or roll back query selection
+without changing data or schema. No dependency or environment variable was added.
+
+No new L1/L2 cache ships here. The removed reads are authoritative progression,
+quest, effect and eligibility inputs, so a cross-command cache would need freshness
+and invalidation guarantees that a display cache cannot provide. Immutable rule
+catalogs are already resident. Query savings below come from projection alone;
+they are not evidence of a caching gain or completion of #562.
+
+### Reproducible validation
+
+Run from the repository root:
+
+```sh
+bun --no-env-file test packages/city/tests packages/tasks/tests packages/economy/tests
+bun --no-env-file test apps/server/integration/login-projections.test.ts apps/server/integration/city-persistence.test.ts apps/server/integration/realm-lock-diagnostics.test.ts
+bun --no-env-file test packages/drizzle/tests/observed-pool.unit.test.ts packages/drizzle/tests/query-failure.unit.test.ts
+```
+
+The projection comparison uses disposable PostgreSQL 17.11, Bun 1.4.2, maintained
+catalogs and synthetic accounts. It compares each selected command against the
+complete snapshot under the same captured time, rolls each comparison back, checks
+identical response bytes and pending writes, and then checks a committed change is
+visible to the next read. Quests and lottery are initialized before comparisons so
+random daily selection and a newly generated lottery grid do not contaminate the
+comparison. Kingdoms 1 and 2 are independent runs with identical synthetic fixtures.
+
+Against baseline `9badbe05`, each kingdom reduced the selected 21 phases from
+1,512 to 406 SELECTs (73.1%). In the recorded local run their summed phase wall
+times were 1,525 to 719 ms for kingdom 1 and 1,457 to 760 ms for kingdom 2. These
+are single local workload samples including rollback and logging, not full login
+latency, provider RTT, concurrent-load percentiles or a native-device SLO result.
+The test prints fresh query/time evidence on every run. The complete-snapshot
+comparison remains available independently of these historical samples.
+
+Unit coverage verifies omitted-field rejection, exact bigint preservation, missing
+owners, aggregate bounds, absence of unnecessary effect loads and safe fallback for
+pending/unknown item grants. The pending-grant fallback was manually mutated by
+inverting its predicate; the focused tests rejected that mutation. Existing bootstrap
+and TCP session suites cover native field/order compatibility, replacement,
+cancellation and active-token preservation. Actual PostgreSQL rollback is exercised
+by the persistence suite. There is no claim of a repository-wide mutation score.
+
+### Operational attribution and remaining acceptance
+
+PostgreSQL pool acquisition now emits `database_pool_acquired` separately from
+statement execution, including wait duration and bounded pool counts. Database
+failure events retain the existing reason and add `failureKind` to distinguish
+server statement timeout, query cancellation, lock timeout and unavailable locks.
+Only fixed classifications are emitted; SQL, parameters and raw errors are excluded.
+Unknown/localized server messages retain the conservative cancellation/unavailable
+classification. Application cancellation remains separate from PostgreSQL failures.
+
+`readRealmLockDiagnostics` returns at most 64 lock records for current-database
+`realm_authority` participants, including their waiting transaction locks, blocker
+PIDs, modes and transaction/wait ages. It excludes query text, addresses, database
+users and player fields. Its disposable concurrency test creates a real row-lock
+wait and verifies the blocker relationship. PostgreSQL-specific diagnostic SQL is
+retained because catalog inspection and `pg_blocking_pids` are PostgreSQL APIs.
+No locking or admission policy changes are inferred from these diagnostics.
+
+The existing telemetry context and disposable Maple integration suites verify
+context isolation and exported signals. This does not establish completeness of the
+operator's live Maple queries or identify the historical incident's lock owner.
+
+Issue #560 remains open until the new server artifact is exercised with synthetic
+fresh/existing native accounts and the full warm/cold, concurrent-login, recovery,
+reconnect and restart workloads. Record client/artifact revisions and topology,
+full login p50/p95/p99, pool and lock waits, and actual init delivery before the
+approximately 30-second retry boundary. Evaluate the proposed warm p95 of 10 s
+using that evidence. Local projection timings cannot establish those criteria.

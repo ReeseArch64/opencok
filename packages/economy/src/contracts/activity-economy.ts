@@ -4,6 +4,7 @@ import type { InventoryItem } from "./inventory";
 export interface ActivityEconomy
 {
     event?(event: MutationEvent): void;
+    hasPendingItemGrants?(): boolean;
     takeItemGrants?(): readonly { itemId: string; count: number; }[];
     push?(command: string, body: Uint8Array): void;
     gold(delta: bigint): void;
