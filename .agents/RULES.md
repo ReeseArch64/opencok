@@ -1,88 +1,42 @@
 # Regras e limites de atuação
 
-Permissões de implementação, teste, formatação ou organização não autorizam modificar conteúdo protegido nem ampliar o escopo da tarefa. Estas regras se aplicam também a ferramentas, scripts, geradores e agentes delegados.
+Aplicam-se a agentes, ferramentas, scripts, geradores e delegados. Implementar, testar, formatar ou organizar não autoriza ampliar escopo nem alterar conteúdo protegido.
 
-## Escopo
+## Escopo e autorização
 
-- Antes de escrever, examine o estado do Git e identifique os caminhos necessários à tarefa.
-- Altere somente o necessário para atender ao pedido. Não faça refatorações, limpezas, atualizações de dependências ou reorganizações incidentais.
-- Preserve alterações existentes, inclusive arquivos não rastreados e mudanças já preparadas para commit. Não sobrescreva, reverta, mova nem exclua trabalho alheio.
-- Se encontrar problemas fora do escopo, relate-os. Detectar um problema não autoriza corrigi-lo.
-- Em caso de dúvida sobre destino, propriedade ou autorização de escrita, pare e pergunte ao responsável pelo projeto.
+- Antes de escrever, examine o Git e os caminhos necessários. Altere apenas o pedido, sem refatoração, limpeza, dependências ou reorganização incidentais. Preserve trabalho alheio, inclusive não rastreado e staged; não sobrescreva, reverta, mova ou exclua. Problemas fora do escopo devem ser relatados, não corrigidos.
+- Dúvidas sobre destino, propriedade ou autorização: pare e pergunte ao responsável.
+- Criar, editar, excluir, mover ou renomear conteúdo protegido exige **pedido explícito e confirmação posterior**, após apresentar caminhos/operações, mudanças/justificativa e efeitos, inclusive arquivos gerados. Aguarde: o pedido inicial ou uma instrução genérica não é confirmação.
+- A autorização limita-se ao escopo apresentado; novos caminhos, mudanças e movimentos para dentro/fora de áreas protegidas exigem nova confirmação. Não contorne por links simbólicos, comandos indiretos, geradores ou delegação; executar ferramentas não autoriza suas escritas.
 
-## Proteções
+## Conteúdo protegido
 
 Somente leitura por padrão, incluindo arquivos e subpastas:
 
-- `.github/`: automações, governança e configurações do GitHub, incluindo `.github/ARCHITECTURE.md`, `.github/SECURITY.md` e `.github/CONTRIBUTING.md`.
-- `.agents/`: regras, habilidades e configurações dos agentes, incluindo este arquivo.
-- `docs/`: decisões e documentação de projeto.
-- `infra/`: infraestrutura e implantação.
-- Qualquer `AGENTS.md` no repositório.
-- Na raiz: `PRODUCT.md`, `CONTEXT.md`, `DESIGN.md`, `GLOSSARY.md` e `RULES.md`, quando existentes.
-- Configurações de ferramentas, manifests de dependências e lockfiles, incluindo `package.json`, `bun.lock`, configurações de TypeScript, lint, formatação e hooks.
+- `.github/` (inclusive `ARCHITECTURE.md`, `SECURITY.md`, `CONTRIBUTING.md`), `.agents/` (inclusive este arquivo), `docs/` e `infra/`.
+- Qualquer `AGENTS.md`; na raiz, `PRODUCT.md`, `CONTEXT.md`, `DESIGN.md`, `GLOSSARY.md` e `RULES.md`, quando existentes.
+- Configurações de ferramentas, manifests e lockfiles, inclusive `package.json`, `bun.lock`, TypeScript, lint, formatação e hooks.
 
-Esses caminhos identificam proteções, não instruções de leitura. Consultar não exige autorização de escrita. O `README.md` raiz e READMEs de aplicações e pacotes são editáveis no escopo da tarefa; README dentro de pasta protegida não é exceção.
+Proteção não é instrução de leitura: consultar dispensa autorização de escrita. README raiz e READMEs de aplicações/pacotes são editáveis no escopo; READMEs em pastas protegidas não são exceção. Testes, pilotos e experimentos existentes não autorizam expansão nem remoção automática.
 
-Arquivos de testes, pilotos ou experimentos já existentes em pastas protegidas não autorizam novos arquivos semelhantes, expansão desses diretórios ou remoção automática do conteúdo existente.
+## Destinos e temporários
 
-## Autorização
+- `apps/`: aplicações/composição; `packages/`: contratos, regras e componentes reutilizáveis. Testes seguem o componente (`tests/`, `integration/` ou junto ao código somente quando já convencional); testes/fixtures permanentes e mínimos pertencem a ele, não a temporários ou `.github/`. `tests/` raiz destina-se a contratos compartilhados e integração isolada entre componentes exigidos pela tarefa.
+- Respeite responsabilidades/autorização de `docs/` e `infra/`. `.agents/` contém somente instruções, habilidades e configurações, nunca trabalho temporário. `.github/` não recebe testes da aplicação, benchmarks, pilotos, relatórios, logs, caches ou builds; automação legítima/teste específico de CI exige autorização e destino apresentados previamente.
+- Procure destino existente antes de criar pastas. Não invente estruturas paralelas, aplicações planejadas, áreas genéricas de experimentação, reorganização ou limite artificial de profundidade.
+- Scripts exploratórios, reproduções descartáveis, benchmarks, logs e relatórios intermediários usam temporário do sistema exclusivo da tarefa, fora do repositório, sem segredos/entradas privadas. Remova apenas temporários próprios de propriedade conhecida; nunca limpe amplamente ignorados/não rastreados.
+- Artefatos normais ficam nos destinos configurados (`dist/`, `coverage/`); verifique efeitos de escrita antes dos comandos. Não versione caches, builds, cobertura, metadados de compilação ou resultados intermediários, nem altere `.gitignore` para esconder arquivos indevidos.
 
-Criar, editar, excluir, mover ou renomear conteúdo protegido exige **pedido explícito e confirmação posterior do responsável pelo projeto**, após a IA apresentar:
+## Formatos, ferramentas e dados
 
-1. Os caminhos afetados e as operações pretendidas.
-2. As mudanças propostas e por que são necessárias.
-3. Os efeitos esperados, inclusive arquivos gerados por comandos.
-
-Aguarde a confirmação antes de escrever. O pedido inicial não é confirmação. Não presuma autorização por pedidos genéricos como “implemente”, “corrija os testes”, “organize” ou “formate”.
-
-A autorização vale somente para o escopo apresentado. Novos caminhos ou mudanças adicionais exigem nova confirmação. Mover conteúdo para dentro ou fora de pastas protegidas também exige esse procedimento.
-
-Não contorne a proteção por links simbólicos, comandos indiretos, geradores ou delegação. Uma autorização para executar ferramentas não autoriza suas escritas em conteúdo protegido.
-
-## Diretórios e destinos
-
-- `apps/`: aplicações e sua composição.
-- `packages/`: contratos, regras e componentes reutilizáveis.
-- Testes de uma aplicação ou pacote: use a estrutura já adotada pelo componente, como `tests/` ou `integration/`. Testes próximos ao código só quando esse for o padrão local.
-- `tests/` na raiz: contratos compartilhados e cenários isolados de integração entre componentes, quando necessários ao pedido.
-- `docs/` e `infra/`: mantenha suas responsabilidades e respeite a autorização de escrita.
-- `.agents/`: somente instruções, habilidades e configurações dos agentes. Não é área de trabalho temporária.
-- `.github/`: não é área de testes da aplicação, benchmarks, pilotos de ferramentas, relatórios, logs, caches ou builds. Uma alteração legítima de automação ou teste específico de CI exige autorização e destino apresentados previamente.
-
-Antes de criar uma pasta, procure um destino existente adequado. Não crie estruturas paralelas, aplicações planejadas ou diretórios genéricos de experimentação por iniciativa própria. Não imponha uma reorganização ou limite artificial de profundidade ao código existente.
-
-## Arquivos temporários e gerados
-
-- Use um diretório temporário do sistema, exclusivo da tarefa e fora do repositório, para scripts exploratórios, reproduções descartáveis, benchmarks, logs e relatórios intermediários. Não copie segredos ou entradas privadas para esse local.
-- Artefatos normais das ferramentas devem ficar nos destinos já configurados, como `dist/` e `coverage/`. Verifique os efeitos de escrita antes de executar comandos.
-- Testes permanentes e fixtures mínimas pertencem ao componente testado, não ao diretório temporário nem à `.github/`.
-- Não versione caches, builds, cobertura, metadados de compilação ou resultados intermediários. Não altere `.gitignore` para esconder arquivos criados indevidamente.
-- Ao concluir, remova apenas os temporários criados pela própria tarefa e cuja propriedade seja conhecida. Nunca faça limpeza ampla de arquivos ignorados ou não rastreados.
-
-## Formatos e ferramentas
-
-Este é um repositório de software, não um vault. Código, testes e configurações podem usar os formatos já adotados pelo componente; não se aplica uma lista limitada a Markdown e PDF.
-
-- Priorize Markdown para documentação editável.
-- Reutilize ferramentas e dependências existentes. Não instale novas ferramentas, altere manifests ou lockfiles nem substitua tecnologias sem autorização para esses caminhos.
-- Não crie arquivos auxiliares persistentes quando um comando ou um arquivo temporário resolver a necessidade.
-- Não gere nem adicione imagens, binários ou exportações sem necessidade explícita da tarefa.
-- Execute verificações pertinentes. Não reduza regras, exclusões de validação ou exigências de testes para obter aprovação.
-- Prefira verificações sem escrita. Aplique correções automáticas somente nos caminhos autorizados; não execute formatação ou correção global que possa alterar outros arquivos.
-
-## Entradas privadas e operações destrutivas
-
-- Mantenha entradas originais de clientes, arquivos privados do jogo e referências locais somente para leitura. Extrações e transformações exigem destino separado e autorizado.
-- Não exponha credenciais, chaves, tokens, código privado da Elex ou dados de jogadores em código, fixtures, logs, relatórios ou serviços externos.
-- Não force a inclusão de arquivos ignorados nem trate entradas locais privadas como dependências compartilhadas.
-- Não execute limpeza destrutiva, descarte de alterações ou reescrita de histórico sem autorização específica. Isso inclui `git reset --hard`, `git clean` e restaurações que sobrescrevam trabalho existente.
-- Testes não autorizam acesso a produção, envio de mensagens, cobranças, implantação ou mutação de dados reais. Use recursos locais ou ambientes de teste explicitamente autorizados.
+- Este é um repositório de software, não um vault: use formatos adotados pelo componente, sem restrição a Markdown/PDF; prefira Markdown para documentação editável.
+- Reutilize ferramentas/dependências; instalar ferramentas, alterar manifests/lockfiles ou substituir tecnologias exige autorização. Evite auxiliares persistentes quando comandos/temporários bastam; imagens, binários e exportações exigem necessidade explícita.
+- Execute verificações pertinentes, preferindo as sem escrita. Não enfraqueça regras, exclusões ou testes para passar. Correções automáticas limitam-se a caminhos autorizados; não execute correções/formatação globais que alterem outros arquivos.
+- Originais de clientes, arquivos privados do jogo e referências locais são somente leitura; extrações/transformações exigem destino separado autorizado. Não exponha credenciais, chaves, tokens, código privado Elex ou dados de jogadores em código, fixtures, logs, relatórios ou serviços externos. Não force inclusão de ignorados nem use entradas privadas como dependências compartilhadas.
+- Limpeza destrutiva, descarte ou reescrita de histórico exigem autorização específica, inclusive `git reset --hard`, `git clean` e restaurações que sobrescrevam trabalho. Testar não autoriza produção, mensagens, cobranças, implantação ou mutações reais: use recursos locais ou testes explicitamente autorizados.
 
 ## Referências e entrega
 
-- Use links Markdown relativos para referências internas; confira a existência do destino e da seção. Não use links de Obsidian.
-- Não invente URLs, resultados de testes ou evidências. Diferencie verificação executada, falha de ambiente e hipótese.
-- Centralize as instruções de leitura no `AGENTS.md`; não crie cadeias recursivas de leitura obrigatória entre documentos.
-- Antes de concluir, revise o diff e o estado do Git. Relate os caminhos alterados, as verificações executadas e as limitações pendentes.
-- Siga o fluxo de contribuição para commits e entrega, incluindo apenas mudanças da tarefa. Uma exigência de entrega não amplia a autorização para modificar arquivos protegidos.
+- Use links Markdown relativos internos e verifique destino/seção; não use links Obsidian. Centralize instruções de leitura em `AGENTS.md`, sem cadeias recursivas obrigatórias.
+- Não invente URLs, testes ou evidências; distinga execução verificada, falha de ambiente e hipótese.
+- Revise diff/Git antes de concluir; relate caminhos, verificações e limitações. Siga o fluxo de commits/entrega somente para mudanças da tarefa; exigências de entrega não ampliam autorização sobre arquivos protegidos.
