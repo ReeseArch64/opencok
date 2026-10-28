@@ -11,9 +11,20 @@ export interface QuestRecordReaders
     long(row: QuestRecord, key: string): bigint;
 }
 
-export interface QuestRuleRuntime<TCatalog extends QuestCatalog> extends QuestRecordReaders
+export interface QuestNumericRuntime
 {
     cityInteger(value: unknown, minimum?: number, maximum?: number): number;
+}
+
+export interface QuestPersistenceValueRuntime
+    extends QuestNumericRuntime, Pick<QuestRecordReaders, "text" | "long">
+{
+    cityAmount(value: unknown): bigint;
+}
+
+export interface QuestRuleRuntime<TCatalog extends QuestCatalog>
+    extends QuestRecordReaders, QuestNumericRuntime
+{
     reconnectTaskPlan(
         rows: readonly QuestRecord[],
         declarations: readonly QuestRule[],

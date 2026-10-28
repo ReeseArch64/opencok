@@ -187,3 +187,8 @@ After #655, `TargetTaskRepository` owns target notes/task reads and writes. City
 preserves their position in the aggregate transaction; the realm supplies the same
 numeric adapters and owner. Legacy context/domain aliases now have 51/57 consumers;
 the remaining target callback adapter is tracked in the Tasks retirement register.
+
+After #657, the injected `RecallTaskRepository` owns recall notes/task persistence
+and the conditional preferred registration-country read. City preserves its position
+and command gate in the aggregate snapshot/writer. Current legacy context/domain
+aliases have 51/56 consumers; Tasks tracks the remaining callback/type facades.

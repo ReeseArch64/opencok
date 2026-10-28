@@ -200,7 +200,7 @@ import {
     publishTroubleMutation,
 } from "@opencok/services/trouble";
 import { PrayerDomain } from "@opencok/services/prayer";
-import { RecallTaskDomain } from "@opencok/services/recall-task";
+import { createRealmRecallTaskDomain } from "./composition/recall-task";
 import { RegionalRecallDomain } from "@opencok/services/regional-recall";
 import { initializeRealmOpeningClock } from "@opencok/repositories/realm-opening-clock";
 import {
@@ -1017,7 +1017,7 @@ export const RealmDependenciesLive = Layer.effect(
                         new SpecialEventDomain(specialEventStock),
                         "realm.SpecialEventDomain",
                     ),
-                    observeAdapter(new RecallTaskDomain(), "realm.RecallTaskDomain"),
+                    observeAdapter(createRealmRecallTaskDomain(), "realm.RecallTaskDomain"),
                     observeAdapter(new RegionalRecallDomain(), "realm.RegionalRecallDomain"),
                     observeAdapter(new PlayerItemGiftDomain(), "realm.PlayerItemGiftDomain"),
                     observeAdapter(new SeasonalExchangeDomain(), "realm.SeasonalExchangeDomain"),

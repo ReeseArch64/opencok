@@ -2,7 +2,7 @@ import { test, expect } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { eq, sql } from "drizzle-orm";
 import { createPrayerDomain } from "@opencok/services/prayer";
-import { recallTaskDomain } from "@opencok/services/recall-task";
+import { createRealmRecallTaskDomain } from "../src/composition/recall-task";
 import { createRealmInventoryExecutor } from "@opencok/repositories/inventory-runtime";
 import { createInventoryService } from "@opencok/services/inventory-runtime";
 import { user_pray } from "@opencok/drizzle/schema/opencok_kingdom/user_pray";
@@ -16,6 +16,9 @@ import { user_recall_task } from "@opencok/drizzle/schema/opencok_kingdom/user_r
 import { user_recall_task_notes } from "@opencok/drizzle/schema/opencok_kingdom/user_recall_task_notes";
 import { sfs, encode, decode, type Fields, Type } from "@opencok/messages/sfs";
 import { cityHarness } from "./support/city";
+
+const recallTaskDomain = createRealmRecallTaskDomain();
+
 async function fixture()
 {
     let draws = 0;

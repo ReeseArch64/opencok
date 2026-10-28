@@ -88,6 +88,7 @@ Rules, and three tracked creation/projection adapters serve remaining callers.
 
 The [tasks domain](tasks/README.md) owns ordinary/main, story, daily and sign-in
 quests after #653, including rules, reward progression, native mapping and
-transactional persistence. Target missions follow in #655; recall and other event missions remain later slices.
+transactional persistence. Target missions follow in #655 and recall missions in #657; other event workflows
+remain later slices.
 The new [mail workspace](mail/README.md) owns only the unchanged system-mail leaf
 contract needed by rollover rewards; avatar/postbox workflows remain #552/#553.

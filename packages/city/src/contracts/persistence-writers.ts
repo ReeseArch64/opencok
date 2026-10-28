@@ -43,7 +43,6 @@ export interface CityPersistenceWriters
         write: NonNullable<CityProgressionWrite["cosmeticTarget"]>,
     ) => Promise<unknown>;
     writePrayer: CityWriteField<"prayer">;
-    writeRecallTasks: CityWriteField<"recallTask">;
     writeRegionalRecall: CityWriteField<"regionalRecall">;
     writeAllianceHeart: CityWriteField<"allianceHeart">;
     writePlayerItemGifts: CityWriteField<"playerItemGifts">;

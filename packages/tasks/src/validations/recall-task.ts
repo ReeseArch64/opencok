@@ -3,7 +3,7 @@ import { field, responseValueSchema } from "@opencok/messages/validations/respon
 import type {
     RecallTaskResponse,
     RecallTaskClaimResponse,
-} from "@opencok/contracts/responses/recall-task";
+} from "../contracts/responses/recall-task";
 
 export const recallTaskSchema = z.strictObject({
     targetList: z

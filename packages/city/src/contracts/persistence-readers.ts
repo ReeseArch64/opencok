@@ -49,7 +49,6 @@ export interface CityPersistenceReaders
         actor?: string,
     ) => Promise<CityProgressionState["cosmeticTarget"]>;
     readPrayer: CityReadField<"prayer">;
-    readRecallTasks: CityReadField<"recallTask", [countryNeeded: boolean]>;
     readRegionalRecall: CityReadField<"regionalRecall", [realm: number, initialize: boolean]>;
     readAllianceHeart: CityReadField<"allianceHeart", [command: string, request?: Uint8Array]>;
     readPlayerItemGifts: CityReadField<"playerItemGifts", [command: string, request?: Uint8Array]>;
