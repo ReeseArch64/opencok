@@ -110,7 +110,7 @@ implementation and verification tracked separately.
 | `resources`                                                      | Versioned typed gameplay catalogs.                                                                                                                    |
 | `player`                                                         | Profiles, descriptions, preferences, nicknames and character provisioning, with app-injected integration collaborators.                               |
 | `production`                                                     | Building resource accumulation, collection/boosts, effect schedules and atomic city settlement, with app-injected runtime adapters.                   |
-| `building`                                                       | Typed building definitions, level/star rules and mappings, plus transactional persistence; construction workflows remain horizontal.                  |
+| `building`                                                       | Building definitions, policies, construction commands/completion and transactional persistence; realm-injected projection and integration ports.      |
 | `research`                                                       | Ordinary/civilization research, prerequisites, costs, native projections and transactional adapters; realm-injected event/reconnect collaborators.    |
 | `troops`                                                         | Training, healing, fortifications, military policies/projections and persistence; realm-injected scoring and login/reconnect collaborators.           |
 | `city`                                                           | Transactional plans, dispatch, snapshots, persistence and bootstrap; realm-injected callbacks preserve atomic writes and reconnect order.             |
@@ -195,8 +195,11 @@ preserve the existing Effect ownership model and protocol execution order.
 `CityProgressionContext` owns the pending write and economy plan. Their structural
 domain contract is generic in `contracts/city-domain.ts`; existing mechanic signatures
 use temporary type-only Services aliases. Realm composition injects world-context and
-campaign/quest/Hero/expedition callbacks before the same aggregate update. Construction, research, military,
-equipment, quests and event domain classes specialize `CityCommandDomain`. Configured
+campaign/quest/Hero/expedition callbacks before the same aggregate update. Building
+construction specializes the generic Base `ActivityDomain`; legacy city mechanics
+specialize `CityCommandDomain`, while research and military use `CommandDomain`.
+The realm injects existing construction numeric/projection helpers and completion hooks
+through its bounded runtime contract. Configured
 domains receive gateways, random sources and world size through constructors; their
 factory entrypoints preserve the same contract for existing callers. The realm
 composition instantiates these classes directly. Equipment and workshop have separate

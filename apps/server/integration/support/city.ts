@@ -24,7 +24,7 @@ import { persistReconnectProgress } from "@opencok/repositories/reconnect-write"
 import { acquireRealmAuthority } from "@opencok/repositories/realm-authority";
 import { createRealmCityProgressionHandlers } from "../../src/composition/city.ts";
 import type { CityDomain } from "@opencok/city/contracts/domain";
-import { constructionDomain } from "@opencok/services/construction";
+import { createRealmConstructionDomain } from "../../src/composition/construction";
 import { TimedActivityService } from "@opencok/services/timed-activity";
 import { idleDeadline } from "@opencok/rules/timed-activity";
 import { loadRules } from "@opencok/resources/rules";
@@ -32,6 +32,8 @@ import { num, text } from "@opencok/contracts/rows";
 import { sfs, str, decode, type Fields } from "@opencok/messages/sfs";
 import { eq } from "drizzle-orm";
 import { DisposablePostgres } from "../../../../packages/drizzle/tests/support/postgres";
+
+const constructionDomain = createRealmConstructionDomain();
 
 export async function cityHarness(
     extra: readonly CityDomain[] = [],

@@ -12,5 +12,9 @@
   "type": "module",
   "exports": {
     "./*": "./src/*.ts"
+  },
+  "dependencies": {
+    "@opencok/messages": "workspace:*",
+    "@opencok/enums": "workspace:*"
   }
 }

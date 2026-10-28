@@ -19,6 +19,9 @@
     "@opencok/errors": "workspace:*",
     "@opencok/constants": "workspace:*",
     "@opencok/drizzle": "workspace:*",
-    "drizzle-orm": "0.45.4"
+    "drizzle-orm": "0.45.4",
+    "@opencok/base": "workspace:*",
+    "@opencok/economy": "workspace:*",
+    "@opencok/messages": "workspace:*"
   }
 }

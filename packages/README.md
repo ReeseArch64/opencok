@@ -54,8 +54,8 @@ accumulation, collection/boosts, effect schedules and atomic city settlement. It
 app-injected economic and world adapters; wider W07 city ownership remains in progress.
 
 The [building package](building/README.md) owns typed catalogs, definition contracts,
-level/star evaluation and mappings after #635. Construction workflows and city
-coordination remain tracked under W07; semantic archetypes remain W14 work.
+level/star evaluation and mappings after #635, persistence after #647 and construction
+workflows after #649. City owns aggregate coordination; semantic archetypes remain W14 work.
 
 The [city package](city/README.md) owns transactional plans, snapshot/effect creation
 and command/activity coordination after #637. The realm injects existing mechanic
@@ -79,4 +79,4 @@ world/march dependencies remain tracked in its ownership register.
 
 Building also owns typed persistence after #647. The realm injects the current
 transaction; City retains legacy row adaptation and cross-mechanic ordering while
-construction workflows migrate separately.
+shared projection boundaries continue to migrate under #558.

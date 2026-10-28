@@ -279,7 +279,7 @@ import { createRealmResearchDomain } from "./composition/research";
 import { createRealmCityProgressionStore } from "./composition/city-persistence.ts";
 import { createCityProductionBoundary } from "@opencok/production/repositories/city-boundary";
 import type { CityProgressionService } from "@opencok/city/services/progression";
-import { ConstructionDomain } from "@opencok/services/construction";
+import { createRealmConstructionDomain } from "./composition/construction";
 import { num, text } from "@opencok/contracts/rows";
 import {
     createActivityExecutor,
@@ -929,7 +929,7 @@ export const RealmDependenciesLive = Layer.effect(
                     observeAdapter(new WorkshopDomain(), "realm.WorkshopDomain"),
                     observeAdapter(new PlayerEffectsDomain(), "realm.PlayerEffectsDomain"),
                     observeAdapter(new QuestsDomain(), "realm.QuestsDomain"),
-                    observeAdapter(new ConstructionDomain(), "realm.ConstructionDomain"),
+                    observeAdapter(createRealmConstructionDomain(), "realm.ConstructionDomain"),
                     observeAdapter(createRealmResearchDomain(), "realm.ResearchDomain"),
                     observeAdapter(
                         new CivilizationScienceDomain(),

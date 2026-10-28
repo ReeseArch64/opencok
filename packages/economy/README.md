@@ -223,3 +223,12 @@ No dependency, schema, saved-state, native wire format or process-authority chan
 is introduced. Rollback uses the previous realm artifact against the same data.
 The shared mutation executor, lazy power reads and continued-cost merger remain
 real integration adapters under #558, rather than duplicated domain implementations.
+
+## Shared activity payloads and reward previews (#649)
+
+`contracts/progression-activity.ts` and `contracts/reward-preview.ts` own the
+unchanged economic payload and reward-preview declarations formerly in shared
+Contracts. They introduce no runtime implementation. Building consumes the owned
+paths to keep its construction workflow independent of horizontal Contracts.
+The old paths remain type-only re-exports; [the migration register](../MIGRATION.md#construction-workflows-649)
+tracks all remaining consumers and removal under #558 W20.
