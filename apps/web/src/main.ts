@@ -6,9 +6,9 @@ import { LoadingView } from "./loading-view.ts";
 import { GatewayPingClient } from "./gateway-ping-client.ts";
 
 const application = new LoadingApplication(new LoadingView(document), new GatewayPingClient(), [
-  ["background", background],
-  ["logo", logo],
-  ["progress-frame", frame],
+    ["background", background],
+    ["logo", logo],
+    ["progress-frame", frame],
 ]);
 
 void application.start();

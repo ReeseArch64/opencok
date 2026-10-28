@@ -1,4 +1,5 @@
-export interface DailyRechargeDefinition {}
+export interface DailyRechargeDefinition
+{}
 
 import type { CatalogTable } from "../../catalog-model.ts";
 

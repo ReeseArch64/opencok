@@ -28,46 +28,57 @@ fight_arena new_resource_battle_base p6_arms week_info p6_health dailytasks_info
 wb_subsection golden_egg civilization alliance_boss red_envelopes overlord_random
 `;
 
-export function dataConfigItems(overrides: Readonly<Record<string, Rule>> = {}): Map<string, Rule> {
-  const result = new Map<string, Rule>(
-    records
-      .trim()
-      .split(/\s+/)
-      .map((id) => [id, { id }]),
-  );
-  const scalars: Record<string, Rule> = {
-    player_max: { k1: "0010" },
-    resources_basics: { k5: "0", k6: "0", k7: "0", k8: "0" },
-    world_fire1: { k2: "0" },
-    shield_base: { k2: "0" },
-    monster: { k3: "0", k4: "0", k6: "0", k8: "0", k10: "0", k11: "boss;0" },
-    beginner_move: { k1: "0" },
-    worldmap_city: { k4: "0", k6: "50" },
-    function_on8: { k2: "0" },
-    on_trumpet: { k2: "0" },
-    serviceterms_on: { k1: "0" },
-    chrisms: { k12: "0" },
-    function_on2: { k8: "0" },
-    function_on3: { k2: "0" },
-    wb_info: { k8: "0" },
-    wa_score: { k10: "0" },
-    wa_scene: { k1: "0" },
-    graveyard: { k3: "0" },
-    kingdom_neutralServer: { k4: "0" },
-    kingdom_neutralServer_time: { k7: "0" },
-    overlord: { k1: "0" },
-  };
-  for (const family of ["worldboss", "worldboss_elite", "worldboss_special", "worldboss_npc"]) {
-    result.set(family, { id: family, k1: "0", k10: "0" });
-    if (family === "worldboss_npc") continue;
-    for (const range of ["10_19", "20_29", "30_40"]) {
-      const id = `${family}_${range}`;
-      result.set(id, { id, k1: "0", k10: "0" });
-      result.set(`${id}_other`, { id: `${id}_other` });
+export function dataConfigItems(overrides: Readonly<Record<string, Rule>> = {}): Map<string, Rule>
+{
+    const result = new Map<string, Rule>(
+        records
+            .trim()
+            .split(/\s+/)
+            .map((id) => [id, { id }]),
+    );
+    const scalars: Record<string, Rule> = {
+        player_max: { k1: "0010" },
+        resources_basics: { k5: "0", k6: "0", k7: "0", k8: "0" },
+        world_fire1: { k2: "0" },
+        shield_base: { k2: "0" },
+        monster: { k3: "0", k4: "0", k6: "0", k8: "0", k10: "0", k11: "boss;0" },
+        beginner_move: { k1: "0" },
+        worldmap_city: { k4: "0", k6: "50" },
+        function_on8: { k2: "0" },
+        on_trumpet: { k2: "0" },
+        serviceterms_on: { k1: "0" },
+        chrisms: { k12: "0" },
+        function_on2: { k8: "0" },
+        function_on3: { k2: "0" },
+        wb_info: { k8: "0" },
+        wa_score: { k10: "0" },
+        wa_scene: { k1: "0" },
+        graveyard: { k3: "0" },
+        kingdom_neutralServer: { k4: "0" },
+        kingdom_neutralServer_time: { k7: "0" },
+        overlord: { k1: "0" },
+    };
+    for (const family of ["worldboss", "worldboss_elite", "worldboss_special", "worldboss_npc"])
+    {
+        result.set(family, { id: family, k1: "0", k10: "0" });
+        if (family === "worldboss_npc")
+        {
+            continue;
+        }
+        for (const range of ["10_19", "20_29", "30_40"])
+        {
+            const id = `${family}_${range}`;
+            result.set(id, { id, k1: "0", k10: "0" });
+            result.set(`${id}_other`, { id: `${id}_other` });
+        }
     }
-  }
-  for (const [id, rule] of Object.entries(scalars)) result.set(id, { id, ...rule });
-  for (const [id, rule] of Object.entries(overrides))
-    result.set(id, { ...result.get(id), id, ...rule });
-  return result;
+    for (const [id, rule] of Object.entries(scalars))
+    {
+        result.set(id, { id, ...rule });
+    }
+    for (const [id, rule] of Object.entries(overrides))
+    {
+        result.set(id, { ...result.get(id), id, ...rule });
+    }
+    return result;
 }

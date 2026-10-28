@@ -7,7 +7,7 @@ import type { GeneralBaseDefinition } from "@opencok/hero/resources/catalogs/typ
 const mapper = new HeroDefinitionMapper(heroCatalogBindings);
 
 export const heroDefinitionByIdentity = Object.fromEntries(
-  heroRoster.map((hero) => [hero.identity, mapper.toDefinition(hero)]),
+    heroRoster.map((hero) => [hero.identity, mapper.toDefinition(hero)]),
 ) as Readonly<Record<HeroIdentity, GeneralBaseDefinition>>;
 
 export const heroDefinitions = heroRoster.map((hero) => heroDefinitionByIdentity[hero.identity]);

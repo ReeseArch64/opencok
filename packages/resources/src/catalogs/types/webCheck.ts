@@ -1,5 +1,6 @@
-export interface WebCheckDefinition {
-  readonly "id": string;
+export interface WebCheckDefinition
+{
+    readonly "id": string;
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";

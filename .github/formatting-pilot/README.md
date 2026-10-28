@@ -211,8 +211,9 @@ Candidate:
    `avatarUrl`, `avatarGrant`); postbox workflows (`mailStatus`, `mailSave`,
    `mailRead`, `mailDelete`, `mailSystem`, `mailUpdates`, `mailBatch`); and command
    dispatch (`execute`, lines 504–1254). Each requires constructor injection,
-   controller/service boundaries and protocol regressions. These are identified
-   follow-ups, not newly opened issues or approved implementation scope.
+   controller/service boundaries and protocol regressions. These are tracked separately in [#552](https://github.com/ReeseArch64/opencok/issues/552)
+   and [#553](https://github.com/ReeseArch64/opencok/issues/553); their implementation
+   remains outside this formatting migration.
 
 ## Verification scope and limits
 
@@ -232,3 +233,8 @@ rollout CI, a repository-wide migration or mobile compatibility. Those checks
 belong to the post-decision integration/baseline PRs. No database, account, state,
 service restart, deployment or client packaging changes are involved. Reverting
 this pilot removes only evaluation artifacts.
+
+## Rollout evidence
+
+See [migration validation](MIGRATION.md) for the adopted baseline, editor LSP/CLI
+comparison, workspace checks and separately tracked structural work.

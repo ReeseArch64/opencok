@@ -1,122 +1,152 @@
 import type {
-  ExpeditionScoreCursor,
-  ExpeditionScoreSource,
-  ExpeditionScoreProjection,
-  ExpeditionScoreVersion,
-  ExpeditionLiveSource,
+    ExpeditionScoreCursor,
+    ExpeditionScoreSource,
+    ExpeditionScoreProjection,
+    ExpeditionScoreVersion,
+    ExpeditionLiveSource,
 } from "@opencok/contracts/expedition-score-publication";
 import { type Row } from "@opencok/contracts/rows";
 import { sfs, int, type Fields } from "@opencok/messages/sfs";
 
-export class ExpeditionScorePublicationService {
-  private cursor?: ExpeditionScoreCursor;
-  private running?: Promise<void>;
+export class ExpeditionScorePublicationService
+{
+    private cursor?: ExpeditionScoreCursor;
+    private running?: Promise<void>;
 
-  constructor(
-    readonly source: ExpeditionScoreSource,
-    readonly projection: ExpeditionScoreProjection,
-    readonly publish: (
-      clock: Row,
-      version: ExpeditionScoreVersion,
-      now: bigint,
-    ) => Promise<unknown>,
-    readonly now = Date.now,
-  ) {}
+    constructor(
+        readonly source: ExpeditionScoreSource,
+        readonly projection: ExpeditionScoreProjection,
+        readonly publish: (
+            clock: Row,
+            version: ExpeditionScoreVersion,
+            now: bigint,
+        ) => Promise<unknown>,
+        readonly now = Date.now,
+    )
+    {}
 
-  refresh() {
-    this.running ??= this.run().finally(() => {
-      this.running = undefined;
-    });
+    refresh()
+    {
+        this.running ??= this.run().finally(() => {
+            this.running = undefined;
+        });
 
-    return this.running;
-  }
-
-  private async run() {
-    let latest: ExpeditionScoreVersion | undefined;
-    let observedAt = BigInt(this.now());
-
-    for (let page = 0; page < 4; page++) {
-      observedAt = BigInt(this.now());
-      const rows = await this.source.page(this.cursor, observedAt);
-      latest = await this.projection.write(rows, observedAt);
-      const last = rows.at(-1);
-      this.cursor =
-        rows.length === 64 && last
-          ? { periodId: last.periodId, stage: last.stage, member: last.member }
-          : undefined;
-
-      if (!this.cursor) break;
+        return this.running;
     }
 
-    const clock = await this.source.clock();
+    private async run()
+    {
+        let latest: ExpeditionScoreVersion | undefined;
+        let observedAt = BigInt(this.now());
 
-    if (clock && latest) await this.publish(clock, latest, observedAt);
-  }
+        for (let page = 0; page < 4; page++)
+        {
+            observedAt = BigInt(this.now());
+            const rows = await this.source.page(this.cursor, observedAt);
+            latest = await this.projection.write(rows, observedAt);
+            const last = rows.at(-1);
+            this.cursor = rows.length === 64 && last
+                ? { periodId: last.periodId, stage: last.stage, member: last.member }
+                : undefined;
+
+            if (!this.cursor)
+            {
+                break;
+            }
+        }
+
+        const clock = await this.source.clock();
+
+        if (clock && latest)
+        {
+            await this.publish(clock, latest, observedAt);
+        }
+    }
 }
 
-export class ExpeditionLiveViewService {
-  constructor(
-    readonly source: ExpeditionLiveSource,
-    readonly now = Date.now,
-  ) {}
-
-  async enrich(owner: string, body: Fields): Promise<Fields> {
-    const view = await this.source.owned(owner, BigInt(this.now()));
-
-    if (
-      !view ||
-      int(body, "state", -1) !== view.stage ||
-      body.startTime?.value !== view.startTime ||
-      body.endTime?.value !== view.endTime
+export class ExpeditionLiveViewService
+{
+    constructor(
+        readonly source: ExpeditionLiveSource,
+        readonly now = Date.now,
     )
-      return body;
+    {}
 
-    const fallback = { ...body, rank: sfs.int(-1) };
-    let totals;
+    async enrich(owner: string, body: Fields): Promise<Fields>
+    {
+        const view = await this.source.owned(owner, BigInt(this.now()));
 
-    try {
-      totals = await this.source.shared(view);
-    } catch {
-      return fallback;
-    }
+        if (
+            !view
+            || int(body, "state", -1) !== view.stage
+            || body.startTime?.value !== view.startTime
+            || body.endTime?.value !== view.endTime
+        )
+        {
+            return body;
+        }
 
-    if (!totals) return fallback;
+        const fallback = { ...body, rank: sfs.int(-1) };
+        let totals;
 
-    const kingdoms = body.kingdominfolist?.value;
+        try
+        {
+            totals = await this.source.shared(view);
+        }
+        catch
+        {
+            return fallback;
+        }
 
-    if (!Array.isArray(kingdoms)) throw new Error("Missing native expedition kingdoms");
+        if (!totals)
+        {
+            return fallback;
+        }
 
-    return {
-      ...body,
-      rank: sfs.int(totals.rank),
-      alliancescore: sfs.double(totals.allianceScore),
-      kingdominfolist: sfs.array(
-        kingdoms.map((value) => {
-          if (
-            !value ||
-            typeof value !== "object" ||
-            !("value" in value) ||
-            !value.value ||
-            typeof value.value !== "object"
-          )
-            throw new Error("Invalid native expedition kingdom");
+        const kingdoms = body.kingdominfolist?.value;
 
-          const fields = value.value as Fields,
-            id = int(fields, "serverid");
+        if (!Array.isArray(kingdoms))
+        {
+            throw new Error("Missing native expedition kingdoms");
+        }
 
-          if (id !== view.kingdomId && id !== view.opponent)
-            throw new Error("Foreign native expedition kingdom");
+        return {
+            ...body,
+            rank: sfs.int(totals.rank),
+            alliancescore: sfs.double(totals.allianceScore),
+            kingdominfolist: sfs.array(
+                kingdoms.map((value) => {
+                    if (
+                        !value
+                        || typeof value !== "object"
+                        || !("value" in value)
+                        || !value.value
+                        || typeof value.value !== "object"
+                    )
+                    {
+                        throw new Error("Invalid native expedition kingdom");
+                    }
 
-          return sfs.object({
-            ...fields,
-            score: sfs.string(
-              expeditionScoreText(id === view.kingdomId ? totals.ownScore : totals.otherScore),
+                    const fields = value.value as Fields,
+                        id = int(fields, "serverid");
+
+                    if (id !== view.kingdomId && id !== view.opponent)
+                    {
+                        throw new Error("Foreign native expedition kingdom");
+                    }
+
+                    return sfs.object({
+                        ...fields,
+                        score: sfs.string(
+                            expeditionScoreText(
+                                id === view.kingdomId ? totals.ownScore : totals.otherScore,
+                            ),
+                        ),
+                    });
+                }),
             ),
-          });
-        }),
-      ),
-    };
-  }
+        };
+    }
 }
 
 import { expeditionScoreText } from "@opencok/mappings/new-expedition";

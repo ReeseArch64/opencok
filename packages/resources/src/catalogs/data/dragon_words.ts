@@ -4,7 +4,7 @@ import type { CatalogTable } from "../../catalog-model.ts";
 import { records as records0 } from "./dragon_words.records0.ts";
 
 export const catalog: CatalogTable<DragonWordsDefinition> = {
-  "kind": CatalogKind.Table,
-  "records": [...records0],
-  "sections": [{ "id": "dragon_words", "start": 0, "count": 78 }],
+    "kind": CatalogKind.Table,
+    "records": [...records0],
+    "sections": [{ "id": "dragon_words", "start": 0, "count": 78 }],
 };

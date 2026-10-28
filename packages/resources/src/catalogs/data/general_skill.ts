@@ -8,7 +8,7 @@ import { records as records3 } from "./general_skill.records3.ts";
 import { records as records4 } from "./general_skill.records4.ts";
 
 export const catalog: CatalogTable<GeneralSkillDefinition> = {
-  "kind": CatalogKind.Table,
-  "records": [...records0, ...records1, ...records2, ...records3, ...records4],
-  "sections": [],
+    "kind": CatalogKind.Table,
+    "records": [...records0, ...records1, ...records2, ...records3, ...records4],
+    "sections": [],
 };

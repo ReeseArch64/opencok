@@ -1,9 +1,10 @@
-export interface RecallQuestDefinition {
-  readonly "id": number;
-  readonly "type": number;
-  readonly "extendType": number;
-  readonly "quantity": number;
-  readonly "rewardall": number;
+export interface RecallQuestDefinition
+{
+    readonly "id": number;
+    readonly "type": number;
+    readonly "extendType": number;
+    readonly "quantity": number;
+    readonly "rewardall": number;
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";

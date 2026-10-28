@@ -4,16 +4,19 @@ import { bytea } from "../../types";
 import { opencok_kingdom } from "../namespaces";
 
 export const user_world_pve = opencok_kingdom.table(
-  "user_world_pve",
-  {
-    "uid": varchar("uid", { length: 40 }).notNull(),
-    "pointId": integer("pointId").notNull(),
-    "attNum": integer("attNum").notNull(),
-    "buyNum": integer("buyNum"),
-    "monsterInfo": bytea("monsterInfo"),
-  },
-  (table) => [
-    primaryKey({ name: "user_world_pve_PRIMARY", columns: [table["uid"], table["pointId"]] }),
-    check("user_world_pve_monsterInfo_length", sql.raw('octet_length("monsterInfo") <= 65535')),
-  ],
+    "user_world_pve",
+    {
+        "uid": varchar("uid", { length: 40 }).notNull(),
+        "pointId": integer("pointId").notNull(),
+        "attNum": integer("attNum").notNull(),
+        "buyNum": integer("buyNum"),
+        "monsterInfo": bytea("monsterInfo"),
+    },
+    (table) => [
+        primaryKey({ name: "user_world_pve_PRIMARY", columns: [table["uid"], table["pointId"]] }),
+        check(
+            "user_world_pve_monsterInfo_length",
+            sql.raw("octet_length(\"monsterInfo\") <= 65535"),
+        ),
+    ],
 );

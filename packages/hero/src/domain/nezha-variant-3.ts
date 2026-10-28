@@ -5,78 +5,79 @@ import { HeroSkill } from "@opencok/enums/hero-skill";
 import type { HeroDefinition } from "../contracts/hero-definition.ts";
 import { Hero } from "./hero.ts";
 
-export class NezhaVariant3 extends Hero {
-  public readonly identity = HeroIdentity.NezhaVariant3;
-  public readonly name = "Nezha";
-  public readonly gender = HeroGender.Male;
-  public readonly recruitment: HeroDefinition["recruitment"] = {
-    available: false,
-    cost: { item: HeroItem.NezhaVariant3Fragment, quantity: 3000 },
-    initialQuality: 1,
-  };
-  public readonly progression: HeroDefinition["progression"] = {
-    initialLevel: 1,
-    maximumLevel: 100,
-    automatedGrantLevelLimit: 1,
-    talentPointDivisor: 1,
-    breakthroughs: this.freeBreakthroughs(HeroItem.NezhaVariant3Fragment, 5),
-  };
-  public readonly stars: HeroDefinition["stars"] = {
-    initial: 1,
-    maximum: 3,
-    initialSkills: [HeroSkill.NezhaVariant3IKnowWhereYouAre],
-    upgrades: [
-      {
-        stars: 2,
+export class NezhaVariant3 extends Hero
+{
+    public readonly identity = HeroIdentity.NezhaVariant3;
+    public readonly name = "Nezha";
+    public readonly gender = HeroGender.Male;
+    public readonly recruitment: HeroDefinition["recruitment"] = {
+        available: false,
         cost: { item: HeroItem.NezhaVariant3Fragment, quantity: 3000 },
-        skills: [HeroSkill.NezhaVariant3ShadowWorld],
-      },
-      {
-        stars: 3,
-        cost: { item: HeroItem.NezhaVariant3Fragment, quantity: 6000 },
-        skills: [HeroSkill.NezhaVariant3NightmaresOnTour],
-      },
-      {
-        stars: 4,
-        cost: { item: HeroItem.NezhaVariant3Fragment, quantity: 10000 },
-        skills: [HeroSkill.NezhaVariant3TrickPrey],
-      },
-      {
-        stars: 5,
-        cost: { item: HeroItem.NezhaVariant3Fragment, quantity: 20000 },
-        skills: [HeroSkill.NezhaVariant3VerdictOfEternalNight],
-      },
-    ],
-  };
-  public readonly talentTrees: HeroDefinition["talentTrees"] = [];
-  public readonly refinement = this.standardRefinement(HeroItem.NezhaVariant3Fragment, [
-    {
-      position: 1,
-      refinementItemQuantity: 0,
-      requiredLevel: 50,
-      requiredStars: 6,
-      unlockCost: { item: HeroItem.HeroBadge, quantity: 100 },
-    },
-    {
-      position: 2,
-      refinementItemQuantity: 0,
-      requiredLevel: 50,
-      requiredStars: 6,
-      unlockCost: { item: HeroItem.HeroBadge, quantity: 100 },
-    },
-    {
-      position: 3,
-      refinementItemQuantity: 0,
-      requiredLevel: 50,
-      requiredStars: 6,
-      unlockCost: { item: HeroItem.HeroBadge, quantity: 100 },
-    },
-    {
-      position: 4,
-      refinementItemQuantity: 0,
-      requiredStars: 6,
-      unlockCost: { item: HeroItem.HeroBadge, quantity: 100 },
-    },
-    { position: 5, refinementItemQuantity: 0 },
-  ]);
+        initialQuality: 1,
+    };
+    public readonly progression: HeroDefinition["progression"] = {
+        initialLevel: 1,
+        maximumLevel: 100,
+        automatedGrantLevelLimit: 1,
+        talentPointDivisor: 1,
+        breakthroughs: this.freeBreakthroughs(HeroItem.NezhaVariant3Fragment, 5),
+    };
+    public readonly stars: HeroDefinition["stars"] = {
+        initial: 1,
+        maximum: 3,
+        initialSkills: [HeroSkill.NezhaVariant3IKnowWhereYouAre],
+        upgrades: [
+            {
+                stars: 2,
+                cost: { item: HeroItem.NezhaVariant3Fragment, quantity: 3000 },
+                skills: [HeroSkill.NezhaVariant3ShadowWorld],
+            },
+            {
+                stars: 3,
+                cost: { item: HeroItem.NezhaVariant3Fragment, quantity: 6000 },
+                skills: [HeroSkill.NezhaVariant3NightmaresOnTour],
+            },
+            {
+                stars: 4,
+                cost: { item: HeroItem.NezhaVariant3Fragment, quantity: 10000 },
+                skills: [HeroSkill.NezhaVariant3TrickPrey],
+            },
+            {
+                stars: 5,
+                cost: { item: HeroItem.NezhaVariant3Fragment, quantity: 20000 },
+                skills: [HeroSkill.NezhaVariant3VerdictOfEternalNight],
+            },
+        ],
+    };
+    public readonly talentTrees: HeroDefinition["talentTrees"] = [];
+    public readonly refinement = this.standardRefinement(HeroItem.NezhaVariant3Fragment, [
+        {
+            position: 1,
+            refinementItemQuantity: 0,
+            requiredLevel: 50,
+            requiredStars: 6,
+            unlockCost: { item: HeroItem.HeroBadge, quantity: 100 },
+        },
+        {
+            position: 2,
+            refinementItemQuantity: 0,
+            requiredLevel: 50,
+            requiredStars: 6,
+            unlockCost: { item: HeroItem.HeroBadge, quantity: 100 },
+        },
+        {
+            position: 3,
+            refinementItemQuantity: 0,
+            requiredLevel: 50,
+            requiredStars: 6,
+            unlockCost: { item: HeroItem.HeroBadge, quantity: 100 },
+        },
+        {
+            position: 4,
+            refinementItemQuantity: 0,
+            requiredStars: 6,
+            unlockCost: { item: HeroItem.HeroBadge, quantity: 100 },
+        },
+        { position: 5, refinementItemQuantity: 0 },
+    ]);
 }

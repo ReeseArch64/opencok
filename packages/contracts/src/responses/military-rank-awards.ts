@@ -1,5 +1,6 @@
-export interface MilitaryRankAwardResponse {
-  requested: number;
-  credited: number;
-  balance: number;
+export interface MilitaryRankAwardResponse
+{
+    requested: number;
+    credited: number;
+    balance: number;
 }

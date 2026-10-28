@@ -1,9 +1,10 @@
-export interface SpResourcesInitDefinition {
-  readonly "id": number;
-  readonly "areaLevel": number;
-  readonly "resourceId": number;
-  readonly "type": number;
-  readonly "ratio"?: number;
+export interface SpResourcesInitDefinition
+{
+    readonly "id": number;
+    readonly "areaLevel": number;
+    readonly "resourceId": number;
+    readonly "type": number;
+    readonly "ratio"?: number;
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";

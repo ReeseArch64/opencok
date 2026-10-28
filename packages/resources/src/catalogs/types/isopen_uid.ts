@@ -1,4 +1,5 @@
-export interface IsopenUidDefinition {}
+export interface IsopenUidDefinition
+{}
 
 import type { CatalogTable } from "../../catalog-model.ts";
 

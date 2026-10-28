@@ -7,7 +7,7 @@ import { records as records2 } from "./general_random_effect.records2.ts";
 import { records as records3 } from "./general_random_effect.records3.ts";
 
 export const catalog: CatalogTable<GeneralRandomEffectDefinition> = {
-  "kind": CatalogKind.Table,
-  "records": [...records0, ...records1, ...records2, ...records3],
-  "sections": [{ "id": "general_random_effect", "start": 0, "count": 2878 }],
+    "kind": CatalogKind.Table,
+    "records": [...records0, ...records1, ...records2, ...records3],
+    "sections": [{ "id": "general_random_effect", "start": 0, "count": 2878 }],
 };

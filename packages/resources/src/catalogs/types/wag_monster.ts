@@ -1,7 +1,8 @@
-export interface WagMonsterDefinition {
-  readonly "id": number;
-  readonly "monster": number;
-  readonly "randomRate": number;
+export interface WagMonsterDefinition
+{
+    readonly "id": number;
+    readonly "monster": number;
+    readonly "randomRate": number;
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";

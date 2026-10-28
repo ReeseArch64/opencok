@@ -1,6 +1,7 @@
-export interface GoldenEggStepDefinition {
-  readonly "id": number;
-  readonly "step": readonly number[];
+export interface GoldenEggStepDefinition
+{
+    readonly "id": number;
+    readonly "step": readonly number[];
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";

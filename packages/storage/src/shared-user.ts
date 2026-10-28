@@ -43,87 +43,111 @@ return 1`;
 
 type Command = (command: string, ...args: string[]) => Promise<unknown>;
 
-function validOwner(owner: string, layout: SharedUserLayout) {
-  if (
-    typeof owner !== "string" ||
-    !owner ||
-    owner.length > 40 ||
-    owner.includes("\0") ||
-    !owner.isWellFormed() ||
-    (layout !== "hash" && layout !== "keys")
-  )
-    throw new DependencyError("shared user cache");
+function validOwner(owner: string, layout: SharedUserLayout)
+{
+    if (
+        typeof owner !== "string"
+        || !owner
+        || owner.length > 40
+        || owner.includes("\0")
+        || !owner.isWellFormed()
+        || (layout !== "hash" && layout !== "keys")
+    )
+    {
+        throw new DependencyError("shared user cache");
+    }
 }
 
-function cacheKey(owner: string, layout: SharedUserLayout) {
-  return layout === "hash" ? "cross_user_info_global" : `USER_INFO_${owner}`;
+function cacheKey(owner: string, layout: SharedUserLayout)
+{
+    return layout === "hash" ? "cross_user_info_global" : `USER_INFO_${owner}`;
 }
 
 export async function publishSharedUser(
-  command: Command,
-  update: SharedUserUpdate,
-  layout: SharedUserLayout = "hash",
-): Promise<void> {
-  validOwner(update.owner, layout);
+    command: Command,
+    update: SharedUserUpdate,
+    layout: SharedUserLayout = "hash",
+): Promise<void>
+{
+    validOwner(update.owner, layout);
 
-  if (
-    !Number.isInteger(update.kingdomId) ||
-    update.kingdomId < 1 ||
-    update.kingdomId > 2147483647 ||
-    typeof update.version !== "bigint" ||
-    update.version < 1n ||
-    update.version > 9223372036854775807n ||
-    typeof update.updatedAt !== "string" ||
-    !/^(0|[1-9]\d{0,18})$/.test(update.updatedAt) ||
-    BigInt(update.updatedAt) > 9223372036854775807n ||
-    typeof update.body !== "string" ||
-    !update.body.isWellFormed() ||
-    Buffer.byteLength(update.body) > 65535
-  )
-    throw new DependencyError("shared user cache");
+    if (
+        !Number.isInteger(update.kingdomId)
+        || update.kingdomId < 1
+        || update.kingdomId > 2147483647
+        || typeof update.version !== "bigint"
+        || update.version < 1n
+        || update.version > 9223372036854775807n
+        || typeof update.updatedAt !== "string"
+        || !/^(0|[1-9]\d{0,18})$/.test(update.updatedAt)
+        || BigInt(update.updatedAt) > 9223372036854775807n
+        || typeof update.body !== "string"
+        || !update.body.isWellFormed()
+        || Buffer.byteLength(update.body) > 65535
+    )
+    {
+        throw new DependencyError("shared user cache");
+    }
 
-  try {
-    const result = await command(
-      "EVAL",
-      sharedUserScript,
-      "4",
-      cacheKey(update.owner, layout),
-      "opencok:shared-user:publication-version",
-      `USER_LAST_UPDATE_TIME_${update.owner}`,
-      `opencok:kingdom:${update.kingdomId}:player-update:${update.owner}`,
-      update.owner,
-      String(update.version),
-      update.updatedAt,
-      update.body,
-      layout,
-    );
+    try
+    {
+        const result = await command(
+            "EVAL",
+            sharedUserScript,
+            "4",
+            cacheKey(update.owner, layout),
+            "opencok:shared-user:publication-version",
+            `USER_LAST_UPDATE_TIME_${update.owner}`,
+            `opencok:kingdom:${update.kingdomId}:player-update:${update.owner}`,
+            update.owner,
+            String(update.version),
+            update.updatedAt,
+            update.body,
+            layout,
+        );
 
-    if (result !== 0 && result !== 1) throw new Error();
-  } catch {
-    throw new DependencyError("shared user cache");
-  }
+        if (result !== 0 && result !== 1)
+        {
+            throw new Error();
+        }
+    }
+    catch
+    {
+        throw new DependencyError("shared user cache");
+    }
 }
 
 export async function loadSharedUser(
-  command: Command,
-  owner: string,
-  layout: SharedUserLayout = "hash",
-): Promise<string | null> {
-  validOwner(owner, layout);
+    command: Command,
+    owner: string,
+    layout: SharedUserLayout = "hash",
+): Promise<string | null>
+{
+    validOwner(owner, layout);
 
-  try {
-    const result =
-      layout === "hash"
-        ? await command("HGET", cacheKey(owner, layout), owner)
-        : await command("GET", cacheKey(owner, layout));
+    try
+    {
+        const result = layout === "hash"
+            ? await command("HGET", cacheKey(owner, layout), owner)
+            : await command("GET", cacheKey(owner, layout));
 
-    if (result === null) return null;
+        if (result === null)
+        {
+            return null;
+        }
 
-    if (typeof result !== "string" || !result.isWellFormed() || Buffer.byteLength(result) > 65535)
-      throw new Error();
+        if (
+            typeof result !== "string" || !result.isWellFormed()
+            || Buffer.byteLength(result) > 65535
+        )
+        {
+            throw new Error();
+        }
 
-    return result;
-  } catch {
-    throw new DependencyError("shared user cache");
-  }
+        return result;
+    }
+    catch
+    {
+        throw new DependencyError("shared user cache");
+    }
 }

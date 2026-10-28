@@ -4,7 +4,7 @@ import type { CatalogTable } from "../../catalog-model.ts";
 import { records as records0 } from "./function_on_luaUI.records0.ts";
 
 export const catalog: CatalogTable<FunctionOnLuaUIDefinition> = {
-  "kind": CatalogKind.Table,
-  "records": [...records0],
-  "sections": [{ "id": "function_on_luaUI", "start": 0, "count": 3 }],
+    "kind": CatalogKind.Table,
+    "records": [...records0],
+    "sections": [{ "id": "function_on_luaUI", "start": 0, "count": 3 }],
 };

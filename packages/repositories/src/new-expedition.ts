@@ -10,9 +10,9 @@ import { king_tax_record } from "@opencok/drizzle/schema/opencok_kingdom/king_ta
 import { king_allot_tax_record } from "@opencok/drizzle/schema/opencok_kingdom/king_allot_tax_record";
 import { userprofile } from "@opencok/drizzle/schema/opencok_kingdom/userprofile";
 import {
-  expeditionFailure,
-  expeditionPhase,
-  expeditionSchedule,
+    expeditionFailure,
+    expeditionPhase,
+    expeditionSchedule,
 } from "@opencok/rules/new-expedition";
 import { cityInteger } from "@opencok/rules/city-progression";
 import { text, num, long, type Row } from "@opencok/contracts/rows";
@@ -22,308 +22,370 @@ import type { MutationTransaction } from "./mutation";
 import { fenceRealmTransaction, type RealmAuthority } from "./realm-authority";
 
 export async function installExpeditionPeriod(
-  tx: MutationTransaction,
-  authority: RealmAuthority,
-  manifest: ExpeditionManifest,
-  authorize: (manifest: ExpeditionManifest) => Promise<boolean>,
-  recordedAt = BigInt(Date.now()),
-) {
-  await fenceRealmTransaction(tx, authority);
+    tx: MutationTransaction,
+    authority: RealmAuthority,
+    manifest: ExpeditionManifest,
+    authorize: (manifest: ExpeditionManifest) => Promise<boolean>,
+    recordedAt = BigInt(Date.now()),
+)
+{
+    await fenceRealmTransaction(tx, authority);
 
-  if (manifest.serverId !== authority.kingdomId || !(await authorize(manifest)))
-    expeditionFailure();
-
-  const phases = expeditionSchedule(manifest);
-  await tx.execute(sql`SELECT pg_advisory_xact_lock(60718, ${manifest.serverId})`);
-  const [prior] = await tx
-    .select()
-    .from(expedition_period)
-    .where(eq(expedition_period.serverId, manifest.serverId))
-    .for("update");
-  const schedule = JSON.stringify(
-    phases.map((phase) => ({
-      stage: phase.stage,
-      startTime: String(phase.startTime),
-      endTime: String(phase.endTime),
-    })),
-  );
-  const archive = async (
-    value: {
-      periodId: string;
-      serverId: number;
-      matchServerId: number;
-      schedule: string;
-      startTime: bigint;
-      endTime: bigint;
-    },
-    at: bigint,
-  ) => {
-    const saved = { ...value, recordedAt: at };
-    await tx.insert(expedition_manifest).values(saved).onConflictDoNothing();
-    const [existing] = await tx
-      .select()
-      .from(expedition_manifest)
-      .where(
-        and(
-          eq(expedition_manifest.periodId, value.periodId),
-          eq(expedition_manifest.serverId, value.serverId),
-        ),
-      )
-      .limit(1);
-
-    if (
-      !existing ||
-      existing.serverId !== value.serverId ||
-      existing.matchServerId !== value.matchServerId ||
-      existing.schedule !== value.schedule ||
-      existing.startTime !== value.startTime ||
-      existing.endTime !== value.endTime
-    )
-      expeditionFailure();
-  };
-
-  if (prior)
-    await archive(
-      {
-        periodId: prior.periodId,
-        serverId: prior.serverId,
-        matchServerId: prior.matchServerId,
-        schedule: prior.schedule,
-        startTime: prior.startTime,
-        endTime: prior.endTime,
-      },
-      0n,
-    );
-
-  if (prior?.periodId === manifest.periodId) {
-    if (prior.schedule !== schedule || prior.matchServerId !== manifest.matchServerId)
-      expeditionFailure();
-
-    return;
-  }
-
-  if (prior && manifest.startTime < prior.endTime) expeditionFailure();
-
-  const value = {
-    serverId: manifest.serverId,
-    periodId: manifest.periodId,
-    matchServerId: manifest.matchServerId,
-    startTime: manifest.startTime,
-    endTime: phases.at(-1)!.endTime,
-    schedule,
-    victoryTimes: prior?.victoryTimes ?? 0,
-    count: (prior?.count ?? 0) + 1,
-  };
-  await archive(
+    if (manifest.serverId !== authority.kingdomId || !(await authorize(manifest)))
     {
-      periodId: value.periodId,
-      serverId: value.serverId,
-      matchServerId: value.matchServerId,
-      schedule: value.schedule,
-      startTime: value.startTime,
-      endTime: value.endTime,
-    },
-    recordedAt,
-  );
-  await tx
-    .insert(expedition_period)
-    .values(value)
-    .onConflictDoUpdate({ target: expedition_period.serverId, set: value });
+        expeditionFailure();
+    }
+
+    const phases = expeditionSchedule(manifest);
+    await tx.execute(sql`SELECT pg_advisory_xact_lock(60718, ${manifest.serverId})`);
+    const [prior] = await tx
+        .select()
+        .from(expedition_period)
+        .where(eq(expedition_period.serverId, manifest.serverId))
+        .for("update");
+    const schedule = JSON.stringify(
+        phases.map((phase) => ({
+            stage: phase.stage,
+            startTime: String(phase.startTime),
+            endTime: String(phase.endTime),
+        })),
+    );
+    const archive = async (
+        value: {
+            periodId: string;
+            serverId: number;
+            matchServerId: number;
+            schedule: string;
+            startTime: bigint;
+            endTime: bigint;
+        },
+        at: bigint,
+    ) => {
+        const saved = { ...value, recordedAt: at };
+        await tx.insert(expedition_manifest).values(saved).onConflictDoNothing();
+        const [existing] = await tx
+            .select()
+            .from(expedition_manifest)
+            .where(
+                and(
+                    eq(expedition_manifest.periodId, value.periodId),
+                    eq(expedition_manifest.serverId, value.serverId),
+                ),
+            )
+            .limit(1);
+
+        if (
+            !existing
+            || existing.serverId !== value.serverId
+            || existing.matchServerId !== value.matchServerId
+            || existing.schedule !== value.schedule
+            || existing.startTime !== value.startTime
+            || existing.endTime !== value.endTime
+        )
+        {
+            expeditionFailure();
+        }
+    };
+
+    if (prior)
+    {
+        await archive(
+            {
+                periodId: prior.periodId,
+                serverId: prior.serverId,
+                matchServerId: prior.matchServerId,
+                schedule: prior.schedule,
+                startTime: prior.startTime,
+                endTime: prior.endTime,
+            },
+            0n,
+        );
+    }
+
+    if (prior?.periodId === manifest.periodId)
+    {
+        if (prior.schedule !== schedule || prior.matchServerId !== manifest.matchServerId)
+        {
+            expeditionFailure();
+        }
+
+        return;
+    }
+
+    if (prior && manifest.startTime < prior.endTime)
+    {
+        expeditionFailure();
+    }
+
+    const value = {
+        serverId: manifest.serverId,
+        periodId: manifest.periodId,
+        matchServerId: manifest.matchServerId,
+        startTime: manifest.startTime,
+        endTime: phases.at(-1)!.endTime,
+        schedule,
+        victoryTimes: prior?.victoryTimes ?? 0,
+        count: (prior?.count ?? 0) + 1,
+    };
+    await archive(
+        {
+            periodId: value.periodId,
+            serverId: value.serverId,
+            matchServerId: value.matchServerId,
+            schedule: value.schedule,
+            startTime: value.startTime,
+            endTime: value.endTime,
+        },
+        recordedAt,
+    );
+    await tx
+        .insert(expedition_period)
+        .values(value)
+        .onConflictDoUpdate({ target: expedition_period.serverId, set: value });
 }
 
 export async function readExpedition(
-  tx: MutationTransaction,
-  profile: Row,
-  now: bigint,
-  command?: string,
-  request?: Uint8Array,
-): Promise<ExpeditionState> {
-  const owner = text(profile, "uid"),
-    realm = num(profile, "serverId");
-  let [period] = await tx
-    .select()
-    .from(expedition_period)
-    .where(eq(expedition_period.serverId, realm))
-    .for("share");
-  let phase = expeditionPhase(period, now);
+    tx: MutationTransaction,
+    profile: Row,
+    now: bigint,
+    command?: string,
+    request?: Uint8Array,
+): Promise<ExpeditionState>
+{
+    const owner = text(profile, "uid"),
+        realm = num(profile, "serverId");
+    let [period] = await tx
+        .select()
+        .from(expedition_period)
+        .where(eq(expedition_period.serverId, realm))
+        .for("share");
+    let phase = expeditionPhase(period, now);
 
-  if (!phase) {
-    const archives = await tx
-      .select()
-      .from(expedition_manifest)
-      .where(
-        and(
-          eq(expedition_manifest.serverId, realm),
-          sql`${expedition_manifest.startTime}<=${now} and ${expedition_manifest.endTime}>${now}`,
-        ),
-      )
-      .limit(2)
-      .for("share");
+    if (!phase)
+    {
+        const archives = await tx
+            .select()
+            .from(expedition_manifest)
+            .where(
+                and(
+                    eq(expedition_manifest.serverId, realm),
+                    sql`${expedition_manifest.startTime}<=${now} and ${expedition_manifest.endTime}>${now}`,
+                ),
+            )
+            .limit(2)
+            .for("share");
 
-    if (archives.length > 1) throw new Error("Ambiguous owned expedition manifest time");
+        if (archives.length > 1)
+        {
+            throw new Error("Ambiguous owned expedition manifest time");
+        }
 
-    const archive = archives[0];
+        const archive = archives[0];
 
-    if (archive) {
-      period = { ...archive, victoryTimes: period?.victoryTimes ?? 0, count: period?.count ?? 0 };
-      phase = expeditionPhase(period, now);
+        if (archive)
+        {
+            period = {
+                ...archive,
+                victoryTimes: period?.victoryTimes ?? 0,
+                count: period?.count ?? 0,
+            };
+            phase = expeditionPhase(period, now);
+        }
     }
-  }
 
-  const needsView = command === "newexpidition.activityinfo" || command === "expedition.notify";
-  const [clock] = needsView
-    ? await tx.select().from(expedition_clock).where(eq(expedition_clock.serverId, realm)).limit(1)
-    : [];
-  let projectionOnly = false;
+    const needsView = command === "newexpidition.activityinfo" || command === "expedition.notify";
+    const [clock] = needsView
+        ? await tx.select().from(expedition_clock).where(eq(expedition_clock.serverId, realm))
+            .limit(1)
+        : [];
+    let projectionOnly = false;
 
-  if (!phase && clock) {
-    projectionOnly = true;
-    phase = { stage: clock.stage, startTime: clock.startTime, endTime: clock.endTime };
-    period = {
-      serverId: realm,
-      periodId: clock.periodId,
-      matchServerId: clock.opponent,
-      schedule: JSON.stringify([
-        { stage: clock.stage, startTime: String(clock.startTime), endTime: String(clock.endTime) },
-      ]),
-      startTime: clock.startTime,
-      endTime: clock.endTime,
-      victoryTimes: period?.victoryTimes ?? 0,
-      count: period?.count ?? 0,
-    };
-  }
+    if (!phase && clock)
+    {
+        projectionOnly = true;
+        phase = { stage: clock.stage, startTime: clock.startTime, endTime: clock.endTime };
+        period = {
+            serverId: realm,
+            periodId: clock.periodId,
+            matchServerId: clock.opponent,
+            schedule: JSON.stringify([
+                {
+                    stage: clock.stage,
+                    startTime: String(clock.startTime),
+                    endTime: String(clock.endTime),
+                },
+            ]),
+            startTime: clock.startTime,
+            endTime: clock.endTime,
+            victoryTimes: period?.victoryTimes ?? 0,
+            count: period?.count ?? 0,
+        };
+    }
 
-  const progress = !period
-    ? []
-    : await tx
-        .select()
-        .from(expedition_progress)
-        .where(
-          and(
-            eq(expedition_progress.uid, owner),
+    const progress = !period
+        ? []
+        : await tx
+            .select()
+            .from(expedition_progress)
+            .where(
+                and(
+                    eq(expedition_progress.uid, owner),
+                    eq(expedition_progress.periodId, period.periodId),
+                ),
+            )
+            .limit(10);
+
+    if (progress.length > 9)
+    {
+        expeditionFailure();
+    }
+
+    let allianceScore = 0,
+        kingdomScore = 0,
+        rank = -1;
+
+    if (
+        (period && phase && command === "newexpidition.activityinfo")
+        || (period && phase && command === "newexpidition.takealliancereward")
+    )
+    {
+        const where = and(
             eq(expedition_progress.periodId, period.periodId),
-          ),
-        )
-        .limit(10);
+            eq(expedition_progress.stage, phase.stage),
+            eq(userprofile.serverId, realm),
+        );
+        const [total] = await tx
+            .select({
+                score: sql<number>`coalesce(sum(${expedition_progress.score}), 0)::float8`,
+                alliance: sql<
+                    number
+                >`coalesce(sum(${expedition_progress.score}) filter (where ${userprofile.allianceId} = ${
+                    text(profile, "allianceId")
+                } and ${userprofile.allianceId} <> ''), 0)::float8`,
+                higher: sql<number>`count(*) filter (where ${expedition_progress.score} > ${
+                    num(progress.find((row) => row.stage === phase.stage) ?? {}, "score")
+                })::int`,
+            })
+            .from(expedition_progress)
+            .innerJoin(userprofile, eq(userprofile.uid, expedition_progress.uid))
+            .where(where);
+        kingdomScore = Number(total?.score ?? 0);
+        allianceScore = Number(total?.alliance ?? 0);
+        rank = progress.some((row) => row.stage === phase.stage && row.score > 0)
+            ? Number(total?.higher ?? 0) + 1
+            : -1;
+    }
 
-  if (progress.length > 9) expeditionFailure();
+    const state: ExpeditionState = { period, phase, progress, allianceScore, kingdomScore, rank };
 
-  let allianceScore = 0,
-    kingdomScore = 0,
-    rank = -1;
+    if (needsView)
+    {
+        state.clock = clock;
+        const [server] = await tx
+            .select({ lastMergeMillis: server_info.lastMergeMillis })
+            .from(server_info)
+            .where(eq(server_info.uid, "server"))
+            .limit(1);
+        state.lastMergeMillis = long(server ?? {}, "lastMergeMillis");
+    }
 
-  if (
-    (period && phase && command === "newexpidition.activityinfo") ||
-    (period && phase && command === "newexpidition.takealliancereward")
-  ) {
-    const where = and(
-      eq(expedition_progress.periodId, period.periodId),
-      eq(expedition_progress.stage, phase.stage),
-      eq(userprofile.serverId, realm),
-    );
-    const [total] = await tx
-      .select({
-        score: sql<number>`coalesce(sum(${expedition_progress.score}), 0)::float8`,
-        alliance: sql<number>`coalesce(sum(${expedition_progress.score}) filter (where ${userprofile.allianceId} = ${text(profile, "allianceId")} and ${userprofile.allianceId} <> ''), 0)::float8`,
-        higher: sql<number>`count(*) filter (where ${expedition_progress.score} > ${num(progress.find((row) => row.stage === phase.stage) ?? {}, "score")})::int`,
-      })
-      .from(expedition_progress)
-      .innerJoin(userprofile, eq(userprofile.uid, expedition_progress.uid))
-      .where(where);
-    kingdomScore = Number(total?.score ?? 0);
-    allianceScore = Number(total?.alliance ?? 0);
-    rank = progress.some((row) => row.stage === phase.stage && row.score > 0)
-      ? Number(total?.higher ?? 0) + 1
-      : -1;
-  }
+    if (projectionOnly)
+    {
+        state.projectionOnly = true;
+    }
 
-  const state: ExpeditionState = { period, phase, progress, allianceScore, kingdomScore, rank };
+    if (period && phase)
+    {
+        const [closure] = await tx
+            .select({ periodId: expedition_stage_closure.periodId })
+            .from(expedition_stage_closure)
+            .where(
+                and(
+                    eq(expedition_stage_closure.periodId, period.periodId),
+                    eq(expedition_stage_closure.stage, phase.stage),
+                ),
+            )
+            .limit(1);
 
-  if (needsView) {
-    state.clock = clock;
-    const [server] = await tx
-      .select({ lastMergeMillis: server_info.lastMergeMillis })
-      .from(server_info)
-      .where(eq(server_info.uid, "server"))
-      .limit(1);
-    state.lastMergeMillis = long(server ?? {}, "lastMergeMillis");
-  }
+        if (closure)
+        {
+            state.closed = true;
+        }
+    }
 
-  if (projectionOnly) state.projectionOnly = true;
+    if (["expedition.show", "distribution.record.show", "tax.record.show"].includes(command ?? ""))
+    {
+        const params = request ? decode(Buffer.from(request)) : {};
+        const offset = cityInteger(
+            int(params, "currentCount", command === "expedition.show" ? 0 : -1),
+            0,
+            1000000,
+        );
 
-  if (period && phase) {
-    const [closure] = await tx
-      .select({ periodId: expedition_stage_closure.periodId })
-      .from(expedition_stage_closure)
-      .where(
-        and(
-          eq(expedition_stage_closure.periodId, period.periodId),
-          eq(expedition_stage_closure.stage, phase.stage),
-        ),
-      )
-      .limit(1);
+        if (command === "expedition.show")
+        {
+            state.records = await tx
+                .select()
+                .from(expedition_record)
+                .orderBy(desc(expedition_record.time), asc(expedition_record.uuid))
+                .offset(offset)
+                .limit(50);
+        }
 
-    if (closure) state.closed = true;
-  }
+        if (command === "tax.record.show")
+        {
+            state.taxRecords = await tx
+                .select()
+                .from(king_tax_record)
+                .orderBy(desc(king_tax_record.taxTime), asc(king_tax_record.uuid))
+                .offset(offset)
+                .limit(50);
+        }
 
-  if (["expedition.show", "distribution.record.show", "tax.record.show"].includes(command ?? "")) {
-    const params = request ? decode(Buffer.from(request)) : {};
-    const offset = cityInteger(
-      int(params, "currentCount", command === "expedition.show" ? 0 : -1),
-      0,
-      1000000,
-    );
+        if (command === "distribution.record.show")
+        {
+            state.distributions = await tx
+                .select()
+                .from(king_allot_tax_record)
+                .orderBy(desc(king_allot_tax_record.sendTime), asc(king_allot_tax_record.uuid))
+                .offset(offset)
+                .limit(50);
+        }
+    }
 
-    if (command === "expedition.show")
-      state.records = await tx
-        .select()
-        .from(expedition_record)
-        .orderBy(desc(expedition_record.time), asc(expedition_record.uuid))
-        .offset(offset)
-        .limit(50);
-
-    if (command === "tax.record.show")
-      state.taxRecords = await tx
-        .select()
-        .from(king_tax_record)
-        .orderBy(desc(king_tax_record.taxTime), asc(king_tax_record.uuid))
-        .offset(offset)
-        .limit(50);
-
-    if (command === "distribution.record.show")
-      state.distributions = await tx
-        .select()
-        .from(king_allot_tax_record)
-        .orderBy(desc(king_allot_tax_record.sendTime), asc(king_allot_tax_record.uuid))
-        .offset(offset)
-        .limit(50);
-  }
-
-  return state;
+    return state;
 }
 
 export async function writeExpedition(
-  tx: MutationTransaction,
-  owner: string,
-  rows: readonly Row[],
-) {
-  for (const row of rows) {
-    if (row.uid !== owner || !Number.isFinite(num(row, "score")) || num(row, "score") < 0)
-      expeditionFailure();
+    tx: MutationTransaction,
+    owner: string,
+    rows: readonly Row[],
+)
+{
+    for (const row of rows)
+    {
+        if (row.uid !== owner || !Number.isFinite(num(row, "score")) || num(row, "score") < 0)
+        {
+            expeditionFailure();
+        }
 
-    const value = {
-      uid: owner,
-      periodId: text(row, "periodId"),
-      stage: cityInteger(row.stage, 0, 8),
-      score: num(row, "score"),
-      takeReward: text(row, "takeReward"),
-    };
-    await tx
-      .insert(expedition_progress)
-      .values(value)
-      .onConflictDoUpdate({
-        target: [expedition_progress.uid, expedition_progress.periodId, expedition_progress.stage],
-        set: { score: value.score, takeReward: value.takeReward },
-      });
-  }
+        const value = {
+            uid: owner,
+            periodId: text(row, "periodId"),
+            stage: cityInteger(row.stage, 0, 8),
+            score: num(row, "score"),
+            takeReward: text(row, "takeReward"),
+        };
+        await tx
+            .insert(expedition_progress)
+            .values(value)
+            .onConflictDoUpdate({
+                target: [
+                    expedition_progress.uid,
+                    expedition_progress.periodId,
+                    expedition_progress.stage,
+                ],
+                set: { score: value.score, takeReward: value.takeReward },
+            });
+    }
 }

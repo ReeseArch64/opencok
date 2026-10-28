@@ -1,8 +1,9 @@
-export interface QuickScienceDefinition {
-  readonly "id": number;
-  readonly "groupid": number;
-  readonly "scienceid": number;
-  readonly "Targetlv": number;
+export interface QuickScienceDefinition
+{
+    readonly "id": number;
+    readonly "groupid": number;
+    readonly "scienceid": number;
+    readonly "Targetlv": number;
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";

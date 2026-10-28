@@ -1,7 +1,8 @@
-export interface ArenaRankDefinition {
-  readonly "id": number;
-  readonly "min": number;
-  readonly "max": number;
+export interface ArenaRankDefinition
+{
+    readonly "id": number;
+    readonly "min": number;
+    readonly "max": number;
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";

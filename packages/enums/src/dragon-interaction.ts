@@ -1,6 +1,7 @@
-export enum DragonInteraction {
-  Greet = "greet",
-  Chat = "chat",
-  Praise = "praise",
-  Pet = "pet",
+export enum DragonInteraction
+{
+    Greet = "greet",
+    Chat = "chat",
+    Praise = "praise",
+    Pet = "pet",
 }

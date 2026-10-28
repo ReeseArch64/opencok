@@ -4,8 +4,9 @@ import { requireEnvironment } from "./validation";
 
 export const env = parseEnvironment(loadEnvironment(process.env));
 
-export function requireEnv<K extends keyof Environment>(key: K): NonNullable<Environment[K]> {
-  return requireEnvironment(env, key);
+export function requireEnv<K extends keyof Environment>(key: K): NonNullable<Environment[K]>
+{
+    return requireEnvironment(env, key);
 }
 
 export { EnvironmentError } from "./validation";

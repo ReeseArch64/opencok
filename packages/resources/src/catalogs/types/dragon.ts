@@ -1,5 +1,6 @@
-export interface DragonDefinition {
-  readonly "id": number;
+export interface DragonDefinition
+{
+    readonly "id": number;
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";

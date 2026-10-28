@@ -1,4 +1,5 @@
-export interface ShippingInvestmentWrite {
-  count: number;
-  gold: number;
+export interface ShippingInvestmentWrite
+{
+    count: number;
+    gold: number;
 }

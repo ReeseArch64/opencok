@@ -1,8 +1,9 @@
-export interface TimeGiftDefinition {
-  readonly "id": number;
-  readonly "level": number;
-  readonly "rate": number;
-  readonly "reward": readonly (readonly number[])[];
+export interface TimeGiftDefinition
+{
+    readonly "id": number;
+    readonly "level": number;
+    readonly "rate": number;
+    readonly "reward": readonly (readonly number[])[];
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";

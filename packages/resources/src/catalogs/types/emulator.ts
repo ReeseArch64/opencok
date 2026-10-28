@@ -1,6 +1,7 @@
-export interface EmulatorDefinition {
-  readonly "id": number;
-  readonly "name": string;
+export interface EmulatorDefinition
+{
+    readonly "id": number;
+    readonly "name": string;
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";

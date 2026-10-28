@@ -19,37 +19,46 @@ redis.call('SET', KEYS[1], nextValue)
 return 1`;
 
 export async function publishPlayerUpdate(
-  command: (name: string, ...args: string[]) => Promise<unknown>,
-  kingdomId: number,
-  uid: string,
-  updatedAt: string,
-): Promise<void> {
-  if (
-    !Number.isInteger(kingdomId) ||
-    kingdomId < 1 ||
-    kingdomId > 2147483647 ||
-    typeof uid !== "string" ||
-    !uid ||
-    uid.length > 255 ||
-    !uid.isWellFormed() ||
-    uid.includes("\0") ||
-    typeof updatedAt !== "string" ||
-    !/^(0|[1-9][0-9]{0,18})$/.test(updatedAt) ||
-    BigInt(updatedAt) > 9223372036854775807n
-  )
-    throw new DependencyError("redis");
+    command: (name: string, ...args: string[]) => Promise<unknown>,
+    kingdomId: number,
+    uid: string,
+    updatedAt: string,
+): Promise<void>
+{
+    if (
+        !Number.isInteger(kingdomId)
+        || kingdomId < 1
+        || kingdomId > 2147483647
+        || typeof uid !== "string"
+        || !uid
+        || uid.length > 255
+        || !uid.isWellFormed()
+        || uid.includes("\0")
+        || typeof updatedAt !== "string"
+        || !/^(0|[1-9][0-9]{0,18})$/.test(updatedAt)
+        || BigInt(updatedAt) > 9223372036854775807n
+    )
+    {
+        throw new DependencyError("redis");
+    }
 
-  try {
-    const result = await command(
-      "EVAL",
-      playerUpdateScript,
-      "1",
-      `opencok:kingdom:${kingdomId}:player-update:${uid}`,
-      updatedAt,
-    );
+    try
+    {
+        const result = await command(
+            "EVAL",
+            playerUpdateScript,
+            "1",
+            `opencok:kingdom:${kingdomId}:player-update:${uid}`,
+            updatedAt,
+        );
 
-    if (result !== 0 && result !== 1) throw new Error();
-  } catch {
-    throw new DependencyError("redis");
-  }
+        if (result !== 0 && result !== 1)
+        {
+            throw new Error();
+        }
+    }
+    catch
+    {
+        throw new DependencyError("redis");
+    }
 }

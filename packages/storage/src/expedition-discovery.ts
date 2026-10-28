@@ -24,52 +24,64 @@ redis.call('PEXPIREAT',KEYS[1],ARGV[4])
 return 1`;
 
 export async function publishExpeditionDiscovery(
-  command: (command: string, ...args: string[]) => Promise<unknown>,
-  value: ExpeditionDiscoveryPublication,
-) {
-  const match = value.key.match(/^opencok:global:expedition-match:([1-9]\d{0,9})$/),
-    decimal = (raw: string) => /^[1-9]\d{0,18}$/.test(raw) && BigInt(raw) <= 9223372036854775807n;
+    command: (command: string, ...args: string[]) => Promise<unknown>,
+    value: ExpeditionDiscoveryPublication,
+)
+{
+    const match = value.key.match(/^opencok:global:expedition-match:([1-9]\d{0,9})$/),
+        decimal = (raw: string) =>
+            /^[1-9]\d{0,18}$/.test(raw) && BigInt(raw) <= 9223372036854775807n;
 
-  if (
-    !match ||
-    Number(match[1]) > 2147483647 ||
-    !decimal(value.ownerEpoch) ||
-    !decimal(value.sequence) ||
-    !decimal(value.expiresAt) ||
-    Buffer.byteLength(value.value) > 8192
-  )
-    throw new DependencyError("redis");
+    if (
+        !match
+        || Number(match[1]) > 2147483647
+        || !decimal(value.ownerEpoch)
+        || !decimal(value.sequence)
+        || !decimal(value.expiresAt)
+        || Buffer.byteLength(value.value) > 8192
+    )
+    {
+        throw new DependencyError("redis");
+    }
 
-  let parsed;
+    let parsed;
 
-  try {
-    parsed = JSON.parse(value.value);
-  } catch {
-    throw new DependencyError("redis");
-  }
+    try
+    {
+        parsed = JSON.parse(value.value);
+    }
+    catch
+    {
+        throw new DependencyError("redis");
+    }
 
-  if (
-    !parsed ||
-    typeof parsed !== "object" ||
-    parsed.serverId !== Number(match[1]) ||
-    parsed.ownerEpoch !== value.ownerEpoch ||
-    parsed.sequence !== value.sequence
-  )
-    throw new DependencyError("redis");
+    if (
+        !parsed
+        || typeof parsed !== "object"
+        || parsed.serverId !== Number(match[1])
+        || parsed.ownerEpoch !== value.ownerEpoch
+        || parsed.sequence !== value.sequence
+    )
+    {
+        throw new DependencyError("redis");
+    }
 
-  const result = await command(
-    "EVAL",
-    publish,
-    "1",
-    value.key,
-    value.value,
-    value.ownerEpoch,
-    value.sequence,
-    value.expiresAt,
-    match[1]!,
-  );
+    const result = await command(
+        "EVAL",
+        publish,
+        "1",
+        value.key,
+        value.value,
+        value.ownerEpoch,
+        value.sequence,
+        value.expiresAt,
+        match[1]!,
+    );
 
-  if (result !== 0 && result !== 1) throw new DependencyError("redis");
+    if (result !== 0 && result !== 1)
+    {
+        throw new DependencyError("redis");
+    }
 
-  return result === 1;
+    return result === 1;
 }

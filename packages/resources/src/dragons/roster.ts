@@ -7,10 +7,10 @@ import type { DragonBaseCatalogRecord } from "@opencok/dragon/contracts/dragon-b
 const mapper = new DragonDefinitionMapper(dragonCatalogBindings);
 
 export const dragonDefinitionByIdentity: ReadonlyMap<DragonIdentity, DragonBaseCatalogRecord> =
-  new Map(
-    dragonRoster
-      .filter((dragon) => dragon.server !== undefined)
-      .map((dragon) => [dragon.identity, mapper.toDefinition(dragon)]),
-  );
+    new Map(
+        dragonRoster
+            .filter((dragon) => dragon.server !== undefined)
+            .map((dragon) => [dragon.identity, mapper.toDefinition(dragon)]),
+    );
 
 export const dragonDefinitions = [...dragonDefinitionByIdentity.values()];

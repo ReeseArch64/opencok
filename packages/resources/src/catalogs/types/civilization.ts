@@ -1,6 +1,7 @@
-export interface CivilizationDefinition {
-  readonly "id": number;
-  readonly "type": number;
+export interface CivilizationDefinition
+{
+    readonly "id": number;
+    readonly "type": number;
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";

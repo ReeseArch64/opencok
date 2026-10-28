@@ -6,68 +6,77 @@ import { HeroTalentTree } from "@opencok/enums/hero-talent-tree";
 import type { HeroDefinition } from "../contracts/hero-definition.ts";
 import { Hero } from "./hero.ts";
 
-export class LuminousShield extends Hero {
-  public readonly identity = HeroIdentity.LuminousShield;
-  public readonly name = "Luminous Shield";
-  public readonly gender = HeroGender.Male;
-  public readonly recruitment: HeroDefinition["recruitment"] = {
-    available: true,
-    cost: { item: HeroItem.LuminousShieldFragment, quantity: 3000 },
-    initialQuality: 1,
-  };
-  public readonly progression: HeroDefinition["progression"] = {
-    initialLevel: 1,
-    maximumLevel: 100,
-    automatedGrantLevelLimit: 100,
-    talentPointDivisor: 1,
-    breakthroughs: this.freeBreakthroughs(HeroItem.LuminousShieldFragment, 5),
-  };
-  public readonly stars: HeroDefinition["stars"] = {
-    initial: 1,
-    maximum: 4,
-    initialSkills: [HeroSkill.LuminousShieldAdvancedRecruitmentInfantry],
-    upgrades: [
-      { stars: 2, cost: { item: HeroItem.LuminousShieldFragment, quantity: 6000 }, skills: [] },
-      {
-        stars: 3,
-        cost: { item: HeroItem.LuminousShieldFragment, quantity: 15000 },
-        skills: [HeroSkill.LuminousShieldSmashTheEnemies],
-      },
-      {
-        stars: 4,
-        cost: { item: HeroItem.LuminousShieldFragment, quantity: 30000 },
-        skills: [HeroSkill.LuminousShieldPowerOfLifeInfantry],
-      },
-      { stars: 5, cost: { item: HeroItem.LuminousShieldFragment, quantity: 60000 }, skills: [] },
-    ],
-  };
-  public readonly talentTrees: HeroDefinition["talentTrees"] = [
-    HeroTalentTree.LuminousShieldCombat,
-  ];
-  public readonly refinement = this.standardRefinement(HeroItem.LuminousShieldFragment, [
-    {
-      position: 1,
-      refinementItemQuantity: 1,
-      requiredLevel: 1,
-      unlockCost: { item: HeroItem.HeroBadge, quantity: 0 },
-    },
-    {
-      position: 2,
-      refinementItemQuantity: 1,
-      requiredLevel: 1,
-      unlockCost: { item: HeroItem.HeroBadge, quantity: 0 },
-    },
-    {
-      position: 3,
-      refinementItemQuantity: 1,
-      requiredLevel: 30,
-      unlockCost: { item: HeroItem.HeroBadge, quantity: 1 },
-    },
-    {
-      position: 4,
-      refinementItemQuantity: 0,
-      unlockCost: { item: HeroItem.HeroBadge, quantity: 1 },
-    },
-    { position: 5, refinementItemQuantity: 0 },
-  ]);
+export class LuminousShield extends Hero
+{
+    public readonly identity = HeroIdentity.LuminousShield;
+    public readonly name = "Luminous Shield";
+    public readonly gender = HeroGender.Male;
+    public readonly recruitment: HeroDefinition["recruitment"] = {
+        available: true,
+        cost: { item: HeroItem.LuminousShieldFragment, quantity: 3000 },
+        initialQuality: 1,
+    };
+    public readonly progression: HeroDefinition["progression"] = {
+        initialLevel: 1,
+        maximumLevel: 100,
+        automatedGrantLevelLimit: 100,
+        talentPointDivisor: 1,
+        breakthroughs: this.freeBreakthroughs(HeroItem.LuminousShieldFragment, 5),
+    };
+    public readonly stars: HeroDefinition["stars"] = {
+        initial: 1,
+        maximum: 4,
+        initialSkills: [HeroSkill.LuminousShieldAdvancedRecruitmentInfantry],
+        upgrades: [
+            {
+                stars: 2,
+                cost: { item: HeroItem.LuminousShieldFragment, quantity: 6000 },
+                skills: [],
+            },
+            {
+                stars: 3,
+                cost: { item: HeroItem.LuminousShieldFragment, quantity: 15000 },
+                skills: [HeroSkill.LuminousShieldSmashTheEnemies],
+            },
+            {
+                stars: 4,
+                cost: { item: HeroItem.LuminousShieldFragment, quantity: 30000 },
+                skills: [HeroSkill.LuminousShieldPowerOfLifeInfantry],
+            },
+            {
+                stars: 5,
+                cost: { item: HeroItem.LuminousShieldFragment, quantity: 60000 },
+                skills: [],
+            },
+        ],
+    };
+    public readonly talentTrees: HeroDefinition["talentTrees"] = [
+        HeroTalentTree.LuminousShieldCombat,
+    ];
+    public readonly refinement = this.standardRefinement(HeroItem.LuminousShieldFragment, [
+        {
+            position: 1,
+            refinementItemQuantity: 1,
+            requiredLevel: 1,
+            unlockCost: { item: HeroItem.HeroBadge, quantity: 0 },
+        },
+        {
+            position: 2,
+            refinementItemQuantity: 1,
+            requiredLevel: 1,
+            unlockCost: { item: HeroItem.HeroBadge, quantity: 0 },
+        },
+        {
+            position: 3,
+            refinementItemQuantity: 1,
+            requiredLevel: 30,
+            unlockCost: { item: HeroItem.HeroBadge, quantity: 1 },
+        },
+        {
+            position: 4,
+            refinementItemQuantity: 0,
+            unlockCost: { item: HeroItem.HeroBadge, quantity: 1 },
+        },
+        { position: 5, refinementItemQuantity: 0 },
+    ]);
 }

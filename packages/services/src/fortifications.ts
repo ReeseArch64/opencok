@@ -6,193 +6,219 @@ import { errors } from "@opencok/constants/game";
 import { sfs, str, int, encode, type Fields } from "@opencok/messages/sfs";
 import { text, num, long, type Row } from "@opencok/contracts/rows";
 import type {
-  ActivityAction,
-  PreparedActivity,
-  TimedActivity,
+    ActivityAction,
+    PreparedActivity,
+    TimedActivity,
 } from "@opencok/contracts/timed-activity";
 import {
-  cityInteger,
-  cityDuration,
-  progressionActivityData,
+    cityInteger,
+    cityDuration,
+    progressionActivityData,
 } from "@opencok/rules/city-progression";
 import {
-  troopDefinition,
-  troopQueueType,
-  troopBuilding,
-  unitPower,
-  troopCosts,
-  totalBuildingParameter,
-  transferTroops,
+    troopDefinition,
+    troopQueueType,
+    troopBuilding,
+    unitPower,
+    troopCosts,
+    totalBuildingParameter,
+    transferTroops,
 } from "@opencok/rules/military";
 import { idleDeadline } from "@opencok/rules/timed-activity";
 import { CityProgressionContext } from "./city-progression-context.ts";
 import type { CityDomain } from "./city-domain.ts";
 import { militaryBoolean } from "./training";
 
-export function fortificationCapacity(context: CityProgressionContext) {
-  return cityInteger(
-    Math.max(
-      0,
-      totalBuildingParameter(context.state, context.rules, 419000, 0) + context.effect(88),
-    ),
-  );
+export function fortificationCapacity(context: CityProgressionContext)
+{
+    return cityInteger(
+        Math.max(
+            0,
+            totalBuildingParameter(context.state, context.rules, 419000, 0) + context.effect(88),
+        ),
+    );
 }
 
-function complete(context: CityProgressionContext, row: Row, count: number) {
-  if (count <= 0 || num(row, "build") !== count)
-    throw new GameError(errors.invalid, "city_progression");
+function complete(context: CityProgressionContext, row: Row, count: number)
+{
+    if (count <= 0 || num(row, "build") !== count)
+    {
+        throw new GameError(errors.invalid, "city_progression");
+    }
 
-  const [, free] = transferTroops(count, num(row, "num"), count);
-  context.write.forts = [{ ...row, num: free, build: 0, finishTime: 0n }];
-  recordTargetTask(context, 2, count, "5");
-  context.recordHero(4, text(row, "armyId"), count);
-  context.power(unitPower(troopDefinition(context.rules, text(row, "armyId")), count));
+    const [, free] = transferTroops(count, num(row, "num"), count);
+    context.write.forts = [{ ...row, num: free, build: 0, finishTime: 0n }];
+    recordTargetTask(context, 2, count, "5");
+    context.recordHero(4, text(row, "armyId"), count);
+    context.power(unitPower(troopDefinition(context.rules, text(row, "armyId")), count));
 
-  return { armyId: sfs.string(text(row, "armyId")), free: sfs.int(free) };
+    return { armyId: sfs.string(text(row, "armyId")), free: sfs.int(free) };
 }
 
 async function prepare(
-  context: CityProgressionContext,
-  command: string,
-  params: Fields,
-): Promise<PreparedActivity> {
-  const armyId = str(params, "id"),
-    rule = troopDefinition(context.rules, armyId);
+    context: CityProgressionContext,
+    command: string,
+    params: Fields,
+): Promise<PreparedActivity>
+{
+    const armyId = str(params, "id"),
+        rule = troopDefinition(context.rules, armyId);
 
-  if (troopQueueType(rule) !== 2) throw new GameError(errors.invalid, "city_progression");
+    if (troopQueueType(rule) !== 2)
+    {
+        throw new GameError(errors.invalid, "city_progression");
+    }
 
-  const count = cityInteger(
-    int(params, "num"),
-    command === "fort.destory" || command === "fort.destroy" ? 0 : 1,
-  );
-  const row = context.state.forts.find((fort) => fort.armyId === armyId) ?? {
-    uid: context.owner,
-    armyId,
-    level: 1,
-    num: 0,
-    build: 0,
-    finishTime: 0n,
-  };
+    const count = cityInteger(
+        int(params, "num"),
+        command === "fort.destory" || command === "fort.destroy" ? 0 : 1,
+    );
+    const row = context.state.forts.find((fort) => fort.armyId === armyId) ?? {
+        uid: context.owner,
+        armyId,
+        level: 1,
+        num: 0,
+        build: 0,
+        finishTime: 0n,
+    };
 
-  if (command === "fort.destory" || command === "fort.destroy") {
-    const [free] = transferTroops(num(row, "num"), 0, count);
-    context.write.forts = [{ ...row, num: free }];
-    context.power(-unitPower(rule, count));
+    if (command === "fort.destory" || command === "fort.destroy")
+    {
+        const [free] = transferTroops(num(row, "num"), 0, count);
+        context.write.forts = [{ ...row, num: free }];
+        context.power(-unitPower(rule, count));
 
-    return { response: encode({ id: sfs.string(armyId), free: sfs.int(free) }) };
-  }
+        return { response: encode({ id: sfs.string(armyId), free: sfs.int(free) }) };
+    }
 
-  const building = troopBuilding(context.state, rule);
-  context.checkPower(unitPower(rule, count));
-  const reserved = context.state.forts.reduce(
-    (sum, fort) =>
-      sum + BigInt(cityInteger(num(fort, "num"))) + BigInt(cityInteger(num(fort, "build"))),
-    0n,
-  );
+    const building = troopBuilding(context.state, rule);
+    context.checkPower(unitPower(rule, count));
+    const reserved = context.state.forts.reduce(
+        (sum, fort) =>
+            sum + BigInt(cityInteger(num(fort, "num"))) + BigInt(cityInteger(num(fort, "build"))),
+        0n,
+    );
 
-  if (reserved + BigInt(count) > BigInt(fortificationCapacity(context)))
-    throw new GameError(errors.fortCapacity, "fortification_capacity");
+    if (reserved + BigInt(count) > BigInt(fortificationCapacity(context)))
+    {
+        throw new GameError(errors.fortCapacity, "fortification_capacity");
+    }
 
-  if (
-    num(row, "build") !== 0 ||
-    context.state.queues.some((queue) => num(queue, "type") === 2 && text(queue, "itemId"))
-  )
-    throw new GameError(errors.occupied, "city_progression");
-
-  if (
-    !context.state.queues.some(
-      (queue) =>
-        num(queue, "type") === 2 &&
-        long(queue, "updateTime") === idleDeadline &&
-        long(queue, "endTime") >= context.now,
+    if (
+        num(row, "build") !== 0
+        || context.state.queues.some((queue) => num(queue, "type") === 2 && text(queue, "itemId"))
     )
-  )
-    throw new GameError(errors.full, "city_progression");
+    {
+        throw new GameError(errors.occupied, "city_progression");
+    }
 
-  const durationMs = cityDuration(
-    (cityInteger(rule.time) * count) /
-      (1 + totalBuildingParameter(context.state, context.rules, 416000, 1) / 100),
-    context.effect(67) + context.generalEffect(67, num(building, "itemId")),
-  );
-  const direct = command === "fort.cd",
-    purchase = direct ? Object.hasOwn(params, "max") : militaryBoolean(params, "gold");
-  context.spend(troopCosts(rule, count), purchase);
+    if (
+        !context.state.queues.some(
+            (queue) =>
+                num(queue, "type") === 2
+                && long(queue, "updateTime") === idleDeadline
+                && long(queue, "endTime") >= context.now,
+        )
+    )
+    {
+        throw new GameError(errors.full, "city_progression");
+    }
 
-  if (direct) context.accelerate(durationMs);
+    const durationMs = cityDuration(
+        (cityInteger(rule.time) * count)
+            / (1 + totalBuildingParameter(context.state, context.rules, 416000, 1) / 100),
+        context.effect(67) + context.generalEffect(67, num(building, "itemId")),
+    );
+    const direct = command === "fort.cd",
+        purchase = direct ? Object.hasOwn(params, "max") : militaryBoolean(params, "gold");
+    context.spend(troopCosts(rule, count), purchase);
 
-  context.write.forts = [
-    { ...row, build: count, finishTime: direct ? context.now : context.now + durationMs },
-  ];
+    if (direct)
+    {
+        context.accelerate(durationMs);
+    }
 
-  return {
-    type: 2,
-    itemId: armyId,
-    durationMs: direct ? 0n : durationMs,
-    ready: direct,
-    responseKind: "nested",
-    data: context.data("fort", { units: { [armyId]: count } }),
-    item: encode({ itemId: sfs.string(armyId) }),
-    response: encode({
-      resource: sfs.object(context.resource()),
-      ...(purchase || direct ? { gold: sfs.long(context.balance("gold")) } : {}),
-    }),
-  };
+    context.write.forts = [
+        { ...row, build: count, finishTime: direct ? context.now : context.now + durationMs },
+    ];
+
+    return {
+        type: 2,
+        itemId: armyId,
+        durationMs: direct ? 0n : durationMs,
+        ready: direct,
+        responseKind: "nested",
+        data: context.data("fort", { units: { [armyId]: count } }),
+        item: encode({ itemId: sfs.string(armyId) }),
+        response: encode({
+            resource: sfs.object(context.resource()),
+            ...(purchase || direct ? { gold: sfs.long(context.balance("gold")) } : {}),
+        }),
+    };
 }
 
 async function apply(
-  context: CityProgressionContext,
-  action: ActivityAction,
-  activity: TimedActivity,
-): Promise<Fields> {
-  const row = context.state.forts.find((fort) => fort.armyId === activity.itemId),
-    data = progressionActivityData(activity.data),
-    saved = context.state.queues.find((queue) => queue.uuid === activity.queueId);
+    context: CityProgressionContext,
+    action: ActivityAction,
+    activity: TimedActivity,
+): Promise<Fields>
+{
+    const row = context.state.forts.find((fort) => fort.armyId === activity.itemId),
+        data = progressionActivityData(activity.data),
+        saved = context.state.queues.find((queue) => queue.uuid === activity.queueId);
 
-  if (
-    !row ||
-    !saved ||
-    saved.itemId !== activity.itemId ||
-    num(row, "build") <= 0 ||
-    long(row, "finishTime") !== long(saved, "updateTime") ||
-    (data && (data.kind !== "fort" || data.units?.[activity.itemId] !== num(row, "build")))
-  )
-    throw new GameError(errors.queue, "city_progression");
+    if (
+        !row
+        || !saved
+        || saved.itemId !== activity.itemId
+        || num(row, "build") <= 0
+        || long(row, "finishTime") !== long(saved, "updateTime")
+        || (data && (data.kind !== "fort" || data.units?.[activity.itemId] !== num(row, "build")))
+    )
+    {
+        throw new GameError(errors.queue, "city_progression");
+    }
 
-  if (
-    troopQueueType(troopDefinition(context.rules, activity.itemId)) !== 2 ||
-    action === TimedActivityAction.Start
-  )
-    throw new GameError(errors.invalid, "city_progression");
+    if (
+        troopQueueType(troopDefinition(context.rules, activity.itemId)) !== 2
+        || action === TimedActivityAction.Start
+    )
+    {
+        throw new GameError(errors.invalid, "city_progression");
+    }
 
-  if (action === TimedActivityAction.Restore || action === TimedActivityAction.Reschedule) {
-    context.write.forts = [{ ...row, finishTime: activity.dueAt }];
+    if (action === TimedActivityAction.Restore || action === TimedActivityAction.Reschedule)
+    {
+        context.write.forts = [{ ...row, finishTime: activity.dueAt }];
 
-    return { itemId: sfs.string(activity.itemId) };
-  }
+        return { itemId: sfs.string(activity.itemId) };
+    }
 
-  if (action === TimedActivityAction.Cancel) {
-    context.refund(data);
-    context.write.forts = [{ ...row, build: 0, finishTime: 0n }];
+    if (action === TimedActivityAction.Cancel)
+    {
+        context.refund(data);
+        context.write.forts = [{ ...row, build: 0, finishTime: 0n }];
 
-    return { resource: sfs.object(context.resource()) };
-  }
+        return { resource: sfs.object(context.resource()) };
+    }
 
-  return complete(context, row, num(row, "build"));
+    return complete(context, row, num(row, "build"));
 }
 
-export class FortificationDomain extends CityCommandDomain {
-  public readonly commands: CityDomain["commands"] = [
-    "fort.build",
-    "fort.cd",
-    "fort.destory",
-    "fort.destroy",
-  ];
+export class FortificationDomain extends CityCommandDomain
+{
+    public readonly commands: CityDomain["commands"] = [
+        "fort.build",
+        "fort.cd",
+        "fort.destory",
+        "fort.destroy",
+    ];
 
-  public readonly types: CityDomain["types"] = [2];
+    public readonly types: CityDomain["types"] = [2];
 
-  public readonly prepare: CityDomain["prepare"] = prepare;
+    public readonly prepare: CityDomain["prepare"] = prepare;
 
-  public readonly apply: CityDomain["apply"] = apply;
+    public readonly apply: CityDomain["apply"] = apply;
 }
 
 export const fortificationDomain: CityDomain = new FortificationDomain();

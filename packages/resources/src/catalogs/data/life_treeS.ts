@@ -4,7 +4,7 @@ import type { CatalogTable } from "../../catalog-model.ts";
 import { records as records0 } from "./life_treeS.records0.ts";
 
 export const catalog: CatalogTable<LifeTreeSDefinition> = {
-  "kind": CatalogKind.Table,
-  "records": [...records0],
-  "sections": [{ "id": "life_treeS", "start": 0, "count": 2 }],
+    "kind": CatalogKind.Table,
+    "records": [...records0],
+    "sections": [{ "id": "life_treeS", "start": 0, "count": 2 }],
 };

@@ -3,203 +3,248 @@ import { cityInteger } from "./city-progression";
 import { GameError } from "@opencok/errors/game";
 import { errors } from "@opencok/constants/game";
 
-export function worldMutationFailure(): never {
-  throw new GameError(errors.invalid, "world_state");
+export function worldMutationFailure(): never
+{
+    throw new GameError(errors.invalid, "world_state");
 }
 
-export function worldFootprint(point: number, size: number, four = true): number[] {
-  cityInteger(point, 1, size * size);
-  const x = (point - 1) % size,
-    y = Math.floor((point - 1) / size);
+export function worldFootprint(point: number, size: number, four = true): number[]
+{
+    cityInteger(point, 1, size * size);
+    const x = (point - 1) % size,
+        y = Math.floor((point - 1) / size);
 
-  if (!four) return [point];
+    if (!four)
+    {
+        return [point];
+    }
 
-  if (x === 0 || y === 0) worldMutationFailure();
+    if (x === 0 || y === 0)
+    {
+        worldMutationFailure();
+    }
 
-  return [point - 1, point - size, point - size - 1, point];
+    return [point - 1, point - size, point - size - 1, point];
 }
 
-export interface MarchRouteSegment {
-  sp: number;
-  dp: number;
-  mt: number;
+export interface MarchRouteSegment
+{
+    sp: number;
+    dp: number;
+    mt: number;
 }
 
 export function ordinaryMarchRoute(
-  rules: Rules,
-  size: number,
-  source: number,
-  target: number,
-  speed: number,
-  effect: number,
-  sourceFour = true,
-  targetFour = false,
-  blackEffect = 0,
-  scout = false,
-  sourceFootprint?: readonly number[],
-  targetFootprint?: readonly number[],
-  javaCoordinates = false,
-) {
-  const rule = rules.items.get("world_marchtime");
+    rules: Rules,
+    size: number,
+    source: number,
+    target: number,
+    speed: number,
+    effect: number,
+    sourceFour = true,
+    targetFour = false,
+    blackEffect = 0,
+    scout = false,
+    sourceFootprint?: readonly number[],
+    targetFootprint?: readonly number[],
+    javaCoordinates = false,
+)
+{
+    const rule = rules.items.get("world_marchtime");
 
-  if (
-    !rule ||
-    !Number.isFinite(speed) ||
-    speed <= 0 ||
-    !Number.isFinite(effect) ||
-    !Number.isFinite(blackEffect)
-  )
-    worldMutationFailure();
-
-  const coordinateY = (id: number) =>
-    javaCoordinates ? Math.trunc((id - 1) / size) : Math.floor((id - 1) / size);
-  let distance = Infinity,
-    fromPoint = source,
-    toPoint = target;
-
-  for (const from of sourceFootprint ?? worldFootprint(source, size, sourceFour))
-    for (const to of targetFootprint ?? worldFootprint(target, size, targetFour)) {
-      const current = Math.hypot(
-        ((from - 1) % size) - ((to - 1) % size),
-        coordinateY(from) - coordinateY(to),
-      );
-
-      if (current > 0 && current < distance) {
-        distance = current;
-        fromPoint = from;
-        toPoint = to;
-      }
+    if (
+        !rule
+        || !Number.isFinite(speed)
+        || speed <= 0
+        || !Number.isFinite(effect)
+        || !Number.isFinite(blackEffect)
+    )
+    {
+        worldMutationFailure();
     }
 
-  const from = [(fromPoint - 1) % size, coordinateY(fromPoint)] as const,
-    to = [(toPoint - 1) % size, coordinateY(toPoint)] as const,
-    center = Math.floor(size / 2);
-  const axis = Math.abs(to[0] - from[0]) >= Math.abs(to[1] - from[1]) ? 0 : 1,
-    other = axis === 0 ? 1 : 0,
-    delta = to[axis] - from[axis],
-    step = Math.sign(delta);
-  const hits: [number, number][] = [];
+    const coordinateY = (id: number) =>
+        javaCoordinates ? Math.trunc((id - 1) / size) : Math.floor((id - 1) / size);
+    let distance = Infinity,
+        fromPoint = source,
+        toPoint = target;
 
-  if (delta !== 0)
-    for (let offset = 0; offset !== delta; offset += step) {
-      const position: [number, number] = [...from];
-      position[axis] += offset;
-      position[other] = Math.trunc(
-        Math.fround(
-          Math.fround(Math.fround((from[other] - to[other]) / (from[axis] - to[axis])) * offset) +
-            from[other],
-        ),
-      );
+    for (const from of sourceFootprint ?? worldFootprint(source, size, sourceFour))
+    {
+        for (const to of targetFootprint ?? worldFootprint(target, size, targetFour))
+        {
+            const current = Math.hypot(
+                ((from - 1) % size) - ((to - 1) % size),
+                coordinateY(from) - coordinateY(to),
+            );
 
-      if (Math.max(Math.abs(position[0] - center), Math.abs(position[1] - center)) !== 26) continue;
-
-      if (!hits.length) hits.push(position);
-      else if (Math.hypot(position[0] - hits[0]![0], position[1] - hits[0]![1]) > 1) {
-        hits.push(position);
-        break;
-      }
+            if (current > 0 && current < distance)
+            {
+                distance = current;
+                fromPoint = from;
+                toPoint = to;
+            }
+        }
     }
 
-  const knots = [from, ...hits, to],
-    segments: MarchRouteSegment[] = [];
+    const from = [(fromPoint - 1) % size, coordinateY(fromPoint)] as const,
+        to = [(toPoint - 1) % size, coordinateY(toPoint)] as const,
+        center = Math.floor(size / 2);
+    const axis = Math.abs(to[0] - from[0]) >= Math.abs(to[1] - from[1]) ? 0 : 1,
+        other = axis === 0 ? 1 : 0,
+        delta = to[axis] - from[axis],
+        step = Math.sign(delta);
+    const hits: [number, number][] = [];
 
-  for (let index = 1; index < knots.length; index++) {
-    const start = knots[index - 1]!,
-      end = knots[index]!,
-      length = Math.hypot(end[0] - start[0], end[1] - start[1]);
+    if (delta !== 0)
+    {
+        for (let offset = 0; offset !== delta; offset += step)
+        {
+            const position: [number, number] = [...from];
+            position[axis] += offset;
+            position[other] = Math.trunc(
+                Math.fround(
+                    Math.fround(
+                        Math.fround((from[other] - to[other]) / (from[axis] - to[axis])) * offset,
+                    )
+                        + from[other],
+                ),
+            );
 
-    if (length === 0) continue;
+            if (Math.max(Math.abs(position[0] - center), Math.abs(position[1] - center)) !== 26)
+            {
+                continue;
+            }
 
-    const black =
-      Math.abs((start[0] + end[0]) / 2 - center) <= 26 &&
-      Math.abs((start[1] + end[1]) / 2 - center) <= 26;
-    const bonus = Math.fround(
-      Math.fround(100 + Math.fround(effect)) + (black ? Math.fround(blackEffect) : 0),
-    );
-    const seconds = Math.trunc(
-      ((Math.pow(length, Math.fround(Number(rule.k1))) *
-        cityInteger(scout ? rule.k3 : rule.k2, 1)) /
-        (Math.fround(speed) * Math.max(bonus / 100, 0.001))) *
-        (black ? Number(rule.k5) : 1),
-    );
-    segments.push({
-      sp: 1 + start[0] + start[1] * size,
-      dp: 1 + end[0] + end[1] * size,
-      mt: cityInteger(Math.max(0, seconds), 0, 2147483) * 1000,
-    });
-  }
+            if (!hits.length)
+            {
+                hits.push(position);
+            }
+            else if (Math.hypot(position[0] - hits[0]![0], position[1] - hits[0]![1]) > 1)
+            {
+                hits.push(position);
+                break;
+            }
+        }
+    }
 
-  const total = segments.reduce((sum, row) => sum + row.mt, 0);
+    const knots = [from, ...hits, to],
+        segments: MarchRouteSegment[] = [];
 
-  return {
-    duration: BigInt(cityInteger(Math.max(1, total), 1)),
-    segments: hits.length ? segments : [],
-  };
+    for (let index = 1; index < knots.length; index++)
+    {
+        const start = knots[index - 1]!,
+            end = knots[index]!,
+            length = Math.hypot(end[0] - start[0], end[1] - start[1]);
+
+        if (length === 0)
+        {
+            continue;
+        }
+
+        const black = Math.abs((start[0] + end[0]) / 2 - center) <= 26
+            && Math.abs((start[1] + end[1]) / 2 - center) <= 26;
+        const bonus = Math.fround(
+            Math.fround(100 + Math.fround(effect)) + (black ? Math.fround(blackEffect) : 0),
+        );
+        const seconds = Math.trunc(
+            ((Math.pow(length, Math.fround(Number(rule.k1)))
+                * cityInteger(scout ? rule.k3 : rule.k2, 1))
+                / (Math.fround(speed) * Math.max(bonus / 100, 0.001)))
+                * (black ? Number(rule.k5) : 1),
+        );
+        segments.push({
+            sp: 1 + start[0] + start[1] * size,
+            dp: 1 + end[0] + end[1] * size,
+            mt: cityInteger(Math.max(0, seconds), 0, 2147483) * 1000,
+        });
+    }
+
+    const total = segments.reduce((sum, row) => sum + row.mt, 0);
+
+    return {
+        duration: BigInt(cityInteger(Math.max(1, total), 1)),
+        segments: hits.length ? segments : [],
+    };
 }
 
-export function ordinaryMarchDuration(...args: Parameters<typeof ordinaryMarchRoute>): bigint {
-  return ordinaryMarchRoute(...args).duration;
+export function ordinaryMarchDuration(...args: Parameters<typeof ordinaryMarchRoute>): bigint
+{
+    return ordinaryMarchRoute(...args).duration;
 }
 
 export function resourceGatherRate(
-  rules: Rules,
-  resource: number,
-  castleLevel: number,
-  effect: number,
-  shared = false,
-) {
-  const rule = rules.items.get("resources_speed"),
-    castle = rules.building("400000", castleLevel);
-  const base = Math.fround(
-    Number(shared ? rules.items.get("on_event2")?.k4 : rule?.[`k${resource + 1}`]),
-  );
-  const fixed =
-    resource === 5 ? 0 : Number(castle.clientParameters?.[4]?.value.split(";")[resource] ?? 0);
-  const value = Math.fround(
-    Math.fround(base + Math.fround(fixed / 3600)) *
-      Math.fround(Math.max(Math.fround(100 + effect), 20) / 100),
-  );
+    rules: Rules,
+    resource: number,
+    castleLevel: number,
+    effect: number,
+    shared = false,
+)
+{
+    const rule = rules.items.get("resources_speed"),
+        castle = rules.building("400000", castleLevel);
+    const base = Math.fround(
+        Number(shared ? rules.items.get("on_event2")?.k4 : rule?.[`k${resource + 1}`]),
+    );
+    const fixed = resource === 5
+        ? 0
+        : Number(castle.clientParameters?.[4]?.value.split(";")[resource] ?? 0);
+    const value = Math.fround(
+        Math.fround(base + Math.fround(fixed / 3600))
+            * Math.fround(Math.max(Math.fround(100 + effect), 20) / 100),
+    );
 
-  if (!Number.isFinite(value) || value <= 0) worldMutationFailure();
+    if (!Number.isFinite(value) || value <= 0)
+    {
+        worldMutationFailure();
+    }
 
-  return value;
+    return value;
 }
 
 export function accelerateMarchSegments(
-  segments: readonly MarchRouteSegment[],
-  start: bigint,
-  now: bigint,
-  percent: number,
-) {
-  cityInteger(percent, 1, 100);
+    segments: readonly MarchRouteSegment[],
+    start: bigint,
+    now: bigint,
+    percent: number,
+)
+{
+    cityInteger(percent, 1, 100);
 
-  if (segments.length > 3 || now < 0n) worldMutationFailure();
-
-  const fraction = Math.fround(1 - Math.fround(percent / 100));
-  let cursor = start,
-    active = false,
-    remaining = 0n;
-  const result = segments.map((segment) => {
-    cityInteger(segment.sp, 1);
-    cityInteger(segment.dp, 1);
-    cityInteger(segment.mt);
-    let time = segment.mt;
-
-    if (now < cursor + BigInt(time)) {
-      const left = active ? BigInt(time) : cursor + BigInt(time) - now;
-      const spent = BigInt(time) - left;
-      const shortened = BigInt(Math.trunc(Math.fround(Math.fround(Number(left)) * fraction)));
-      time = cityInteger(spent + shortened);
-      remaining += shortened;
-      active = true;
+    if (segments.length > 3 || now < 0n)
+    {
+        worldMutationFailure();
     }
 
-    cursor += BigInt(segment.mt);
+    const fraction = Math.fround(1 - Math.fround(percent / 100));
+    let cursor = start,
+        active = false,
+        remaining = 0n;
+    const result = segments.map((segment) => {
+        cityInteger(segment.sp, 1);
+        cityInteger(segment.dp, 1);
+        cityInteger(segment.mt);
+        let time = segment.mt;
 
-    return { ...segment, mt: time };
-  });
+        if (now < cursor + BigInt(time))
+        {
+            const left = active ? BigInt(time) : cursor + BigInt(time) - now;
+            const spent = BigInt(time) - left;
+            const shortened = BigInt(Math.trunc(Math.fround(Math.fround(Number(left)) * fraction)));
+            time = cityInteger(spent + shortened);
+            remaining += shortened;
+            active = true;
+        }
 
-  if (!active) worldMutationFailure();
+        cursor += BigInt(segment.mt);
 
-  return { segments: result, remaining };
+        return { ...segment, mt: time };
+    });
+
+    if (!active)
+    {
+        worldMutationFailure();
+    }
+
+    return { segments: result, remaining };
 }

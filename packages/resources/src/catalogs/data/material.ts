@@ -4,7 +4,7 @@ import type { CatalogTable } from "../../catalog-model.ts";
 import { records as records0 } from "./material.records0.ts";
 
 export const catalog: CatalogTable<MaterialDefinition> = {
-  "kind": CatalogKind.Table,
-  "records": [...records0],
-  "sections": [{ "id": "meterial", "start": 0, "count": 17 }],
+    "kind": CatalogKind.Table,
+    "records": [...records0],
+    "sections": [{ "id": "meterial", "start": 0, "count": 17 }],
 };

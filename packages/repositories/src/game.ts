@@ -16,10 +16,10 @@ import { readDonationRanking, readCemeteryRanking } from "./community-ranking.ts
 import { readThroneRanking } from "./throne-ranking.ts";
 import type { ThroneRankingPeriod } from "@opencok/contracts/throne-ranking";
 import {
-  readHeroRanking,
-  readHeroInsideRanking,
-  readHeroHistory,
-  readHeroHistoryPresentation,
+    readHeroRanking,
+    readHeroInsideRanking,
+    readHeroHistory,
+    readHeroHistoryPresentation,
 } from "@opencok/hero/repositories/hero-ranking";
 import { user_mixed_info } from "@opencok/drizzle/schema/opencok_kingdom/user_mixed_info";
 import { reportAvatar } from "./avatar-report.ts";
@@ -37,27 +37,27 @@ import { translationv2 } from "@opencok/drizzle/schema/opencok_kingdom/translati
 import { mail } from "@opencok/drizzle/schema/opencok_kingdom/mail";
 import { readMailStatus } from "./mail.ts";
 import type {
-  MailSystemQuery,
-  MailSystemInspector,
-  MailBatchQuery,
-  MailGroupQuery,
-  MailGroupInspector,
-  MailCategoryQuery,
-  MailCategoryInspector,
-  MailContentsQuery,
-  MailContentsInspector,
-  MailConversationSaveQuery,
-  MailConversationReadQuery,
-  MailCategoryDeleteQuery,
-  MailCategoryDeleteInspector,
-  MailBatchInvitationPlanner,
-  MailTypeDeleteQuery,
-  MailConversationDeleteQuery,
-  MailDeleteQuery,
-  MailDeletePlanner,
-  MailReadQuery,
-  MailSaveQuery,
-  MailStatusQuery,
+    MailSystemQuery,
+    MailSystemInspector,
+    MailBatchQuery,
+    MailGroupQuery,
+    MailGroupInspector,
+    MailCategoryQuery,
+    MailCategoryInspector,
+    MailContentsQuery,
+    MailContentsInspector,
+    MailConversationSaveQuery,
+    MailConversationReadQuery,
+    MailCategoryDeleteQuery,
+    MailCategoryDeleteInspector,
+    MailBatchInvitationPlanner,
+    MailTypeDeleteQuery,
+    MailConversationDeleteQuery,
+    MailDeleteQuery,
+    MailDeletePlanner,
+    MailReadQuery,
+    MailSaveQuery,
+    MailStatusQuery,
 } from "@opencok/contracts/mail";
 import { mail_contents } from "@opencok/drizzle/schema/opencok_kingdom/mail_contents";
 import { mail_group } from "@opencok/drizzle/schema/opencok_kingdom/mail_group";
@@ -99,23 +99,23 @@ import { celebrity } from "@opencok/drizzle/schema/opencok_kingdom/celebrity";
 import { usermapping } from "@opencok/drizzle/schema/opencok_global/usermapping";
 import { DependencyError } from "@opencok/errors/dependency";
 import {
-  and,
-  asc,
-  eq,
-  getTableColumns,
-  gt,
-  inArray,
-  or,
-  sql,
-  DrizzleQueryError,
+    and,
+    asc,
+    eq,
+    getTableColumns,
+    gt,
+    inArray,
+    or,
+    sql,
+    DrizzleQueryError,
 } from "drizzle-orm";
 import type { ServerConfig } from "@opencok/contracts/server";
 import type {
-  GameStore,
-  CityState,
-  LoginConfigurationState,
-  PushPreference,
-  ProfilePreferenceField,
+    GameStore,
+    CityState,
+    LoginConfigurationState,
+    PushPreference,
+    ProfilePreferenceField,
 } from "@opencok/contracts/game";
 import { num, type Row } from "@opencok/contracts/rows";
 import { checkPlayerSummaryStore, getPlayerSummariesByIds } from "./players.ts";
@@ -127,639 +127,787 @@ import type { PlayerRankingQuery } from "@opencok/contracts/ranking";
 import { readPlayerRanking } from "./ranking.ts";
 
 type GameRepositoryConfig = Pick<
-  ServerConfig,
-  | "databaseUrl"
-  | "timeoutMs"
-  | "globalDatabase"
-  | "kingdomId"
-  | "kingdomDatabase"
-  | "playerKingdoms"
-  | "mailChat"
+    ServerConfig,
+    | "databaseUrl"
+    | "timeoutMs"
+    | "globalDatabase"
+    | "kingdomId"
+    | "kingdomDatabase"
+    | "playerKingdoms"
+    | "mailChat"
 >;
 
-export class Database implements GameStore, FriendshipMineStore {
-  readonly databases;
-  readonly kingdom;
+export class Database implements GameStore, FriendshipMineStore
+{
+    readonly databases;
+    readonly kingdom;
 
-  async rankingPrivacy(uid: string, kind: "payment" | "consumption"): Promise<number> {
-    if (!uid || uid.length > 40 || (kind !== "payment" && kind !== "consumption"))
-      throw new Error("Invalid ranking privacy request");
+    async rankingPrivacy(uid: string, kind: "payment" | "consumption"): Promise<number>
+    {
+        if (!uid || uid.length > 40 || (kind !== "payment" && kind !== "consumption"))
+        {
+            throw new Error("Invalid ranking privacy request");
+        }
 
-    const column = kind === "payment" ? user_mixed_info.payHide : user_mixed_info.costHide;
-    const rows = await this.kingdom.db
-      .select({ hide: column })
-      .from(user_mixed_info)
-      .where(eq(user_mixed_info.uid, uid))
-      .limit(1);
+        const column = kind === "payment" ? user_mixed_info.payHide : user_mixed_info.costHide;
+        const rows = await this.kingdom.db
+            .select({ hide: column })
+            .from(user_mixed_info)
+            .where(eq(user_mixed_info.uid, uid))
+            .limit(1);
 
-    return rows[0]?.hide ?? 0;
-  }
+        return rows[0]?.hide ?? 0;
+    }
 
-  battleRankingState(uid: string, now: number) {
-    return readBattleRankingState(
-      this.kingdom.db,
-      this.databases.global.db,
-      uid,
-      this.config.kingdomId,
-      now,
-    );
-  }
+    battleRankingState(uid: string, now: number)
+    {
+        return readBattleRankingState(
+            this.kingdom.db,
+            this.databases.global.db,
+            uid,
+            this.config.kingdomId,
+            now,
+        );
+    }
 
-  activityDirectory(uid: string) {
-    return readActivityDirectory(this.kingdom.db, uid);
-  }
+    activityDirectory(uid: string)
+    {
+        return readActivityDirectory(this.kingdom.db, uid);
+    }
 
-  heroEvents(uid: string, kingdomId: number, selection: HeroEventSelection, now: number) {
-    if (!Number.isInteger(kingdomId) || kingdomId < 1 || !this.databases.kingdoms.has(kingdomId))
-      throw new Error("Unconfigured hero realm");
+    heroEvents(uid: string, kingdomId: number, selection: HeroEventSelection, now: number)
+    {
+        if (
+            !Number.isInteger(kingdomId) || kingdomId < 1 || !this.databases.kingdoms.has(kingdomId)
+        )
+        {
+            throw new Error("Unconfigured hero realm");
+        }
 
-    return readHeroEvents(this.databases.getKingdom(kingdomId).db, uid, selection, now);
-  }
+        return readHeroEvents(this.databases.getKingdom(kingdomId).db, uid, selection, now);
+    }
 
-  heroHistory(uid: string, kingdomId: number, type: number, now: number) {
-    if (!Number.isInteger(kingdomId) || kingdomId < 1 || !this.databases.kingdoms.has(kingdomId))
-      throw new Error("Unconfigured hero ranking realm");
+    heroHistory(uid: string, kingdomId: number, type: number, now: number)
+    {
+        if (
+            !Number.isInteger(kingdomId) || kingdomId < 1 || !this.databases.kingdoms.has(kingdomId)
+        )
+        {
+            throw new Error("Unconfigured hero ranking realm");
+        }
 
-    return readHeroHistory(this.databases.getKingdom(kingdomId).db, uid, type, now);
-  }
+        return readHeroHistory(this.databases.getKingdom(kingdomId).db, uid, type, now);
+    }
 
-  heroHistoryPresentation(alliances: readonly string[], realms: readonly number[]) {
-    return readHeroHistoryPresentation(this.databases.global.db, alliances, realms);
-  }
+    heroHistoryPresentation(alliances: readonly string[], realms: readonly number[])
+    {
+        return readHeroHistoryPresentation(this.databases.global.db, alliances, realms);
+    }
 
-  heroInsideRanking(uid: string, kingdomId: number, eventId: string, now: number) {
-    if (!Number.isInteger(kingdomId) || kingdomId < 1 || !this.databases.kingdoms.has(kingdomId))
-      throw new Error("Unconfigured hero ranking realm");
+    heroInsideRanking(uid: string, kingdomId: number, eventId: string, now: number)
+    {
+        if (
+            !Number.isInteger(kingdomId) || kingdomId < 1 || !this.databases.kingdoms.has(kingdomId)
+        )
+        {
+            throw new Error("Unconfigured hero ranking realm");
+        }
 
-    return readHeroInsideRanking(this.databases.getKingdom(kingdomId).db, uid, eventId, now);
-  }
+        return readHeroInsideRanking(this.databases.getKingdom(kingdomId).db, uid, eventId, now);
+    }
 
-  heroRanking(uid: string, kingdomId: number, activityId: string, now: number) {
-    if (!Number.isInteger(kingdomId) || kingdomId < 1 || !this.databases.kingdoms.has(kingdomId))
-      throw new Error("Unconfigured hero ranking realm");
+    heroRanking(uid: string, kingdomId: number, activityId: string, now: number)
+    {
+        if (
+            !Number.isInteger(kingdomId) || kingdomId < 1 || !this.databases.kingdoms.has(kingdomId)
+        )
+        {
+            throw new Error("Unconfigured hero ranking realm");
+        }
 
-    return readHeroRanking(this.databases.getKingdom(kingdomId).db, uid, activityId, now);
-  }
+        return readHeroRanking(this.databases.getKingdom(kingdomId).db, uid, activityId, now);
+    }
 
-  throneRanking(kingdomId: number, publication?: ThroneRankingPeriod) {
-    if (!Number.isInteger(kingdomId) || kingdomId < 1 || !this.databases.kingdoms.has(kingdomId))
-      throw new Error("Unconfigured throne ranking realm");
+    throneRanking(kingdomId: number, publication?: ThroneRankingPeriod)
+    {
+        if (
+            !Number.isInteger(kingdomId) || kingdomId < 1 || !this.databases.kingdoms.has(kingdomId)
+        )
+        {
+            throw new Error("Unconfigured throne ranking realm");
+        }
 
-    return readThroneRanking(
-      this.databases.getKingdom(kingdomId).db,
-      this.databases.global.db,
-      publication,
-    );
-  }
+        return readThroneRanking(
+            this.databases.getKingdom(kingdomId).db,
+            this.databases.global.db,
+            publication,
+        );
+    }
 
-  donationRanking(uid: string, now: number) {
-    return readDonationRanking(this.kingdom.db, uid, now);
-  }
+    donationRanking(uid: string, now: number)
+    {
+        return readDonationRanking(this.kingdom.db, uid, now);
+    }
 
-  cemeteryRanking(uid: string, type: "0" | "1", now: number) {
-    return readCemeteryRanking(this.kingdom.db, uid, type, now);
-  }
+    cemeteryRanking(uid: string, type: "0" | "1", now: number)
+    {
+        return readCemeteryRanking(this.kingdom.db, uid, type, now);
+    }
 
-  crossRankingRealm(): Promise<boolean> {
-    return readCrossRankingRealm(this.databases.global.db, this.config.kingdomId);
-  }
+    crossRankingRealm(): Promise<boolean>
+    {
+        return readCrossRankingRealm(this.databases.global.db, this.config.kingdomId);
+    }
 
-  flowerRanking(uid: string, realm: number, uids: readonly string[]) {
-    if (!Number.isInteger(realm) || realm < 1 || !this.databases.kingdoms.has(realm))
-      throw new Error("Unconfigured flower ranking realm");
+    flowerRanking(uid: string, realm: number, uids: readonly string[])
+    {
+        if (!Number.isInteger(realm) || realm < 1 || !this.databases.kingdoms.has(realm))
+        {
+            throw new Error("Unconfigured flower ranking realm");
+        }
 
-    return readFlowerRanking(this.databases.getKingdom(realm).db, uid, uids);
-  }
+        return readFlowerRanking(this.databases.getKingdom(realm).db, uid, uids);
+    }
 
-  normalRankingRealm(): Promise<boolean> {
-    return readNormalRankingRealm(this.databases.global.db, this.config.kingdomId);
-  }
+    normalRankingRealm(): Promise<boolean>
+    {
+        return readNormalRankingRealm(this.databases.global.db, this.config.kingdomId);
+    }
 
-  constructor(readonly config: GameRepositoryConfig) {
-    const kingdoms = [...(config.playerKingdoms ?? [])];
-    const own = kingdoms.find((realm) => realm.id === config.kingdomId);
+    constructor(readonly config: GameRepositoryConfig)
+    {
+        const kingdoms = [...(config.playerKingdoms ?? [])];
+        const own = kingdoms.find((realm) => realm.id === config.kingdomId);
 
-    if (own && own.database !== config.kingdomDatabase)
-      throw new Error("Player realm configuration conflicts with the selected realm");
+        if (own && own.database !== config.kingdomDatabase)
+        {
+            throw new Error("Player realm configuration conflicts with the selected realm");
+        }
 
-    if (!own) kingdoms.push({ id: config.kingdomId, database: config.kingdomDatabase });
+        if (!own)
+        {
+            kingdoms.push({ id: config.kingdomId, database: config.kingdomDatabase });
+        }
 
-    if (kingdoms.length > 2) throw new Error("At most two player realms may be configured");
+        if (kingdoms.length > 2)
+        {
+            throw new Error("At most two player realms may be configured");
+        }
 
-    this.databases = createDatabases(
-      {
-        connectionString: config.databaseUrl,
-        max: 8,
-        connectionTimeoutMillis: config.timeoutMs,
-        statement_timeout: config.timeoutMs,
-        query_timeout: config.timeoutMs,
-      },
-      {
-        globalDatabase: config.globalDatabase,
-        kingdoms,
-      },
-    );
-    this.kingdom = this.databases.getKingdom(config.kingdomId);
+        this.databases = createDatabases(
+            {
+                connectionString: config.databaseUrl,
+                max: 8,
+                connectionTimeoutMillis: config.timeoutMs,
+                statement_timeout: config.timeoutMs,
+                query_timeout: config.timeoutMs,
+            },
+            {
+                globalDatabase: config.globalDatabase,
+                kingdoms,
+            },
+        );
+        this.kingdom = this.databases.getKingdom(config.kingdomId);
 
-    for (const kingdom of this.databases.kingdoms.values()) kingdom.pool.on("error", () => {});
+        for (const kingdom of this.databases.kingdoms.values())
+        {
+            kingdom.pool.on("error", () => {});
+        }
 
-    this.databases.global.pool.on("error", () => {});
-  }
+        this.databases.global.pool.on("error", () => {});
+    }
 
-  async start() {
-    await this.kingdom.db.select().from(userprofile).limit(0);
+    async start()
+    {
+        await this.kingdom.db.select().from(userprofile).limit(0);
 
-    for (const table of [
-      user_resource,
-      user_building,
-      queue,
-      user_world,
-      worldpoint,
-      world_march,
-      user_army,
-      user_item,
-      user_lord,
-      user_civilization_prestige,
-      user_mine,
-      material_cost_ranking,
-      mail,
-      mail_update,
-      mail_gift_opening,
-      mail_contents,
-      translationv2,
-      mail_group,
-      alliance_invite_move,
-      switches,
-      parse_info,
-      celebrity,
-      pic_upload_record,
-    ])
-      await this.kingdom.db.select().from(table).limit(0);
+        for (
+            const table of [
+                user_resource,
+                user_building,
+                queue,
+                user_world,
+                worldpoint,
+                world_march,
+                user_army,
+                user_item,
+                user_lord,
+                user_civilization_prestige,
+                user_mine,
+                material_cost_ranking,
+                mail,
+                mail_update,
+                mail_gift_opening,
+                mail_contents,
+                translationv2,
+                mail_group,
+                alliance_invite_move,
+                switches,
+                parse_info,
+                celebrity,
+                pic_upload_record,
+            ]
+        )
+        {
+            await this.kingdom.db.select().from(table).limit(0);
+        }
 
-    await this.databases.global.db.select().from(account_new).limit(0);
-    await this.databases.global.db
-      .select({
-        uid: usermapping.gameUid,
-        type: usermapping.mappingType,
-        value: usermapping.mappingValue,
-      })
-      .from(usermapping)
-      .limit(0);
-    await this.databases.global.db
-      .select({
-        uid: mail_gift_log.uid,
-        sendTime: mail_gift_log.sendTime,
-        toUid: mail_gift_log.toUid,
-        isOpened: mail_gift_log.isOpened,
-        receiveTime: mail_gift_log.receiveTime,
-      })
-      .from(mail_gift_log)
-      .limit(0);
-    await checkPlayerSummaryStore(this.kingdom.db);
-    await checkPowerStore(this.kingdom.db);
-    await checkPublicProfileStore(this.kingdom.db);
-  }
-
-  async health() {
-    await Promise.all([
-      this.kingdom.db.execute(sql`select 1`),
-      this.databases.global.db.execute(sql`select 1`),
-    ]);
-  }
-
-  async getProfileById(uid: string): Promise<Row | undefined> {
-    return (
-      await this.kingdom.db.select().from(userprofile).where(eq(userprofile.uid, uid)).limit(1)
-    )[0];
-  }
-
-  updateAvatarReport(owner: string, target: string, now: number) {
-    return reportAvatar(this.kingdom.db, this.config.kingdomId, owner, target, now);
-  }
-
-  celebrityDescription(uid: string, kingdomId: number): Promise<Buffer | null> {
-    return readCelebrityDescription(this.databases, uid, kingdomId);
-  }
-
-  saveCelebrityDescription(uid: string, now: number, readDescription: () => Buffer | null) {
-    return saveCelebrityDescription(
-      this.kingdom.db,
-      uid,
-      this.config.kingdomId,
-      now,
-      readDescription,
-    );
-  }
-
-  async getAccountsByPlayerId(uid: string): Promise<Row[]> {
-    return this.databases.global.db
-      .select({ active: account_new.active, server: account_new.server, uuid: account_new.uuid })
-      .from(account_new)
-      .where(eq(account_new.gameUid, uid));
-  }
-
-  async getCityByPlayerId(uid: string, now: number): Promise<CityState> {
-    return this.kingdom.db.transaction(
-      async (tx) => {
-        const profile = (
-          await tx.select().from(userprofile).where(eq(userprofile.uid, uid)).limit(1)
-        )[0];
-        const civilizationType = profile ? num(profile, "civilizationType") : 0;
-        const prestige =
-          civilizationType > 0
-            ? (
-                await tx
-                  .select({ value: user_civilization_prestige.prestigeValue })
-                  .from(user_civilization_prestige)
-                  .where(
-                    and(
-                      eq(user_civilization_prestige.uid, uid),
-                      eq(user_civilization_prestige.civilizationType, civilizationType),
-                    ),
-                  )
-                  .limit(1)
-              )[0]
-            : undefined;
-        const resource = (
-          await tx.select().from(user_resource).where(eq(user_resource.uid, uid)).limit(1)
-        )[0];
-        const buildings = await tx
-          .select()
-          .from(user_building)
-          .where(eq(user_building.uid, uid))
-          .orderBy(asc(user_building.uuid));
-        const queues = await tx
-          .select()
-          .from(queue)
-          .where(eq(queue.ownerId, uid))
-          .orderBy(asc(queue.uuid));
-        const world = (
-          await tx
+        await this.databases.global.db.select().from(account_new).limit(0);
+        await this.databases.global.db
             .select({
-              ...getTableColumns(user_world),
-              cityDefValue: worldpoint.cityDefValue,
-              gridType: worldpoint.gridType,
-              fireTime: worldpoint.fireTime,
+                uid: usermapping.gameUid,
+                type: usermapping.mappingType,
+                value: usermapping.mappingValue,
             })
-            .from(user_world)
-            .innerJoin(
-              worldpoint,
-              and(
-                eq(worldpoint.id, user_world.pointId),
-                eq(worldpoint.worldId, user_world.worldId),
-              ),
+            .from(usermapping)
+            .limit(0);
+        await this.databases.global.db
+            .select({
+                uid: mail_gift_log.uid,
+                sendTime: mail_gift_log.sendTime,
+                toUid: mail_gift_log.toUid,
+                isOpened: mail_gift_log.isOpened,
+                receiveTime: mail_gift_log.receiveTime,
+            })
+            .from(mail_gift_log)
+            .limit(0);
+        await checkPlayerSummaryStore(this.kingdom.db);
+        await checkPowerStore(this.kingdom.db);
+        await checkPublicProfileStore(this.kingdom.db);
+    }
+
+    async health()
+    {
+        await Promise.all([
+            this.kingdom.db.execute(sql`select 1`),
+            this.databases.global.db.execute(sql`select 1`),
+        ]);
+    }
+
+    async getProfileById(uid: string): Promise<Row | undefined>
+    {
+        return (
+            await this.kingdom.db.select().from(userprofile).where(eq(userprofile.uid, uid)).limit(
+                1,
             )
-            .where(eq(user_world.uid, uid))
-            .limit(1)
         )[0];
-        const hasMarches =
-          (await tx.select({ uuid: world_march.uuid }).from(world_march).limit(1)).length > 0;
-        const armies = await tx
-          .select()
-          .from(user_army)
-          .where(eq(user_army.uid, uid))
-          .orderBy(asc(user_army.armyId));
-        const items = await tx
-          .select()
-          .from(user_item)
-          .where(
-            and(
-              eq(user_item.ownerId, uid),
-              gt(user_item.count, 0),
-              or(eq(user_item.vanishTime, 0n), gt(user_item.vanishTime, BigInt(now))),
-            ),
-          )
-          .orderBy(asc(user_item.itemId));
-        const hospital = await tx
-          .select()
-          .from(user_hospital)
-          .where(eq(user_hospital.uid, uid))
-          .orderBy(asc(user_hospital.armyId));
-        const forts = await tx
-          .select()
-          .from(user_wall)
-          .where(eq(user_wall.uid, uid))
-          .orderBy(asc(user_wall.armyId));
-        const equipment = await tx
-          .select()
-          .from(user_equip)
-          .where(eq(user_equip.uid, uid))
-          .orderBy(asc(user_equip.uuid))
-          .limit(1001);
+    }
 
-        if (equipment.length > 1000) throw new Error("Oversized equipment inventory");
+    updateAvatarReport(owner: string, target: string, now: number)
+    {
+        return reportAvatar(this.kingdom.db, this.config.kingdomId, owner, target, now);
+    }
 
-        const sciences = await tx
-          .select()
-          .from(user_science)
-          .where(eq(user_science.uid, uid))
-          .orderBy(asc(user_science.itemId));
-        const lord = (await tx.select().from(user_lord).where(eq(user_lord.uid, uid)).limit(1))[0];
+    celebrityDescription(uid: string, kingdomId: number): Promise<Buffer | null>
+    {
+        return readCelebrityDescription(this.databases, uid, kingdomId);
+    }
 
-        return {
-          profile,
-          resource,
-          buildings,
-          queues,
-          world,
-          hasMarches,
-          armies,
-          sciences,
-          equipment,
-          hospital,
-          forts,
-          items,
-          lord,
-          civilizationPrestige: prestige?.value ?? 0n,
-        };
-      },
-      { isolationLevel: "repeatable read", accessMode: "read only" },
-    );
-  }
+    saveCelebrityDescription(uid: string, now: number, readDescription: () => Buffer | null)
+    {
+        return saveCelebrityDescription(
+            this.kingdom.db,
+            uid,
+            this.config.kingdomId,
+            now,
+            readDescription,
+        );
+    }
 
-  getConfigurationByPlayerId(uid: string): Promise<LoginConfigurationState> {
-    return getConfigurationByPlayerId(this.kingdom.db, uid);
-  }
+    async getAccountsByPlayerId(uid: string): Promise<Row[]>
+    {
+        return this.databases.global.db
+            .select({
+                active: account_new.active,
+                server: account_new.server,
+                uuid: account_new.uuid,
+            })
+            .from(account_new)
+            .where(eq(account_new.gameUid, uid));
+    }
 
-  configurationSwitches(): Promise<Row[] | undefined> {
-    return readLoginSwitches(this.kingdom.db);
-  }
+    async getCityByPlayerId(uid: string, now: number): Promise<CityState>
+    {
+        return this.kingdom.db.transaction(
+            async (tx) => {
+                const profile = (
+                    await tx.select().from(userprofile).where(eq(userprofile.uid, uid)).limit(1)
+                )[0];
+                const civilizationType = profile ? num(profile, "civilizationType") : 0;
+                const prestige = civilizationType > 0
+                    ? (
+                        await tx
+                            .select({ value: user_civilization_prestige.prestigeValue })
+                            .from(user_civilization_prestige)
+                            .where(
+                                and(
+                                    eq(user_civilization_prestige.uid, uid),
+                                    eq(
+                                        user_civilization_prestige.civilizationType,
+                                        civilizationType,
+                                    ),
+                                ),
+                            )
+                            .limit(1)
+                    )[0]
+                    : undefined;
+                const resource = (
+                    await tx.select().from(user_resource).where(eq(user_resource.uid, uid)).limit(1)
+                )[0];
+                const buildings = await tx
+                    .select()
+                    .from(user_building)
+                    .where(eq(user_building.uid, uid))
+                    .orderBy(asc(user_building.uuid));
+                const queues = await tx
+                    .select()
+                    .from(queue)
+                    .where(eq(queue.ownerId, uid))
+                    .orderBy(asc(queue.uuid));
+                const world = (
+                    await tx
+                        .select({
+                            ...getTableColumns(user_world),
+                            cityDefValue: worldpoint.cityDefValue,
+                            gridType: worldpoint.gridType,
+                            fireTime: worldpoint.fireTime,
+                        })
+                        .from(user_world)
+                        .innerJoin(
+                            worldpoint,
+                            and(
+                                eq(worldpoint.id, user_world.pointId),
+                                eq(worldpoint.worldId, user_world.worldId),
+                            ),
+                        )
+                        .where(eq(user_world.uid, uid))
+                        .limit(1)
+                )[0];
+                const hasMarches =
+                    (await tx.select({ uuid: world_march.uuid }).from(world_march).limit(1)).length
+                        > 0;
+                const armies = await tx
+                    .select()
+                    .from(user_army)
+                    .where(eq(user_army.uid, uid))
+                    .orderBy(asc(user_army.armyId));
+                const items = await tx
+                    .select()
+                    .from(user_item)
+                    .where(
+                        and(
+                            eq(user_item.ownerId, uid),
+                            gt(user_item.count, 0),
+                            or(eq(user_item.vanishTime, 0n), gt(user_item.vanishTime, BigInt(now))),
+                        ),
+                    )
+                    .orderBy(asc(user_item.itemId));
+                const hospital = await tx
+                    .select()
+                    .from(user_hospital)
+                    .where(eq(user_hospital.uid, uid))
+                    .orderBy(asc(user_hospital.armyId));
+                const forts = await tx
+                    .select()
+                    .from(user_wall)
+                    .where(eq(user_wall.uid, uid))
+                    .orderBy(asc(user_wall.armyId));
+                const equipment = await tx
+                    .select()
+                    .from(user_equip)
+                    .where(eq(user_equip.uid, uid))
+                    .orderBy(asc(user_equip.uuid))
+                    .limit(1001);
 
-  activityOperators(uid: string, now: number) {
-    return readActivityOperators(this.kingdom.db, uid, now);
-  }
+                if (equipment.length > 1000)
+                {
+                    throw new Error("Oversized equipment inventory");
+                }
 
-  initializeWorldNewsPreference(uid: string, now: number): Promise<void> {
-    return initializeWorldNewsPreference(this.kingdom.db, uid, this.config.kingdomId, now);
-  }
+                const sciences = await tx
+                    .select()
+                    .from(user_science)
+                    .where(eq(user_science.uid, uid))
+                    .orderBy(asc(user_science.itemId));
+                const lord =
+                    (await tx.select().from(user_lord).where(eq(user_lord.uid, uid)).limit(1))[0];
 
-  setPushPreference(uid: string, preference: PushPreference, now: number): Promise<void> {
-    return setPushPreference(this.kingdom.db, uid, this.config.kingdomId, preference, now);
-  }
+                return {
+                    profile,
+                    resource,
+                    buildings,
+                    queues,
+                    world,
+                    hasMarches,
+                    armies,
+                    sciences,
+                    equipment,
+                    hospital,
+                    forts,
+                    items,
+                    lord,
+                    civilizationPrestige: prestige?.value ?? 0n,
+                };
+            },
+            { isolationLevel: "repeatable read", accessMode: "read only" },
+        );
+    }
 
-  nicknameOccupied(name: string): Promise<boolean> {
-    return nicknameOccupied(this.databases.global.db, name);
-  }
+    getConfigurationByPlayerId(uid: string): Promise<LoginConfigurationState>
+    {
+        return getConfigurationByPlayerId(this.kingdom.db, uid);
+    }
 
-  updateProfilePreference(
-    uid: string,
-    field: ProfilePreferenceField,
-    now: number,
-    readValue: () => number,
-  ): Promise<number | undefined> {
-    return updateProfilePreference(
-      this.kingdom.db,
-      uid,
-      this.config.kingdomId,
-      field,
-      now,
-      readValue,
-    );
-  }
+    configurationSwitches(): Promise<Row[] | undefined>
+    {
+        return readLoginSwitches(this.kingdom.db);
+    }
 
-  getPowerByPlayerId(uid: string, now: number) {
-    return getPowerByPlayerId(this.kingdom.db, uid, now);
-  }
+    activityOperators(uid: string, now: number)
+    {
+        return readActivityOperators(this.kingdom.db, uid, now);
+    }
 
-  getPlayerSummariesByIds(uids: string[], allServers: boolean) {
-    return getPlayerSummariesByIds(this.databases, this.config.kingdomId, uids, allServers);
-  }
+    initializeWorldNewsPreference(uid: string, now: number): Promise<void>
+    {
+        return initializeWorldNewsPreference(this.kingdom.db, uid, this.config.kingdomId, now);
+    }
 
-  publicProfile(uid: string, observerAllianceId: string) {
-    return loadPublicProfile(this.databases, this.config.kingdomId, uid, observerAllianceId);
-  }
+    setPushPreference(uid: string, preference: PushPreference, now: number): Promise<void>
+    {
+        return setPushPreference(this.kingdom.db, uid, this.config.kingdomId, preference, now);
+    }
 
-  mailStatus(uid: string, query: MailStatusQuery) {
-    return readMailStatus(this.kingdom.db, uid, query);
-  }
+    nicknameOccupied(name: string): Promise<boolean>
+    {
+        return nicknameOccupied(this.databases.global.db, name);
+    }
 
-  mailSave(uid: string, query: MailSaveQuery) {
-    return saveMail(this.kingdom.db, this.config.kingdomId, uid, query);
-  }
+    updateProfilePreference(
+        uid: string,
+        field: ProfilePreferenceField,
+        now: number,
+        readValue: () => number,
+    ): Promise<number | undefined>
+    {
+        return updateProfilePreference(
+            this.kingdom.db,
+            uid,
+            this.config.kingdomId,
+            field,
+            now,
+            readValue,
+        );
+    }
 
-  mailBatch(uid: string, query: MailBatchQuery, inspect: MailCategoryInspector) {
-    return readMailBatch(this.databases, this.config.kingdomId, uid, query, inspect);
-  }
+    getPowerByPlayerId(uid: string, now: number)
+    {
+        return getPowerByPlayerId(this.kingdom.db, uid, now);
+    }
 
-  mailGroups(uid: string, query: MailGroupQuery, inspect: MailGroupInspector) {
-    return readMailGroups(this.databases, this.config.kingdomId, uid, query, inspect);
-  }
+    getPlayerSummariesByIds(uids: string[], allServers: boolean)
+    {
+        return getPlayerSummariesByIds(this.databases, this.config.kingdomId, uids, allServers);
+    }
 
-  mailCategory(uid: string, query: MailCategoryQuery, inspect: MailCategoryInspector) {
-    return readMailCategory(this.databases, this.config.kingdomId, uid, query, inspect);
-  }
+    publicProfile(uid: string, observerAllianceId: string)
+    {
+        return loadPublicProfile(this.databases, this.config.kingdomId, uid, observerAllianceId);
+    }
 
-  mailContents(uid: string, query: MailContentsQuery, inspect: MailContentsInspector) {
-    return readMailContents(this.kingdom.db, this.config.kingdomId, uid, query, inspect);
-  }
+    mailStatus(uid: string, query: MailStatusQuery)
+    {
+        return readMailStatus(this.kingdom.db, uid, query);
+    }
 
-  mailConversationSave(uid: string, query: MailConversationSaveQuery) {
-    return saveMailConversation(this.kingdom.db, this.config.kingdomId, uid, query);
-  }
+    mailSave(uid: string, query: MailSaveQuery)
+    {
+        return saveMail(this.kingdom.db, this.config.kingdomId, uid, query);
+    }
 
-  mailRead(uid: string, query: MailReadQuery) {
-    return markMailRead(this.kingdom.db, this.config.kingdomId, uid, query);
-  }
+    mailBatch(uid: string, query: MailBatchQuery, inspect: MailCategoryInspector)
+    {
+        return readMailBatch(this.databases, this.config.kingdomId, uid, query, inspect);
+    }
 
-  mailConversationRead(uid: string, query: MailConversationReadQuery) {
-    if (query.effects.some((effect) => effect.kind === "chat") && !this.config.mailChat)
-      throw new DependencyError("chat read delivery unavailable");
+    mailGroups(uid: string, query: MailGroupQuery, inspect: MailGroupInspector)
+    {
+        return readMailGroups(this.databases, this.config.kingdomId, uid, query, inspect);
+    }
 
-    return markMailConversationRead(this.kingdom.db, this.config.kingdomId, uid, query);
-  }
+    mailCategory(uid: string, query: MailCategoryQuery, inspect: MailCategoryInspector)
+    {
+        return readMailCategory(this.databases, this.config.kingdomId, uid, query, inspect);
+    }
 
-  mailCategoryDelete(
-    uid: string,
-    query: MailCategoryDeleteQuery,
-    inspect: MailCategoryDeleteInspector,
-    invitations?: MailBatchInvitationPlanner,
-    chatEnabled = false,
-  ) {
-    return deleteMailCategories(
-      this.kingdom.db,
-      this.config.kingdomId,
-      uid,
-      query,
-      inspect,
-      invitations,
-      chatEnabled && !!this.config.mailChat,
-    );
-  }
+    mailContents(uid: string, query: MailContentsQuery, inspect: MailContentsInspector)
+    {
+        return readMailContents(this.kingdom.db, this.config.kingdomId, uid, query, inspect);
+    }
 
-  mailConversationDelete(uid: string, query: MailConversationDeleteQuery) {
-    if (!this.config.mailChat) throw new DependencyError("chat deletion delivery unavailable");
+    mailConversationSave(uid: string, query: MailConversationSaveQuery)
+    {
+        return saveMailConversation(this.kingdom.db, this.config.kingdomId, uid, query);
+    }
 
-    return deleteMailConversations(this.kingdom.db, this.config.kingdomId, uid, query);
-  }
+    mailRead(uid: string, query: MailReadQuery)
+    {
+        return markMailRead(this.kingdom.db, this.config.kingdomId, uid, query);
+    }
 
-  mailTypeDelete(uid: string, query: MailTypeDeleteQuery) {
-    return deleteMailType(this.kingdom.db, this.config.kingdomId, uid, query);
-  }
+    mailConversationRead(uid: string, query: MailConversationReadQuery)
+    {
+        if (query.effects.some((effect) => effect.kind === "chat") && !this.config.mailChat)
+        {
+            throw new DependencyError("chat read delivery unavailable");
+        }
 
-  mailDelete(uid: string, query: MailDeleteQuery, plan: MailDeletePlanner) {
-    return deleteMail(this.kingdom.db, this.config.kingdomId, uid, query, plan);
-  }
+        return markMailConversationRead(this.kingdom.db, this.config.kingdomId, uid, query);
+    }
 
-  getSystemMailByPlayerId(uid: string, query: MailSystemQuery, inspect: MailSystemInspector) {
-    return readSystemMail(this.databases, this.config.kingdomId, uid, query, inspect);
-  }
+    mailCategoryDelete(
+        uid: string,
+        query: MailCategoryDeleteQuery,
+        inspect: MailCategoryDeleteInspector,
+        invitations?: MailBatchInvitationPlanner,
+        chatEnabled = false,
+    )
+    {
+        return deleteMailCategories(
+            this.kingdom.db,
+            this.config.kingdomId,
+            uid,
+            query,
+            inspect,
+            invitations,
+            chatEnabled && !!this.config.mailChat,
+        );
+    }
 
-  mailUpdates(uid: string, query: MailUpdateQuery, inspect: MailUpdateInspector) {
-    return readMailUpdates(this.kingdom.db, this.config.kingdomId, uid, query, inspect);
-  }
+    mailConversationDelete(uid: string, query: MailConversationDeleteQuery)
+    {
+        if (!this.config.mailChat)
+        {
+            throw new DependencyError("chat deletion delivery unavailable");
+        }
 
-  relayMailChat(publish: ChatMailboxPublisher) {
-    return relayMailChat(this.kingdom.db, this.config.kingdomId, publish, this.config.timeoutMs);
-  }
+        return deleteMailConversations(this.kingdom.db, this.config.kingdomId, uid, query);
+    }
 
-  relayMailGifts() {
-    return relayMailGiftOpenings(this.kingdom.db, this.databases.global.db);
-  }
+    mailTypeDelete(uid: string, query: MailTypeDeleteQuery)
+    {
+        return deleteMailType(this.kingdom.db, this.config.kingdomId, uid, query);
+    }
 
-  allianceRanking(uid: string, query: AllianceRankingQuery) {
-    return readAllianceRanking(this.kingdom.db, uid, query);
-  }
+    mailDelete(uid: string, query: MailDeleteQuery, plan: MailDeletePlanner)
+    {
+        return deleteMail(this.kingdom.db, this.config.kingdomId, uid, query, plan);
+    }
 
-  playerRanking(uid: string, query: PlayerRankingQuery) {
-    return readPlayerRanking(this.kingdom.db, uid, query);
-  }
+    getSystemMailByPlayerId(uid: string, query: MailSystemQuery, inspect: MailSystemInspector)
+    {
+        return readSystemMail(this.databases, this.config.kingdomId, uid, query, inspect);
+    }
 
-  friendshipMine(uid: string, initial: () => FriendshipMine) {
-    return loadFriendshipMine(
-      this.databases.global.db,
-      this.kingdom.db,
-      this.config.kingdomId,
-      uid,
-      initial,
-    );
-  }
+    mailUpdates(uid: string, query: MailUpdateQuery, inspect: MailUpdateInspector)
+    {
+        return readMailUpdates(this.kingdom.db, this.config.kingdomId, uid, query, inspect);
+    }
 
-  async getWorldByPointIds(uid: string, ids: number[]) {
-    return this.kingdom.db.transaction(
-      async (tx) => {
-        const world = (
-          await tx.select().from(user_world).where(eq(user_world.uid, uid)).limit(1)
-        )[0];
-        const hasMarches =
-          (await tx.select({ uuid: world_march.uuid }).from(world_march).limit(1)).length > 0;
-        const points = ids.length
-          ? await tx
-              .select()
-              .from(worldpoint)
-              .where(and(eq(worldpoint.worldId, 0), inArray(worldpoint.id, ids)))
-          : [];
-        const owners = [
-          ...new Set(
-            points.filter((row) => row.pointType === 1 && row.ownerId).map((row) => row.ownerId!),
-          ),
-        ];
-        const cosmetics = owners.length
-          ? await tx
-              .select()
-              .from(user_state)
-              .where(
-                and(inArray(user_state.uid, owners), inArray(user_state.type2, [100, 105, 200])),
-              )
-              .orderBy(user_state.uid, user_state.stateId)
-              .limit(8193)
-          : [];
+    relayMailChat(publish: ChatMailboxPublisher)
+    {
+        return relayMailChat(
+            this.kingdom.db,
+            this.config.kingdomId,
+            publish,
+            this.config.timeoutMs,
+        );
+    }
 
-        if (cosmetics.length > 8192) throw new Error("World cosmetic projection exceeds bound");
+    relayMailGifts()
+    {
+        return relayMailGiftOpenings(this.kingdom.db, this.databases.global.db);
+    }
 
-        return { world, hasMarches, points, cosmetics };
-      },
-      { isolationLevel: "repeatable read", accessMode: "read only" },
-    );
-  }
+    allianceRanking(uid: string, query: AllianceRankingQuery)
+    {
+        return readAllianceRanking(this.kingdom.db, uid, query);
+    }
 
-  close() {
-    return this.databases.close();
-  }
+    playerRanking(uid: string, query: PlayerRankingQuery)
+    {
+        return readPlayerRanking(this.kingdom.db, uid, query);
+    }
+
+    friendshipMine(uid: string, initial: () => FriendshipMine)
+    {
+        return loadFriendshipMine(
+            this.databases.global.db,
+            this.kingdom.db,
+            this.config.kingdomId,
+            uid,
+            initial,
+        );
+    }
+
+    async getWorldByPointIds(uid: string, ids: number[])
+    {
+        return this.kingdom.db.transaction(
+            async (tx) => {
+                const world = (
+                    await tx.select().from(user_world).where(eq(user_world.uid, uid)).limit(1)
+                )[0];
+                const hasMarches =
+                    (await tx.select({ uuid: world_march.uuid }).from(world_march).limit(1)).length
+                        > 0;
+                const points = ids.length
+                    ? await tx
+                        .select()
+                        .from(worldpoint)
+                        .where(and(eq(worldpoint.worldId, 0), inArray(worldpoint.id, ids)))
+                    : [];
+                const owners = [
+                    ...new Set(
+                        points.filter((row) => row.pointType === 1 && row.ownerId).map((row) =>
+                            row.ownerId!
+                        ),
+                    ),
+                ];
+                const cosmetics = owners.length
+                    ? await tx
+                        .select()
+                        .from(user_state)
+                        .where(
+                            and(
+                                inArray(user_state.uid, owners),
+                                inArray(user_state.type2, [100, 105, 200]),
+                            ),
+                        )
+                        .orderBy(user_state.uid, user_state.stateId)
+                        .limit(8193)
+                    : [];
+
+                if (cosmetics.length > 8192)
+                {
+                    throw new Error("World cosmetic projection exceeds bound");
+                }
+
+                return { world, hasMarches, points, cosmetics };
+            },
+            { isolationLevel: "repeatable read", accessMode: "read only" },
+        );
+    }
+
+    close()
+    {
+        return this.databases.close();
+    }
 }
 
 export function getConfigurationByPlayerId(
-  db: Database["kingdom"]["db"],
-  uid: string,
-): Promise<LoginConfigurationState> {
-  return db.transaction(
-    async (tx) => {
-      const profile = (
-        await tx.select().from(userprofile).where(eq(userprofile.uid, uid)).limit(1)
-      )[0];
-      const pushSettings = await tx
-        .select({ type: parse_info.type, status: parse_info.status, audio: parse_info.audio })
-        .from(parse_info)
-        .where(eq(parse_info.uid, uid))
-        .orderBy(asc(parse_info.type));
+    db: Database["kingdom"]["db"],
+    uid: string,
+): Promise<LoginConfigurationState>
+{
+    return db.transaction(
+        async (tx) => {
+            const profile = (
+                await tx.select().from(userprofile).where(eq(userprofile.uid, uid)).limit(1)
+            )[0];
+            const pushSettings = await tx
+                .select({
+                    type: parse_info.type,
+                    status: parse_info.status,
+                    audio: parse_info.audio,
+                })
+                .from(parse_info)
+                .where(eq(parse_info.uid, uid))
+                .orderBy(asc(parse_info.type));
 
-      return { profile, switches: undefined, pushSettings };
-    },
-    { isolationLevel: "repeatable read", accessMode: "read only" },
-  );
+            return { profile, switches: undefined, pushSettings };
+        },
+        { isolationLevel: "repeatable read", accessMode: "read only" },
+    );
 }
 
-export async function readLoginSwitches(db: Database["kingdom"]["db"]): Promise<Row[] | undefined> {
-  try {
-    return await db.select().from(switches).orderBy(asc(switches.name));
-  } catch (error) {
-    const cause = error instanceof DrizzleQueryError ? error.cause : error;
+export async function readLoginSwitches(db: Database["kingdom"]["db"]): Promise<Row[] | undefined>
+{
+    try
+    {
+        return await db.select().from(switches).orderBy(asc(switches.name));
+    }
+    catch (error)
+    {
+        const cause = error instanceof DrizzleQueryError ? error.cause : error;
 
-    if (
-      cause &&
-      typeof cause === "object" &&
-      "code" in cause &&
-      typeof cause.code === "string" &&
-      /^[0-9A-Z]{5}$/.test(cause.code)
-    )
-      return [];
+        if (
+            cause
+            && typeof cause === "object"
+            && "code" in cause
+            && typeof cause.code === "string"
+            && /^[0-9A-Z]{5}$/.test(cause.code)
+        )
+        {
+            return [];
+        }
 
-    return undefined;
-  }
+        return undefined;
+    }
 }
 
 export async function initializeWorldNewsPreference(
-  db: Database["kingdom"]["db"],
-  uid: string,
-  kingdomId: number,
-  now: number,
-): Promise<void> {
-  if (
-    !uid ||
-    uid.length > 40 ||
-    !Number.isSafeInteger(now) ||
-    now < 0 ||
-    !Number.isInteger(kingdomId) ||
-    kingdomId < 1
-  )
-    throw new DependencyError("configuration preference input");
+    db: Database["kingdom"]["db"],
+    uid: string,
+    kingdomId: number,
+    now: number,
+): Promise<void>
+{
+    if (
+        !uid
+        || uid.length > 40
+        || !Number.isSafeInteger(now)
+        || now < 0
+        || !Number.isInteger(kingdomId)
+        || kingdomId < 1
+    )
+    {
+        throw new DependencyError("configuration preference input");
+    }
 
-  await db.transaction(
-    async (tx) => {
-      const profile = (
-        await tx
-          .select({
-            uid: userprofile.uid,
-            serverId: userprofile.serverId,
-            banFlag: userprofile.banFlag,
-            banTime: userprofile.banTime,
-          })
-          .from(userprofile)
-          .where(eq(userprofile.uid, uid))
-          .limit(1)
-          .for("update")
-      )[0];
+    await db.transaction(
+        async (tx) => {
+            const profile = (
+                await tx
+                    .select({
+                        uid: userprofile.uid,
+                        serverId: userprofile.serverId,
+                        banFlag: userprofile.banFlag,
+                        banTime: userprofile.banTime,
+                    })
+                    .from(userprofile)
+                    .where(eq(userprofile.uid, uid))
+                    .limit(1)
+                    .for("update")
+            )[0];
 
-      if (
-        !profile ||
-        profile.uid !== uid ||
-        profile.serverId !== kingdomId ||
-        (profile.banFlag ?? 0) !== 0 ||
-        (profile.banTime ?? 0n) > BigInt(now)
-      )
-        throw new DependencyError("configuration preference owner");
+            if (
+                !profile
+                || profile.uid !== uid
+                || profile.serverId !== kingdomId
+                || (profile.banFlag ?? 0) !== 0
+                || (profile.banTime ?? 0n) > BigInt(now)
+            )
+            {
+                throw new DependencyError("configuration preference owner");
+            }
 
-      await tx.insert(parse_info).values({ uid, type: WORLD_NEWS_PUSH_TYPE, status: 0, audio: 1 });
-    },
-    { isolationLevel: "read committed", accessMode: "read write" },
-  );
+            await tx.insert(parse_info).values({
+                uid,
+                type: WORLD_NEWS_PUSH_TYPE,
+                status: 0,
+                audio: 1,
+            });
+        },
+        { isolationLevel: "read committed", accessMode: "read write" },
+    );
 }

@@ -20,41 +20,46 @@ end
 return rows`;
 
 export async function loadWorldFightBulletins(
-  command: Command,
-  kingdomId: number,
-  alliance: string,
-  start: number,
-  end: number,
-): Promise<readonly string[]> {
-  if (
-    !Number.isInteger(kingdomId) ||
-    kingdomId < 1 ||
-    kingdomId > 2147483647 ||
-    !alliance ||
-    alliance.length > 40 ||
-    alliance.includes("\0") ||
-    !alliance.isWellFormed() ||
-    [start, end].some(
-      (value) => !Number.isInteger(value) || value < -2147483648 || value > 2147483647,
+    command: Command,
+    kingdomId: number,
+    alliance: string,
+    start: number,
+    end: number,
+): Promise<readonly string[]>
+{
+    if (
+        !Number.isInteger(kingdomId)
+        || kingdomId < 1
+        || kingdomId > 2147483647
+        || !alliance
+        || alliance.length > 40
+        || alliance.includes("\0")
+        || !alliance.isWellFormed()
+        || [start, end].some(
+            (value) => !Number.isInteger(value) || value < -2147483648 || value > 2147483647,
+        )
     )
-  )
-    throw new DependencyError("world bulletin identity");
+    {
+        throw new DependencyError("world bulletin identity");
+    }
 
-  const result = await command(
-    "EVAL",
-    script,
-    "1",
-    `WORLD_BATTLE_BULLETIN_${kingdomId}${alliance}`,
-    String(start),
-    String(end),
-  );
+    const result = await command(
+        "EVAL",
+        script,
+        "1",
+        `WORLD_BATTLE_BULLETIN_${kingdomId}${alliance}`,
+        String(start),
+        String(end),
+    );
 
-  if (
-    !Array.isArray(result) ||
-    result.length > 4096 ||
-    result.some((value) => typeof value !== "string")
-  )
-    throw new DependencyError("world bulletin archive");
+    if (
+        !Array.isArray(result)
+        || result.length > 4096
+        || result.some((value) => typeof value !== "string")
+    )
+    {
+        throw new DependencyError("world bulletin archive");
+    }
 
-  return result;
+    return result;
 }
