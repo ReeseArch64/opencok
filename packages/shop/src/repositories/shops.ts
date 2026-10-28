@@ -8,13 +8,13 @@ import { shop_stock } from "@opencok/drizzle/schema/opencok_kingdom/shop_stock";
 import { userprofile } from "@opencok/drizzle/schema/opencok_kingdom/userprofile";
 import { user_building } from "@opencok/drizzle/schema/opencok_kingdom/user_building";
 import type { ShopRepository } from "@opencok/shop/contracts/shops";
-import type { Database } from "@opencok/repositories/game";
+import type { DatabaseClient } from "@opencok/drizzle/contracts/database";
 import type { RealmAuthority } from "@opencok/repositories/realm-authority";
 import { createMutationExecutor } from "@opencok/repositories/mutation";
 import { executeInventoryTransaction } from "@opencok/repositories/inventory";
 
 export function createShopRepository(
-    db: Database["kingdom"]["db"],
+    db: DatabaseClient<"kingdom">,
     authority: RealmAuthority,
     now = Date.now,
     confirmed?: (

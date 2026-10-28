@@ -15,7 +15,7 @@ import type {
 import { long, num, text } from "@opencok/contracts/rows";
 import { createMutationExecutor, type MutationTransaction } from "./mutation";
 import { executeInventoryTransaction } from "./inventory";
-import type { Database } from "./game";
+import type { DatabaseClient } from "@opencok/drizzle/contracts/database";
 import type { RealmAuthority } from "./realm-authority";
 
 export type ActivityDomain = (
@@ -58,7 +58,7 @@ export interface ActivityPreparation
 }
 
 export function createActivityExecutor(
-    db: Database["kingdom"]["db"],
+    db: DatabaseClient<"kingdom">,
     authority: RealmAuthority,
     domains: ReadonlyMap<number, ActivityDomain>,
     now = Date.now,
@@ -300,7 +300,7 @@ export function createActivityExecutor(
 }
 
 export async function dueActivities(
-    db: Database["kingdom"]["db"],
+    db: DatabaseClient<"kingdom">,
     types: readonly number[],
     now: bigint,
     limit = 64,
@@ -340,7 +340,7 @@ export async function dueActivities(
 }
 
 export async function unregisteredActivities(
-    db: Database["kingdom"]["db"],
+    db: DatabaseClient<"kingdom">,
     types: readonly number[],
     limit = 64,
     owner?: string,

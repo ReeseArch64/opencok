@@ -11,12 +11,12 @@ import { cityInteger } from "@opencok/rules/city-progression";
 import { fenceRealmTransaction, type RealmAuthority } from "./realm-authority";
 import { pendingOwnedProgression } from "./progression-finality";
 import type { CostFinalityOwned } from "@opencok/contracts/continued-cost-finality";
-import type { Database } from "./game";
+import type { DatabaseClient } from "@opencok/drizzle/contracts/database";
 
 export { createCostFinalityShared } from "./continued-cost-finality-global";
 
 export function createCostFinalityOwned(
-    db: Database["kingdom"]["db"],
+    db: DatabaseClient<"kingdom">,
     authority: RealmAuthority,
 ): CostFinalityOwned
 {

@@ -6,10 +6,10 @@ import type {
 import { avatar_completion } from "@opencok/drizzle/schema/opencok_kingdom/avatar_completion";
 import { userprofile } from "@opencok/drizzle/schema/opencok_kingdom/userprofile";
 import { and, eq } from "drizzle-orm";
-import type { Database } from "./game.ts";
+import type { DatabaseClient } from "@opencok/drizzle/contracts/database";
 
 type Publication = (
-    db: Database["kingdom"]["db"],
+    db: DatabaseClient<"kingdom">,
     kingdomId: number,
     owner: string,
     sequence: number,
@@ -24,7 +24,7 @@ export const publishAvatarChat: Publication = (...args) => publishAvatarEffect(4
 
 function publishAvatarEffect(
     bit: 2 | 4,
-    db: Database["kingdom"]["db"],
+    db: DatabaseClient<"kingdom">,
     kingdomId: number,
     owner: string,
     sequence: number,

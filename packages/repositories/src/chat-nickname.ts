@@ -3,11 +3,11 @@ import { chat_avatar_profile } from "@opencok/drizzle/schema/opencok_chat/chat_a
 import { account_new } from "@opencok/drizzle/schema/opencok_global/account_new";
 import { nickname_change_receipt } from "@opencok/drizzle/schema/opencok_global/nickname_change_receipt";
 import { validChatNickname, type ChatNicknameStore } from "@opencok/contracts/chat-nickname";
-import type { Database } from "./game.ts";
+import type { DatabaseClient } from "@opencok/drizzle/contracts/database";
 import { nicknameAccountUid } from "./nickname-global.ts";
 
 export function createChatNicknameStore(
-    db: Database["databases"]["global"]["db"],
+    db: DatabaseClient<"global">,
 ): ChatNicknameStore
 {
     return {

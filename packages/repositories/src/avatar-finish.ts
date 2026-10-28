@@ -10,7 +10,7 @@ import type {
     AvatarFinishSnapshot,
 } from "@opencok/contracts/files";
 import { and, eq, gt } from "drizzle-orm";
-import type { Database } from "./game.ts";
+import type { DatabaseClient } from "@opencok/drizzle/contracts/database";
 
 function invalid(): never
 {
@@ -18,7 +18,7 @@ function invalid(): never
 }
 
 export function commitAvatarFinish(
-    db: Database["kingdom"]["db"],
+    db: DatabaseClient<"kingdom">,
     kingdomId: number,
     owner: string,
     input: AvatarFinishQuery,

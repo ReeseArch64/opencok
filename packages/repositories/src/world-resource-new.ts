@@ -14,7 +14,7 @@ import {
     worldResourceNewIdentity,
 } from "@opencok/rules/world-resource-new";
 import { encode, sfs } from "@opencok/messages/sfs";
-import type { Database } from "./game";
+import type { DatabaseClient } from "@opencok/drizzle/contracts/database";
 import { fenceRealmTransaction, type RealmAuthority } from "./realm-authority";
 
 const empty = {
@@ -42,7 +42,7 @@ const owned = (point: Row) =>
     );
 
 export function createWorldResourceNewExecutor(
-    db: Database["kingdom"]["db"],
+    db: DatabaseClient<"kingdom">,
     authority: RealmAuthority,
     size: number,
     areas: number,

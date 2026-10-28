@@ -3,10 +3,10 @@ import { mail_update } from "@opencok/drizzle/schema/opencok_kingdom/mail_update
 import { userprofile } from "@opencok/drizzle/schema/opencok_kingdom/userprofile";
 import { and, eq, inArray, sql } from "drizzle-orm";
 import type { MailSaveQuery, MailSaveSnapshot } from "@opencok/contracts/mail";
-import type { Database } from "./game.ts";
+import type { DatabaseClient } from "@opencok/drizzle/contracts/database";
 
 export function saveMail(
-    db: Database["kingdom"]["db"],
+    db: DatabaseClient<"kingdom">,
     kingdomId: number,
     uid: string,
     query: MailSaveQuery,

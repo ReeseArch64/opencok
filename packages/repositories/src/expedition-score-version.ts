@@ -1,10 +1,10 @@
 import { eq, sql } from "drizzle-orm";
 import { expedition_score_owner } from "@opencok/drizzle/schema/opencok_global/expedition_score_owner";
 import type { RealmAuthority } from "./realm-authority";
-import type { Database } from "./game";
+import type { DatabaseClient } from "@opencok/drizzle/contracts/database";
 
 type GlobalTransaction = Parameters<
-    Parameters<Database["databases"]["global"]["db"]["transaction"]>[0]
+    Parameters<DatabaseClient<"global">["transaction"]>[0]
 >[0];
 
 export async function expeditionScoreVersion(tx: GlobalTransaction, authority: RealmAuthority)

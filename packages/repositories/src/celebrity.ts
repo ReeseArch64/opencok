@@ -5,7 +5,7 @@ import { DependencyError } from "@opencok/errors/dependency";
 import { mysqlUtf8UnicodeCandidates, mysqlUtf8UnicodeKey } from "@opencok/rules/mysql-unicode";
 import { eq, sql } from "drizzle-orm";
 import { nicknameTrim } from "@opencok/rules/nickname";
-import type { Database } from "./game.ts";
+import type { DatabaseClient } from "@opencok/drizzle/contracts/database";
 
 export async function readCelebrityDescription(
     databases: Pick<ReturnType<typeof createDatabases>, "kingdoms" | "getKingdom">,
@@ -89,7 +89,7 @@ export async function readCelebrityDescription(
 }
 
 export async function saveCelebrityDescription(
-    db: Database["kingdom"]["db"],
+    db: DatabaseClient<"kingdom">,
     owner: string,
     kingdomId: number,
     now: number,

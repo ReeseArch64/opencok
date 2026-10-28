@@ -12,7 +12,7 @@ import { validatePosting } from "@opencok/ledger/posting";
 import { createMutationExecutor, type MutationTransaction } from "./mutation.ts";
 import { readPlayerEffects } from "./power.ts";
 import type { RealmAuthority } from "./realm-authority.ts";
-import type { Database } from "./game.ts";
+import type { DatabaseClient } from "@opencok/drizzle/contracts/database";
 
 export interface InventoryPreparation
 {
@@ -37,7 +37,7 @@ export interface InventoryPreparation
 }
 
 export function createInventoryExecutor(
-    db: Database["kingdom"]["db"],
+    db: DatabaseClient<"kingdom">,
     authority: RealmAuthority,
     now = Date.now,
     preparation?: InventoryPreparation,

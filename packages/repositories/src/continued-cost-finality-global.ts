@@ -9,7 +9,7 @@ import { writeCostRankingSnapshot } from "./continued-cost-ranking-global";
 import type { CostFinalityShared } from "@opencok/contracts/continued-cost-finality";
 import type { CostRankingPeriod } from "@opencok/contracts/continued-cost-ranking";
 import type { RealmAuthority } from "./realm-authority";
-import type { Database } from "./game";
+import type { DatabaseClient } from "@opencok/drizzle/contracts/database";
 
 function read(row: typeof periods.$inferSelect): CostRankingPeriod
 {
@@ -34,7 +34,7 @@ function read(row: typeof periods.$inferSelect): CostRankingPeriod
 }
 
 export function createCostFinalityShared(
-    db: Database["databases"]["global"]["db"],
+    db: DatabaseClient<"global">,
     authority: RealmAuthority,
 ): CostFinalityShared
 {

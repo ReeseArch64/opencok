@@ -7,10 +7,10 @@ import type {
     MailCategoryDeleteSnapshot,
 } from "@opencok/contracts/mail";
 import { enqueueMailChat } from "./mail-chat-intents.ts";
-import type { Database } from "./game.ts";
+import type { DatabaseClient } from "@opencok/drizzle/contracts/database";
 
 export async function deleteMailConversations(
-    db: Database["kingdom"]["db"],
+    db: DatabaseClient<"kingdom">,
     kingdomId: number,
     owner: string,
     query: MailConversationDeleteQuery,

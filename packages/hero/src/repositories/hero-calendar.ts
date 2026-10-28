@@ -8,10 +8,10 @@ import { cityAmount, cityInteger } from "@opencok/rules/city-progression";
 import { long, text } from "@opencok/contracts/rows";
 import type { HeroCalendarStore } from "@opencok/hero/contracts/hero-calendar";
 import { fenceRealmTransaction, type RealmAuthority } from "@opencok/repositories/realm-authority";
-import type { Database } from "@opencok/repositories/game";
+import type { DatabaseClient } from "@opencok/drizzle/contracts/database";
 
 export function createHeroCalendarStore(
-    db: Database["kingdom"]["db"],
+    db: DatabaseClient<"kingdom">,
     authority: RealmAuthority,
     now = Date.now,
 ): HeroCalendarStore

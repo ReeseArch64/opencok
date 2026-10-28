@@ -6,11 +6,11 @@ import { world_interest } from "@opencok/drizzle/schema/opencok_kingdom/world_in
 import { alliance_member } from "@opencok/drizzle/schema/opencok_kingdom/alliance_member";
 import { alliance_territory } from "@opencok/drizzle/schema/opencok_kingdom/alliance_territory";
 import type { WorldUtilityStore } from "@opencok/contracts/world-utility";
-import type { Database } from "./game";
+import type { DatabaseClient } from "@opencok/drizzle/contracts/database";
 import { fenceRealmTransaction, type RealmAuthority } from "./realm-authority";
 
 export function createWorldUtilityStore(
-    db: Database["kingdom"]["db"],
+    db: DatabaseClient<"kingdom">,
     authority: RealmAuthority,
     size: number,
 ): WorldUtilityStore

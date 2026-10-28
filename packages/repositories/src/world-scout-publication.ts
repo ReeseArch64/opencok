@@ -2,7 +2,7 @@ import { eq } from "drizzle-orm";
 import { mail } from "@opencok/drizzle/schema/opencok_kingdom/mail";
 import { userprofile } from "@opencok/drizzle/schema/opencok_kingdom/userprofile";
 import type { WorldScoutMailReader } from "@opencok/contracts/world-scout-publication";
-import type { Database } from "./game";
+import type { DatabaseClient } from "@opencok/drizzle/contracts/database";
 
 const identifier = (value: string) =>
     typeof value === "string"
@@ -12,7 +12,7 @@ const identifier = (value: string) =>
     && !value.includes("\0");
 
 export function createWorldScoutMailReader(
-    db: Database["kingdom"]["db"],
+    db: DatabaseClient<"kingdom">,
     kingdomId: number,
 ): WorldScoutMailReader
 {

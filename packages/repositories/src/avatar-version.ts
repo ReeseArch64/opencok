@@ -14,9 +14,9 @@ import { legacyAvatarVersion } from "@opencok/rules/avatar-version";
 import { nextAvatarRevision } from "./avatar-publication.ts";
 import { and, asc, eq, gt, or, sql } from "drizzle-orm";
 import { insertAvatarSystemMail } from "./avatar-mail.ts";
-import type { Database } from "./game.ts";
+import type { DatabaseClient } from "@opencok/drizzle/contracts/database";
 
-type RealmDatabase = Database["kingdom"]["db"];
+type RealmDatabase = DatabaseClient<"kingdom">;
 
 function validKey(owner: string, operationId: string, kingdomId: number)
 {

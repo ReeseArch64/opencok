@@ -6,7 +6,7 @@ import { text } from "@opencok/contracts/rows";
 import { cityInteger, cityAmount } from "@opencok/rules/city-progression";
 import type { ExpeditionPhaseStore } from "@opencok/contracts/expedition-phase";
 import { fenceRealmTransaction, type RealmAuthority } from "./realm-authority";
-import type { Database } from "./game";
+import type { DatabaseClient } from "@opencok/drizzle/contracts/database";
 import { userprofile } from "@opencok/drizzle/schema/opencok_kingdom/userprofile";
 import { readExpedition } from "./new-expedition";
 import { GameError } from "@opencok/errors/game";
@@ -14,7 +14,7 @@ import { errors } from "@opencok/constants/game";
 import type { ExpeditionActivityReader } from "@opencok/contracts/expedition-phase";
 
 export function createExpeditionPhaseStore(
-    db: Database["kingdom"]["db"],
+    db: DatabaseClient<"kingdom">,
     authority: RealmAuthority,
     now = Date.now,
 ): ExpeditionPhaseStore
@@ -95,7 +95,7 @@ export function createExpeditionPhaseStore(
 }
 
 export async function currentExpeditionClock(
-    db: Database["kingdom"]["db"],
+    db: DatabaseClient<"kingdom">,
     authority: RealmAuthority,
 )
 {
@@ -115,7 +115,7 @@ export async function currentExpeditionClock(
 }
 
 export function createExpeditionActivityReader(
-    db: Database["kingdom"]["db"],
+    db: DatabaseClient<"kingdom">,
     authority: RealmAuthority,
     now = Date.now,
 ): ExpeditionActivityReader

@@ -118,6 +118,19 @@ export class ArchitectureAudit
         }
 
         const reverse = new DependencyGraph(consumers);
+        const repositoryFacade = "packages/repositories/src/game.ts";
+
+        for (const consumer of reverse.reachable(repositoryFacade))
+        {
+            if (
+                consumer !== repositoryFacade
+                && (consumer.startsWith("packages/repositories/src/")
+                    || /^packages\/[^/]+\/src\/repositories\//.test(consumer))
+            )
+            {
+                violations.add(`repository-facade: ${consumer} -> ${repositoryFacade}`);
+            }
+        }
 
         for (const module of modules.filter((entry) => entry.owner === "packages/catalog-tools"))
         {

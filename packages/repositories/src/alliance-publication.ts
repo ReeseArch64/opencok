@@ -6,11 +6,11 @@ import { queue } from "@opencok/drizzle/schema/opencok_kingdom/queue";
 import { alliance_help } from "@opencok/drizzle/schema/opencok_kingdom/alliance_help";
 import { alliance_science } from "@opencok/drizzle/schema/opencok_kingdom/alliance_science";
 import { alliance_science_upgrade } from "@opencok/drizzle/schema/opencok_kingdom/alliance_science_upgrade";
-import type { Database } from "./game";
+import type { DatabaseClient } from "@opencok/drizzle/contracts/database";
 import { fenceRealmTransaction, type RealmAuthority } from "./realm-authority";
 
 export function createAlliancePublicationReader(
-    db: Database["kingdom"]["db"],
+    db: DatabaseClient<"kingdom">,
     authority: RealmAuthority,
 )
 {

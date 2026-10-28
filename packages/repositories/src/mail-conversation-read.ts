@@ -7,7 +7,7 @@ import type {
     MailConversationReadSnapshot,
 } from "@opencok/contracts/mail";
 import { and, eq, inArray, or, sql } from "drizzle-orm";
-import type { Database } from "./game.ts";
+import type { DatabaseClient } from "@opencok/drizzle/contracts/database";
 
 const integer = (value: number) =>
     Number.isInteger(value) && value >= -2147483648 && value <= 2147483647;
@@ -17,7 +17,7 @@ const identifier = (value: string) =>
     && value.isWellFormed();
 
 export function markMailConversationRead(
-    db: Database["kingdom"]["db"],
+    db: DatabaseClient<"kingdom">,
     kingdomId: number,
     owner: string,
     query: MailConversationReadQuery,

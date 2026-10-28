@@ -2,10 +2,10 @@ import { mail } from "@opencok/drizzle/schema/opencok_kingdom/mail";
 import { userprofile } from "@opencok/drizzle/schema/opencok_kingdom/userprofile";
 import { eq, sql } from "drizzle-orm";
 import type { MailStatusQuery, MailStatusSnapshot } from "@opencok/contracts/mail";
-import type { Database } from "./game.ts";
+import type { DatabaseClient } from "@opencok/drizzle/contracts/database";
 
 export function readMailStatus(
-    db: Database["kingdom"]["db"],
+    db: DatabaseClient<"kingdom">,
     uid: string,
     query: MailStatusQuery,
 ): Promise<MailStatusSnapshot>

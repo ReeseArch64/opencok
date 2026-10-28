@@ -8,12 +8,12 @@ import type {
     MailContentsQuery,
     MailContentsSnapshot,
 } from "@opencok/contracts/mail";
-import type { Database } from "./game.ts";
+import type { DatabaseClient } from "@opencok/drizzle/contracts/database";
 
 const selectedMail = alias(mail, "selected_mail");
 
 export function readMailContents(
-    db: Database["kingdom"]["db"],
+    db: DatabaseClient<"kingdom">,
     kingdomId: number,
     uid: string,
     query: MailContentsQuery,

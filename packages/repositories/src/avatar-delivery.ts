@@ -5,9 +5,9 @@ import { mail_contents } from "@opencok/drizzle/schema/opencok_kingdom/mail_cont
 import { mail_group } from "@opencok/drizzle/schema/opencok_kingdom/mail_group";
 import { userprofile } from "@opencok/drizzle/schema/opencok_kingdom/userprofile";
 import { and, asc, eq, gt, or } from "drizzle-orm";
-import type { Database } from "./game.ts";
+import type { DatabaseClient } from "@opencok/drizzle/contracts/database";
 
-export async function checkAvatarCompletionStore(db: Database["kingdom"]["db"]): Promise<void>
+export async function checkAvatarCompletionStore(db: DatabaseClient<"kingdom">): Promise<void>
 {
     for (const table of [avatar_completion, mail, mail_contents, mail_group])
     {
@@ -16,7 +16,7 @@ export async function checkAvatarCompletionStore(db: Database["kingdom"]["db"]):
 }
 
 export async function nextAvatarDelivery(
-    db: Database["kingdom"]["db"],
+    db: DatabaseClient<"kingdom">,
     kingdomId: number,
     cursor?: AvatarDeliveryKey,
 ): Promise<AvatarDeliveryKey | undefined>

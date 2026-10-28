@@ -9,7 +9,7 @@ import { userprofile } from "@opencok/drizzle/schema/opencok_kingdom/userprofile
 import { world_march } from "@opencok/drizzle/schema/opencok_kingdom/world_march";
 import { t_worldboss } from "@opencok/drizzle/schema/opencok_kingdom/t_worldboss";
 import { t_worldbossrank } from "@opencok/drizzle/schema/opencok_kingdom/t_worldbossrank";
-import type { Database } from "./game.ts";
+import type { DatabaseClient } from "@opencok/drizzle/contracts/database";
 import type { Row } from "@opencok/contracts/rows";
 import type {
     WorldSpecialDetailSnapshot,
@@ -17,7 +17,7 @@ import type {
 } from "@opencok/contracts/world-point-detail";
 import { readWorldResourceOwner } from "./world-resource-owner.ts";
 
-type Reader = Pick<Database["kingdom"]["db"], "select">;
+type Reader = Pick<DatabaseClient<"kingdom">, "select">;
 
 const territoryTypes = [14, 18, 20, 21, 23, 46, 47];
 

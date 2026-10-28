@@ -7,10 +7,10 @@ import { nicknameTrim } from "@opencok/rules/nickname";
 import { sql } from "drizzle-orm";
 import { drizzle, type NodePgDatabase } from "drizzle-orm/node-postgres";
 import * as globalSchema from "@opencok/drizzle/schema/global";
-import type { Database } from "./game.ts";
+import type { DatabaseClient } from "@opencok/drizzle/contracts/database";
 import { readNicknameOccupation } from "./nickname.ts";
 
-type GlobalDatabase = Database["databases"]["global"]["db"];
+type GlobalDatabase = DatabaseClient<"global">;
 
 export type NicknameGlobalTransaction = Pick<
     NodePgDatabase<typeof globalSchema>,

@@ -5,7 +5,7 @@ import type {
     MailConversationSaveQuery,
     MailConversationSaveSnapshot,
 } from "@opencok/contracts/mail";
-import type { Database } from "./game.ts";
+import type { DatabaseClient } from "@opencok/drizzle/contracts/database";
 
 function int(value: number): boolean
 {
@@ -13,7 +13,7 @@ function int(value: number): boolean
 }
 
 export function saveMailConversation(
-    db: Database["kingdom"]["db"],
+    db: DatabaseClient<"kingdom">,
     kingdomId: number,
     uid: string,
     query: MailConversationSaveQuery,

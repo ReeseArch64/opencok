@@ -4,10 +4,10 @@ import { mail_gift_opening } from "@opencok/drizzle/schema/opencok_kingdom/mail_
 import { userprofile } from "@opencok/drizzle/schema/opencok_kingdom/userprofile";
 import { and, eq, inArray, sql } from "drizzle-orm";
 import type { MailReadQuery, MailReadSnapshot } from "@opencok/contracts/mail";
-import type { Database } from "./game.ts";
+import type { DatabaseClient } from "@opencok/drizzle/contracts/database";
 
 export function markMailRead(
-    db: Database["kingdom"]["db"],
+    db: DatabaseClient<"kingdom">,
     kingdomId: number,
     uid: string,
     query: MailReadQuery,

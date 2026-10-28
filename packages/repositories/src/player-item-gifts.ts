@@ -6,7 +6,7 @@ import { cityAmount, cityInteger } from "@opencok/rules/city-progression";
 import { playerItemGiftRecipient } from "@opencok/rules/player-item-gifts";
 import type { PlayerItemGiftWrite } from "@opencok/contracts/player-item-gifts";
 import type { MutationTransaction } from "./mutation";
-import type { Database } from "./game";
+import type { DatabaseClient } from "@opencok/drizzle/contracts/database";
 
 export async function readPlayerItemGifts(
     tx: MutationTransaction,
@@ -99,7 +99,7 @@ export async function writePlayerItemGifts(
 }
 
 export async function pendingPlayerItemGiftOwners(
-    db: Database["kingdom"]["db"],
+    db: DatabaseClient<"kingdom">,
     online: readonly string[],
 )
 {

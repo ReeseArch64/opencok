@@ -12,10 +12,10 @@ import type {
 } from "@opencok/contracts/expedition-stage-finality";
 import type { RealmAuthority } from "./realm-authority";
 import { expeditionScoreVersion } from "./expedition-score-version";
-import type { Database } from "./game";
+import type { DatabaseClient } from "@opencok/drizzle/contracts/database";
 
 export function createExpeditionStageRegistry(
-    db: Database["databases"]["global"]["db"],
+    db: DatabaseClient<"global">,
     authority: RealmAuthority,
 ): ExpeditionStageRegistry
 {

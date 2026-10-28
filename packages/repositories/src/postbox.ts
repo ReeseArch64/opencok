@@ -10,10 +10,10 @@ import { text, num, long } from "@opencok/contracts/rows";
 import { createMutationExecutor } from "./mutation.ts";
 import { executeInventoryTransaction } from "./inventory.ts";
 import type { RealmAuthority } from "./realm-authority.ts";
-import type { Database } from "./game.ts";
+import type { DatabaseClient } from "@opencok/drizzle/contracts/database";
 
 export function createPostboxExecutor(
-    db: Database["kingdom"]["db"],
+    db: DatabaseClient<"kingdom">,
     authority: RealmAuthority,
     now = Date.now,
     preparation?: InventoryPreparation,

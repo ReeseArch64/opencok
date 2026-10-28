@@ -5,7 +5,7 @@ import type { MutationCommand, MutationEvent, EconomyPosting } from "@opencok/co
 import { validatePosting } from "@opencok/ledger/posting";
 import { createMutationExecutor } from "./mutation.ts";
 import type { RealmAuthority } from "./realm-authority.ts";
-import type { Database } from "./game.ts";
+import type { DatabaseClient } from "@opencok/drizzle/contracts/database";
 
 const profileAssets = [
     "gold",
@@ -39,7 +39,7 @@ export interface EconomyPlan
 }
 
 export function createEconomyMutationExecutor(
-    db: Database["kingdom"]["db"],
+    db: DatabaseClient<"kingdom">,
     authority: RealmAuthority,
     now = Date.now,
 )

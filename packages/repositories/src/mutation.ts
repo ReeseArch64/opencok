@@ -11,9 +11,9 @@ import { userprofile } from "@opencok/drizzle/schema/opencok_kingdom/userprofile
 import type { MutationCommand, MutationResult } from "@opencok/contracts/mutation";
 import { validatePosting } from "@opencok/ledger/posting";
 import { fenceRealmTransaction, type RealmAuthority } from "./realm-authority.ts";
-import type { Database } from "./game.ts";
+import type { DatabaseClient } from "@opencok/drizzle/contracts/database";
 
-type Realm = Database["kingdom"]["db"];
+type Realm = DatabaseClient<"kingdom">;
 
 export type MutationTransaction = Parameters<Parameters<Realm["transaction"]>[0]>[0];
 

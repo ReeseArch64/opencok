@@ -2,9 +2,9 @@ import { randomUUID } from "node:crypto";
 import { and, asc, eq, sql } from "drizzle-orm";
 import { mail_chat_read_intent } from "@opencok/drizzle/schema/opencok_kingdom/mail_chat_read_intent";
 import type { ChatMailboxPublisher, ChatMailboxUpdate } from "@opencok/contracts/chat-mailbox";
-import type { Database } from "./game.ts";
+import type { DatabaseClient } from "@opencok/drizzle/contracts/database";
 
-type Db = Database["kingdom"]["db"];
+type Db = DatabaseClient<"kingdom">;
 
 type Tx = Parameters<Parameters<Db["transaction"]>[0]>[0];
 

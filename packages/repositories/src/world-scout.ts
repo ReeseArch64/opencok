@@ -7,10 +7,10 @@ import { world_barbarion } from "@opencok/drizzle/schema/opencok_kingdom/world_b
 import type { WorldScoutStore } from "@opencok/contracts/world-scout";
 import { worldCityCandidates } from "@opencok/rules/world-city-geometry";
 import { readWorldResourceOwner } from "./world-resource-owner";
-import type { Database } from "./game";
+import type { DatabaseClient } from "@opencok/drizzle/contracts/database";
 
 export function createWorldScoutStore(
-    db: Database["kingdom"]["db"],
+    db: DatabaseClient<"kingdom">,
     size: number,
 ): WorldScoutStore
 {

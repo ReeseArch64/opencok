@@ -8,7 +8,7 @@ import { user_pet_dragon } from "@opencok/drizzle/schema/opencok_kingdom/user_pe
 import { new_general_skill } from "@opencok/drizzle/schema/opencok_kingdom/new_general_skill";
 import type { WorldMarchInspectionStore } from "@opencok/contracts/world-march-inspection";
 import { readWorldResourceOwner } from "./world-resource-owner";
-import type { Database } from "./game";
+import type { DatabaseClient } from "@opencok/drizzle/contracts/database";
 
 function identity(value: string)
 {
@@ -19,7 +19,7 @@ function identity(value: string)
 }
 
 export function createWorldMarchInspectionStore(
-    db: Database["kingdom"]["db"],
+    db: DatabaseClient<"kingdom">,
 ): WorldMarchInspectionStore
 {
     return {

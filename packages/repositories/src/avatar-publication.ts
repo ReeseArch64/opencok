@@ -1,7 +1,7 @@
 import { sql } from "drizzle-orm";
-import type { Database } from "./game.ts";
+import type { DatabaseClient } from "@opencok/drizzle/contracts/database";
 
-type Transaction = Parameters<Parameters<Database["kingdom"]["db"]["transaction"]>[0]>[0];
+type Transaction = Parameters<Parameters<DatabaseClient<"kingdom">["transaction"]>[0]>[0];
 
 export async function nextAvatarRevision(tx: Transaction, owner: string): Promise<bigint>
 {

@@ -5,11 +5,11 @@ import { server_info as globalServer } from "@opencok/drizzle/schema/opencok_glo
 import { ob_user } from "@opencok/drizzle/schema/opencok_kingdom/ob_user";
 import { ob_record } from "@opencok/drizzle/schema/opencok_kingdom/ob_record";
 import type { BattleRankingState } from "@opencok/contracts/battle-ranking";
-import type { Database } from "./game.ts";
+import type { DatabaseClient } from "@opencok/drizzle/contracts/database";
 
 export async function readBattleRankingState(
-    db: Database["kingdom"]["db"],
-    global: Database["databases"]["global"]["db"],
+    db: DatabaseClient<"kingdom">,
+    global: DatabaseClient<"global">,
     uid: string,
     realm: number,
     now: number,

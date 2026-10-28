@@ -28,10 +28,10 @@ import { executeInventoryTransaction } from "./inventory";
 import type { ProgressionBoundary } from "./city-progression";
 import type { RealmAuthority } from "./realm-authority";
 import type { ActivityDomain } from "./timed-activity";
-import type { Database } from "./game";
+import type { DatabaseClient } from "@opencok/drizzle/contracts/database";
 
 export function createAllianceRepository(
-    db: Database["kingdom"]["db"],
+    db: DatabaseClient<"kingdom">,
     authority: RealmAuthority,
     boundary: ProgressionBoundary,
     now = Date.now,

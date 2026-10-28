@@ -20,10 +20,10 @@ import { long } from "@opencok/contracts/rows";
 import { provisionHash } from "@opencok/rules/provisioning";
 import { fenceRealmTransaction, type RealmAuthority } from "./realm-authority.ts";
 import { appendMutationRecords } from "./mutation.ts";
-import type { Database } from "./game.ts";
+import type { DatabaseClient } from "@opencok/drizzle/contracts/database";
 
 export function createCharacterCreator(
-    db: Database["kingdom"]["db"],
+    db: DatabaseClient<"kingdom">,
     authority: RealmAuthority,
     mapSize: number,
     now = Date.now,

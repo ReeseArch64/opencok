@@ -8,10 +8,10 @@ import type { CharacterReservation, ProvisioningStore } from "@opencok/contracts
 import { HttpError } from "@opencok/errors/http";
 import { starterVersion } from "@opencok/contracts/provisioning";
 import { provisionHash } from "@opencok/rules/provisioning";
-import type { Database } from "./game.ts";
+import type { DatabaseClient } from "@opencok/drizzle/contracts/database";
 
 export function createProvisioningStore(
-    db: Database["databases"]["global"]["db"],
+    db: DatabaseClient<"global">,
     now = Date.now,
 ): ProvisioningStore
 {

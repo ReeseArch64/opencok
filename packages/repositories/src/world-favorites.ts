@@ -3,7 +3,7 @@ import { userprofile } from "@opencok/drizzle/schema/opencok_kingdom/userprofile
 import { server_info } from "@opencok/drizzle/schema/opencok_global/server_info";
 import type { WorldFavoriteStore } from "@opencok/contracts/world-favorites";
 import type { Row } from "@opencok/contracts/rows";
-import type { Database } from "./game.ts";
+import type { DatabaseClient } from "@opencok/drizzle/contracts/database";
 import { and, asc, eq, inArray, or, sql } from "drizzle-orm";
 
 function integer(value: unknown): value is number
@@ -33,8 +33,8 @@ function validate(owner: string, now: number)
 }
 
 export function createWorldFavoriteStore(
-    db: Database["kingdom"]["db"],
-    global: Database["databases"]["global"]["db"],
+    db: DatabaseClient<"kingdom">,
+    global: DatabaseClient<"global">,
     kingdomId: number,
 ): WorldFavoriteStore
 {
@@ -251,8 +251,8 @@ export function createWorldFavoriteStore(
 }
 
 export async function checkWorldFavoriteStore(
-    db: Database["kingdom"]["db"],
-    global: Database["databases"]["global"]["db"],
+    db: DatabaseClient<"kingdom">,
+    global: DatabaseClient<"global">,
 ): Promise<void>
 {
     await db.select().from(world_favorite).limit(0);

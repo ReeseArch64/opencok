@@ -5,16 +5,16 @@ import { user_building } from "@opencok/drizzle/schema/opencok_kingdom/user_buil
 import { pic_upload_record } from "@opencok/drizzle/schema/opencok_kingdom/pic_upload_record";
 import type { AvatarGrantInspector, AvatarGrantSnapshot } from "@opencok/contracts/files";
 import { and, eq } from "drizzle-orm";
-import type { Database } from "./game.ts";
+import type { DatabaseClient } from "@opencok/drizzle/contracts/database";
 
-export async function checkAvatarGrantStore(db: Database["kingdom"]["db"])
+export async function checkAvatarGrantStore(db: DatabaseClient<"kingdom">)
 {
     await db.select({ uid: pic_upload_record.uid }).from(pic_upload_record).limit(0);
     await db.select({ sequence: avatar_completion.sequence }).from(avatar_completion).limit(0);
 }
 
 export function readAvatarGrant(
-    db: Database["kingdom"]["db"],
+    db: DatabaseClient<"kingdom">,
     kingdomId: number,
     owner: string,
     now: number,

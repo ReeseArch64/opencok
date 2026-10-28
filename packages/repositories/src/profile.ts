@@ -18,10 +18,10 @@ import type { createDatabases } from "@opencok/drizzle";
 import { account_new } from "@opencok/drizzle/schema/opencok_global/account_new";
 import { alliance_vedio } from "@opencok/drizzle/schema/opencok_kingdom/alliance_vedio";
 import { DependencyError } from "@opencok/errors/dependency";
-import type { Database } from "./game.ts";
+import type { DatabaseClient } from "@opencok/drizzle/contracts/database";
 import { readProfileAlliance } from "./profile-alliance.ts";
 
-export async function checkPublicProfileStore(db: Database["kingdom"]["db"])
+export async function checkPublicProfileStore(db: DatabaseClient<"kingdom">)
 {
     for (const table of [user_skill, user_honor, user_achievement, flower_ranking, alliance_vedio])
     {
@@ -87,7 +87,7 @@ export async function loadPublicProfile(
 }
 
 export function readPublicProfile(
-    db: Database["kingdom"]["db"],
+    db: DatabaseClient<"kingdom">,
     uid: string,
     observerAllianceId = "",
 ): Promise<PublicProfileState>

@@ -12,7 +12,7 @@ import { encodeProductionRates, decodeProductionRates } from "@opencok/mappings/
 import { changeProductionRate, settleProduction } from "@opencok/rules/timed-activity";
 import { createMutationExecutor, type MutationTransaction } from "./mutation";
 import { executeInventoryTransaction } from "./inventory";
-import type { Database } from "./game";
+import type { DatabaseClient } from "@opencok/drizzle/contracts/database";
 import type { RealmAuthority } from "./realm-authority";
 
 export interface ProductionPreparation
@@ -26,7 +26,7 @@ export interface ProductionPreparation
 }
 
 export function createProductionExecutor(
-    db: Database["kingdom"]["db"],
+    db: DatabaseClient<"kingdom">,
     authority: RealmAuthority,
     preparation: ProductionPreparation,
     now = Date.now,

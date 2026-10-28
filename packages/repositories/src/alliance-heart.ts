@@ -9,7 +9,7 @@ import { playerItemGiftRecipient } from "@opencok/rules/player-item-gifts";
 import { cityInteger } from "@opencok/rules/city-progression";
 import type { AllianceHeartState, AllianceHeartWrite } from "@opencok/contracts/alliance-heart";
 import type { MutationTransaction } from "./mutation";
-import type { Database } from "./game";
+import type { DatabaseClient } from "@opencok/drizzle/contracts/database";
 
 export async function readAllianceHeart(
     tx: MutationTransaction,
@@ -132,7 +132,7 @@ export async function writeAllianceHeart(
 }
 
 export async function pendingAllianceHeartOwners(
-    db: Database["kingdom"]["db"],
+    db: DatabaseClient<"kingdom">,
     online: readonly string[],
 )
 {

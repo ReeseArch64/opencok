@@ -22,7 +22,7 @@ import { worldCityCandidates } from "@opencok/rules/world-city-geometry";
 import { normalizeWorldCityGeometry } from "./world-city-geometry";
 import { userprofile } from "@opencok/drizzle/schema/opencok_kingdom/userprofile";
 import type { MutationTransaction } from "./mutation";
-import type { Database } from "./game";
+import type { DatabaseClient } from "@opencok/drizzle/contracts/database";
 import type { RealmAuthority } from "./realm-authority";
 import { fenceRealmTransaction } from "./realm-authority";
 
@@ -599,7 +599,7 @@ export async function writeWorldMutation(
 }
 
 export async function dueWorldMarches(
-    db: Database["kingdom"]["db"],
+    db: DatabaseClient<"kingdom">,
     now: bigint,
     after?: { dueAt: bigint; id: string; },
 )
@@ -626,7 +626,7 @@ export async function dueWorldMarches(
 }
 
 export function createWorldInterest(
-    db: Database["kingdom"]["db"],
+    db: DatabaseClient<"kingdom">,
     authority: RealmAuthority,
     size: number,
     now = Date.now,
@@ -714,7 +714,7 @@ export function createWorldInterest(
     };
 }
 
-export async function unregisteredWorldMarches(db: Database["kingdom"]["db"], after?: string)
+export async function unregisteredWorldMarches(db: DatabaseClient<"kingdom">, after?: string)
 {
     return db
         .select({ id: world_march.uuid, owner: world_march.ownerUid })

@@ -15,12 +15,12 @@ import type {
 } from "@opencok/contracts/expedition-stage-finality";
 import { fenceRealmTransaction, type RealmAuthority } from "./realm-authority";
 import { pendingOwnedProgression } from "./progression-finality";
-import type { Database } from "./game";
+import type { DatabaseClient } from "@opencok/drizzle/contracts/database";
 
 export { createExpeditionStageRegistry } from "./expedition-stage-finality-global";
 
 export function createExpeditionStageRealm(
-    db: Database["kingdom"]["db"],
+    db: DatabaseClient<"kingdom">,
     authority: RealmAuthority,
 ): ExpeditionStageRealm
 {
