@@ -2,10 +2,11 @@
 
 `@opencok/player` owns character-specific workflows. The first implemented slice
 is the seven saved profile preferences migrated in
-[#595](https://github.com/ReeseArch64/opencok/issues/595). Provisioning, nickname,
-public profile and progression remain later #558 migrations. Push preferences and
-login news initialization are also owned here after
-[#603](https://github.com/ReeseArch64/opencok/issues/603).
+[#595](https://github.com/ReeseArch64/opencok/issues/595). Push preferences and
+login news initialization moved here in
+[#603](https://github.com/ReeseArch64/opencok/issues/603), followed by realm
+character provisioning in [#609](https://github.com/ReeseArch64/opencok/issues/609).
+Nickname, public profile and progression remain later #558 migrations.
 
 | Entrypoint                         | Responsibility                                                      |
 | ---------------------------------- | ------------------------------------------------------------------- |
