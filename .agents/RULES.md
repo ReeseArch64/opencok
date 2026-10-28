@@ -14,12 +14,12 @@ Permissões de implementação, teste, formatação ou organização não autori
 
 Somente leitura por padrão, incluindo arquivos e subpastas:
 
-- `.github/`: automações, governança e configurações do GitHub.
+- `.github/`: automações, governança e configurações do GitHub, incluindo `.github/ARCHITECTURE.md`, `.github/SECURITY.md` e `.github/CONTRIBUTING.md`.
 - `.agents/`: regras, habilidades e configurações dos agentes, incluindo este arquivo.
 - `docs/`: decisões e documentação de projeto.
 - `infra/`: infraestrutura e implantação.
 - Qualquer `AGENTS.md` no repositório.
-- Na raiz: `PRODUCT.md`, `ARCHITECTURE.md`, `CONTEXT.md`, `CONTRIBUTING.md`, `DESIGN.md`, `GLOSSARY.md`, `RULES.md` e `SECURITY.md`, quando existentes.
+- Na raiz: `PRODUCT.md`, `CONTEXT.md`, `DESIGN.md`, `GLOSSARY.md` e `RULES.md`, quando existentes.
 - Configurações de ferramentas, manifests de dependências e lockfiles, incluindo `package.json`, `bun.lock`, configurações de TypeScript, lint, formatação e hooks.
 
 Esses caminhos identificam proteções, não instruções de leitura. Consultar não exige autorização de escrita. O `README.md` raiz e READMEs de aplicações e pacotes são editáveis no escopo da tarefa; README dentro de pasta protegida não é exceção.
