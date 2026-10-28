@@ -6,7 +6,7 @@ import {
     targetTaskPurchaseOperationId,
     publishTargetTaskMutation,
 } from "@opencok/services/target-task";
-import { trainingDomain } from "@opencok/services/training";
+import { createRealmTrainingDomain } from "../src/composition/troops";
 import { user_target_task } from "@opencok/drizzle/schema/opencok_kingdom/user_target_task";
 import { user_target_task_notes } from "@opencok/drizzle/schema/opencok_kingdom/user_target_task_notes";
 import { user_item } from "@opencok/drizzle/schema/opencok_kingdom/user_item";
@@ -15,6 +15,9 @@ import { mail } from "@opencok/drizzle/schema/opencok_kingdom/mail";
 import { sfs, encode, type Fields } from "@opencok/messages/sfs";
 import type { TargetTaskPaymentGateway } from "@opencok/contracts/target-task";
 import { cityHarness } from "./support/city";
+
+const trainingDomain = createRealmTrainingDomain();
+
 async function fixture(gateway?: TargetTaskPaymentGateway)
 {
     const h = await cityHarness([createTargetTaskDomain(gateway, () => 0), trainingDomain]);

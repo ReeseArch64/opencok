@@ -1,3 +1,4 @@
+import { TroopsRepository } from "@opencok/troops/repositories/progression";
 import { ResearchRepository } from "@opencok/research/repositories/progression";
 import {
     militaryRankAwardReader,
@@ -236,6 +237,7 @@ export function createRealmCityProgressionStore(
         readers,
         writers,
         research: new ResearchRepository(tx, owner),
+        troops: new TroopsRepository(tx, owner),
         birth: authority
             ? (rules, mode) => allocateWorldBirth(tx, authority, mapSize, rules, now, mode)
             : undefined,

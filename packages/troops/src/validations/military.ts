@@ -1,8 +1,5 @@
 import { z } from "zod";
-import type {
-    WoundedTroopsResponse,
-    FortificationResponse,
-} from "@opencok/contracts/responses/military";
+import type { WoundedTroopsResponse, FortificationResponse } from "../contracts/responses/military";
 import { field } from "@opencok/messages/validations/response";
 
 export const woundedTroopsSchema = z.strictObject({

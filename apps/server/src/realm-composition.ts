@@ -272,9 +272,9 @@ import { EquipmentDomain, WorkshopDomain } from "@opencok/services/equipment";
 import { PlayerEffectsDomain } from "@opencok/services/player-effects";
 import { QuestsDomain } from "@opencok/services/quests";
 import { cityQueueCommands } from "@opencok/rules/city-command";
-import { TrainingDomain } from "@opencok/services/training";
-import { HospitalDomain } from "@opencok/services/hospital";
-import { FortificationDomain } from "@opencok/services/fortifications";
+import { createRealmTrainingDomain } from "./composition/troops";
+import { createRealmHospitalDomain } from "./composition/troops";
+import { createRealmFortificationDomain } from "./composition/troops";
 import { createRealmResearchDomain } from "./composition/research";
 import { createRealmCityProgressionStore } from "./composition/city-persistence.ts";
 import { createCityProductionBoundary } from "@opencok/production/repositories/city-boundary";
@@ -1027,9 +1027,9 @@ export const RealmDependenciesLive = Layer.effect(
                     observeAdapter(new AnniversaryDomain(), "realm.AnniversaryDomain"),
                     observeAdapter(new AvatarActivationDomain(), "realm.AvatarActivationDomain"),
                     observeAdapter(new ArenaDomain(), "realm.ArenaDomain"),
-                    observeAdapter(new TrainingDomain(), "realm.TrainingDomain"),
-                    observeAdapter(new HospitalDomain(), "realm.HospitalDomain"),
-                    observeAdapter(new FortificationDomain(), "realm.FortificationDomain"),
+                    observeAdapter(createRealmTrainingDomain(), "realm.TrainingDomain"),
+                    observeAdapter(createRealmHospitalDomain(), "realm.HospitalDomain"),
+                    observeAdapter(createRealmFortificationDomain(), "realm.FortificationDomain"),
                 ],
                 rules,
                 economyEffects,

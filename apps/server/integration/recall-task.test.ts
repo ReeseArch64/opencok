@@ -2,7 +2,7 @@ import { test, expect } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { and, eq, sql } from "drizzle-orm";
 import { recallTaskDomain } from "@opencok/services/recall-task";
-import { trainingDomain } from "@opencok/services/training";
+import { createRealmTrainingDomain } from "../src/composition/troops";
 import { user_recall_task } from "@opencok/drizzle/schema/opencok_kingdom/user_recall_task";
 import { user_recall_task_notes } from "@opencok/drizzle/schema/opencok_kingdom/user_recall_task_notes";
 import { userprofile } from "@opencok/drizzle/schema/opencok_kingdom/userprofile";
@@ -11,6 +11,9 @@ import { user_state } from "@opencok/drizzle/schema/opencok_kingdom/user_state";
 import { stat_reg } from "@opencok/drizzle/schema/opencok_kingdom/stat_reg";
 import { sfs, Type } from "@opencok/messages/sfs";
 import { cityHarness } from "./support/city";
+
+const trainingDomain = createRealmTrainingDomain();
+
 async function fixture(synthetic = true)
 {
     const h = await cityHarness([recallTaskDomain, trainingDomain]);

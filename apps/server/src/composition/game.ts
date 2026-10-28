@@ -1,3 +1,5 @@
+import { MilitaryMapper } from "@opencok/troops/mappings/military";
+import type { MilitaryProjection } from "@opencok/contracts/military-projection";
 import { ResearchMapper } from "@opencok/research/mappings/research";
 import type { ReconnectResearchProjection } from "@opencok/contracts/reconnect";
 import { GameService } from "@opencok/services/game";
@@ -18,6 +20,13 @@ export function createRealmGameService(
     heroes?: ConstructorParameters<typeof GameService>[5],
 ): GameService
 {
+    const mapper = new MilitaryMapper();
+    const military: MilitaryProjection = {
+        wounded: (row) => mapper.woundedTroops(row),
+        fortification: (row) => mapper.fortification(row, rules),
+        snapshot: (armies, hospital, forts) =>
+            mapper.militarySnapshot(armies, hospital, forts, rules),
+    };
     const research = new ResearchMapper();
     const projectResearch: ReconnectResearchProjection = (rows, queues) =>
         research.data(rows, queues, rules);
@@ -52,11 +61,13 @@ export function createRealmGameService(
                                 specialServer: serverFeature(rules, "araf_mode", context),
                                 cn1: null,
                                 research: projectResearch,
+                                military,
                             },
                         ),
                     validate: validateReconnectResult,
                 },
             ),
         projectResearch,
+        military,
     );
 }
