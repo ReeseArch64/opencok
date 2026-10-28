@@ -56,7 +56,6 @@ import { javaDecimal } from "@opencok/rules/java-integer";
 import { dragonRankingRanges } from "@opencok/rules/dragon-ranking";
 import { dragonRanking } from "@opencok/mappings/dragon-ranking";
 import { decodeDragonRanking } from "./dragon-ranking.ts";
-import { worldPointDetail } from "./world-point-detail.ts";
 import { favoriteInteger } from "@opencok/world/rules/world-favorites";
 import { worldSearchName } from "@opencok/world/rules/world-search";
 import { playerSearch } from "@opencok/mappings/player-search";
@@ -206,6 +205,7 @@ export class GameService
         },
         readonly ranking = services.ranking,
         readonly worldQueries = services.worldQueries,
+        readonly worldDetail = services.worldDetail,
     )
     {
         this.bootstrap = createBootstrap?.({
@@ -851,21 +851,12 @@ export class GameService
                 body = await this.services.playerPreferences.command(uid, command, params);
                 break;
             case "world.get.detail":
-                if (!this.services.worldPointDetail)
+                if (!this.services.worldPointDetail || !this.worldDetail)
                 {
                     throw new GameError(errors.unsupported);
                 }
 
-                body = await worldPointDetail(
-                    this.services.worldPointDetail,
-                    uid,
-                    params,
-                    this.rules,
-                    this.config.kingdomId,
-                    this.now(),
-                    this.services,
-                    this.now,
-                );
+                body = await this.worldDetail.read(uid, params, this.now(), this.now);
                 break;
             case "search.player":
                 body = await this.playerSearch(uid, params);

@@ -1,4 +1,6 @@
-import type { WorldPointDetailSnapshot } from "@opencok/contracts/world-point-detail";
+import type { PlayerEffectSnapshot } from "@opencok/contracts/power";
+import type { WorldResourceOwnerSnapshot } from "@opencok/contracts/world-resource-owner";
+import type { WorldPointDetailSnapshot } from "@opencok/world/contracts/world-point-detail";
 import type { GameServices } from "@opencok/contracts/game";
 import type { Rules } from "@opencok/rules/game";
 import { decodeWorldResourceArmy } from "@opencok/messages/world-resource-army";
@@ -17,7 +19,7 @@ import { sfs, type Fields } from "@opencok/messages/sfs";
 import { mailBlank } from "@opencok/rules/mail";
 
 export async function occupiedResourceFields(
-    state: WorldPointDetailSnapshot,
+    state: WorldPointDetailSnapshot<PlayerEffectSnapshot, WorldResourceOwnerSnapshot>,
     rules: Rules,
     now: number,
     services: Pick<GameServices, "worldPowerEffects" | "emperorVersion" | "expeditionStage">,

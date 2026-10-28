@@ -11,7 +11,7 @@ import type {
 } from "./city-progression";
 import type { TimedActivity } from "./timed-activity";
 import type { Row } from "./rows";
-import type { WorldResourceOwnerSnapshot } from "./world-point-detail";
+import type { WorldResourceOwnerSnapshot } from "./world-resource-owner";
 
 export interface CityProgressionPlan<TRules>
 {

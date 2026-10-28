@@ -1,10 +1,7 @@
 import { validateFields } from "@opencok/messages/validations/fields";
-import {
-    worldPointOwnerSchema,
-    worldCityFieldsSchema,
-} from "@opencok/validations/world-point-detail";
+import { worldPointOwnerSchema, worldCityFieldsSchema } from "../validations/world-point-detail";
 
-import type { WorldPointOwnerDetail, WorldCityDetail } from "@opencok/contracts/world-point-detail";
+import type { WorldPointOwnerDetail, WorldCityDetail } from "../contracts/world-point-detail";
 import { sfs, type Fields } from "@opencok/messages/sfs";
 
 function serializeWorldPointOwner(detail: WorldPointOwnerDetail): Fields

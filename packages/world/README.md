@@ -81,9 +81,10 @@ owned `worldSearchName`/`favoriteInteger` primitives; they do not retain duplica
 implementations. GameServices retains aggregate adapters until those callers are
 composed directly under #558 W20.
 
-Specialized point detail requires projections from power/Hero, territory and other
-owners. Resource queries, gathering/cargo, populations, march lifecycle, scouting
-and multi-aggregate spatial recovery remain later W10 work. Their current realm
+Point-detail ownership follows in #693, with actual power/Hero, resource, monster
+and territory projection collaborators. Resource queries, gathering/cargo,
+populations, march lifecycle, scouting and multi-aggregate spatial recovery remain
+later W10 work. Their current realm
 transactions and authority are unchanged. This delivery does not complete
 [ADR-0017](../../docs/decisions/0017-adopt-fenced-realm-process-authorities.md), W10,
 W18 or the full [#558](https://github.com/ReeseArch64/opencok/issues/558) inventory.
@@ -103,3 +104,58 @@ lockfile. No schema, saved identifier, configuration value, client asset or
 independent writer changes are required. Preserve existing favorites, residence,
 subscriptions, authority epochs and march data; no reset or data conversion is
 needed. Existing backup and recovery procedures remain applicable.
+
+## Point details and specialized projections (#693)
+
+World also owns the complete `world.get.detail` query: point selection, local and
+remote authorization, spatial snapshots, owner/city visibility, specialized
+territory/boss presentation and native response assembly. The former point-detail
+Service, special-detail Service, two repositories, rules, Mapper, validation and
+contracts move into their matching responsibility directories. Shared GameService
+retains transport dispatch and its complete response/frame checks.
+
+Resource/gathering calculations, monster health and exploration interpretation,
+barbarian army/power calculation and player/Hero effects remain with their current
+owners. The realm injects those actual collaborators. World coordinates their
+results in the original order instead of importing horizontal packages or copying
+the algorithms. Showing a territorial reward flag or boss rank is a projection;
+it cannot grant benefits or settle an event.
+
+World's snapshots are generic over city effects and resource-owner state. Their
+constraints describe only fields inspected by spatial code; injected calculators
+retain the concrete data they need. The existing `WorldResourceOwnerSnapshot`
+aggregate now lives in `contracts/src/world-resource-owner.ts`, separately from
+spatial query contracts. It still combines player effects, buildings and Hero world
+state for City, Hero, Scout, march inspection and reconnect. That concrete aggregate
+and its effect/resource implementation remain tracked W10/W20 migration work.
+There is no reexport at the former `contracts/world-point-detail` path.
+
+The former 823-line point repository is separated into the factory/readiness flow,
+target selection, owner/city reads, march snapshots and shared value validation.
+Their original transaction reader and call order remain intact. World now contains
+43 source modules (4,512 physical lines), four package test files (113 lines) and
+no generated catalog payload. The 492-line specialized presentation Service was
+reviewed as one bounded read workflow with territory/boss variants and explicit
+external calculators; it owns no gameplay writes. Additional unrelated families
+should receive their own responsibility modules rather than expanding that service.
+
+Repository callbacks for city effects and resource-owner state receive the exact
+current transactional reader. The queries retain `repeatable read`/`read only`,
+existing limits and error translation. Remote requests authorize the local profile
+and residence before opening the target realm's transaction. This remains two
+ordered snapshots, not a distributed snapshot or new write authority. Read-only
+transactions continue through the current database wrapper without a mutation
+fence.
+
+Projection preserves early returns, remote field omissions, signed quantities,
+legacy JSON round trips, exploration's Java ordering, individual clock samples and
+collection/byte bounds. Turret archive reads retain their position in the query.
+Reading a point never repairs gathering pointers, starts exploration, moves troops
+or liquidates rewards. Tests use actual owner collaborators and synthetic data;
+the PostgreSQL point-detail suite verifies authorization and unchanged gameplay
+state across local/remote resource, territory and boss reads.
+
+Deployment and rollback use the complete realm artifact against the same schemas,
+saved identifiers, exploration/march state, effects and reward ledgers. No client
+asset, environment value or process topology conversion is introduced. Native
+rendering, semantic definitions and full W10/W18 completion remain separate work.

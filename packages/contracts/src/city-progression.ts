@@ -4,7 +4,7 @@ export type { ProgressionActivityData } from "@opencok/economy/contracts/progres
 import type { GeneralWrite } from "@opencok/hero/contracts/generals";
 import type { GeneralRoster } from "@opencok/hero/contracts/generals";
 import type { GeneralRankingWeights } from "@opencok/hero/contracts/generals";
-import type { WorldResourceOwnerSnapshot } from "./world-point-detail";
+import type { WorldResourceOwnerSnapshot } from "./world-resource-owner";
 import type { Row } from "./rows";
 import type { PlayerEffectSnapshot } from "./power";
 import type { ActivityEconomy } from "@opencok/economy/contracts/activity-economy";

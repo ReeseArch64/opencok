@@ -3,9 +3,9 @@ import { drizzle, type NodePgClient } from "drizzle-orm/node-postgres";
 import * as kingdom from "@opencok/drizzle/schema/kingdom";
 import type { Row } from "@opencok/contracts/rows";
 import {
-    createWorldPointDetailStore,
-    checkWorldPointDetailStore,
-} from "@opencok/repositories/world-point-detail";
+    createRealmWorldPointDetailStore as createWorldPointDetailStore,
+    checkRealmWorldPointDetailStore as checkWorldPointDetailStore,
+} from "../src/composition/world-detail";
 import { readWorldResourceOwner } from "@opencok/repositories/world-resource-owner";
 
 const now = 1792756800123;

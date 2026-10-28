@@ -72,7 +72,7 @@ export class CityProgressionContext implements CityProgressionPlan<Rules>
             mode?: import("@opencok/contracts/world-birth").WorldBirthMode,
         ) => Promise<import("@opencok/contracts/world-birth").WorldBirthPlacement>,
         readonly foreignEffect?: (
-            snapshot: import("@opencok/contracts/world-point-detail").WorldResourceOwnerSnapshot,
+            snapshot: import("@opencok/contracts/world-resource-owner").WorldResourceOwnerSnapshot,
             id: number,
             at?: bigint,
         ) => number,

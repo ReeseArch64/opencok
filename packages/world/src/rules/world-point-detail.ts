@@ -1,14 +1,13 @@
-import { javaDecimal } from "./java-integer.ts";
 import type {
     WorldPointDetailQuery,
     WorldCityDetail,
     WorldPointOwnerDetail,
     WorldPointOwnerSnapshot,
-} from "@opencok/contracts/world-point-detail";
-import type { Row } from "@opencok/contracts/rows";
+} from "../contracts/world-point-detail";
+import type { Row } from "../contracts/rows";
 import { errors } from "@opencok/constants/game";
 import { GameError } from "@opencok/errors/game";
-import { mailBlank } from "./mail.ts";
+import type { WorldPointRuleRuntime } from "../contracts/point-detail-runtime";
 
 function invalid(): never
 {
@@ -92,7 +91,10 @@ export function worldPointDetailQuery(
     return { point: integer(point), kingdomId, now };
 }
 
-export function worldPointOccupied(point: Row): boolean
+export function worldPointOccupied(
+    point: Row,
+    mailBlank: WorldPointRuleRuntime["mailBlank"],
+): boolean
 {
     return (
         !mailBlank(nullableText(point.ownerId, 255))
@@ -104,6 +106,7 @@ export function worldPointOwnerBase(
     point: Row,
     owner: WorldPointOwnerSnapshot,
     remote: boolean,
+    mailBlank: WorldPointRuleRuntime["mailBlank"],
 ): WorldPointOwnerDetail
 {
     if (typeof remote !== "boolean")
@@ -204,6 +207,7 @@ export function worldCityDetail(
     lastBeDuelTime: unknown,
     slowDownEffect: number,
     multiplier: string | undefined,
+    javaDecimal: WorldPointRuleRuntime["javaDecimal"],
 ): WorldCityDetail
 {
     const observer = long(observerPower ?? 0n);

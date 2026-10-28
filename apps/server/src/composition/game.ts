@@ -1,3 +1,4 @@
+import { createRealmWorldPointDetailService } from "./world-detail";
 import { createRealmWorldQueryService } from "./world";
 import { createRealmRankingService } from "./ranking";
 import { MilitaryMapper } from "@opencok/troops/mappings/military";
@@ -22,6 +23,7 @@ export function createRealmGameService(
     heroes?: ConstructorParameters<typeof GameService>[5],
 ): GameService
 {
+    const detail = createRealmWorldPointDetailService(rules, services);
     const mapper = new MilitaryMapper();
     const military: MilitaryProjection = {
         wounded: (row) => mapper.woundedTroops(row),
@@ -73,5 +75,16 @@ export function createRealmGameService(
         military,
         services.ranking ?? createRealmRankingService(db, rules, config, now, services),
         services.worldQueries ?? createRealmWorldQueryService(config, rules, now, services),
+        services.worldDetail ?? {
+            read: (owner, params, instant, clock) =>
+                detail.read(
+                    services.worldPointDetail!,
+                    owner,
+                    params,
+                    config.kingdomId,
+                    instant,
+                    clock,
+                ),
+        },
     );
 }

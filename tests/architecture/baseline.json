@@ -36,7 +36,6 @@
     "undeclared: apps/server/integration/core.test.ts -> @opencok/chat",
     "undeclared: apps/server/integration/mailbox-effects.test.ts -> pg",
     "undeclared: apps/server/integration/nickname-change.test.ts -> @opencok/chat",
-    "undeclared: apps/server/integration/world-map-queries.test.ts -> pg",
     "undeclared: apps/server/test/hua-mulan.test.ts -> @opencok/enums",
     "unresolved: apps/web/src/main.ts -> ../assets/loading.jpg",
     "unresolved: apps/web/src/main.ts -> ../assets/logo.png",

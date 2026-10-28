@@ -148,8 +148,12 @@ The [World package](../packages/world/README.md) owns map/viewport, search,
 favorites and nearest/leader/leave workflows, their SQL adapters and map Controller.
 The realm constructs its map reader directly and injects existing projections,
 clocks and authority fencing. Favorite writes retain the guarded realm database;
-leave retains its explicit transaction fence. Specialized world details, populations,
-recovery and march/gathering authority remain separate migration work.
+leave retains its explicit transaction fence. World also owns point-detail query
+orchestration and specialized spatial presentation, with actual effect/resource,
+monster and player/Hero collaborators injected by the realm. Generic snapshots keep
+those domains outside World; the original local/remote read-only transactions are
+preserved. Populations, recovery and march/gathering authority remain separate
+migration work.
 
 Realm composition injects `GameService` and `WorldService` into `GameController`
 and `WorldController`. Controllers delegate commands; Services coordinate use

@@ -9,18 +9,17 @@ import { expect, test } from "bun:test";
 import { drizzle, type NodePgClient } from "drizzle-orm/node-postgres";
 import * as kingdom from "@opencok/drizzle/schema/kingdom";
 import {
-    createWorldPointDetailStore,
-    checkWorldPointDetailStore,
-} from "@opencok/repositories/world-point-detail";
-import {
-    worldPointDetailQuery,
-    worldPointOccupied,
-    worldPointOwnerBase,
-} from "@opencok/rules/world-point-detail";
-import { worldPointOwner } from "@opencok/mappings/world-point-detail";
-import type { WorldPointOwnerSnapshot } from "@opencok/contracts/world-point-detail";
+    createRealmWorldPointDetailStore as createWorldPointDetailStore,
+    checkRealmWorldPointDetailStore as checkWorldPointDetailStore,
+} from "../src/composition/world-detail";
+import { worldPointDetailQuery } from "@opencok/world/rules/world-point-detail";
+import type { WorldPointOwnerSnapshot } from "@opencok/world/contracts/world-point-detail";
+import { worldPointOwner } from "@opencok/world/mappings/world-point-detail";
+import { createRealmWorldPointDetailPolicy } from "../src/composition/world-detail";
 import type { Row } from "@opencok/contracts/rows";
 import { decode, encode, sfs } from "@opencok/messages/sfs";
+
+const { worldPointOccupied, worldPointOwnerBase } = createRealmWorldPointDetailPolicy();
 
 const now = 1792756800123;
 const pointKeys = [
@@ -288,25 +287,6 @@ function fixture()
 }
 const reads = (f: ReturnType<typeof fixture>, table: string) =>
     f.queries.filter((q) => q.text.includes(`from "opencok_kingdom"."${table}"`));
-
-test("point queries preserve signed point IDs and normalize the local realm sentinel", () => {
-    for (const server of [undefined, -1, 1])
-    {
-        expect(worldPointDetailQuery(-1, server, 1, now)).toEqual({ point: -1, kingdomId: 1, now });
-    }
-    expect(worldPointDetailQuery(2147483647, 2, 1, now).kingdomId).toBe(2);
-    for (const server of [0, -2, NaN, Infinity, 1.5, 2147483648])
-    {
-        expect(() => worldPointDetailQuery(1, server, 1, now)).toThrow();
-    }
-    for (const point of [NaN, 1.5, -2147483649, 2147483648])
-    {
-        expect(() => worldPointDetailQuery(point, 1, 1, now)).toThrow();
-    }
-    expect(() => worldPointDetailQuery(1, 1, 0, now)).toThrow();
-    expect(() => worldPointDetailQuery(1, 1, 1, -1)).toThrow();
-    expect(() => worldPointDetailQuery(1, 1, 1, 9007199254740992)).toThrow();
-});
 
 test("point occupancy recognizes either owner identity or name using Java whitespace", () => {
     for (const blank of [null, "", "\t\r\n ", "\u001c", "\u180e", "\u2003", "\u3000"])

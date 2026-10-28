@@ -2,7 +2,7 @@ import { z } from "zod";
 import type {
     WorldPointOwnerResponse,
     WorldCityFieldsResponse,
-} from "@opencok/contracts/responses/world-point-detail";
+} from "../contracts/responses/world-point-detail";
 import { field } from "@opencok/messages/validations/response";
 
 export const worldPointOwnerSchema = z.strictObject({

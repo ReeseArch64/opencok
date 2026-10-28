@@ -1,6 +1,15 @@
-import type { GeneralWorldSnapshot } from "@opencok/hero/contracts/general-world";
-import type { PlayerEffectSnapshot } from "./power.ts";
 import type { Row } from "./rows.ts";
+
+export interface WorldCityEffects
+{
+    profile: Row;
+    throneRewards: readonly unknown[];
+}
+
+export interface WorldResourceOwnerIdentity
+{
+    effects: { profile: Row; };
+}
 
 export interface WorldPointDetailQuery
 {
@@ -9,13 +18,6 @@ export interface WorldPointDetailQuery
     now: number;
     cityExtras?: boolean;
     resourceEffects?: boolean;
-}
-
-export interface WorldResourceOwnerSnapshot
-{
-    effects: PlayerEffectSnapshot;
-    buildings: readonly Row[];
-    newGenerals: GeneralWorldSnapshot;
 }
 
 export interface WorldPointOwnerSnapshot
@@ -27,7 +29,10 @@ export interface WorldPointOwnerSnapshot
     member?: Row;
 }
 
-export interface WorldPointDetailSnapshot
+export interface WorldPointDetailSnapshot<
+    TEffects extends WorldCityEffects = WorldCityEffects,
+    TOwner extends WorldResourceOwnerIdentity = WorldResourceOwnerIdentity,
+>
 {
     profile: Row | undefined;
     world?: Row;
@@ -39,25 +44,28 @@ export interface WorldPointDetailSnapshot
     city?: {
         observerStatistics: Row | undefined;
         mixed: Row | undefined;
-        effects: PlayerEffectSnapshot;
+        effects: TEffects;
     };
     barbarian?: { row: Row | undefined; };
     neutralResource?: { march: Row | undefined; };
-    special?: WorldSpecialDetailSnapshot;
+    special?: WorldSpecialDetailSnapshot<TOwner>;
     resourceGroup?: readonly Row[];
-    resource?: { march: Row | undefined; owner?: WorldResourceOwnerSnapshot; };
+    resource?: { march: Row | undefined; owner?: TOwner; };
 }
 
 export type WorldExplorationSelector = (point: Row, marches: readonly Row[]) => string | undefined;
 
-export interface WorldPointDetailStore
+export interface WorldPointDetailStore<
+    TEffects extends WorldCityEffects = WorldCityEffects,
+    TOwner extends WorldResourceOwnerIdentity = WorldResourceOwnerIdentity,
+>
 {
     read(
         observer: string,
         query: WorldPointDetailQuery,
         selectExploration?: WorldExplorationSelector,
         turret?: WorldTurretReader,
-    ): Promise<WorldPointDetailSnapshot>;
+    ): Promise<WorldPointDetailSnapshot<TEffects, TOwner>>;
 }
 
 export interface WorldPointOwnerDetail
@@ -80,7 +88,9 @@ export interface WorldCityDetail
     lastBeDuelTime: bigint;
 }
 
-export interface WorldSpecialDetailSnapshot
+export interface WorldSpecialDetailSnapshot<
+    TOwner extends WorldResourceOwnerIdentity = WorldResourceOwnerIdentity,
+>
 {
     territory?: Row;
     marches: readonly Row[];
@@ -88,7 +98,7 @@ export interface WorldSpecialDetailSnapshot
     team?: Row;
     ownerProfile?: Row;
     ownerAlliance?: Row;
-    ownerEffects?: WorldResourceOwnerSnapshot;
+    ownerEffects?: TOwner;
     banner?: string;
     observerBanner?: string;
     resources: readonly { row: Row; profile: Row; }[];

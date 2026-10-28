@@ -4,7 +4,7 @@ import {
     ownerLong as long,
     ownerRecords as bounded,
 } from "@opencok/services/world-resource-owner-values";
-import type { WorldResourceOwnerSnapshot } from "@opencok/contracts/world-point-detail";
+import type { WorldResourceOwnerSnapshot } from "@opencok/contracts/world-resource-owner";
 import { legacyIntegerOrder, legacyObjectOrder } from "@opencok/messages/legacy-object-order";
 import type { Rules } from "@opencok/rules/game";
 import { validateNewGeneralContent } from "@opencok/hero/rules/new-general-effects";

@@ -131,3 +131,9 @@ The [World domain](world/README.md) owns map browsing, map search, favorites and
 spatial utilities after #691. The realm injects projections and existing fencing;
 map persistence is composed directly. Specialized details, populations, march and
 gathering lifecycle remain later migrations with unchanged authority.
+
+World additionally owns complete point-detail and specialized spatial presentation
+after #693. Actual resource, monster and player/Hero projection collaborators are
+injected; their gameplay authority and the shared effect/resource aggregate remain
+with their current owners. Local and remote reads preserve their original snapshot
+boundaries without repairing gameplay state.

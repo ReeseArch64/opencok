@@ -3,7 +3,7 @@ import type { Value } from "@opencok/messages/sfs";
 import type { Row } from "./rows.ts";
 
 import type { PlayerEffectSnapshot } from "./power.ts";
-import type { WorldResourceOwnerSnapshot } from "./world-point-detail.ts";
+import type { WorldResourceOwnerSnapshot } from "./world-resource-owner.ts";
 import type { AvatarSystemMail } from "./files.ts";
 
 export interface ReconnectBaseState

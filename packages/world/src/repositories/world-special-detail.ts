@@ -1,7 +1,6 @@
 import { and, asc, desc, eq, inArray } from "drizzle-orm";
 import { alliance_territory } from "@opencok/drizzle/schema/opencok_kingdom/alliance_territory";
 import { alliance } from "@opencok/drizzle/schema/opencok_kingdom/alliance";
-import { mailBlank } from "@opencok/rules/mail";
 import { kingdom_battle_team } from "@opencok/drizzle/schema/opencok_kingdom/kingdom_battle_team";
 import { alliance_battle_team } from "@opencok/drizzle/schema/opencok_kingdom/alliance_battle_team";
 import { user_territory_resource } from "@opencok/drizzle/schema/opencok_kingdom/user_territory_resource";
@@ -10,12 +9,14 @@ import { world_march } from "@opencok/drizzle/schema/opencok_kingdom/world_march
 import { t_worldboss } from "@opencok/drizzle/schema/opencok_kingdom/t_worldboss";
 import { t_worldbossrank } from "@opencok/drizzle/schema/opencok_kingdom/t_worldbossrank";
 import type { DatabaseClient } from "@opencok/drizzle/contracts/database";
-import type { Row } from "@opencok/contracts/rows";
+import type { Row } from "../contracts/rows";
 import type {
     WorldSpecialDetailSnapshot,
     WorldTurretReader,
-} from "@opencok/contracts/world-point-detail";
-import { readWorldResourceOwner } from "./world-resource-owner.ts";
+} from "../contracts/world-point-detail";
+import type { WorldResourceOwnerIdentity } from "../contracts/world-point-detail";
+import type { WorldDetailReaders } from "../contracts/point-detail-persistence";
+import type { WorldCityEffects } from "../contracts/world-point-detail";
 
 type Reader = Pick<DatabaseClient<"kingdom">, "select">;
 
@@ -84,15 +85,17 @@ async function banner(db: Reader, id: unknown): Promise<string>
     return row ? text(row.bannerStyle) : "UN";
 }
 
-export async function readSpecialWorldDetail(
+export async function readSpecialWorldDetail<TOwner extends WorldResourceOwnerIdentity>(
     db: Reader,
     point: Row,
     observer: Row,
     kingdomId: number,
     remote: boolean,
-    turret?: WorldTurretReader,
-): Promise<WorldSpecialDetailSnapshot | undefined>
+    turret: WorldTurretReader | undefined,
+    runtime: Pick<WorldDetailReaders<WorldCityEffects, TOwner>, "mailBlank" | "readResourceOwner">,
+): Promise<WorldSpecialDetailSnapshot<TOwner> | undefined>
 {
+    const { mailBlank } = runtime;
     const type = point.pointType as number;
 
     if (!territoryTypes.includes(type) && (remote || ![49, 50].includes(type)))
@@ -100,7 +103,12 @@ export async function readSpecialWorldDetail(
         return undefined;
     }
 
-    const state: WorldSpecialDetailSnapshot = { marches: [], resources: [], kills: [], ranks: [] };
+    const state: WorldSpecialDetailSnapshot<TOwner> = {
+        marches: [],
+        resources: [],
+        kills: [],
+        ranks: [],
+    };
 
     if ([49, 50].includes(type))
     {
@@ -294,7 +302,7 @@ export async function readSpecialWorldDetail(
             && state.marches.some((march) => march.ownerUid === owner)
         )
         {
-            state.ownerEffects = await readWorldResourceOwner(db, text(owner));
+            state.ownerEffects = await runtime.readResourceOwner(db, text(owner));
         }
     }
 

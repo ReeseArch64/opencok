@@ -990,3 +990,19 @@ This package is additional to the original 64-directory inventory above. It does
 not absorb all files prefixed world: resource/gathering state, population, scouting,
 recovery and march lifecycles retain their current owners until cohesive migrations
 are verified. W10 and the separate authority protocol in W18 remain incomplete.
+
+## World point details and specialized projections (#693)
+
+World now owns the complete `world.get.detail` query vertical: nine former
+horizontal modules for selection, authorization, spatial reads, specialized
+territory/boss presentation, rules, native mapping, validation and contracts.
+Actual resource/gathering, monster/barbarian and player/Hero calculators remain
+injected by the realm. Repository collaborators receive the original transactional
+reader; local authorization still precedes a separate remote-realm snapshot.
+
+Generic World snapshots avoid importing the concrete effect/resource aggregate.
+`contracts/src/world-resource-owner.ts` retains that existing aggregate for City,
+Hero, Scout, march inspection and reconnect until those owners migrate. Consumers
+move directly; the former point-detail contract path is removed. The World register
+records remaining W10/W20 responsibilities, read-only guarantees and compatibility
+limits. No gameplay repair, reward grant or process authority change is introduced.
