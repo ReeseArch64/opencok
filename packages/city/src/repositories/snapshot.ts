@@ -1,11 +1,9 @@
 import { user_branch_city_info } from "@opencok/drizzle/schema/opencok_kingdom/user_branch_city_info";
 import { activity_minstrel } from "@opencok/drizzle/schema/opencok_kingdom/activity_minstrel";
 import { user_skill } from "@opencok/drizzle/schema/opencok_kingdom/user_skill";
-import { and, asc, eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { userprofile } from "@opencok/drizzle/schema/opencok_kingdom/userprofile";
 import { user_resource } from "@opencok/drizzle/schema/opencok_kingdom/user_resource";
-import { user_building } from "@opencok/drizzle/schema/opencok_kingdom/user_building";
-import { user_building_exp } from "@opencok/drizzle/schema/opencok_kingdom/user_building_exp";
 import { playerinfo } from "@opencok/drizzle/schema/opencok_kingdom/playerinfo";
 import { queue } from "@opencok/drizzle/schema/opencok_kingdom/queue";
 import { user_task } from "@opencok/drizzle/schema/opencok_kingdom/user_task";
@@ -41,16 +39,8 @@ export class CitySnapshotReader
         const [statistics] = await tx.select().from(playerinfo).where(
             eq(playerinfo.uid, owner),
         );
-        const [buildingExperience] = await tx
-            .select()
-            .from(user_building_exp)
-            .where(eq(user_building_exp.uid, owner));
-        const buildings = await tx
-            .select()
-            .from(user_building)
-            .where(eq(user_building.uid, owner))
-            .orderBy(asc(user_building.uuid))
-            .limit(257);
+        const [buildingExperience] = await session.buildings.readExperience();
+        const buildings = await session.buildings.read();
         const sciences = await session.research.read();
         const armies = await session.troops.readArmies();
         const hospital = await session.troops.readHospital();
