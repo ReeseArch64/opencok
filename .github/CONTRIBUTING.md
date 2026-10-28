@@ -11,7 +11,7 @@
 
 ### Tools and checks
 
-Install with `bun install --frozen-lockfile`. Use lockfile-pinned dprint CLI/TypeScript plugin and the Oxlint/Oxfmt bundled with `vite-plus`; no global formatter or remote plugin is required. Configuration: `.oxlintrc.json` for lint, `dprint.json` for JS/TS, `.oxfmtrc.json` for other formats. See [ADR-0003](../docs/decisions/0003-adopt-dprint-oxfmt-and-oxlint.md) for policy and historical validation.
+Install with `bun install --frozen-lockfile`. Use lockfile-pinned dprint CLI/TypeScript plugin and the Oxlint/Oxfmt bundled with `vite-plus`; no global formatter or remote plugin is required. Configuration: `.oxlintrc.json` for lint, `dprint.json` for TypeScript, `.oxfmtrc.json` for other formats. See [ADR-0003](../docs/decisions/0003-adopt-dprint-oxfmt-and-oxlint.md) for policy and historical validation.
 
 Before submitting, run from the repository root:
 
@@ -27,11 +27,11 @@ Use `bun run lint:fix`, then `bun run format` and lint again; nested guards may 
 ### Formatting and comments
 
 - Comments are prohibited in all tracked project files, including code, configuration, scripts, SQL migrations, templates and embedded examples: no inline, block, documentation or suppression comments. Explain intent in prose; express constraints through names, types and tests. Preserve executable interpreter directives.
-- dprint exclusively owns JS/JSX/TS/TSX and c/m module variants: four spaces, double quotes, semicolons, LF, 100 columns, trailing commas only in multiline constructs. Let the pinned plugin wrap arguments, conditions, generics and chains.
-- Oxfmt owns other supported formats, including JSON, YAML, Markdown, CSS, HTML and Markdown embedded code, with two-space indentation. Preserve Markdown prose wrapping; import/export and package-key sorting stay disabled. Root commands invoke both disjoint owners.
-- Use Allman braces for declarations/control flow; start `else`, `catch` and `finally` on new lines. Arrow callback braces stay inline, objects retain expression layout, and empty blocks may remain `{}` after a line break. Oxlint `curly` requires braces for every control body, including `do` bodies dprint does not wrap.
-- Separate imports/declarations, adjacent top-level declarations, class methods, control-flow blocks and final returns with a blank line. Keep related fields/locals together. Preserve meaningful spacing, collapse decorative repetition and never imitate minified code. Logical-stage padding remains a review responsibility; Oxlint does not enforce it generally.
-- EditorConfig specifies four-space source overrides and two-space defaults. VS Code uses recommended dprint/Oxc extensions and local dprint for JS/TS; select Oxfmt for other languages. Editors without integrations must run root commands.
+- The C#-inspired presentation applies only to TypeScript files (TS/TSX and c/m TypeScript module variants). dprint exclusively owns these files: four spaces, double quotes, semicolons, LF, 100 columns, trailing commas only in multiline constructs. Let the pinned plugin wrap arguments, conditions, generics and chains.
+- Oxfmt owns JavaScript/JSX and c/m JavaScript module variants plus other supported formats, including JSON, YAML, Markdown, CSS, HTML and Markdown embedded code, with the existing two-space, same-line-brace defaults. Do not apply the TypeScript presentation to these files. Preserve Markdown prose wrapping; import/export and package-key sorting stay disabled. Root commands invoke both disjoint owners.
+- In TypeScript, use Allman braces for declarations/control flow; start `else`, `catch` and `finally` on new lines. Arrow callback braces stay inline, objects retain expression layout, and empty blocks may remain `{}` after a line break. Oxlint `curly` requires braces for every control body, including `do` bodies dprint does not wrap.
+- In TypeScript, separate imports/declarations, adjacent top-level declarations, class methods, control-flow blocks and final returns with a blank line. Keep related fields/locals together. Preserve meaningful spacing, collapse decorative repetition and never imitate minified code. Logical-stage padding remains a review responsibility; Oxlint does not enforce it generally.
+- EditorConfig specifies four-space TypeScript overrides and two-space defaults. VS Code uses recommended dprint/Oxc extensions and local dprint only for TypeScript; select Oxfmt for JavaScript and other supported languages. Editors without integrations must run root commands.
 
 Tools exclude private `data/`, generated `.husky/_/`, workspace `node_modules/`, `dist/`, coverage, TypeScript build metadata, Drizzle migrations, snapshots and database fixtures. Former root `mobile/` and `legacy/` inputs are absent; authorized originals belong in ignored data. Maintained application/package source, Drizzle TypeScript schemas, agent skills and hook configuration remain included. Preserve [architecture boundaries](ARCHITECTURE.md).
 
