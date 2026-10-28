@@ -1,8 +1,8 @@
 import { validateFields } from "@opencok/messages/validations/fields";
-import { playerRankingSchema } from "@opencok/validations/ranking";
+import { playerRankingSchema } from "../validations/ranking";
 
-import type { PlayerRankingKind, PlayerRankingResult } from "@opencok/contracts/ranking";
-import { text, type Row } from "@opencok/contracts/rows";
+import type { PlayerRankingKind, PlayerRankingResult } from "../contracts/ranking";
+import { text, type Row } from "../contracts/rows";
 import { GameError } from "@opencok/errors/game";
 import { errors } from "@opencok/constants/game";
 import { sfs, type Fields, type Value } from "@opencok/messages/sfs";

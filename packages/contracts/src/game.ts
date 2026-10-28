@@ -1,3 +1,8 @@
+import type {
+    RankingStore,
+    RankingCommands,
+    RankingPublications,
+} from "@opencok/ranking/contracts/runtime";
 import type { HeroEventSelection, HeroEventSnapshot } from "@opencok/hero/contracts/hero-event";
 import type { InventoryFields as Fields } from "@opencok/economy/contracts/inventory";
 import type { BattleRankingState, PlayoffPublication } from "./battle-ranking.ts";
@@ -53,11 +58,9 @@ import type {
     MailStatusSnapshot,
 } from "./mail.ts";
 import type { ExpeditionRankingEntry } from "./expedition-ranking.ts";
-import type { AllianceRankingQuery, AllianceRankingSnapshot } from "./alliance-ranking.ts";
 import type { Row } from "./rows.ts";
 import type { MailUpdateInspector, MailUpdateQuery, MailUpdateSnapshot } from "./mail-updates.ts";
 import type { PowerState } from "./power.ts";
-import type { PlayerRankingQuery, PlayerRankingSnapshot } from "./ranking.ts";
 import type { ReconnectProgressState, ReconnectProgressWrite } from "./reconnect.ts";
 
 export interface AuthenticationStore
@@ -84,7 +87,7 @@ export interface CityState
     civilizationPrestige?: bigint;
 }
 
-export interface GameStore extends AuthenticationStore
+export interface GameStore extends AuthenticationStore, RankingStore
 {
     activityDirectory?(
         uid: string,
@@ -99,7 +102,6 @@ export interface GameStore extends AuthenticationStore
         selection: HeroEventSelection,
         now: number,
     ): Promise<HeroEventSnapshot>;
-    rankingPrivacy?(uid: string, kind: "payment" | "consumption"): Promise<number>;
     battleRankingState?(uid: string, now: number): Promise<BattleRankingState>;
     heroHistory?(
         uid: string,
@@ -135,7 +137,6 @@ export interface GameStore extends AuthenticationStore
         realm: number,
         uids: readonly string[],
     ): Promise<FlowerRankingState>;
-    normalRankingRealm?(): Promise<boolean>;
     getSystemMailByPlayerId?(
         uid: string,
         query: MailSystemQuery,
@@ -194,8 +195,6 @@ export interface GameStore extends AuthenticationStore
     mailTypeDelete?(uid: string, query: MailTypeDeleteQuery): Promise<MailCategoryDeleteSnapshot>;
     mailSave(uid: string, query: MailSaveQuery): Promise<MailSaveSnapshot>;
     mailStatus(uid: string, query: MailStatusQuery): Promise<MailStatusSnapshot>;
-    allianceRanking(uid: string, query: AllianceRankingQuery): Promise<AllianceRankingSnapshot>;
-    playerRanking(uid: string, query: PlayerRankingQuery): Promise<PlayerRankingSnapshot>;
     getPowerByPlayerId(uid: string, now: number): Promise<PowerState>;
     getPlayerSummariesByIds(uids: string[], allServers: boolean): Promise<PlayerSummary[]>;
     configurationSwitches?(): Promise<Row[] | undefined>;
@@ -226,8 +225,9 @@ export interface LoginConfigurationState
     pushSettings: Row[];
 }
 
-export interface GameServices
+export interface GameServices extends RankingPublications
 {
+    ranking?: RankingCommands;
     celebrityDescription?: {
         read(owner: string, params: Fields, now: number): Promise<Fields>;
         save(owner: string, params: Fields, now: number): Promise<Fields>;
@@ -279,8 +279,6 @@ export interface GameServices
         global: boolean,
     ): Promise<FlowerRankingPublication>;
     militaryRanking?(type: number, group: number): Promise<readonly string[]>;
-    attributeRanking?(type: number): Promise<readonly string[]>;
-    publishedGlobalRanking?(kind: "payment" | "consumption"): Promise<readonly string[]>;
     globalCelebrityRanking?(rankType: number): Promise<readonly string[]>;
     scoreActivityRanking?(): Promise<readonly string[]>;
     trade?(

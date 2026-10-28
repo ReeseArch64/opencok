@@ -2,7 +2,7 @@ import { z } from "zod";
 import type {
     PublishedRankingResponse,
     AttributeRankingResponse,
-} from "@opencok/contracts/responses/published-ranking";
+} from "../contracts/responses/published-ranking";
 import { responseFieldsSchema, field } from "@opencok/messages/validations/response";
 
 export const publishedRankingSchema = z.strictObject({

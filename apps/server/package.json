@@ -41,7 +41,9 @@
     "@opencok/skins": "workspace:*",
     "@opencok/alliance": "workspace:*",
     "@opencok/constants": "workspace:*",
-    "@opencok/errors": "workspace:*"
+    "@opencok/errors": "workspace:*",
+    "@opencok/ranking": "workspace:*",
+    "@opencok/validations": "workspace:*"
   },
   "devDependencies": {
     "@opencok/api": "workspace:*",

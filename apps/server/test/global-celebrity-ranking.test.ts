@@ -5,7 +5,7 @@ import { createRealmGameService } from "../src/composition/game";
 import { decode, encode, fields, sfs, type Fields, type Value } from "@opencok/messages/sfs";
 import { Rules } from "@opencok/rules/game";
 import { Cache } from "@opencok/storage/session";
-import { readNormalRankingRealm } from "../../../packages/repositories/src/ranking-realm.ts";
+import { readNormalRankingRealm } from "@opencok/ranking/repositories/ranking-realm";
 import { drizzle, type NodePgClient } from "drizzle-orm/node-postgres";
 
 const boards = [

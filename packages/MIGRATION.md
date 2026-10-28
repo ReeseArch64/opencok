@@ -957,3 +957,21 @@ Full server/package suites, workspace types, root lint/format and realm build ve
 the integration. No production-performance or native-device claim is inferred.
 Rollback restores the prior realm artifact against unchanged storage/effects,
 inventory, receipt and outbox data; no schema or data conversion is required.
+
+## Permanent rankings and published views (#689)
+
+The [Ranking register](ranking/README.md#migration-register) records the complete
+vertical for ten permanent player/alliance and published attribute/payment/
+consumption commands. Eighteen standalone horizontal modules and four GameService
+workflows move into the existing Ranking workspace, together with privacy reads
+and focused tests. Application composition supplies science, video, feature,
+profile and clock collaborators. Shared aggregate Database/Cache adapters
+continue delegating to owned implementations; their eventual retirement remains
+W20 work.
+
+Candidate windows, SQL snapshot isolation, collation/null ordering, fallback
+ordinals, field types and published Redis keys are preserved. Consumption views
+continue through their existing event coordinator. Hero, Dragon, Expedition and
+other event settlement, funding and reward ownership are outside this delivery.
+The original inventory above remains a historical baseline, not a claim that every
+ranking or event family is migrated. No schema or process authority changes.

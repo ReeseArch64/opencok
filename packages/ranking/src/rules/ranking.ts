@@ -3,11 +3,11 @@ import type {
     PlayerRankingQuery,
     PlayerRankingSnapshot,
     PlayerRankingResult,
-} from "@opencok/contracts/ranking";
-import { text } from "@opencok/contracts/rows";
+} from "../contracts/ranking";
+import { text } from "../contracts/rows";
 import { errors } from "@opencok/constants/game";
 import { GameError } from "@opencok/errors/game";
-import type { Rules } from "./game.ts";
+import type { RankingCatalog } from "../contracts/runtime";
 
 function invalid(): never
 {
@@ -16,7 +16,7 @@ function invalid(): never
 
 export function playerRankingQuery(
     kind: PlayerRankingKind,
-    rules: Rules,
+    rules: Pick<RankingCatalog, "items" | "configuration">,
     now: number,
 ): PlayerRankingQuery
 {

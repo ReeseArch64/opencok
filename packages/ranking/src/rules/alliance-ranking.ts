@@ -3,12 +3,12 @@ import type {
     AllianceRankingQuery,
     AllianceRankingSnapshot,
     AllianceRankingResult,
-} from "@opencok/contracts/alliance-ranking";
-import { text, type Row } from "@opencok/contracts/rows";
+} from "../contracts/alliance-ranking";
+import { text, type Row } from "../contracts/rows";
 import { GameError } from "@opencok/errors/game";
 import { errors } from "@opencok/constants/game";
-import { allianceScienceEffects } from "./power-memberships.ts";
-import type { Rules } from "./game.ts";
+import type { AllianceScienceEffects } from "../contracts/runtime";
+import type { RankingCatalog } from "../contracts/runtime";
 
 function invalid(): never
 {
@@ -34,7 +34,7 @@ function integer(value: unknown): number
 
 export function allianceRankingQuery(
     kind: AllianceRankingKind,
-    rules: Rules,
+    rules: Pick<RankingCatalog, "items">,
     now: number,
 ): AllianceRankingQuery
 {
@@ -51,7 +51,7 @@ export function allianceRankingQuery(
 export function selectAllianceRanking(
     query: AllianceRankingQuery,
     snapshot: AllianceRankingSnapshot,
-    rules: Rules,
+    allianceScienceEffects: AllianceScienceEffects,
 ): AllianceRankingResult
 {
     if (
@@ -133,7 +133,7 @@ export function selectAllianceRanking(
             )
             .map((alliance) => {
                 const id = text(alliance, "uid");
-                const expansion = allianceScienceEffects(sciences.get(id) ?? [], rules).get(500)
+                const expansion = allianceScienceEffects(sciences.get(id) ?? []).get(500)
                     ?? 0;
                 const add = Math.max(-2147483648, Math.min(2147483647, Math.trunc(expansion)));
                 const maximum = integer(alliance.maxMember ?? 0);

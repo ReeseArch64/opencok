@@ -21,6 +21,7 @@
     "@opencok/contracts": "workspace:*",
     "@aws-sdk/client-s3": "^3.0.0",
     "@aws-sdk/s3-request-presigner": "^3.1156.0",
-    "@opencok/hero": "workspace:*"
+    "@opencok/hero": "workspace:*",
+    "@opencok/ranking": "workspace:*"
   }
 }

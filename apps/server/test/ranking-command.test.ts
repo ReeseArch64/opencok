@@ -1,7 +1,7 @@
 import { expect, test } from "bun:test";
 import type { GameStore } from "@opencok/contracts/game";
 import type { Row } from "@opencok/contracts/rows";
-import type { PlayerRankingQuery, PlayerRankingSnapshot } from "@opencok/contracts/ranking";
+import type { PlayerRankingQuery, PlayerRankingSnapshot } from "@opencok/ranking/contracts/ranking";
 import { createRealmGameService } from "../src/composition/game";
 import { Rules } from "@opencok/rules/game";
 import { decode, encode, sfs } from "@opencok/messages/sfs";

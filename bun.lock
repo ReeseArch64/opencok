@@ -97,6 +97,7 @@
         "@opencok/player": "workspace:*",
         "@opencok/policy": "workspace:*",
         "@opencok/production": "workspace:*",
+        "@opencok/ranking": "workspace:*",
         "@opencok/repositories": "workspace:*",
         "@opencok/research": "workspace:*",
         "@opencok/resources": "workspace:*",
@@ -107,6 +108,7 @@
         "@opencok/storage": "workspace:*",
         "@opencok/tasks": "workspace:*",
         "@opencok/troops": "workspace:*",
+        "@opencok/validations": "workspace:*",
         "effect": "catalog:",
       },
       "devDependencies": {
@@ -371,6 +373,7 @@
         "@opencok/ledger": "workspace:*",
         "@opencok/mail": "workspace:*",
         "@opencok/messages": "workspace:*",
+        "@opencok/ranking": "workspace:*",
         "@opencok/share": "workspace:*",
         "@opencok/skins": "workspace:*",
         "@opencok/tasks": "workspace:*",
@@ -791,6 +794,14 @@
     },
     "packages/ranking": {
       "name": "@opencok/ranking",
+      "dependencies": {
+        "@opencok/constants": "workspace:*",
+        "@opencok/drizzle": "workspace:*",
+        "@opencok/errors": "workspace:*",
+        "@opencok/messages": "workspace:*",
+        "drizzle-orm": "0.45.4",
+        "zod": "catalog:",
+      },
       "devDependencies": {
         "@opencok/config": "workspace:*",
         "@types/bun": "catalog:",
@@ -811,6 +822,7 @@
         "@opencok/ledger": "workspace:*",
         "@opencok/mappings": "workspace:*",
         "@opencok/messages": "workspace:*",
+        "@opencok/ranking": "workspace:*",
         "@opencok/rules": "workspace:*",
         "@opencok/share": "workspace:*",
         "@opencok/tasks": "workspace:*",
@@ -973,6 +985,7 @@
         "@opencok/contracts": "workspace:*",
         "@opencok/errors": "workspace:*",
         "@opencok/hero": "workspace:*",
+        "@opencok/ranking": "workspace:*",
         "node-zookeeper-client": "1.1.3",
       },
       "devDependencies": {

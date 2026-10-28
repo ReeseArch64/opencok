@@ -4,7 +4,7 @@ import type { Row } from "@opencok/contracts/rows";
 import type {
     AllianceRankingQuery,
     AllianceRankingSnapshot,
-} from "@opencok/contracts/alliance-ranking";
+} from "@opencok/ranking/contracts/alliance-ranking";
 import { createRealmGameService } from "../src/composition/game";
 import { Rules } from "@opencok/rules/game";
 import { decode, encode, sfs } from "@opencok/messages/sfs";

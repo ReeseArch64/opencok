@@ -28,6 +28,7 @@
     "@opencok/economy": "workspace:*",
     "@opencok/tasks": "workspace:*",
     "@opencok/alliance": "workspace:*",
-    "@opencok/share": "workspace:*"
+    "@opencok/share": "workspace:*",
+    "@opencok/ranking": "workspace:*"
   }
 }
