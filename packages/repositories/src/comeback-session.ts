@@ -11,7 +11,7 @@ import {
 } from "@opencok/rules/comeback";
 import { long, text, type Row } from "@opencok/contracts/rows";
 import type { ComebackSession } from "@opencok/contracts/comeback";
-import type { MutationResult } from "@opencok/contracts/mutation";
+import type { MutationResult } from "@opencok/ledger/contracts/mutation";
 import { createMutationExecutor, type MutationTransaction } from "./mutation";
 import type { RealmAuthority } from "./realm-authority";
 import type { DatabaseClient } from "@opencok/drizzle/contracts/database";

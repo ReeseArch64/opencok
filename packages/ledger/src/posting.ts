@@ -1,4 +1,4 @@
-import type { EconomyPosting } from "@opencok/contracts/mutation";
+import type { EconomyPosting } from "./contracts/mutation";
 
 const maximum = 9223372036854775807n;
 

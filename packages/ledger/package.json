@@ -2,7 +2,8 @@
   "name": "@opencok/ledger",
   "private": true,
   "scripts": {
-    "check-types": "tsc --noEmit"
+    "check-types": "tsc --noEmit",
+    "test": "bun --no-env-file test tests"
   },
   "devDependencies": {
     "@opencok/config": "workspace:*",
@@ -12,8 +13,5 @@
   "type": "module",
   "exports": {
     "./*": "./src/*.ts"
-  },
-  "dependencies": {
-    "@opencok/contracts": "workspace:*"
   }
 }

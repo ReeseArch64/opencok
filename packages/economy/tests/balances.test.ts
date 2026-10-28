@@ -5,7 +5,7 @@ import type {
     BalanceTransactionExecutor,
 } from "../src/repositories/balance-transaction";
 import type { EconomyPlan } from "../src/contracts/balances";
-import type { MutationCommand, MutationResult } from "@opencok/contracts/mutation";
+import type { MutationCommand, MutationResult } from "@opencok/ledger/contracts/mutation";
 import { userprofile } from "@opencok/drizzle/schema/opencok_kingdom/userprofile";
 
 const initial = {

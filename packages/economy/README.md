@@ -18,7 +18,7 @@ The realm app supplies its existing `createMutationExecutor` with the same
 database, authority and clock. Economy does not import horizontal repositories.
 The supplied executor retains fencing, idempotent receipts, rollback, ledger and
 outbox persistence. `ledger` remains the shared posting-validation primitive;
-shared mutation messages remain in `contracts`. The old horizontal
+shared mutation messages now live in `ledger/contracts/mutation` after #613. The old horizontal
 `repositories/economy-mutation` path is removed after all maintained callers migrate.
 
 ## Preserved behavior
@@ -55,3 +55,30 @@ No schema migration, data rewrite, configuration change or client repackaging is
 needed. Rollback uses the prior realm artifact against the same saved state.
 This preserves the current realm authority; it does not implement the future
 player/world process split or prove physical-client/other-track compatibility.
+
+## Activity economic coordination (#613)
+
+`services/activity-economy` owns the existing `debit` and `activityEconomy`
+operations. `contracts/activity-ledger` defines the structural planner port;
+InventoryPlanner supplies it without an economy-to-Services dependency. Its
+resource/asset balance readers use the same legacy row conversion as before.
+Gold-pool order remains delegated to the planner, including ordinary and DMM
+pools. Resource limits, item delegation, campaign grant cursors, events and native
+push fields retain their existing behavior.
+
+`contracts/inventory` owns InventoryItem/InventoryFields, and
+`contracts/activity-economy` owns the economic activity port. The shared mutation,
+posting and outbox message types belong to `ledger/contracts/mutation`. All
+maintained type consumers migrate; the old exports are removed, with no reverse
+facades. Economy and ledger no longer depend on the broad contracts package.
+This avoids the pre-existing contracts/Hero/Services cycle rather than extending
+it into economy. The shared inventory/timed-activity state/planning contracts and
+remaining InventoryPlanner implementation still await their domain migrations.
+
+Seven tests pass with identical 57 assertions against the original and extracted
+adapter. The function bodies are unchanged apart from the structural ledger type
+and delegation of the two saved-balance reads. PostgreSQL inventory, campaign
+producer and timed-economy suites verify grant/receipt rollback, campaign effects,
+production, recovery and ownership loss. The source graph removes four cyclic
+module edges and two cyclic workspace edges (baseline 100 to 94); other baseline
+debt remains explicit. There is no schema, default or authority change.

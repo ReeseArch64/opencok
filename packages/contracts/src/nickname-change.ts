@@ -100,9 +100,9 @@ export interface NicknameChangeConfiguration
     confirmedSpending?(
         profile: Row,
         buildings: readonly Row[],
-        postings: readonly import("./mutation").EconomyPosting[],
+        postings: readonly import("@opencok/ledger/contracts/mutation").EconomyPosting[],
         now: number,
-    ): import("./mutation").MutationEvent | undefined;
+    ): import("@opencok/ledger/contracts/mutation").MutationEvent | undefined;
     itemType(): unknown;
     price(): unknown;
     refundRatio(profile: Row): Promise<number>;

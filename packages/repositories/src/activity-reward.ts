@@ -1,5 +1,5 @@
 import { economy_posting } from "@opencok/drizzle/schema/opencok_kingdom/economy_posting";
-import type { EconomyPosting } from "@opencok/contracts/mutation";
+import type { EconomyPosting } from "@opencok/ledger/contracts/mutation";
 import { alliance } from "@opencok/drizzle/schema/opencok_kingdom/alliance";
 import { alliance_member } from "@opencok/drizzle/schema/opencok_kingdom/alliance_member";
 import type { ActivityRewardWrite } from "@opencok/contracts/activity-reward";

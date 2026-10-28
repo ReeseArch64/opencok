@@ -1,4 +1,4 @@
-import { activityEconomy } from "./timed-activity";
+import { activityEconomy } from "@opencok/economy/services/activity-economy";
 import { productionBoost } from "@opencok/mappings/production";
 import { randomUUID } from "node:crypto";
 import type { ProductionExecutor, ProductionAccount } from "@opencok/contracts/timed-activity";
@@ -13,7 +13,7 @@ import { sfs, encode, str, type Fields } from "@opencok/messages/sfs";
 import { inventoryReplay } from "@opencok/mappings/inventory";
 import { resource } from "@opencok/mappings/city";
 import { InventoryPlanner, type InventoryEffects } from "./inventory";
-import { debit } from "./timed-activity";
+import { debit } from "@opencok/economy/services/activity-economy";
 
 const assets = ["wood", "stone", "iron", "food"] as const;
 

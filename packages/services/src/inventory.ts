@@ -1,5 +1,5 @@
 import { confirmedContinuedCost } from "./continued-cost-spending";
-import { activityEconomy } from "./timed-activity";
+import { activityEconomy } from "@opencok/economy/services/activity-economy";
 import type { InventoryCommandResponse } from "@opencok/contracts/responses/inventory";
 import {
     inventoryPurchase,
@@ -11,11 +11,11 @@ import {
     inventoryResponse,
     inventoryReplay,
 } from "@opencok/mappings/inventory";
-import type { MutationEvent, EconomyPosting } from "@opencok/contracts/mutation";
+import type { MutationEvent, EconomyPosting } from "@opencok/ledger/contracts/mutation";
 import { randomUUID } from "node:crypto";
+import type { InventoryItem } from "@opencok/economy/contracts/inventory";
 import type {
     InventoryExecutor,
-    InventoryItem,
     InventoryPlan,
     InventoryState,
 } from "@opencok/contracts/inventory";
@@ -326,6 +326,16 @@ export class InventoryPlanner
     balance(key: string)
     {
         return this.profile[key] ?? long(this.state.profile, key);
+    }
+
+    resourceBalance(asset: string)
+    {
+        return long(this.state.resource, asset);
+    }
+
+    assetBalance(asset: string)
+    {
+        return long(this.state.assets ?? {}, asset);
     }
 
     total()

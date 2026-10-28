@@ -1,5 +1,5 @@
 import type { HeroEventSelection, HeroEventSnapshot } from "@opencok/hero/contracts/hero-event";
-import type { InventoryFields as Fields } from "./inventory.ts";
+import type { InventoryFields as Fields } from "@opencok/economy/contracts/inventory";
 import type { BattleRankingState, PlayoffPublication } from "./battle-ranking.ts";
 import type { FlowerRankingPublication, FlowerRankingState } from "./flower-ranking.ts";
 import type { CommunityRankingSnapshot, DonationScore } from "./community-ranking.ts";

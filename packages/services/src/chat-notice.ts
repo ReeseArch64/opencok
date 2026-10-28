@@ -4,7 +4,7 @@ import type { InventoryExecutor } from "@opencok/contracts/inventory";
 import { sfs, str, int, encode, type Fields } from "@opencok/messages/sfs";
 import { inventoryReplay } from "@opencok/mappings/inventory";
 import { InventoryPlanner, type InventoryEffects } from "./inventory.ts";
-import { activityEconomy } from "./timed-activity.ts";
+import { activityEconomy } from "@opencok/economy/services/activity-economy";
 import { long, text, num } from "@opencok/contracts/rows";
 import type { Rules } from "@opencok/rules/game";
 import { GameError } from "@opencok/errors/game";

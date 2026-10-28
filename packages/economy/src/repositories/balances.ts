@@ -4,7 +4,7 @@ import type { BalanceTransactionExecutor } from "./balance-transaction";
 import { eq } from "drizzle-orm";
 import { userprofile } from "@opencok/drizzle/schema/opencok_kingdom/userprofile";
 import { user_resource } from "@opencok/drizzle/schema/opencok_kingdom/user_resource";
-import type { MutationCommand, EconomyPosting } from "@opencok/contracts/mutation";
+import type { MutationCommand, EconomyPosting } from "@opencok/ledger/contracts/mutation";
 import { validatePosting } from "@opencok/ledger/posting";
 
 export function createEconomyMutationExecutor(

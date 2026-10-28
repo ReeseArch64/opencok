@@ -1,5 +1,5 @@
 import type { InventoryPlan } from "@opencok/contracts/inventory";
-import type { MutationResult } from "@opencok/contracts/mutation";
+import type { MutationResult } from "@opencok/ledger/contracts/mutation";
 import type { ShopPurchase } from "@opencok/shop/contracts/shops";
 import type { MutationTransaction } from "@opencok/repositories/mutation";
 import { and, eq } from "drizzle-orm";

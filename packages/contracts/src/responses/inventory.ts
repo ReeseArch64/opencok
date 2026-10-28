@@ -1,4 +1,4 @@
-import type { InventoryFields } from "../inventory.ts";
+import type { InventoryFields } from "@opencok/economy/contracts/inventory";
 
 export interface InventoryCommandResponse
 {

@@ -1,4 +1,4 @@
-import type { MutationCommand, MutationResult } from "./mutation";
+import type { MutationCommand, MutationResult } from "@opencok/ledger/contracts/mutation";
 import type { AvatarSystemMail } from "./files";
 import type { Row } from "./rows";
 

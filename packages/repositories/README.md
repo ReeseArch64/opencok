@@ -101,3 +101,8 @@ mutation executor from app composition; it has no reverse dependency on this
 package. The former `economy-mutation` source is retired with all consumers
 migrated. Shared mutation/authority machinery remains here pending its own
 ownership work, and inventory extraction remains part of #558.
+
+Mutation command/result/posting/event types now come from
+`@opencok/ledger/contracts/mutation` after #613. Inventory item/field and activity
+economy types come from their economy contracts. Repository transaction logic is
+unchanged; these owners eliminate reverse dependencies through horizontal contracts.
