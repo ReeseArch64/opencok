@@ -1,3 +1,5 @@
+import type { AllianceApplicationsFactory } from "@opencok/alliance/contracts/applications";
+import { AllianceApplicationCommand } from "@opencok/alliance/enums/application-command";
 import type { AllianceGovernanceFactory } from "@opencok/alliance/contracts/governance";
 import { AllianceGovernanceCommand } from "@opencok/alliance/enums/governance-command";
 import { randomUUID, randomInt, createHash } from "node:crypto";
@@ -24,7 +26,7 @@ import {
 } from "@opencok/rules/alliance";
 import { cityInteger } from "@opencok/rules/city-progression";
 import { createAllianceSchema } from "@opencok/validations/alliance";
-import { allianceMailData, allianceSnapshot } from "@opencok/mappings/alliance";
+import { allianceSnapshot } from "@opencok/mappings/alliance";
 import { inventoryReplay } from "@opencok/economy/mappings/inventory";
 import { previewRewards } from "@opencok/rules/rewards";
 import { javaMailBytes } from "@opencok/rules/avatar-mail";
@@ -52,20 +54,20 @@ export const allianceCommands = [
     "al.name",
     "al.abbr",
     "al.searchuser",
-    "al.apply",
-    "al.cancelapply",
-    "al.invite",
-    "al.cancelinvite",
-    "al.acceptapply",
-    "al.refuseapply",
-    "al.acceptinvite",
-    "al.refuseinvite",
-    "al.applylist",
-    "al.invitelist",
-    "al.userapplylist",
-    "al.userinvitelist",
-    "al.apply.message",
-    "al.apply.message.get",
+    AllianceApplicationCommand.Apply,
+    AllianceApplicationCommand.CancelApply,
+    AllianceApplicationCommand.Invite,
+    AllianceApplicationCommand.CancelInvite,
+    AllianceApplicationCommand.AcceptApply,
+    AllianceApplicationCommand.RefuseApply,
+    AllianceApplicationCommand.AcceptInvite,
+    AllianceApplicationCommand.RefuseInvite,
+    AllianceApplicationCommand.ApplyList,
+    AllianceApplicationCommand.InviteList,
+    AllianceApplicationCommand.UserApplyList,
+    AllianceApplicationCommand.UserInviteList,
+    AllianceApplicationCommand.Message,
+    AllianceApplicationCommand.GetMessage,
     AllianceGovernanceCommand.Leave,
     AllianceGovernanceCommand.LeaveV2,
     AllianceGovernanceCommand.Dismiss,
@@ -109,6 +111,7 @@ export class AllianceService
         readonly gifts: AllianceGiftFactory<RealmInventoryPlanner>,
         readonly science: AllianceScienceFactory<RealmInventoryPlanner>,
         readonly governance: AllianceGovernanceFactory,
+        readonly applicationsFactory: AllianceApplicationsFactory,
         readonly forbidden: (value: string) => boolean | Promise<boolean> = () => false,
     )
     {}
@@ -143,6 +146,7 @@ export class AllianceService
                     this.gifts,
                     this.science,
                     this.governance,
+                    this.applicationsFactory,
                 );
                 context.member();
                 const body = this.gifts(context).publish(giftEvent, type),
@@ -373,6 +377,7 @@ export class AllianceService
                     this.gifts,
                     this.science,
                     this.governance,
+                    this.applicationsFactory,
                 );
                 const body = await context.command(command, params);
                 const inventory = context.ledger.result(body);
@@ -433,6 +438,7 @@ export class AllianceContext
         private readonly gifts: AllianceGiftFactory<RealmInventoryPlanner>,
         private readonly science: AllianceScienceFactory<RealmInventoryPlanner>,
         private readonly governance: AllianceGovernanceFactory,
+        private readonly applicationsFactory: AllianceApplicationsFactory,
     )
     {
         this.allianceId = text(state.inventory.profile, "allianceId");
@@ -820,36 +826,6 @@ export class AllianceContext
         return { uid: sfs.string(uid), allianceId: sfs.string(this.allianceId) };
     }
 
-    application(type: number, uid = this.owner, id = this.allianceId)
-    {
-        return this.state.applications.find(
-            (row) =>
-                row.userId === uid
-                && row.allianceId === id
-                && num(row, "type") === type
-                && long(row, "applyTime") + 28800000n > this.now,
-        );
-    }
-
-    mail(type: number, to: string, id: string, contents: Record<string, string | number>)
-    {
-        const template = this.rules.mail.get(type === 17 ? "10009" : "10010");
-        this.write.mails = [
-            ...(this.write.mails ?? []),
-            {
-                uid: id,
-                toUser: to,
-                fromUser: this.owner,
-                fromName: text(this.profile(), "name"),
-                type,
-                title: template?.title ?? "",
-                contents: Buffer.from(JSON.stringify(contents)),
-                createTime: this.now,
-                rewardStatus: 0,
-            },
-        ];
-    }
-
     async command(command: string, params: Fields): Promise<Fields>
     {
         if (command === "alliance.tick")
@@ -1080,33 +1056,33 @@ export class AllianceContext
         }
 
         if (
-            [
-                "al.apply",
-                "al.cancelapply",
-                "al.acceptapply",
-                "al.refuseapply",
-                "al.invite",
-                "al.cancelinvite",
-                "al.acceptinvite",
-                "al.refuseinvite",
-            ].includes(command)
+            ([
+                AllianceApplicationCommand.Apply,
+                AllianceApplicationCommand.CancelApply,
+                AllianceApplicationCommand.AcceptApply,
+                AllianceApplicationCommand.RefuseApply,
+                AllianceApplicationCommand.Invite,
+                AllianceApplicationCommand.CancelInvite,
+                AllianceApplicationCommand.AcceptInvite,
+                AllianceApplicationCommand.RefuseInvite,
+            ] as readonly string[]).includes(command)
         )
         {
-            return this.membership(command, params);
+            return this.applicationsFactory(this).command(command, params);
         }
 
         if (
-            [
-                "al.applylist",
-                "al.invitelist",
-                "al.userapplylist",
-                "al.userinvitelist",
-                "al.apply.message",
-                "al.apply.message.get",
-            ].includes(command)
+            ([
+                AllianceApplicationCommand.ApplyList,
+                AllianceApplicationCommand.InviteList,
+                AllianceApplicationCommand.UserApplyList,
+                AllianceApplicationCommand.UserInviteList,
+                AllianceApplicationCommand.Message,
+                AllianceApplicationCommand.GetMessage,
+            ] as readonly string[]).includes(command)
         )
         {
-            return this.applications(command, params);
+            return this.applicationsFactory(this).queries(command, params);
         }
 
         this.member();
@@ -1140,299 +1116,6 @@ export class AllianceContext
         }
 
         return this.governance(this).command(command, params);
-    }
-
-    membership(command: string, params: Fields): Fields
-    {
-        if (command === "al.apply" || command === "al.cancelapply")
-        {
-            const id = str(params, "allianceId"),
-                alliance = this.alliance(id);
-
-            if (command === "al.cancelapply")
-            {
-                this.write.deletedApplications = this.state.applications
-                    .filter(
-                        (row) =>
-                            row.userId === this.owner && row.allianceId === id
-                            && num(row, "type") === 1,
-                    )
-                    .map((row) => text(row, "uid"));
-
-                return {};
-            }
-
-            allianceJoinAllowed(
-                this.profile(),
-                alliance,
-                this.state.members,
-                this.power(this.owner),
-                this.castle(this.owner),
-                num(alliance, "maxMember") + Math.trunc(this.scienceEffect(500, id)),
-            );
-
-            if (num(alliance, "recruit") === 1)
-            {
-                return this.join(this.owner, alliance);
-            }
-
-            if (this.application(1, this.owner, id))
-            {
-                return { join: sfs.bool(false), joinBool: sfs.bool(false) };
-            }
-
-            const applications = this.state.applications
-                .filter((row) => row.userId === this.owner && num(row, "type") === 1)
-                .sort((a, b) => Number(long(a, "applyTime") - long(b, "applyTime")));
-            this.write.deletedApplications = applications
-                .slice(0, Math.max(0, applications.length - 3))
-                .map((row) => text(row, "uid"));
-            const uid = randomUUID();
-            this.write.applications = [
-                {
-                    uid,
-                    userId: this.owner,
-                    allianceId: id,
-                    type: 1,
-                    applyTime: this.now,
-                    message: Buffer.alloc(0),
-                },
-            ];
-            const leader = this.list(id).find((row) => num(row, "rank") === 5);
-
-            if (leader)
-            {
-                this.mail(25, text(leader, "uid"), uid, {
-                    applicantId: this.owner,
-                    applicantName: text(this.profile(), "name"),
-                    contents: "115001|" + text(this.profile(), "name"),
-                    deal: 0,
-                });
-            }
-
-            return { join: sfs.bool(false), joinBool: sfs.bool(false), mailId: sfs.string(uid) };
-        }
-
-        if (command === "al.invite" || command === "al.cancelinvite")
-        {
-            this.right("invite");
-            const uid = str(params, "playerId"),
-                target = this.profile(uid);
-
-            if (text(target, "allianceId") || num(target, "crossFightSrcServerId") > 0)
-            {
-                allianceFailure(errors.locked);
-            }
-
-            if (command === "al.cancelinvite")
-            {
-                const row = this.application(2, uid);
-                this.write.deletedApplications = row ? [text(row, "uid")] : [];
-
-                return {};
-            }
-
-            if ([1, 2, 3].some((type) => this.application(type, uid)))
-            {
-                allianceFailure(errors.locked);
-            }
-
-            const id = randomUUID(),
-                alliance = this.alliance();
-            this.write.applications = [
-                {
-                    uid: id,
-                    userId: uid,
-                    allianceId: this.allianceId,
-                    type: 2,
-                    applyTime: this.now,
-                    message: Buffer.alloc(0),
-                },
-            ];
-            this.mail(17, uid, id, {
-                allianceId: this.allianceId,
-                alliancename: text(alliance, "alliancename"),
-                allianceLang: text(alliance, "language"),
-                contents: "115000|" + text(alliance, "alliancename"),
-                deal: 0,
-            });
-
-            return {
-                allianceId: sfs.string(this.allianceId),
-                inviteSenderId: sfs.string(this.owner),
-                inviteReceiver: sfs.string(uid),
-                mailId: sfs.string(id),
-            };
-        }
-
-        const invite = command.endsWith("invite");
-        let application: Row | undefined;
-        let selectedMail: Row | undefined;
-
-        if (params.mailId)
-        {
-            const id = str(params, "mailId"),
-                mail = this.state.mails.find((row) => row.uid === id);
-
-            if (!mail || mail.toUser !== this.owner || num(mail, "type") !== (invite ? 17 : 25))
-            {
-                allianceFailure(errors.locked);
-            }
-
-            selectedMail = mail;
-            const data = allianceMailData(
-                Buffer.isBuffer(mail.contents) ? mail.contents : Buffer.alloc(0),
-            );
-
-            if (Number(data.deal ?? 0) !== 0)
-            {
-                allianceFailure(errors.locked);
-            }
-
-            application = this.state.applications.find(
-                (row) =>
-                    num(row, "type") === (invite ? 2 : 1)
-                    && long(row, "applyTime") + 28800000n > this.now
-                    && (row.uid === id
-                        || (invite && row.userId === this.owner
-                            && row.allianceId === data.allianceId)
-                        || (!invite && row.userId === data.applicantId
-                            && row.allianceId === this.allianceId)),
-            );
-        }
-        else if (!invite)
-        {
-            application = this.application(1, str(params, "playerId"));
-        }
-
-        if (!application)
-        {
-            allianceFailure(errors.locked);
-        }
-
-        if (
-            (invite && application.userId !== this.owner)
-            || (!invite && application.allianceId !== this.allianceId)
-        )
-        {
-            allianceFailure(errors.locked);
-        }
-
-        if (!invite)
-        {
-            this.right("invite");
-        }
-
-        if (selectedMail)
-        {
-            this.write.mailUpdates = [
-                {
-                    ...selectedMail,
-                    contents: Buffer.from(
-                        JSON.stringify({
-                            ...allianceMailData(selectedMail.contents as Buffer),
-                            deal: 1,
-                        }),
-                    ),
-                },
-            ];
-        }
-
-        if (command.startsWith("al.refuse"))
-        {
-            if (invite)
-            {
-                this.write.applications = [{ ...application, type: 3 }];
-            }
-            else
-            {
-                this.write.deletedApplications = [text(application, "uid")];
-            }
-
-            return { result: sfs.int(1) };
-        }
-
-        const result = this.join(
-            text(application, "userId"),
-            this.alliance(text(application, "allianceId")),
-        );
-
-        return invite ? { result: sfs.int(1), allianceInfo: sfs.object(result) } : result;
-    }
-
-    applications(command: string, params: Fields): Fields
-    {
-        if (command === "al.apply.message" || command === "al.apply.message.get")
-        {
-            const id = str(params, "allianceId"),
-                uid = command.endsWith(".get") ? str(params, "uid") : this.owner;
-
-            if (uid !== this.owner)
-            {
-                this.member(this.owner, id);
-                this.right("invite");
-            }
-
-            const row = this.application(1, uid, id);
-
-            if (!row)
-            {
-                allianceFailure();
-            }
-
-            if (command.endsWith(".get"))
-            {
-                return {
-                    message: sfs.string(
-                        Buffer.isBuffer(row.message) ? row.message.toString("utf8") : "",
-                    ),
-                };
-            }
-
-            const message = allianceText(str(params, "message", ""), 0, 200);
-            this.write.applications = [{ ...row, message: Buffer.from(message) }];
-
-            return {};
-        }
-
-        const own = command.startsWith("al.user"),
-            type = command.includes("invite") ? 2 : 1;
-
-        if (!own)
-        {
-            this.member();
-            this.right("invite");
-        }
-
-        const rows = this.state.applications
-            .filter(
-                (row) =>
-                    num(row, "type") === type
-                    && long(row, "applyTime") + 28800000n > this.now
-                    && (own ? row.userId === this.owner : row.allianceId === this.allianceId),
-            )
-            .sort((a, b) => text(a, "uid").localeCompare(text(b, "uid")))
-            .slice(
-                ((this.state.selection.page ?? 1) - 1) * 10,
-                ((this.state.selection.page ?? 1) - 1) * 10 + 10,
-            );
-
-        return {
-            list: sfs.array(
-                rows.map((row) =>
-                    sfs.object({
-                        uid: sfs.string(text(row, "uid")),
-                        playerId: sfs.string(text(row, "userId")),
-                        allianceId: sfs.string(text(row, "allianceId")),
-                        applyTime: sfs.long(long(row, "applyTime")),
-                        message: sfs.string(
-                            Buffer.isBuffer(row.message) ? row.message.toString("utf8") : "",
-                        ),
-                    })
-                ),
-            ),
-            page: sfs.int(this.state.selection.page ?? 0),
-        };
     }
 }
 

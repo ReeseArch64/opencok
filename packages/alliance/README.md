@@ -6,9 +6,11 @@ Alliance owns the existing queue-assistance workflow after
 Shared gifts follow in [#665](https://github.com/ReeseArch64/opencok/issues/665).
 Research and donations follow in [#667](https://github.com/ReeseArch64/opencok/issues/667).
 Governance follows in [#669](https://github.com/ReeseArch64/opencok/issues/669).
-Its thirty-seven source modules and four test files cover help, gifts, research,
-donations, governance, native mapping and transactional persistence/recovery.
-Membership lifecycle and its broad coordinator remain subsequent domain slices.
+Applications and invitations follow in [#671](https://github.com/ReeseArch64/opencok/issues/671).
+Its forty-four source modules and five test files cover help, gifts, research,
+donations, governance, applications/invitations, native mapping and transactional
+persistence/recovery. Membership entry/removal and the broad coordinator remain
+subsequent domain slices.
 
 ## Responsibilities and composition
 
@@ -261,8 +263,8 @@ Services `alliance-publication`, Rules `alliance-science`, Rules
 retirement under #558 W20: migrate coordinator/publication policy injection and
 catalog tests, then relocate the shared error binding. The unused free
 `allianceCapacity` export is removed; the policy retains capacity and its default
-entry evaluation. Application/invitation lifecycle, directory/search, membership
-mutations, aggregate orchestration and publication still require later slices.
+entry evaluation. Application/invitation lifecycle follows in #671; directory/search,
+membership mutations, aggregate orchestration and publication still require later slices.
 
 Seven governance tests add 92 assertions for permission isolation, rank and
 leadership gates, exact absence boundaries, removal delegation, costs, restrictions,
@@ -278,3 +280,69 @@ member, blacklist, profile, inventory, receipt and outbox storage. Keep committe
 memberships, rewards and receipts across rollback. No migration, environment,
 third-party version or client repackaging change. Native-device and production-load
 acceptance remain separate from synthetic server validation.
+
+## Applications and invitations
+
+`services/applications` owns application/invitation commands, their active lookup,
+notification preparation, application messages and paginated lists. Realm
+composition injects actual record readers, UUID generation and failure behavior,
+the existing membership policy and `mappings/applications`. Bounded context ports
+retain the required catalog, membership facts and existing join operation. The
+shared coordinator dispatches before its general membership gate, preserving entry
+for players outside an alliance.
+
+Applications retain the eight-hour exclusive deadline, eligibility/capacity checks,
+open recruitment path and oldest-entry trimming before inserting a fourth pending
+application. Active duplicates do not allocate another UUID or mail. Invitations
+require catalog rights and a local eligible target; active applications, invitations
+and refusal records still prevent another invitation. Cancellation keeps its
+original type, player and alliance selection.
+
+Acceptance/refusal validates the selected mail's recipient, type and unconsumed
+deal, then binds it to an active application. Imported mail identities may differ
+from application IDs: the saved alliance/applicant identity remains the fallback.
+Selected mail is marked consumed in the same plan. Refused invitations retain their
+type-three row; refused applications are deleted. Acceptance delegates to the
+existing join port, which still coordinates profile, member, map, march, production,
+first-membership rewards and application cleanup. No second writer is introduced.
+
+Application messages preserve text validation and authorized reader checks. Lists
+retain owner/alliance/type/expiry filters, UID ordering, ten-row pages and the
+native default page value. The Mapper preserves field order, SFS types and exact
+long values; a lazy page reader retains evaluation after row mapping. The existing
+mail-data decoder moves here unchanged, including whitespace/NUL trimming and
+scalar-only fields. Its two former consumers now use the owned implementation;
+there is no decoder compatibility facade.
+
+`repositories/applications` owns the scoped 8,193-row application query and
+8,192-row guard, selected-mail query, application upsert/deletion and owned mail
+consumption. The shared transaction delegates at the original read/write positions.
+Participant discovery, application cleanup on membership/deletion and new mail
+insertion remain in the aggregate until its lifecycle migration. In particular,
+first-join system-mail grouping stays in the original transaction. Governance and
+applications share the renamed pure `contracts/persistence-runtime` record/check
+port; no runtime dependency or field changes accompany that promotion.
+
+| Former source                                                                | Owned destination                                   | Composition and retirement                                                          |
+| ---------------------------------------------------------------------------- | --------------------------------------------------- | ----------------------------------------------------------------------------------- |
+| Services `alliances` membership/applications/application/mail methods        | `services/applications`, contracts and command enum | Required realm factory; legacy methods removed                                      |
+| Application/invitation native results and lists                              | `mappings/applications`                             | Injected into the owned Service                                                     |
+| Mappings `allianceMailData`                                                  | `AllianceApplicationsMapper.mailData`               | Owned Service and shared transaction discovery use the owned decoder directly       |
+| Aggregate application/selected-mail reads and application/consumption writes | `repositories/applications`                         | Same transaction and ordering; aggregate cleanup/new-mail ownership remains W08/W20 |
+| Shared application state/write fields                                        | `contracts/applications`                            | Shared Contracts aggregate extends owned interfaces                                 |
+
+Eight tests add 73 assertions for entry gates, pending limits, saved-state duplicate
+suppression, invitation/refusal expiry, imported mail binding and consumed-state
+reconstruction, authorized messages, pagination, wire roundtrips and malformed mail.
+The full Alliance suite contains 33 tests and 338 assertions. Thirty-five runtime
+comparisons verify the extracted methods, native mapping, parameter defaults,
+complete coordinator methods, command admission, decoder and aggregate read/write
+flows; seven contract comparisons verify field preservation and the shared
+persistence port. The existing four disposable PostgreSQL suites retain 28 tests
+and 284 assertions against the parent baseline.
+
+Deploy or roll back the complete realm artifact without schema, environment,
+third-party version or client packaging changes. Preserve committed applications,
+mail consumption, memberships, rewards, receipts and outbox. Synthetic fixtures do
+not replace native-device or production-load acceptance. Membership entry/removal,
+creation/directory and aggregate/publication ownership remain later #558 work.

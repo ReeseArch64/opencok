@@ -1,8 +1,9 @@
+import { AllianceApplicationsRepository } from "@opencok/alliance/repositories/applications";
 import { AllianceGovernanceRepository } from "@opencok/alliance/repositories/governance";
 import { AllianceScienceRepository } from "@opencok/alliance/repositories/science";
 import { AllianceGiftRepository } from "@opencok/alliance/repositories/gifts";
 import { AllianceHelpRepository } from "@opencok/alliance/repositories/help";
-import { allianceMailData } from "@opencok/mappings/alliance";
+import { AllianceApplicationsMapper } from "@opencok/alliance/mappings/applications";
 import { mail_group } from "@opencok/drizzle/schema/opencok_kingdom/mail_group";
 import { mail } from "@opencok/drizzle/schema/opencok_kingdom/mail";
 import { and, asc, eq, inArray, or, sql } from "drizzle-orm";
@@ -68,7 +69,7 @@ export function createAllianceRepository(
 
                 if (message && [17, 25].includes(message.type))
                 {
-                    const data = allianceMailData(message.contents);
+                    const data = AllianceApplicationsMapper.mailData(message.contents);
 
                     if (message.type === 17 && typeof data.allianceId === "string")
                     {
@@ -144,21 +145,11 @@ export function createAllianceRepository(
                     throw new Error("Alliance participants changed; retry operation");
                 }
 
-                const applications = await tx
-                    .select()
-                    .from(alliance_apply)
-                    .where(
-                        or(
-                            inArray(alliance_apply.userId, participants),
-                            inArray(alliance_apply.allianceId, groups),
-                        ),
-                    )
-                    .limit(8193);
-
-                if (applications.length > 8192)
-                {
-                    throw new Error("Alliance application limit exceeded");
-                }
+                const applications = await AllianceApplicationsRepository.read(
+                    tx,
+                    participants,
+                    groups,
+                );
 
                 return executeRealmInventoryTransaction(
                     tx,
@@ -239,9 +230,10 @@ export function createAllianceRepository(
                                 selection.giftEvent,
                             ),
                             gifts: await AllianceGiftRepository.readOwned(tx, input.owner),
-                            mails: selection.mailId
-                                ? await tx.select().from(mail).where(eq(mail.uid, selection.mailId))
-                                : [],
+                            mails: await AllianceApplicationsRepository.readMail(
+                                tx,
+                                selection.mailId,
+                            ),
                             directory: selection.key !== undefined && !selection.searchPlayers
                                 ? await tx
                                     .select()
@@ -486,30 +478,11 @@ async function writeAlliance(
             .onConflictDoUpdate({ target: user_lord.uid, set: { firstJoinAllianceFlag: 0 } });
     }
 
-    for (const row of write.applications ?? [])
-    {
-        check(row);
-        const value = row as typeof alliance_apply.$inferInsert;
-        await tx
-            .insert(alliance_apply)
-            .values(value)
-            .onConflictDoUpdate({ target: alliance_apply.uid, set: value });
-    }
-
-    if (write.deletedApplications?.length)
-    {
-        await tx
-            .delete(alliance_apply)
-            .where(
-                and(
-                    inArray(alliance_apply.uid, [...write.deletedApplications]),
-                    or(
-                        inArray(alliance_apply.userId, [...participants]),
-                        inArray(alliance_apply.allianceId, [...allowed]),
-                    ),
-                ),
-            );
-    }
+    await new AllianceApplicationsRepository(tx, { text, check }).write(
+        write,
+        participants,
+        allowed,
+    );
 
     await new AllianceScienceRepository(tx, owner, allowed, { text, check }).write(write);
 
@@ -517,18 +490,7 @@ async function writeAlliance(
 
     await new AllianceGiftRepository(tx, owner, participants, { text, check }).write(write);
 
-    for (const row of write.mailUpdates ?? [])
-    {
-        if (row.toUser !== owner || !Buffer.isBuffer(row.contents))
-        {
-            throw new Error("Foreign alliance mail update");
-        }
-
-        await tx
-            .update(mail)
-            .set({ contents: row.contents })
-            .where(and(eq(mail.uid, text(row, "uid")), eq(mail.toUser, owner)));
-    }
+    await new AllianceApplicationsRepository(tx, { text, check }).updateMail(write, owner);
 
     for (const row of write.mails ?? [])
     {
