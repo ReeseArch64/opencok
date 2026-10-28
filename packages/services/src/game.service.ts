@@ -60,7 +60,6 @@ import { dragonRankingRanges } from "@opencok/rules/dragon-ranking";
 import { dragonRanking } from "@opencok/mappings/dragon-ranking";
 import { decodeDragonRanking } from "./dragon-ranking.ts";
 import { worldPointDetail } from "./world-point-detail.ts";
-import { celebrityDescription, saveCelebrityDescription } from "./celebrity.ts";
 import { checkNickname } from "@opencok/rules/nickname";
 import { favoriteInteger, favoriteName, favoriteServer } from "@opencok/rules/world-favorites";
 import { worldFavorites } from "@opencok/mappings/world-favorites";
@@ -1100,23 +1099,15 @@ export class GameService
                 break;
             }
             case "celebrity.desc.get":
-                body = await celebrityDescription(
-                    this.db,
-                    uid,
-                    this.config.kingdomId,
-                    params,
-                    this.now(),
-                );
-                break;
             case "celebrity.desc.save":
-                body = await saveCelebrityDescription(
-                    this.db,
-                    this.services,
-                    uid,
-                    this.config.kingdomId,
-                    params,
-                    this.now(),
-                );
+                if (!this.services.celebrityDescription)
+                {
+                    throw new GameError(errors.unsupported);
+                }
+
+                body = command === "celebrity.desc.get"
+                    ? await this.services.celebrityDescription.read(uid, params, this.now())
+                    : await this.services.celebrityDescription.save(uid, params, this.now());
                 break;
             case "user.modify.nickName":
                 body = await changeNickname(

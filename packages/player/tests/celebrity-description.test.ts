@@ -1,6 +1,7 @@
+import { CelebrityDescriptionService } from "@opencok/player/services/celebrity-description";
 import { expect, test } from "bun:test";
 import { drizzle, type NodePgClient } from "drizzle-orm/node-postgres";
-import { readCelebrityDescription } from "@opencok/repositories/celebrity";
+import { readCelebrityDescription } from "@opencok/player/repositories/celebrity-description";
 import { GameService as Game } from "@opencok/services/game";
 import { Rules } from "@opencok/rules/game";
 import type { GameStore } from "@opencok/contracts/game";
@@ -86,6 +87,7 @@ function fixture()
         new Rules(new Map(), new Map(), new Map()),
         { kingdomId: 1 },
         () => 1000,
+        { celebrityDescription: new CelebrityDescriptionService(store, 1) },
     );
     return {
         queries,

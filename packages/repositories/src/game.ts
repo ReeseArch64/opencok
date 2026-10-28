@@ -91,7 +91,6 @@ import { user_mine } from "@opencok/drizzle/schema/opencok_kingdom/user_mine";
 import { switches } from "@opencok/drizzle/schema/opencok_kingdom/switches";
 import { parse_info } from "@opencok/drizzle/schema/opencok_kingdom/parse_info";
 import { nicknameOccupied } from "./nickname.ts";
-import { readCelebrityDescription, saveCelebrityDescription } from "./celebrity.ts";
 import { celebrity } from "@opencok/drizzle/schema/opencok_kingdom/celebrity";
 import { usermapping } from "@opencok/drizzle/schema/opencok_global/usermapping";
 import { DependencyError } from "@opencok/errors/dependency";
@@ -385,22 +384,6 @@ export class Database implements GameStore, FriendshipMineStore
     updateAvatarReport(owner: string, target: string, now: number)
     {
         return reportAvatar(this.kingdom.db, this.config.kingdomId, owner, target, now);
-    }
-
-    celebrityDescription(uid: string, kingdomId: number): Promise<Buffer | null>
-    {
-        return readCelebrityDescription(this.databases, uid, kingdomId);
-    }
-
-    saveCelebrityDescription(uid: string, now: number, readDescription: () => Buffer | null)
-    {
-        return saveCelebrityDescription(
-            this.kingdom.db,
-            uid,
-            this.config.kingdomId,
-            now,
-            readDescription,
-        );
     }
 
     async getAccountsByPlayerId(uid: string): Promise<Row[]>

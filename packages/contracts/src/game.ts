@@ -201,12 +201,6 @@ export interface GameStore extends AuthenticationStore
     configurationSwitches?(): Promise<Row[] | undefined>;
     nicknameOccupied?(name: string): Promise<boolean>;
     updateAvatarReport?(owner: string, target: string, now: number): Promise<void>;
-    celebrityDescription?(uid: string, kingdomId: number): Promise<Buffer | null>;
-    saveCelebrityDescription?(
-        uid: string,
-        now: number,
-        readDescription: () => Buffer | null,
-    ): Promise<void>;
     getCityByPlayerId(uid: string, now: number): Promise<CityState>;
     getWorldByPointIds(
         uid: string,
@@ -235,6 +229,10 @@ export interface LoginConfigurationState
 
 export interface GameServices
 {
+    celebrityDescription?: {
+        read(owner: string, params: Fields, now: number): Promise<Fields>;
+        save(owner: string, params: Fields, now: number): Promise<Fields>;
+    };
     publicProfile?(uid: string, params: Fields): Promise<Fields>;
     playerPreferences?: {
         configuration(uid: string): Promise<LoginConfigurationState>;
