@@ -392,7 +392,6 @@ services:
       CHAT_KINGDOM_DATABASES: 1:opencok_kingdom_1,2:opencok_kingdom_2
       MONGO_URI: ${MONGO_URI}
       CHAT_SECRET: ${CHAT_SECRET}
-      CHAT_MAILBOX_SECRETS: ${CHAT_MAILBOX_SECRETS}
     ports:
       - 8083:8083
     healthcheck:
@@ -460,7 +459,7 @@ services:
       MAIL_WORKER_KINGDOM_URL: ${MAIL_WORKER_KINGDOM_URL}
       MAIL_WORKER_GLOBAL_URL: ${MAIL_WORKER_GLOBAL_URL}
       CHAT_URL: http://chat:8083
-      MAIL_WORKER_CHAT_SECRET: ${MAIL_WORKER_CHAT_SECRET}
+      CHAT_SECRET: ${CHAT_SECRET}
       OTEL_EXPORTER_OTLP_ENDPOINT: http://maple:4318
       MAPLE_LOCAL_INGEST_KEY: ${MAPLE_LOCAL_INGEST_KEY}
     stop_grace_period: 45s

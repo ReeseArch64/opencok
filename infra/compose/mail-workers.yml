@@ -5,14 +5,14 @@ services:
       KINGDOM_ID: ${MAIL_WORKER_KINGDOM_ID:?Mail worker kingdom required}
       KINGDOM_DATABASE_NAME: ${MAIL_WORKER_KINGDOM_DATABASE_NAME:?Mail worker kingdom database required}
       GLOBAL_DATABASE_NAME: ${MAIL_WORKER_GLOBAL_DATABASE_NAME:-opencok_global}
-      CHAT_MAILBOX_SECRET: ${MAIL_WORKER_CHAT_SECRET:?Realm mailbox signing key required}
+      CHAT_SECRET: ${CHAT_SECRET:?Chat signing key required}
   scheduler:
     environment:
       KINGDOM_ID: ${MAIL_WORKER_KINGDOM_ID:?Mail worker kingdom required}
       KINGDOM_DATABASE_NAME: ${MAIL_WORKER_KINGDOM_DATABASE_NAME:?Mail worker kingdom database required}
   chat:
     environment:
-      CHAT_MAILBOX_SECRETS: ${CHAT_MAILBOX_SECRETS:?Per-realm mailbox signing keys required}
+      CHAT_SECRET: ${CHAT_SECRET:?Chat signing key required}
   mail-workers:
     profiles: [mail-workers]
     environment:
@@ -22,4 +22,4 @@ services:
       MAIL_WORKER_KINGDOM_URL: ${MAIL_WORKER_KINGDOM_URL:?Restricted kingdom URL required}
       MAIL_WORKER_GLOBAL_URL: ${MAIL_WORKER_GLOBAL_URL:?Restricted global URL required}
       CHAT_URL: ${MAIL_WORKER_CHAT_URL:?Private Chat URL required}
-      MAIL_WORKER_CHAT_SECRET: ${MAIL_WORKER_CHAT_SECRET:?Realm mailbox signing key required}
+      CHAT_SECRET: ${CHAT_SECRET:?Chat signing key required}

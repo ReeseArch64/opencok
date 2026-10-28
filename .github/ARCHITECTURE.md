@@ -202,7 +202,7 @@ Separate realm configuration, state, leases and pools. New owner boundaries requ
 
 ## 20. Global and alliance chat: delivery, archiving, and deletion
 
-[Chat](../apps/chat/README.md) owns message persistence, authorization, retention, cursor/deduplication and signed internal updates; social feed belongs to Share. Target global/alliance retention archives after one day and deletes after seven days from sending, including archives. Redis fan-out is ephemeral; membership/moderation/private attachments require authorization. Distinct per-realm mailbox keys cannot be replaced by a shared broad Chat credential in external Workers.
+[Chat](../apps/chat/README.md) owns message persistence, authorization, retention, cursor/deduplication and signed internal updates; social feed belongs to Share. Target global/alliance retention archives after one day and deletes after seven days from sending, including archives. Redis fan-out is ephemeral; membership/moderation/private attachments require authorization. Chat, Server and external Workers share `CHAT_SECRET` for trusted Chat integrations. Mailbox signatures remain specific to each operation and cover realm and owner fields; the shared credential authenticates trusted backends across realms.
 
 ## 21. File and media lifecycle
 

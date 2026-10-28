@@ -42,26 +42,3 @@ export const realmSettings = {
     KINGDOM_ID: z.coerce.number().int().positive().max(2147483647).default(1),
     GLOBAL_DATABASE_NAME: databaseName.default("opencok_global"),
 };
-
-export const chatMailboxSecrets = z.preprocess(
-    (value) => {
-        const source = blankToUndefined(value);
-        if (typeof source !== "string")
-        {
-            return source;
-        }
-        try
-        {
-            return JSON.parse(source);
-        }
-        catch
-        {
-            return source;
-        }
-    },
-    z.record(
-        z.string().regex(/^[1-9][0-9]{0,9}$/).refine((value) => Number(value) <= 2147483647),
-        z.string().min(1),
-    ).refine((value) => new Set(Object.values(value)).size === Object.keys(value).length)
-        .optional(),
-);

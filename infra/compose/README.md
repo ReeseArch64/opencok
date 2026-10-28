@@ -185,14 +185,12 @@ production readiness.
 
 Before starting, provision the restricted roles described below and supply
 `SCHEDULER_DATABASE_URL`, `ACTIVITY_SCHEDULER_SECRET`, `MAIL_WORKER_KINGDOM_URL`,
-`MAIL_WORKER_GLOBAL_URL`, `MAIL_WORKER_CHAT_SECRET` and `CHAT_MAILBOX_SECRETS`
-through private deployment configuration. Missing values fail application validation;
-there is no fallback to broad database credentials. All six variable names already
-exist in the application schemas and previous overlays; no new deployment variable
-names are introduced. Restricted URLs cannot reuse `DATABASE_URL`, and the two
-signing keys cannot reuse `GAME_SECRET` or `CHAT_SECRET`. The Chat key map preserves
-per-realm key isolation. Internal origins and realm/database names are fixed in base
-Compose; port, timeout, polling and pool limits use the existing schema defaults.
+`MAIL_WORKER_GLOBAL_URL` and `CHAT_SECRET`
+through private deployment configuration. Missing values fail application validation.
+Chat, Server and Workers share `CHAT_SECRET`; `ACTIVITY_SCHEDULER_SECRET` remains
+dedicated and must differ from game, provisioning and Chat keys.
+Internal origins and realm/database names are fixed in base Compose; port,
+timeout, polling and pool limits use the existing schema defaults.
 Do not run provisioning with administrative credentials inside application containers.
 
 Web listens at <http://localhost:5173>, with port 5173 published on all host
@@ -224,7 +222,7 @@ starting either configuration.
 Provision the intended realm/global databases and their migrations first, then run
 the operator-only role provisioning command with fresh role names. Administrative
 URLs and the provisioning password belong only in that operator process. The
-worker receives only its two restricted URLs, its realm mailbox key and telemetry
+worker receives its two restricted URLs, the shared `CHAT_SECRET` and telemetry
 settings. The overlay adds no migration/setup dependency and does not provision
 permissions during application startup.
 
@@ -242,15 +240,12 @@ identical realm/database identities in both sets of variables:
 | `MAIL_WORKER_GLOBAL_DATABASE_NAME`  | Global database, default `opencok_global`                       |
 | `MAIL_WORKER_KINGDOM_URL`           | Restricted role bound to that realm database                    |
 | `MAIL_WORKER_GLOBAL_URL`            | Distinct restricted global projection role                      |
-| `CHAT_MAILBOX_SECRETS`              | JSON realm-to-key map passed only to Chat                       |
 | `MAIL_WORKER_CHAT_URL`              | Reachable private Chat origin, normally `http://chat:8083` here |
-| `MAIL_WORKER_CHAT_SECRET`           | Only the map value for this worker's realm                      |
+| `CHAT_SECRET`                       | Shared Chat signing key used by Chat, Server and Workers        |
 
-Map every realm using external workers to a distinct key, different from the broad
-Chat key and optional unmapped-realm fallback. Chat receives the map;
-Server and its worker receive only their selected realm value. The overlay does not expose other
-realm signing keys to Workers. Unmapped realms may retain local delivery with the
-explicit fallback described in the Chat guide.
+Configure the same `CHAT_SECRET` for Chat, Server and Workers. The signed mailbox
+payload retains the realm and owner scope. Deploy matching versions together when
+replacing the previous mailbox-specific key settings.
 
 Build matching artifacts before cutover:
 

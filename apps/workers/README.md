@@ -46,21 +46,21 @@ Use explicit restricted PostgreSQL URLs, never the administrative migration or
 realm credentials. The worker requires `MAIL_INTEGRATION_MODE=external`; the Server
 setting defaults to `local` and must be explicitly switched during cutover.
 
-| Variable                   | Meaning/default                                                                    |
-| -------------------------- | ---------------------------------------------------------------------------------- |
-| `KINGDOM_ID`               | Required positive realm identity                                                   |
-| `MAIL_WORKER_KINGDOM_URL`  | Required restricted connection to that realm database                              |
-| `MAIL_WORKER_GLOBAL_URL`   | Required restricted global gift-projection connection                              |
-| `KINGDOM_DATABASE_NAME`    | Expected realm database, default `opencok_kingdom_<KINGDOM_ID>`                    |
-| `GLOBAL_DATABASE_NAME`     | Expected global database, default `opencok_global`                                 |
-| `CHAT_URL`                 | Optional Chat origin; composition fixes the mailbox endpoint path                  |
-| `MAIL_WORKER_CHAT_SECRET`  | Required with `CHAT_URL`; matches its realm entry in Chat’s `CHAT_MAILBOX_SECRETS` |
-| `MAIL_WORKER_HEALTH_HOST`  | `127.0.0.1`                                                                        |
-| `MAIL_WORKER_HEALTH_PORT`  | `18091`                                                                            |
-| `MAIL_WORKER_TIMEOUT_MS`   | `5000`, accepted range 100–30000                                                   |
-| `MAIL_WORKER_POLL_MS`      | `5000`, accepted range 1000–60000                                                  |
-| `MAIL_WORKER_KINGDOM_POOL` | `2`, accepted range 1–4                                                            |
-| `MAIL_WORKER_GLOBAL_POOL`  | `1`, accepted range 1–2                                                            |
+| Variable                   | Meaning/default                                                   |
+| -------------------------- | ----------------------------------------------------------------- |
+| `KINGDOM_ID`               | Required positive realm identity                                  |
+| `MAIL_WORKER_KINGDOM_URL`  | Required restricted connection to that realm database             |
+| `MAIL_WORKER_GLOBAL_URL`   | Required restricted global gift-projection connection             |
+| `KINGDOM_DATABASE_NAME`    | Expected realm database, default `opencok_kingdom_<KINGDOM_ID>`   |
+| `GLOBAL_DATABASE_NAME`     | Expected global database, default `opencok_global`                |
+| `CHAT_URL`                 | Optional Chat origin; composition fixes the mailbox endpoint path |
+| `CHAT_SECRET`              | Required with `CHAT_URL`; matches Chat and Server                 |
+| `MAIL_WORKER_HEALTH_HOST`  | `127.0.0.1`                                                       |
+| `MAIL_WORKER_HEALTH_PORT`  | `18091`                                                           |
+| `MAIL_WORKER_TIMEOUT_MS`   | `5000`, accepted range 100–30000                                  |
+| `MAIL_WORKER_POLL_MS`      | `5000`, accepted range 1000–60000                                 |
+| `MAIL_WORKER_KINGDOM_POOL` | `2`, accepted range 1–4                                           |
+| `MAIL_WORKER_GLOBAL_POOL`  | `1`, accepted range 1–2                                           |
 
 Database path validation prevents an accidental mismatch with the configured realm
 or global database. Startup also checks actual database permissions before opening
@@ -73,20 +73,10 @@ local deployment.
 If Chat delivery was active in the realm, configure its endpoint in Workers before
 switching the realm to external mode. Omitting Chat config intentionally disables
 that queue consumer; it does not reroute pending intents back into the realm.
-Provision a distinct mailbox key for each realm and configure the JSON map as
-`CHAT_MAILBOX_SECRETS` on Chat. Configure the local Server with its matching realm
-key through `CHAT_MAILBOX_SECRET`, or the matching entry of its optional map.
-Supply only this worker's realm key as
-`MAIL_WORKER_CHAT_SECRET`. Chat selects the expected mailbox key from the signed
-payload's realm; another realm's key cannot authorize the request. Its other
-private integrations retain `CHAT_SECRET`. Use different values for each realm
-and for the broad Chat key. Environment variable names and domain-separated
-signatures alone do not restrict a reused key. Map every externally consumed realm. Mapped realms accept only their own key.
-Unmapped realms retain `CHAT_MAILBOX_SECRET`, falling back to `CHAT_SECRET` when
-that optional route key is absent, so other realms can remain on local delivery
-during rollout. Every mapped key must differ from the other map entries and both
-fallback keys; the receiver validates those constraints. Do not give an external
-worker either fallback key.
+Configure the same `CHAT_SECRET` on Chat, Server and Workers. The shared key
+covers trusted Chat integrations across realms; signed mailbox requests retain
+their realm, owner and operation identity. Deploy the matching application versions
+together when replacing the previous mailbox-specific settings.
 
 Each process owns up to two independent, non-overlapping loops. A gift pass processes at
 most one batch of 100 rows; a Chat pass processes at most 50 single-intent

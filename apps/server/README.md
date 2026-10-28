@@ -140,9 +140,7 @@ requires the remaining service settings through its process environment.
 | `GLOBAL_DATABASE_NAME`  | Defaults to `opencok_global`.                                                                                                          |
 | `CHAT_URL`              | Optional shared Chat HTTP(S) origin; enables session issuance, nickname delivery and mailbox effects.                                  |
 | `MAIL_INTEGRATION_MODE` | `local` by default; `external` disables only the realm gift-opening and Chat mailbox delivery loops.                                   |
-| `CHAT_SECRET`           | Required when the session URL is configured; must match the maintained chat service.                                                   |
-| `CHAT_MAILBOX_SECRET`   | Optional mailbox fallback for unmapped realms; otherwise uses `CHAT_SECRET`.                                                           |
-| `CHAT_MAILBOX_SECRETS`  | Optional JSON realm-to-key map matching Chat; a mapped realm uses only its selected key.                                               |
+| `CHAT_SECRET`           | Required when the session URL is configured; must match Chat and mail Workers.                                                         |
 | `API_URL`               | Optional internal API HTTP(S) origin; unset disables avatar grants.                                                                    |
 | `GAME_SECRET`           | Required private secret matching the legacy mobile login issuer.                                                                       |
 | `REDIS_URL`             | Shared API/realm URL; defaults to `redis://127.0.0.1:6379/0` outside Compose. Set the local Compose URL or an external production URL. |

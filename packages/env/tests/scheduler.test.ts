@@ -34,7 +34,6 @@ test("realm scheduler keys cannot reuse game, provisioning or any Chat integrati
             "GAME_SECRET",
             "PROVISIONING_SIGNING_SECRET",
             "CHAT_SECRET",
-            "CHAT_MAILBOX_SECRET",
         ]
     )
     {
@@ -42,11 +41,4 @@ test("realm scheduler keys cannot reuse game, provisioning or any Chat integrati
             parseServerEnvironment({ ...base, [field]: key, ACTIVITY_SCHEDULER_SECRET: key })
         ).toThrow("ACTIVITY_SCHEDULER_SECRET");
     }
-    expect(() =>
-        parseServerEnvironment({
-            ...base,
-            CHAT_MAILBOX_SECRETS: JSON.stringify({ "2": key }),
-            ACTIVITY_SCHEDULER_SECRET: key,
-        })
-    ).toThrow("ACTIVITY_SCHEDULER_SECRET");
 });

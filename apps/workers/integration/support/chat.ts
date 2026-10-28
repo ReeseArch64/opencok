@@ -6,7 +6,6 @@ import { createChatMailboxHandler } from "@opencok/controllers/chat-mailbox";
 export async function chatReceiver(
     database: ReturnType<typeof createDatabase<"global">>,
     secret: string,
-    signingSecrets?: Readonly<Record<string, string>>,
 )
 {
     const store = createChatMailboxStore(database.db);
@@ -20,7 +19,6 @@ export async function chatReceiver(
     const server = createServer((request, response) => {
         const handler = createChatMailboxHandler({
             signingSecret: secret,
-            signingSecrets,
             timeoutMs: 30000,
             mailboxes: {
                 list: store.list,

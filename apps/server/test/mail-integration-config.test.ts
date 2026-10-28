@@ -10,39 +10,33 @@ const source = {
     CHAT_SECRET: "synthetic-backend",
 };
 
-test("realm selects its own mailbox key without changing other integration credentials", async () => {
-    for (const mode of ["local", "external"] as const)
-    {
+for (const mode of ["local", "external"] as const)
+{
+    test(`realm uses the shared Chat key for mailbox delivery in ${mode} mode`, async () => {
         const settings = await Effect.runPromise(
             config.pipe(Effect.provideService(EnvironmentSource, {
                 ...source,
                 KINGDOM_ID: "2",
                 MAIL_INTEGRATION_MODE: mode,
-                CHAT_MAILBOX_SECRET: "synthetic-mailbox-fallback",
-                CHAT_MAILBOX_SECRETS: JSON.stringify({
-                    "1": "synthetic-one",
-                    "2": "synthetic-two",
-                }),
             })),
         );
         expect(settings.mailIntegrationMode).toBe(mode);
-        expect(settings.mailChat?.signingSecret).toBe("synthetic-two");
+        expect(settings.mailChat).toEqual({
+            url: "https://chat.internal/_internal/mailbox",
+            signingSecret: "synthetic-backend",
+        });
         expect(settings.chatSession?.signingSecret).toBe("synthetic-backend");
         expect(settings.nicknameChat?.signingSecret).toBe("synthetic-backend");
-    }
-});
+    });
+}
 
-test("realm preserves legacy local default and optional dedicated mailbox fallback", async () => {
-    for (const dedicated of [undefined, "synthetic-mailbox-fallback"])
-    {
-        const settings = await Effect.runPromise(
-            config.pipe(Effect.provideService(EnvironmentSource, {
-                ...source,
-                CHAT_MAILBOX_SECRET: dedicated,
-                CHAT_MAILBOX_SECRETS: JSON.stringify({ "2": "synthetic-two" }),
-            })),
-        );
-        expect(settings.mailIntegrationMode).toBe("local");
-        expect(settings.mailChat?.signingSecret).toBe(dedicated ?? "synthetic-backend");
-    }
+test("realm preserves local delivery default with Chat disabled", async () => {
+    const settings = await Effect.runPromise(
+        config.pipe(Effect.provideService(EnvironmentSource, {
+            DATABASE_URL: source.DATABASE_URL,
+            GAME_SECRET: source.GAME_SECRET,
+        })),
+    );
+    expect(settings.mailIntegrationMode).toBe("local");
+    expect(settings.mailChat).toBeUndefined();
 });

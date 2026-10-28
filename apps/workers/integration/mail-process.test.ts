@@ -216,9 +216,13 @@ test(
     30000,
 );
 
-test("a realm mailbox key cannot forge another realm's remote effects", async () => {
+test("an invalid Chat key cannot apply remote mailbox effects", async () => {
     const config = h.config(1);
-    const publish = createChatMailboxPublisher({ ...config.chat!, timeoutMs: 1000 });
+    const publish = createChatMailboxPublisher({
+        ...config.chat!,
+        signingSecret: "synthetic-invalid-chat-key",
+        timeoutMs: 1000,
+    });
     const operationId = randomUUID();
     await expect(publish({
         owner: "owner",
@@ -547,7 +551,7 @@ test(
             MAIL_WORKER_TIMEOUT_MS: "1000",
             MAIL_WORKER_POLL_MS: "1000",
             CHAT_URL: new URL(h.chat.url).origin,
-            MAIL_WORKER_CHAT_SECRET: config.chat!.signingSecret,
+            CHAT_SECRET: config.chat!.signingSecret,
             NODE_ENV: "test",
         };
         const child = Bun.spawn([

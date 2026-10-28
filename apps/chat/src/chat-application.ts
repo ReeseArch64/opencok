@@ -40,8 +40,6 @@ export class ChatApplication
     public constructor({
         repository,
         signingSecret,
-        mailboxSigningSecret = signingSecret,
-        mailboxSigningSecrets,
         websocketUrl,
         log = () => {},
         instanceId = randomUUID(),
@@ -52,9 +50,6 @@ export class ChatApplication
             !repository
             || typeof signingSecret !== "string"
             || !signingSecret
-            || typeof mailboxSigningSecret !== "string"
-            || !mailboxSigningSecret
-            || Object.values(mailboxSigningSecrets ?? {}).includes(signingSecret)
             || !Number.isSafeInteger(cleanupIntervalMs)
             || cleanupIntervalMs < 1_000
         )
@@ -131,8 +126,7 @@ export class ChatApplication
             mailboxHandler: repository.mailbox
                 ? new ChatMailboxController({
                     mailboxes: repository.mailbox,
-                    signingSecret: mailboxSigningSecret,
-                    signingSecrets: mailboxSigningSecrets,
+                    signingSecret,
                     log,
                 })
                     .handle

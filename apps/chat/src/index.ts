@@ -62,8 +62,6 @@ try
         repository,
         instanceId: "chat-local",
         signingSecret: config.CHAT_SECRET,
-        mailboxSigningSecret: config.CHAT_MAILBOX_SECRET,
-        mailboxSigningSecrets: config.CHAT_MAILBOX_SECRETS,
         websocketUrl: "ws://192.168.1.104:8083/chat/ws",
         log: (event) =>
             logEvent(
