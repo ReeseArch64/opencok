@@ -92,3 +92,12 @@ repository paths are retired with all callers migrated. Realm character creation
 also moved to `player` in #609. Its app composition supplies the existing world
 allocator, fencing and mutation-record callbacks inside the same transaction.
 Global account linkage and realm seeds keep their separate transaction ownership.
+
+## Economy ownership
+
+The balance mutation adapter and its asset/plan contracts now belong to
+[`economy`](../economy/README.md) after #611. Its factory receives the existing
+mutation executor from app composition; it has no reverse dependency on this
+package. The former `economy-mutation` source is retired with all consumers
+migrated. Shared mutation/authority machinery remains here pending its own
+ownership work, and inventory extraction remains part of #558.

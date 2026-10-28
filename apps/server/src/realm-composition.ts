@@ -305,7 +305,7 @@ import { InventoryService } from "@opencok/services/inventory";
 import { decodeWorldPowerEffects } from "@opencok/services/power";
 import { worldPowerEffects } from "@opencok/rules/power-world";
 import { checkMutationStore, createMutationExecutor } from "@opencok/repositories/mutation";
-import { createEconomyMutationExecutor } from "@opencok/repositories/economy-mutation";
+import { createEconomyMutationExecutor } from "@opencok/economy/repositories/balances";
 import { checkNicknameChangeStore } from "@opencok/repositories/nickname-change";
 import { nicknameAllianceReward } from "@opencok/rules/nickname-alliance";
 import { createCn1Sessions } from "@opencok/repositories/cn1-session";
@@ -3255,7 +3255,7 @@ export const RealmDependenciesLive = Layer.effect(
                 "realm.createMutationExecutor",
             ),
             economy: observeAdapter(
-                createEconomyMutationExecutor(db.kingdom.db, authority),
+                createEconomyMutationExecutor(createMutationExecutor(db.kingdom.db, authority)),
                 "realm.createEconomyMutationExecutor",
             ),
             profileSessions: {

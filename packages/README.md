@@ -41,3 +41,10 @@ performance baselines and authority changes remain separate workstreams in #558.
 This clarification does not complete its file/catalog/command inventory or accept
 the remaining package proposals. Preserve existing public contracts and player data
 through each subsequent slice.
+
+## Additional implemented domains
+
+[`economy`](economy/README.md) implements the balance-mutation foundation required
+by #558 W06 after #611. It owns existing asset contracts and the transactional
+adapter, while ledger remains a shared validation primitive. Inventory and later
+reservation workflows remain tracked separately.

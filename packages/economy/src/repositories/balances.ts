@@ -1,51 +1,16 @@
+import { profileAssets, resourceAssets } from "../constants/assets";
+import type { EconomyAsset, EconomyPlan } from "../contracts/balances";
+import type { BalanceTransactionExecutor } from "./balance-transaction";
 import { eq } from "drizzle-orm";
 import { userprofile } from "@opencok/drizzle/schema/opencok_kingdom/userprofile";
 import { user_resource } from "@opencok/drizzle/schema/opencok_kingdom/user_resource";
-import type { MutationCommand, MutationEvent, EconomyPosting } from "@opencok/contracts/mutation";
+import type { MutationCommand, EconomyPosting } from "@opencok/contracts/mutation";
 import { validatePosting } from "@opencok/ledger/posting";
-import { createMutationExecutor } from "./mutation.ts";
-import type { RealmAuthority } from "./realm-authority.ts";
-import type { DatabaseClient } from "@opencok/drizzle/contracts/database";
-
-const profileAssets = [
-    "gold",
-    "paidGold",
-    "paidSpecialGold",
-    "dmmGold",
-    "dmmPaidGold",
-    "dmmPaidSpecialGold",
-] as const;
-
-const resourceAssets = [
-    "wood",
-    "stone",
-    "iron",
-    "food",
-    "woodbind",
-    "stonebind",
-    "ironbind",
-    "foodbind",
-] as const;
-
-export type EconomyAsset =
-    | `profile.${(typeof profileAssets)[number]}`
-    | `resource.${(typeof resourceAssets)[number]}`;
-
-export interface EconomyPlan
-{
-    changes: readonly { asset: EconomyAsset; delta: bigint; reason: string; }[];
-    response: Uint8Array;
-    events?: readonly MutationEvent[];
-}
 
 export function createEconomyMutationExecutor(
-    db: DatabaseClient<"kingdom">,
-    authority: RealmAuthority,
-    now = Date.now,
+    execute: BalanceTransactionExecutor,
 )
 {
-    const execute = createMutationExecutor(db, authority, now);
-
     return (
         input: MutationCommand,
         plan: (balances: Readonly<Record<EconomyAsset, bigint>>) => Promise<EconomyPlan>,

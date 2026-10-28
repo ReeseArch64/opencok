@@ -2,7 +2,7 @@
 
 Parent: [#558](https://github.com/ReeseArch64/opencok/issues/558). Convention: [ADR-0016](../docs/decisions/0016-adopt-domain-owned-package-layout.md).
 
-This register accounts for all 64 original package directories, including four retired packages and the store-to-shop rename. The current tree has 61 package workspaces, including the implemented offline `catalog-tools` workspace added in #598. Confirmed entries reproduce maintainer decisions; proposed entries require disposition review. No proposed row claims completed extraction, service deployment or verified client support.
+This register accounts for all 64 original package directories, including four retired packages and the store-to-shop rename. The current tree has 62 package workspaces, including offline `catalog-tools` added in #598 and the implemented balance foundation in `economy` added in #611. Confirmed entries reproduce maintainer decisions; proposed entries require disposition review. No proposed row claims completed extraction, service deployment or verified client support.
 
 ## Existing package disposition review
 
@@ -329,3 +329,16 @@ on horizontal repositories. Account/realm protocol contracts and hashes remain
 shared; global reservations stay in account. This preserves the current atomic
 player/world initialization and does not implement W17/W18 process cutover.
 See [player](player/README.md) for compatibility, tests and rollback.
+
+## Economy balance foundation (#611)
+
+`economy` is an implemented additional package required by #558 W06, with four
+source modules and one test file. It owns the existing fourteen-asset allowlist,
+balance plan and transactional debit/credit adapter. Realm composition injects the
+same mutation executor; the returned adapter body remains byte-identical. The old
+horizontal source is retired after all callers migrate. Shared posting validation
+stays in ledger, and receipt/epoch/outbox ownership remains in the current realm.
+Domain tests cover valid and invalid plans; the existing cross-component PostgreSQL
+mutation foundation integration remains in server tests. See [economy](economy/README.md)
+for boundaries, verification and rollback. Inventory, reservations and the remaining
+economic consumers still require extraction; this is not completion of W06.
