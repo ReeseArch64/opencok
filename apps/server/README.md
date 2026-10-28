@@ -4163,3 +4163,21 @@ sleep after each iteration; the job starts no timer or independent process.
 PostgreSQL authority, advisory locks, rules and protocol payloads are unchanged.
 This is a preparatory composition slice of #558, not world authority extraction,
 a scheduler implementation or a measured performance improvement.
+
+## March recovery composition
+
+`WorldMarchRecoveryJob` owns the import and due-page cursors previously held by
+realm composition. The existing world recovery fiber awaits it after totem
+recovery and before world notification delivery. It creates no timer or process.
+Each run selects at most one 64-entry page of unregistered marches, settles each
+known owner's activities and sends `world.tick`; it then does the same for a due
+page. A full page advances its cursor before processing; a short or empty page
+resets that cursor. Owner failures are reported independently, while selection
+failures propagate to the existing world recovery loop. A new job starts both
+scans from the beginning, relying on persisted checkpoints and existing idempotency.
+
+Import operation keys remain `world-import:<id>` and due keys remain
+`world:<id>:<version>`. Selection, authority fencing, troop reservations, cargo
+funding and committed notifications remain owned by the existing repositories and
+domain services. This is a composition refactor under #558; it does not introduce
+new world/player ownership or change recovery policy.
