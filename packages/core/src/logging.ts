@@ -213,7 +213,12 @@ function classifiedErrorReason(error: unknown): string
         return code;
     }
 
-    if (error.name === "TimeoutError" || error.name === "AbortError")
+    if (error.name === "AbortError")
+    {
+        return "operation_cancelled";
+    }
+
+    if (error.name === "TimeoutError")
     {
         return "dependency_timeout";
     }

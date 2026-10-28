@@ -2,6 +2,7 @@ import { afterEach, beforeEach, expect, spyOn, test } from "bun:test";
 import * as crypto from "node:crypto";
 import { Effect } from "effect";
 import {
+    errorReason,
     initializeLogging,
     logContext,
     logEvent,
@@ -147,4 +148,20 @@ test("known dependency error codes expose actionable controlled reasons", async 
         expect(records.at(-1)).toMatchObject({ reason, level: "error" });
     }
     expect(JSON.stringify(records)).not.toContain("private-");
+});
+
+test("errorReason distinguishes cancellation from dependency deadlines through wrappers", () => {
+    const cancelled = new DOMException("private cancellation", "AbortError");
+    const deadline = new DOMException("private deadline", "TimeoutError");
+
+    expect(errorReason(new Error("private wrapper", { cause: cancelled }))).toBe(
+        "operation_cancelled",
+    );
+    expect(errorReason(deadline)).toBe("dependency_timeout");
+    expect(errorReason(Object.assign(new Error("private query"), { code: "57014" }))).toBe(
+        "database_query_cancelled",
+    );
+    expect(errorReason(Object.assign(new Error("private lock"), { code: "55P03" }))).toBe(
+        "database_lock_unavailable",
+    );
 });

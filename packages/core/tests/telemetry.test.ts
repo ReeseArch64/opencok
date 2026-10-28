@@ -1,7 +1,7 @@
 import { expect, spyOn, test } from "bun:test";
 import { initializeLogging, initializeTelemetry, logEvent, logHttpRequest } from "../src/logging";
 import { observedFetch } from "../src/fetch";
-import { observeOperation } from "../src/operation";
+import { observeOperation, observeRootServerOperation } from "../src/operation";
 
 test("OTLP exports correlated redacted logs, parented spans, exceptions and duration metrics", async () => {
     const received: { signal: string; body: any; }[] = [];
@@ -131,6 +131,68 @@ test("an unavailable collector cannot block operations and export recovers witho
     finally
     {
         healthy = true;
+        await active.close();
+        collector.stop(true);
+        spies.forEach((spy) => spy.mockRestore());
+    }
+});
+
+test("independent TCP packets export separate root traces with correctly parented login phases", async () => {
+    const received: any[] = [];
+    const collector = Bun.serve({
+        hostname: "127.0.0.1",
+        port: 0,
+        async fetch(request)
+        {
+            if (new URL(request.url).pathname === "/v1/traces")
+            {
+                received.push(await request.json());
+            }
+
+            return Response.json({});
+        },
+    });
+    initializeLogging("tcp-trace-test");
+    const spies = ["log", "info", "warn", "error"].map((method) =>
+        spyOn(console, method as "log").mockImplementation(() => {})
+    );
+    const active = initializeTelemetry("tcp-trace-test", {
+        endpoint: `http://127.0.0.1:${collector.port}`,
+        ingestKey: "synthetic-ingest-key",
+    })!;
+
+    try
+    {
+        await observeOperation("listener.context", async () => {
+            await Promise.all([
+                observeRootServerOperation(
+                    "tcp.packet",
+                    () => observeOperation("login.authentication", async () => {}),
+                ),
+                observeRootServerOperation(
+                    "tcp.packet",
+                    () => observeOperation("login.authentication", async () => {}),
+                ),
+            ]);
+        });
+        await active.flush();
+        const spans = received.flatMap((body) =>
+            body.resourceSpans.flatMap((resource: any) =>
+                resource.scopeSpans.flatMap((scope: any) => scope.spans)
+            )
+        );
+        const packets = spans.filter((span: any) => span.name === "tcp.packet");
+        const phases = spans.filter((span: any) => span.name === "login.authentication");
+        expect(packets).toHaveLength(2);
+        expect(phases).toHaveLength(2);
+        expect(new Set(packets.map((span: any) => span.traceId)).size).toBe(2);
+        expect(packets.map((span: any) => span.parentSpanId ?? "")).toEqual(["", ""]);
+        expect(phases.map((span: any) => span.parentSpanId).sort()).toEqual(
+            packets.map((span: any) => span.spanId).sort(),
+        );
+    }
+    finally
+    {
         await active.close();
         collector.stop(true);
         spies.forEach((spy) => spy.mockRestore());

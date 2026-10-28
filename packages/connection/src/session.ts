@@ -1,5 +1,5 @@
 import { loggedGameCommands } from "@opencok/constants/logged-commands";
-import { observeServerOperation } from "@opencok/core/operation";
+import { observeOperation, observeRootServerOperation } from "@opencok/core/operation";
 import {
     MAX_CONNECTIONS,
     SOCKET_TIMEOUT_MS,
@@ -44,7 +44,10 @@ export function createSessionHandler(
 {
     const { db, cache, game, world } = dependencies;
     const { sockets, inFlight, metrics, ready } = state;
-    const sessions = new Map<string, { socket: Socket; token: string; }>();
+    const sessions = new Map<
+        string,
+        { socket: Socket; token: string; drain(): Promise<void>; replace(): void; }
+    >();
 
     return (socket: Socket) => {
         const initialization = new AbortController();
@@ -164,32 +167,65 @@ export function createSessionHandler(
 
                 try
                 {
-                    const profile = await authenticate(body, db, config);
+                    const profile = await observeOperation(
+                        "login.authentication",
+                        () => authenticate(body, db, config),
+                    );
+                    initialization.signal.throwIfAborted();
                     claimed = text(profile, "uid");
                     stage = "session";
                     const previous = sessions.get(claimed);
 
+                    sessions.set(claimed, {
+                        socket,
+                        token,
+                        drain: () => chain,
+                        replace: () => {
+                            closeReason = "session_replaced";
+                            initialization.abort();
+                            socket.destroy();
+                        },
+                    });
+
                     if (previous)
                     {
                         report("session_replaced");
-                        previous.socket.destroy();
+                        previous.replace();
+                        await observeOperation(
+                            "login.previous_session_drain",
+                            () => previous.drain(),
+                        );
+                        initialization.signal.throwIfAborted();
                         await cache.release(claimed, previous.token);
                     }
 
-                    if (!(await cache.claim(claimed, token)))
+                    initialization.signal.throwIfAborted();
+
+                    if (
+                        !(await observeOperation(
+                            "login.session_claim",
+                            () => cache.claim(claimed!, token),
+                        ))
+                    )
                     {
                         throw new LoginError();
                     }
 
-                    sessions.set(claimed, { socket, token });
-                    stage = "initialization";
+                    initialization.signal.throwIfAborted();
+                    stage = "profile_session";
                     const details = fields(body.p);
-                    await dependencies.profileSessions?.open(claimed, connectionId, Date.now());
-                    const initializedState = await game.initialize(
-                        claimed,
-                        details,
-                        initialization.signal,
+                    await observeOperation(
+                        "login.profile_session_open",
+                        () =>
+                            dependencies.profileSessions?.open(claimed!, connectionId, Date.now()),
                     );
+                    initialization.signal.throwIfAborted();
+                    stage = "initialization";
+                    const initializedState = await observeOperation(
+                        "login.initialization",
+                        () => game.initialize(claimed!, details, initialization.signal),
+                    );
+                    initialization.signal.throwIfAborted();
                     const initial = initializedState.body;
 
                     if (socket.destroyed || !ready() || sessions.get(claimed)?.socket !== socket)
@@ -210,29 +246,32 @@ export function createSessionHandler(
                     }
 
                     uid = claimed;
-                    send(
-                        envelope(0, 1, {
-                            id: sfs.int(++metrics.userId),
-                            zn: sfs.string(`COK${config.kingdomId}`),
-                            un: sfs.string(uid),
-                            rs: sfs.short(0),
-                            pi: sfs.short(0),
-                            rl: sfs.array(),
-                            p: sfs.object({ use: sfs.int(0), ...dynamicResourceConfig() }),
-                        }),
-                    );
+                    stage = "delivery";
+                    observeOperation("login.delivery", () => {
+                        send(
+                            envelope(0, 1, {
+                                id: sfs.int(++metrics.userId),
+                                zn: sfs.string(`COK${config.kingdomId}`),
+                                un: sfs.string(claimed!),
+                                rs: sfs.short(0),
+                                pi: sfs.short(0),
+                                rl: sfs.array(),
+                                p: sfs.object({ use: sfs.int(0), ...dynamicResourceConfig() }),
+                            }),
+                        );
 
-                    if (details._cok_)
-                    {
-                        initial._cok_ = details._cok_;
-                    }
+                        if (details._cok_)
+                        {
+                            initial._cok_ = details._cok_;
+                        }
 
-                    send(extension("init", initial));
+                        send(extension("init", initial));
 
-                    for (const push of initializedState.pushes)
-                    {
-                        send(extension(push.command, push.body));
-                    }
+                        for (const push of initializedState.pushes)
+                        {
+                            send(extension(push.command, push.body));
+                        }
+                    });
 
                     if (!socket.destroyed)
                     {
@@ -268,7 +307,7 @@ export function createSessionHandler(
                     }
 
                     report("login_accepted", {
-                        initialization: "partial",
+                        initialization: "queued",
                         outcome: "success",
                         durationMs: Math.round(performance.now() - started),
                     });
@@ -281,7 +320,9 @@ export function createSessionHandler(
                             stage,
                             durationMs: Math.round(performance.now() - started),
                             outcome: "failure",
-                            reason: error instanceof LoginError
+                            reason: initialization.signal.aborted
+                                ? closeReason === "peer_closed" ? "connection_closed" : closeReason
+                                : error instanceof LoginError
                                 ? error.reason
                                 : error instanceof GameError
                                 ? (error.reason ?? "game_state")
@@ -555,7 +596,7 @@ export function createSessionHandler(
                                             component: "tcp",
                                         },
                                         () =>
-                                            observeServerOperation(
+                                            observeRootServerOperation(
                                                 "tcp.packet",
                                                 () => handle(packet),
                                             ),

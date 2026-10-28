@@ -90,6 +90,51 @@ as the legacy model does, including imported IDs that do not end in `00`. It kee
 the saved ID and level in the response. Research mutations retain their stricter
 base-ID and catalog-level checks; login projection does not repair saved rows.
 
+## Login initialization diagnostics
+
+For #560, each TCP packet starts an independent root trace. Authentication, previous-session
+drain, cache claim, profile-session opening, initialization and response serialization/queueing
+have separate `login.*` operations. Initialization exposes `login.initialize.*` operations for
+each sequential progression command, reconciliation, final state hydration, power, mapping
+and reconnect settlement. Nested database spans belong to these phases; do not sum parent
+and child durations. Names are fixed server phases and contain no player identifiers.
+
+`login_rejected` distinguishes `connection_closed` and `session_replaced` from dependency
+failures. Generic `AbortError` maps to `operation_cancelled`; `TimeoutError` still maps to
+`dependency_timeout`, SQLSTATE `57014` to `database_query_cancelled`, and `55P03` to
+`database_lock_unavailable`. These SQLSTATE categories alone do not identify a query deadline
+or a lock owner. `login_accepted` reports initialization as `queued`: bytes accepted by the
+server socket do not prove native client delivery or rendering.
+
+A replacement aborts and drains the previous connection's queued work before releasing its
+claim and starting the new initializer. Cancellation checks between awaited phases prevent
+additional recovery work after disconnect. An in-flight mutation must finish or roll back;
+the replacement does not race it with another initializer. This drain inherits dependency
+bounds and does not establish a separate cleanup deadline or cross-process drain guarantee.
+PostgreSQL fencing and token-conditional cache cleanup remain required.
+
+Focused synthetic validation:
+
+```sh
+bun --no-env-file test packages/core/tests packages/city/tests apps/server/test/login-session.test.ts apps/server/test/logging.test.ts apps/server/test/reconnect.test.ts apps/server/test/reconnect-plan.test.ts
+```
+
+The tests cover TCP response order and field types, replacement during unfinished work,
+disconnect during authentication, cancellation between recovery phases, serial progression
+and push order, reconnect projection, and OTLP export with independent packet traces.
+They use synthetic state and an in-process collector; they do not certify Maple storage,
+PostgreSQL persistence or native rendering. No snapshot format changes are introduced;
+existing deterministic wire assertions remain the contract checks.
+
+Remaining acceptance evidence for #560 requires an authorized disposable workload: record
+exact server/image revision, native client track, both kingdoms, topology and dependency
+versions; compare fresh/existing accounts, warm/cold caches, concurrent logins, recovery and
+restart/reconnect. Capture end-to-end p50/p95/p99, query counts, pool acquisition and lock
+waits, sanitized lock ownership, and reward/progress invariants. Validate the retry boundary
+and proposed warm p95 budget of 10 seconds with the native client. Query optimization (#561)
+and safe derived-read caching (#562) require separate measurements. This change alone does
+not complete those criteria or prove the reported loading failure resolved.
+
 ## Saved civilization at login
 
 The 12.06.0 login snapshot includes `civilization_type` as an SFS int and

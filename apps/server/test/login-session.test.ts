@@ -7,7 +7,10 @@ import type { ServerDependencies } from "@opencok/connection/dependencies";
 import { FrameReader, frame } from "@opencok/messages/frame";
 import { envelope, fields, sfs, str, type Fields } from "@opencok/messages/sfs";
 
-async function harness(initialize: ServerDependencies["game"]["initialize"])
+async function harness(
+    initialize: ServerDependencies["game"]["initialize"],
+    authenticateWait: () => Promise<void> = async () => {},
+)
 {
     const claims = new Map<string, string>();
     const closed: string[] = [];
@@ -15,7 +18,11 @@ async function harness(initialize: ServerDependencies["game"]["initialize"])
     const inFlight = new Set<Promise<void>>();
     const dependencies = {
         db: {
-            getProfileById: async () => ({ uid: "synthetic", deviceUuid: "device", pf: "Google" }),
+            getProfileById: async () => {
+                await authenticateWait();
+
+                return { uid: "synthetic", deviceUuid: "device", pf: "Google" };
+            },
             getAccountsByPlayerId: async () => [{ active: 0, server: 1, uuid: "device" }],
         },
         cache: {
@@ -252,4 +259,86 @@ test("initialization failure releases its claim and permits a successful retry",
     }
     expect(h.claims.size).toBe(0);
     expect(h.closed).toHaveLength(2);
+});
+
+test("replacement waits for an abandoned mutation to settle before initializing the next session", async () => {
+    const entered = Promise.withResolvers<void>();
+    const cancelled = Promise.withResolvers<void>();
+    const mutation = Promise.withResolvers<void>();
+    const actions: string[] = [];
+    let calls = 0;
+    const h = await harness(async (_owner, _details, signal) => {
+        if (++calls === 1)
+        {
+            signal!.addEventListener("abort", () => cancelled.resolve(), { once: true });
+            actions.push("previous-started");
+            entered.resolve();
+            await mutation.promise;
+            actions.push("previous-settled");
+            signal!.throwIfAborted();
+        }
+
+        actions.push("replacement-started");
+
+        return { body: {}, pushes: [] };
+    });
+
+    try
+    {
+        const previous = await h.connect();
+        await entered.promise;
+        const previousToken = h.claims.get("synthetic");
+        const replacement = await h.connect();
+        await cancelled.promise;
+        expect(actions).toEqual(["previous-started"]);
+        expect(h.claims.get("synthetic")).toBe(previousToken);
+        mutation.resolve();
+        await replacement.initialized;
+        expect(actions).toEqual([
+            "previous-started",
+            "previous-settled",
+            "replacement-started",
+        ]);
+        expect(h.claims.size).toBe(1);
+        expect(h.claims.get("synthetic")).not.toBe(previousToken);
+        expect(previous.packets).toHaveLength(1);
+    }
+    finally
+    {
+        mutation.resolve();
+        await h.close();
+    }
+});
+
+test("disconnect during authentication prevents session claiming and initialization", async () => {
+    const entered = Promise.withResolvers<void>();
+    const authentication = Promise.withResolvers<void>();
+    let initializations = 0;
+    const h = await harness(async () => {
+        initializations++;
+
+        return { body: {}, pushes: [] };
+    }, async () => {
+        entered.resolve();
+        await authentication.promise;
+    });
+
+    try
+    {
+        const client = await h.connect();
+        await entered.promise;
+        client.socket.destroy();
+        await once(client.socket, "close");
+        await Bun.sleep(10);
+        authentication.resolve();
+    }
+    finally
+    {
+        authentication.resolve();
+        await h.close();
+    }
+
+    expect(initializations).toBe(0);
+    expect(h.claims.size).toBe(0);
+    expect(h.closed).toHaveLength(0);
 });
