@@ -103,5 +103,6 @@ The [Alliance domain](alliance/README.md) owns existing member-help commands,
 generation validation, native mapping and transactional persistence after #663.
 Shared gift production, claims, mapping and persistence follow in #665. The realm
 injects numeric/catalog/economic collaborators. Research, donations and recovery
-follow in #667; shared membership and aggregate publication remain subsequent
-slices. Production and catalog tests retain a tracked science-rule binding.
+follow in #667; governance commands, membership policies and alliance/member/blacklist
+persistence follow in #669. Shared membership lifecycle and aggregate publication
+remain subsequent slices. Remaining policy bindings have tracked retirement tasks.

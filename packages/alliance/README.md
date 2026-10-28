@@ -5,9 +5,10 @@ Alliance owns the existing queue-assistance workflow after
 [ADR-0016](../../docs/decisions/0016-adopt-domain-owned-package-layout.md).
 Shared gifts follow in [#665](https://github.com/ReeseArch64/opencok/issues/665).
 Research and donations follow in [#667](https://github.com/ReeseArch64/opencok/issues/667).
-Its twenty-nine source modules and three test files cover help, gifts, research,
-donations, native mapping and transactional persistence/recovery. Membership and
-its broad coordinator remain subsequent domain slices.
+Governance follows in [#669](https://github.com/ReeseArch64/opencok/issues/669).
+Its thirty-seven source modules and four test files cover help, gifts, research,
+donations, governance, native mapping and transactional persistence/recovery.
+Membership lifecycle and its broad coordinator remain subsequent domain slices.
 
 ## Responsibilities and composition
 
@@ -60,8 +61,9 @@ There is no remaining `alliance-help` compatibility entrypoint. Shared Alliance
 contracts still compose the help fields; shared repositories/publication and the
 membership coordinator remain integration adapters. Their retirement
 belongs to #558 W08/W20 after those consumers have migrated. Help, gift and science extraction
-each remove two Service cycle entries from the architecture baseline; 73 existing
-violations remain elsewhere. No baseline rule is relaxed.
+each remove two Service cycle entries from the architecture baseline. Governance
+declares two direct realm dependencies and retires their two stale test exceptions;
+71 existing violations remain elsewhere. No baseline rule is relaxed.
 
 ## Verification and recovery
 
@@ -211,3 +213,68 @@ Deploy or roll back the complete realm artifact against unchanged science,
 research, donation and history rows, production checkpoints, inventory, receipts
 and outbox. Preserve saved offers and research payloads when rolling back. No
 schema/save conversion, environment, client resource or third-party version change.
+
+## Governance and membership policy
+
+`services/governance` owns permissions, ranks, leadership, leave/kick/dissolve
+admission, attributes, rank names, flags, diplomacy and blacklist commands.
+`rules/membership` owns the existing text, membership, rank-capability, editable
+permission, target, creation-cost, capacity and entry policies. Bounded contracts
+expose the required catalog, readers, error behavior and context operations.
+The realm injects actual readers, integer validation, alliance failures and the
+original unsupported-command error. Its direct Constants and Errors dependencies
+are declared; Alliance gains no broad package dependency.
+
+Six editable settings retain their defaults and strict key/value validation.
+They cannot grant gameplay capabilities from the rank catalog. Ordinary rank
+changes retain no-self and superior-rank gates. Leadership transfer/replacement
+requires exactly one current leader, local profiles and the existing rights or
+rank-specific absence deadline and cost. Both member ranks and rally reset remain
+in the enclosing transaction. Governance delegates removal to the existing
+membership workflow, preserving its profile, world, march, production, first-join
+reward and notification coordination.
+
+Text checks, moderation in the outer coordinator, rename charges, first free
+abbreviation change, recruitment and power/castle restrictions are unchanged.
+Blacklist edits remain leader-only, bound to the current alliance, with validated
+saved string arrays and the 500-character serialized limit. `mappings/governance`
+preserves native field order and SFS types. Lazy snapshot/balance callbacks retain
+the original evaluation order and exact long values.
+
+`repositories/governance` owns blacklist reads and alliance/member/blacklist writes.
+The shared transaction calls these at their original positions: alliance creation
+expands the allowed set before the check closure; sorted name/abbreviation advisory
+locks precede uniqueness checks and upserts; member writes validate the locked
+participants; blacklist writes retain their later position. No query, lock,
+receipt, outbox, save format or authority ownership changes.
+
+| Former source                                               | Owned destination                                          | Composition and retirement                                                                   |
+| ----------------------------------------------------------- | ---------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
+| Services `alliances` governance command tail and attributes | `services/governance`, `mappings/governance`, command enum | Required realm-composed factory after the existing membership and specialized dispatch gates |
+| Rules `alliance` policy functions                           | `rules/membership`                                         | Bound compatibility exports; existing error construction stays in Rules                      |
+| Aggregate alliance/member/blacklist persistence             | `repositories/governance`                                  | Same transaction and operation order; retire shared adapter with W08/W20 aggregate migration |
+| Shared governance state/write fields                        | `contracts/governance`                                     | Shared Contracts aggregate extends the owned interfaces                                      |
+
+The Rules compatibility binding has direct consumers in Services `alliances`,
+Services `alliance-publication`, Rules `alliance-science`, Rules
+`tests/alliance.test.ts` and Server `src/composition/alliance.ts`. Alliance owns
+retirement under #558 W20: migrate coordinator/publication policy injection and
+catalog tests, then relocate the shared error binding. The unused free
+`allianceCapacity` export is removed; the policy retains capacity and its default
+entry evaluation. Application/invitation lifecycle, directory/search, membership
+mutations, aggregate orchestration and publication still require later slices.
+
+Seven governance tests add 92 assertions for permission isolation, rank and
+leadership gates, exact absence boundaries, removal delegation, costs, restrictions,
+saved blacklist reconstruction and native roundtrips. The full Alliance suite has
+25 tests and 265 assertions. Fifty runtime comparisons verify all extracted policy
+bodies and defaults, native mapper inlining, command admission order, coordinator
+methods and complete aggregate read/write flows; six contract comparisons preserve
+moved and unchanged fields. Existing PostgreSQL scenarios cover concurrency,
+rollback, replay, leadership, membership and economy boundaries.
+
+Deploy or roll back the complete realm artifact against unchanged alliance,
+member, blacklist, profile, inventory, receipt and outbox storage. Keep committed
+memberships, rewards and receipts across rollback. No migration, environment,
+third-party version or client repackaging change. Native-device and production-load
+acceptance remain separate from synthetic server validation.

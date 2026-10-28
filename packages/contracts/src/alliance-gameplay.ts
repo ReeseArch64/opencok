@@ -1,4 +1,8 @@
 import type {
+    AllianceGovernanceState,
+    AllianceGovernanceWrite,
+} from "@opencok/alliance/contracts/governance";
+import type {
     AllianceScienceState,
     AllianceScienceWrite,
 } from "@opencok/alliance/contracts/science";
@@ -23,7 +27,8 @@ export interface AllianceSelection
     page?: number;
 }
 
-export interface AllianceState extends AllianceHelpState, AllianceGiftState, AllianceScienceState
+export interface AllianceState
+    extends AllianceHelpState, AllianceGiftState, AllianceScienceState, AllianceGovernanceState
 {
     now: bigint;
     inventory: InventoryState;
@@ -36,24 +41,19 @@ export interface AllianceState extends AllianceHelpState, AllianceGiftState, All
     points: readonly Row[];
     powers: readonly Row[];
     marches: readonly Row[];
-    blacklist: readonly Row[];
     directory: readonly Row[];
     candidates: readonly Row[];
     directoryTotal: bigint;
     mails: readonly Row[];
 }
 
-export interface AllianceWrite extends AllianceHelpWrite, AllianceGiftWrite, AllianceScienceWrite
+export interface AllianceWrite
+    extends AllianceHelpWrite, AllianceGiftWrite, AllianceScienceWrite, AllianceGovernanceWrite
 {
-    alliances?: readonly Row[];
-    deletedAlliances?: readonly string[];
-    members?: readonly Row[];
     removedMembers?: readonly string[];
-    memberships?: readonly { uid: string; allianceId: string; }[];
     applications?: readonly Row[];
     deletedApplications?: readonly string[];
     firstJoin?: readonly string[];
-    blacklist?: readonly Row[];
     mails?: readonly Row[];
     mailUpdates?: readonly Row[];
 }
