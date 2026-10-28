@@ -352,6 +352,61 @@ test("CLI check mode is read-only, deterministic and hides input paths and displ
     }
 });
 
+test.skipIf(process.platform === "win32")(
+    "CLI rejects a FIFO without waiting for a writer",
+    async () => {
+        const directory = await mkdtemp(join(tmpdir(), "opencok-binding-fifo-test-"));
+
+        try
+        {
+            const fifo = join(directory, "PRIVATE-FIFO");
+            const created = Bun.spawnSync(["mkfifo", fifo], { stdout: "pipe", stderr: "pipe" });
+            expect(created.exitCode).toBe(0);
+            const cli = new URL("../src/discover.ts", import.meta.url).pathname;
+            const child = Bun.spawn([
+                process.execPath,
+                "--no-env-file",
+                cli,
+                "v1",
+                fifo,
+                fifo,
+                fifo,
+                fifo,
+            ], { stdout: "pipe", stderr: "pipe" });
+            let timedOut = false;
+            const timer = setTimeout(() => {
+                timedOut = true;
+                child.kill("SIGKILL");
+            }, 3000);
+
+            try
+            {
+                const [stdout, stderr, code] = await Promise.all([
+                    new Response(child.stdout).text(),
+                    new Response(child.stderr).text(),
+                    child.exited,
+                ]);
+                expect(timedOut).toBe(false);
+                expect(code).toBe(2);
+                expect(stdout).toBe("");
+                expect(stderr).not.toContain(directory);
+                expect(stderr).not.toContain("PRIVATE-FIFO");
+            }
+            finally
+            {
+                clearTimeout(timer);
+                child.kill("SIGKILL");
+                await child.exited;
+            }
+        }
+        finally
+        {
+            await rm(directory, { recursive: true, force: true });
+        }
+    },
+    10000,
+);
+
 test("duplicate catalogs and missing client groups remain explicit failures", () => {
     const h = fixture();
     const discovery = new ClientBindingDiscovery(h.sources);
