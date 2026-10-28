@@ -644,6 +644,7 @@
       },
       "devDependencies": {
         "@opencok/config": "workspace:*",
+        "@opencok/policy": "workspace:*",
         "@opencok/resources": "workspace:*",
         "@opencok/services": "workspace:*",
         "@types/bun": "catalog:",
