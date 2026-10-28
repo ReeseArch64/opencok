@@ -16,19 +16,17 @@ start Chat, PostgreSQL and the existing global/kingdom migrations. The local sta
 configures API discovery and realm session issuance automatically and publishes Chat
 on port 8083. The advertised WebSocket URL is fixed at
 `ws://192.168.1.104:8083/chat/ws` in code; see the
-[stack guide](../../infra/compose/README.md). To run Chat on the host instead, stop
+[stack guide](../../infra/README.md). To run Chat on the host instead, stop
 the Compose Chat service, configure the root `.env` or process environment, and run
 `bun run --cwd apps/chat start`.
 
-| Setting                  | Meaning                                                                                 |
-| ------------------------ | --------------------------------------------------------------------------------------- |
-| `DATABASE_URL`           | Required PostgreSQL connection URL; topology selects physical databases                 |
-| `CHAT_SECRET`            | Required shared secret for trusted backend session, avatar and nickname requests        |
-| `CHAT_MAILBOX_SECRET`    | Optional mailbox fallback for unmapped realms; otherwise uses `CHAT_SECRET`             |
-| `CHAT_MAILBOX_SECRETS`   | JSON realm-to-key map; mapped realms accept only their selected key                     |
-| `MONGO_URI`              | Authenticated MongoDB archive URI; PostgreSQL fallback remains available during outages |
-| `GLOBAL_DATABASE_NAME`   | Default `opencok_global`                                                                |
-| `CHAT_KINGDOM_DATABASES` | Default `1:opencok_kingdom_1,2:opencok_kingdom_2`                                       |
+| Setting                  | Meaning                                                                                   |
+| ------------------------ | ----------------------------------------------------------------------------------------- |
+| `DATABASE_URL`           | Required PostgreSQL connection URL; topology selects physical databases                   |
+| `CHAT_SECRET`            | Required shared secret for trusted backend session, avatar, nickname and mailbox requests |
+| `MONGO_URI`              | Authenticated MongoDB archive URI; PostgreSQL fallback remains available during outages   |
+| `GLOBAL_DATABASE_NAME`   | Default `opencok_global`                                                                  |
+| `CHAT_KINGDOM_DATABASES` | Default `1:opencok_kingdom_1,2:opencok_kingdom_2`                                         |
 
 The entrypoint binds to `0.0.0.0:8083` with consumer ID `chat-local`; these values
 are fixed in code. This entrypoint runs one Chat consumer per deployment. Additional
@@ -75,7 +73,7 @@ message bodies, player identities or credentials. Existing shared database
 instrumentation contributes dependency spans. The exporter starts before application
 resources and flushes after resource cleanup, including startup failure. Maple
 availability does not gate Chat readiness. Without an OTLP endpoint, console logging
-continues. See the [local Maple guide](../../infra/compose/README.md#observability).
+continues. See the [local Maple guide](../../infra/README.md#observability).
 
 ## Validation and limits
 
@@ -195,24 +193,13 @@ expire after 30 seconds. The receiver bounds JSON bodies to 4 KiB, enforces stri
 operation fields, and acknowledges only committed effects with the same realm,
 owner, operation ID and effect index.
 
-For isolated mail Workers, configure `CHAT_MAILBOX_SECRETS` as a JSON object mapping
-positive realm IDs to distinct nonempty keys. Provide only the selected realm key
-as `MAIL_WORKER_CHAT_SECRET` to its Workers process. Chat uses the signed payload's
-realm to select the expected mailbox key. A mapped realm accepts only that key;
-another mapped realm's key or either fallback key is rejected. Session, avatar
-and nickname routes continue using `CHAT_SECRET`.
+Chat, Server and mail Workers use the same `CHAT_SECRET` for mailbox requests.
+The shared key authenticates trusted backends across realms; the signed body still
+identifies the realm and owner, and signatures remain specific to each operation.
 
-Unmapped realms retain `CHAT_MAILBOX_SECRET`, falling back to `CHAT_SECRET` when
-the optional mailbox route key is absent. This permits gradual local-delivery
-rollout. Every external-worker realm must have a map entry, and its worker must
-receive only the mapped key. Mapped values must differ from one another and from
-both fallback keys; configuration rejects duplicates.
-
-Deploy matching Chat and Server support first. Configure the map on Chat and the
-matching realm key on Server through `CHAT_MAILBOX_SECRET` or its optional map
-while delivery remains local, then follow the [Workers cutover](../workers/README.md#cutover-and-rollback).
-Keep entries for every external-worker realm that still delivers mailbox effects.
-Retain the appropriate fallback for remaining local realms during the transition.
+Deploy matching Chat, Server and Workers versions together, configure the same
+`CHAT_SECRET` on each, and follow the [Workers cutover](../workers/README.md#cutover-and-rollback).
+The mailbox-specific fallback, realm key map and worker key settings are no longer used.
 
 Global migration `0005_chat_mailbox_effects.sql` adds owned private-message copies
 and durable operation receipts. The consumer marks or removes matching

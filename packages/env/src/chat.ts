@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { loadEnvironment } from "./load";
 import { postgresUrl } from "./database.schema";
-import { databaseName, chatMailboxSecrets } from "./service.schema";
+import { databaseName } from "./service.schema";
 import { blankToUndefined, validateEnvironment } from "./validation";
 
 export const chatSchema = z.object({
@@ -14,8 +14,6 @@ export const chatSchema = z.object({
             .optional(),
     ),
     CHAT_SECRET: z.string().min(1),
-    CHAT_MAILBOX_SECRETS: chatMailboxSecrets,
-    CHAT_MAILBOX_SECRET: z.preprocess(blankToUndefined, z.string().min(1).optional()),
     GLOBAL_DATABASE_NAME: databaseName.default("opencok_global"),
     CHAT_KINGDOM_DATABASES: z
         .string()
@@ -30,13 +28,7 @@ export const chatSchema = z.object({
         .pipe(
             z.array(z.object({ id: z.number().int().positive(), database: databaseName })).min(1),
         ),
-}).refine(
-    (settings) =>
-        Object.values(settings.CHAT_MAILBOX_SECRETS ?? {}).every((secret) =>
-            secret !== settings.CHAT_SECRET && secret !== settings.CHAT_MAILBOX_SECRET
-        ),
-    { path: ["CHAT_MAILBOX_SECRETS"] },
-);
+});
 
 export const parseChatEnvironment = (source: Readonly<Record<string, string | undefined>>) =>
     validateEnvironment(chatSchema, source);

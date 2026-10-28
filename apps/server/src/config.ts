@@ -24,8 +24,7 @@ export const config = Effect.gen(function*()
         mailChat: settings.CHAT_URL
             ? {
                 url: new URL("/_internal/mailbox", settings.CHAT_URL).href,
-                signingSecret: settings.CHAT_MAILBOX_SECRETS?.[settings.KINGDOM_ID]
-                    ?? settings.CHAT_MAILBOX_SECRET ?? settings.CHAT_SECRET!,
+                signingSecret: settings.CHAT_SECRET!,
             }
             : undefined,
         chatSession: settings.CHAT_URL

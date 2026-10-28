@@ -58,7 +58,7 @@ and explicit retention/recovery policy.
 Follow-up changes require separate implementation authorization; this ADR
 performs no install, cache flush, migration or configuration change.
 
-- **Affected paths**: `packages/storage/src/session.ts`, `packages/storage/src/timeout.ts`, `packages/storage/src/discovery-redis.ts`, `apps/server/src/realm-composition.ts`, `packages/env/src/server.schema.ts`, `packages/env/src/api.schema.ts`, `docker-compose.yml`, `docker-compose.dev.yml`, `infra/compose/README.md`, `tests/stack/compose.test.ts`.
+- **Affected paths**: `packages/storage/src/session.ts`, `packages/storage/src/timeout.ts`, `packages/storage/src/discovery-redis.ts`, `apps/server/src/realm-composition.ts`, `packages/env/src/server.schema.ts`, `packages/env/src/api.schema.ts`, `docker-compose.yml`, `docker-compose.dev.yml`, `infra/README.md`, `tests/stack/compose.test.ts`.
 - **Dependencies**: Retain the recorded Redis 6.2.24 image baseline and existing Bun `RedisClient` adapters. Review/pin a Redis Insight image compatible with that baseline before closing the tooling gate; do not invent a pin for current `latest`. Any client/provider/runtime transition or Redis upgrade needs separate compatibility review.
 - **Configuration**: Keep shared server-only `REDIS_URL`, bounded dependency timeouts and internal local Redis networking without a host port. The development override supplies local Redis ordering; external URLs do not authorize development tools to access production.
 - **Patterns to follow**: `Cache` realm/owner-epoch key scoping, token checks and bounded commands in `session.ts`; sanitized `DependencyError` failures and explicit required-versus-optional behavior.
@@ -90,7 +90,7 @@ These unchecked gates are not a claim that the current stack passes them.
 
 Provenance: Redis/tool choices previously recorded as ADR-0005 and ADR-0006.
 See [architecture section 7](../../.github/ARCHITECTURE.md#7-mongodb-redis-and-file-storage)
-and [external Redis operation](../../infra/compose/README.md#external-redis-and-deployment-separation).
+and [external Redis operation](../../infra/README.md#external-redis-and-deployment-separation).
 Revisit on unsupported releases, failed compatibility/security gates or evidence
 that the ephemeral/durable boundary cannot be maintained. No throughput or
 managed-service verification is asserted.

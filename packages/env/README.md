@@ -39,7 +39,7 @@ variable names, never supplied values or raw Zod issues. Do not log environment
 objects or URLs.
 
 The Compose setup password preserves spaces and special characters. An empty
-password is absent; the initialization job requires it. See the [local environment guide](../../infra/compose/README.md).
+password is absent; the initialization job requires it. See the [local environment guide](../../infra/README.md).
 
 The read-only object is a snapshot at import and does not mutate `process.env`.
 Only the listed keys are exposed. Parsing uses native `node:util.parseEnv`: quoted

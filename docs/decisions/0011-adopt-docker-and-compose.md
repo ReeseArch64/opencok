@@ -49,7 +49,7 @@ Do not broaden Docker socket access beyond separately scoped administration need
 
 ## Implementation Plan
 
-- **Affected paths**: `docker-compose.yml`, `docker-compose.dev.yml`, `apps/api/Dockerfile`, `apps/server/Dockerfile`, `apps/chat/Dockerfile`, `.dockerignore`, `infra/compose/README.md`, `.github/ARCHITECTURE.md`.
+- **Affected paths**: `docker-compose.yml`, `docker-compose.dev.yml`, `apps/api/Dockerfile`, `apps/server/Dockerfile`, `apps/chat/Dockerfile`, `.dockerignore`, `infra/README.md`, `.github/ARCHITECTURE.md`.
 - **Dependencies**: Use Docker Engine and Compose v2 supporting profiles, health conditions and `up --wait`. Retain existing service image baselines and current `oven/bun:1.4.2` build / `1.4.2-slim` runtime images pending separately validated updates; no installation occurs here.
 - **Patterns**: Preserve multi-stage builds, frozen production dependency installation with `--ignore-scripts`, non-root application execution, service DNS, readiness checks and one-shot setup jobs. Do not copy ignored private inputs into images.
 - **Configuration**: Preserve root environment injection, internal/external network roles, named-volume identities and external `DATABASE_URL`/`REDIS_URL`/S3 endpoints. Do not print interpolated secrets as validation evidence.
@@ -77,7 +77,7 @@ These comparisons do not assert prior benchmark or deployment results.
 
 ## More Information
 
-See the [local stack guide](../../infra/compose/README.md),
+See the [local stack guide](../../infra/README.md),
 [architecture](../../.github/ARCHITECTURE.md) and
 [contribution rules](../../.github/CONTRIBUTING.md).
 Revisit if supported development environments cannot reproduce the documented topology.

@@ -20,7 +20,7 @@ ambient configuration imports remain. See
 ## Run
 
 The root `.env` is limited to the shared host settings and private login-secret
-exception described in the [stack guide](../../infra/compose/README.md). Compose
+exception described in the [stack guide](../../infra/README.md). Compose
 provides all other local values directly. There are no app-local env files.
 For standalone Bun execution with separately configured dependencies:
 
@@ -31,7 +31,7 @@ bun run --cwd apps/api start
 
 For containers, use `docker compose -f docker-compose.yml -f docker-compose.dev.yml --profile dev up --build -d` after configuring
 the game secret and repository-local input copies described in the
-[stack guide](../../infra/compose/README.md). The gateway is the public HTTP entry
+[stack guide](../../infra/README.md). The gateway is the public HTTP entry
 point; the API has no directly published container port.
 
 Container/process settings are validated through `@opencok/env/api` and
@@ -200,5 +200,5 @@ governs Evlog/OpenTelemetry export to Maple Local. Composed application operatio
 and dependencies emit correlated start/result/error records and duration metrics.
 Generated effects are distinguished from committed transactions and deferred
 delivery. See the [shared contract](../../packages/core/README.md#operational-logging)
-and [Compose runbook](../../infra/compose/README.md#observability) for the dashboard,
+and [Compose runbook](../../infra/README.md#observability) for the dashboard,
 configuration, credentials and retention/alerting limitations.

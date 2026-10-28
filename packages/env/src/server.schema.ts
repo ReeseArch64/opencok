@@ -1,13 +1,7 @@
 import { z } from "zod";
 import { blankToUndefined, validateEnvironment } from "./validation";
 
-import {
-    databaseName,
-    redisUrl,
-    realmSettings,
-    chatUrl,
-    chatMailboxSecrets,
-} from "./service.schema";
+import { databaseName, redisUrl, realmSettings, chatUrl } from "./service.schema";
 
 export const serverSchema = z
     .object({
@@ -64,8 +58,6 @@ export const serverSchema = z
             (value) => (value === "" ? undefined : value),
             z.string().min(1).optional(),
         ),
-        CHAT_MAILBOX_SECRETS: chatMailboxSecrets,
-        CHAT_MAILBOX_SECRET: z.preprocess(blankToUndefined, z.string().min(1).optional()),
         ACTIVITY_SCHEDULER_MODE: z.enum(["local", "external"]).default("local"),
         ACTIVITY_SCHEDULER_SECRET: z.preprocess(blankToUndefined, z.string().min(32).optional()),
         MAIL_INTEGRATION_MODE: z.enum(["local", "external"]).default("local"),
@@ -101,8 +93,6 @@ export const serverSchema = z
             settings.GAME_SECRET,
             settings.PROVISIONING_SIGNING_SECRET,
             settings.CHAT_SECRET,
-            settings.CHAT_MAILBOX_SECRET,
-            ...Object.values(settings.CHAT_MAILBOX_SECRETS ?? {}),
         ].includes(settings.ACTIVITY_SCHEDULER_SECRET), {
         path: ["ACTIVITY_SCHEDULER_SECRET"],
     })

@@ -201,7 +201,7 @@ For rollback, stop admission and drain Scheduler before restoring local backgrou
 discovery. Retain matching owner protocol support and all durable state. An
 interrupted or timed-out dispatch may already have committed; recover through the
 same idempotent owner transition rather than deleting deadlines, resetting a queue
-or issuing another reward. The [Compose overlay](../../infra/compose/README.md#opt-in-timed-activity-scheduler)
+or issuing another reward. The [Compose configuration](../../infra/README.md#timed-activity-scheduler)
 provides an explicit one-realm rollout recipe. No production deployment is performed
 by this change.
 

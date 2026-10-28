@@ -24,15 +24,18 @@ export const workersSchema = z.object({
     MAIL_WORKER_KINGDOM_URL: workerDatabaseUrl,
     MAIL_WORKER_GLOBAL_URL: workerDatabaseUrl,
     CHAT_URL: chatUrl,
-    MAIL_WORKER_CHAT_SECRET: z.preprocess(blankToUndefined, z.string().min(1).optional()),
+    CHAT_SECRET: z.preprocess(
+        (value) => (value === "" ? undefined : value),
+        z.string().min(1).optional(),
+    ),
     MAIL_WORKER_HEALTH_HOST: z.string().min(1).default("127.0.0.1"),
     MAIL_WORKER_HEALTH_PORT: port(18091),
     MAIL_WORKER_TIMEOUT_MS: timeout(5000),
     MAIL_WORKER_POLL_MS: z.coerce.number().int().min(1000).max(60000).default(5000),
     MAIL_WORKER_KINGDOM_POOL: z.coerce.number().int().min(1).max(4).default(2),
     MAIL_WORKER_GLOBAL_POOL: z.coerce.number().int().min(1).max(2).default(1),
-}).refine((settings) => !settings.CHAT_URL || !!settings.MAIL_WORKER_CHAT_SECRET, {
-    path: ["MAIL_WORKER_CHAT_SECRET"],
+}).refine((settings) => !settings.CHAT_URL || !!settings.CHAT_SECRET, {
+    path: ["CHAT_SECRET"],
 }).refine((settings) => {
     try
     {

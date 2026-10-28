@@ -29,7 +29,7 @@ export function mailWorkerConfig(settings: WorkersEnvironment): MailWorkerConfig
         chat: settings.CHAT_URL
             ? {
                 url: new URL("/_internal/mailbox", settings.CHAT_URL).href,
-                signingSecret: settings.MAIL_WORKER_CHAT_SECRET!,
+                signingSecret: settings.CHAT_SECRET!,
             }
             : undefined,
     };

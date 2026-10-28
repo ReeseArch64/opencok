@@ -79,18 +79,21 @@ test("worker connection URLs cannot override database identity or resource budge
     ).toBe("custom_realm");
 });
 
-test("worker publisher requires its dedicated mailbox credential", () => {
+test("worker publisher requires the shared Chat credential", () => {
     const chat = { ...base, CHAT_URL: "https://chat.internal" };
-    expect(() => parseWorkersEnvironment({ ...chat, CHAT_SECRET: "broad-secret" })).toThrow(
-        "MAIL_WORKER_CHAT_SECRET",
-    );
+    for (const secret of [undefined, ""])
+    {
+        expect(() => parseWorkersEnvironment({ ...chat, CHAT_SECRET: secret })).toThrow(
+            "CHAT_SECRET",
+        );
+    }
     expect(
         mailWorkerConfig(
-            parseWorkersEnvironment({ ...chat, MAIL_WORKER_CHAT_SECRET: "mailbox-secret" }),
+            parseWorkersEnvironment({ ...chat, CHAT_SECRET: "shared-chat-secret" }),
         ).chat,
     ).toEqual({
         url: "https://chat.internal/_internal/mailbox",
-        signingSecret: "mailbox-secret",
+        signingSecret: "shared-chat-secret",
     });
     try
     {
@@ -102,4 +105,13 @@ test("worker publisher requires its dedicated mailbox credential", () => {
         expect(String(error)).toContain("MAIL_WORKER_GLOBAL_URL");
         expect(String(error)).not.toContain("sensitive-url");
     }
+});
+
+test("worker preserves the exact shared Chat signing key", () => {
+    const config = mailWorkerConfig(parseWorkersEnvironment({
+        ...base,
+        CHAT_URL: "https://chat.internal",
+        CHAT_SECRET: " synthetic-shared-chat ",
+    }));
+    expect(config.chat?.signingSecret).toBe(" synthetic-shared-chat ");
 });

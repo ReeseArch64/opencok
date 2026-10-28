@@ -10,12 +10,11 @@ import { signChatNickname } from "@opencok/identity/chat-nickname";
 import { signChatAvatarProfile } from "@opencok/identity/chat-avatar-profile";
 import { createChatApp } from "../src/app";
 
-for (const mode of ["legacy", "dedicated", "realm"] as const)
+for (const kingdomId of [1, 2])
 {
-    test(`mailbox HTTP key isolates private routes in ${mode} mode`, async () => {
-        const dedicated = mode !== "legacy";
+    test(`shared Chat key authenticates private routes for realm ${kingdomId}`, async () => {
         const backendSecret = "synthetic-backend-secret";
-        const mailboxSecret = dedicated ? "synthetic-mailbox-secret" : backendSecret;
+        const wrongSecret = "synthetic-wrong-secret";
         const calls = { mailbox: 0, nickname: 0, avatar: 0, session: 0 };
         const repository: ChatRepository = {
             profiles: {
@@ -55,29 +54,10 @@ for (const mode of ["legacy", "dedicated", "realm"] as const)
             health: async () => {},
             deleteExpired: async () => ({ messages: 0, sessions: 0 }),
         };
-        if (mode === "realm")
-        {
-            expect(() =>
-                createChatApp({
-                    repository,
-                    signingSecret: backendSecret,
-                    mailboxSigningSecret: "synthetic-fallback",
-                    mailboxSigningSecrets: { "1": backendSecret },
-                    websocketUrl: "ws://localhost/chat/ws",
-                })
-            ).toThrow("invalid chat app configuration");
-        }
+
         const app = createChatApp({
             repository,
             signingSecret: backendSecret,
-            mailboxSigningSecret: mode === "realm"
-                ? "synthetic-fallback"
-                : dedicated
-                ? mailboxSecret
-                : undefined,
-            mailboxSigningSecrets: mode === "realm"
-                ? { "1": mailboxSecret, "2": "synthetic-realm-two" }
-                : undefined,
             websocketUrl: "ws://localhost/chat/ws",
         });
         try
@@ -91,7 +71,7 @@ for (const mode of ["legacy", "dedicated", "realm"] as const)
                 throw new Error("Missing Chat port");
             }
             const origin = `http://127.0.0.1:${address.port}`;
-            const identity = { owner: "1", kingdomId: 1, operationId: randomUUID() };
+            const identity = { owner: "1", kingdomId, operationId: randomUUID() };
             const mailbox = encodeChatMailbox({
                 ...identity,
                 effectIndex: 0,
@@ -118,56 +98,42 @@ for (const mode of ["legacy", "dedicated", "realm"] as const)
                 });
             };
             expect(
-                (await signed("/_internal/mailbox", mailbox, signChatMailbox, mailboxSecret))
+                (await signed("/_internal/mailbox", mailbox, signChatMailbox, wrongSecret))
                     .status,
             )
-                .toBe(200);
+                .toBe(403);
             expect(
                 (await signed("/_internal/mailbox", mailbox, signChatMailbox, backendSecret))
                     .status,
             )
-                .toBe(dedicated ? 403 : 200);
-            if (mode === "realm")
-            {
-                const realmTwo = JSON.stringify({ ...JSON.parse(mailbox), kingdomId: 2 });
-                const unmapped = JSON.stringify({ ...JSON.parse(mailbox), kingdomId: 3 });
-                expect(
-                    (await signed(
-                        "/_internal/mailbox",
-                        mailbox,
-                        signChatMailbox,
-                        "synthetic-fallback",
-                    )).status,
-                ).toBe(403);
-                expect(
-                    (await signed("/_internal/mailbox", realmTwo, signChatMailbox, mailboxSecret))
-                        .status,
-                ).toBe(403);
-                expect(
-                    (await signed(
-                        "/_internal/mailbox",
-                        realmTwo,
-                        signChatMailbox,
-                        "synthetic-realm-two",
-                    )).status,
-                ).toBe(200);
-                expect(
-                    (await signed("/_internal/mailbox", unmapped, signChatMailbox, mailboxSecret))
-                        .status,
-                ).toBe(403);
-                expect(
-                    (await signed(
-                        "/_internal/mailbox",
-                        unmapped,
-                        signChatMailbox,
-                        "synthetic-fallback",
-                    )).status,
-                ).toBe(200);
-            }
+                .toBe(200);
+
+            const timestamp = String(Date.now());
+            const changedRealm = JSON.stringify({
+                ...JSON.parse(mailbox),
+                kingdomId: kingdomId + 1,
+            });
+            expect(
+                (await fetch(`${origin}/_internal/mailbox`, {
+                    method: "POST",
+                    body: changedRealm,
+                    headers: {
+                        "content-type": "application/json",
+                        "x-opencok-timestamp": timestamp,
+                        "x-opencok-signature": signChatMailbox(mailbox, timestamp, backendSecret),
+                    },
+                })).status,
+            ).toBe(403);
+            expect(
+                (await signed("/_internal/mailbox", mailbox, signChatNickname, backendSecret))
+                    .status,
+            )
+                .toBe(403);
+
             const nickname = encodeChatNickname(identity);
             const avatar = encodeAvatarProfile({
                 owner: "1",
-                kingdomId: 1,
+                kingdomId,
                 sequence: 1,
                 picVer: 1,
                 committedAt: 1000n,
@@ -176,19 +142,19 @@ for (const mode of ["legacy", "dedicated", "realm"] as const)
                 platform: "test",
             });
             expect(
-                (await signed("/_internal/nickname", nickname, signChatNickname, mailboxSecret))
+                (await signed("/_internal/nickname", nickname, signChatNickname, wrongSecret))
                     .status,
             )
-                .toBe(dedicated ? 403 : 200);
+                .toBe(403);
             expect(
                 (await signed(
                     "/_internal/avatar-profile",
                     avatar,
                     signChatAvatarProfile,
-                    mailboxSecret,
+                    wrongSecret,
                 )).status,
             )
-                .toBe(dedicated ? 403 : 200);
+                .toBe(403);
             const session = async (secret: string) => {
                 const form = new URLSearchParams({
                     appid: "synthetic",
@@ -204,7 +170,7 @@ for (const mode of ["legacy", "dedicated", "realm"] as const)
                 );
                 return fetch(`${origin}/external/session`, { method: "POST", body: form });
             };
-            expect((await session(mailboxSecret)).status).toBe(dedicated ? 403 : 200);
+            expect((await session(wrongSecret)).status).toBe(403);
             expect(
                 (await signed("/_internal/nickname", nickname, signChatNickname, backendSecret))
                     .status,
@@ -219,10 +185,10 @@ for (const mode of ["legacy", "dedicated", "realm"] as const)
             ).toBe(200);
             expect((await session(backendSecret)).status).toBe(200);
             expect(calls).toEqual({
-                mailbox: mode === "realm" ? 3 : dedicated ? 1 : 2,
-                nickname: dedicated ? 1 : 2,
-                avatar: dedicated ? 1 : 2,
-                session: dedicated ? 1 : 2,
+                mailbox: 1,
+                nickname: 1,
+                avatar: 1,
+                session: 1,
             });
         }
         finally

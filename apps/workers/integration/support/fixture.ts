@@ -78,10 +78,7 @@ export async function mailHarness()
             });
         }
         const secret = randomBytes(24).toString("hex");
-        const realmSecrets = Object.fromEntries(
-            roles.map((role) => [String(role.id), randomBytes(24).toString("hex")]),
-        );
-        receiver = await chatReceiver(global, secret, realmSecrets);
+        receiver = await chatReceiver(global, secret);
         const chat = receiver;
         const url = (database: string, user: string, password: string) => {
             const target = new URL(`postgresql://127.0.0.1:${postgres.options.port}/${database}`);
@@ -101,7 +98,7 @@ export async function mailHarness()
                 intervalMs: 1000,
                 kingdomPool: 2,
                 globalPool: 1,
-                chat: { url: chat.url, signingSecret: realmSecrets[String(id)]! },
+                chat: { url: chat.url, signingSecret: secret },
             };
         };
         const gift = async (id: number, suffix: string = randomUUID()) => {
