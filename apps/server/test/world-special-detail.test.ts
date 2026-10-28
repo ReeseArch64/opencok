@@ -1,16 +1,25 @@
 import { importBuildingDefinition } from "@opencok/building/mappings/legacy-definition";
 import { expect, test } from "bun:test";
-import type {
-    WorldPointDetailSnapshot,
-    WorldResourceOwnerSnapshot,
-} from "@opencok/contracts/world-point-detail";
-import { specialWorldFields } from "../../../packages/services/src/world-special-detail.ts";
+import type { WorldPointDetailSnapshot as DetailSnapshot } from "@opencok/world/contracts/world-point-detail";
+import type { WorldResourceOwnerSnapshot } from "@opencok/contracts/world-resource-owner";
+import type { PlayerEffectSnapshot } from "@opencok/contracts/power";
+import { createRealmWorldSpecialDetailService } from "../src/composition/world-detail";
 import { occupiedResourceFields } from "../../../packages/services/src/world-resource-query.ts";
 import { territorySoldierCapacity } from "../../../packages/services/src/world-territory-capacity.ts";
 import { Rules } from "@opencok/rules/game";
 import { decodeWorldResourceArmy } from "@opencok/messages/world-resource-army";
 import { sfs, Type, encode, decode, type Fields } from "@opencok/messages/sfs";
 import vectors from "./fixtures/world-resource-army-vectors.json";
+
+type WorldPointDetailSnapshot = DetailSnapshot<PlayerEffectSnapshot, WorldResourceOwnerSnapshot>;
+
+const specialWorldFields = (
+    snapshot: WorldPointDetailSnapshot,
+    observer: string,
+    rules: Rules,
+    now: number,
+    services: Parameters<typeof createRealmWorldSpecialDetailService>[1],
+) => createRealmWorldSpecialDetailService(rules, services).fields(snapshot, observer, now);
 
 function fixture(type = 14)
 {

@@ -1,17 +1,18 @@
 import { expect, test } from "bun:test";
 import { drizzle, type NodePgClient } from "drizzle-orm/node-postgres";
 import * as kingdom from "@opencok/drizzle/schema/kingdom";
-import { createWorldPointDetailStore } from "@opencok/repositories/world-point-detail";
+import { createRealmWorldPointDetailStore as createWorldPointDetailStore } from "../src/composition/world-detail";
 import { createRealmGameService } from "../src/composition/game";
 import { Rules } from "@opencok/rules/game";
 import type { GameStore } from "@opencok/contracts/game";
 import type { Row } from "@opencok/contracts/rows";
-import type { WorldPointDetailStore } from "@opencok/contracts/world-point-detail";
 import { sfs, Type, encode, decode, encodeArray, type Fields } from "@opencok/messages/sfs";
 import { MAX_FRAME } from "@opencok/messages/frame";
 
 import orderVectors from "./fixtures/mail-helper-order-vectors.json";
 import barbarianVectors from "./fixtures/world-barbarian-vectors.json";
+
+type WorldPointDetailStore = ReturnType<typeof createWorldPointDetailStore>;
 
 const now = 1792756800123;
 const samplePoint = (patch: Row = {}): Row => ({

@@ -1,15 +1,14 @@
 import { afterAll, beforeAll, expect, test } from "bun:test";
 import { readFile } from "node:fs/promises";
 import { drizzle } from "drizzle-orm/node-postgres";
-import type { Pool } from "pg";
 import { DisposablePostgres } from "../../../packages/drizzle/tests/support/postgres.ts";
 import { DisposableRedis } from "./support/redis.ts";
 import { Cache } from "../../../packages/storage/src/session.ts";
 import {
-    createWorldPointDetailStore,
-    checkWorldPointDetailStore,
-} from "../../../packages/repositories/src/world-point-detail.ts";
-import { worldPointDetail } from "../../../packages/services/src/world-point-detail.ts";
+    createRealmWorldPointDetailStore as createWorldPointDetailStore,
+    checkRealmWorldPointDetailStore as checkWorldPointDetailStore,
+} from "../src/composition/world-detail";
+import { createRealmWorldPointDetailService } from "../src/composition/world-detail";
 import { decodeWorldResourceArmy } from "../../../packages/messages/src/world-resource-army.ts";
 import { Rules } from "../../../packages/rules/src/game.ts";
 import { sfs, Type, encode, decode, type Fields } from "../../../packages/messages/src/sfs.ts";
@@ -18,7 +17,7 @@ import vectors from "../test/fixtures/world-resource-army-vectors.json";
 
 const postgres = new DisposablePostgres();
 const redis = new DisposableRedis();
-const pools: Pool[] = [];
+const pools: Awaited<ReturnType<DisposablePostgres["start"]>>[] = [];
 let cache: Cache;
 let store: ReturnType<typeof createWorldPointDetailStore>;
 let databases: Parameters<typeof createWorldPointDetailStore>[0];
@@ -32,14 +31,12 @@ const services = {
 const query = async (point: number, realm = 1) =>
     decode(
         encode(
-            await worldPointDetail(
+            await createRealmWorldPointDetailService(rules, services).read(
                 store,
                 "self",
                 { point: sfs.int(point), serverId: sfs.int(realm) },
-                rules,
                 1,
                 5000,
-                services,
             ),
         ),
     );
@@ -246,4 +243,36 @@ test("authorization and missing dependencies fail before exposing target state",
     await cache.command("SET", "opencok:kingdom:1:turret:t21", "invalid");
     await expect(query(721)).rejects.toThrow("world point detail unavailable");
     expect((await query(723)).point).toEqual(sfs.int(723));
+});
+
+test("local observer rejection precedes an unavailable remote point table", async () => {
+    await pools[1]!.query(
+        `alter table opencok_kingdom.worldpoint rename to worldpoint_unavailable`,
+    );
+
+    try
+    {
+        await pools[0]!.query(
+            `update opencok_kingdom.userprofile set "banFlag"=1 where uid='self'`,
+        );
+
+        await expect(query(723, 2)).rejects.toMatchObject({ code: "E000000" });
+
+        await pools[0]!.query(
+            `update opencok_kingdom.userprofile set "banFlag"=0 where uid='self'`,
+        );
+
+        await expect(query(723, 2)).rejects.toThrow("world point detail unavailable");
+    }
+    finally
+    {
+        await pools[1]!.query(
+            `alter table opencok_kingdom.worldpoint_unavailable rename to worldpoint`,
+        );
+        await pools[0]!.query(
+            `update opencok_kingdom.userprofile set "banFlag"=0 where uid='self'`,
+        );
+    }
+
+    expect((await query(723, 2)).point).toEqual(sfs.int(723));
 });

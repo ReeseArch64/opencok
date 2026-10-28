@@ -19,7 +19,7 @@ import { rows } from "@opencok/repositories/world-resource-owner-values";
 import { long } from "@opencok/repositories/world-resource-owner-values";
 import { integer } from "@opencok/repositories/world-resource-owner-values";
 import { text } from "@opencok/repositories/world-resource-owner-values";
-import type { WorldResourceOwnerSnapshot } from "@opencok/contracts/world-point-detail";
+import type { WorldResourceOwnerSnapshot } from "@opencok/contracts/world-resource-owner";
 
 import { asc, eq } from "drizzle-orm";
 import type { DatabaseClient } from "@opencok/drizzle/contracts/database";

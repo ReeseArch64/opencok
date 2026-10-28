@@ -18,7 +18,10 @@ import type {
     HeroHistoryPublication,
 } from "@opencok/hero/contracts/hero-ranking";
 import type { DragonRankingEntry, DragonRankingRange } from "./dragon-ranking.ts";
-import type { WorldPointDetailStore } from "./world-point-detail.ts";
+import type { WorldPointDetailStore } from "@opencok/world/contracts/world-point-detail";
+import type { WorldPointDetailCommand } from "@opencok/world/contracts/point-detail-runtime";
+import type { PlayerEffectSnapshot } from "./power";
+import type { WorldResourceOwnerSnapshot } from "./world-resource-owner";
 import type { PlayerSearchStore } from "./player-search.ts";
 import type { AvatarFinishService } from "./files.ts";
 import type { AvatarVersionService } from "./avatar-version.ts";
@@ -322,7 +325,8 @@ export interface GameServices extends RankingPublications, WorldQueryStores
     nicknameBadWords?(name: string): boolean | Promise<boolean>;
     nicknameReservedPatterns?(): readonly string[];
     filterBadWords?(text: string): string;
-    worldPointDetail?: WorldPointDetailStore;
+    worldPointDetail?: WorldPointDetailStore<PlayerEffectSnapshot, WorldResourceOwnerSnapshot>;
+    worldDetail?: WorldPointDetailCommand;
     worldScout?: import("./world-scout").WorldScoutStore;
     worldFightBulletins?: import("./world-bulletins").WorldBulletinArchive;
     worldMarchInspection?: import("./world-march-inspection").WorldMarchInspectionStore;

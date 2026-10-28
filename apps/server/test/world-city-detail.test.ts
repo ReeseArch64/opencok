@@ -1,8 +1,10 @@
 import { expect, test } from "bun:test";
-import { worldCityDetail } from "@opencok/rules/world-point-detail";
-import { worldCityFields } from "@opencok/mappings/world-point-detail";
+import { createRealmWorldPointDetailPolicy } from "../src/composition/world-detail";
+import { worldCityFields } from "@opencok/world/mappings/world-point-detail";
 import { decode, encode, sfs } from "@opencok/messages/sfs";
 import vectors from "./fixtures/world-city-vectors.json";
+
+const { worldCityDetail } = createRealmWorldPointDetailPolicy();
 
 test("city strength comparison matches 1331 independent Java 8 signed-long multiplication vectors", () => {
     expect(vectors).toHaveLength(1331);

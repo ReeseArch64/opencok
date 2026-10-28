@@ -8,8 +8,8 @@ import {
     worldMonsterHealth as healthFields,
     worldMonsterExploration,
 } from "@opencok/mappings/world-monster-detail";
-import { worldPointOwnerBase } from "@opencok/rules/world-point-detail";
-import { worldPointOwner } from "@opencok/mappings/world-point-detail";
+import { createRealmWorldPointDetailPolicy } from "../src/composition/world-detail";
+import { worldPointOwner } from "@opencok/world/mappings/world-point-detail";
 import { Rules, type Rule } from "@opencok/rules/game";
 import type { Row } from "@opencok/contracts/rows";
 import {
@@ -21,6 +21,8 @@ import {
     decodeArray,
     type Value,
 } from "@opencok/messages/sfs";
+
+const { worldPointOwnerBase } = createRealmWorldPointDetailPolicy();
 
 function rules()
 {

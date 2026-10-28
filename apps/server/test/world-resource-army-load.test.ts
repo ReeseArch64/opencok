@@ -1,6 +1,6 @@
 import { expect, test } from "bun:test";
 import type { GameServices } from "@opencok/contracts/game";
-import type { WorldResourceOwnerSnapshot } from "@opencok/contracts/world-point-detail";
+import type { WorldResourceOwnerSnapshot } from "@opencok/contracts/world-resource-owner";
 import type { SavedResourceArmy } from "@opencok/messages/world-resource-army";
 import { decodeWorldResourceArmy } from "@opencok/messages/world-resource-army";
 import { readResourceRawArmyLoad } from "@opencok/services/world-resource-army-load";

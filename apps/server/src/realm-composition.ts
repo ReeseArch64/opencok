@@ -327,9 +327,9 @@ import { createChatMailboxPublisher } from "@opencok/connection/chat-mailbox";
 import { GameController } from "@opencok/controllers/game";
 import { WorldController } from "@opencok/world/controllers/world";
 import {
-    createWorldPointDetailStore,
-    checkWorldPointDetailStore,
-} from "@opencok/repositories/world-point-detail";
+    createRealmWorldPointDetailStore,
+    checkRealmWorldPointDetailStore,
+} from "./composition/world-detail";
 import {
     createWorldSearchStore,
     checkWorldSearchStore,
@@ -441,10 +441,10 @@ export const RealmDependenciesLive = Layer.effect(
         );
         yield* fromPromise(
             "realm.world-point-detail",
-            () => checkWorldPointDetailStore(db.kingdom.db),
+            () => checkRealmWorldPointDetailStore(db.kingdom.db),
         );
         const worldPointDetail = observeAdapter(
-            createWorldPointDetailStore(db.databases, config.kingdomId),
+            createRealmWorldPointDetailStore(db.databases, config.kingdomId),
             "realm.createWorldPointDetailStore",
         );
         yield* fromPromise(

@@ -1,5 +1,5 @@
 import { expect, test } from "bun:test";
-import type { WorldResourceOwnerSnapshot } from "@opencok/contracts/world-point-detail";
+import type { WorldResourceOwnerSnapshot } from "@opencok/contracts/world-resource-owner";
 import type { GameServices } from "@opencok/contracts/game";
 import type { RuleContext } from "@opencok/rules/availability";
 import { ruleAvailable } from "@opencok/rules/availability";
