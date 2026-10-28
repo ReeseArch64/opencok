@@ -1,3 +1,4 @@
+import { planInventoryGrants } from "@opencok/services/inventory";
 import { user_mixed_info } from "@opencok/drizzle/schema/opencok_kingdom/user_mixed_info";
 import { test, expect } from "bun:test";
 import { randomUUID } from "node:crypto";
@@ -6,9 +7,9 @@ import { cityHarness } from "./support/city";
 import { continuedCostDomain, continuedCostOperation } from "@opencok/services/continued-cost";
 import { readContinuedCostSpending } from "@opencok/mappings/continued-cost";
 import { InventoryService } from "@opencok/services/inventory";
-import { ShopService } from "@opencok/services/shops";
+import { ShopService } from "@opencok/shop/services/shops";
 import { createInventoryExecutor } from "@opencok/repositories/inventory";
-import { createShopRepository } from "@opencok/repositories/shops";
+import { createShopRepository } from "@opencok/shop/repositories/shops";
 import { relayMutationEvent } from "@opencok/repositories/mutation";
 import { pendingContinuedCosts } from "@opencok/repositories/continued-cost";
 import { acquireRealmAuthority } from "@opencok/repositories/realm-authority";
@@ -86,6 +87,7 @@ async function fixture()
     const shop = new ShopService(
         createShopRepository(h.db.db, h.authority, () => h.clock.now),
         h.rules,
+        planInventoryGrants,
     );
     const events = () =>
         h.db.db

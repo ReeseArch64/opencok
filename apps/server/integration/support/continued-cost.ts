@@ -1,3 +1,4 @@
+import { planInventoryGrants } from "@opencok/services/inventory";
 import { randomUUID } from "node:crypto";
 import { migrate } from "drizzle-orm/node-postgres/migrator";
 import { createDatabase } from "@opencok/drizzle";
@@ -10,8 +11,8 @@ import {
 } from "@opencok/repositories/continued-cost-ranking";
 import { acquireRealmAuthority } from "@opencok/repositories/realm-authority";
 import { costRankingPlan } from "@opencok/rules/continued-cost-ranking";
-import { ShopService } from "@opencok/services/shops";
-import { createShopRepository } from "@opencok/repositories/shops";
+import { ShopService } from "@opencok/shop/services/shops";
+import { createShopRepository } from "@opencok/shop/repositories/shops";
 import { userprofile } from "@opencok/drizzle/schema/opencok_kingdom/userprofile";
 import { user_resource } from "@opencok/drizzle/schema/opencok_kingdom/user_resource";
 import { user_building } from "@opencok/drizzle/schema/opencok_kingdom/user_building";
@@ -119,7 +120,11 @@ export async function costRankingFixture(extra: readonly CityDomain[] = [])
             registry2 = createCostRankingRegistry(global.db, authority2),
             service = new ContinuedCostRankingService(source, registry, h.rules, [1, 2], now),
             service2 = new ContinuedCostRankingService(source2, registry2, rules2, [1, 2], now),
-            shop2 = new ShopService(createShopRepository(second.db, authority2, now), rules2);
+            shop2 = new ShopService(
+                createShopRepository(second.db, authority2, now),
+                rules2,
+                planInventoryGrants,
+            );
         const spend = (amount: bigint, operationId = randomUUID()) =>
                 h.command("synthetic.spend", {
                     gold: sfs.long(amount),

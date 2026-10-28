@@ -92,18 +92,19 @@ new process ownership and named-definition rules remain separate decisions.
 
 ### Implemented API and realm package boundaries
 
-| Packages                                                            | Boundary                                                                                                                                        |
-| ------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
-| `env`, `config`, `core`                                             | Validated root environment, strict compiler settings, scoped runtime/resources, HTTP and filtered logging.                                      |
-| `api`, `connection`, `controllers`, `identity`                      | HTTP/SFS entry, authentication and thin command Controllers.                                                                                    |
-| `contracts`, `messages`, `dtos`, `enums`, `validations`, `mappings` | Versioned ports, wire types, DTOs, runtime validation and serialization.                                                                        |
-| `services`                                                          | Application workflows and orchestration of rules, contracts and persistence ports.                                                              |
-| `rules`, domain rule modules including `hero/rules` and `combat`    | Pure rule evaluation; no sockets, ORM or broker imports.                                                                                        |
-| `hero`                                                              | Hero and general contracts, rules, workflows, mappings, validations, catalog types and persistence adapters, separated by responsibility.       |
-| `dragon`                                                            | Named dragon archetypes, configuration contracts, validation and catalog mapping; existing gameplay workflows remain in their current packages. |
-| `resources`                                                         | Versioned typed gameplay catalogs.                                                                                                              |
-| `policy`                                                            | Pure content matching, bounded file/worker adapters and the maintained nickname/description dictionary.                                         |
-| `repositories`, `drizzle`, `storage`                                | Owned transactional state, schemas, Redis/ZooKeeper and S3 adapters.                                                                            |
+| Packages                                                            | Boundary                                                                                                                                              |
+| ------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `env`, `config`, `core`                                             | Validated root environment, strict compiler settings, scoped runtime/resources, HTTP and filtered logging.                                            |
+| `api`, `connection`, `controllers`, `identity`                      | HTTP/SFS entry, authentication and thin command Controllers.                                                                                          |
+| `contracts`, `messages`, `dtos`, `enums`, `validations`, `mappings` | Versioned ports, wire types, DTOs, runtime validation and serialization.                                                                              |
+| `services`                                                          | Application workflows and orchestration of rules, contracts and persistence ports.                                                                    |
+| `rules`, domain rule modules including `hero/rules` and `combat`    | Pure rule evaluation; no sockets, ORM or broker imports.                                                                                              |
+| `hero`                                                              | Hero and general contracts, rules, workflows, mappings, validations, catalog types and persistence adapters, separated by responsibility.             |
+| `dragon`                                                            | Named dragon archetypes, configuration contracts, validation and catalog mapping; existing gameplay workflows remain in their current packages.       |
+| `resources`                                                         | Versioned typed gameplay catalogs.                                                                                                                    |
+| `shop`                                                              | In-game mall and NPC trading contracts, pure rules, Services, offer mappings and transactional adapters; inventory planning is injected by the realm. |
+| `policy`                                                            | Pure content matching, bounded file/worker adapters and the maintained nickname/description dictionary.                                               |
+| `repositories`, `drizzle`, `storage`                                | Owned transactional state, schemas, Redis/ZooKeeper and S3 adapters.                                                                                  |
 
 The nickname/description word list is versioned in
 `packages/policy/src/resources/data/badwords.json` and included in the server artifact.
@@ -156,7 +157,7 @@ See the [dragon authoring guide](../packages/resources/README.md#named-dragon-de
 
 Packages never import applications. Declare direct workspace dependencies and
 public exports; do not turn helpers into a cross-domain rules container.
-`bun run test:packages` runs resource, policy, validation, mapping, controller and rule tests
+`bun run test:packages` runs resource, policy, shop, validation, mapping, controller and rule tests
 within their packages. Follow
 [repository conventions](../packages/repositories/README.md). Current service
 composition uses Effect; [ADR-0012](../docs/decisions/0012-adopt-effect-for-service-composition.md)

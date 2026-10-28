@@ -1,3 +1,4 @@
+import { planInventoryGrants } from "@opencok/services/inventory";
 import { expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { eq } from "drizzle-orm";
@@ -8,8 +9,8 @@ import { economy_posting } from "@opencok/drizzle/schema/opencok_kingdom/economy
 import { mutation_outbox } from "@opencok/drizzle/schema/opencok_kingdom/mutation_outbox";
 import { command_receipt } from "@opencok/drizzle/schema/opencok_kingdom/command_receipt";
 import { acquireRealmAuthority } from "@opencok/repositories/realm-authority";
-import { createTradeExecutor } from "@opencok/repositories/trade";
-import { TradeService } from "@opencok/services/trade";
+import { createTradeExecutor } from "@opencok/shop/repositories/trade";
+import { TradeService } from "@opencok/shop/services/trade";
 import type { Rule } from "@opencok/rules/game";
 import { sfs } from "@opencok/messages/sfs";
 import { shopHarness } from "./support/shops";
@@ -213,15 +214,19 @@ test(
             expect(offer.body.superValue).toEqual(sfs.int(1));
             const executor = createTradeExecutor(h.db.db, h.authority, h.now);
             let lost = true;
-            const unreliable = new TradeService(async (...args) => {
-                const result = await executor(...args);
-                if (lost)
-                {
-                    lost = false;
-                    throw new Error("synthetic lost trade reply");
-                }
-                return result;
-            }, h.rules);
+            const unreliable = new TradeService(
+                async (...args) => {
+                    const result = await executor(...args);
+                    if (lost)
+                    {
+                        lost = false;
+                        throw new Error("synthetic lost trade reply");
+                    }
+                    return result;
+                },
+                h.rules,
+                planInventoryGrants,
+            );
             const id = randomUUID();
             const params = { operationId: sfs.string(id) };
             await expect(unreliable.command("buyer", "trade.exchange", params)).rejects.toThrow(
@@ -258,7 +263,11 @@ test(
             expect(await h.snapshot()).toEqual(committed);
             await h.restart();
             const next = await acquireRealmAuthority(h.db.db, 1, () => true);
-            const restored = new TradeService(createTradeExecutor(h.db.db, next, h.now), h.rules);
+            const restored = new TradeService(
+                createTradeExecutor(h.db.db, next, h.now),
+                h.rules,
+                planInventoryGrants,
+            );
             h.rules.trades.clear();
             const replay = await restored.command("buyer", "trade.exchange", params);
             expect(replay.body.addItem).toBeDefined();
@@ -266,6 +275,7 @@ test(
             const stale = new TradeService(
                 createTradeExecutor(h.db.db, h.authority, h.now),
                 h.rules,
+                planInventoryGrants,
             );
             await expect(stale.command("buyer", "trade.exchange", params)).rejects.toThrow();
             await expect(stale.command("buyer", "trade.exchange", {})).rejects.toThrow();
@@ -290,6 +300,7 @@ test(
             const restored = new TradeService(
                 createTradeExecutor(h.db.db, h.authority, h.now),
                 h.rules,
+                planInventoryGrants,
             );
             const loaded = await restored.command("buyer", "trade.info", {});
             expect(loaded.body.trade).toEqual(original.body.trade);

@@ -1,6 +1,6 @@
-import type { ShopState } from "@opencok/contracts/shops";
+import type { ShopState } from "@opencok/shop/contracts/shops";
 import type { Rule } from "@opencok/rules/game";
-import { shopCounters, shopPrice, shopWindow } from "@opencok/rules/shops";
+import { shopCounters, shopPrice, shopWindow } from "@opencok/shop/rules/shops";
 import { sfs, type Fields } from "@opencok/messages/sfs";
 
 export function shopOffer(rule: Rule, state: ShopState): Fields
