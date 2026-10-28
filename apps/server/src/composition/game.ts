@@ -1,3 +1,5 @@
+import { AvatarOrchestrationService } from "@opencok/services/avatar-orchestration";
+import { AvatarMapper } from "@opencok/mappings/avatar";
 import { observeOperation } from "@opencok/core/operation";
 import { createRealmWorldPointDetailService } from "./world-detail";
 import { createRealmWorldQueryService } from "./world";
@@ -88,5 +90,6 @@ export function createRealmGameService(
                     clock,
                 ),
         },
+        new AvatarOrchestrationService(db, rules, config, now, services, new AvatarMapper()),
     );
 }
