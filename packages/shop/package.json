@@ -25,6 +25,7 @@
     "@opencok/repositories": "workspace:*",
     "@opencok/drizzle": "workspace:*",
     "drizzle-orm": "0.45.4",
-    "@opencok/ledger": "workspace:*"
+    "@opencok/ledger": "workspace:*",
+    "@opencok/economy": "workspace:*"
   }
 }

@@ -9,7 +9,8 @@
     "@opencok/config": "workspace:*",
     "@types/bun": "catalog:",
     "typescript": "catalog:",
-    "fast-xml-parser": "^5.0.0"
+    "fast-xml-parser": "^5.0.0",
+    "@opencok/economy": "workspace:*"
   },
   "type": "module",
   "exports": {

@@ -1,10 +1,9 @@
 # Economy
 
-`economy` owns wallet/resource balance mutations under
-[#611](https://github.com/ReeseArch64/opencok/issues/611), part of #558 W06.
-This first implementation extracts the existing balance adapter; inventory
-planning, item operations, production and reservation protocols remain subsequent
-work. It does not create a network service or a second mutation authority.
+`economy` owns wallet/resource balance mutations, activity economic coordination
+and pure inventory rules under #611, #613 and #615, part of #558 W06. Full inventory
+planning, item persistence, production and reservation protocols remain subsequent
+work. These extractions do not create a network service or a second mutation authority.
 
 ## Boundaries
 
@@ -82,3 +81,19 @@ producer and timed-economy suites verify grant/receipt rollback, campaign effect
 production, recovery and ownership loss. The source graph removes four cyclic
 module edges and two cyclic workspace edges (baseline 100 to 94); other baseline
 debt remains explicit. There is no schema, default or authority change.
+
+## Inventory rules (#615)
+
+`rules/inventory` owns count and integer validation, catalog lookup, bundle/batch
+pricing, recipe selection and weighted draws. `contracts/inventory-catalogs`
+requires only a read-only goods map of string-valued rows. The existing loaded
+Rules object supplies this port structurally; economy does not import the horizontal
+rules package or redefine the maintained catalog data.
+
+All callers in shop, Services, mail reward rules and the resource catalog test use
+the owned path. The old horizontal module is removed. Existing three rule tests
+move from the server unchanged apart from the import and retain 33 assertions.
+An additional catalog test verifies exact string identities (including `001`
+versus `1`), row identity, missing/malformed IDs and the original error. Rule
+function bodies and native IDs are unchanged. No SQL, transaction, authority,
+client package or saved-state change is involved; rollback uses the previous artifact.
