@@ -90,8 +90,6 @@ import { user_lord } from "@opencok/drizzle/schema/opencok_kingdom/user_lord";
 import { user_mine } from "@opencok/drizzle/schema/opencok_kingdom/user_mine";
 import { switches } from "@opencok/drizzle/schema/opencok_kingdom/switches";
 import { parse_info } from "@opencok/drizzle/schema/opencok_kingdom/parse_info";
-import { WORLD_NEWS_PUSH_TYPE } from "@opencok/constants/game";
-import { setPushPreference } from "./push-preferences.ts";
 import { nicknameOccupied } from "./nickname.ts";
 import { readCelebrityDescription, saveCelebrityDescription } from "./celebrity.ts";
 import { celebrity } from "@opencok/drizzle/schema/opencok_kingdom/celebrity";
@@ -109,12 +107,7 @@ import {
     DrizzleQueryError,
 } from "drizzle-orm";
 import type { ServerConfig } from "@opencok/contracts/server";
-import type {
-    GameStore,
-    CityState,
-    LoginConfigurationState,
-    PushPreference,
-} from "@opencok/contracts/game";
+import type { GameStore, CityState } from "@opencok/contracts/game";
 import { num, type Row } from "@opencok/contracts/rows";
 import { checkPlayerSummaryStore, getPlayerSummariesByIds } from "./players.ts";
 import { checkPowerStore, getPowerByPlayerId } from "./power.ts";
@@ -551,11 +544,6 @@ export class Database implements GameStore, FriendshipMineStore
         );
     }
 
-    getConfigurationByPlayerId(uid: string): Promise<LoginConfigurationState>
-    {
-        return getConfigurationByPlayerId(this.kingdom.db, uid);
-    }
-
     configurationSwitches(): Promise<Row[] | undefined>
     {
         return readLoginSwitches(this.kingdom.db);
@@ -564,16 +552,6 @@ export class Database implements GameStore, FriendshipMineStore
     activityOperators(uid: string, now: number)
     {
         return readActivityOperators(this.kingdom.db, uid, now);
-    }
-
-    initializeWorldNewsPreference(uid: string, now: number): Promise<void>
-    {
-        return initializeWorldNewsPreference(this.kingdom.db, uid, this.config.kingdomId, now);
-    }
-
-    setPushPreference(uid: string, preference: PushPreference, now: number): Promise<void>
-    {
-        return setPushPreference(this.kingdom.db, uid, this.config.kingdomId, preference, now);
     }
 
     nicknameOccupied(name: string): Promise<boolean>
@@ -785,32 +763,6 @@ export class Database implements GameStore, FriendshipMineStore
     }
 }
 
-export function getConfigurationByPlayerId(
-    db: Database["kingdom"]["db"],
-    uid: string,
-): Promise<LoginConfigurationState>
-{
-    return db.transaction(
-        async (tx) => {
-            const profile = (
-                await tx.select().from(userprofile).where(eq(userprofile.uid, uid)).limit(1)
-            )[0];
-            const pushSettings = await tx
-                .select({
-                    type: parse_info.type,
-                    status: parse_info.status,
-                    audio: parse_info.audio,
-                })
-                .from(parse_info)
-                .where(eq(parse_info.uid, uid))
-                .orderBy(asc(parse_info.type));
-
-            return { profile, switches: undefined, pushSettings };
-        },
-        { isolationLevel: "repeatable read", accessMode: "read only" },
-    );
-}
-
 export async function readLoginSwitches(db: Database["kingdom"]["db"]): Promise<Row[] | undefined>
 {
     try
@@ -834,61 +786,4 @@ export async function readLoginSwitches(db: Database["kingdom"]["db"]): Promise<
 
         return undefined;
     }
-}
-
-export async function initializeWorldNewsPreference(
-    db: Database["kingdom"]["db"],
-    uid: string,
-    kingdomId: number,
-    now: number,
-): Promise<void>
-{
-    if (
-        !uid
-        || uid.length > 40
-        || !Number.isSafeInteger(now)
-        || now < 0
-        || !Number.isInteger(kingdomId)
-        || kingdomId < 1
-    )
-    {
-        throw new DependencyError("configuration preference input");
-    }
-
-    await db.transaction(
-        async (tx) => {
-            const profile = (
-                await tx
-                    .select({
-                        uid: userprofile.uid,
-                        serverId: userprofile.serverId,
-                        banFlag: userprofile.banFlag,
-                        banTime: userprofile.banTime,
-                    })
-                    .from(userprofile)
-                    .where(eq(userprofile.uid, uid))
-                    .limit(1)
-                    .for("update")
-            )[0];
-
-            if (
-                !profile
-                || profile.uid !== uid
-                || profile.serverId !== kingdomId
-                || (profile.banFlag ?? 0) !== 0
-                || (profile.banTime ?? 0n) > BigInt(now)
-            )
-            {
-                throw new DependencyError("configuration preference owner");
-            }
-
-            await tx.insert(parse_info).values({
-                uid,
-                type: WORLD_NEWS_PUSH_TYPE,
-                status: 0,
-                audio: 1,
-            });
-        },
-        { isolationLevel: "read committed", accessMode: "read write" },
-    );
 }

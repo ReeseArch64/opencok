@@ -55,7 +55,6 @@ function fixture(issuer?: ChatSessionIssuer, clock = () => now)
         getPowerByPlayerId: unused,
         publicProfile: unused,
         getPlayerSummariesByIds: unused,
-        getConfigurationByPlayerId: unused,
         mailGroups: unused,
         mailBatch: unused,
         mailCategory: unused,

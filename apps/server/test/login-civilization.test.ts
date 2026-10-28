@@ -56,7 +56,6 @@ test("login carries the saved civilization and exact score/prestige in init.user
         getPowerByPlayerId: async () => emptyPowerState(state.profile!),
         getProfileById: unused,
         getAccountsByPlayerId: unused,
-        getConfigurationByPlayerId: unused,
         getPlayerSummariesByIds: unused,
         getWorldByPointIds: unused,
         getCityByPlayerId: async (uid) => {

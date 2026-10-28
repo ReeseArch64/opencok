@@ -1,7 +1,7 @@
 import { expect, test } from "bun:test";
 import { drizzle, type NodePgClient } from "drizzle-orm/node-postgres";
 import * as schema from "@opencok/drizzle/schema/kingdom";
-import { initializeWorldNewsPreference } from "@opencok/repositories/game";
+import { initializeWorldNewsPreference } from "../src/repositories/world-news-preference";
 
 const owner = "synthetic-player";
 const now = 1000;

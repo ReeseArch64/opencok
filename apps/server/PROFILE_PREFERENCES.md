@@ -9,7 +9,10 @@ retain their existing persisted behavior. Avatar changes remain topic 7.
 The seven saved visibility/accessibility/timer preferences are owned by the
 [player package](../../packages/player/README.md). Realm composition injects its
 Service into the command router; the general GameStore no longer exposes their
-mutation method. Nickname and push-setting workflows retain their current owners.
+mutation method. The two push commands and login world-news initialization are also
+owned by player and injected as `GameServices.playerPreferences`. Their former
+GameStore/Database methods are retired. Shared login wire mapping remains one
+implementation; nickname workflows retain their current owners.
 
 ## Rename contract
 

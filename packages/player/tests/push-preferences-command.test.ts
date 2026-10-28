@@ -1,5 +1,7 @@
+import { PushPreferenceService } from "../src/services/push-preferences";
 import { expect, test } from "bun:test";
-import type { GameStore, PushPreference } from "@opencok/contracts/game";
+import type { GameStore } from "@opencok/contracts/game";
+import type { PushPreference } from "../src/contracts/push-preferences";
 import type { Row } from "@opencok/contracts/rows";
 import { GameService as Game } from "@opencok/services/game";
 import { Rules } from "@opencok/rules/game";
@@ -43,6 +45,7 @@ function fixture()
     const rules = new Rules(new Map(), new Map(), new Map());
     rules.features.set("broken", {});
     const game = new Game(db as unknown as GameStore, rules, { kingdomId: 2 }, () => now, {
+        playerPreferences: new PushPreferenceService(db, () => now),
         changeAccountCount: unexpected,
         featureAvailability: () => {
             throw new Error("Unexpected announcement");
@@ -243,4 +246,24 @@ test("failed required reads and preference writes propagate without a success re
             instance.game.execute("self", command, { type: sfs.int(1), status: sfs.int(0) }),
         ).rejects.toThrow("Synthetic dependency failure");
     }
+});
+
+test("unknown push commands and missing player composition reject before accessing state", async () => {
+    const instance = fixture();
+    const service = new PushPreferenceService(instance.db, () => now);
+    await expect(service.command("self", "unknown", {})).rejects.toThrow();
+    const uncomposed = new Game(
+        instance.db as unknown as GameStore,
+        new Rules(new Map(), new Map(), new Map()),
+        { kingdomId: 2 },
+        () => now,
+    );
+
+    for (const command of ["pushSetting.get", "parse.push.set"])
+    {
+        await expect(uncomposed.execute("self", command, {})).rejects.toThrow();
+    }
+    await expect(uncomposed.execute("self", "login.other", { config: sfs.bool(true) }))
+        .rejects.toThrow();
+    expect(instance.calls).toEqual([]);
 });

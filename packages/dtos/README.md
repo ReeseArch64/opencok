@@ -5,7 +5,9 @@ convention: `Create<Resource>Dto` and `Update<Resource>Dto`, such as `CreateCity
 Only declare DTOs for implemented operations; a city creation endpoint is not
 introduced by this convention.
 
-Implemented inputs are `CreateWorldFavoriteDto` and `UpdatePushPreferenceDto`.
+`CreateWorldFavoriteDto` remains here. `UpdatePushPreferenceDto` moved to
+[player/dtos](../player/src/dtos/update-push-preference.dto.ts) with its implemented
+workflow in #603; its former horizontal path is retired.
 Each class has explicit `declare public readonly` plain data properties, without
 decorators, constructors, inheritance, methods or static schemas. Required fields
 stay required; use `?` only when an input field may be omitted. `declare` avoids

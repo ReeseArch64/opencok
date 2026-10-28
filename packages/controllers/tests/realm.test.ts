@@ -26,7 +26,6 @@ const store = {
     publicProfile: unavailable,
     getPowerByPlayerId: unavailable,
     getPlayerSummariesByIds: unavailable,
-    getConfigurationByPlayerId: unavailable,
 
     async getProfileById()
     {

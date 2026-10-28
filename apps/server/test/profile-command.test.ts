@@ -102,7 +102,6 @@ function fixture(remote = false)
         getWorldByPointIds: unused,
         getPlayerSummariesByIds: unused,
         getPowerByPlayerId: unused,
-        getConfigurationByPlayerId: unused,
     };
     const services: GameServices = {
         playerUpdateTimes: async (id, uids) => {
