@@ -120,7 +120,7 @@ import type {
 import { expeditionRanking } from "@opencok/mappings/expedition-ranking";
 import { expeditionRankingLimit, selectExpeditionRanking } from "@opencok/rules/expedition-ranking";
 import { decodeExpeditionRanking } from "./expedition-ranking.ts";
-import { allianceCommands } from "./alliances";
+import { allianceCommands } from "@opencok/alliance/constants/commands";
 import { allianceRanking } from "@opencok/mappings/alliance-ranking";
 import { allianceRankingQuery, selectAllianceRanking } from "@opencok/rules/alliance-ranking";
 import type { AllianceRankingKind } from "@opencok/contracts/alliance-ranking";

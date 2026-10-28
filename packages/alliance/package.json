@@ -19,6 +19,7 @@
     "@opencok/drizzle": "workspace:*",
     "drizzle-orm": "0.45.4",
     "zod": "catalog:",
-    "@opencok/economy": "workspace:*"
+    "@opencok/economy": "workspace:*",
+    "@opencok/ledger": "workspace:*"
   }
 }

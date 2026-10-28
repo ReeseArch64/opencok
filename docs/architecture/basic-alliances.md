@@ -117,6 +117,22 @@ contracts extend owned fields while retaining the actual inventory binding until
 the outer coordinator and transactional aggregate migrate. No saved-state,
 receipt, outbox or process-authority boundary changes.
 
+## Mutation coordinator ownership
+
+After #681, Alliance owns the outer command/trusted-gift Service, request validation,
+canonical fields, event mapping, command registry and deterministic identity. Realm
+composition injects the actual planner/context/policy/error/UUID adapters. Game
+dispatch, first-join mail and research recovery use owned registry/identity modules;
+the shared Alliance Service module is removed after all consumers migrate.
+
+Unsupported admission remains before recovery; every accepted non-tick command
+recovers before native validation. Sequential moderation, operation IDs, canonical
+key order, selection defaults, event append conditions and production plans retain
+their previous behavior. The owned repository contract remains bound to actual
+inventory state through the shared adapter until aggregate persistence migrates.
+Ledger supplies only existing leaf mutation contracts; no transaction, authority,
+receipt, outbox or save format changes.
+
 ## Queue assistance
 
 After #663, the [Alliance package](../../packages/alliance/README.md) owns help
