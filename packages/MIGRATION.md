@@ -415,6 +415,27 @@ Six identical tests (86 assertions) pass against the original planner, extracted
 ledger and inheriting planner. Real PostgreSQL suites cover composed retry, rollback,
 recovery and fencing. No new dependency, architecture exception, saved-state format
 or process authority is introduced. The 177-line ledger is cohesive; the residual
-616-line Services module remains a reviewed migration target under #558, including
-cross-domain effects, continued-cost observation and command/transaction ownership.
+616-line Services module was the next reviewed migration target; #623 extracts
+command ownership below while persistence and cross-domain adapters remain tracked.
 See [economy](economy/README.md) for the boundary and rollback details.
+
+## Inventory command planning (#623)
+
+Economy has twenty-four source modules and seven test files. InventoryService,
+InventoryPlanner, grant planning and command state/plan/executor contracts move
+into owned responsibility directories. Resource response mapping/schema/contracts
+move with them; maintained callers use the new paths and explicit composition
+factories. The old Services inventory module is removed without a reverse facade.
+
+Feature, power and continued-cost dependencies are injected through InventoryRuntime.
+The legacy Services runtime adapter retains their existing implementations and read
+order. Shared InventoryState extends the owned state only for its power snapshot;
+repository transactions and realm authority remain unchanged. AllianceContext
+receives shared effects directly. No new dependency cycle exception is permitted.
+
+Seven original command/resource vectors retain 53 assertions; three domain runtime
+vectors and two server adapter tests cover ordering, precision and rejection. Real
+PostgreSQL integrations verify the composed factories and atomic side effects.
+No schema migration or data rewrite is required. Remaining inventory persistence,
+app composition and process authority work stays under #558. See
+[economy](economy/README.md) for verification boundaries and recovery.

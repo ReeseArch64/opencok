@@ -1,6 +1,7 @@
 import { randomUUID } from "node:crypto";
 import type { MailRewardExecutor } from "@opencok/contracts/mail-rewards";
-import type { InventoryPlan, InventoryState } from "@opencok/contracts/inventory";
+import type { InventoryState } from "@opencok/contracts/inventory";
+import type { InventoryPlan } from "@opencok/economy/contracts/inventory-planning";
 import type { InventoryCommandResponse } from "@opencok/economy/contracts/responses/inventory";
 import { long, text, type Row } from "@opencok/contracts/rows";
 import { sfs, str, encode, Type, type Fields } from "@opencok/messages/sfs";
@@ -9,10 +10,10 @@ import { errors } from "@opencok/constants/game";
 import type { Rules } from "@opencok/rules/game";
 import { mailRewardEntries, mailRewardSelection } from "@opencok/rules/mail-rewards";
 import { inventoryItem } from "@opencok/economy/mappings/inventory-item";
-import { resource } from "@opencok/mappings/city";
+import { resource } from "@opencok/economy/mappings/resources";
 import { inventoryResponse, inventoryReplay } from "@opencok/economy/mappings/inventory";
 import { combineMailRewards, mailRewardEvent } from "@opencok/mappings/mail-rewards";
-import { planInventoryGrants } from "./inventory.ts";
+import { planRealmInventoryGrants } from "@opencok/services/inventory-runtime";
 
 const resources = new Map([
     ["wood", "wood"],
@@ -101,7 +102,7 @@ export class MailRewardService
             }
         }
 
-        const plan = planInventoryGrants(
+        const plan = planRealmInventoryGrants(
             state,
             this.rules,
             rewards

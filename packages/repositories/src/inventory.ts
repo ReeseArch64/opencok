@@ -1,3 +1,4 @@
+import type { InventoryState } from "@opencok/contracts/inventory";
 import { mergeInventoryConfirmation } from "./inventory-confirmation";
 import { user_assets } from "@opencok/drizzle/schema/opencok_kingdom/user_assets";
 import { and, asc, eq } from "drizzle-orm";
@@ -6,7 +7,7 @@ import { user_item_cd } from "@opencok/drizzle/schema/opencok_kingdom/user_item_
 import { user_building } from "@opencok/drizzle/schema/opencok_kingdom/user_building";
 import { userprofile } from "@opencok/drizzle/schema/opencok_kingdom/userprofile";
 import { user_resource } from "@opencok/drizzle/schema/opencok_kingdom/user_resource";
-import type { InventoryExecutor } from "@opencok/contracts/inventory";
+import type { InventoryExecutor } from "@opencok/economy/contracts/inventory-planning";
 import type { EconomyPosting } from "@opencok/ledger/contracts/mutation";
 import { validatePosting } from "@opencok/ledger/posting";
 import { createMutationExecutor, type MutationTransaction } from "./mutation.ts";
@@ -41,7 +42,7 @@ export function createInventoryExecutor(
     authority: RealmAuthority,
     now = Date.now,
     preparation?: InventoryPreparation,
-): InventoryExecutor
+): InventoryExecutor<InventoryState>
 {
     const execute = createMutationExecutor(db, authority, now);
 
@@ -81,12 +82,12 @@ export function createInventoryExecutor(
 export async function executeInventoryTransaction(
     tx: MutationTransaction,
     owner: string,
-    plan: Parameters<InventoryExecutor>[1],
+    plan: Parameters<InventoryExecutor<InventoryState>>[1],
     reason: string,
     useEffect?: import("@opencok/contracts/inventory").InventoryState["useEffect"],
     recordAction?: import("@opencok/contracts/inventory").InventoryState["recordAction"],
     confirmed?: (
-        plan: import("@opencok/contracts/inventory").InventoryPlan,
+        plan: import("@opencok/economy/contracts/inventory-planning").InventoryPlan,
     ) => Promise<import("@opencok/ledger/contracts/mutation").MutationResult | undefined>,
 )
 {

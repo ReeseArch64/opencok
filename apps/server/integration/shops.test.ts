@@ -1,4 +1,4 @@
-import { planInventoryGrants } from "@opencok/services/inventory";
+import { planRealmInventoryGrants } from "@opencok/services/inventory-runtime";
 import { expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { eq, sql } from "drizzle-orm";
@@ -90,7 +90,7 @@ test(
             let service = new ShopService(
                 createShopRepository(first.db, authority, () => now),
                 rules,
-                planInventoryGrants,
+                planRealmInventoryGrants,
             );
             const buy = (owner = "buyer", operationId = randomUUID(), id = "test", count = 1) =>
                 service.command(owner, "shoppingMall.buy", {
@@ -196,7 +196,7 @@ test(
             const tradeService = new TradeService(
                 createTradeExecutor(first.db, authority, () => now),
                 rules,
-                planInventoryGrants,
+                planRealmInventoryGrants,
             );
             const offered = await tradeService.command("buyer", "trade.info", {});
             expect(offered.body.trade).toEqual(sfs.string("200300;1|200301;2"));
@@ -253,7 +253,7 @@ test(
                     },
                 },
                 rules,
-                planInventoryGrants,
+                planRealmInventoryGrants,
             );
             const lostRequest = {
                 id: sfs.string("failure"),
@@ -279,13 +279,13 @@ test(
             service = new ShopService(
                 createShopRepository(reopened.db, nextAuthority, () => now),
                 rules,
-                planInventoryGrants,
+                planRealmInventoryGrants,
             );
             expect((await buy("buyer", operation)).body.gold!.value).toBe(90n);
             const stale = new ShopService(
                 createShopRepository(reopened.db, authority, () => now),
                 rules,
-                planInventoryGrants,
+                planRealmInventoryGrants,
             );
             await expect(
                 stale.command("buyer", "shoppingMall.buy", {

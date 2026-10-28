@@ -5,7 +5,7 @@ import type { FriendshipMineExecutor } from "@opencok/contracts/friendship-mine"
 import type { RealmSocialExecutor } from "@opencok/contracts/realm-social";
 import { sfs, str, encode, fields, type Fields } from "@opencok/messages/sfs";
 import { inventoryReplay } from "@opencok/economy/mappings/inventory";
-import { InventoryPlanner, type InventoryEffects } from "./inventory.ts";
+import { createInventoryPlanner, type InventoryEffects } from "@opencok/services/inventory-runtime";
 import { activityEconomy } from "@opencok/economy/services/activity-economy";
 import { friendshipMineView } from "@opencok/rules/reconnect-mine";
 import { inventoryWeighted } from "@opencok/economy/rules/inventory";
@@ -111,7 +111,7 @@ export class FriendshipMineService
                 const rule = this.rules.reconnect.treasures!.get(
                     String(view.itemId + view.level - 1),
                 )!;
-                const planner = new InventoryPlanner(state, this.rules, this.effects, now),
+                const planner = createInventoryPlanner(state, this.rules, this.effects, now),
                     economy = activityEconomy(planner);
                 const helpers = [...store.helpers];
                 let body: Fields = {};

@@ -5,7 +5,7 @@ import { randomUUID } from "node:crypto";
 import { sfs, encode, decode } from "@opencok/messages/sfs";
 import { cityHarness } from "./support/city";
 import { playerEffectsDomain } from "@opencok/services/player-effects";
-import { InventoryService } from "@opencok/services/inventory";
+import { createInventoryService } from "@opencok/services/inventory-runtime";
 import { createInventoryExecutor } from "@opencok/repositories/inventory";
 import { user_state } from "@opencok/drizzle/schema/opencok_kingdom/user_state";
 import { user_vip } from "@opencok/drizzle/schema/opencok_kingdom/user_vip";
@@ -19,7 +19,7 @@ test(
         const h = await cityHarness([playerEffectsDomain]);
         try
         {
-            const inventory = new InventoryService(
+            const inventory = createInventoryService(
                 createInventoryExecutor(h.db.db, h.authority, () => h.clock.now, {
                     before: async (tx, owner, now) => {
                         await h.preparation.prepare(tx, owner, now);

@@ -3,7 +3,7 @@ import { randomUUID } from "node:crypto";
 import { eq, and } from "drizzle-orm";
 import { anniversaryDomain } from "@opencok/services/anniversary";
 import { questsDomain } from "@opencok/services/quests";
-import { InventoryService } from "@opencok/services/inventory";
+import { createInventoryService } from "@opencok/services/inventory-runtime";
 import { createInventoryExecutor } from "@opencok/repositories/inventory";
 import { trigger_var } from "@opencok/drizzle/schema/opencok_kingdom/trigger_var";
 import { user_item } from "@opencok/drizzle/schema/opencok_kingdom/user_item";
@@ -50,7 +50,7 @@ async function fixture()
             ],
         },
     ];
-    const inventory = new InventoryService(
+    const inventory = createInventoryService(
         createInventoryExecutor(h.db.db, h.authority, () => h.clock.now, {
             before: async (tx, owner, at) => {
                 await h.preparation.prepare(tx, owner, at);

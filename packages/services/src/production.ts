@@ -11,8 +11,8 @@ import {
 import type { Rules } from "@opencok/rules/game";
 import { sfs, encode, str, type Fields } from "@opencok/messages/sfs";
 import { inventoryReplay } from "@opencok/economy/mappings/inventory";
-import { resource } from "@opencok/mappings/city";
-import { InventoryPlanner, type InventoryEffects } from "./inventory";
+import { resource } from "@opencok/economy/mappings/resources";
+import { createInventoryPlanner, type InventoryEffects } from "@opencok/services/inventory-runtime";
 import { debit } from "@opencok/economy/services/activity-economy";
 
 const assets = ["wood", "stone", "iron", "food"] as const;
@@ -56,7 +56,7 @@ export class ProductionService
         const response = await this.execute(
             { owner, requestId, command, request: encode(request) },
             async (state) => {
-                const ledger = new InventoryPlanner(
+                const ledger = createInventoryPlanner(
                     state,
                     this.rules,
                     this.effects,

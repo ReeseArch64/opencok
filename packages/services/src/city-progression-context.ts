@@ -12,7 +12,7 @@ import type {
     ProgressionActivityData,
 } from "@opencok/contracts/city-progression";
 import { text, num, long, type Row } from "@opencok/contracts/rows";
-import { resource } from "@opencok/mappings/city";
+import { resource } from "@opencok/economy/mappings/resources";
 import type { Rules } from "@opencok/rules/game";
 import {
     cityAssets,

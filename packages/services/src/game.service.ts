@@ -139,7 +139,8 @@ import {
     type Value,
 } from "@opencok/messages/sfs";
 import { guidePlayerSummary, playerSummary } from "@opencok/mappings/players";
-import { building, gold, queue, resource, user } from "@opencok/mappings/city";
+import { building, gold, queue, user } from "@opencok/mappings/city";
+import { resource } from "@opencok/economy/mappings/resources";
 import { powerInfo } from "@opencok/mappings/power";
 import { publicProfileBase } from "@opencok/mappings/profile";
 import { publicProfileAlliance } from "./profile.ts";

@@ -10,7 +10,7 @@ import {
 import { shopOffer } from "@opencok/shop/mappings/shops";
 import type { ShopState, ShopPlan } from "@opencok/shop/contracts/shops";
 import { ShopService } from "@opencok/shop/services/shops";
-import { planInventoryGrants } from "@opencok/services/inventory";
+import { planRealmInventoryGrants } from "@opencok/services/inventory-runtime";
 import { sfs, fields } from "@opencok/messages/sfs";
 
 const rules = new Rules(new Map(), new Map(), new Map());
@@ -144,7 +144,7 @@ test("shop service splits gold pools and preserves both item debit and grant pos
             },
         },
         rules,
-        planInventoryGrants,
+        planRealmInventoryGrants,
     );
     const result = await service.command("buyer", "shoppingMall.buy", {
         id: sfs.string("offer"),
@@ -245,11 +245,11 @@ test("shop and trade grants cannot spend or revive a stack at its expiry deadlin
         { uuid: "expired", itemId: "200300", count: 4, value: 0, vanishTime: BigInt(current.now) },
     ];
     expect(() =>
-        planInventoryGrants(current.inventory, rules, [], current.now, [
+        planRealmInventoryGrants(current.inventory, rules, [], current.now, [
             { itemId: "200300", count: 1 },
         ])
     ).toThrow();
-    const plan = planInventoryGrants(
+    const plan = planRealmInventoryGrants(
         current.inventory,
         rules,
         [{ itemId: "200300", count: 1 }],
@@ -262,7 +262,7 @@ test("shop and trade grants cannot spend or revive a stack at its expiry deadlin
         { ...current.inventory.items[0]!, vanishTime: BigInt(current.now + 1) },
     ];
     expect(
-        planInventoryGrants(current.inventory, rules, [], current.now, [{
+        planRealmInventoryGrants(current.inventory, rules, [], current.now, [{
             itemId: "200300",
             count: 1,
         }])

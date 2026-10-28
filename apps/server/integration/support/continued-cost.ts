@@ -1,4 +1,4 @@
-import { planInventoryGrants } from "@opencok/services/inventory";
+import { planRealmInventoryGrants } from "@opencok/services/inventory-runtime";
 import { randomUUID } from "node:crypto";
 import { migrate } from "drizzle-orm/node-postgres/migrator";
 import { createDatabase } from "@opencok/drizzle";
@@ -123,7 +123,7 @@ export async function costRankingFixture(extra: readonly CityDomain[] = [])
             shop2 = new ShopService(
                 createShopRepository(second.db, authority2, now),
                 rules2,
-                planInventoryGrants,
+                planRealmInventoryGrants,
             );
         const spend = (amount: bigint, operationId = randomUUID()) =>
                 h.command("synthetic.spend", {
