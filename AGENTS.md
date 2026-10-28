@@ -1,35 +1,30 @@
-# Agent Instructions
+# Guia para Agentes de IA
 
-## Context
+Orienta contribuições ao OpenCoK, uma plataforma de jogo auto-hospedada, respeitando o escopo autorizado e os dados de jogadores e operadores.
 
-- Follow [the contribution guide](.github/CONTRIBUTING.md) for Git, GitHub and
-  delivery requirements. Reuse context already read during the session.
-- Consult [the product definition](PRODUCT.md) when a task affects goals, scope
-  or player/operator behavior.
-- Consult [the architecture](.github/ARCHITECTURE.md) when a task involves service
-  boundaries, directory responsibilities, infrastructure or client compatibility.
-  Search for relevant headings and read only the applicable sections.
-- Check [accepted ADRs](docs/decisions/README.md) before changing a technology
-  choice. Keep rationale in ADRs, system design in the architecture, product
-  decisions in the product definition and contribution rules in the guide.
+## Contexto e fontes
 
-## Workflow
+Centralize a leitura neste guia, sem cadeias recursivas obrigatórias. Reutilize contexto já lido; releia após mudanças ou para conferir orientações. Procure títulos e leia apenas seções relevantes de documentos extensos. Se uma fonte necessária estiver ausente ou inacessível, informe; não presuma seu conteúdo.
 
-- Inspect Git status and relevant code before editing. Preserve unrelated work
-  and existing staged changes.
-- Keep changes focused on the request and follow established patterns before
-  adding dependencies or abstractions.
-- Respect the project's Oxlint and Oxfmt rules. Run `bun run lint` and
-  `bun run format:check`, plus tests and type checks relevant to the change.
-  Fix violations introduced by your work; do not weaken checks to make them pass.
-- Review the final diff and report what changed, validation performed and any
-  remaining limitations. Document assumptions and new dependencies where they belong.
+| Fonte                                   | Quando e para quê                                                                                                                   |
+| --------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| [Regras de atuação](.agents/RULES.md)   | Antes de escrever: escopo, caminhos protegidos, confirmação de autorização e destinos.                                              |
+| [Segurança](.github/SECURITY.md)        | Acesso a dados, segredos, transmissões, incidentes e relatos privados.                                                              |
+| [Contribuição](.github/CONTRIBUTING.md) | Git/GitHub, padrões, testes, revisão e entrega em toda tarefa de contribuição.                                                      |
+| [Produto](PRODUCT.md)                   | Objetivos, escopo e comportamento de jogadores/operadores.                                                                          |
+| [Arquitetura](.github/ARCHITECTURE.md)  | Serviços, responsabilidades, infraestrutura e compatibilidade; antes de criar, mover ou reorganizar e antes de trabalho no cliente. |
+| [Glossário](GLOSSARY.md)                | Vocabulário, nomes, contratos e apresentação de código.                                                                             |
+| [ADRs](docs/decisions/README.md)        | Consultar decisões aceitas antes de mudar tecnologia.                                                                               |
 
-## Protected inputs and data
+Mantenha justificativas em ADRs, desenho na arquitetura, decisões de produto em `PRODUCT.md` e procedimentos no guia de contribuição; não duplique definições aqui. Use links Markdown relativos, não links Obsidian.
 
-- Treat ignored files as local inputs, not shared project dependencies. Never
-  force-add private game files, client artifacts or keys.
-- Keep original mobile inputs read-only. Consult the relevant architecture
-  section before client work; extract, patch and package in a separate directory.
-- Access sensitive information only as needed. Keep credentials, signing keys,
-  session tokens, private Elex code and player data out of source, logs and reports.
+## Execução e entrega
+
+- Examine Git e código relevante antes de editar; preserve alterações existentes, inclusive staged e não rastreadas. Mantenha o foco no pedido e padrões existentes antes de acrescentar dependências ou abstrações. Confirme alterações protegidas conforme as regras.
+- Use `generate-tests` para cada implementação e cubra as camadas exigidas no guia. Execute `bun run lint`, `bun run format:check`, testes e verificações de tipos pertinentes. Corrija violações próprias sem enfraquecer verificações; registre bloqueios e justificativas de inaplicabilidade.
+- Ao concluir uma implementação, use `code-review` contra a issue e critérios de aceite antes da PR, nos eixos Standards e Spec; resolva bloqueios e repita após mudanças, conforme o guia.
+- Revise diff/Git, documente premissas e novas dependências no local apropriado e relate alterações, validações e limitações. Siga o fluxo de commits, branches, stacks e PRs; não amplie autorização para cumprir a entrega.
+
+## Dados e entradas privadas
+
+Ignorados são entradas locais, não dependências compartilhadas; nunca force inclusão de arquivos privados, artefatos do cliente ou chaves. Mantenha originais mobile somente leitura e extraia, altere ou empacote em destino separado autorizado. Consulte apenas dados necessários; exclua credenciais, chaves, tokens, código privado Elex e dados de jogadores de código, logs e relatórios. Diante de exposição, interrompa e avise sem reproduzir o valor, seguindo a política de segurança.
