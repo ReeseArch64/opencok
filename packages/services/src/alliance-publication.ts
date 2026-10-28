@@ -1,3 +1,4 @@
+import type { AllianceScienceMapper } from "@opencok/alliance/mappings/science";
 import type { AllianceHelpMapper } from "@opencok/alliance/mappings/help";
 import { decode, fields, str, sfs, type Fields } from "@opencok/messages/sfs";
 import { text, num, long, type Row } from "@opencok/contracts/rows";
@@ -5,7 +6,6 @@ import type { AlliancePublicationSnapshot } from "@opencok/contracts/alliance-ga
 import { alliancePermissions, allianceTargets } from "@opencok/rules/alliance";
 import { allianceScienceEffects } from "@opencok/rules/power-memberships";
 import type { Rules } from "@opencok/rules/game";
-import { allianceScienceRule, allianceScienceStage } from "@opencok/rules/alliance-science";
 
 export async function publishAllianceMutation(
     read: (id: string, players?: readonly string[]) => Promise<AlliancePublicationSnapshot>,
@@ -13,6 +13,7 @@ export async function publishAllianceMutation(
     publish: (owner: string, command: string, body: Fields) => Promise<unknown>,
     rules: Rules,
     helpMapper: Pick<AllianceHelpMapper, "publication">,
+    scienceMapper: Pick<AllianceScienceMapper, "publication">,
 )
 {
     const data = decode(payload),
@@ -64,34 +65,8 @@ export async function publishAllianceMutation(
     const record = snapshot.record,
         leader = snapshot.members.find((row) => row.rank === 5),
         effects = allianceScienceEffects(snapshot.sciences, rules);
-    const scienceFields = (science: Row): Fields => {
-        const rule = allianceScienceRule(rules, num(science, "scienceId"), num(science, "level")),
-            stage = allianceScienceStage(rule, num(science, "donateprogress")),
-            research = snapshot.research.find((row) => row.scienceId === science.scienceId);
-
-        return {
-            scienceId: sfs.int(num(science, "scienceId")),
-            level: sfs.int(num(science, "level")),
-            currentPro: sfs.int(stage.current),
-            totalPro: sfs.int(num(science, "donateprogress")),
-            needPro: sfs.int(stage.required),
-            star: sfs.int(stage.stage + 1),
-            para1: sfs.string(rule.para1 ?? ""),
-            para2: sfs.string(rule.para2 ?? "0"),
-            points: sfs.string(rule.points ?? "0"),
-            nextPara2: sfs.string(
-                rules.power.allianceSciences?.get(
-                    String(num(science, "scienceId") + num(science, "level") + 1),
-                )?.para2 ?? "0",
-            ),
-            ...(research
-                ? {
-                    startTime: sfs.long(long(research, "startTime")),
-                    finishTime: sfs.long(long(research, "startTime") + long(research, "needTime")),
-                }
-                : {}),
-        };
-    };
+    const scienceFields = (science: Row): Fields =>
+        scienceMapper.publication(science, rules, snapshot.research);
 
     for (const member of snapshot.members)
     {

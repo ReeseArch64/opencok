@@ -1,3 +1,8 @@
+import { AllianceScienceService } from "@opencok/alliance/services/science";
+import { AllianceSciencePolicy } from "@opencok/alliance/rules/science";
+import { AllianceScienceMapper } from "@opencok/alliance/mappings/science";
+import type { AllianceScienceContext } from "@opencok/alliance/contracts/science";
+import { rankingCalendar } from "@opencok/rules/community-ranking";
 import { AllianceGiftService } from "@opencok/alliance/services/gifts";
 import { AllianceGiftPolicy } from "@opencok/alliance/rules/gifts";
 import { AllianceGiftMapper } from "@opencok/alliance/mappings/gifts";
@@ -5,7 +10,7 @@ import type { AllianceGiftContext } from "@opencok/alliance/contracts/gifts";
 import type { RealmInventoryPlanner } from "@opencok/services/inventory-runtime";
 import { inventoryWeighted } from "@opencok/economy/rules/inventory";
 import { activityEconomy } from "@opencok/economy/services/activity-economy";
-import { randomUUID } from "node:crypto";
+import { randomUUID, randomInt } from "node:crypto";
 import { AllianceHelpService } from "@opencok/alliance/services/help";
 import { AllianceHelpPolicy } from "@opencok/alliance/rules/help-generation";
 import { AllianceHelpMapper } from "@opencok/alliance/mappings/help";
@@ -49,6 +54,27 @@ export function createRealmAllianceGifts(context: AllianceGiftContext<RealmInven
     );
 }
 
+export function createRealmAllianceScience(context: AllianceScienceContext<RealmInventoryPlanner>)
+{
+    const policy = new AllianceSciencePolicy({ num, cityInteger, allianceFailure });
+
+    return new AllianceScienceService(
+        context,
+        {
+            text,
+            num,
+            long,
+            cityInteger,
+            allianceFailure,
+            randomInt,
+            rankingCalendar,
+            activityEconomy,
+        },
+        policy,
+        new AllianceScienceMapper({ text, num, long }, policy),
+    );
+}
+
 export function createRealmAllianceService(
     repository: AllianceRepository,
     rules: Rules,
@@ -62,6 +88,7 @@ export function createRealmAllianceService(
         effects,
         createRealmAllianceHelp,
         createRealmAllianceGifts,
+        createRealmAllianceScience,
         forbidden,
     );
 }
@@ -79,5 +106,9 @@ export function publishAllianceMutation(
         publish,
         rules,
         new AllianceHelpMapper({ text, num, long }),
+        new AllianceScienceMapper(
+            { text, num, long },
+            new AllianceSciencePolicy({ num, cityInteger, allianceFailure }),
+        ),
     );
 }

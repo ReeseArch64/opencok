@@ -265,7 +265,7 @@ import { GeneralDrawDomain } from "@opencok/hero/services/general-draws";
 import { allianceStableId } from "@opencok/services/alliances";
 import { createRealmAllianceService } from "./composition/alliance";
 import { createAllianceRepository } from "@opencok/repositories/alliance-gameplay";
-import { dueAllianceResearch } from "@opencok/repositories/alliance-recovery";
+import { AllianceScienceRecoveryReader } from "@opencok/alliance/repositories/science-recovery";
 import { createAlliancePublicationReader } from "@opencok/repositories/alliance-publication";
 import { publishAllianceMutation } from "./composition/alliance";
 import { relayMutationEvent } from "@opencok/repositories/mutation";
@@ -1093,8 +1093,7 @@ export const RealmDependenciesLive = Layer.effect(
         let allianceCursor: string | undefined;
         const recoverAlliances = async () => {
             authority.assertReady();
-            const due = await dueAllianceResearch(
-                db.kingdom.db,
+            const due = await new AllianceScienceRecoveryReader(db.kingdom.db).due(
                 config.kingdomId,
                 BigInt(Date.now()),
                 allianceCursor,

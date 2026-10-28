@@ -1,11 +1,10 @@
+import { AllianceScienceRepository } from "@opencok/alliance/repositories/science";
 import { AllianceHelpRepository } from "@opencok/alliance/repositories/help";
 import { and, eq, inArray } from "drizzle-orm";
 import { alliance } from "@opencok/drizzle/schema/opencok_kingdom/alliance";
 import { alliance_member } from "@opencok/drizzle/schema/opencok_kingdom/alliance_member";
 import { userprofile } from "@opencok/drizzle/schema/opencok_kingdom/userprofile";
 import { queue } from "@opencok/drizzle/schema/opencok_kingdom/queue";
-import { alliance_science } from "@opencok/drizzle/schema/opencok_kingdom/alliance_science";
-import { alliance_science_upgrade } from "@opencok/drizzle/schema/opencok_kingdom/alliance_science_upgrade";
 import type { DatabaseClient } from "@opencok/drizzle/contracts/database";
 import { fenceRealmTransaction, type RealmAuthority } from "./realm-authority";
 
@@ -53,14 +52,8 @@ export function createAlliancePublicationReader(
                         )
                     : [];
                 const helps = await AllianceHelpRepository.readPublication(tx, id);
-                const sciences = await tx
-                    .select()
-                    .from(alliance_science)
-                    .where(eq(alliance_science.allianceId, id));
-                const research = await tx
-                    .select()
-                    .from(alliance_science_upgrade)
-                    .where(eq(alliance_science_upgrade.allianceId, id));
+                const sciences = await AllianceScienceRepository.readPublishedSciences(tx, id);
+                const research = await AllianceScienceRepository.readPublishedResearch(tx, id);
                 const profiles = players.length
                     ? await tx
                         .select({ uid: userprofile.uid, allianceId: userprofile.allianceId })

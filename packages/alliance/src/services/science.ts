@@ -1,23 +1,21 @@
-import { randomInt } from "node:crypto";
 import { sfs, str, int, type Fields } from "@opencok/messages/sfs";
-import { text, num, long, type Row } from "@opencok/contracts/rows";
-import { allianceFailure } from "@opencok/rules/alliance";
-import { cityInteger } from "@opencok/rules/city-progression";
-import {
-    allianceScienceRule,
-    allianceScienceStage,
-    allianceScienceRow,
-    allianceDonationCount,
-} from "@opencok/rules/alliance-science";
-import { rankingCalendar } from "@opencok/rules/community-ranking";
-import { activityEconomy } from "@opencok/economy/services/activity-economy";
-import type { AllianceContext } from "./alliances";
+import type { AllianceRecord as Row } from "../contracts/records";
+import type { AllianceScienceContext, AllianceScienceLedger } from "../contracts/science";
+import type { AllianceScienceRuntime } from "../contracts/science-runtime";
+import { AllianceSciencePolicy } from "../rules/science";
+import { AllianceScienceMapper } from "../mappings/science";
+import { allianceScienceAssets as assets } from "../constants/science";
+import { AllianceScienceCommand, AllianceSciencePush } from "../enums/science-command";
+import { AllianceProgressAction } from "../enums/progress-action";
 
-const assets = ["wood", "stone", "iron", "food", "silver", "gold"] as const;
-
-export class AllianceScienceContext
+export class AllianceScienceService<TLedger extends AllianceScienceLedger>
 {
-    constructor(readonly context: AllianceContext)
+    public constructor(
+        readonly context: AllianceScienceContext<TLedger>,
+        private readonly runtime: AllianceScienceRuntime<TLedger>,
+        private readonly policy: AllianceSciencePolicy,
+        private readonly mapper: AllianceScienceMapper,
+    )
     {}
 
     get c()
@@ -27,6 +25,9 @@ export class AllianceScienceContext
 
     row(id: number)
     {
+        const { num } = this.runtime;
+        const { allianceScienceRule, allianceScienceRow } = this.policy;
+
         allianceScienceRule(this.c.rules, id);
 
         return allianceScienceRow(
@@ -40,6 +41,9 @@ export class AllianceScienceContext
 
     snapshot(row: Row): Fields
     {
+        const { text, num } = this.runtime;
+        const { allianceScienceRule, allianceScienceStage } = this.policy;
+
         const rule = allianceScienceRule(this.c.rules, num(row, "scienceId"), num(row, "level")),
             stage = allianceScienceStage(rule, num(row, "donateprogress")),
             queue = this.c.write.deletedResearch?.includes(text(row, "allianceId"))
@@ -50,32 +54,14 @@ export class AllianceScienceContext
                         && num(queue, "scienceId") === num(row, "scienceId"),
                 );
 
-        return {
-            scienceId: sfs.int(num(row, "scienceId")),
-            level: sfs.int(num(row, "level")),
-            currentPro: sfs.int(stage.current),
-            totalPro: sfs.int(num(row, "donateprogress")),
-            needPro: sfs.int(stage.required),
-            star: sfs.int(stage.stage + 1),
-            para1: sfs.string(rule.para1 ?? ""),
-            para2: sfs.string(rule.para2 ?? "0"),
-            points: sfs.string(rule.points ?? "0"),
-            nextPara2: sfs.string(
-                this.c.rules.power.allianceSciences?.get(
-                    String(num(row, "scienceId") + num(row, "level") + 1),
-                )?.para2 ?? "0",
-            ),
-            ...(queue
-                ? {
-                    startTime: sfs.long(long(queue, "startTime")),
-                    finishTime: sfs.long(long(queue, "startTime") + long(queue, "needTime")),
-                }
-                : {}),
-        };
+        return this.mapper.project(row, rule, stage, queue, this.c.rules);
     }
 
     snapshots(id: string)
     {
+        const { num } = this.runtime;
+        const { allianceScienceRow } = this.policy;
+
         const rows = [...(this.c.rules.power.allianceSciences?.values() ?? [])]
             .filter((rule) => rule.science_lv === "0")
             .map((rule) =>
@@ -97,6 +83,10 @@ export class AllianceScienceContext
 
     complete(): Fields
     {
+        const { text, num, long, cityInteger } = this.runtime;
+        const { allianceScienceRule, allianceScienceRow } = this.policy;
+        const allianceFailure: () => never = this.runtime.allianceFailure;
+
         if (!this.c.allianceId)
         {
             return {};
@@ -162,49 +152,19 @@ export class AllianceScienceContext
             this.c.productionOwners.add(text(member, "uid"));
         }
 
-        this.c.ledger.pushes.push({ command: "push.al.science", body: this.snapshot(next) });
+        this.c.ledger.pushes.push({
+            command: AllianceSciencePush.Update,
+            body: this.snapshot(next),
+        });
 
         return this.snapshot(next);
     }
 
-    options(row: Row): Fields
-    {
-        return {
-            scienceId: sfs.int(num(row, "scienceid")),
-            ...Object.fromEntries(
-                ["low", "mid", "high"].flatMap((prefix) => [
-                    [
-                        prefix + "Res",
-                        sfs.int(
-                            assets.indexOf(text(row, prefix + "res") as (typeof assets)[number]),
-                        ),
-                    ],
-                    [prefix + "Num", sfs.int(num(row, prefix + "num"))],
-                    [prefix + "Contribute", sfs.int(num(row, prefix + "contribute"))],
-                    [
-                        prefix + "Progress",
-                        sfs.int(num(row, prefix === "high" ? "higprogress" : prefix + "progress")),
-                    ],
-                    ...(prefix === "low"
-                        ? []
-                        : [[prefix + "Available", sfs.int(num(row, prefix + "Available"))]]),
-                ]),
-            ),
-        };
-    }
-
-    option(row: Row, prefix: string): Fields
-    {
-        return {
-            resource: sfs.string(text(row, prefix + "res")),
-            num: sfs.int(num(row, prefix + "num")),
-            contribute: sfs.int(num(row, prefix + "contribute")),
-            progress: sfs.int(num(row, prefix === "high" ? "higprogress" : prefix + "progress")),
-        };
-    }
-
     offers(id: number, previous?: Row, used?: number): Row
     {
+        const { num, text, cityInteger, randomInt } = this.runtime;
+        const { allianceScienceRule, allianceScienceStage } = this.policy;
+
         const c = this.c,
             science = this.row(id),
             rule = allianceScienceRule(c.rules, id, num(science, "level")),
@@ -286,12 +246,16 @@ export class AllianceScienceContext
 
     async command(command: string, params: Fields): Promise<Fields>
     {
+        const { text, num, long, cityInteger, activityEconomy, rankingCalendar } = this.runtime;
+        const { allianceScienceRule, allianceScienceStage, allianceDonationCount } = this.policy;
+        const allianceFailure: () => never = this.runtime.allianceFailure;
+
         const c = this.c,
             member = c.member(),
             config = c.rules.items.get("alliance_science"),
             economy = activityEconomy(c.ledger);
 
-        if (command === "al.science.donate.cd")
+        if (command === AllianceScienceCommand.Cooldown)
         {
             const remaining = long(member, "donateCDTime") - c.now;
 
@@ -307,10 +271,10 @@ export class AllianceScienceContext
             economy.gold(-BigInt(cost));
             c.setMember({ ...member, donateCDTime: 0n, donateAvailable: 1 });
 
-            return { gold: sfs.long(c.ledger.total()), donateCDTime: sfs.long(0n) };
+            return this.mapper.cooldown(c.ledger.total());
         }
 
-        if (command === "al.targetscience.set")
+        if (command === AllianceScienceCommand.Target)
         {
             c.right("alliancescience");
             const id = cityInteger(Number(str(params, "scienceId")), 1);
@@ -345,7 +309,7 @@ export class AllianceScienceContext
 
             c.setAlliance({ ...c.alliance(), targetScience: JSON.stringify(selected) });
 
-            return { targetScience: sfs.string(selected.join(";")) };
+            return this.mapper.targets(selected);
         }
 
         const id = cityInteger(int(params, "scienceId"), 1),
@@ -357,7 +321,7 @@ export class AllianceScienceContext
             allianceFailure();
         }
 
-        if (command === "al.science.fresh")
+        if (command === AllianceScienceCommand.Fresh)
         {
             const previous = c.state.donations.find((row) => num(row, "scienceid") === id),
                 next = previous ?? this.offers(id);
@@ -367,10 +331,10 @@ export class AllianceScienceContext
                 c.write.donations = [next];
             }
 
-            return this.options(next);
+            return this.mapper.options(next);
         }
 
-        if (command === "al.science.research")
+        if (command === AllianceScienceCommand.Research)
         {
             c.right("alliancescience");
 
@@ -417,14 +381,10 @@ export class AllianceScienceContext
                 },
             ];
 
-            return {
-                ...this.snapshot(row),
-                startTime: sfs.long(c.now),
-                finishTime: sfs.long(c.now + duration),
-            };
+            return this.mapper.research(this.snapshot(row), c.now, duration);
         }
 
-        if (command !== "al.science.donate")
+        if (command !== AllianceScienceCommand.Donate)
         {
             allianceFailure();
         }
@@ -524,7 +484,7 @@ export class AllianceScienceContext
         });
         const offers = this.offers(id, offer, option);
         c.write.donations = [offers];
-        c.write.actions = [{ uid: c.owner, kind: "alliance.donate", count: 1 }];
+        c.write.actions = [{ uid: c.owner, kind: AllianceProgressAction.Donate, count: 1 }];
         const weekStart = rankingCalendar(Number(c.now)).nextMonday - 604800000n,
             history = c.state.history.find(
                 (row) =>
@@ -542,19 +502,16 @@ export class AllianceScienceContext
             },
         ];
 
-        return {
-            ...this.snapshot(next),
-            options: sfs.object(this.options(offers)),
-            point: sfs.int(num(c.member(), "point")),
-            accPoint: sfs.int(num(c.member(), "accPoint")),
-            alliancepoint: sfs.long(long(c.alliance(), "alliancepoint")),
-            gold: sfs.long(c.ledger.total()),
-            donateCDTime: sfs.long(nextCd),
-            donateAvailable: sfs.long(BigInt(num(c.member(), "donateAvailable"))),
-            contributeValue: sfs.int(contribution),
-            resourceCostValue: sfs.int(quantity),
-            resourceCostType: sfs.int(assets.indexOf(resource as (typeof assets)[number])),
-            dp: sfs.int(progress),
-        };
+        return this.mapper.donation(
+            next,
+            offers,
+            c,
+            nextCd,
+            contribution,
+            quantity,
+            resource,
+            progress,
+            (row) => this.snapshot(row),
+        );
     }
 }

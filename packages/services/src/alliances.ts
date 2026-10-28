@@ -36,7 +36,8 @@ import {
     type InventoryEffects,
 } from "@opencok/services/inventory-runtime";
 import { activityEconomy } from "@opencok/economy/services/activity-economy";
-import { AllianceScienceContext } from "./alliance-science";
+import type { AllianceScienceFactory } from "@opencok/alliance/contracts/science";
+import { AllianceScienceCommand } from "@opencok/alliance/enums/science-command";
 import type { AllianceHelpFactory } from "@opencok/alliance/contracts/help";
 import { AllianceHelpCommand } from "@opencok/alliance/enums/help-command";
 import type { AllianceGiftFactory } from "@opencok/alliance/contracts/gifts";
@@ -80,11 +81,11 @@ export const allianceCommands = [
     "al.permission.modify",
     "al.rankname.set",
     "alliance.flag.choose",
-    "al.targetscience.set",
-    "al.science.fresh",
-    "al.science.donate",
-    "al.science.research",
-    "al.science.donate.cd",
+    AllianceScienceCommand.Target,
+    AllianceScienceCommand.Fresh,
+    AllianceScienceCommand.Donate,
+    AllianceScienceCommand.Research,
+    AllianceScienceCommand.Cooldown,
     AllianceHelpCommand.Call,
     AllianceHelpCommand.Render,
     AllianceHelpCommand.All,
@@ -105,6 +106,7 @@ export class AllianceService
         readonly effects: InventoryEffects,
         readonly help: AllianceHelpFactory<Rules>,
         readonly gifts: AllianceGiftFactory<RealmInventoryPlanner>,
+        readonly science: AllianceScienceFactory<RealmInventoryPlanner>,
         readonly forbidden: (value: string) => boolean | Promise<boolean> = () => false,
     )
     {}
@@ -137,6 +139,7 @@ export class AllianceService
                     this.effects,
                     this.help,
                     this.gifts,
+                    this.science,
                 );
                 context.member();
                 const body = this.gifts(context).publish(giftEvent, type),
@@ -208,7 +211,8 @@ export class AllianceService
 
             if (
                 key === "scienceId"
-                && field.type !== (command === "al.targetscience.set" ? Type.String : Type.Int)
+                && field.type
+                    !== (command === AllianceScienceCommand.Target ? Type.String : Type.Int)
             )
             {
                 allianceFailure();
@@ -364,6 +368,7 @@ export class AllianceService
                     this.effects,
                     this.help,
                     this.gifts,
+                    this.science,
                 );
                 const body = await context.command(command, params);
                 const inventory = context.ledger.result(body);
@@ -422,6 +427,7 @@ export class AllianceContext
         readonly effects: InventoryEffects,
         private readonly help: AllianceHelpFactory<Rules>,
         private readonly gifts: AllianceGiftFactory<RealmInventoryPlanner>,
+        private readonly science: AllianceScienceFactory<RealmInventoryPlanner>,
     )
     {
         this.allianceId = text(state.inventory.profile, "allianceId");
@@ -634,7 +640,7 @@ export class AllianceContext
             jointime: sfs.long(long(member ?? {}, "jointime")),
             currentlevel: sfs.int(Math.floor(num(alliance, "giftlevel") / 1000)),
             nextlevel: sfs.int((Math.floor(num(alliance, "giftlevel") / 1000) + 1) * 1000),
-            allianceScience: new AllianceScienceContext(this).snapshots(id),
+            allianceScience: this.science(this).snapshots(id),
             ...Object.fromEntries(
                 ["rankone", "ranktwo", "rankthree", "rankfour", "rankfive"].map((key) => [
                     key,
@@ -843,7 +849,7 @@ export class AllianceContext
     {
         if (command === "alliance.tick")
         {
-            return new AllianceScienceContext(this).complete();
+            return this.science(this).complete();
         }
 
         if (command === "alliance.init")
@@ -1100,9 +1106,9 @@ export class AllianceContext
 
         this.member();
 
-        if (command.startsWith("al.science.") || command === "al.targetscience.set")
+        if (command.startsWith("al.science.") || command === AllianceScienceCommand.Target)
         {
-            return new AllianceScienceContext(this).command(command, params);
+            return this.science(this).command(command, params);
         }
 
         if (
