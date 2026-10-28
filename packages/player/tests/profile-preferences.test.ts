@@ -1,10 +1,12 @@
+import { errors } from "@opencok/constants/game";
 import { expect, test } from "bun:test";
 import { drizzle, type NodePgClient } from "drizzle-orm/node-postgres";
 import * as schema from "@opencok/drizzle/schema/kingdom";
-import type { GameStore, ProfilePreferenceField } from "@opencok/contracts/game";
+import type { GameStore } from "@opencok/contracts/game";
+import type { ProfilePreferenceField } from "@opencok/player/contracts/profile-preferences";
+import { ProfilePreferenceService } from "@opencok/player/services/profile-preferences";
 import type { Row } from "@opencok/contracts/rows";
-import { Database } from "@opencok/repositories/game";
-import { updateProfilePreference } from "@opencok/repositories/profile-preferences";
+import { updateProfilePreference } from "@opencok/player/repositories/profile-preferences";
 import { GameService as Game } from "@opencok/services/game";
 import { Rules } from "@opencok/rules/game";
 import { decode, encode, sfs, type Fields } from "@opencok/messages/sfs";
@@ -162,7 +164,6 @@ function fixture()
         }
     }
     const db = drizzle(new FixturePool() as unknown as NodePgClient, { schema });
-    const repository = { kingdom: { db }, config: { kingdomId: 2 } } as Database;
     const store = {
         getProfileById: async (uid: string) => {
             expect(uid).toBe("self");
@@ -176,15 +177,17 @@ function fixture()
             readValue: () => number,
         ) => {
             expect([uid, instant]).toEqual(["self", now]);
-            return Database.prototype.updateProfilePreference.call(
-                repository,
+            return updateProfilePreference(
+                db,
                 uid,
+                2,
                 field,
                 instant,
                 readValue,
             );
         },
     };
+    const service = new ProfilePreferenceService(store);
     return {
         db,
         queries,
@@ -194,6 +197,10 @@ function fixture()
             new Rules(new Map(), new Map(), new Map()),
             { kingdomId: 2 },
             () => now,
+            {
+                profilePreference: (uid, command, params, instant) =>
+                    service.command(uid, command, params, instant),
+            },
         ),
         row: () => structuredClone(saved.get("self")),
         other: () => structuredClone(saved.get("other")),
@@ -539,4 +546,47 @@ test("restored banner values and mixed ownership are checked before deferred inp
         expect(instance.row()).toEqual(before);
         expect(instance.queries.at(-1)?.text).toBe("rollback");
     }
+});
+
+test("unrecognized player preference commands reject before reading or decoding state", async () => {
+    let reads = 0;
+    const service = new ProfilePreferenceService({
+        getProfileById: async () => {
+            reads++;
+            return { uid: "self" };
+        },
+    });
+
+    for (const command of ["", "unknown", "toString", "constructor", "__proto__"])
+    {
+        await expect(service.command("self", command, {}, now)).rejects.toMatchObject({
+            code: errors.unsupported,
+        });
+    }
+
+    expect(reads).toBe(0);
+});
+
+test("a realm without a composed preference service rejects every routed preference command", async () => {
+    let reads = 0;
+    const game = new Game(
+        {
+            getProfileById: async () => {
+                reads++;
+                return { uid: "self" };
+            },
+        } as unknown as GameStore,
+        new Rules(new Map(), new Map(), new Map()),
+        { kingdomId: 2 },
+        () => now,
+    );
+
+    for (const [command] of commands)
+    {
+        await expect(game.execute("self", command, {})).rejects.toMatchObject({
+            code: errors.unsupported,
+        });
+    }
+
+    expect(reads).toBe(0);
 });

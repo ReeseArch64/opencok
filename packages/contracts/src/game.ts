@@ -215,12 +215,6 @@ export interface GameStore extends AuthenticationStore
         now: number,
         readDescription: () => Buffer | null,
     ): Promise<void>;
-    updateProfilePreference?(
-        uid: string,
-        field: ProfilePreferenceField,
-        now: number,
-        readValue: () => number,
-    ): Promise<number | undefined>;
     getCityByPlayerId(uid: string, now: number): Promise<CityState>;
     getWorldByPointIds(
         uid: string,
@@ -240,15 +234,6 @@ export interface PushPreference
     audio: number;
 }
 
-export type ProfilePreferenceField =
-    | "showEquip"
-    | "showMedal"
-    | "marchSoldierShow"
-    | "colorblind"
-    | "scrollEquip"
-    | "showBanner"
-    | "clientSaveFlag";
-
 export interface PlayerSummary
 {
     data: Row;
@@ -265,6 +250,12 @@ export interface LoginConfigurationState
 
 export interface GameServices
 {
+    profilePreference?(
+        uid: string,
+        command: string,
+        params: Fields,
+        now: number,
+    ): Promise<Fields>;
     hotItemBusinessMan?(): Promise<Fields | undefined>;
     worldEffectBoard?(): Promise<Fields>;
     expeditionActivity?(owner: string): Promise<Fields>;

@@ -9,7 +9,7 @@ import { mutation_outbox } from "@opencok/drizzle/schema/opencok_kingdom/mutatio
 import { acquireRealmAuthority, fenceRealmDatabase } from "@opencok/repositories/realm-authority";
 import { createMutationExecutor, relayMutationEvent } from "@opencok/repositories/mutation";
 import { createEconomyMutationExecutor } from "@opencok/repositories/economy-mutation";
-import { updateProfilePreference } from "@opencok/repositories/profile-preferences";
+import { updateProfilePreference } from "@opencok/player/repositories/profile-preferences";
 import { user_mixed_info } from "@opencok/drizzle/schema/opencok_kingdom/user_mixed_info";
 import { eq } from "drizzle-orm";
 import { DisposablePostgres } from "../../../packages/drizzle/tests/support/postgres.ts";

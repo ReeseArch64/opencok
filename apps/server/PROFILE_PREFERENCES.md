@@ -6,6 +6,11 @@ It completes the existing nickname cost, journal, refund and delivery foundation
 `march.soldier.show`, `colorblind.set`, `equip.scroll`, `banner.set` and `speed.cd.open`
 retain their existing persisted behavior. Avatar changes remain topic 7.
 
+The seven saved visibility/accessibility/timer preferences are owned by the
+[player package](../../packages/player/README.md). Realm composition injects its
+Service into the command router; the general GameStore no longer exposes their
+mutation method. Nickname and push-setting workflows retain their current owners.
+
 ## Rename contract
 
 The caller supplies a String `nickName`. The authenticated session supplies the owner

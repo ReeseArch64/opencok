@@ -1,9 +1,9 @@
-import type { ProfilePreferenceField } from "@opencok/contracts/game";
+import type { ProfilePreferenceField } from "../contracts/profile-preferences";
 import { userprofile } from "@opencok/drizzle/schema/opencok_kingdom/userprofile";
 import { user_mixed_info } from "@opencok/drizzle/schema/opencok_kingdom/user_mixed_info";
 import { DependencyError } from "@opencok/errors/dependency";
 import { eq } from "drizzle-orm";
-import type { Database } from "./game.ts";
+import type { createDatabase } from "@opencok/drizzle";
 
 const columns = {
     showEquip: user_mixed_info.showEquip,
@@ -16,7 +16,7 @@ const columns = {
 };
 
 export async function updateProfilePreference(
-    db: Database["kingdom"]["db"],
+    db: ReturnType<typeof createDatabase<"kingdom">>["db"],
     uid: string,
     kingdomId: number,
     field: ProfilePreferenceField,
