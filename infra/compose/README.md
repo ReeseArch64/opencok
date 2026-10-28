@@ -210,137 +210,145 @@ Development ordering waits for database setup and for Server/Chat readiness befo
 starting Scheduler/Workers. Base services can reach external PostgreSQL through
 the external network without depending on local PostgreSQL/setup.
 
+## API character provisioning
+
+Base Compose configures Firebase-backed character provisioning directly on API and
+Server. Supply these values in the private Compose environment before starting
+the stack; `.env.example` contains placeholders and the default realm endpoint:
+
+| Variable                      | Scope                                                        |
+| ----------------------------- | ------------------------------------------------------------ |
+| `FIREBASE_PROJECT_ID`         | Firebase project used to verify identities                   |
+| `FIREBASE_CREDENTIALS_FILE`   | Existing local service-account JSON file                     |
+| `PROVISIONING_SIGNING_SECRET` | Signing key shared by API and Server, at least 32 characters |
+| `API_PROVISIONING_REALMS`     | JSON realm IDs and trusted `/_internal/characters` endpoints |
+
+The default endpoint is `http://server:18090/_internal/characters` for realm `1`.
+API receives the credentials file at `/run/opencok/firebase.json` through a
+read-only bind mount with automatic host-path creation disabled. The file remains
+local and must exist before API starts; do not commit it. Server receives only the
+provisioning signing key. API retains external network access for Firebase.
+The credentials and provisioning variables are required during Compose interpolation,
+including commands that select another profile. No separate provisioning overlay is needed.
+
 ## Mail integration Workers
 
-Base Compose runs the implemented Workers process for the default realm.
-[`mail-workers.yml`](mail-workers.yml) remains a one-realm configuration overlay
-with the `mail-workers` profile alias and explicit realm/database/key requirements.
+Base Compose runs the implemented Workers process for realm `1`, using
+`opencok_kingdom_1` and `opencok_global`. The `mail-workers` profile alias remains
+available alongside `all`, `dev` and `prod`. Server and Workers use the same fixed
+realm/database identities in `docker-compose.yml`; no separate overlay is needed.
 Read the [Workers guide](../../apps/workers/README.md) for restricted-role
-provisioning, exact grants, bindings, failure recovery and measured limits before
-starting either configuration.
+provisioning, exact grants, bindings, failure recovery and measured limits.
 
 Provision the intended realm/global databases and their migrations first, then run
 the operator-only role provisioning command with fresh role names. Administrative
 URLs and the provisioning password belong only in that operator process. The
 worker receives its two restricted URLs, the shared `CHAT_SECRET` and telemetry
-settings. The overlay adds no migration/setup dependency and does not provision
-permissions during application startup.
+settings. Compose does not provision permissions during application startup.
 
-Configure these deployment values in the private environment supplied to Compose.
-The realm/database-name variables and `MAIL_WORKER_CHAT_URL` customize the overlay;
-base Compose uses realm `1`, the database names above and `http://chat:8083`.
-Each overlay also rebinds the other background process to the same Server realm.
-Provide both restricted process URLs for that realm; if combining overlays, use
-identical realm/database identities in both sets of variables:
+Configure these deployment values in the private environment supplied to Compose:
 
-| Variable                            | Scope                                                           |
-| ----------------------------------- | --------------------------------------------------------------- |
-| `MAIL_WORKER_KINGDOM_ID`            | Realm shared by Server and this worker                          |
-| `MAIL_WORKER_KINGDOM_DATABASE_NAME` | Actual realm database expected by both                          |
-| `MAIL_WORKER_GLOBAL_DATABASE_NAME`  | Global database, default `opencok_global`                       |
-| `MAIL_WORKER_KINGDOM_URL`           | Restricted role bound to that realm database                    |
-| `MAIL_WORKER_GLOBAL_URL`            | Distinct restricted global projection role                      |
-| `MAIL_WORKER_CHAT_URL`              | Reachable private Chat origin, normally `http://chat:8083` here |
-| `CHAT_SECRET`                       | Shared Chat signing key used by Chat, Server and Workers        |
+| Variable                  | Scope                                                           |
+| ------------------------- | --------------------------------------------------------------- |
+| `MAIL_WORKER_KINGDOM_URL` | Restricted role bound to `opencok_kingdom_1`                    |
+| `MAIL_WORKER_GLOBAL_URL`  | Distinct restricted global projection role for `opencok_global` |
+| `CHAT_SECRET`             | Shared Chat signing key used by Chat, Server and Workers        |
 
-Configure the same `CHAT_SECRET` for Chat, Server and Workers. The signed mailbox
-payload retains the realm and owner scope. Deploy matching versions together when
-replacing the previous mailbox-specific key settings.
+Workers reaches Chat at `http://chat:8083`. The signed mailbox payload retains
+the realm and owner scope. Deploy matching versions together when replacing the
+previous mailbox-specific key settings.
 
 Build matching artifacts before cutover:
 
 ```sh
-docker compose -f docker-compose.yml -f infra/compose/mail-workers.yml --profile mail-workers build server chat mail-workers
+docker compose --profile mail-workers build server chat mail-workers
 ```
 
-This command requires the normal base-stack interpolation values as well as the
-private worker values above. Do not print resolved Compose configuration with real
-credentials. The new Workers image uses the pinned Bun runtime and a non-root
-user. Its health listener uses port 18091 inside the container; the overlay does
-not publish it on the host. The internal network must reach PostgreSQL, Chat and
-telemetry. The worker joins the external network for external database access; this does
-not prove provider connectivity or grant database permissions.
+This command requires the base-stack interpolation values, including API
+provisioning values, as well as the private worker values above. Do not print
+resolved Compose configuration with real credentials. The Workers image uses the
+pinned Bun runtime and a non-root user. Its health listener uses port 18091 inside
+the container, without a published host port. The internal network must reach
+PostgreSQL, Chat and telemetry. The worker joins the external network for external
+database access; this does not prove provider connectivity or grant permissions.
 
-After matching Chat/key-map support is deployed while delivery remains local,
-stop and drain the old Server consumer and any previous worker. Start the worker
-with this overlay, verify health and backlog progress, then start Server with the
-same overlay and realm identity. The overlay's Server environment selects external
-mode, suppressing its two local Mail loops. It does not start a worker implicitly
-unless the worker service/profile is selected. Keep all durable intent and Chat
-receipt rows throughout this transition.
+After matching Chat and shared-key support is deployed while delivery remains local,
+stop and drain the old Server consumer and any previous worker. Start Workers from
+the main Compose, verify health and backlog progress, then start Server with the
+same realm identity. Base Compose selects external Mail mode on Server, suppressing
+its two local Mail loops. Keep all durable intent and Chat receipt rows throughout
+this transition.
 
-The overlay sets a 45-second graceful stop allowance, pools of two realm and one
-global connection, five-second polling/operation timeouts and bounded health
-requests. These are explicit deployment limits, not measured production SLOs.
+Compose sets a 45-second graceful stop allowance. Application defaults use pools
+of two realm and one global connection, five-second polling/operation timeouts and
+bounded health requests. These are deployment limits, not measured production SLOs.
 For rollback, stop/drain Workers and Server, explicitly override
 `MAIL_INTEGRATION_MODE` to `local` on Server, and restart only Server.
-Removing the overlay alone no longer restores local delivery. Retain the Chat key configuration needed by
-that Server version and preserve queues/receipts for uncertain-outcome replay.
-Follow the full [cutover sequence](../../apps/workers/README.md#cutover-and-rollback).
+Retain the Chat key configuration needed by that Server version and preserve
+queues/receipts for uncertain-outcome replay. Follow the full
+[cutover sequence](../../apps/workers/README.md#cutover-and-rollback).
 No production deployment or native client repackaging is performed by this change.
 
 ## Timed-activity Scheduler
 
 Base Compose runs Scheduler and selects external timed-activity discovery for
-realm `1`. [`activity-scheduler.yml`](activity-scheduler.yml) remains an explicit
-realm/database configuration overlay with the `scheduler` profile alias. Read the [Scheduler guide](../../apps/scheduler/README.md)
-for the complete twelve-type scope, legacy restoration, restricted-role provisioner,
-health semantics and remaining deadline families.
+realm `1`, using `opencok_kingdom_1`. The `scheduler` profile alias remains available
+alongside `all`, `dev` and `prod`. Server, Scheduler and Workers share the fixed
+realm/database identities in `docker-compose.yml`; no separate overlay is needed.
+Read the [Scheduler guide](../../apps/scheduler/README.md) for the complete
+twelve-type scope, legacy restoration, restricted-role provisioner, health semantics
+and remaining deadline families.
 
 Apply kingdom migration `0045_timed_activity_discovery.sql` in an operator-planned
 window first: its regular index build can block writes and adds storage/write
-maintenance cost. Then run the operator-only provisioner
-with a fresh restricted role and protected realm binding. Supply these values in
-the private Compose environment. The realm/database-name variables customize
-only the overlay; base Compose uses realm `1` and `opencok_kingdom_1`:
+maintenance cost. Then run the operator-only provisioner with a fresh restricted
+role and protected realm binding. Supply these values in the private Compose environment:
 
-| Variable                          | Scope                                                   |
-| --------------------------------- | ------------------------------------------------------- |
-| `SCHEDULER_KINGDOM_ID`            | Realm shared by Server and Scheduler                    |
-| `SCHEDULER_KINGDOM_DATABASE_NAME` | Actual realm database expected by both                  |
-| `SCHEDULER_DATABASE_URL`          | Read-only role bound to that realm/database             |
-| `ACTIVITY_SCHEDULER_SECRET`       | Distinct realm deadline key, shared only with its owner |
+| Variable                    | Scope                                                   |
+| --------------------------- | ------------------------------------------------------- |
+| `SCHEDULER_DATABASE_URL`    | Read-only role bound to `opencok_kingdom_1`             |
+| `ACTIVITY_SCHEDULER_SECRET` | Distinct realm deadline key, shared only with its owner |
 
 The key must differ from game, provisioning and Chat credentials; use a different
 key for each realm. Administrative provisioning URLs/passwords do not belong in
-the Scheduler container. The overlay adds no migration/setup dependency and the
-runtime never creates roles or repairs grants.
+the Scheduler container. The runtime never creates roles or repairs grants.
 
 Build matching artifacts before cutover:
 
 ```sh
-docker compose -f docker-compose.yml -f infra/compose/activity-scheduler.yml --profile scheduler build server scheduler
+docker compose --profile scheduler build server scheduler
 ```
 
-Normal base-stack interpolation values are still required. Do not print resolved
-Compose configuration with real credentials. The image uses the pinned Bun
-runtime and a non-root user. Its health port 18092 remains inside the network;
-the overlay publishes no new host port. The owner endpoint is reached through
+Base-stack interpolation values, including API provisioning values, are required.
+Do not print resolved Compose configuration with real credentials. The image uses
+the pinned Bun runtime and a non-root user. Its health port 18092 remains inside
+the network, without a published host port. The owner endpoint is reached through
 Server's existing internal HTTP port 18090. The internal network must reach the
-realm database, owner and telemetry. Scheduler also joins the external network
-for external database access; provider connectivity is not verified by configuration.
+realm database, owner and telemetry. Scheduler also joins the external network for
+external database access; provider connectivity is not verified by configuration.
 
 After deploying matching protocol support in local mode, stop and drain the old
-Server global loop and any existing Scheduler. Start Server with the overlay's
-external mode and realm identity, then start Scheduler with the same overlay and
+Server global loop and any existing Scheduler. Start Server from the main Compose
+with external mode and its realm identity, then start Scheduler with the
 `scheduler` profile. Verify current-owner capability checks, restricted-role
 readiness, actual deadline lateness and backlog progress. Scheduler readiness
 requires the owner to answer successfully. Foreground/reconnect recovery stays
 local to Server throughout the external mode.
 
-The overlay sets a two-connection pool, one-second delay between completed passes,
-64 candidates per phase, four attempts per owner, five-second operation timeout
-and 45-second graceful stop allowance. The owner retains every gameplay mutation
-and its existing transaction fence. These are deployment bounds, not measured
-production SLOs. All queue/activity rows and economic receipts survive cutover.
+Compose sets a 45-second graceful stop allowance. Application defaults use a
+two-connection pool, one-second delay between completed passes, 64 candidates per
+phase, four attempts per owner and a five-second operation timeout. The owner
+retains every gameplay mutation and its existing transaction fence. These are
+deployment bounds, not measured production SLOs. All queue/activity rows and economic
+receipts survive cutover.
 
 For rollback, stop/drain Scheduler and Server, explicitly override
 `ACTIVITY_SCHEDULER_MODE` to `local` on Server, and restart only Server.
-Removing the overlay alone no longer restores local activity discovery. Retain compatible protocol support and
-all persisted activities, legacy queues, receipts and outbox entries. A lost HTTP
-response may follow a committed owner transaction; replay the same durable
-operation rather than resetting a queue or granting rewards again. This change
-performs no production deployment and does not complete the other W16 deadlines.
+Retain compatible protocol support and all persisted activities, legacy queues,
+receipts and outbox entries. A lost HTTP response may follow a committed owner
+transaction; replay the same durable operation rather than resetting a queue or
+granting rewards again. This change performs no production deployment and does not
+complete the other W16 deadlines.
 
 ## External Redis and deployment separation
 
