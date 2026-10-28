@@ -67,7 +67,8 @@ resource changes, a database migration or a production deployment through this A
 
 - **Affected paths**: `.github/build-pilot/`, root `package.json` and `bun.lock`,
   `packages/env/src/load.ts`, `packages/env/tests/load.test.ts`, the environment
-  guide, `.github/workflows/build-artifacts.yml` and `apps/chat/scripts/mutate-chat.ts`.
+  guide, `.github/testing/`, `.github/workflows/build-artifacts.yml` and
+  `apps/{server,chat}/scripts/mutate-*.ts`.
 - **Dependencies**: Keep Bun 1.4.2 and TypeScript 7.0.2. Pin evaluation-only
   `esbuild@0.28.2`, `rolldown@1.2.15`, `rollup@4.65.1`, `@swc/core@1.16.20`,
   `@rollup/plugin-node-resolve@16.0.3`, `@rollup/plugin-commonjs@29.0.3` and
@@ -77,6 +78,8 @@ resource changes, a database migration or a production deployment through this A
   injected synthetic test collaborators and the root `.env` policy. Resolve the
   environment from the executing module URL, and test moved bundles independently
   of the original workspace and current working directory.
+  Use the shared synthetic mutation workspace manifest/dependency fixture for
+  temporary emitted tests; it must not read the original workspace's `.env`.
 - **Patterns to avoid**: No arbitrary secret definitions, private fixtures,
   unminified-versus-minified rankings, counting SWC/Rollup or Oxc/Rolldown as
   independent wins, or weakening checks to qualify a candidate.
