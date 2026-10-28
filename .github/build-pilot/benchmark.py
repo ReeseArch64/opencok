@@ -86,6 +86,13 @@ def main():
     }
     with tempfile.TemporaryDirectory(prefix="opencok-build-pilot-") as temporary:
         output = pathlib.Path(temporary) / "dist"
+        web_app = pathlib.Path(temporary) / "web-workspace" / "apps/web"
+        if "web" in options.apps:
+            subprocess.run([
+                bun, "--no-env-file", str(ROOT / ".github/build-pilot/web-workspace.ts"),
+                str(web_app.parents[1]),
+            ], cwd=ROOT, env={"PATH": os.environ["PATH"]}, check=True, stdout=subprocess.DEVNULL)
+            report["webFixturesSha256"] = hashlib.sha256((ROOT / ".github/build-pilot/web-assets.json").read_bytes()).hexdigest()
         for app in options.apps:
             for mode in ["minified", "diagnostic"]:
                 for candidate in options.candidates:
@@ -96,9 +103,11 @@ def main():
                         if candidate == "bun-cli":
                             command = [bun, "--no-env-file", "build", "src/index.html" if app == "web" else "src/index.ts", "--target", "browser" if app == "web" else "bun", "--outdir", str(output if app == "web" else output / "src")]
                             command += ["--minify"] if mode == "minified" else ["--sourcemap=linked"]
-                            cwd = ROOT / "apps" / app
+                            cwd = web_app if app == "web" else ROOT / "apps" / app
                         else:
                             command = [bun, "--no-env-file", str(ROOT / ".github/build-pilot/build.ts"), candidate, app, mode, str(output)]
+                            if app == "web":
+                                command.append(str(web_app / "src/index.html"))
                             cwd = ROOT
                         result = measure(command, cwd, output)
                         if iteration == 0:

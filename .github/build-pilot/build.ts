@@ -1,5 +1,5 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
-import { resolve, join } from "node:path";
+import { resolve, join, dirname } from "node:path";
 
 const [candidate, app, mode, destination, override] = process.argv.slice(2);
 
@@ -28,7 +28,7 @@ switch (candidate)
             outdir: directory,
             target: web ? "browser" : "bun",
             format: "esm",
-            naming: override ? "index.test.[ext]" : undefined,
+            naming: override && !web ? "index.test.[ext]" : undefined,
             external: ["bun:test"],
             minify,
             sourcemap: minify ? "none" : "linked",
@@ -45,7 +45,7 @@ switch (candidate)
     {
         const { build } = await import("esbuild");
         await build({
-            entryPoints: [web ? join(root, "apps/web/src/main.ts") : entry],
+            entryPoints: [web ? join(dirname(entry), "main.ts") : entry],
             outdir: directory,
             bundle: true,
             platform: web ? "browser" : "node",
@@ -54,7 +54,7 @@ switch (candidate)
             format: "esm",
             target: "esnext",
             external: web ? [] : ["bun", "bun:test"],
-            entryNames: override ? "index.test" : "[name]",
+            entryNames: override && !web ? "index.test" : "[name]",
             minify,
             sourcemap: minify ? false : "linked",
             loader: { ".jpg": "file", ".png": "file" },
@@ -64,7 +64,7 @@ switch (candidate)
         if (web)
         {
             await build({
-                entryPoints: [join(root, "apps/web/src/styles.css")],
+                entryPoints: [join(dirname(entry), "styles.css")],
                 outdir: directory,
                 bundle: true,
                 loader: { ".jpg": "file", ".png": "file" },
