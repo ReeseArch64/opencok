@@ -346,6 +346,13 @@ for actual coverage and deferred cases. Historical details remain in the
 
 ### 15.4. Local TypeScript stack
 
+API, Chat, realm and browser builds retain their Bun CLI pipelines with semantic
+TypeScript checks run separately. The public [build pilot](build-pilot/README.md)
+measures per-application alternatives and executes emitted compatibility fixtures;
+[proposed ADR-0015](../docs/decisions/0015-adopt-measured-per-application-build-selection.md)
+records the recommendation and its review criteria. These build checks do not
+select a production runtime or certify a native client release.
+
 The implemented Compose stack runs Bun API/server, Traefik, PostgreSQL, Redis,
 ZooKeeper, MinIO/CDN and development tools. The `dev` profile includes Chat with a
 directly published WebSocket on port 8083; `all` also includes pgAdmin, Redis Insight
