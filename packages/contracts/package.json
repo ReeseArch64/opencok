@@ -23,6 +23,7 @@
     "@opencok/equipment": "workspace:*",
     "@opencok/tasks": "workspace:*",
     "@opencok/mail": "workspace:*",
-    "@opencok/skins": "workspace:*"
+    "@opencok/skins": "workspace:*",
+    "@opencok/alliance": "workspace:*"
   }
 }

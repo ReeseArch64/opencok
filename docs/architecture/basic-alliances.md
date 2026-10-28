@@ -36,6 +36,13 @@ orchestration remain separate systems.
 
 ## Queue assistance
 
+After #663, the [Alliance package](../../packages/alliance/README.md) owns help
+commands, generation validation, mapping and persistence under ADR-0016. Realm
+composition injects the help factory into the shared coordinator and supplies the
+publication mapper. Shared aggregate repositories delegate help operations within
+the same transaction and at the same read/write/invalidation positions. Membership,
+science and gifts remain in their existing owners pending subsequent #558 slices.
+
 A new help request records the running timed-activity identity, start time and
 helpers. Queue IDs and client-supplied helper identities confer no authority.
 Every helper must currently belong to the sender's alliance, cannot help themself,

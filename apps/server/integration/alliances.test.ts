@@ -14,7 +14,7 @@ import { command_receipt } from "@opencok/drizzle/schema/opencok_kingdom/command
 import { economy_posting } from "@opencok/drizzle/schema/opencok_kingdom/economy_posting";
 import { createAllianceRepository } from "@opencok/repositories/alliance-gameplay";
 import { createCityProductionBoundary } from "@opencok/production/repositories/city-boundary";
-import { AllianceService } from "@opencok/services/alliances";
+import { createRealmAllianceService } from "../src/composition/alliance";
 import { createRealmResearchDomain } from "../src/composition/research";
 import { fields, str, int, sfs, type Fields } from "@opencok/messages/sfs";
 import { cityHarness } from "./support/city";
@@ -49,7 +49,7 @@ async function harness()
         () => h.clock.now,
         h.handlers.domains,
     );
-    const service = new AllianceService(repository, h.rules, h.effects);
+    const service = createRealmAllianceService(repository, h.rules, h.effects);
     const command = (name: string, params: Fields = {}, owner = "owner") =>
         service.command(owner, name, { operationId: sfs.string(randomUUID()), ...params });
     const create = async () => {
@@ -83,7 +83,7 @@ test("alliance creation and concurrent joins preserve one membership and one lea
     });
     expect(int(fields(transferred.body.alliance), "rank")).toBe(4);
     await h.allianceCommand("al.leave");
-    const reloaded = new AllianceService(h.repository, h.rules, h.effects);
+    const reloaded = createRealmAllianceService(h.repository, h.rules, h.effects);
     const init = await reloaded.command("other", "alliance.init", {});
     expect(str(fields(init.body.alliance), "learderUid")).toBe("other");
     expect(int(fields(init.body.alliance), "member")).toBe(1);
@@ -211,7 +211,7 @@ test("donations debit once, cap progress and complete durable research after res
     const pending = await dueAllianceResearch(h.db.db, 1, BigInt(h.clock.now));
     expect(pending).toHaveLength(1);
     expect(Buffer.isBuffer(pending[0]!.accelerate)).toBe(true);
-    const restarted = new AllianceService(h.repository, h.rules, h.effects);
+    const restarted = createRealmAllianceService(h.repository, h.rules, h.effects);
     await restarted.command("owner", "alliance.init", {});
     await restarted.command("owner", "alliance.init", {});
     const science = (await h.db.db.select().from(alliance_science))[0]!;
@@ -338,7 +338,7 @@ test(
         const before = await h.db.db.select().from(user_gift);
         expect(before).toHaveLength(2);
         expect(new Set(before.map((row) => row.uid)).size).toBe(2);
-        const restarted = new AllianceService(h.repository, h.rules, h.effects);
+        const restarted = createRealmAllianceService(h.repository, h.rules, h.effects);
         await restarted.publishGift("owner", event, 30000);
         expect(await h.db.db.select().from(user_gift)).toEqual(before);
         await expect(h.allianceCommand("al.gengift", { typeId: sfs.int(30000) })).rejects.toThrow();
@@ -441,7 +441,7 @@ test("outbox publication uses current members and preserves pending unrelated ev
     await h.allianceCommand("al.apply", { allianceId: sfs.string(id) }, "other");
     await h.allianceCommand("al.acceptapply", { playerId: sfs.string("other") });
     const { relayMutationEvent } = await import("@opencok/repositories/mutation");
-    const { publishAllianceMutation } = await import("@opencok/services/alliance-publication");
+    const { publishAllianceMutation } = await import("../src/composition/alliance");
     const { createAlliancePublicationReader } = await import(
         "@opencok/repositories/alliance-publication"
     );

@@ -1,3 +1,4 @@
+import { AllianceHelpRepository } from "@opencok/alliance/repositories/help";
 import { donate_history } from "@opencok/drizzle/schema/opencok_kingdom/donate_history";
 import { alliance_gift } from "@opencok/drizzle/schema/opencok_kingdom/alliance_gift";
 import { allianceMailData } from "@opencok/mappings/alliance";
@@ -10,7 +11,6 @@ import { alliance_apply } from "@opencok/drizzle/schema/opencok_kingdom/alliance
 import { alliance_science } from "@opencok/drizzle/schema/opencok_kingdom/alliance_science";
 import { alliance_science_upgrade } from "@opencok/drizzle/schema/opencok_kingdom/alliance_science_upgrade";
 import { alliance_donate } from "@opencok/drizzle/schema/opencok_kingdom/alliance_donate";
-import { alliance_help } from "@opencok/drizzle/schema/opencok_kingdom/alliance_help";
 import { alliance_blacklist } from "@opencok/drizzle/schema/opencok_kingdom/alliance_blacklist";
 import { user_gift } from "@opencok/drizzle/schema/opencok_kingdom/user_gift";
 import { userprofile } from "@opencok/drizzle/schema/opencok_kingdom/userprofile";
@@ -228,13 +228,7 @@ export function createAllianceRepository(
                                 .select()
                                 .from(alliance_donate)
                                 .where(eq(alliance_donate.uerid, input.owner)),
-                            helps: groups.length
-                                ? await tx
-                                    .select()
-                                    .from(alliance_help)
-                                    .where(inArray(alliance_help.allianceId, groups))
-                                    .limit(4097)
-                                : [],
+                            helps: await AllianceHelpRepository.readGroups(tx, groups),
                             queues: await tx.select().from(queue).where(
                                 inArray(queue.ownerId, participants),
                             ),
@@ -540,7 +534,7 @@ async function writeAlliance(
             .update(alliance_member)
             .set({ allianceId: "", rank: 0 })
             .where(eq(alliance_member.uid, id));
-        await tx.update(alliance_help).set({ isvalid: 0 }).where(eq(alliance_help.senderId, id));
+        await AllianceHelpRepository.invalidateSender(tx, id);
     }
 
     for (const member of write.memberships ?? [])
@@ -672,59 +666,7 @@ async function writeAlliance(
             });
     }
 
-    for (const row of write.helps ?? [])
-    {
-        check(row);
-
-        if (!participants.includes(text(row, "senderId")))
-        {
-            throw new Error("Foreign help sender");
-        }
-
-        const value = row as typeof alliance_help.$inferInsert;
-        await tx
-            .insert(alliance_help)
-            .values(value)
-            .onConflictDoUpdate({ target: alliance_help.helpId, set: value });
-    }
-
-    for (const row of write.queues ?? [])
-    {
-        if (!participants.includes(text(row, "ownerId")))
-        {
-            throw new Error("Foreign helped queue");
-        }
-
-        await tx
-            .update(queue)
-            .set({ updateTime: long(row, "updateTime"), isHelped: Number(row.isHelped) })
-            .where(and(eq(queue.uuid, text(row, "uuid")), eq(queue.ownerId, text(row, "ownerId"))));
-    }
-
-    for (const row of write.activities ?? [])
-    {
-        if (!participants.includes(text(row, "ownerId")))
-        {
-            throw new Error("Foreign helped activity");
-        }
-
-        const updated = await tx
-            .update(timed_activity)
-            .set({ dueAt: long(row, "dueAt"), version: Number(row.version) })
-            .where(
-                and(
-                    eq(timed_activity.id, text(row, "id")),
-                    eq(timed_activity.version, Number(row.version) - 1),
-                    eq(timed_activity.status, 0),
-                ),
-            )
-            .returning({ id: timed_activity.id });
-
-        if (updated.length !== 1)
-        {
-            throw new Error("Helped activity changed");
-        }
-    }
+    await new AllianceHelpRepository(tx, participants, { text, long, check }).write(write);
 
     if (write.publishedGift)
     {
@@ -827,6 +769,6 @@ async function writeAlliance(
             eq(alliance_science_upgrade.allianceId, id),
         );
         await tx.delete(alliance_apply).where(eq(alliance_apply.allianceId, id));
-        await tx.update(alliance_help).set({ isvalid: 0 }).where(eq(alliance_help.allianceId, id));
+        await AllianceHelpRepository.invalidateAlliance(tx, id);
     }
 }

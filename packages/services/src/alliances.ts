@@ -37,7 +37,8 @@ import {
 } from "@opencok/services/inventory-runtime";
 import { activityEconomy } from "@opencok/economy/services/activity-economy";
 import { AllianceScienceContext } from "./alliance-science";
-import { AllianceHelpContext } from "./alliance-help";
+import type { AllianceHelpFactory } from "@opencok/alliance/contracts/help";
+import { AllianceHelpCommand } from "@opencok/alliance/enums/help-command";
 import { publishAllianceGift, allianceGift } from "./alliance-gifts";
 
 export const allianceCommands = [
@@ -83,10 +84,10 @@ export const allianceCommands = [
     "al.science.donate",
     "al.science.research",
     "al.science.donate.cd",
-    "al.callhelp",
-    "al.renderhelp",
-    "al.helpall",
-    "al.showhelp",
+    AllianceHelpCommand.Call,
+    AllianceHelpCommand.Render,
+    AllianceHelpCommand.All,
+    AllianceHelpCommand.Show,
     "al.showgift",
     "al.opengift",
     "al.cleargift",
@@ -101,6 +102,7 @@ export class AllianceService
         readonly repository: AllianceRepository,
         readonly rules: Rules,
         readonly effects: InventoryEffects,
+        readonly help: AllianceHelpFactory<Rules>,
         readonly forbidden: (value: string) => boolean | Promise<boolean> = () => false,
     )
     {}
@@ -131,6 +133,7 @@ export class AllianceService
                         Number(state.now),
                     ),
                     this.effects,
+                    this.help,
                 );
                 context.member();
                 const body = publishAllianceGift(context, giftEvent, type),
@@ -356,6 +359,7 @@ export class AllianceService
                         Number(state.now),
                     ),
                     this.effects,
+                    this.help,
                 );
                 const body = await context.command(command, params);
                 const inventory = context.ledger.result(body);
@@ -412,6 +416,7 @@ export class AllianceContext
         readonly rules: Rules,
         readonly ledger: RealmInventoryPlanner,
         readonly effects: InventoryEffects,
+        private readonly help: AllianceHelpFactory<Rules>,
     )
     {
         this.allianceId = text(state.inventory.profile, "allianceId");
@@ -1095,9 +1100,16 @@ export class AllianceContext
             return new AllianceScienceContext(this).command(command, params);
         }
 
-        if (["al.callhelp", "al.renderhelp", "al.helpall", "al.showhelp"].includes(command))
+        if (
+            ([
+                AllianceHelpCommand.Call,
+                AllianceHelpCommand.Render,
+                AllianceHelpCommand.All,
+                AllianceHelpCommand.Show,
+            ] as readonly string[]).includes(command)
+        )
         {
-            return new AllianceHelpContext(this).command(command, params);
+            return this.help(this).command(command, params);
         }
 
         if (["al.showgift", "al.opengift", "al.cleargift"].includes(command))
