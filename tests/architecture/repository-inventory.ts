@@ -3,6 +3,9 @@ import { readFileSync, existsSync } from "node:fs";
 import { resolve } from "node:path";
 import type { Workspace } from "./contracts.ts";
 import { ArchitectureAudit } from "./architecture-audit.ts";
+import { FileClassification } from "./file-classification.ts";
+import { InventoryRelations } from "./inventory-relations.ts";
+import { SourceFacts } from "./source-facts.ts";
 
 export class RepositoryInventory
 {
@@ -48,19 +51,15 @@ export class RepositoryInventory
             ]),
         );
         const report = new ArchitectureAudit().inspect(files, workspaces);
-        const dependents = new Map<string, string[]>();
-
-        for (const module of report.modules)
-        {
-            for (const dependency of module.dependencies)
-            {
-                const entries = dependents.get(dependency) ?? [];
-                entries.push(module.path);
-                dependents.set(dependency, entries);
-            }
-        }
+        const relations = new InventoryRelations(report.modules);
+        const classification = new FileClassification();
+        const facts = new SourceFacts();
 
         return {
+            revision: execFileSync("git", ["rev-parse", "HEAD"], {
+                cwd: this.root,
+                encoding: "utf8",
+            }).trim(),
             workspaces: workspaces.map((workspace) => ({
                 ...workspace,
                 dependencies: [...workspace.dependencies].sort(),
@@ -68,8 +67,16 @@ export class RepositoryInventory
             files: paths.map((path) => ({
                 path,
                 currentOwner: workspaces.find((workspace) => path.startsWith(`${workspace.path}/`))
-                    ?.path,
-                directDependents: (dependents.get(path) ?? []).sort(),
+                    ?.path ?? "repository",
+                role: classification.role(path),
+                sourceLines: /\.[cm]?[jt]sx?$/.test(path)
+                    ? (files.get(path) ? files.get(path)!.split("\n").length : 0)
+                        - (files.get(path)!.endsWith("\n") ? 1 : 0)
+                    : null,
+                ...relations.consumers(path),
+                sourceEvidence: /\.[cm]?[jt]sx?$/.test(path)
+                    ? facts.read(files.get(path)!, path)
+                    : [],
                 proposedOwner: null,
                 migrationStatus: "unreviewed",
             })),
