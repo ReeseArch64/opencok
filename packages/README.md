@@ -106,6 +106,6 @@ injects numeric/catalog/economic collaborators. Research, donations and recovery
 follow in #667; governance commands, membership policies and alliance/member/blacklist
 persistence follow in #669. Applications, invitations and their messages follow in
 #671. Creation and member entry/removal follow in #673. Queries and native snapshots
-follow in #675. Effects
-and aggregate publication remain subsequent slices. Remaining policy bindings have
+follow in #675. Publication and its transactional reader follow in #677. Effects
+and aggregate orchestration remain subsequent slices. Remaining policy bindings have
 tracked retirement tasks.

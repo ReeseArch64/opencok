@@ -4,8 +4,10 @@ import { trigger_var } from "@opencok/drizzle/schema/opencok_kingdom/trigger_var
 import { alliance } from "@opencok/drizzle/schema/opencok_kingdom/alliance";
 import { alliance_member } from "@opencok/drizzle/schema/opencok_kingdom/alliance_member";
 import { mutation_outbox } from "@opencok/drizzle/schema/opencok_kingdom/mutation_outbox";
-import { createAlliancePublicationReader } from "@opencok/repositories/alliance-publication";
-import { publishAllianceMutation } from "../src/composition/alliance";
+import {
+    createAlliancePublicationReader,
+    publishAllianceMutation,
+} from "../src/composition/alliance";
 import { user_general } from "@opencok/drizzle/schema/opencok_kingdom/user_general";
 import { playerinfo } from "@opencok/drizzle/schema/opencok_kingdom/playerinfo";
 import { expect, test } from "bun:test";

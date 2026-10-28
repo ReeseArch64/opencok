@@ -78,14 +78,3 @@ export interface AllianceRepository
         plan: (state: AllianceState) => Promise<AlliancePlan>,
     ): Promise<Buffer>;
 }
-
-export interface AlliancePublicationSnapshot
-{
-    profiles: readonly Row[];
-    record?: Row;
-    members: readonly Row[];
-    queues: readonly Row[];
-    helps: readonly Row[];
-    sciences: readonly Row[];
-    research: readonly Row[];
-}

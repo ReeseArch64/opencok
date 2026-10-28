@@ -9,10 +9,11 @@ Governance follows in [#669](https://github.com/ReeseArch64/opencok/issues/669).
 Applications and invitations follow in [#671](https://github.com/ReeseArch64/opencok/issues/671).
 Creation and membership follow in [#673](https://github.com/ReeseArch64/opencok/issues/673).
 Queries and snapshots follow in [#675](https://github.com/ReeseArch64/opencok/issues/675).
-Its sixty-three source modules and seven test files cover help, gifts, research,
+Publication follows in [#677](https://github.com/ReeseArch64/opencok/issues/677).
+Its sixty-nine source modules and eight test files cover help, gifts, research,
 donations, governance, applications/invitations, creation/membership, queries,
-snapshots, native mapping and transactional persistence/recovery. Effects and the
-broad coordinator remain subsequent domain slices.
+snapshots, publication, native mapping and transactional persistence/recovery.
+Effects and the broad coordinator remain subsequent domain slices.
 
 ## Responsibilities and composition
 
@@ -474,3 +475,63 @@ schema/save conversion or client packaging changes. Preserve memberships, scienc
 inventory, receipts and outbox. Effects, transaction discovery, aggregate/publication
 ownership and semantic catalog definitions remain #558 work. Native-device and
 production-load acceptance remain separate.
+
+## Publication and current-membership reads
+
+`services/publication` owns delivery of the existing alliance mutation event.
+`mappings/publication` owns its distinct native update/join/leave/leadership/science
+and point payloads. Publication intentionally keeps its existing shape, which
+has different fields and leader fallback behavior from query snapshots. Bounded
+contracts contain the snapshot, reader/publisher ports and actual science-effect
+adapter; existing Help and Science Mappers remain injected collaborators.
+Realm composition supplies the existing record readers, membership policy,
+science effects, help/science mapping and publisher without broad package imports
+into Alliance. No dependency or workspace change is needed.
+
+Pending leave events revalidate the current profile before notifying a player;
+a later membership prevents an old event from clearing it. A missing alliance
+returns after eligible leave messages. Activity reward events publish the exact
+absolute shared balance only to current non-actor members and return before other
+updates or science evaluation. Ordinary delivery retains per-member order:
+update, conditional join, leadership, matching help and science messages.
+Publication failure propagates to the existing outbox owner without swallowing or
+continuing to later recipients.
+
+Join messages still require a changed current member bound to this alliance and
+retain catalog order, level-zero filtering and default science rows. Help messages
+require both current queue identity and sender ownership. Science messages retain
+current research mapping and exact shared points. Native field order/types,
+`learderUid`/`learderName`, permission defaults, targets, capacity truncation and
+long precision are unchanged.
+
+`repositories/publication` owns the complete repeatable-read transaction. The realm
+injects the existing authority fence, called before the first query. Record,
+current profile/member join, queues, help, science, research and selected profiles
+are read in the original order with unchanged realm scopes and bounds. Realm and
+two PostgreSQL integration consumers now use the composed reader factory. Outbox
+relay, acknowledgments, retries and authority acquisition remain with their existing
+owners; this does not introduce a worker or new process authority.
+
+| Former source                           | Owned destination                                       | Integration and retirement                                              |
+| --------------------------------------- | ------------------------------------------------------- | ----------------------------------------------------------------------- |
+| Services `alliance-publication`         | `services/publication`, Mapper, runtime ports and enums | Realm composition constructs the Service; legacy module removed         |
+| Repositories `alliance-publication`     | `repositories/publication`                              | Realm injects its existing fence; realm and integration imports migrate |
+| Contracts `AlliancePublicationSnapshot` | `contracts/publication`                                 | Exact declaration move; no shared consumer or facade remains            |
+
+Seven publication tests add 52 assertions for current-profile revalidation, early
+exits, actor exclusion, native roundtrips, ordered recipients, join science defaults,
+help binding and failure propagation. The full Alliance suite has 54 tests and 526
+assertions; root package tests have 447 tests and 557,913 assertions. Four full
+structural comparisons cover the entire publication workflow with native Mappers
+inlined, the complete transaction, reader defaults and snapshot declaration; a
+separate wiring check verifies the actual fence and science-effect injection.
+Architecture tests retain 15 tests/42 assertions and 71 existing violations.
+The four disposable PostgreSQL suites retain 28 tests/284 assertions; server tests
+retain 1,501 tests/245,699 assertions. Five affected workspace type checks,
+architecture types, frozen install, lint, formatting and realm build pass.
+
+Deploy or roll back the complete realm artifact without schema/save conversion,
+environment or client packaging changes. Keep pending outbox events, committed
+receipts, current memberships and player progress. Effects, aggregate orchestration,
+transaction discovery and semantic catalogs remain #558 work. Native-device,
+production-load and separate process-authority acceptance remain open.
