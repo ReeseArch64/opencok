@@ -17,8 +17,8 @@ import { readCampaignProfile } from "./campaign-notice";
 import { costRankAwardReader, writeCostRankAward } from "./continued-cost-rewards";
 import { expeditionAwardReader, writeExpeditionAward } from "./expedition-stage-rewards";
 import {
-  heroRankAwardReader,
-  writeHeroRankAward,
+    heroRankAwardReader,
+    writeHeroRankAward,
 } from "@opencok/hero/repositories/hero-ranking-rewards";
 import { heroScoreReader, writeHeroScore } from "@opencok/hero/repositories/hero-score";
 import { readOlympic, writeOlympic } from "./olympic";
@@ -81,9 +81,9 @@ import { user_equip } from "@opencok/drizzle/schema/opencok_kingdom/user_equip";
 import { user_glory_info } from "@opencok/drizzle/schema/opencok_kingdom/user_glory_info";
 import { building_production } from "@opencok/drizzle/schema/opencok_kingdom/building_production";
 import type {
-  CityProgressionStore,
-  CityProgressionState,
-  CityProgressionWrite,
+    CityProgressionStore,
+    CityProgressionState,
+    CityProgressionWrite,
 } from "@opencok/contracts/city-progression";
 import type { ActivityEconomy } from "@opencok/contracts/timed-activity";
 import { text, num, long, type Row } from "@opencok/contracts/rows";
@@ -91,801 +91,1063 @@ import type { MutationTransaction } from "./mutation";
 import { readPlayerEffects } from "./power";
 
 export type ProgressionBoundary = (
-  tx: MutationTransaction,
-  owner: string,
-  now: bigint,
-  change: () => Promise<void>,
-  deleted: readonly string[],
-  economy: ActivityEconomy,
+    tx: MutationTransaction,
+    owner: string,
+    now: bigint,
+    change: () => Promise<void>,
+    deleted: readonly string[],
+    economy: ActivityEconomy,
 ) => Promise<void>;
 
 export function createCityProgressionStore(
-  tx: MutationTransaction,
-  owner: string,
-  now: bigint,
-  boundary: ProgressionBoundary,
-  mapSize = 1200,
-  authority?: RealmAuthority,
-): CityProgressionStore {
-  let alliance = "";
-  let questBefore: Pick<CityProgressionState, "tasks" | "quests"> | undefined;
-  let cosmeticTarget: Awaited<ReturnType<typeof readCosmeticTarget>>;
+    tx: MutationTransaction,
+    owner: string,
+    now: bigint,
+    boundary: ProgressionBoundary,
+    mapSize = 1200,
+    authority?: RealmAuthority,
+): CityProgressionStore
+{
+    let alliance = "";
+    let questBefore: Pick<CityProgressionState, "tasks" | "quests"> | undefined;
+    let cosmeticTarget: Awaited<ReturnType<typeof readCosmeticTarget>>;
 
-  return {
-    async birthPoint(rules, mode) {
-      if (!authority) {throw new Error("Missing world birth authority");}
+    return {
+        async birthPoint(rules, mode)
+        {
+            if (!authority)
+            {
+                throw new Error("Missing world birth authority");
+            }
 
-      if (mode !== "random") {
-        const [existing] = await tx
-          .select({ id: worldpoint.id })
-          .from(worldpoint)
-          .where(
-            and(
-              eq(worldpoint.worldId, 0),
-              eq(worldpoint.ownerId, owner),
-              eq(worldpoint.pointType, 1),
-            ),
-          )
-          .limit(1)
-          .for("update");
+            if (mode !== "random")
+            {
+                const [existing] = await tx
+                    .select({ id: worldpoint.id })
+                    .from(worldpoint)
+                    .where(
+                        and(
+                            eq(worldpoint.worldId, 0),
+                            eq(worldpoint.ownerId, owner),
+                            eq(worldpoint.pointType, 1),
+                        ),
+                    )
+                    .limit(1)
+                    .for("update");
 
-        if (existing) {throw new Error("Resident city already exists");}
-      }
+                if (existing)
+                {
+                    throw new Error("Resident city already exists");
+                }
+            }
 
-      return allocateWorldBirth(tx, authority, mapSize, rules, now, mode);
-    },
-    async treasurePoints(ids) {
-      if (
-        ids.length > 4096 ||
-        ids.some((id) => !Number.isInteger(id) || id < 1 || id > mapSize * mapSize)
-      )
-        {throw new Error("Invalid treasure target query");}
-
-      if (!ids.length) {return [];}
-
-      return tx
-        .select()
-        .from(worldpoint)
-        .where(and(eq(worldpoint.worldId, 0), inArray(worldpoint.id, [...ids])))
-        .orderBy(asc(worldpoint.id))
-        .for("update");
-    },
-    async getState(command, ranking, request) {
-      const [profile] = await tx.select().from(userprofile).where(eq(userprofile.uid, owner));
-      const [resource] = await tx.select().from(user_resource).where(eq(user_resource.uid, owner));
-
-      if (!profile || !resource) {throw new Error("Missing city owner");}
-
-      const [statistics] = await tx.select().from(playerinfo).where(eq(playerinfo.uid, owner));
-      const [buildingExperience] = await tx
-        .select()
-        .from(user_building_exp)
-        .where(eq(user_building_exp.uid, owner));
-      const buildings = await tx
-        .select()
-        .from(user_building)
-        .where(eq(user_building.uid, owner))
-        .orderBy(asc(user_building.uuid))
-        .limit(257);
-      const sciences = await tx
-        .select()
-        .from(user_science)
-        .where(eq(user_science.uid, owner))
-        .orderBy(asc(user_science.itemId))
-        .limit(4097);
-      const armies = await tx
-        .select()
-        .from(user_army)
-        .where(eq(user_army.uid, owner))
-        .orderBy(asc(user_army.armyId))
-        .limit(1025);
-      const hospital = await tx
-        .select()
-        .from(user_hospital)
-        .where(eq(user_hospital.uid, owner))
-        .orderBy(asc(user_hospital.armyId))
-        .limit(1025);
-      const forts = await tx
-        .select()
-        .from(user_wall)
-        .where(eq(user_wall.uid, owner))
-        .orderBy(asc(user_wall.armyId))
-        .limit(1025);
-      const queues = await tx.select().from(queue).where(eq(queue.ownerId, owner)).limit(257);
-
-      if (
-        buildings.length > 256 ||
-        sciences.length > 4096 ||
-        armies.length > 1024 ||
-        hospital.length > 1024 ||
-        forts.length > 1024 ||
-        queues.length > 256
-      )
-        {throw new Error("City aggregate exceeds bound");}
-
-      const skills = await tx.select().from(user_skill).where(eq(user_skill.ownerId, owner));
-      const tasks = await tx.select().from(user_task).where(eq(user_task.uid, owner));
-      const achievements = await tx
-        .select()
-        .from(user_achievement)
-        .where(eq(user_achievement.uid, owner));
-      const equipment = await tx.select().from(user_equip).where(eq(user_equip.uid, owner));
-      const [glory] = await tx.select().from(user_glory_info).where(eq(user_glory_info.uid, owner));
-      const civilizationSciences = await tx
-        .select()
-        .from(user_civilization_science)
-        .where(eq(user_civilization_science.userID, owner))
-        .limit(4097);
-
-      if (civilizationSciences.length > 4096)
-        {throw new Error("Civilization science aggregate exceeds bound");}
-
-      alliance = profile.allianceId ?? "";
-      const worldMutation =
-        command?.startsWith("world.") ||
-        command === "get.act.boss.point" ||
-        command === "create.boss" ||
-        command?.startsWith("treasuremap.") ||
-        command === "buy.citydef" ||
-        command === "resource.new.detail" ||
-        command === "common.res.syn" ||
-        command === "totem" ||
-        command === "civilizationCastle"
-          ? await readWorldMutationState(tx, owner, request, mapSize, command)
-          : undefined;
-
-      const quests = await readQuests(tx, owner, profile, now);
-      questBefore = structuredClone({ tasks, quests });
-
-      return {
-        militaryAward:
-          command === "activity.accept.reward" ? militaryRankAwardReader(tx, owner) : undefined,
-        activityReward:
-          command === "activity.accept.reward" ? activityRewardReader(tx, owner) : undefined,
-        redPackets:
-          command?.startsWith("redPackets.") || command === "campaign.paid.gift"
-            ? redPacketReader(tx, owner)
-            : undefined,
-        worldMonsters: [
-          "world.use",
-          "create.boss",
-          "world.get.monster",
-          "world.get.barbarion",
-          "get.act.boss.point",
-        ].includes(command ?? "")
-          ? worldMonsterReader(tx, mapSize)
-          : undefined,
-        campaignProfile:
-          command?.startsWith("egg.") ||
-          command?.startsWith("goldeggs.") ||
-          command?.startsWith("normal.recharge.") ||
-          command?.startsWith("campaign.") ||
-          command === "activity.accept.reward" ||
-          command === "world.march" ||
-          command?.startsWith("redPackets.") ||
-          command === "trigger.activity" ||
-          command?.startsWith("hot.item.")
-            ? await readCampaignProfile(tx, owner)
-            : undefined,
-        costRankAward:
-          command === "continuedcost.rank.deliver" ? costRankAwardReader(tx, owner) : undefined,
-        expeditionAward:
-          command === "expedition.award.deliver" ? expeditionAwardReader(tx, owner) : undefined,
-        heroRankingAward:
-          command === "hero.rank.deliver" ? heroRankAwardReader(tx, owner) : undefined,
-        comeback: command?.startsWith("comeback.")
-          ? await readComeback(tx, owner, profile)
-          : undefined,
-        hotItem: command?.startsWith("hot.item.") ? await readHotItems(tx, owner, now) : undefined,
-        heroScore: heroScoreReader(tx, owner, alliance),
-        profile,
-        resource,
-        cosmeticTarget:
-          command === "trigger.activity" || command === "avatar.activate"
-            ? (cosmeticTarget = await readCosmeticTarget(
-                tx,
-                request,
-                command === "avatar.activate" ? owner : undefined,
-              ))
-            : undefined,
-        trouble:
-          command === "get.trouble.list" || command?.startsWith("trouble.")
-            ? await readTrouble(tx, owner, command === "get.trouble.list")
-            : undefined,
-        olympic: command?.startsWith("Olympic.") ? await readOlympic(tx, owner) : undefined,
-        cupBetting: command?.startsWith("euro.cup.") ? await readCupBetting(tx, owner) : undefined,
-        groupBuy: command?.startsWith("groupbuys.") ? await readGroupBuy(tx, owner) : undefined,
-        continuedCost: command?.startsWith("continuedcost.")
-          ? readContinuedCost(tx, owner)
-          : undefined,
-        prayer: await readPrayer(tx, owner),
-        recallTask: await readRecallTasks(tx, owner, command?.startsWith("recall.task.") ?? false),
-        regionalRecall: command?.startsWith("region.recall.")
-          ? await readRegionalRecall(
-              tx,
-              owner,
-              num(profile, "serverId"),
-              command === "region.recall.init",
+            return allocateWorldBirth(tx, authority, mapSize, rules, now, mode);
+        },
+        async treasurePoints(ids)
+        {
+            if (
+                ids.length > 4096
+                || ids.some((id) => !Number.isInteger(id) || id < 1 || id > mapSize * mapSize)
             )
-          : undefined,
-        allianceHeart:
-          command === "heart.send" || command === "heart.init"
-            ? await readAllianceHeart(tx, owner, command, request)
-            : undefined,
-        playerItemGifts:
-          command === "item.send" || command === "gift.init"
-            ? await readPlayerItemGifts(tx, owner, command, request)
-            : undefined,
-        monsterExchange:
-          command === "act.exchange" || command?.startsWith("act.ex.")
-            ? await readMonsterExchanges(tx, owner)
-            : undefined,
-        fragmentExchange:
-          command === "act.exchange" || command?.startsWith("act.ex.")
-            ? await readFragmentExchanges(tx, owner)
-            : undefined,
-        seasonalExchange: command?.startsWith("activity.exchange.")
-          ? await readSeasonalExchange(tx, owner)
-          : undefined,
-        vipBox: command?.startsWith("vip.box.") ? await readVipBox(tx, owner) : undefined,
-        targetTask: await readTargetTasks(tx, owner),
-        rechargeFeedback:
-          command === "pay.recharge.ui.state" || command === "feedback.paid"
-            ? rechargeFeedbackReader(tx, owner)
-            : undefined,
-        eggActivity: command?.startsWith("egg.") ? await readEggActivity(tx, owner) : undefined,
-        goldEggs: command?.startsWith("goldeggs.")
-          ? goldEggsReader(tx, owner, num(profile, "serverId"), now)
-          : undefined,
-        normalRecharge: command?.startsWith("normal.recharge.")
-          ? await readNormalRecharge(tx, owner, now, true)
-          : undefined,
-        rechargeActivity: command?.startsWith("new.sercum.")
-          ? await readRechargeActivity(tx, owner)
-          : undefined,
-        ordinaryBoxServer:
-          command === "get.table.value" || command?.startsWith("ordinary.box.")
-            ? await readOrdinaryBoxServer(tx)
-            : undefined,
-        sevenDayCycle: command?.startsWith("sevenday.")
-          ? await readSevenDayCycle(tx, owner)
-          : undefined,
-        branchCity: command?.startsWith("branchcity.")
-          ? ((
-              await tx
+            {
+                throw new Error("Invalid treasure target query");
+            }
+
+            if (!ids.length)
+            {
+                return [];
+            }
+
+            return tx
                 .select()
-                .from(user_branch_city_info)
-                .where(eq(user_branch_city_info.uid, owner))
-            )[0] ?? null)
-          : undefined,
-        dailyInvestment: command?.startsWith("invest.")
-          ? await readDailyInvestment(tx, owner)
-          : undefined,
-        castleLevelEvent: command?.startsWith("castle.")
-          ? await readCastleLevelEvent(tx, owner)
-          : undefined,
-        luckyDay: command?.startsWith("luckyday.") ? await readLuckyDay(tx, owner) : undefined,
-        dragonTower: command?.startsWith("dragontower")
-          ? await readDragonTower(tx, owner, now, num(profile, "serverId"), request)
-          : undefined,
-        expedition: await readExpedition(tx, profile, now, command, request),
-        expeditionScore: { load: (at) => readExpedition(tx, profile, at) },
-        arena:
-          command?.startsWith("arena.") || command === "show.arena.army"
-            ? await readArena(tx, owner)
-            : undefined,
-        anniversaryStatistics:
-          command === "1year.info" ? await readAnniversaryStatistics(tx, owner) : undefined,
-        campaignVariables: await readCampaignVariables(tx, owner, Number(profile.serverId)),
-        lottery: command?.startsWith("lottery.") ? await readLottery(tx, owner) : undefined,
-        totems: ["totem", "totem.init"].includes(command ?? "")
-          ? await readTotems(tx, owner)
-          : undefined,
-        civilizationSciences,
-        ...(command === "civilizationCastle"
-          ? await readCivilizationCastle(tx, owner, request)
-          : {}),
-        worldMutation,
-        dragons: await readDragonProgression(tx, owner),
-        minstrel: ["minstrel", "alchemist"].includes(command ?? "")
-          ? (
-              await tx
+                .from(worldpoint)
+                .where(and(eq(worldpoint.worldId, 0), inArray(worldpoint.id, [...ids])))
+                .orderBy(asc(worldpoint.id))
+                .for("update");
+        },
+        async getState(command, ranking, request)
+        {
+            const [profile] = await tx.select().from(userprofile).where(eq(userprofile.uid, owner));
+            const [resource] = await tx.select().from(user_resource).where(
+                eq(user_resource.uid, owner),
+            );
+
+            if (!profile || !resource)
+            {
+                throw new Error("Missing city owner");
+            }
+
+            const [statistics] = await tx.select().from(playerinfo).where(
+                eq(playerinfo.uid, owner),
+            );
+            const [buildingExperience] = await tx
                 .select()
-                .from(activity_minstrel)
-                .where(
-                  and(
-                    eq(activity_minstrel.uid, owner),
-                    eq(activity_minstrel.type, command === "alchemist" ? 1 : 0),
-                  ),
-                )
-            )[0]
-          : undefined,
-        generalRoster: await readGeneralRoster(tx, owner, command, ranking),
-        abilityPages: await readAbilityPages(tx, owner),
-        suitDecompositions: await readSuitDecompositions(tx, owner),
-        quests,
-        statistics: statistics ?? {},
-        buildingExperience: buildingExperience ?? {},
-        buildings,
-        sciences,
-        armies,
-        hospital,
-        forts,
-        queues,
-        effects: await readProgressionEffects(
-          tx,
-          owner,
-          await readPlayerEffects(tx, profile, true),
-        ),
-        newGenerals: await readResourceNewGenerals(tx, owner, false),
-        tasks,
-        skills,
-        achievements,
-        equipment,
-        glory: glory ?? {},
-      };
-    },
-    async update(write, economy) {
-      validateWrite(write, owner);
-      const persist = async () => {
-        for (const row of write.civilizationSciences ?? []) {
-          if (row.userID !== owner) {throw new Error("Foreign civilization science write");}
-
-          const value = {
-            userID: owner,
-            baseItemID: num(row, "baseItemID"),
-            level: num(row, "level"),
-          };
-          await tx
-            .insert(user_civilization_science)
-            .values(value)
-            .onConflictDoUpdate({
-              target: [user_civilization_science.baseItemID, user_civilization_science.userID],
-              set: { level: value.level },
-            });
-        }
-
-        if (write.minstrel) {
-          const row = write.minstrel;
-
-          if (row.uid !== owner || ![0, 1].includes(num(row, "type")))
-            {throw new Error("Foreign minstrel write");}
-
-          const value = {
-            uid: owner,
-            type: num(row, "type"),
-            listen: num(row, "listen"),
-            listentime: long(row, "listentime"),
-            share: num(row, "share"),
-            sharetime: long(row, "sharetime"),
-            reward: num(row, "reward"),
-            rewardtime: long(row, "rewardtime"),
-            resettime: long(row, "resettime"),
-          };
-          await tx
-            .insert(activity_minstrel)
-            .values(value)
-            .onConflictDoUpdate({
-              target: [activity_minstrel.uid, activity_minstrel.type],
-              set: value,
-            });
-        }
-
-        if (write.monsterExchange) {await writeMonsterExchanges(tx, owner, write.monsterExchange);}
-
-        if (write.fragmentExchange) {await writeFragmentExchanges(tx, owner, write.fragmentExchange);}
-
-        if (write.cosmeticTarget)
-          {await writeCosmeticTarget(tx, owner, cosmeticTarget?.uid, write.cosmeticTarget);}
-
-        if (write.costRankAward) {await writeCostRankAward(tx, owner, write.costRankAward, now);}
-
-        if (write.expeditionAward)
-          {await writeExpeditionAward(tx, owner, write.expeditionAward, now);}
-
-        if (write.heroRankingAward)
-          {await writeHeroRankAward(tx, owner, write.heroRankingAward, now);}
-
-        if (write.heroScore) {await writeHeroScore(tx, owner, alliance, write.heroScore);}
-
-        if (write.olympic) {await writeOlympic(tx, owner, write.olympic);}
-
-        if (write.cupBetting) {await writeCupBetting(tx, owner, write.cupBetting);}
-
-        if (write.groupBuy) {await writeGroupBuy(tx, owner, write.groupBuy);}
-
-        if (write.specialEventPurchase)
-          {await writeSpecialEventPurchase(tx, owner, write.specialEventPurchase);}
-
-        if (write.continuedCostHide !== undefined)
-          {await writeContinuedCostHide(tx, owner, write.continuedCostHide);}
-
-        if (write.continuedCost) {await writeContinuedCost(tx, owner, write.continuedCost);}
-
-        if (write.troubleHistory) {await writeTrouble(tx, owner, write.troubleHistory);}
-
-        if (write.comeback) {await writeComeback(tx, owner, write.comeback);}
-
-        if (write.hotItem) {await writeHotItems(tx, owner, write.hotItem);}
-
-        if (write.prayer) {await writePrayer(tx, owner, write.prayer);}
-
-        if (write.recallTask) {await writeRecallTasks(tx, owner, write.recallTask);}
-
-        if (write.regionalRecall) {await writeRegionalRecall(tx, owner, write.regionalRecall);}
-
-        if (write.allianceHeart) {await writeAllianceHeart(tx, owner, write.allianceHeart);}
-
-        if (write.playerItemGifts) {await writePlayerItemGifts(tx, owner, write.playerItemGifts);}
-
-        if (write.seasonalExchange) {await writeSeasonalExchange(tx, owner, write.seasonalExchange);}
-
-        if (write.vipBox) {await writeVipBox(tx, owner, write.vipBox);}
-
-        if (write.targetTask) {await writeTargetTasks(tx, owner, write.targetTask);}
-
-        if (write.redPackets) {await writeRedPackets(tx, owner, write.redPackets);}
-
-        if (write.militaryAward) {await writeMilitaryRankAward(tx, owner, write.militaryAward, now);}
-
-        if (write.activityRewardClaim)
-          {await writeActivityReward(tx, owner, write.activityRewardClaim);}
-
-        if (write.rechargeFeedback)
-          {await writeRechargeFeedback(tx, owner, write.rechargeFeedback, now);}
-
-        if (write.eggActivity) {await writeEggActivity(tx, owner, write.eggActivity);}
-
-        if (write.goldEggs) {await writeGoldEggs(tx, owner, write.goldEggs, now);}
-
-        if (write.normalRecharge) {await writeNormalRecharge(tx, owner, write.normalRecharge, now);}
-
-        if (write.rechargeActivity) {await writeRechargeActivity(tx, owner, write.rechargeActivity);}
-
-        if (write.ordinaryBox) {await writeOrdinaryBox(tx, owner, write.ordinaryBox);}
-
-        if (write.sevenDayCycle) {await writeSevenDayCycle(tx, owner, write.sevenDayCycle);}
-
-        if (write.shippingInvestment)
-          {await writeShippingInvestment(tx, owner, write.shippingInvestment);}
-
-        if (write.branchCityOpenState !== undefined)
-          {await tx
-            .insert(user_branch_city_info)
-            .values({
-              uid: owner,
-              openstate: write.branchCityOpenState,
-              takerewardcount: 0,
-            })
-            .onConflictDoUpdate({
-              target: user_branch_city_info.uid,
-              set: { openstate: write.branchCityOpenState },
-            });}
-
-        if (write.dailyInvestment) {await writeDailyInvestment(tx, owner, write.dailyInvestment);}
-
-        if (write.castleLevelEvent || write.castleLevelEnrollments)
-          {await writeCastleLevelEvent(
-            tx,
-            owner,
-            write.castleLevelEvent ?? [],
-            write.castleLevelEnrollments ?? [],
-          );}
-
-        if (write.luckyDay) {await writeLuckyDay(tx, owner, write.luckyDay);}
-
-        if (write.dragonTower) {await writeDragonTower(tx, owner, write.dragonTower);}
-
-        if (write.expedition) {await writeExpedition(tx, owner, write.expedition);}
-
-        if (write.arena) {await writeArena(tx, owner, write.arena);}
-
-        if (write.campaignVariables)
-          {await writeCampaignVariables(tx, owner, write.campaignVariables, now);}
-
-        if (write.lottery) {await writeLottery(tx, owner, write.lottery);}
-
-        if (write.totems) {await writeTotems(tx, owner, write.totems);}
-
-        if (write.civilizationCastle)
-          {await writeCivilizationCastle(tx, owner, write.civilizationCastle);}
-
-        if (write.worldMutation) {await writeWorldMutation(tx, owner, write.worldMutation);}
-
-        if (write.dragons) {await writeDragonProgression(tx, owner, write.dragons);}
-
-        await writePlayerEffects(tx, owner, write);
-
-        await writeEquipment(tx, owner, write);
-
-        if (write.quests) {await writeQuests(tx, owner, write.quests, questBefore);}
-
-        for (const row of write.buildings ?? []) {
-          const value = {
-            uuid: text(row, "uuid"),
-            uid: owner,
-            itemId: num(row, "itemId"),
-            pos: num(row, "pos"),
-            level: num(row, "level"),
-            opType: num(row, "opType"),
-            star: num(row, "star"),
-            progress: num(row, "progress"),
-            reward: num(row, "reward"),
-            refreshTime: long(row, "refreshTime"),
-            updateTime: long(row, "updateTime"),
-            effectTime: long(row, "effectTime"),
-            putId: text(row, "putId"),
-            unlockFlag: num(row, "unlockFlag"),
-            costUnlockTimes: num(row, "costUnlockTimes"),
-          };
-          const [existing] = await tx
-            .select({ uid: user_building.uid })
-            .from(user_building)
-            .where(eq(user_building.uuid, value.uuid));
-
-          if (existing && existing.uid !== owner) {throw new Error("Foreign building");}
-
-          await tx
-            .insert(user_building)
-            .values(value)
-            .onConflictDoUpdate({
-              target: user_building.uuid,
-              set: value,
-              setWhere: eq(user_building.uid, owner),
-            });
-        }
-
-        for (const row of write.skills ?? []) {
-          if (row.ownerId !== owner || !/^6[0-9]{5}$/.test(text(row, "skillId")))
-            {throw new Error("Invalid research skill owner");}
-
-          const value = {
-            uuid: text(row, "uuid"),
-            ownerId: owner,
-            skillId: text(row, "skillId"),
-            stat: num(row, "stat"),
-            startTime: long(row, "startTime"),
-            endTime: long(row, "endTime"),
-            actTime: long(row, "actTime"),
-            param1: num(row, "param1"),
-            param2: num(row, "param2"),
-          };
-          const [existing] = await tx
-            .select({ ownerId: user_skill.ownerId })
-            .from(user_skill)
-            .where(eq(user_skill.uuid, value.uuid));
-
-          if (existing && existing.ownerId !== owner) {throw new Error("Foreign research skill");}
-
-          await tx
-            .insert(user_skill)
-            .values(value)
-            .onConflictDoUpdate({
-              target: user_skill.uuid,
-              set: value,
-              setWhere: eq(user_skill.ownerId, owner),
-            });
-        }
-
-        for (const row of write.sciences ?? []) {
-          const value = {
-            uid: owner,
-            itemId: text(row, "itemId"),
-            level: num(row, "level"),
-            cd: long(row, "cd"),
-          };
-          await tx
-            .insert(user_science)
-            .values(value)
-            .onConflictDoUpdate({ target: [user_science.uid, user_science.itemId], set: value });
-        }
-
-        for (const row of write.armies ?? []) {
-          const value = {
-            uid: owner,
-            armyId: text(row, "armyId"),
-            level: num(row, "level"),
-            free: num(row, "free"),
-            pve: num(row, "pve"),
-            march: num(row, "march"),
-            defence: num(row, "defence"),
-            train: num(row, "train"),
-            finishTime: long(row, "finishTime"),
-            foodCostTime: long(row, "foodCostTime"),
-          };
-          await tx
-            .insert(user_army)
-            .values(value)
-            .onConflictDoUpdate({ target: [user_army.uid, user_army.armyId], set: value });
-        }
-
-        for (const row of write.hospital ?? []) {
-          const value = {
-            uid: owner,
-            armyId: text(row, "armyId"),
-            dead: num(row, "dead"),
-            heal: num(row, "heal"),
-            finishTime: long(row, "finishTime"),
-          };
-          await tx
-            .insert(user_hospital)
-            .values(value)
-            .onConflictDoUpdate({ target: [user_hospital.uid, user_hospital.armyId], set: value });
-        }
-
-        for (const row of write.forts ?? []) {
-          const value = {
-            uid: owner,
-            armyId: text(row, "armyId"),
-            num: num(row, "num"),
-            build: num(row, "build"),
-            level: num(row, "level"),
-            finishTime: long(row, "finishTime"),
-          };
-          await tx
-            .insert(user_wall)
-            .values(value)
-            .onConflictDoUpdate({ target: [user_wall.uid, user_wall.armyId], set: value });
-        }
-
-        for (const row of write.queues ?? []) {
-          if (text(row, "ownerId") !== owner) {throw new Error("Foreign queue");}
-
-          const [existing] = await tx
-            .select({ uuid: queue.uuid })
-            .from(queue)
-            .where(
-              and(eq(queue.ownerId, owner), eq(queue.type, num(row, "type")), eq(queue.qid, 1)),
+                .from(user_building_exp)
+                .where(eq(user_building_exp.uid, owner));
+            const buildings = await tx
+                .select()
+                .from(user_building)
+                .where(eq(user_building.uid, owner))
+                .orderBy(asc(user_building.uuid))
+                .limit(257);
+            const sciences = await tx
+                .select()
+                .from(user_science)
+                .where(eq(user_science.uid, owner))
+                .orderBy(asc(user_science.itemId))
+                .limit(4097);
+            const armies = await tx
+                .select()
+                .from(user_army)
+                .where(eq(user_army.uid, owner))
+                .orderBy(asc(user_army.armyId))
+                .limit(1025);
+            const hospital = await tx
+                .select()
+                .from(user_hospital)
+                .where(eq(user_hospital.uid, owner))
+                .orderBy(asc(user_hospital.armyId))
+                .limit(1025);
+            const forts = await tx
+                .select()
+                .from(user_wall)
+                .where(eq(user_wall.uid, owner))
+                .orderBy(asc(user_wall.armyId))
+                .limit(1025);
+            const queues = await tx.select().from(queue).where(eq(queue.ownerId, owner)).limit(257);
+
+            if (
+                buildings.length > 256
+                || sciences.length > 4096
+                || armies.length > 1024
+                || hospital.length > 1024
+                || forts.length > 1024
+                || queues.length > 256
+            )
+            {
+                throw new Error("City aggregate exceeds bound");
+            }
+
+            const skills = await tx.select().from(user_skill).where(eq(user_skill.ownerId, owner));
+            const tasks = await tx.select().from(user_task).where(eq(user_task.uid, owner));
+            const achievements = await tx
+                .select()
+                .from(user_achievement)
+                .where(eq(user_achievement.uid, owner));
+            const equipment = await tx.select().from(user_equip).where(eq(user_equip.uid, owner));
+            const [glory] = await tx.select().from(user_glory_info).where(
+                eq(user_glory_info.uid, owner),
+            );
+            const civilizationSciences = await tx
+                .select()
+                .from(user_civilization_science)
+                .where(eq(user_civilization_science.userID, owner))
+                .limit(4097);
+
+            if (civilizationSciences.length > 4096)
+            {
+                throw new Error("Civilization science aggregate exceeds bound");
+            }
+
+            alliance = profile.allianceId ?? "";
+            const worldMutation = command?.startsWith("world.")
+                    || command === "get.act.boss.point"
+                    || command === "create.boss"
+                    || command?.startsWith("treasuremap.")
+                    || command === "buy.citydef"
+                    || command === "resource.new.detail"
+                    || command === "common.res.syn"
+                    || command === "totem"
+                    || command === "civilizationCastle"
+                ? await readWorldMutationState(tx, owner, request, mapSize, command)
+                : undefined;
+
+            const quests = await readQuests(tx, owner, profile, now);
+            questBefore = structuredClone({ tasks, quests });
+
+            return {
+                militaryAward: command === "activity.accept.reward"
+                    ? militaryRankAwardReader(tx, owner)
+                    : undefined,
+                activityReward: command === "activity.accept.reward"
+                    ? activityRewardReader(tx, owner)
+                    : undefined,
+                redPackets: command?.startsWith("redPackets.") || command === "campaign.paid.gift"
+                    ? redPacketReader(tx, owner)
+                    : undefined,
+                worldMonsters: [
+                        "world.use",
+                        "create.boss",
+                        "world.get.monster",
+                        "world.get.barbarion",
+                        "get.act.boss.point",
+                    ].includes(command ?? "")
+                    ? worldMonsterReader(tx, mapSize)
+                    : undefined,
+                campaignProfile: command?.startsWith("egg.")
+                        || command?.startsWith("goldeggs.")
+                        || command?.startsWith("normal.recharge.")
+                        || command?.startsWith("campaign.")
+                        || command === "activity.accept.reward"
+                        || command === "world.march"
+                        || command?.startsWith("redPackets.")
+                        || command === "trigger.activity"
+                        || command?.startsWith("hot.item.")
+                    ? await readCampaignProfile(tx, owner)
+                    : undefined,
+                costRankAward: command === "continuedcost.rank.deliver"
+                    ? costRankAwardReader(tx, owner)
+                    : undefined,
+                expeditionAward: command === "expedition.award.deliver"
+                    ? expeditionAwardReader(tx, owner)
+                    : undefined,
+                heroRankingAward: command === "hero.rank.deliver"
+                    ? heroRankAwardReader(tx, owner)
+                    : undefined,
+                comeback: command?.startsWith("comeback.")
+                    ? await readComeback(tx, owner, profile)
+                    : undefined,
+                hotItem: command?.startsWith("hot.item.")
+                    ? await readHotItems(tx, owner, now)
+                    : undefined,
+                heroScore: heroScoreReader(tx, owner, alliance),
+                profile,
+                resource,
+                cosmeticTarget: command === "trigger.activity" || command === "avatar.activate"
+                    ? (cosmeticTarget = await readCosmeticTarget(
+                        tx,
+                        request,
+                        command === "avatar.activate" ? owner : undefined,
+                    ))
+                    : undefined,
+                trouble: command === "get.trouble.list" || command?.startsWith("trouble.")
+                    ? await readTrouble(tx, owner, command === "get.trouble.list")
+                    : undefined,
+                olympic: command?.startsWith("Olympic.") ? await readOlympic(tx, owner) : undefined,
+                cupBetting: command?.startsWith("euro.cup.")
+                    ? await readCupBetting(tx, owner)
+                    : undefined,
+                groupBuy: command?.startsWith("groupbuys.")
+                    ? await readGroupBuy(tx, owner)
+                    : undefined,
+                continuedCost: command?.startsWith("continuedcost.")
+                    ? readContinuedCost(tx, owner)
+                    : undefined,
+                prayer: await readPrayer(tx, owner),
+                recallTask: await readRecallTasks(
+                    tx,
+                    owner,
+                    command?.startsWith("recall.task.") ?? false,
+                ),
+                regionalRecall: command?.startsWith("region.recall.")
+                    ? await readRegionalRecall(
+                        tx,
+                        owner,
+                        num(profile, "serverId"),
+                        command === "region.recall.init",
+                    )
+                    : undefined,
+                allianceHeart: command === "heart.send" || command === "heart.init"
+                    ? await readAllianceHeart(tx, owner, command, request)
+                    : undefined,
+                playerItemGifts: command === "item.send" || command === "gift.init"
+                    ? await readPlayerItemGifts(tx, owner, command, request)
+                    : undefined,
+                monsterExchange: command === "act.exchange" || command?.startsWith("act.ex.")
+                    ? await readMonsterExchanges(tx, owner)
+                    : undefined,
+                fragmentExchange: command === "act.exchange" || command?.startsWith("act.ex.")
+                    ? await readFragmentExchanges(tx, owner)
+                    : undefined,
+                seasonalExchange: command?.startsWith("activity.exchange.")
+                    ? await readSeasonalExchange(tx, owner)
+                    : undefined,
+                vipBox: command?.startsWith("vip.box.") ? await readVipBox(tx, owner) : undefined,
+                targetTask: await readTargetTasks(tx, owner),
+                rechargeFeedback: command === "pay.recharge.ui.state" || command === "feedback.paid"
+                    ? rechargeFeedbackReader(tx, owner)
+                    : undefined,
+                eggActivity: command?.startsWith("egg.")
+                    ? await readEggActivity(tx, owner)
+                    : undefined,
+                goldEggs: command?.startsWith("goldeggs.")
+                    ? goldEggsReader(tx, owner, num(profile, "serverId"), now)
+                    : undefined,
+                normalRecharge: command?.startsWith("normal.recharge.")
+                    ? await readNormalRecharge(tx, owner, now, true)
+                    : undefined,
+                rechargeActivity: command?.startsWith("new.sercum.")
+                    ? await readRechargeActivity(tx, owner)
+                    : undefined,
+                ordinaryBoxServer:
+                    command === "get.table.value" || command?.startsWith("ordinary.box.")
+                        ? await readOrdinaryBoxServer(tx)
+                        : undefined,
+                sevenDayCycle: command?.startsWith("sevenday.")
+                    ? await readSevenDayCycle(tx, owner)
+                    : undefined,
+                branchCity: command?.startsWith("branchcity.")
+                    ? ((
+                        await tx
+                            .select()
+                            .from(user_branch_city_info)
+                            .where(eq(user_branch_city_info.uid, owner))
+                    )[0] ?? null)
+                    : undefined,
+                dailyInvestment: command?.startsWith("invest.")
+                    ? await readDailyInvestment(tx, owner)
+                    : undefined,
+                castleLevelEvent: command?.startsWith("castle.")
+                    ? await readCastleLevelEvent(tx, owner)
+                    : undefined,
+                luckyDay: command?.startsWith("luckyday.")
+                    ? await readLuckyDay(tx, owner)
+                    : undefined,
+                dragonTower: command?.startsWith("dragontower")
+                    ? await readDragonTower(tx, owner, now, num(profile, "serverId"), request)
+                    : undefined,
+                expedition: await readExpedition(tx, profile, now, command, request),
+                expeditionScore: { load: (at) => readExpedition(tx, profile, at) },
+                arena: command?.startsWith("arena.") || command === "show.arena.army"
+                    ? await readArena(tx, owner)
+                    : undefined,
+                anniversaryStatistics: command === "1year.info"
+                    ? await readAnniversaryStatistics(tx, owner)
+                    : undefined,
+                campaignVariables: await readCampaignVariables(tx, owner, Number(profile.serverId)),
+                lottery: command?.startsWith("lottery.") ? await readLottery(tx, owner) : undefined,
+                totems: ["totem", "totem.init"].includes(command ?? "")
+                    ? await readTotems(tx, owner)
+                    : undefined,
+                civilizationSciences,
+                ...(command === "civilizationCastle"
+                    ? await readCivilizationCastle(tx, owner, request)
+                    : {}),
+                worldMutation,
+                dragons: await readDragonProgression(tx, owner),
+                minstrel: ["minstrel", "alchemist"].includes(command ?? "")
+                    ? (
+                        await tx
+                            .select()
+                            .from(activity_minstrel)
+                            .where(
+                                and(
+                                    eq(activity_minstrel.uid, owner),
+                                    eq(activity_minstrel.type, command === "alchemist" ? 1 : 0),
+                                ),
+                            )
+                    )[0]
+                    : undefined,
+                generalRoster: await readGeneralRoster(tx, owner, command, ranking),
+                abilityPages: await readAbilityPages(tx, owner),
+                suitDecompositions: await readSuitDecompositions(tx, owner),
+                quests,
+                statistics: statistics ?? {},
+                buildingExperience: buildingExperience ?? {},
+                buildings,
+                sciences,
+                armies,
+                hospital,
+                forts,
+                queues,
+                effects: await readProgressionEffects(
+                    tx,
+                    owner,
+                    await readPlayerEffects(tx, profile, true),
+                ),
+                newGenerals: await readResourceNewGenerals(tx, owner, false),
+                tasks,
+                skills,
+                achievements,
+                equipment,
+                glory: glory ?? {},
+            };
+        },
+        async update(write, economy)
+        {
+            validateWrite(write, owner);
+            const persist = async () => {
+                for (const row of write.civilizationSciences ?? [])
+                {
+                    if (row.userID !== owner)
+                    {
+                        throw new Error("Foreign civilization science write");
+                    }
+
+                    const value = {
+                        userID: owner,
+                        baseItemID: num(row, "baseItemID"),
+                        level: num(row, "level"),
+                    };
+                    await tx
+                        .insert(user_civilization_science)
+                        .values(value)
+                        .onConflictDoUpdate({
+                            target: [
+                                user_civilization_science.baseItemID,
+                                user_civilization_science.userID,
+                            ],
+                            set: { level: value.level },
+                        });
+                }
+
+                if (write.minstrel)
+                {
+                    const row = write.minstrel;
+
+                    if (row.uid !== owner || ![0, 1].includes(num(row, "type")))
+                    {
+                        throw new Error("Foreign minstrel write");
+                    }
+
+                    const value = {
+                        uid: owner,
+                        type: num(row, "type"),
+                        listen: num(row, "listen"),
+                        listentime: long(row, "listentime"),
+                        share: num(row, "share"),
+                        sharetime: long(row, "sharetime"),
+                        reward: num(row, "reward"),
+                        rewardtime: long(row, "rewardtime"),
+                        resettime: long(row, "resettime"),
+                    };
+                    await tx
+                        .insert(activity_minstrel)
+                        .values(value)
+                        .onConflictDoUpdate({
+                            target: [activity_minstrel.uid, activity_minstrel.type],
+                            set: value,
+                        });
+                }
+
+                if (write.monsterExchange)
+                {
+                    await writeMonsterExchanges(tx, owner, write.monsterExchange);
+                }
+
+                if (write.fragmentExchange)
+                {
+                    await writeFragmentExchanges(tx, owner, write.fragmentExchange);
+                }
+
+                if (write.cosmeticTarget)
+                {
+                    await writeCosmeticTarget(tx, owner, cosmeticTarget?.uid, write.cosmeticTarget);
+                }
+
+                if (write.costRankAward)
+                {
+                    await writeCostRankAward(tx, owner, write.costRankAward, now);
+                }
+
+                if (write.expeditionAward)
+                {
+                    await writeExpeditionAward(tx, owner, write.expeditionAward, now);
+                }
+
+                if (write.heroRankingAward)
+                {
+                    await writeHeroRankAward(tx, owner, write.heroRankingAward, now);
+                }
+
+                if (write.heroScore)
+                {
+                    await writeHeroScore(tx, owner, alliance, write.heroScore);
+                }
+
+                if (write.olympic)
+                {
+                    await writeOlympic(tx, owner, write.olympic);
+                }
+
+                if (write.cupBetting)
+                {
+                    await writeCupBetting(tx, owner, write.cupBetting);
+                }
+
+                if (write.groupBuy)
+                {
+                    await writeGroupBuy(tx, owner, write.groupBuy);
+                }
+
+                if (write.specialEventPurchase)
+                {
+                    await writeSpecialEventPurchase(tx, owner, write.specialEventPurchase);
+                }
+
+                if (write.continuedCostHide !== undefined)
+                {
+                    await writeContinuedCostHide(tx, owner, write.continuedCostHide);
+                }
+
+                if (write.continuedCost)
+                {
+                    await writeContinuedCost(tx, owner, write.continuedCost);
+                }
+
+                if (write.troubleHistory)
+                {
+                    await writeTrouble(tx, owner, write.troubleHistory);
+                }
+
+                if (write.comeback)
+                {
+                    await writeComeback(tx, owner, write.comeback);
+                }
+
+                if (write.hotItem)
+                {
+                    await writeHotItems(tx, owner, write.hotItem);
+                }
+
+                if (write.prayer)
+                {
+                    await writePrayer(tx, owner, write.prayer);
+                }
+
+                if (write.recallTask)
+                {
+                    await writeRecallTasks(tx, owner, write.recallTask);
+                }
+
+                if (write.regionalRecall)
+                {
+                    await writeRegionalRecall(tx, owner, write.regionalRecall);
+                }
+
+                if (write.allianceHeart)
+                {
+                    await writeAllianceHeart(tx, owner, write.allianceHeart);
+                }
+
+                if (write.playerItemGifts)
+                {
+                    await writePlayerItemGifts(tx, owner, write.playerItemGifts);
+                }
+
+                if (write.seasonalExchange)
+                {
+                    await writeSeasonalExchange(tx, owner, write.seasonalExchange);
+                }
+
+                if (write.vipBox)
+                {
+                    await writeVipBox(tx, owner, write.vipBox);
+                }
+
+                if (write.targetTask)
+                {
+                    await writeTargetTasks(tx, owner, write.targetTask);
+                }
+
+                if (write.redPackets)
+                {
+                    await writeRedPackets(tx, owner, write.redPackets);
+                }
+
+                if (write.militaryAward)
+                {
+                    await writeMilitaryRankAward(tx, owner, write.militaryAward, now);
+                }
+
+                if (write.activityRewardClaim)
+                {
+                    await writeActivityReward(tx, owner, write.activityRewardClaim);
+                }
+
+                if (write.rechargeFeedback)
+                {
+                    await writeRechargeFeedback(tx, owner, write.rechargeFeedback, now);
+                }
+
+                if (write.eggActivity)
+                {
+                    await writeEggActivity(tx, owner, write.eggActivity);
+                }
+
+                if (write.goldEggs)
+                {
+                    await writeGoldEggs(tx, owner, write.goldEggs, now);
+                }
+
+                if (write.normalRecharge)
+                {
+                    await writeNormalRecharge(tx, owner, write.normalRecharge, now);
+                }
+
+                if (write.rechargeActivity)
+                {
+                    await writeRechargeActivity(tx, owner, write.rechargeActivity);
+                }
+
+                if (write.ordinaryBox)
+                {
+                    await writeOrdinaryBox(tx, owner, write.ordinaryBox);
+                }
+
+                if (write.sevenDayCycle)
+                {
+                    await writeSevenDayCycle(tx, owner, write.sevenDayCycle);
+                }
+
+                if (write.shippingInvestment)
+                {
+                    await writeShippingInvestment(tx, owner, write.shippingInvestment);
+                }
+
+                if (write.branchCityOpenState !== undefined)
+                {
+                    await tx
+                        .insert(user_branch_city_info)
+                        .values({
+                            uid: owner,
+                            openstate: write.branchCityOpenState,
+                            takerewardcount: 0,
+                        })
+                        .onConflictDoUpdate({
+                            target: user_branch_city_info.uid,
+                            set: { openstate: write.branchCityOpenState },
+                        });
+                }
+
+                if (write.dailyInvestment)
+                {
+                    await writeDailyInvestment(tx, owner, write.dailyInvestment);
+                }
+
+                if (write.castleLevelEvent || write.castleLevelEnrollments)
+                {
+                    await writeCastleLevelEvent(
+                        tx,
+                        owner,
+                        write.castleLevelEvent ?? [],
+                        write.castleLevelEnrollments ?? [],
+                    );
+                }
+
+                if (write.luckyDay)
+                {
+                    await writeLuckyDay(tx, owner, write.luckyDay);
+                }
+
+                if (write.dragonTower)
+                {
+                    await writeDragonTower(tx, owner, write.dragonTower);
+                }
+
+                if (write.expedition)
+                {
+                    await writeExpedition(tx, owner, write.expedition);
+                }
+
+                if (write.arena)
+                {
+                    await writeArena(tx, owner, write.arena);
+                }
+
+                if (write.campaignVariables)
+                {
+                    await writeCampaignVariables(tx, owner, write.campaignVariables, now);
+                }
+
+                if (write.lottery)
+                {
+                    await writeLottery(tx, owner, write.lottery);
+                }
+
+                if (write.totems)
+                {
+                    await writeTotems(tx, owner, write.totems);
+                }
+
+                if (write.civilizationCastle)
+                {
+                    await writeCivilizationCastle(tx, owner, write.civilizationCastle);
+                }
+
+                if (write.worldMutation)
+                {
+                    await writeWorldMutation(tx, owner, write.worldMutation);
+                }
+
+                if (write.dragons)
+                {
+                    await writeDragonProgression(tx, owner, write.dragons);
+                }
+
+                await writePlayerEffects(tx, owner, write);
+
+                await writeEquipment(tx, owner, write);
+
+                if (write.quests)
+                {
+                    await writeQuests(tx, owner, write.quests, questBefore);
+                }
+
+                for (const row of write.buildings ?? [])
+                {
+                    const value = {
+                        uuid: text(row, "uuid"),
+                        uid: owner,
+                        itemId: num(row, "itemId"),
+                        pos: num(row, "pos"),
+                        level: num(row, "level"),
+                        opType: num(row, "opType"),
+                        star: num(row, "star"),
+                        progress: num(row, "progress"),
+                        reward: num(row, "reward"),
+                        refreshTime: long(row, "refreshTime"),
+                        updateTime: long(row, "updateTime"),
+                        effectTime: long(row, "effectTime"),
+                        putId: text(row, "putId"),
+                        unlockFlag: num(row, "unlockFlag"),
+                        costUnlockTimes: num(row, "costUnlockTimes"),
+                    };
+                    const [existing] = await tx
+                        .select({ uid: user_building.uid })
+                        .from(user_building)
+                        .where(eq(user_building.uuid, value.uuid));
+
+                    if (existing && existing.uid !== owner)
+                    {
+                        throw new Error("Foreign building");
+                    }
+
+                    await tx
+                        .insert(user_building)
+                        .values(value)
+                        .onConflictDoUpdate({
+                            target: user_building.uuid,
+                            set: value,
+                            setWhere: eq(user_building.uid, owner),
+                        });
+                }
+
+                for (const row of write.skills ?? [])
+                {
+                    if (row.ownerId !== owner || !/^6[0-9]{5}$/.test(text(row, "skillId")))
+                    {
+                        throw new Error("Invalid research skill owner");
+                    }
+
+                    const value = {
+                        uuid: text(row, "uuid"),
+                        ownerId: owner,
+                        skillId: text(row, "skillId"),
+                        stat: num(row, "stat"),
+                        startTime: long(row, "startTime"),
+                        endTime: long(row, "endTime"),
+                        actTime: long(row, "actTime"),
+                        param1: num(row, "param1"),
+                        param2: num(row, "param2"),
+                    };
+                    const [existing] = await tx
+                        .select({ ownerId: user_skill.ownerId })
+                        .from(user_skill)
+                        .where(eq(user_skill.uuid, value.uuid));
+
+                    if (existing && existing.ownerId !== owner)
+                    {
+                        throw new Error("Foreign research skill");
+                    }
+
+                    await tx
+                        .insert(user_skill)
+                        .values(value)
+                        .onConflictDoUpdate({
+                            target: user_skill.uuid,
+                            set: value,
+                            setWhere: eq(user_skill.ownerId, owner),
+                        });
+                }
+
+                for (const row of write.sciences ?? [])
+                {
+                    const value = {
+                        uid: owner,
+                        itemId: text(row, "itemId"),
+                        level: num(row, "level"),
+                        cd: long(row, "cd"),
+                    };
+                    await tx
+                        .insert(user_science)
+                        .values(value)
+                        .onConflictDoUpdate({
+                            target: [user_science.uid, user_science.itemId],
+                            set: value,
+                        });
+                }
+
+                for (const row of write.armies ?? [])
+                {
+                    const value = {
+                        uid: owner,
+                        armyId: text(row, "armyId"),
+                        level: num(row, "level"),
+                        free: num(row, "free"),
+                        pve: num(row, "pve"),
+                        march: num(row, "march"),
+                        defence: num(row, "defence"),
+                        train: num(row, "train"),
+                        finishTime: long(row, "finishTime"),
+                        foodCostTime: long(row, "foodCostTime"),
+                    };
+                    await tx
+                        .insert(user_army)
+                        .values(value)
+                        .onConflictDoUpdate({
+                            target: [user_army.uid, user_army.armyId],
+                            set: value,
+                        });
+                }
+
+                for (const row of write.hospital ?? [])
+                {
+                    const value = {
+                        uid: owner,
+                        armyId: text(row, "armyId"),
+                        dead: num(row, "dead"),
+                        heal: num(row, "heal"),
+                        finishTime: long(row, "finishTime"),
+                    };
+                    await tx
+                        .insert(user_hospital)
+                        .values(value)
+                        .onConflictDoUpdate({
+                            target: [user_hospital.uid, user_hospital.armyId],
+                            set: value,
+                        });
+                }
+
+                for (const row of write.forts ?? [])
+                {
+                    const value = {
+                        uid: owner,
+                        armyId: text(row, "armyId"),
+                        num: num(row, "num"),
+                        build: num(row, "build"),
+                        level: num(row, "level"),
+                        finishTime: long(row, "finishTime"),
+                    };
+                    await tx
+                        .insert(user_wall)
+                        .values(value)
+                        .onConflictDoUpdate({
+                            target: [user_wall.uid, user_wall.armyId],
+                            set: value,
+                        });
+                }
+
+                for (const row of write.queues ?? [])
+                {
+                    if (text(row, "ownerId") !== owner)
+                    {
+                        throw new Error("Foreign queue");
+                    }
+
+                    const [existing] = await tx
+                        .select({ uuid: queue.uuid })
+                        .from(queue)
+                        .where(
+                            and(
+                                eq(queue.ownerId, owner),
+                                eq(queue.type, num(row, "type")),
+                                eq(queue.qid, 1),
+                            ),
+                        );
+
+                    if (!existing)
+                    {
+                        await tx.insert(queue).values({
+                            uuid: text(row, "uuid"),
+                            ownerId: owner,
+                            qid: 1,
+                            type: num(row, "type"),
+                            itemId: "",
+                            startTime: long(row, "startTime"),
+                            endTime: long(row, "endTime"),
+                            updateTime: long(row, "updateTime"),
+                            totalTime: 0n,
+                            isHelped: 0,
+                            para: 0,
+                        });
+                    }
+                }
+
+                if (write.profile)
+                {
+                    await tx.update(userprofile).set(write.profile).where(
+                        eq(userprofile.uid, owner),
+                    );
+
+                    if (write.legacyGeneralLevel !== undefined)
+                    {
+                        await tx
+                            .update(user_general)
+                            .set({ level: write.legacyGeneralLevel })
+                            .where(eq(user_general.uid, owner));
+                    }
+                }
+
+                if (write.generalRoster)
+                {
+                    await writeGeneralRoster(tx, owner, write.generalRoster, now);
+                }
+
+                if (write.statistics)
+                {
+                    await tx
+                        .insert(playerinfo)
+                        .values({ uid: owner, ...write.statistics })
+                        .onConflictDoUpdate({ target: playerinfo.uid, set: write.statistics });
+                }
+
+                if (write.buildingExperience)
+                {
+                    await tx
+                        .insert(user_building_exp)
+                        .values({ uid: owner, ...write.buildingExperience })
+                        .onConflictDoUpdate({
+                            target: user_building_exp.uid,
+                            set: write.buildingExperience,
+                        });
+                }
+
+                if (write.deletedBuildings?.length)
+                {
+                    await tx
+                        .update(new_general)
+                        .set({ buildingUuid: "", state: 1 })
+                        .where(
+                            and(
+                                eq(new_general.uid, owner),
+                                eq(new_general.state, 2),
+                                inArray(new_general.buildingUuid, [...write.deletedBuildings]),
+                            ),
+                        );
+                    await tx
+                        .delete(user_building)
+                        .where(
+                            and(
+                                eq(user_building.uid, owner),
+                                inArray(user_building.uuid, [...write.deletedBuildings]),
+                            ),
+                        );
+                }
+            };
+            const scienceBefore = write.sciences?.length
+                ? await tx
+                    .select({ itemId: user_science.itemId, level: user_science.level })
+                    .from(user_science)
+                    .where(eq(user_science.uid, owner))
+                : [];
+            const changedScience = write.sciences?.some(
+                (row) =>
+                    num(row, "level")
+                        !== (scienceBefore.find((before) => before.itemId === row.itemId)?.level
+                            ?? 0),
             );
 
-          if (!existing)
-            {await tx.insert(queue).values({
-              uuid: text(row, "uuid"),
-              ownerId: owner,
-              qid: 1,
-              type: num(row, "type"),
-              itemId: "",
-              startTime: long(row, "startTime"),
-              endTime: long(row, "endTime"),
-              updateTime: long(row, "updateTime"),
-              totalTime: 0n,
-              isHelped: 0,
-              para: 0,
-            });}
-        }
+            if (
+                write.luckyDay
+                || write.generalRoster
+                || write.equipment?.length
+                || write.deletedEquipment?.length
+                || write.equipmentSelection !== undefined
+                || write.vip
+                || write.states?.length
+                || write.deletedStates?.length
+                || write.generals?.length
+                || write.buildings?.length
+                || changedScience
+                || write.civilizationSciences?.length
+                || write.dragons
+                || write.profile
+                || write.deletedBuildings?.length
+            )
+            {
+                await boundary(tx, owner, now, persist, write.deletedBuildings ?? [], economy);
+            }
+            else
+            {
+                await persist();
+            }
 
-        if (write.profile) {
-          await tx.update(userprofile).set(write.profile).where(eq(userprofile.uid, owner));
-
-          if (write.legacyGeneralLevel !== undefined)
-            {await tx
-              .update(user_general)
-              .set({ level: write.legacyGeneralLevel })
-              .where(eq(user_general.uid, owner));}
-        }
-
-        if (write.generalRoster) {await writeGeneralRoster(tx, owner, write.generalRoster, now);}
-
-        if (write.statistics)
-          {await tx
-            .insert(playerinfo)
-            .values({ uid: owner, ...write.statistics })
-            .onConflictDoUpdate({ target: playerinfo.uid, set: write.statistics });}
-
-        if (write.buildingExperience)
-          {await tx
-            .insert(user_building_exp)
-            .values({ uid: owner, ...write.buildingExperience })
-            .onConflictDoUpdate({ target: user_building_exp.uid, set: write.buildingExperience });}
-
-        if (write.deletedBuildings?.length) {
-          await tx
-            .update(new_general)
-            .set({ buildingUuid: "", state: 1 })
-            .where(
-              and(
-                eq(new_general.uid, owner),
-                eq(new_general.state, 2),
-                inArray(new_general.buildingUuid, [...write.deletedBuildings]),
-              ),
-            );
-          await tx
-            .delete(user_building)
-            .where(
-              and(
-                eq(user_building.uid, owner),
-                inArray(user_building.uuid, [...write.deletedBuildings]),
-              ),
-            );
-        }
-      };
-      const scienceBefore = write.sciences?.length
-        ? await tx
-            .select({ itemId: user_science.itemId, level: user_science.level })
-            .from(user_science)
-            .where(eq(user_science.uid, owner))
-        : [];
-      const changedScience = write.sciences?.some(
-        (row) =>
-          num(row, "level") !==
-          (scienceBefore.find((before) => before.itemId === row.itemId)?.level ?? 0),
-      );
-
-      if (
-        write.luckyDay ||
-        write.generalRoster ||
-        write.equipment?.length ||
-        write.deletedEquipment?.length ||
-        write.equipmentSelection !== undefined ||
-        write.vip ||
-        write.states?.length ||
-        write.deletedStates?.length ||
-        write.generals?.length ||
-        write.buildings?.length ||
-        changedScience ||
-        write.civilizationSciences?.length ||
-        write.dragons ||
-        write.profile ||
-        write.deletedBuildings?.length
-      )
-        {await boundary(tx, owner, now, persist, write.deletedBuildings ?? [], economy);}
-      else {await persist();}
-
-      if (write.deletedBuildings?.length)
-        {await tx
-          .delete(building_production)
-          .where(
-            and(
-              eq(building_production.ownerId, owner),
-              inArray(building_production.buildingId, [...write.deletedBuildings]),
-            ),
-          );}
-    },
-  };
+            if (write.deletedBuildings?.length)
+            {
+                await tx
+                    .delete(building_production)
+                    .where(
+                        and(
+                            eq(building_production.ownerId, owner),
+                            inArray(building_production.buildingId, [...write.deletedBuildings]),
+                        ),
+                    );
+            }
+        },
+    };
 }
 
-function validateWrite(write: CityProgressionWrite, owner: string) {
-  for (const [rows, identity, fields] of [
-    [
-      write.buildings,
-      "uuid",
-      [
-        "itemId",
-        "pos",
-        "level",
-        "star",
-        "progress",
-        "opType",
-        "reward",
-        "unlockFlag",
-        "costUnlockTimes",
-      ],
-    ],
-    [write.sciences, "itemId", ["level"]],
-    [write.armies, "armyId", ["level", "free", "pve", "march", "defence", "train"]],
-    [write.hospital, "armyId", ["dead", "heal"]],
-    [write.forts, "armyId", ["level", "num", "build"]],
-  ] as const) {
-    if (!rows) {continue;}
+function validateWrite(write: CityProgressionWrite, owner: string)
+{
+    for (
+        const [rows, identity, fields] of [
+            [
+                write.buildings,
+                "uuid",
+                [
+                    "itemId",
+                    "pos",
+                    "level",
+                    "star",
+                    "progress",
+                    "opType",
+                    "reward",
+                    "unlockFlag",
+                    "costUnlockTimes",
+                ],
+            ],
+            [write.sciences, "itemId", ["level"]],
+            [write.armies, "armyId", ["level", "free", "pve", "march", "defence", "train"]],
+            [write.hospital, "armyId", ["dead", "heal"]],
+            [write.forts, "armyId", ["level", "num", "build"]],
+        ] as const
+    )
+    {
+        if (!rows)
+        {
+            continue;
+        }
 
-    if (rows.length > 1024 || new Set(rows.map((row) => row[identity])).size !== rows.length)
-      {throw new Error("Invalid city write set");}
+        if (rows.length > 1024 || new Set(rows.map((row) => row[identity])).size !== rows.length)
+        {
+            throw new Error("Invalid city write set");
+        }
 
-    for (const row of rows) {
-      if (row.uid !== owner || !text(row, identity) || text(row, identity).length > 40)
-        {throw new Error("Invalid city owner");}
+        for (const row of rows)
+        {
+            if (row.uid !== owner || !text(row, identity) || text(row, identity).length > 40)
+            {
+                throw new Error("Invalid city owner");
+            }
 
-      for (const key of fields) {
-        const value = num(row as Row, key);
+            for (const key of fields)
+            {
+                const value = num(row as Row, key);
 
-        if (!Number.isInteger(value) || value < 0 || value > 2147483647)
-          {throw new Error("Invalid city quantity");}
-      }
+                if (!Number.isInteger(value) || value < 0 || value > 2147483647)
+                {
+                    throw new Error("Invalid city quantity");
+                }
+            }
 
-      for (const key of ["finishTime", "cd", "refreshTime", "updateTime", "foodCostTime"]) {
-        if (long(row as Row, key) < 0n || long(row as Row, key) > 9223372036854775807n)
-          {throw new Error("Invalid city deadline");}
-      }
+            for (const key of ["finishTime", "cd", "refreshTime", "updateTime", "foodCostTime"])
+            {
+                if (long(row as Row, key) < 0n || long(row as Row, key) > 9223372036854775807n)
+                {
+                    throw new Error("Invalid city deadline");
+                }
+            }
+        }
     }
-  }
 }

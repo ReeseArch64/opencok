@@ -6,74 +6,75 @@ import { HeroTalentTree } from "@opencok/enums/hero-talent-tree";
 import type { HeroDefinition } from "../contracts/hero-definition.ts";
 import { Hero } from "./hero.ts";
 
-export class SenNoRikyu extends Hero {
-  public readonly identity = HeroIdentity.SenNoRikyu;
-  public readonly name = "Sen no Rikyū";
-  public readonly gender = HeroGender.Male;
-  public readonly recruitment: HeroDefinition["recruitment"] = {
-    available: true,
-    cost: { item: HeroItem.SenNoRikyuFragment, quantity: 3000 },
-    initialQuality: 1,
-  };
-  public readonly progression: HeroDefinition["progression"] = {
-    initialLevel: 1,
-    maximumLevel: 100,
-    automatedGrantLevelLimit: 100,
-    talentPointDivisor: 1,
-    breakthroughs: this.freeBreakthroughs(HeroItem.SenNoRikyuFragment, 5),
-  };
-  public readonly stars: HeroDefinition["stars"] = {
-    initial: 1,
-    maximum: 5,
-    initialSkills: [HeroSkill.SenNoRikyuBumperHarvest],
-    upgrades: [
-      { stars: 2, cost: { item: HeroItem.SenNoRikyuFragment, quantity: 6000 }, skills: [] },
-      {
-        stars: 3,
-        cost: { item: HeroItem.SenNoRikyuFragment, quantity: 15000 },
-        skills: [HeroSkill.SenNoRikyuBumperHarvest2],
-      },
-      {
-        stars: 4,
-        cost: { item: HeroItem.SenNoRikyuFragment, quantity: 30000 },
-        skills: [HeroSkill.SenNoRikyuInsaneGathering],
-      },
-      {
-        stars: 5,
-        cost: { item: HeroItem.SenNoRikyuFragment, quantity: 60000 },
-        skills: [HeroSkill.SenNoRikyuRuthlessPlunder],
-      },
-    ],
-  };
-  public readonly talentTrees: HeroDefinition["talentTrees"] = [HeroTalentTree.SenNoRikyuCombat];
-  public readonly refinement = this.standardRefinement(HeroItem.SenNoRikyuFragment, [
-    {
-      position: 1,
-      refinementItemQuantity: 0,
-      requiredLevel: 1,
-      requiredStars: 1,
-      unlockCost: { item: HeroItem.HeroBadge, quantity: 0 },
-    },
-    {
-      position: 2,
-      refinementItemQuantity: 0,
-      requiredLevel: 1,
-      requiredStars: 1,
-      unlockCost: { item: HeroItem.HeroBadge, quantity: 0 },
-    },
-    {
-      position: 3,
-      refinementItemQuantity: 0,
-      requiredLevel: 30,
-      requiredStars: 1,
-      unlockCost: { item: HeroItem.HeroBadge, quantity: 1 },
-    },
-    {
-      position: 4,
-      refinementItemQuantity: 0,
-      requiredStars: 3,
-      unlockCost: { item: HeroItem.HeroBadge, quantity: 1 },
-    },
-    { position: 5, refinementItemQuantity: 0 },
-  ]);
+export class SenNoRikyu extends Hero
+{
+    public readonly identity = HeroIdentity.SenNoRikyu;
+    public readonly name = "Sen no Rikyū";
+    public readonly gender = HeroGender.Male;
+    public readonly recruitment: HeroDefinition["recruitment"] = {
+        available: true,
+        cost: { item: HeroItem.SenNoRikyuFragment, quantity: 3000 },
+        initialQuality: 1,
+    };
+    public readonly progression: HeroDefinition["progression"] = {
+        initialLevel: 1,
+        maximumLevel: 100,
+        automatedGrantLevelLimit: 100,
+        talentPointDivisor: 1,
+        breakthroughs: this.freeBreakthroughs(HeroItem.SenNoRikyuFragment, 5),
+    };
+    public readonly stars: HeroDefinition["stars"] = {
+        initial: 1,
+        maximum: 5,
+        initialSkills: [HeroSkill.SenNoRikyuBumperHarvest],
+        upgrades: [
+            { stars: 2, cost: { item: HeroItem.SenNoRikyuFragment, quantity: 6000 }, skills: [] },
+            {
+                stars: 3,
+                cost: { item: HeroItem.SenNoRikyuFragment, quantity: 15000 },
+                skills: [HeroSkill.SenNoRikyuBumperHarvest2],
+            },
+            {
+                stars: 4,
+                cost: { item: HeroItem.SenNoRikyuFragment, quantity: 30000 },
+                skills: [HeroSkill.SenNoRikyuInsaneGathering],
+            },
+            {
+                stars: 5,
+                cost: { item: HeroItem.SenNoRikyuFragment, quantity: 60000 },
+                skills: [HeroSkill.SenNoRikyuRuthlessPlunder],
+            },
+        ],
+    };
+    public readonly talentTrees: HeroDefinition["talentTrees"] = [HeroTalentTree.SenNoRikyuCombat];
+    public readonly refinement = this.standardRefinement(HeroItem.SenNoRikyuFragment, [
+        {
+            position: 1,
+            refinementItemQuantity: 0,
+            requiredLevel: 1,
+            requiredStars: 1,
+            unlockCost: { item: HeroItem.HeroBadge, quantity: 0 },
+        },
+        {
+            position: 2,
+            refinementItemQuantity: 0,
+            requiredLevel: 1,
+            requiredStars: 1,
+            unlockCost: { item: HeroItem.HeroBadge, quantity: 0 },
+        },
+        {
+            position: 3,
+            refinementItemQuantity: 0,
+            requiredLevel: 30,
+            requiredStars: 1,
+            unlockCost: { item: HeroItem.HeroBadge, quantity: 1 },
+        },
+        {
+            position: 4,
+            refinementItemQuantity: 0,
+            requiredStars: 3,
+            unlockCost: { item: HeroItem.HeroBadge, quantity: 1 },
+        },
+        { position: 5, refinementItemQuantity: 0 },
+    ]);
 }

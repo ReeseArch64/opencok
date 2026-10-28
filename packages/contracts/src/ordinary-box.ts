@@ -1,4 +1,5 @@
-export interface OrdinaryBoxWrite {
-  mdata?: string;
-  gold: boolean;
+export interface OrdinaryBoxWrite
+{
+    mdata?: string;
+    gold: boolean;
 }

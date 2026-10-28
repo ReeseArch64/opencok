@@ -1,6 +1,7 @@
-export interface ServerlistDefinition {
-  readonly "id": number;
-  readonly "serverType": number;
+export interface ServerlistDefinition
+{
+    readonly "id": number;
+    readonly "serverType": number;
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";

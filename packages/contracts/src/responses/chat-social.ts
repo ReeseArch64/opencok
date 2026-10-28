@@ -1,3 +1,4 @@
-export interface ChatSocialResponse {
-  [key: string]: unknown;
+export interface ChatSocialResponse
+{
+    [key: string]: unknown;
 }

@@ -6,89 +6,90 @@ import { HeroTalentTree } from "@opencok/enums/hero-talent-tree";
 import type { HeroDefinition } from "../contracts/hero-definition.ts";
 import { Hero } from "./hero.ts";
 
-export class Mulan extends Hero {
-  public readonly identity = HeroIdentity.Mulan;
-  public readonly name = "Hua Mulan";
-  public readonly gender = HeroGender.Female;
-  public readonly recruitment: HeroDefinition["recruitment"] = {
-    available: true,
-    cost: { item: HeroItem.MulanFragment, quantity: 3000 },
-    initialQuality: 1,
-  };
-  public readonly progression: HeroDefinition["progression"] = {
-    initialLevel: 1,
-    maximumLevel: 99,
-    automatedGrantLevelLimit: 100,
-    talentPointDivisor: 10,
-    breakthroughs: this.freeBreakthroughs(HeroItem.MulanFragment, 5),
-  };
-  public readonly stars: HeroDefinition["stars"] = {
-    initial: 1,
-    maximum: 5,
-    initialSkills: [HeroSkill.MulanFormation],
-    upgrades: [
-      {
-        stars: 2,
-        cost: { item: HeroItem.MulanFragment, quantity: 6000 },
-        skills: [HeroSkill.InfantryBasicAttack],
-      },
-      {
-        stars: 3,
-        cost: { item: HeroItem.MulanFragment, quantity: 15000 },
-        skills: [HeroSkill.InfantryDamage],
-      },
-      {
-        stars: 4,
-        cost: { item: HeroItem.MulanFragment, quantity: 30000 },
-        skills: [HeroSkill.InfantryStrikingDistance],
-      },
-      {
-        stars: 5,
-        cost: { item: HeroItem.MulanFragment, quantity: 60000 },
-        skills: [HeroSkill.InfantryBasicPuncture],
-      },
-    ],
-  };
-  public readonly talentTrees: HeroDefinition["talentTrees"] = [
-    HeroTalentTree.MulanVanguard,
-    HeroTalentTree.MulanOffensive,
-    HeroTalentTree.MulanSpear,
-  ];
-  public readonly refinement = this.standardRefinement(HeroItem.MulanFragment, [
-    {
-      position: 1,
-      refinementItemQuantity: 1,
-      requiredLevel: 1,
-      requiredStars: 1,
-      unlockCost: { item: HeroItem.HeroBadge, quantity: 0 },
-    },
-    {
-      position: 2,
-      refinementItemQuantity: 1,
-      requiredLevel: 1,
-      requiredStars: 2,
-      unlockCost: { item: HeroItem.HeroBadge, quantity: 0 },
-    },
-    {
-      position: 3,
-      refinementItemQuantity: 1,
-      requiredLevel: 30,
-      requiredStars: 3,
-      unlockCost: { item: HeroItem.HeroBadge, quantity: 1 },
-    },
-    {
-      position: 4,
-      refinementItemQuantity: 0,
-      requiredLevel: 1,
-      requiredStars: 4,
-      unlockCost: { item: HeroItem.HeroBadge, quantity: 1 },
-    },
-    {
-      position: 5,
-      refinementItemQuantity: 0,
-      requiredLevel: 1,
-      requiredStars: 5,
-      unlockCost: { item: HeroItem.HeroBadge, quantity: 1 },
-    },
-  ]);
+export class Mulan extends Hero
+{
+    public readonly identity = HeroIdentity.Mulan;
+    public readonly name = "Hua Mulan";
+    public readonly gender = HeroGender.Female;
+    public readonly recruitment: HeroDefinition["recruitment"] = {
+        available: true,
+        cost: { item: HeroItem.MulanFragment, quantity: 3000 },
+        initialQuality: 1,
+    };
+    public readonly progression: HeroDefinition["progression"] = {
+        initialLevel: 1,
+        maximumLevel: 99,
+        automatedGrantLevelLimit: 100,
+        talentPointDivisor: 10,
+        breakthroughs: this.freeBreakthroughs(HeroItem.MulanFragment, 5),
+    };
+    public readonly stars: HeroDefinition["stars"] = {
+        initial: 1,
+        maximum: 5,
+        initialSkills: [HeroSkill.MulanFormation],
+        upgrades: [
+            {
+                stars: 2,
+                cost: { item: HeroItem.MulanFragment, quantity: 6000 },
+                skills: [HeroSkill.InfantryBasicAttack],
+            },
+            {
+                stars: 3,
+                cost: { item: HeroItem.MulanFragment, quantity: 15000 },
+                skills: [HeroSkill.InfantryDamage],
+            },
+            {
+                stars: 4,
+                cost: { item: HeroItem.MulanFragment, quantity: 30000 },
+                skills: [HeroSkill.InfantryStrikingDistance],
+            },
+            {
+                stars: 5,
+                cost: { item: HeroItem.MulanFragment, quantity: 60000 },
+                skills: [HeroSkill.InfantryBasicPuncture],
+            },
+        ],
+    };
+    public readonly talentTrees: HeroDefinition["talentTrees"] = [
+        HeroTalentTree.MulanVanguard,
+        HeroTalentTree.MulanOffensive,
+        HeroTalentTree.MulanSpear,
+    ];
+    public readonly refinement = this.standardRefinement(HeroItem.MulanFragment, [
+        {
+            position: 1,
+            refinementItemQuantity: 1,
+            requiredLevel: 1,
+            requiredStars: 1,
+            unlockCost: { item: HeroItem.HeroBadge, quantity: 0 },
+        },
+        {
+            position: 2,
+            refinementItemQuantity: 1,
+            requiredLevel: 1,
+            requiredStars: 2,
+            unlockCost: { item: HeroItem.HeroBadge, quantity: 0 },
+        },
+        {
+            position: 3,
+            refinementItemQuantity: 1,
+            requiredLevel: 30,
+            requiredStars: 3,
+            unlockCost: { item: HeroItem.HeroBadge, quantity: 1 },
+        },
+        {
+            position: 4,
+            refinementItemQuantity: 0,
+            requiredLevel: 1,
+            requiredStars: 4,
+            unlockCost: { item: HeroItem.HeroBadge, quantity: 1 },
+        },
+        {
+            position: 5,
+            refinementItemQuantity: 0,
+            requiredLevel: 1,
+            requiredStars: 5,
+            unlockCost: { item: HeroItem.HeroBadge, quantity: 1 },
+        },
+    ]);
 }

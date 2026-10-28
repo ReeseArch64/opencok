@@ -3,9 +3,9 @@ import type { LuckyDayResponse } from "@opencok/contracts/responses/lucky-day";
 import { field } from "./response";
 
 export const luckyDaySchema = z.strictObject({
-  luckyeffectId: field.string,
-  getEffectTimes: field.int,
-  totalTimes: field.int,
-  effectEndTime: field.long,
-  lucky_id: field.string,
+    luckyeffectId: field.string,
+    getEffectTimes: field.int,
+    totalTimes: field.int,
+    effectEndTime: field.long,
+    lucky_id: field.string,
 }) satisfies z.ZodType<LuckyDayResponse>;

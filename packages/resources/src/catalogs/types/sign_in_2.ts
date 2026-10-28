@@ -1,7 +1,8 @@
-export interface SignIn2Definition {
-  readonly "id": number;
-  readonly "day": number;
-  readonly "reward": number;
+export interface SignIn2Definition
+{
+    readonly "id": number;
+    readonly "day": number;
+    readonly "reward": number;
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";

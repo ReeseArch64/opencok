@@ -4,15 +4,15 @@ import { bytea } from "../../types";
 import { opencok_kingdom } from "../namespaces";
 
 export const contact_3 = opencok_kingdom.table(
-  "contact_3",
-  {
-    "uid": varchar("uid", { length: 255 }).notNull(),
-    "friendUid": varchar("friendUid", { length: 255 }).notNull(),
-    "stat": integer("stat").default(sql.raw("0")),
-    "description": bytea("description"),
-  },
-  (table) => [
-    primaryKey({ name: "contact_3_PRIMARY", columns: [table["uid"], table["friendUid"]] }),
-    check("contact_3_description_length", sql.raw('octet_length("description") <= 65535')),
-  ],
+    "contact_3",
+    {
+        "uid": varchar("uid", { length: 255 }).notNull(),
+        "friendUid": varchar("friendUid", { length: 255 }).notNull(),
+        "stat": integer("stat").default(sql.raw("0")),
+        "description": bytea("description"),
+    },
+    (table) => [
+        primaryKey({ name: "contact_3_PRIMARY", columns: [table["uid"], table["friendUid"]] }),
+        check("contact_3_description_length", sql.raw("octet_length(\"description\") <= 65535")),
+    ],
 );

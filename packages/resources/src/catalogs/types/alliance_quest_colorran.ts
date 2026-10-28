@@ -1,8 +1,9 @@
-export interface AllianceQuestColorranDefinition {
-  readonly "id": number;
-  readonly "color": number;
-  readonly "rate"?: number;
-  readonly "systemRate"?: number;
+export interface AllianceQuestColorranDefinition
+{
+    readonly "id": number;
+    readonly "color": number;
+    readonly "rate"?: number;
+    readonly "systemRate"?: number;
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";

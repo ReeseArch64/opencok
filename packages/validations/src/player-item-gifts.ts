@@ -1,15 +1,15 @@
 import { z } from "zod";
 import { field } from "./response";
 import type {
-  PlayerItemGiftResponse,
-  PlayerItemGiftLoginResponse,
+    PlayerItemGiftResponse,
+    PlayerItemGiftLoginResponse,
 } from "@opencok/contracts/responses/player-item-gifts";
 
 export const playerItemGiftSchema = z.strictObject({
-  result: field.bool,
+    result: field.bool,
 }) satisfies z.ZodType<PlayerItemGiftResponse>;
 
 export const playerItemGiftLoginSchema = z.strictObject({
-  item_allname: z.array(field.string).max(64),
-  item_allitemId: z.array(field.string).max(64),
+    item_allname: z.array(field.string).max(64),
+    item_allitemId: z.array(field.string).max(64),
 }) satisfies z.ZodType<PlayerItemGiftLoginResponse>;

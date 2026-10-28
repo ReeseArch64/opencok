@@ -6,7 +6,7 @@ import { records as records1 } from "./shop_new_9.26.records1.ts";
 import { records as records2 } from "./shop_new_9.26.records2.ts";
 
 export const catalog: CatalogTable<ShopNew926Definition> = {
-  "kind": CatalogKind.Table,
-  "records": [...records0, ...records1, ...records2],
-  "sections": [],
+    "kind": CatalogKind.Table,
+    "records": [...records0, ...records1, ...records2],
+    "sections": [],
 };

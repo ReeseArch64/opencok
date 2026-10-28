@@ -4,7 +4,7 @@ import type { CatalogTable } from "../../catalog-model.ts";
 import { records as records0 } from "./comeback.records0.ts";
 
 export const catalog: CatalogTable<ComebackDefinition> = {
-  "kind": CatalogKind.Table,
-  "records": [...records0],
-  "sections": [{ "id": "comeback", "start": 0, "count": 1 }],
+    "kind": CatalogKind.Table,
+    "records": [...records0],
+    "sections": [{ "id": "comeback", "start": 0, "count": 1 }],
 };

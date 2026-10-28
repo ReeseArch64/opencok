@@ -4,7 +4,7 @@ import type { CatalogTable } from "../../catalog-model.ts";
 import { records as records0 } from "./equip_strength.records0.ts";
 
 export const catalog: CatalogTable<EquipStrengthDefinition> = {
-  "kind": CatalogKind.Table,
-  "records": [...records0],
-  "sections": [],
+    "kind": CatalogKind.Table,
+    "records": [...records0],
+    "sections": [],
 };

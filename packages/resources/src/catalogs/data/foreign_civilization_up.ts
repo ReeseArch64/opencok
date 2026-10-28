@@ -9,7 +9,7 @@ import { records as records4 } from "./foreign_civilization_up.records4.ts";
 import { records as records5 } from "./foreign_civilization_up.records5.ts";
 
 export const catalog: CatalogTable<ForeignCivilizationUpDefinition> = {
-  "kind": CatalogKind.Table,
-  "records": [...records0, ...records1, ...records2, ...records3, ...records4, ...records5],
-  "sections": [{ "id": "foreign_civilization_up", "start": 0, "count": 3761 }],
+    "kind": CatalogKind.Table,
+    "records": [...records0, ...records1, ...records2, ...records3, ...records4, ...records5],
+    "sections": [{ "id": "foreign_civilization_up", "start": 0, "count": 3761 }],
 };

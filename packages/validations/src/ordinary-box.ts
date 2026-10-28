@@ -3,8 +3,8 @@ import type { OrdinaryBoxPreviewResponse } from "@opencok/contracts/responses/or
 import { field } from "./response";
 
 export const ordinaryBoxPreviewSchema = z.strictObject({
-  reward_info: z.array(z.strictObject({ id: field.string, num: field.string })).max(128),
-  baodi_num: field.int,
-  special: field.int,
-  para5: field.int.optional(),
+    reward_info: z.array(z.strictObject({ id: field.string, num: field.string })).max(128),
+    baodi_num: field.int,
+    special: field.int,
+    para5: field.int.optional(),
 }) satisfies z.ZodType<OrdinaryBoxPreviewResponse>;

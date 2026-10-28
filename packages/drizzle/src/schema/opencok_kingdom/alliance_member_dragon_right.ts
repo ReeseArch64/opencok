@@ -3,21 +3,21 @@ import { bigint, check, primaryKey, smallint, varchar } from "drizzle-orm/pg-cor
 import { opencok_kingdom } from "../namespaces";
 
 export const alliance_member_dragon_right = opencok_kingdom.table(
-  "alliance_member_dragon_right",
-  {
-    "uid": varchar("uid", { length: 50 }).notNull(),
-    "allianceId": varchar("allianceId", { length: 50 }).notNull(),
-    "canFight": smallint("canFight"),
-    "leaveTime": bigint("leaveTime", { mode: "bigint" }),
-  },
-  (table) => [
-    primaryKey({
-      name: "alliance_member_dragon_right_PRIMARY",
-      columns: [table["uid"], table["allianceId"]],
-    }),
-    check(
-      "alliance_member_dragon_right_canFight_range",
-      sql.raw('"canFight" BETWEEN -128 AND 127'),
-    ),
-  ],
+    "alliance_member_dragon_right",
+    {
+        "uid": varchar("uid", { length: 50 }).notNull(),
+        "allianceId": varchar("allianceId", { length: 50 }).notNull(),
+        "canFight": smallint("canFight"),
+        "leaveTime": bigint("leaveTime", { mode: "bigint" }),
+    },
+    (table) => [
+        primaryKey({
+            name: "alliance_member_dragon_right_PRIMARY",
+            columns: [table["uid"], table["allianceId"]],
+        }),
+        check(
+            "alliance_member_dragon_right_canFight_range",
+            sql.raw("\"canFight\" BETWEEN -128 AND 127"),
+        ),
+    ],
 );

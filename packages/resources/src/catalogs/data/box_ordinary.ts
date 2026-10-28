@@ -4,7 +4,7 @@ import type { CatalogTable } from "../../catalog-model.ts";
 import { records as records0 } from "./box_ordinary.records0.ts";
 
 export const catalog: CatalogTable<BoxOrdinaryDefinition> = {
-  "kind": CatalogKind.Table,
-  "records": [...records0],
-  "sections": [],
+    "kind": CatalogKind.Table,
+    "records": [...records0],
+    "sections": [],
 };

@@ -1,6 +1,7 @@
-export interface LordImageXmlDefinition {
-  readonly "id": number;
-  readonly "test": string;
+export interface LordImageXmlDefinition
+{
+    readonly "id": number;
+    readonly "test": string;
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";

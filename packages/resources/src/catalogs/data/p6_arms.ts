@@ -14,19 +14,19 @@ import { records as records9 } from "./p6_arms.records9.ts";
 import { records as records10 } from "./p6_arms.records10.ts";
 
 export const catalog: CatalogTable<P6ArmsDefinition> = {
-  "kind": CatalogKind.Table,
-  "records": [
-    ...records0,
-    ...records1,
-    ...records2,
-    ...records3,
-    ...records4,
-    ...records5,
-    ...records6,
-    ...records7,
-    ...records8,
-    ...records9,
-    ...records10,
-  ],
-  "sections": [],
+    "kind": CatalogKind.Table,
+    "records": [
+        ...records0,
+        ...records1,
+        ...records2,
+        ...records3,
+        ...records4,
+        ...records5,
+        ...records6,
+        ...records7,
+        ...records8,
+        ...records9,
+        ...records10,
+    ],
+    "sections": [],
 };

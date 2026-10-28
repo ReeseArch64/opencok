@@ -1,4 +1,5 @@
-export interface WorldUseResponse {
-  readonly pointId: number;
-  readonly itemid: string;
+export interface WorldUseResponse
+{
+    readonly pointId: number;
+    readonly itemid: string;
 }

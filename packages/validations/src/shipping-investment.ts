@@ -3,8 +3,8 @@ import type { ShippingInvestmentResponse } from "@opencok/contracts/responses/sh
 import { field, responseRecord } from "./response";
 
 export const shippingInvestmentSchema = z.strictObject({
-  count: field.int,
-  sum_count: field.int,
-  gold: field.int,
-  gold_reward: responseRecord(field.string, field.string).optional(),
+    count: field.int,
+    sum_count: field.int,
+    gold: field.int,
+    gold_reward: responseRecord(field.string, field.string).optional(),
 }) satisfies z.ZodType<ShippingInvestmentResponse>;

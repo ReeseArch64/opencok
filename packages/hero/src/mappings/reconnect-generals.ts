@@ -7,21 +7,26 @@ import { sfs, type Fields } from "@opencok/messages/sfs";
 import type { OwnGeneralSnapshot } from "@opencok/hero/contracts/reconnect-generals";
 import { generalInfo } from "@opencok/hero/mappings/profile-generals";
 
-function serializeReconnectGenerals(generals: readonly OwnGeneralSnapshot[]): Fields {
-  if (generals.length > 32767) {return invalid();}
+function serializeReconnectGenerals(generals: readonly OwnGeneralSnapshot[]): Fields
+{
+    if (generals.length > 32767)
+    {
+        return invalid();
+    }
 
-  return {
-    userGenerals: sfs.array(
-      generals.map((general) =>
-        sfs.object({
-          ...generalInfo(general),
-          abilityIndex: sfs.int(general.abilityIndex),
-        }),
-      ),
-    ),
-  };
+    return {
+        userGenerals: sfs.array(
+            generals.map((general) =>
+                sfs.object({
+                    ...generalInfo(general),
+                    abilityIndex: sfs.int(general.abilityIndex),
+                })
+            ),
+        ),
+    };
 }
 
-export function reconnectGenerals(...args: Parameters<typeof serializeReconnectGenerals>): Fields {
-  return validateFields(reconnectGeneralsSchema, serializeReconnectGenerals(...args));
+export function reconnectGenerals(...args: Parameters<typeof serializeReconnectGenerals>): Fields
+{
+    return validateFields(reconnectGeneralsSchema, serializeReconnectGenerals(...args));
 }

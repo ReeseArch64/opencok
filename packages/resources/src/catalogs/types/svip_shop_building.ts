@@ -1,8 +1,9 @@
-export interface SvipShopBuildingDefinition {
-  readonly "id": number;
-  readonly "level": number;
-  readonly "experience": number;
-  readonly "nextExp": number;
+export interface SvipShopBuildingDefinition
+{
+    readonly "id": number;
+    readonly "level": number;
+    readonly "experience": number;
+    readonly "nextExp": number;
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";

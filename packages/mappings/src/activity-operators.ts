@@ -3,10 +3,11 @@ import type { ActivityOperatorResponse } from "@opencok/contracts/responses/acti
 import { activityOperatorsSchema } from "@opencok/validations/activity-operators";
 import { validateFields } from "./validation";
 
-export function activityOperatorsView(rows: readonly ActivityOperatorResponse[]): Fields {
-  return validateFields(activityOperatorsSchema, {
-    activityList: sfs.array(
-      rows.map((row) => sfs.object({ id: sfs.int(row.id), endTime: sfs.long(row.endTime) })),
-    ),
-  });
+export function activityOperatorsView(rows: readonly ActivityOperatorResponse[]): Fields
+{
+    return validateFields(activityOperatorsSchema, {
+        activityList: sfs.array(
+            rows.map((row) => sfs.object({ id: sfs.int(row.id), endTime: sfs.long(row.endTime) })),
+        ),
+    });
 }

@@ -4,23 +4,23 @@ import { bytea } from "../../types";
 import { opencok_kingdom } from "../namespaces";
 
 export const stat_adjust = opencok_kingdom.table(
-  "stat_adjust",
-  {
-    "uid": varchar("uid", { length: 40 }).notNull(),
-    "device": varchar("device", { length: 10 }),
-    "country": varchar("country", { length: 20 }),
-    "channel": varchar("channel", { length: 50 }),
-    "campain": varchar("campain", { length: 100 }),
-    "fulldata": bytea("fulldata"),
-  },
-  (table) => [
-    primaryKey({ name: "stat_adjust_PRIMARY", columns: [table["uid"]] }),
-    index("stat_adjust_index_query").on(
-      sql.raw('"device"'),
-      sql.raw('"country"'),
-      sql.raw('"channel"'),
-      sql.raw('"campain"'),
-    ),
-    check("stat_adjust_fulldata_length", sql.raw('octet_length("fulldata") <= 65535')),
-  ],
+    "stat_adjust",
+    {
+        "uid": varchar("uid", { length: 40 }).notNull(),
+        "device": varchar("device", { length: 10 }),
+        "country": varchar("country", { length: 20 }),
+        "channel": varchar("channel", { length: 50 }),
+        "campain": varchar("campain", { length: 100 }),
+        "fulldata": bytea("fulldata"),
+    },
+    (table) => [
+        primaryKey({ name: "stat_adjust_PRIMARY", columns: [table["uid"]] }),
+        index("stat_adjust_index_query").on(
+            sql.raw("\"device\""),
+            sql.raw("\"country\""),
+            sql.raw("\"channel\""),
+            sql.raw("\"campain\""),
+        ),
+        check("stat_adjust_fulldata_length", sql.raw("octet_length(\"fulldata\") <= 65535")),
+    ],
 );

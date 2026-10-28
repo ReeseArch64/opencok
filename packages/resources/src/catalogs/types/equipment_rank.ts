@@ -1,9 +1,10 @@
-export interface EquipmentRankDefinition {
-  readonly "id": number;
-  readonly "reward": string;
-  readonly "mail": string;
-  readonly "startTime": string;
-  readonly "endTime": string;
+export interface EquipmentRankDefinition
+{
+    readonly "id": number;
+    readonly "reward": string;
+    readonly "mail": string;
+    readonly "startTime": string;
+    readonly "endTime": string;
 }
 
 import type { CatalogTable } from "../../catalog-model.ts";

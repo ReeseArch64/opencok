@@ -6,7 +6,7 @@ import { records as records1 } from "./function_on - Copy.records1.ts";
 import { records as records2 } from "./function_on - Copy.records2.ts";
 
 export const catalog: CatalogTable<FunctionOnCopyDefinition> = {
-  "kind": CatalogKind.Table,
-  "records": [...records0, ...records1, ...records2],
-  "sections": [{ "id": "function_on", "start": 0, "count": 1976 }],
+    "kind": CatalogKind.Table,
+    "records": [...records0, ...records1, ...records2],
+    "sections": [{ "id": "function_on", "start": 0, "count": 1976 }],
 };
