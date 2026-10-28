@@ -45,8 +45,12 @@ The read-only object is a snapshot at import and does not mutate `process.env`.
 Only the listed keys are exposed. Parsing uses native `node:util.parseEnv`: quoted
 values and comments are supported; `$VARIABLE` expansion is not performed.
 
-The root is discovered from the package location using the ancestor workspace
-`package.json`, rather than the current working directory. Deployments must retain
+The root is discovered from the executing ESM module URL using the ancestor workspace
+`package.json`, rather than the current working directory. Source execution starts
+at the package location; bundled execution starts at the emitted entrypoint. This
+keeps relocated bundles from reading the build workspace's `.env`; avoid `__dirname`,
+which Bun can replace with the original source directory during bundling.
+Deployments must retain
 that workspace layout and manifest. Inject production secrets through the process
 environment; no local file is required. This package uses server filesystem APIs
 and must not be imported into browser/mobile bundles.

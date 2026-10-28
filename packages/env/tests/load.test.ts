@@ -183,3 +183,61 @@ test("public imports validate and expose only their selected domain", async () =
         await rm(item.root, { recursive: true, force: true });
     }
 });
+
+test("relocated ESM bundles load only the deployed workspace environment", async () => {
+    const source = await fixture("NODE_ENV=invalid\nDATABASE_ROLE=invalid\n");
+    const deployment = await mkdtemp(join(tmpdir(), "opencok-deployed-env-"));
+
+    try
+    {
+        await writeFile(
+            join(deployment, "package.json"),
+            JSON.stringify({ workspaces: [], type: "module" }),
+        );
+        await writeFile(
+            join(deployment, ".env"),
+            "NODE_ENV=testing\nDATABASE_ROLE=kingdom\n",
+        );
+
+        for (const minify of [false, true])
+        {
+            const outdir = join(deployment, "apps/server/dist/src");
+            const built = await Bun.build({
+                entrypoints: [source.script],
+                outdir,
+                target: "bun",
+                format: "esm",
+                minify,
+                sourcemap: "linked",
+            });
+            expect(built.success).toBe(true);
+            const entrypoint = join(outdir, "read.js");
+            const result = await run(entrypoint, tmpdir());
+            expect(result.code).toBe(0);
+            expect(JSON.parse(result.stdout)).toEqual({
+                mode: "testing",
+                role: "kingdom",
+                hasDatabase: false,
+            });
+
+            const overridden = await run(entrypoint, tmpdir(), { NODE_ENV: "production" });
+            expect(overridden.code).toBe(0);
+            expect(JSON.parse(overridden.stdout).mode).toBe("production");
+
+            await rm(join(deployment, ".env"));
+            const absent = await run(entrypoint, tmpdir(), { DATABASE_ROLE: "global" });
+            expect(absent.code).toBe(0);
+            expect(JSON.parse(absent.stdout)).toEqual({
+                mode: "development",
+                role: "global",
+                hasDatabase: false,
+            });
+            await writeFile(join(deployment, ".env"), "NODE_ENV=testing\nDATABASE_ROLE=kingdom\n");
+        }
+    }
+    finally
+    {
+        await rm(source.root, { recursive: true, force: true });
+        await rm(deployment, { recursive: true, force: true });
+    }
+});
