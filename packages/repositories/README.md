@@ -76,8 +76,8 @@ of importing the broad `Database` class for its kingdom/global fields. The alias
 are derived from the same constructors and preserve schema and transaction types.
 Repository implementation modules, including domain-owned repository directories,
 must not import the broad facade directly or transitively. App composition and
-explicit test fixtures can still use it. This boundary is checked by the
-[architecture suite](../../tests/architecture/README.md).
+explicit test fixtures can still use it. Review this boundary explicitly: the former root architecture suite was removed
+at the owner's request, so it is no longer an automated check.
 
 #605 removes this coupling from 112 horizontal adapters, nine Hero adapters and
 two shop adapters. Query code, SQL, locking, transactions and runtime exports are

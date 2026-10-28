@@ -18,8 +18,6 @@ jobs:
       - uses: ./.github/actions/setup
       - run: bun run lint
       - run: bun run format:check
-      - run: bun run check-types:architecture
-      - run: bun run test:architecture
       - run: bun run test:packages
       - run: bun run --cwd apps/workers test
       - run: bun run --cwd apps/scheduler test

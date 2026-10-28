@@ -50,7 +50,7 @@ API/realm entrypoints compose concrete collaborators; packages must not import a
 
 ## 4. Organization of the monorepo
 
-`apps/` owns processes/configuration/composition; `packages/` owns reusable domains/contracts/adapters; `infra/` owns deployment/ingress; root `tests/` owns shared contracts and isolated stack scenarios. ADRs remain in `docs/decisions/`. Ignored `data/` contains authorized local references, never required shared private artifacts.
+`apps/` owns processes/configuration/composition; `packages/` owns reusable domains/contracts/adapters; `infra/` owns deployment/ingress. Tests and minimal fixtures belong with their owning application/package; do not create a root test directory. ADRs remain in `docs/decisions/`. Ignored `data/` contains authorized local references, never required shared private artifacts.
 
 ### Domain package migration convention
 
