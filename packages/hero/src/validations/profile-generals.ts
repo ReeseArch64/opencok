@@ -3,7 +3,7 @@ import type {
     GeneralInfoResponse,
     PublicGeneralsResponse,
 } from "@opencok/hero/contracts/responses/profile-generals";
-import { field, responseRecord } from "@opencok/validations/response";
+import { field, responseRecord } from "@opencok/messages/validations/response";
 
 export const generalInfoSchema = z.strictObject({
     uuid: field.string,

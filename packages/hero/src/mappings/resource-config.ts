@@ -1,4 +1,4 @@
-import { validateFields } from "@opencok/mappings/validation";
+import { validateFields } from "@opencok/messages/validations/fields";
 import { heroResourceConfigSchema } from "@opencok/hero/validations/resource-config";
 import { sfs, type Fields } from "@opencok/messages/sfs";
 

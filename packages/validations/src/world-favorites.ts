@@ -1,6 +1,6 @@
 import { z } from "zod";
 import type { WorldFavoritesResponse } from "@opencok/contracts/responses/world-favorites";
-import { field } from "./response.ts";
+import { field } from "@opencok/messages/validations/response";
 
 export const worldFavoritesSchema = z.strictObject({
     favo: z

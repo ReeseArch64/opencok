@@ -3,7 +3,7 @@ import {
     regionalRecallSchema,
     regionalRecallLoginSchema,
 } from "@opencok/validations/regional-recall";
-import { validateFields } from "./validation";
+import { validateFields } from "@opencok/messages/validations/fields";
 
 export function regionalRecallView(id: string, rewards: readonly Value[], claimed: number)
 {

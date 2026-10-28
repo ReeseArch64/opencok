@@ -3,7 +3,7 @@ import type {
     AnniversaryResponse,
     CampaignTriggerResponse,
 } from "@opencok/contracts/responses/anniversary";
-import { field } from "./response";
+import { field } from "@opencok/messages/validations/response";
 
 export const anniversarySchema = z.strictObject({
     anniversary_array: z.array(

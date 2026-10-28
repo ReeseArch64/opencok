@@ -3,7 +3,7 @@ import type {
     ClosedActivitiesResponse,
     CatalogRewardResponse,
 } from "@opencok/contracts/responses/local-activity-info";
-import { field } from "./response";
+import { field } from "@opencok/messages/validations/response";
 import { rewardPreviewArraySchema } from "./rewards";
 
 export const closedActivitiesSchema = z.strictObject({

@@ -1,5 +1,5 @@
-import { Type, type Fields, type Value } from "@opencok/messages/sfs";
-import { wireFields, wireValue } from "@opencok/validations/sfs";
+import { Type, type Fields, type Value } from "../sfs.ts";
+import { wireFields, wireValue } from "./sfs.ts";
 
 function dataValue(value: Value): unknown
 {

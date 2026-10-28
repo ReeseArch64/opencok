@@ -1,5 +1,5 @@
 import { z } from "zod";
-import type { ResponseValue } from "@opencok/contracts/responses/value";
+import type { ResponseValue } from "../contracts/response-value.ts";
 
 const numeric = z.custom<number>((value) => typeof value === "number");
 

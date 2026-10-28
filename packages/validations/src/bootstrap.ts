@@ -12,7 +12,7 @@ import type {
     ArmySnapshotResponse,
     InventoryItemResponse,
 } from "@opencok/contracts/responses/bootstrap";
-import { field, responseRecord } from "./response.ts";
+import { field, responseRecord } from "@opencok/messages/validations/response";
 
 export const dynamicResourceConfigSchema = heroResourceConfigSchema.catchall(
     field.string,

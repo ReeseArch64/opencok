@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { Type, type Value } from "@opencok/messages/sfs";
+import { Type, type Value } from "../sfs.ts";
 
 function tagged<T extends Type, S extends z.ZodType>(type: T, value: S)
 {

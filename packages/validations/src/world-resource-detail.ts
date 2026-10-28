@@ -4,7 +4,7 @@ import type {
     WorldResourceGroupResponse,
     WorldNeutralResourceResponse,
 } from "@opencok/contracts/responses/world-resource-detail";
-import { field } from "./response.ts";
+import { field } from "@opencok/messages/validations/response";
 
 export const worldResourceOwnerSchema = z.strictObject({
     q: field.int,

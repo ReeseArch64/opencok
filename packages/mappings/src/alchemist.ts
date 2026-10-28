@@ -3,7 +3,7 @@ import { sfs, type Fields } from "@opencok/messages/sfs";
 import type { Rule } from "@opencok/rules/game";
 import { cityInteger } from "@opencok/rules/city-progression";
 import { alchemistInfoSchema } from "@opencok/validations/alchemist";
-import { validateFields } from "./validation";
+import { validateFields } from "@opencok/messages/validations/fields";
 
 export function alchemistInfo(row: Row, rule: Rule): Fields
 {

@@ -1,4 +1,4 @@
-import { validateFields } from "./validation.ts";
+import { validateFields } from "@opencok/messages/validations/fields";
 import { worldSearchSchema } from "@opencok/validations/world-search";
 
 import type { Row } from "@opencok/contracts/rows";

@@ -1,7 +1,7 @@
 import { string } from "@opencok/mappings/reconnect-march-values";
 import { long } from "@opencok/mappings/reconnect-march-values";
 import { integer } from "@opencok/mappings/reconnect-march-values";
-import { validateFields, validateValue } from "./validation.ts";
+import { validateFields, validateValue } from "@opencok/messages/validations/fields";
 import {
     reconnectMarchDragonSchema,
     reconnectMarchArmySchema,

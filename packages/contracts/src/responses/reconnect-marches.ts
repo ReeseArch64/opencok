@@ -1,5 +1,5 @@
 import type { ReconnectMarchGeneralResponse } from "@opencok/hero/contracts/responses/reconnect-march-general";
-import type { ResponseValue } from "./value.ts";
+import type { ResponseValue } from "@opencok/messages/contracts/response-value";
 
 export interface ReconnectMarchArmyResponse
 {

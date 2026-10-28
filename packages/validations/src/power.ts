@@ -3,7 +3,7 @@ import type {
     PlayerStatisticsResponse,
     PowerInfoResponse,
 } from "@opencok/contracts/responses/power";
-import { field } from "./response.ts";
+import { field } from "@opencok/messages/validations/response";
 
 export const playerStatisticsSchema = z.strictObject({
     battleWin: field.int,

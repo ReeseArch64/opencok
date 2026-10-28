@@ -1,7 +1,7 @@
 import type { ActivityRewardAmounts } from "@opencok/contracts/responses/activity-reward";
 import { activityRewardSchema } from "@opencok/validations/activity-reward";
 import { sfs, type Fields } from "@opencok/messages/sfs";
-import { validateFields } from "./validation";
+import { validateFields } from "@opencok/messages/validations/fields";
 
 export function activityRewardView(
     amounts: ActivityRewardAmounts,

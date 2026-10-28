@@ -6,7 +6,7 @@ import type {
     HeroHistoryResponse,
     HeroHistoryMemberResponse,
 } from "@opencok/hero/contracts/responses/hero-ranking";
-import { field } from "@opencok/validations/response";
+import { field } from "@opencok/messages/validations/response";
 
 export const heroSelfRankingSchema = z.strictObject({
     eventList: z.array(z.never()).length(0),

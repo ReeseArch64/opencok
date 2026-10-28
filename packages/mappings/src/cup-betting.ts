@@ -1,5 +1,5 @@
 import { cupMatchSchema, cupBetSchema } from "@opencok/validations/cup-betting";
-import { validateFields } from "./validation";
+import { validateFields } from "@opencok/messages/validations/fields";
 import { sfs, Type, type Fields } from "@opencok/messages/sfs";
 import { num, long, text, type Row } from "@opencok/contracts/rows";
 import { cupOddsString } from "@opencok/rules/cup-betting";

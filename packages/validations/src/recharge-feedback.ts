@@ -1,6 +1,6 @@
 import { z } from "zod";
 import type { RechargeFeedbackResponse } from "@opencok/contracts/responses/recharge-feedback";
-import { field, responseFieldsSchema } from "./response";
+import { field, responseFieldsSchema } from "@opencok/messages/validations/response";
 
 export const rechargeFeedbackSchema = z.strictObject({
     daily_tab: z.array(responseFieldsSchema).max(1024),

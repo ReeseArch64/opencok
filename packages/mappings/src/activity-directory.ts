@@ -1,7 +1,7 @@
 import type { ActivityDirectoryEntryResponse } from "@opencok/contracts/responses/activity-directory";
 import { sfs, type Fields } from "@opencok/messages/sfs";
 import { activityDirectorySchema } from "@opencok/validations/activity-directory";
-import { validateFields } from "./validation";
+import { validateFields } from "@opencok/messages/validations/fields";
 
 export function activityDirectory(entries: readonly ActivityDirectoryEntryResponse[]): Fields
 {

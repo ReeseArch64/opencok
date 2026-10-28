@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { field } from "./response";
+import { field } from "@opencok/messages/validations/response";
 import type {
     CityCosmeticResponse,
     CityCosmeticUpdateResponse,

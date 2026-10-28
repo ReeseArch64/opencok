@@ -1,7 +1,7 @@
 import { decodeLegacyJsonObject } from "@opencok/messages/legacy-json";
 import { sfs, Type, type Fields } from "@opencok/messages/sfs";
 import { militaryRankingSchema } from "@opencok/validations/military-ranking";
-import { validateFields } from "./validation.ts";
+import { validateFields } from "@opencok/messages/validations/fields";
 
 export function militaryRanking(
     entries: readonly string[],

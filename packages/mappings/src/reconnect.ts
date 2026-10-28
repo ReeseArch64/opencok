@@ -6,7 +6,7 @@ import {
     reconnectTasksSchema,
     reconnectTaskSchema,
 } from "@opencok/validations/reconnect";
-import { validateValue } from "./validation.ts";
+import { validateValue } from "@opencok/messages/validations/fields";
 import { building, queue } from "./city.ts";
 import type { Rules } from "@opencok/rules/game";
 import { mailBlank } from "@opencok/rules/mail";
@@ -17,7 +17,7 @@ import type { RuleContext } from "@opencok/rules/availability";
 import { visibleReconnectTasks } from "@opencok/rules/reconnect-tasks";
 import { previewRewards } from "@opencok/rules/rewards";
 import { rewardPreviewArray } from "./rewards.ts";
-import { validateFields } from "./validation.ts";
+import { validateFields } from "@opencok/messages/validations/fields";
 import {
     reconnectBalancesSchema,
     reconnectArmySchema,

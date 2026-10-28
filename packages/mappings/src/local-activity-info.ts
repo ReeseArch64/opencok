@@ -5,7 +5,7 @@ import {
     closedActivitiesSchema,
     catalogRewardSchema,
 } from "@opencok/validations/local-activity-info";
-import { validateFields } from "./validation";
+import { validateFields } from "@opencok/messages/validations/fields";
 import { rewardPreviewArray } from "./rewards";
 
 export function closedActivities(ids: readonly string[]): Fields

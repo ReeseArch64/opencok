@@ -1,6 +1,6 @@
 import { z } from "zod";
 import type { ArenaInfoResponse, ArenaArmyResponse } from "@opencok/contracts/responses/arena";
-import { field } from "./response";
+import { field } from "@opencok/messages/validations/response";
 
 export const arenaInfoSchema = z.strictObject({
     state: field.int,

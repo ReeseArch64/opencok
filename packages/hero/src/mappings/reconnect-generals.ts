@@ -1,6 +1,6 @@
 import { invalid } from "@opencok/mappings/reconnect-values";
 
-import { validateFields } from "@opencok/mappings/validation";
+import { validateFields } from "@opencok/messages/validations/fields";
 import { reconnectGeneralsSchema } from "@opencok/hero/validations/reconnect-generals";
 
 import { sfs, type Fields } from "@opencok/messages/sfs";

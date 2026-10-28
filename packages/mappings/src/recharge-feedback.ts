@@ -1,6 +1,6 @@
 import { sfs, type Fields } from "@opencok/messages/sfs";
 import { rechargeFeedbackSchema } from "@opencok/validations/recharge-feedback";
-import { validateFields } from "./validation";
+import { validateFields } from "@opencok/messages/validations/fields";
 
 export function rechargeFeedbackView(
     tables: readonly Fields[],

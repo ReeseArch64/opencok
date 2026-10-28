@@ -1,5 +1,5 @@
 import { heroResourceConfig } from "@opencok/hero/mappings/resource-config";
-import { validateFields, validateValue } from "./validation.ts";
+import { validateFields, validateValue } from "@opencok/messages/validations/fields";
 import {
     dynamicResourceConfigSchema,
     serverClockSchema,

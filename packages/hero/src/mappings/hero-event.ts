@@ -7,7 +7,7 @@ import {
     heroEventRewardSchema,
     heroPanelSchema,
 } from "@opencok/hero/validations/hero-event";
-import { validateFields } from "@opencok/mappings/validation";
+import { validateFields } from "@opencok/messages/validations/fields";
 
 export function heroEventEntry(
     event: Row,

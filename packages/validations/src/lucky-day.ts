@@ -1,6 +1,6 @@
 import { z } from "zod";
 import type { LuckyDayResponse } from "@opencok/contracts/responses/lucky-day";
-import { field } from "./response";
+import { field } from "@opencok/messages/validations/response";
 
 export const luckyDaySchema = z.strictObject({
     luckyeffectId: field.string,

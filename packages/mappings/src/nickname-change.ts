@@ -12,7 +12,7 @@ import {
 } from "@opencok/validations/nickname-change";
 import type { Rules } from "@opencok/rules/game";
 import { mailBlank } from "@opencok/rules/mail";
-import { validateFields } from "./validation.ts";
+import { validateFields } from "@opencok/messages/validations/fields";
 
 export function nicknameNotification(
     snapshot: NicknameNotification,

@@ -1,5 +1,5 @@
 import { expeditionActivitySchema } from "@opencok/validations/new-expedition";
-import { validateFields } from "./validation";
+import { validateFields } from "@opencok/messages/validations/fields";
 import { sfs, type Fields } from "@opencok/messages/sfs";
 import { text, long, num, type Row } from "@opencok/contracts/rows";
 import type { ExpeditionState } from "@opencok/contracts/new-expedition";

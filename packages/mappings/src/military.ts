@@ -4,7 +4,7 @@ import type { Rules } from "@opencok/rules/game";
 import { cityInteger } from "@opencok/rules/city-progression";
 import { troopDefinition } from "@opencok/rules/military";
 import { woundedTroopsSchema, fortificationSchema } from "@opencok/validations/military";
-import { validateFields } from "./validation";
+import { validateFields } from "@opencok/messages/validations/fields";
 import { armySnapshot } from "./bootstrap";
 
 export function woundedTroops(row: Row): Fields

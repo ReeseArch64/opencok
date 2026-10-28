@@ -1,6 +1,6 @@
 import { z } from "zod";
 import type { ExpeditionRankingResponse } from "@opencok/contracts/responses/expedition-ranking";
-import { field } from "./response.ts";
+import { field } from "@opencok/messages/validations/response";
 
 export const expeditionRankingSchema = z.union([
     z.strictObject({}),

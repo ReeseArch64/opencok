@@ -1,6 +1,6 @@
 import { z } from "zod";
 import type { DataConfigResponse } from "@opencok/contracts/responses/configuration";
-import { field, responseRecord } from "./response.ts";
+import { field, responseRecord } from "@opencok/messages/validations/response";
 
 export const dataConfigObjectKeys = [
     "player_max",

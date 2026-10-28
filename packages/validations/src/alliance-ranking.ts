@@ -1,6 +1,6 @@
 import { z } from "zod";
 import type { AllianceRankingResponse } from "@opencok/contracts/responses/alliance-ranking";
-import { field } from "./response.ts";
+import { field } from "@opencok/messages/validations/response";
 import { allianceVideoSchema } from "./profile-alliance.ts";
 
 export const allianceRankingSchema = z.strictObject({
