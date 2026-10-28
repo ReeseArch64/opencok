@@ -2,8 +2,8 @@
 
 This workspace owns building definition contracts, the maintained typed catalog,
 level/star evaluation and display/legacy-record mappings after #635. The realm's
-central Rules consumer uses these modules; construction commands and transactional
-city coordination remain tracked in W07 of #558. Typed persistence is owned after #647. Existing authority, prices,
+central Rules consumer uses these modules. Typed persistence is owned after #647
+and construction workflows after #649; City retains aggregate coordination. Existing authority, prices,
 queues, receipts and stored building state are unchanged.
 
 ## Source ownership
@@ -36,8 +36,8 @@ The 41 numeric data modules account for almost all source lines. They remain gro
 under `resources/buildings` separately from the small contracts/rules/mappings.
 This is an ownership migration of the existing typed model, not the semantic
 archetype conversion required by [ADR-0018](../../docs/decisions/0018-adopt-client-backed-semantic-definitions.md).
-Opaque identities are preserved without invented names. Construction Services,
-cross-domain plans and semantic identities remain tracked under #558 W07/W14.
+Opaque identities are preserved without invented names. Shared cross-domain plans,
+projection boundaries and semantic identities remain tracked under #558 W07/W14.
 
 The authoring CLI remains in [catalog-tools](../catalog-tools/README.md#catalog-and-building-imports).
 Its default destination is this catalog directory, and emitted modules import the
@@ -92,3 +92,41 @@ scenarios exercise the composed owner and production boundary. Structural compar
 reconstructs both complete city read/write flows and checks every DTO field mapping.
 Deploy or roll back the rebuilt realm against the same schema; no player-data
 conversion, native patch or process-authority change is required.
+
+## Construction workflows (#649)
+
+`services/construction.ts` composes command preparation, activity application and
+completion collaborators. `services/commands.ts` owns creation, upgrades, movement,
+demolition, unlocks and castle rewards; `services/activity.ts` owns cancellation,
+restore/reschedule and completion dispatch. `services/completion.ts` owns building
+history, power/experience changes, domain queues and ordered completion hooks.
+The 471-line command class remains one cohesive preparation responsibility; it has
+no persistence or lifecycle ownership. Completion and timed application are separate.
+
+`rules/construction.ts` owns ordered prerequisites and placement policies;
+`rules/queues.ts` owns the native building-to-queue mapping, also consumed by Troops.
+`enums/command.ts` names the nine unchanged command strings. The former construction
+Service and migrated Rules exports are removed after all runtime callers migrate.
+
+`contracts/construction.ts` bounds the state, catalog and pending-write capabilities
+needed by these workflows. The legacy row-shaped records remain transitional;
+the package does not import the broad Rules/Contracts/Services graph. Constructor
+ports in `contracts/construction-runtime.ts` receive the existing numeric helpers,
+record readers, building/reward serializers, prestige/unlock readers and prayer,
+task, castle-event and expedition hooks. Their single implementations are bound in
+`apps/server/src/composition/construction.ts`, used by realm and integration harness.
+No cycle exception, copied algorithm, new process or authority handoff is introduced.
+
+Base owns generic activity lifecycle declarations and Economy owns economic activity
+payloads/reward previews. Their existing shared paths remain type-only compatibility
+exports with callers and retirement work tracked in the migration register. Shared
+numerical/native projection and cross-domain integrations are still #558 work.
+
+Owned tests cover prerequisite rejection order and lazy prestige, placement membership
+and first-match semantics, historical experience ceilings, completion callback order,
+recovery task suppression, queue creation and detached command/activity callbacks.
+PostgreSQL construction, persistence, prayer, castle-event and general scenarios
+retain 16 tests/174 assertions; core and timed economy add two tests/349 assertions.
+Structural comparison preserves all eight moved runtime bodies, both policies, queue
+mapping and six type declarations after explicit dependency substitutions. No saved
+state or schema changes: deploy the rebuilt realm or restore the prior artifact.

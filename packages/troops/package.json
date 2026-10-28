@@ -21,7 +21,8 @@
     "@opencok/drizzle": "workspace:*",
     "drizzle-orm": "0.45.4",
     "@opencok/mappings": "workspace:*",
-    "@opencok/validations": "workspace:*"
+    "@opencok/validations": "workspace:*",
+    "@opencok/building": "workspace:*"
   },
   "devDependencies": {
     "@opencok/config": "workspace:*",

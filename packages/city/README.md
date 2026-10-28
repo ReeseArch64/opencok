@@ -161,9 +161,12 @@ use the legacy city context/domain aliases, reducing their consumers to 56/66.
 After #645, troop/hospital/wall reads and writes similarly delegate to the injected
 TroopsRepository inside this transaction. City retains aggregate validation and
 production settlement. Three more workflows stop using the legacy city aliases;
-the current context/domain consumer counts are 53/63.
+the context/domain consumer counts were 53/63 at #645.
 
 After #647, BuildingRepository owns building/experience SQL and scoped deletion.
 City converts legacy rows into the owned update DTOs after aggregate validation,
 and preserves the general-detachment update before deletion. Realm composition
-injects the same transaction and owner; construction workflows remain W07 work.
+injects the same transaction and owner. After #649, Building also owns construction
+workflows and receives the existing context through its bounded structural port.
+Current legacy context/domain consumer counts are 53/61; the updated inventory
+tracks their eventual retirement.

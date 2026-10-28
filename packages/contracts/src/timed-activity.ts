@@ -1,39 +1,16 @@
+import type {
+    TimedActivity,
+    PreparedActivity,
+    ActivityAction,
+} from "@opencok/base/contracts/activity";
+export type {
+    TimedActivity,
+    PreparedActivity,
+    ActivityAction,
+} from "@opencok/base/contracts/activity";
 import type { ActivityEconomy } from "@opencok/economy/contracts/activity-economy";
 import type { Row } from "./rows";
 import type { MutationCommand } from "@opencok/ledger/contracts/mutation";
-import type { TimedActivityAction } from "@opencok/enums/timed-activity-action";
-
-export interface TimedActivity
-{
-    id: string;
-    ownerId: string;
-    queueId: string;
-    type: number;
-    itemId: string;
-    startedAt: bigint;
-    dueAt: bigint;
-    version: number;
-    status: number;
-    data?: unknown;
-}
-
-export interface PreparedActivity
-{
-    pushes?: readonly { command: string; body: Uint8Array; }[];
-    queueItemId?: string;
-    startedAt?: bigint;
-    type?: number;
-    ready?: boolean;
-    itemId?: string;
-    durationMs?: bigint;
-    data?: unknown;
-    response: Uint8Array;
-    item?: Uint8Array;
-    event?: Uint8Array | null;
-    responseKind?: "queue" | "nested";
-}
-
-export type ActivityAction = `${TimedActivityAction}`;
 
 import type { InventoryState } from "./inventory";
 import type { InventoryPlan } from "@opencok/economy/contracts/inventory-planning";

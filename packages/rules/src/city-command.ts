@@ -1,15 +1,3 @@
-export const cityCommands = [
-    "build.create",
-    "build.upgrade",
-    "build.destroy",
-    "build.move",
-    "buildingUnlock",
-    "miracle.unlock",
-    "buildingUnlock.info",
-    "buildingUnlock.glory",
-    "building.reward",
-] as const;
-
 export const cityQueueCommands: Readonly<
     Record<
         string,
