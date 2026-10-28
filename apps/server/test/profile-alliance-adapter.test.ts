@@ -1,9 +1,10 @@
+import { readProfileAlliance } from "@opencok/repositories/profile-alliance";
 import { expect, test } from "bun:test";
 import { drizzle, type NodePgClient } from "drizzle-orm/node-postgres";
 import { getTableColumns } from "drizzle-orm";
 import * as schema from "@opencok/drizzle/schema/kingdom";
 import { alliance } from "@opencok/drizzle/schema/opencok_kingdom/alliance";
-import { readPublicProfile } from "@opencok/repositories/profile";
+import { readPublicProfile } from "@opencok/player/repositories/public-profile";
 
 function database(
     options: {
@@ -97,7 +98,7 @@ function database(
 
 test("public alliance inputs share the profile transaction and bind persisted membership with aggregate SQL", async () => {
     const { db, queries } = database({ allianceId: "alliance'a" });
-    const state = await readPublicProfile(db, "synthetic", "other-alliance");
+    const state = await readPublicProfile(db, "synthetic", readProfileAlliance, "other-alliance");
     expect(state.alliance).toMatchObject({
         alliance: {
             uid: "alliance'a",
@@ -140,12 +141,15 @@ test("public alliance inputs share the profile transaction and bind persisted me
 
 test("missing membership skips all alliance reads and same-alliance observers skip research", async () => {
     const absent = database({ allianceId: " ", failure: "alliance" });
-    expect((await readPublicProfile(absent.db, "synthetic")).alliance).toBeUndefined();
+    expect((await readPublicProfile(absent.db, "synthetic", readProfileAlliance)).alliance)
+        .toBeUndefined();
     expect(
         absent.queries.some((query) => query.text.includes("from \"opencok_kingdom\".\"alliance")),
     ).toBe(false);
     const own = database({ failure: "alliance_science" });
-    expect((await readPublicProfile(own.db, "synthetic", "alliance-a")).alliance).toMatchObject({
+    expect(
+        (await readPublicProfile(own.db, "synthetic", readProfileAlliance, "alliance-a")).alliance,
+    ).toMatchObject({
         withEffects: false,
         sciences: [],
     });
@@ -170,7 +174,7 @@ test("missing alliance records, ambiguous leadership and late dependencies rejec
     )
     {
         const { db, queries } = database(options);
-        await expect(readPublicProfile(db, "synthetic")).rejects.toThrow();
+        await expect(readPublicProfile(db, "synthetic", readProfileAlliance)).rejects.toThrow();
         expect(queries.at(-1)?.text).toBe("rollback");
         expect(queries.some((query) => query.text === "commit")).toBe(false);
     }

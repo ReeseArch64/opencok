@@ -640,6 +640,7 @@
         "@opencok/rules": "workspace:*",
         "@opencok/validations": "workspace:*",
         "drizzle-orm": "0.45.4",
+        "zod": "catalog:",
       },
       "devDependencies": {
         "@opencok/config": "workspace:*",

@@ -1,5 +1,5 @@
 import { expect, test } from "bun:test";
-import type { PublicProfileState } from "@opencok/contracts/profile";
+import type { PublicProfileState } from "@opencok/player/contracts/public-profile";
 import type { Row } from "@opencok/contracts/rows";
 import {
     decodeGeneralAbilities,

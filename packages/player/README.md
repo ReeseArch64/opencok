@@ -6,7 +6,8 @@ is the seven saved profile preferences migrated in
 login news initialization moved here in
 [#603](https://github.com/ReeseArch64/opencok/issues/603), followed by realm
 character provisioning in [#609](https://github.com/ReeseArch64/opencok/issues/609).
-Nickname, public profile and progression remain later #558 migrations.
+Public profile queries and snapshots move in #627 below. Nickname and progression
+remain later #558 migrations.
 
 | Entrypoint                         | Responsibility                                                      |
 | ---------------------------------- | ------------------------------------------------------------------- |
@@ -116,3 +117,48 @@ ADR-0017 process separation: world footprint writes still share the current real
 transaction. Player/world reservation protocols and least-privilege processes
 remain W17/W18/W21 work. No schema, configuration or data migration is required;
 rollback uses the previous realm artifact with unchanged persisted state.
+
+## Public profile queries (#627)
+
+`services/public-profile` owns get.user.info: observer eligibility, target validation,
+route identity, projection order and routed update markers. Contracts, base response
+schemas, mappings and progression/social presentation rules belong to player.
+`repositories/public-profile` owns directory routing, table readiness and the bounded
+repeatable-read, read-only snapshot. Its alliance reader port receives the same
+transaction; there is no independent alliance read or new writer.
+
+The realm composes the Service in `composition/public-profile`, supplying the existing
+observer checker, Hero/alliance projections, alliance snapshot reader and cache
+markers. GameService only delegates the command; GameStore and Database no longer
+expose the public profile query. Realm startup performs the owned readiness check
+immediately after the remaining Database checks, before cache/coordination startup.
+Hero and alliance projections accept narrow structural snapshots instead of importing
+the player-owned aggregate, avoiding reverse dependency cycles.
+
+The shared equipment preview also serves equipment and activity-reward responses.
+It remains in explicit equipment-preview mapping/schema/response modules rather than
+creating a dependency on player. Alliance-specific projections, shared public numeric
+validation, statistics serialization and generic catalog access retain their existing
+owners pending the relevant #558 slices. There are no reverse re-export facades.
+
+Preserved behavior includes observer checks before target reads, one server clock,
+global-directory routing with local fallback only for absent entries, conflicting
+route rejection, exact signed values, field order/types, privacy allowlists and the
+same-alliance research suppression. Snapshot reads retain collection limits, explicit
+columns, owner predicates, deterministic ordering and read-only transaction settings.
+Update markers use the routed realm and replace any provider value only after all
+projections complete. Missing markers remain an empty string; provider failures
+produce no partial response.
+
+The original 41 composed profile tests pass with the same 529 assertions. Four
+mapping/progression/repository/routing test files move into player; two additional
+Service tests verify port identity, order, response precedence and failure propagation.
+A disposable two-realm PostgreSQL test verifies real routing, privacy, no profile
+writes, no fallback from unavailable realms and restart persistence. Composed SFS
+core integration verifies application startup and existing realm behavior. These
+checks do not prove physical-client rendering or other native-client tracks.
+
+Zod is now a direct dependency using the existing workspace catalog version for the
+moved schemas; no dependency version changes. There is no configuration, schema,
+saved-data or process-authority change. Rollback uses the previous realm artifact
+against the same data.

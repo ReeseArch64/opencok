@@ -1,7 +1,7 @@
 import { inventoryItem } from "@opencok/economy/mappings/inventory-item";
 import type { InventoryItem } from "@opencok/economy/contracts/inventory";
 import type { Rules } from "@opencok/rules/game";
-import { publicEquipment } from "./profile";
+import { publicEquipment } from "./equipment-preview";
 import { sfs, type Fields } from "@opencok/messages/sfs";
 import { text, num, type Row } from "@opencok/contracts/rows";
 

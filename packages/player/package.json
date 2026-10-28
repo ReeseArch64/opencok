@@ -26,6 +26,7 @@
     "@opencok/mappings": "workspace:*",
     "@opencok/rules": "workspace:*",
     "@opencok/validations": "workspace:*",
-    "@opencok/ledger": "workspace:*"
+    "@opencok/ledger": "workspace:*",
+    "zod": "catalog:"
   }
 }

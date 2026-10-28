@@ -1,7 +1,10 @@
+const readAlliance = async (): Promise<never> => {
+    throw new Error("Unexpected alliance read");
+};
 import { expect, test } from "bun:test";
 import { drizzle, type NodePgClient } from "drizzle-orm/node-postgres";
 import * as schema from "@opencok/drizzle/schema/kingdom";
-import { readPublicProfile } from "@opencok/repositories/profile";
+import { readPublicProfile } from "@opencok/player/repositories/public-profile";
 
 function database(
     options: {
@@ -74,7 +77,7 @@ function database(
 
 test("public profile persistence binds one owner throughout a repeatable read snapshot", async () => {
     const { db, queries } = database();
-    const state = await readPublicProfile(db, "synthetic");
+    const state = await readPublicProfile(db, "synthetic", readAlliance);
     expect(state.profile).toEqual({
         uid: "synthetic",
         name: "Public",
@@ -162,7 +165,7 @@ test("public profile persistence binds one owner throughout a repeatable read sn
 
 test("public profile snapshots skip skill reads when there are no generals", async () => {
     const { db, queries } = database({ noGenerals: true, fail: "user_skill" });
-    expect((await readPublicProfile(db, "synthetic")).skills).toEqual([]);
+    expect((await readPublicProfile(db, "synthetic", readAlliance)).skills).toEqual([]);
     expect(queries.some((query) => query.text.includes("from \"opencok_kingdom\".\"user_skill\"")))
         .toBe(
             false,
@@ -171,7 +174,7 @@ test("public profile snapshots skip skill reads when there are no generals", asy
 
 test("missing profiles skip all dependent reads and invalid identities never reach SQL", async () => {
     const { db, queries } = database({ missing: true });
-    const state = await readPublicProfile(db, "unknown");
+    const state = await readPublicProfile(db, "unknown", readAlliance);
     expect(state.profile).toBeUndefined();
     expect(state.statistics).toBeUndefined();
     expect(state.generals).toEqual([]);
@@ -179,7 +182,7 @@ test("missing profiles skip all dependent reads and invalid identities never rea
     expect(queries).toHaveLength(3);
     for (const uid of ["", " ", "a".repeat(41)])
     {
-        expect(() => readPublicProfile(db, uid)).toThrow();
+        expect(() => readPublicProfile(db, uid, readAlliance)).toThrow();
     }
     expect(queries).toHaveLength(3);
 });
@@ -200,7 +203,7 @@ test("dependent failures and unrepresentable arrays reject the whole public snap
     )
     {
         const { db, queries } = database(options);
-        await expect(readPublicProfile(db, "synthetic")).rejects.toThrow();
+        await expect(readPublicProfile(db, "synthetic", readAlliance)).rejects.toThrow();
         expect(queries.at(-1)?.text).toBe("rollback");
         expect(queries.some((query) => query.text === "commit")).toBe(false);
     }

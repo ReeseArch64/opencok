@@ -71,7 +71,6 @@ function store(state: LoginConfigurationState): GameStore & PushPreferenceStore
         mailStatus: unused,
         allianceRanking: unused,
         playerRanking: unused,
-        publicProfile: unused,
         getPlayerSummariesByIds: unused,
         getPowerByPlayerId: unused,
         initializeWorldNewsPreference: async (uid, instant) => {

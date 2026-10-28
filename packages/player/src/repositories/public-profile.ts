@@ -13,13 +13,16 @@ import { user_equip } from "@opencok/drizzle/schema/opencok_kingdom/user_equip";
 import { user_honor } from "@opencok/drizzle/schema/opencok_kingdom/user_honor";
 import { user_achievement } from "@opencok/drizzle/schema/opencok_kingdom/user_achievement";
 import { and, asc, count, eq, inArray } from "drizzle-orm";
-import type { PublicProfileState, RoutedPublicProfile } from "@opencok/contracts/profile";
+import type {
+    PublicProfileState,
+    RoutedPublicProfile,
+} from "@opencok/player/contracts/public-profile";
 import type { createDatabases } from "@opencok/drizzle";
 import { account_new } from "@opencok/drizzle/schema/opencok_global/account_new";
 import { alliance_vedio } from "@opencok/drizzle/schema/opencok_kingdom/alliance_vedio";
 import { DependencyError } from "@opencok/errors/dependency";
 import type { DatabaseClient } from "@opencok/drizzle/contracts/database";
-import { readProfileAlliance } from "./profile-alliance.ts";
+import type { PublicProfileAllianceReader } from "./public-profile-reader.ts";
 
 export async function checkPublicProfileStore(db: DatabaseClient<"kingdom">)
 {
@@ -34,6 +37,7 @@ export async function loadPublicProfile(
     localKingdomId: number,
     uid: string,
     observerAllianceId: string,
+    readAlliance: PublicProfileAllianceReader,
 ): Promise<RoutedPublicProfile | undefined>
 {
     if (!/^[0-9]{1,40}$/.test(uid))
@@ -70,6 +74,7 @@ export async function loadPublicProfile(
     const state = await readPublicProfile(
         databases.getKingdom(kingdomId).db,
         uid,
+        readAlliance,
         observerAllianceId,
     );
 
@@ -89,6 +94,7 @@ export async function loadPublicProfile(
 export function readPublicProfile(
     db: DatabaseClient<"kingdom">,
     uid: string,
+    readAlliance: PublicProfileAllianceReader,
     observerAllianceId = "",
 ): Promise<PublicProfileState>
 {
@@ -321,7 +327,7 @@ export function readPublicProfile(
             )[0];
             const allianceId = profile.allianceId;
             const alliance = allianceId?.trim()
-                ? await readProfileAlliance(tx, allianceId, allianceId !== observerAllianceId)
+                ? await readAlliance(tx, allianceId, allianceId !== observerAllianceId)
                 : undefined;
 
             return {

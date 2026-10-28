@@ -71,7 +71,6 @@ function fixture()
         mailStatus: unused,
         allianceRanking: unused,
         playerRanking: unused,
-        publicProfile: unused,
         getPlayerSummariesByIds: unused,
         getCityByPlayerId: unused,
         getWorldByPointIds: unused,

@@ -29,7 +29,6 @@ test("setting.xml preserves IDs, string values, Unicode, and correlation through
         mailStatus: unused,
         allianceRanking: unused,
         playerRanking: unused,
-        publicProfile: unused,
         getPlayerSummariesByIds: unused,
         getPowerByPlayerId: unused,
     };
@@ -111,7 +110,6 @@ test("build.info uses the injected clock for buildings and queue previews withou
         mailStatus: unused,
         allianceRanking: unused,
         playerRanking: unused,
-        publicProfile: unused,
         getPlayerSummariesByIds: unused,
         getPowerByPlayerId: unused,
         getAccountsByPlayerId: unused,

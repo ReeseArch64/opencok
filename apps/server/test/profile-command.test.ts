@@ -1,6 +1,14 @@
+import { PublicProfileService } from "@opencok/player/services/public-profile";
+import type { PublicProfileStore } from "@opencok/player/contracts/public-profile-service";
+import { checkGameProfile } from "@opencok/services/game-profile";
+import { publicProfileGenerals } from "@opencok/hero/services/profile-generals";
+import { publicProfileAlliance } from "@opencok/services/profile";
 import { expect, test } from "bun:test";
 import type { GameServices, GameStore } from "@opencok/contracts/game";
-import type { PublicProfileState, RoutedPublicProfile } from "@opencok/contracts/profile";
+import type {
+    PublicProfileState,
+    RoutedPublicProfile,
+} from "@opencok/player/contracts/public-profile";
 import type { Row } from "@opencok/contracts/rows";
 import { GameService as Game } from "@opencok/services/game";
 import { Rules } from "@opencok/rules/game";
@@ -93,15 +101,18 @@ function fixture(remote = false)
         mailStatus: unused,
         allianceRanking: unused,
         playerRanking: unused,
-        publicProfile: async (uid, allianceId) => {
-            calls.push(["target", uid, allianceId]);
-            return route;
-        },
         getAccountsByPlayerId: unused,
         getCityByPlayerId: unused,
         getWorldByPointIds: unused,
         getPlayerSummariesByIds: unused,
         getPowerByPlayerId: unused,
+    };
+    const store: PublicProfileStore = {
+        getProfileById: (uid) => db.getProfileById(uid),
+        publicProfile: async (uid, allianceId) => {
+            calls.push(["target", uid, allianceId]);
+            return route;
+        },
     };
     const services: GameServices = {
         playerUpdateTimes: async (id, uids) => {
@@ -110,20 +121,23 @@ function fixture(remote = false)
         },
     };
     let clockCalls = 0;
-    const game = new Game(
-        db,
-        rules,
-        { kingdomId: 1 },
-        () => {
-            clockCalls++;
-            return now;
-        },
-        services,
-    );
+    const clock = () => {
+        clockCalls++;
+        return now;
+    };
+    const profile = new PublicProfileService(store, rules, { kingdomId: 1 }, {
+        checkProfile: checkGameProfile,
+        generals: publicProfileGenerals,
+        alliance: publicProfileAlliance,
+        playerUpdateTimes: async (id, uids) => services.playerUpdateTimes?.(id, uids),
+    }, clock);
+    services.publicProfile = (uid, params) => profile.get(uid, params);
+    const game = new Game(db, rules, { kingdomId: 1 }, clock, services);
     return {
         state,
         route,
         db,
+        store,
         rules,
         services,
         game,
@@ -237,7 +251,7 @@ test("unknown targets, conflicting routes and incomplete providers never return 
     for (
         const change of [
             (f: ReturnType<typeof fixture>) => {
-                f.db.publicProfile = async () => undefined;
+                f.store.publicProfile = async () => undefined;
             },
             (f: ReturnType<typeof fixture>) => {
                 f.state.profile!.uid = "other";
