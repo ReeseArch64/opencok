@@ -54,7 +54,7 @@ const dependencies: ServerDependencies = {
         playerRanking: async () => {
             throw new Error("Unexpected ranking query");
         },
-        publicProfile: async () => undefined,
+
         getPowerByPlayerId: async () => {
             throw new Error("unused");
         },

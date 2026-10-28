@@ -301,7 +301,7 @@ function command()
         getWorldByPointIds: unused,
         getPowerByPlayerId: unused,
         getPlayerSummariesByIds: unused,
-        publicProfile: unused,
+
         playerRanking: unused,
         allianceRanking: unused,
         mailStatus: unused,

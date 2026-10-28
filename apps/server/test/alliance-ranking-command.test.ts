@@ -38,7 +38,7 @@ function fixture()
     const db: GameStore = {
         getProfileById: unused,
         getAccountsByPlayerId: unused,
-        publicProfile: unused,
+
         getPowerByPlayerId: unused,
         getPlayerSummariesByIds: unused,
         getCityByPlayerId: unused,

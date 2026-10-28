@@ -1,5 +1,5 @@
 import { expect, test } from "bun:test";
-import type { PublicProfileState } from "@opencok/contracts/profile";
+import type { PublicProfileState } from "@opencok/player/contracts/public-profile";
 import { publicProfileAlliance } from "@opencok/services/profile";
 import { Rules } from "@opencok/rules/game";
 import { publicAllianceProgress } from "@opencok/rules/profile";

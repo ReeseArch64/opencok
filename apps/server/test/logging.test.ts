@@ -87,7 +87,7 @@ test("sessions correlate successful commands and every repeated failure without 
             playerRanking: async () => {
                 throw new Error("Unexpected ranking query");
             },
-            publicProfile: async () => undefined,
+
             getPowerByPlayerId: async () => {
                 throw new Error("unused");
             },

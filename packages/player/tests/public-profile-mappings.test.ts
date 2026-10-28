@@ -1,5 +1,6 @@
+import { publicEquipment } from "@opencok/mappings/equipment-preview";
 import { expect, test } from "bun:test";
-import { publicEquipment, publicMedal, publicStatistics } from "@opencok/mappings/profile";
+import { publicMedal, publicStatistics } from "@opencok/player/mappings/public-profile";
 import { decode, encode, sfs, Type } from "@opencok/messages/sfs";
 
 test("public statistics distinguish absent records from zero totals and retain exact stored power", () => {

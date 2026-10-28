@@ -1,4 +1,4 @@
-import type { PublicProfileState } from "@opencok/contracts/profile";
+import type { PublicAllianceProfile } from "@opencok/contracts/profile";
 import { text } from "@opencok/contracts/rows";
 import { errors } from "@opencok/constants/game";
 import { GameError } from "@opencok/errors/game";
@@ -9,7 +9,7 @@ import { publicAllianceInfo } from "@opencok/mappings/profile-alliance";
 import { sfs, type Fields } from "@opencok/messages/sfs";
 
 export function publicProfileAlliance(
-    state: PublicProfileState,
+    state: PublicAllianceProfile,
     rules: Rules,
     remote: boolean,
 ): Fields

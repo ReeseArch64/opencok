@@ -54,7 +54,7 @@ Counts describe maintained TypeScript/JavaScript source under `src` and named te
 | `notifications`  |                  0 / 0 | Delivery intents/channels and owned delivery state.                                                                                                                                                            | Populate current notification/integration responsibilities. In-session SFS delivery stays with gateway transport; FCM/external delivery is worker work. No direct gameplay grants.                                                                 | Proposed; pending review |
 | `npc`            |                  0 / 0 | Named NPC/monster archetypes and owned behavior policies.                                                                                                                                                      | Populate definitions and supported NPC behavior; clarify monster/NPC family boundaries. Spatial admission/spawn coordination belongs to world authority/population. Not authenticated player bots.                                                 | Proposed; pending review |
 | `payments`       |                  0 / 0 | Idempotent delivery of purchased benefits to the realm. Economic grants remain under the realm authority.                                                                                                      | Retain for confirmed scope; move real implementations in tested slices                                                                                                                                                                             | Confirmed in #567/#568   |
-| `player`         |                 17 / 6 | Character provisioning, profile/preferences, experience and bounded player progression.                                                                                                                        | Preferences in #595/#603 and character provisioning in #609; other profile work remains. Keep wallet/inventory and mechanics in their own packages; global account != character.                                                                   | Proposed; pending review |
+| `player`         |                26 / 11 | Character provisioning, public profile queries, preferences, experience and bounded player progression.                                                                                                        | Preferences in #595/#603, provisioning in #609 and public profile queries in #627; nickname/progression work remains. Keep wallet/inventory and mechanics in their own packages; global account != character.                                      | Proposed; pending review |
 | `policy`         |                  7 / 4 | Content matching, reserved-name rules, bounded file/worker adapters and the maintained word dictionary.                                                                                                        | Implemented in #589; five compatibility paths retired in #590. Player nickname mutations remain separate.                                                                                                                                          | Confirmed in #567/#568   |
 | `prompts`        |                  0 / 0 | No current use. Remove the unused workspace.                                                                                                                                                                   | Retired in #568                                                                                                                                                                                                                                    | Confirmed in #567/#568   |
 | `queues`         |                  0 / 0 | Persistent timed-activity lifecycle, dispatch contracts and shared queue invariants.                                                                                                                           | Populate current timed-activity mechanism; keep economic completion inside owned transactions. Transport queues and broker clients are distinct infrastructure responsibilities.                                                                   | Proposed; pending review |
@@ -459,3 +459,24 @@ and chat integration verifies real atomicity, replay and recovery. SQL ordering,
 owner predicates, limits, native output and saved data remain unchanged. No migration
 or configuration change is required; rollback uses the previous artifacts. See
 [economy](economy/README.md) for exact boundaries and verification limits.
+
+## Public profile ownership (#627)
+
+Player has twenty-six source modules and eleven test files. The get.user.info Service,
+profile routing/snapshot repository, base mapping, schemas, response/state contracts
+and profile presentation rules now live in its responsibility directories. The realm
+app composes observer, Hero/alliance and cache providers and owns profile readiness.
+GameService delegates; the GameStore/Database query and old horizontal profile mapping,
+schema, response and repository paths are removed.
+
+Hero and alliance providers use narrow independent snapshots. The shared equipment
+preview is separated from the player aggregate because equipment and activity rewards
+also consume it. Alliance presentation, shared numeric/statistics primitives and generic
+catalog access remain real dependencies under #558, not backward facades. Zod uses
+the already pinned catalog version as a new direct player dependency.
+
+All 41 original composed vectors retain 529 assertions; two owned Service tests and
+a real two-realm PostgreSQL scenario cover composition, provider order, routing,
+privacy, restart and rejection without realm fallback. Existing SFS core integration
+checks startup and realm behavior. No schema, save rewrite, protocol or writer change
+is introduced; rollback uses the previous artifact. See [player](player/README.md).

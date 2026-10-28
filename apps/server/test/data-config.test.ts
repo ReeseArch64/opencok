@@ -377,7 +377,6 @@ test("login.dataconfig reads the authenticated profile, echoes correlation and r
         mailStatus: unused,
         allianceRanking: unused,
         playerRanking: unused,
-        publicProfile: unused,
         getPlayerSummariesByIds: unused,
         getPowerByPlayerId: unused,
         getAccountsByPlayerId: unused,

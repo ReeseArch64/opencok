@@ -1,5 +1,5 @@
 import type { GeneralAbility } from "@opencok/hero/contracts/profile-generals";
-import type { PublicProfileState } from "@opencok/contracts/profile";
+import type { PublicGeneralProfile } from "@opencok/hero/contracts/profile-generals";
 import { text } from "@opencok/contracts/rows";
 import { errors } from "@opencok/constants/game";
 import { GameError } from "@opencok/errors/game";
@@ -96,7 +96,7 @@ export function decodeGeneralAbilities(
     }
 }
 
-export function publicProfileGenerals(state: PublicProfileState, rules: Rules, now: number)
+export function publicProfileGenerals(state: PublicGeneralProfile, rules: Rules, now: number)
 {
     if (!state.profile)
     {

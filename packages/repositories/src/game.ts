@@ -111,7 +111,6 @@ import type { GameStore, CityState } from "@opencok/contracts/game";
 import { num, type Row } from "@opencok/contracts/rows";
 import { checkPlayerSummaryStore, getPlayerSummariesByIds } from "./players.ts";
 import { checkPowerStore, getPowerByPlayerId } from "./power.ts";
-import { checkPublicProfileStore, loadPublicProfile } from "./profile.ts";
 import { loadFriendshipMine } from "./reconnect-mine.ts";
 import type { FriendshipMine, FriendshipMineStore } from "@opencok/contracts/reconnect";
 import type { PlayerRankingQuery } from "@opencok/contracts/ranking";
@@ -364,7 +363,6 @@ export class Database implements GameStore, FriendshipMineStore
             .limit(0);
         await checkPlayerSummaryStore(this.kingdom.db);
         await checkPowerStore(this.kingdom.db);
-        await checkPublicProfileStore(this.kingdom.db);
     }
 
     async health()
@@ -567,11 +565,6 @@ export class Database implements GameStore, FriendshipMineStore
     getPlayerSummariesByIds(uids: string[], allServers: boolean)
     {
         return getPlayerSummariesByIds(this.databases, this.config.kingdomId, uids, allServers);
-    }
-
-    publicProfile(uid: string, observerAllianceId: string)
-    {
-        return loadPublicProfile(this.databases, this.config.kingdomId, uid, observerAllianceId);
     }
 
     mailStatus(uid: string, query: MailStatusQuery)
