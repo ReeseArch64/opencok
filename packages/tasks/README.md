@@ -3,7 +3,7 @@
 Tasks owns ordinary/main, story, daily, legacy daily and sign-in quests after
 [#653](https://github.com/ReeseArch64/opencok/issues/653), under
 [ADR-0016](../../docs/decisions/0016-adopt-domain-owned-package-layout.md).
-Target missions are owned after #655 and recall missions after #657. Other
+Target missions are owned after #655, recall missions after #657 and reconnect missions after #659. Other
 event-specific workflows remain in their current owners for later #558 slices. Background work belongs to jobs.
 
 ## Responsibilities and composition
@@ -15,7 +15,7 @@ selection. `mappings/quests` preserves native field order and main string IDs ve
 numeric story/daily IDs. The fourteen command names live in `enums/command`.
 
 `apps/server/src/composition/quests.ts` injects the actual shared record readers,
-numeric/reconnect algorithms, target-task and campaign callbacks, mail encoding,
+numeric helpers, owned reconnect policies, target-task and campaign callbacks, mail encoding,
 reward previews and Equipment factory. Tasks imports no broad Contracts, Rules,
 Services, Mappings or Repositories package. Structural ports retain the existing
 row-shaped catalog/state boundaries; semantic definitions remain #558 W14 work.
@@ -49,13 +49,10 @@ when no maintained consumer remains. There is one implementation of each algorit
   There are no external direct named imports of those aliases; aggregate interfaces
   in that same module still embed both. Retire the aliases with the remaining
   aggregate-contract boundary and public-export audit.
-- `contracts/src/reconnect.ts` re-exports `ReconnectTask`/`ReconnectTaskPlan`.
-  Direct consumers are `mappings/src/reconnect.ts` and `rules/src/reconnect-tasks.ts`;
-  the reconnect aggregate also uses the owned plan internally.
-- Rules `reconnect-tasks.ts` and `reconnect-task-counts.ts` re-export their former
-  context types for server tests `reconnect-tasks.test.ts` and
-  `reconnect-task-counts.test.ts`, respectively. Move these imports with the remaining
-  reconnect algorithm ownership review before deleting the aliases.
+- The former reconnect task/plan aliases in `contracts/src/reconnect.ts` and context
+  aliases in Rules have no maintained consumers after #659 and are removed.
+  The shared aggregate retains a direct owned `ReconnectTaskPlan` import.
+  Remaining reconnect adapters are tracked below.
 
 The previous quest Rules, Mappings and Repository modules are removed after all
 callers migrate. The real system-mail contract now belongs to
@@ -194,3 +191,65 @@ PostgreSQL tests/110 assertions across recall, target and prayer. Deploy or roll
 back the realm artifact against the same recall notes/tasks, registration, effects,
 inventory, receipts and outbox. No schema, configuration, native resource or data
 conversion is introduced; native-device and production-load acceptance stay separate.
+
+## Reconnect missions (#659)
+
+Tasks adds eight source modules and one test file, bringing it to 55 source modules
+and four tests. `ReconnectTaskPolicy` owns discovery, restoration, ordering and
+visibility; `ReconnectTaskCounts` owns initial progress and building/resource
+counts. `ReconnectTaskMapper`, two native response contracts, two schemas and the
+three push-command enum values form the protocol boundary. Existing quest catalog
+records remain compatibility inputs; semantic authoring is separate W14 work.
+
+`apps/server/src/composition/reconnect-tasks.ts` binds actual Java integer parsing,
+hash-map ordering, blank-value decisions, signed wire validation and native reward
+previews. Ordinary quest app composition consumes the owned policies directly.
+Policies import no broad catalog registry. Discovery preserves predecessor/phase,
+Facebook/operator/building gates, randomness, integer wrap and the 32,767 bound.
+Serialization preserves visibility, field order, completion counts, optional cross
+fields and reward omission on completion pushes.
+
+`ReconnectTaskRepository` owns the ordered 32,768-row sentinel read and the existing
+insert/update segment. Shared aggregate adapters delegate at their original positions
+with the same transaction, owner and numeric/uniqueness/result helpers. Validation
+still rejects claims, existing inserted IDs and invalid original-state transitions;
+inserts precede updates, newly inserted updates are skipped, and updates retain
+state-zero compare-and-set. Fencing, settlement, mail, retry and notification order
+remain in the unchanged reconnect coordinator and enclosing transaction.
+
+| Former source                                       | Owned destination                                                               | Composition and verification                                                              |
+| --------------------------------------------------- | ------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
+| Rules `reconnect-tasks`, `reconnect-task-counts`    | `rules/reconnect-task`, `rules/reconnect-counts`, bounded runtime/catalog ports | Realm factories and tracked shared bindings; owned/app planner and count tests            |
+| Mappings `reconnect` task serializer                | `mappings/reconnect`, `enums/reconnect-command`                                 | Realm factory and shared binding; native wire and push tests                              |
+| Contracts/Validations reconnect task declarations   | `contracts/responses/reconnect`, `validations/reconnect`                        | Owned mapper; exact structural comparisons and workspace types                            |
+| Repositories reconnect progress/write task segments | `repositories/reconnect`                                                        | Existing aggregate adapters; full-flow parity, rollback tests and PostgreSQL login/quests |
+
+### Reconnect compatibility and retirement
+
+Tasks owns these bindings under #558 W20. Migrate the named consumers to injected
+owned collaborators, verify public exports and remove the bindings when unused:
+
+- Shared Rules `reconnect-tasks.ts` exports only bound `reconnectTaskPlan`, and
+  `reconnect-task-counts.ts` exports three bound count methods. Each has two direct
+  consumers: shared Services `quests.ts` and `reconnect-progress.ts`. Context types
+  and visibility have migrated directly; their old aliases are removed.
+- Shared Mappings `reconnect.ts` binds `reconnectTasks` only for shared Services
+  `reconnect-progress.ts`. Other non-task reconnect projections remain in that file.
+- Shared Repositories `reconnect-progress.ts` and `reconnect-write.ts` compose the
+  owned read/write operations until the aggregate reconnect boundary migrates.
+  They retain authority and other mechanics; no duplicate task SQL remains.
+
+The shared reward-preview response/schema needed by Tasks now live in Economy.
+Their remaining aliases and callers are tracked in [Economy](../economy/README.md#reward-preview-wire-contracts-659).
+Mappings and Repositories declare their new direct Tasks dependency; no third-party
+version, workspace or schema changes.
+
+Verification retains 16 baseline app tests/111 assertions and seven PostgreSQL
+core/quests/timed-economy tests/371 assertions, including two-realm login. The focused
+suite adds existing write rollback tests for 21 tests/153 assertions. Four owned tests
+add 19 assertions for injected order, catalog bounds, distinct integer overflow
+semantics and cross-completion wire omission. Thirty-five structural comparisons
+cover original algorithms, complete aggregate read/write/retry flows, all remaining
+shared projections, moved declarations and the unchanged coordinator. Deploy or
+roll back the realm artifact against the same data. Native-device, production-load
+and separated-authority acceptance remain outside this structural slice.

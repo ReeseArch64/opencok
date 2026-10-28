@@ -1,3 +1,4 @@
+import { ReconnectTaskRepository } from "@opencok/tasks/repositories/reconnect";
 import { alliance_science_upgrade } from "@opencok/drizzle/schema/opencok_kingdom/alliance_science_upgrade";
 import { user_hospital } from "@opencok/drizzle/schema/opencok_kingdom/user_hospital";
 import { and, asc, eq } from "drizzle-orm";
@@ -11,7 +12,6 @@ import { user_skill } from "@opencok/drizzle/schema/opencok_kingdom/user_skill";
 import { user_building } from "@opencok/drizzle/schema/opencok_kingdom/user_building";
 import { user_equip } from "@opencok/drizzle/schema/opencok_kingdom/user_equip";
 import { queue } from "@opencok/drizzle/schema/opencok_kingdom/queue";
-import { user_task } from "@opencok/drizzle/schema/opencok_kingdom/user_task";
 import { playerinfo } from "@opencok/drizzle/schema/opencok_kingdom/playerinfo";
 import { stat_reg } from "@opencok/drizzle/schema/opencok_kingdom/stat_reg";
 import { civilization_castle } from "@opencok/drizzle/schema/opencok_kingdom/civilization_castle";
@@ -203,12 +203,7 @@ export async function readReconnectProgress(
         .where(eq(queue.ownerId, uid))
         .orderBy(asc(queue.uuid))
         .limit(32768);
-    const tasks = await tx
-        .select()
-        .from(user_task)
-        .where(eq(user_task.uid, uid))
-        .orderBy(asc(user_task.id))
-        .limit(32768);
+    const tasks = await ReconnectTaskRepository.readTasks(tx, uid);
     const playerInfo = (
         await tx.select().from(playerinfo).where(eq(playerinfo.uid, uid)).limit(1)
     )[0];

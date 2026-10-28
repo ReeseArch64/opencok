@@ -6,12 +6,7 @@ import type { CityProgressionContext } from "@opencok/city/services/context";
 import type { Rules } from "@opencok/rules/game";
 import { text, num, long } from "@opencok/contracts/rows";
 import { cityInteger } from "@opencok/rules/city-progression";
-import { reconnectTaskPlan } from "@opencok/rules/reconnect-tasks";
-import {
-    reconnectContainsBuildings,
-    reconnectResourceOutput,
-    reconnectTaskInitialCount,
-} from "@opencok/rules/reconnect-task-counts";
+import { createRealmReconnectTaskPolicy, createRealmReconnectTaskCounts } from "./reconnect-tasks";
 import { recordTargetTask } from "./target-task";
 import { recordCampaignUse } from "@opencok/services/local-campaign";
 import { javaMailBytes } from "@opencok/rules/avatar-mail";
@@ -24,6 +19,10 @@ import { createRealmEquipmentPolicy } from "./equipment";
 
 export function createRealmQuestPolicy()
 {
+    const { reconnectTaskPlan } = createRealmReconnectTaskPolicy();
+    const { reconnectContainsBuildings, reconnectResourceOutput, reconnectTaskInitialCount } =
+        createRealmReconnectTaskCounts();
+
     return new QuestPolicy<Rules>({
         text,
         num,

@@ -1,12 +1,11 @@
+import type { ReconnectTaskCountState } from "@opencok/tasks/contracts/reconnect";
 import { importBuildingCatalog } from "@opencok/building/mappings/legacy-definition";
 import { expect, test } from "bun:test";
 import { Rules } from "@opencok/rules/game";
-import {
-    reconnectContainsBuildings,
-    reconnectTaskInitialCount,
-    reconnectResourceOutput,
-    type ReconnectTaskCountState,
-} from "@opencok/rules/reconnect-task-counts";
+import { createRealmReconnectTaskCounts } from "../src/composition/reconnect-tasks";
+
+const { reconnectContainsBuildings, reconnectTaskInitialCount, reconnectResourceOutput } =
+    createRealmReconnectTaskCounts();
 
 const rules = new Rules(new Map(), new Map(), new Map());
 rules.reconnect.positionUnlock = [{ unlock: "1" }, { unlock: "0" }, { unlock: "1" }];
