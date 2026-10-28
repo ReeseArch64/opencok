@@ -84,3 +84,26 @@ test("connect_rejectedPromise_preservesTheFailureAndDoesNotLogConnectionDetails"
     expect(records.filter((record) => record.event === "database_pool_acquired")).toHaveLength(1);
     expect(JSON.stringify(records)).not.toContain(failure.message);
 });
+
+test("connect_queuedCallback_retainsTheAcquiringRequestContext", () => {
+    let acquired: Parameters<Pool["connect"]>[0] | undefined;
+    const client = {} as PoolClient;
+    const release = () => {};
+    const pool = {
+        connect: (callback: Parameters<Pool["connect"]>[0]) => {
+            acquired = callback;
+        },
+        waitingCount: 0,
+        idleCount: 0,
+        totalCount: 1,
+    } as unknown as Pool;
+    observePostgresPool(pool, "kingdom");
+    const callback = mock<Parameters<Pool["connect"]>[0]>();
+    withLogContext({ requestId: "acquiring-request" }, () => pool.connect(callback));
+
+    withLogContext({ requestId: "releasing-request" }, () => acquired!(undefined, client, release));
+
+    expect(callback).toHaveBeenCalledWith(undefined, client, release);
+    expect(records.find((record) => record.event === "database_pool_acquired")?.requestId)
+        .toBe("acquiring-request");
+});

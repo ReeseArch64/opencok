@@ -262,7 +262,11 @@ comparison remains available independently of these historical samples.
 
 Unit coverage verifies omitted-field rejection, exact bigint preservation, missing
 owners, aggregate bounds, absence of unnecessary effect loads and safe fallback for
-pending/unknown item grants. The pending-grant fallback was manually mutated by
+pending/unknown item grants. Committed executor-level runs additionally exercise all 21 commands for fresh and
+existing synthetic characters, exact receipt replay, quest/effect/recall daily rollover,
+and runtime reconstruction against the same database with a higher authority epoch.
+The reconstructed runtime replays the saved receipt; the prior owner is rejected.
+The pending-grant fallback was manually mutated by
 inverting its predicate; the focused tests rejected that mutation. Existing bootstrap
 and TCP session suites cover native field/order compatibility, replacement,
 cancellation and active-token preservation. Actual PostgreSQL rollback is exercised
@@ -276,7 +280,9 @@ failure events retain the existing reason and add `failureKind` to distinguish
 server statement timeout, query cancellation, lock timeout and unavailable locks.
 Only fixed classifications are emitted; SQL, parameters and raw errors are excluded.
 Unknown/localized server messages retain the conservative cancellation/unavailable
-classification. Application cancellation remains separate from PostgreSQL failures.
+classification. A caller-provided bootstrap signal that expires produces `application_deadline`;
+dependency `TimeoutError` remains `dependency_timeout`, and disconnect/replacement
+cancellation keeps its existing classification. No new login timer is imposed.
 
 `readRealmLockDiagnostics` returns at most 64 lock records for current-database
 `realm_authority` participants, including their waiting transaction locks, blocker
@@ -284,7 +290,10 @@ PIDs, modes and transaction/wait ages. It excludes query text, addresses, databa
 users and player fields. Its disposable concurrency test creates a real row-lock
 wait and verifies the blocker relationship. PostgreSQL-specific diagnostic SQL is
 retained because catalog inspection and `pg_blocking_pids` are PostgreSQL APIs.
-No locking or admission policy changes are inferred from these diagnostics.
+No locking or admission policy changes are inferred from these diagnostics. A bounded,
+read-only sample of the existing local runtime reported PostgreSQL 18.6 and no
+`realm_authority` locks in three successive observations. This cannot identify the
+owner or cause of the historical contention.
 
 The existing telemetry context and disposable Maple integration suites verify
 context isolation and exported signals. This does not establish completeness of the

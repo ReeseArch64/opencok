@@ -165,3 +165,15 @@ test("errorReason distinguishes cancellation from dependency deadlines through w
         "database_lock_unavailable",
     );
 });
+
+test("errorReason distinguishes an explicit application deadline from dependency timeout", () => {
+    const deadline = Object.assign(new Error("synthetic caller deadline"), {
+        name: "ApplicationDeadlineError",
+    });
+
+    expect(errorReason(deadline)).toBe("application_deadline");
+    expect(errorReason(new Error("wrapper", { cause: deadline }))).toBe("application_deadline");
+    expect(errorReason(new DOMException("synthetic dependency deadline", "TimeoutError"))).toBe(
+        "dependency_timeout",
+    );
+});

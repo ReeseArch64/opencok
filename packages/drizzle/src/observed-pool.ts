@@ -1,3 +1,4 @@
+import { AsyncResource } from "node:async_hooks";
 import type { Pool } from "pg";
 import { observeDependencyOperation } from "@opencok/core/operation";
 import { errorReason, logEvent } from "@opencok/core/logging";
@@ -23,10 +24,10 @@ export function observePostgresPool(pool: Pool, role: string): void
 
         if (callback)
         {
-            return connect((error, client, release) => {
+            return connect(AsyncResource.bind((error, client, release) => {
                 finish(error);
                 callback(error, client, release);
-            });
+            }));
         }
 
         return observeDependencyOperation(`postgresql.${role}.pool_acquire`, async () => {

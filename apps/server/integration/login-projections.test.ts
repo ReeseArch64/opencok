@@ -1,6 +1,7 @@
+import { randomUUID } from "node:crypto";
 import { expect, spyOn, test } from "bun:test";
 import { user_branch_city_info } from "@opencok/drizzle/schema/opencok_kingdom/user_branch_city_info";
-import { encode } from "@opencok/messages/sfs";
+import { encode, sfs } from "@opencok/messages/sfs";
 import type { CityProgressionWrite } from "@opencok/contracts/city-progression";
 import type { ActivityEconomy } from "@opencok/economy/contracts/activity-economy";
 import { initializeLogging } from "@opencok/core/logging";
@@ -179,6 +180,59 @@ for (const kingdomId of [1, 2])
 
                 expect(committed.response).toEqual(unchanged.response);
                 expect(evidence).toHaveLength(21);
+
+                for (const owner of ["owner", "other"])
+                {
+                    for (const command of Object.values(CityInitializationCommand))
+                    {
+                        const params = { operationId: sfs.string(randomUUID()) };
+                        const first = await h.command(command, params, owner);
+                        const replayed = await h.command(command, params, owner);
+
+                        expect(replayed, command).toEqual(first);
+                    }
+                }
+
+                h.clock.now += 86400000;
+
+                for (
+                    const command of [
+                        CityInitializationCommand.Quest,
+                        CityInitializationCommand.Effects,
+                        CityInitializationCommand.Recall,
+                    ]
+                )
+                {
+                    const params = { operationId: sfs.string(randomUUID()) };
+                    const first = await h.command(command, params);
+
+                    expect(await h.command(command, params), command).toEqual(first);
+                }
+
+                const reconnectParams = { operationId: sfs.string(randomUUID()) };
+                const prior = await h.command(CityInitializationCommand.Prayer, reconnectParams);
+                const restarted = await cityHarness(domains, false, undefined, 1200, {
+                    kingdomId,
+                    connection: h.connection,
+                    seed: false,
+                    now: h.clock.now,
+                });
+
+                try
+                {
+                    expect(restarted.authority.epoch).toBeGreaterThan(h.authority.epoch);
+                    expect(
+                        await restarted.command(CityInitializationCommand.Prayer, reconnectParams),
+                    )
+                        .toEqual(prior);
+                    await expect(h.command(CityInitializationCommand.Prayer, {
+                        operationId: sfs.string(randomUUID()),
+                    })).rejects.toThrow("realm authority");
+                }
+                finally
+                {
+                    await restarted.close();
+                }
             }
             finally
             {

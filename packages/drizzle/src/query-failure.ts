@@ -1,4 +1,6 @@
-export function postgresFailureKind(error: unknown): string | undefined
+import { PostgresFailureKind } from "./enums/postgres-failure-kind";
+
+export function postgresFailureKind(error: unknown): PostgresFailureKind | undefined
 {
     if (!(error instanceof Error) || !("code" in error))
     {
@@ -8,15 +10,15 @@ export function postgresFailureKind(error: unknown): string | undefined
     if (error.code === "57014")
     {
         return error.message === "canceling statement due to statement timeout"
-            ? "statement_timeout"
-            : "query_cancelled";
+            ? PostgresFailureKind.StatementTimeout
+            : PostgresFailureKind.QueryCancelled;
     }
 
     if (error.code === "55P03")
     {
         return error.message === "canceling statement due to lock timeout"
-            ? "lock_timeout"
-            : "lock_unavailable";
+            ? PostgresFailureKind.LockTimeout
+            : PostgresFailureKind.LockUnavailable;
     }
 
     return undefined;

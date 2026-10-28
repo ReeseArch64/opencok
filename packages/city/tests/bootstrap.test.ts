@@ -338,3 +338,32 @@ test("cancellation during expedition reads prevents power calculation", async ()
     });
     expect(h.calls).toEqual(["state"]);
 });
+
+test("an explicit caller deadline is distinguished from a dependency timeout", async () => {
+    const h = fixture();
+    const signal = AbortSignal.abort(new DOMException("synthetic caller deadline", "TimeoutError"));
+
+    await expect(h.service.initialize("owner", {}, signal)).rejects.toMatchObject({
+        name: "ApplicationDeadlineError",
+    });
+    expect(h.calls).toEqual([]);
+});
+
+test("a caller deadline during a phase stops subsequent initialization work", async () => {
+    const controller = new AbortController();
+    const commands: string[] = [];
+    const h = fixture({
+        cityProgression: async (_uid, command) => {
+            commands.push(command);
+            controller.abort(new DOMException("synthetic caller deadline", "TimeoutError"));
+
+            return { body: {}, pushes: [] };
+        },
+    });
+
+    await expect(h.service.initialize("owner", {}, controller.signal)).rejects.toMatchObject({
+        name: "ApplicationDeadlineError",
+    });
+    expect(commands).toEqual(["egg.activity.init"]);
+    expect(h.calls).toEqual([]);
+});

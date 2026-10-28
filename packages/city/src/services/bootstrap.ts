@@ -8,6 +8,7 @@ import type {
 import { long, num } from "@opencok/contracts/rows";
 import type { Fields } from "@opencok/messages/sfs";
 import { GameError } from "@opencok/errors/game";
+import { ApplicationDeadlineError } from "@opencok/errors/application-deadline";
 import { errors, MOBILE_CLIENT_VERSION } from "@opencok/constants/game";
 import type { CityBootstrapServices, CityBootstrapReconnect } from "../contracts/bootstrap";
 import type { CityBootstrapMapper } from "../mappings/bootstrap";
@@ -57,12 +58,23 @@ export class CityBootstrapService implements CityBootstrapRuntime
         signal?: AbortSignal,
     ): Promise<CityBootstrapResult>
     {
-        signal?.throwIfAborted();
+        const assertActive = () => {
+            if (
+                signal?.aborted && signal.reason instanceof Error
+                && signal.reason.name === "TimeoutError"
+            )
+            {
+                throw new ApplicationDeadlineError();
+            }
+
+            signal?.throwIfAborted();
+        };
+        assertActive();
 
         const phase = async <T>(name: string, run: () => Promise<T>): Promise<T> => {
-            signal?.throwIfAborted();
+            assertActive();
             const result = await this.observe(`login.initialize.${name}`, run);
-            signal?.throwIfAborted();
+            assertActive();
 
             return result;
         };
@@ -82,9 +94,9 @@ export class CityBootstrapService implements CityBootstrapRuntime
         const gifts = await cityProgression(uid, "gift.init", {});
         const worldRecovery = await cityProgression(uid, "world.tick", {});
         const treasureMaps = await cityProgression(uid, "treasuremap.init", {});
-        signal?.throwIfAborted();
+        assertActive();
         await phase("reconcile_alliance", async () => this.services.reconcileAlliance?.(uid));
-        signal?.throwIfAborted();
+        assertActive();
         await phase("reconcile_timed", async () => this.services.reconcileTimed?.(uid));
         const effects = await cityProgression(uid, "effects.init", {});
         const quest = await cityProgression(uid, "quest.init", {});
@@ -109,7 +121,7 @@ export class CityBootstrapService implements CityBootstrapRuntime
             "alliance",
             async () => this.services.alliance?.(uid, "alliance.init", {}),
         );
-        signal?.throwIfAborted();
+        assertActive();
         const state = await phase("state", async () => this.state(uid));
         const world = state.world;
 
@@ -191,7 +203,7 @@ export class CityBootstrapService implements CityBootstrapRuntime
             });
         }
 
-        signal?.throwIfAborted();
+        assertActive();
 
         if (!this.services.reconnect)
         {
@@ -205,7 +217,7 @@ export class CityBootstrapService implements CityBootstrapRuntime
             "reconnect",
             async () =>
                 this.services.reconnect!(uid, now, async (progress) => {
-                    signal?.throwIfAborted();
+                    assertActive();
                     const planned = await this.reconnect.plan(progress, context);
 
                     if (!progress.world || num(progress.world, "worldId") !== 0)
@@ -230,7 +242,7 @@ export class CityBootstrapService implements CityBootstrapRuntime
 
                     this.reconnect.validate(planned.result, "init");
 
-                    signal?.throwIfAborted();
+                    assertActive();
 
                     return planned;
                 }),
