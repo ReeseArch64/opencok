@@ -22,7 +22,10 @@
     "check-types": "vp check-types",
     "test:packages": "bun --no-env-file test packages/resources/tests packages/validations/tests packages/mappings/tests packages/controllers/tests packages/rules/tests",
     "prepare": "husky",
-    "commitlint": "commitlint"
+    "commitlint": "commitlint",
+    "test:architecture": "bun --no-env-file test tests/architecture",
+    "check-types:architecture": "tsc --noEmit -p tests/architecture/tsconfig.json",
+    "inventory:architecture": "bun --no-env-file tests/architecture/inventory.ts"
   },
   "devDependencies": {
     "@commitlint/cli": "^21.2.4",
