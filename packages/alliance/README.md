@@ -7,10 +7,11 @@ Shared gifts follow in [#665](https://github.com/ReeseArch64/opencok/issues/665)
 Research and donations follow in [#667](https://github.com/ReeseArch64/opencok/issues/667).
 Governance follows in [#669](https://github.com/ReeseArch64/opencok/issues/669).
 Applications and invitations follow in [#671](https://github.com/ReeseArch64/opencok/issues/671).
-Its forty-four source modules and five test files cover help, gifts, research,
-donations, governance, applications/invitations, native mapping and transactional
-persistence/recovery. Membership entry/removal and the broad coordinator remain
-subsequent domain slices.
+Creation and membership follow in [#673](https://github.com/ReeseArch64/opencok/issues/673).
+Its fifty-three source modules and six test files cover help, gifts, research,
+donations, governance, applications/invitations, creation/membership, native mapping
+and transactional persistence/recovery. Directory, snapshot/effects and the broad
+coordinator remain subsequent domain slices.
 
 ## Responsibilities and composition
 
@@ -24,7 +25,8 @@ and quest-action enums retain the existing strings.
 validation, building catalog lookup, failure policy and UUID generator. The shared
 Alliance coordinator receives the help factory through its constructor. Alliance
 imports no broad Contracts, Rules, Services, Mappings or Repositories package.
-Its only runtime dependencies are existing Messages, Drizzle and drizzle-orm.
+Its runtime dependencies are existing Messages, Drizzle, drizzle-orm and Zod
+for creation validation. Economy supplies only the bounded reward-preview type.
 
 `repositories/help` receives the enclosing transaction, locked participants and
 record/check collaborators. Shared aggregate adapters delegate at the original
@@ -264,7 +266,8 @@ retirement under #558 W20: migrate coordinator/publication policy injection and
 catalog tests, then relocate the shared error binding. The unused free
 `allianceCapacity` export is removed; the policy retains capacity and its default
 entry evaluation. Application/invitation lifecycle follows in #671; directory/search,
-membership mutations, aggregate orchestration and publication still require later slices.
+membership mutations follow in #673, while aggregate orchestration and publication
+still require later slices.
 
 Seven governance tests add 92 assertions for permission isolation, rank and
 leadership gates, exact absence boundaries, removal delegation, costs, restrictions,
@@ -344,5 +347,74 @@ and 284 assertions against the parent baseline.
 Deploy or roll back the complete realm artifact without schema, environment,
 third-party version or client packaging changes. Preserve committed applications,
 mail consumption, memberships, rewards, receipts and outbox. Synthetic fixtures do
-not replace native-device or production-load acceptance. Membership entry/removal,
-creation/directory and aggregate/publication ownership remain later #558 work.
+not replace native-device or production-load acceptance. Creation and membership entry/removal follow in #673; directory and
+aggregate/publication ownership remain later #558 work.
+
+## Creation, entry and removal
+
+`services/membership` owns creation, march admission, entry and removal. The
+creation DTO and Zod schema move unchanged into the domain; their sole consumer
+moves with them and the unused legacy modules are removed. Realm composition
+injects actual numeric/failure behavior, UUID/RNG, reward preview, Java-compatible
+mail bytes, activity economy and stable identities. The generic catalog and ledger
+ports preserve concrete adapters at composition without importing broad Rules,
+Services or Contracts into Alliance. Zod uses the existing pinned catalog version;
+Economy supplies its existing leaf reward-preview contract.
+
+Creation preserves castle thresholds/costs, text checks, native defaults, initial
+leader rank and abbreviation collision fallback. Existing membership or cross-realm
+profiles remain ineligible. Entry rejects team/foreign-alliance marches, incoming
+active marches targeting the player or an owned point at or after the current time,
+and the 8,193-row sentinel. Capacity uses current membership and truncated science
+effect. Member initialization preserves prior honor, native counters and join time.
+Quest action, membership, alliance count and production-owner marking stay together.
+
+First membership uses template 10011, the actual reward preview with version
+12.06.0 and RNG, original supported reward categories and unchanged Java mail bytes.
+`mappings/membership` preserves reward serialization, stable mail identity plus the
+00 category, claim status, native response field order and exact long values. Lazy
+snapshot/first-join readers preserve evaluation order. Missing templates produce
+no mail; unsupported reward kinds or missing message bytes still abort the plan.
+Removal preserves march/cross-realm gates, clears membership, closes first-join
+eligibility and marks the production owner. Shared context join/remove ports now
+delegate to the realm-composed membership Service for applications and governance.
+
+`repositories/membership` owns lord, owned-point and relevant-march reads, followed
+by the original coupled writes: member clearing/help invalidation; profile and
+world-point membership, application/donation cleanup and march membership; first-join
+flags; and later new-mail insertion/system grouping. Participant and allowed-alliance
+checks remain unchanged. A duplicate deterministic mail does not create another
+system group. Calls retain their original positions among governance, science,
+help, gifts, application consumption and blacklist operations inside one transaction.
+No process authority, receipt, production schedule or outbox boundary changes.
+
+| Former source                                               | Owned destination                                  | Composition and retirement                                                                              |
+| ----------------------------------------------------------- | -------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| Services `alliances` creation/checkMarch/join/remove        | `services/membership` and bounded ports            | Required realm factory; shared join/remove methods remain delegation ports until coordinator retirement |
+| DTOs `create-alliance.dto`, Validations `alliance`          | `dtos/create-alliance.dto`, `validations/alliance` | Sole consumer migrated; legacy modules removed                                                          |
+| First-join reward/mail and membership native objects        | `mappings/membership`                              | Owned Service with actual failure and stable-identity collaborators                                     |
+| Aggregate lord/point/march reads and membership/mail writes | `repositories/membership`                          | Same transaction and operation order, including help/donation cleanup and mail-group idempotency        |
+| Shared membership state/write fields                        | `contracts/membership`                             | Shared Contracts aggregate extends owned interfaces                                                     |
+
+The unused Rules `newAllianceMember` export is removed; the owned policy remains
+the single implementation. Remaining creation/join policy bindings still serve
+Rules catalog tests. `allianceStableId` remains shared for the trusted gift producer,
+realm march-gift producer and this composed mail mapper. Alliance owns its eventual
+relocation under #558 W20 with aggregate migration; hashes and saved identities must
+remain unchanged. Directory/search, snapshot/effect assembly, transaction discovery,
+aggregate orchestration/publication and semantic catalog definitions remain open.
+
+Seven membership tests add 73 assertions for creation costs/defaults, UUID collision
+order, membership/march gates, exact arrival boundary, population/science capacity,
+honor preservation, deterministic first-join rewards, missing/unsupported mail data,
+removal and native roundtrips. All Alliance tests total 40 tests and 411 assertions.
+Thirty-eight structural comparisons cover extracted algorithms and mapping, full
+coordinator methods, ordered aggregate reads/writes, schema, DTO and contract fields.
+The four disposable PostgreSQL suites retain concurrent entry, last-slot admission,
+first-membership mail, replay, rollback, production and receipt coverage.
+
+Deploy or roll back the complete realm artifact with its updated workspace lockfile.
+No schema, environment, save conversion, third-party version or client packaging
+change. Preserve memberships, first-join flags/rewards, production checkpoints,
+applications, receipts and outbox. Do not reset reward identities or player progress
+during rollback. Native-device and production-load acceptance remain separate.

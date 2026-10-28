@@ -1,4 +1,8 @@
 import type {
+    AllianceMembershipState,
+    AllianceMembershipWrite,
+} from "@opencok/alliance/contracts/membership";
+import type {
     AllianceApplicationState,
     AllianceApplicationWrite,
 } from "@opencok/alliance/contracts/applications";
@@ -37,7 +41,8 @@ export interface AllianceState
         AllianceGiftState,
         AllianceScienceState,
         AllianceGovernanceState,
-        AllianceApplicationState
+        AllianceApplicationState,
+        AllianceMembershipState
 {
     now: bigint;
     inventory: InventoryState;
@@ -45,10 +50,7 @@ export interface AllianceState
     profiles: readonly Row[];
     alliances: readonly Row[];
     members: readonly Row[];
-    lords: readonly Row[];
-    points: readonly Row[];
     powers: readonly Row[];
-    marches: readonly Row[];
     directory: readonly Row[];
     candidates: readonly Row[];
     directoryTotal: bigint;
@@ -60,11 +62,9 @@ export interface AllianceWrite
         AllianceGiftWrite,
         AllianceScienceWrite,
         AllianceGovernanceWrite,
-        AllianceApplicationWrite
+        AllianceApplicationWrite,
+        AllianceMembershipWrite
 {
-    removedMembers?: readonly string[];
-    firstJoin?: readonly string[];
-    mails?: readonly Row[];
 }
 
 export interface AlliancePlan

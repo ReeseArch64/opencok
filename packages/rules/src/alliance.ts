@@ -30,8 +30,6 @@ export const alliancePermissions = policy.alliancePermissions;
 
 export const changeAlliancePermissions = policy.changeAlliancePermissions;
 
-export const newAllianceMember = policy.newAllianceMember;
-
 export const allianceCreationCost = policy.allianceCreationCost;
 
 export const allianceJoinAllowed = policy.allianceJoinAllowed;

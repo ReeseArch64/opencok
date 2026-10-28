@@ -1,3 +1,8 @@
+import { AllianceMembershipService } from "@opencok/alliance/services/membership";
+import { AllianceMembershipMapper } from "@opencok/alliance/mappings/membership";
+import type { AllianceMembershipContext } from "@opencok/alliance/contracts/membership";
+import { previewRewards } from "@opencok/rules/rewards";
+import { javaMailBytes } from "@opencok/rules/avatar-mail";
 import { AllianceApplicationsService } from "@opencok/alliance/services/applications";
 import { AllianceApplicationsMapper } from "@opencok/alliance/mappings/applications";
 import type { AllianceApplicationContext } from "@opencok/alliance/contracts/applications";
@@ -27,7 +32,7 @@ import type { AllianceHelpContext } from "@opencok/alliance/contracts/help";
 import type { Rules } from "@opencok/rules/game";
 import type { AllianceRepository } from "@opencok/contracts/alliance-gameplay";
 import type { InventoryEffects } from "@opencok/services/inventory-runtime";
-import { AllianceService } from "@opencok/services/alliances";
+import { AllianceService, allianceStableId } from "@opencok/services/alliances";
 import { publishAllianceMutation as publishSharedAllianceMutation } from "@opencok/services/alliance-publication";
 import { text, num, long } from "@opencok/contracts/rows";
 import { cityInteger } from "@opencok/rules/city-progression";
@@ -118,6 +123,31 @@ export function createRealmAllianceApplications(context: AllianceApplicationCont
     );
 }
 
+export function createRealmAllianceMembership(
+    context: AllianceMembershipContext<Rules, RealmInventoryPlanner>,
+)
+{
+    const runtime = {
+        text,
+        num,
+        long,
+        randomUUID,
+        randomInt,
+        allianceFailure,
+        errors,
+        previewRewards,
+        javaMailBytes,
+        activityEconomy,
+    };
+
+    return new AllianceMembershipService(
+        context,
+        runtime,
+        new AllianceMembershipPolicy({ ...runtime, cityInteger }),
+        new AllianceMembershipMapper({ allianceFailure, allianceStableId }),
+    );
+}
+
 export function createRealmAllianceService(
     repository: AllianceRepository,
     rules: Rules,
@@ -134,6 +164,7 @@ export function createRealmAllianceService(
         createRealmAllianceScience,
         createRealmAllianceGovernance,
         createRealmAllianceApplications,
+        createRealmAllianceMembership,
         forbidden,
     );
 }

@@ -43,8 +43,8 @@ readers, validation and error behavior. The shared coordinator delegates after i
 existing membership gate; aggregate persistence retains creation allowance
 expansion, advisory locks, participant checks and original operation order.
 Leave/kick/dissolve decisions use the existing member-removal port. Membership
-entry/removal and aggregate publication remain subsequent #558 slices. Applications
-and invitations follow in #671. This extraction changes no realm authority or saved-state contract.
+entry/removal follows in #673; aggregate publication remains subsequent #558 work.
+Applications and invitations follow in #671. This extraction changes no realm authority or saved-state contract.
 
 ## Application and invitation ownership
 
@@ -56,6 +56,17 @@ reads, application writes and mail consumption remain at the same transaction
 positions through the owned repository. The existing join port retains membership
 mutations and first-join reward coordination; participant discovery, cleanup and
 new-mail insertion remain in the aggregate pending subsequent #558 slices.
+
+## Creation and membership ownership
+
+After #673, Alliance owns creation validation/DTO, creation and membership Service,
+first-join/native mapping and coupled membership/mail persistence. Realm composition
+injects actual catalog, reward/RNG, economy, mail-byte and stable-identity behavior.
+Shared join/remove context ports delegate to the owned Service. Lord/point/march
+reads and member/profile/world/application/donation/first-join/mail writes retain
+their transaction positions and participant checks. The existing aggregate still
+coordinates production, receipts and outbox. Directory, snapshot/effect assembly
+and aggregate/publication ownership remain later #558 slices.
 
 ## Queue assistance
 
