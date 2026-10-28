@@ -1,0 +1,131 @@
+{
+  "schemaVersion": 1,
+  "release": "v12.06.0",
+  "databaseReference": "assets/local/database.local.xml",
+  "localizationReference": "assets/local/text_en.ini",
+  "databaseSha256": "a13078a0564d9ddb5726450349ba2d627681879fc6291a8224ad38b54995d5b1",
+  "localizationSha256": "d2b6a77368e543ca8948e110ba0efe3bbdd989fc042d5d8afd1bfdf3185c0782",
+  "families": [
+    {
+      "catalog": "dragon_base",
+      "owner": "dragon",
+      "clientGroup": "dragon_base",
+      "nameField": "name",
+      "links": [],
+      "bindings": [
+        {
+          "nativeId": 109000,
+          "clientId": "109000",
+          "identity": "black-dragon",
+          "localizationKey": "164429",
+          "nameSha256": "726173c7423b021a0dc9d2d455b47adb049aadf2709fafa757bd808c8c06dcd5",
+          "availability": "server"
+        },
+        {
+          "nativeId": 109001,
+          "clientId": "109001",
+          "identity": "red-dragon",
+          "localizationKey": "164583",
+          "nameSha256": "2d3ddb2c99c5c80413582b98aaebc92414faf099405063ea3f86c4bc41534c3c",
+          "availability": "server"
+        },
+        {
+          "nativeId": 109002,
+          "clientId": "109002",
+          "identity": "blue-dragon",
+          "localizationKey": "164603",
+          "nameSha256": "7dd95edb0ac65b9b8b3d347980d5a8d66df48c96afe400cd8a43e810a9207e16",
+          "availability": "server"
+        },
+        {
+          "nativeId": 109003,
+          "clientId": "109003",
+          "identity": "scartha",
+          "localizationKey": "5530112",
+          "nameSha256": "ad8c94442e88fda3a763bbef2263772c1ca1d56fd3d6c2a9da75cbdc3d040f3d",
+          "availability": "server"
+        },
+        {
+          "nativeId": 109004,
+          "clientId": "109004",
+          "identity": "yukine",
+          "localizationKey": "5530114",
+          "nameSha256": "0c8f51bbcfcfbc637a7808479cc540972c271ed9ea452bd6270ba7afdfdbb530",
+          "availability": "server"
+        },
+        {
+          "nativeId": 109005,
+          "clientId": "109005",
+          "identity": "kraken",
+          "localizationKey": "5530113",
+          "nameSha256": "ccffb4bc3e2cb3e7bfa1b9a5548d25021845cca3d08d1f8f93fb690d33c3c4e3",
+          "availability": "server"
+        },
+        {
+          "nativeId": 109006,
+          "clientId": "109006",
+          "identity": "kylin",
+          "localizationKey": "5530139",
+          "nameSha256": "af186bedc2fac87a70d030faf653cb2abc98d93735b247f64ae2445d83a7be9b",
+          "availability": "server"
+        },
+        {
+          "nativeId": 109007,
+          "clientId": "109007",
+          "identity": "thunder-beast",
+          "localizationKey": "9711031",
+          "nameSha256": "9c190295f9bee25e1b182c7f52a3ff56359a90c4a58dace67a3ea5ca40009316",
+          "availability": "server"
+        },
+        {
+          "nativeId": 109008,
+          "clientId": "109008",
+          "identity": "fire-eagle",
+          "localizationKey": "9711655",
+          "nameSha256": "ca4d225f9e9352e14473b350416d5f0f18a2e51e77e2ea614e8ac3f106ae1ac3",
+          "availability": "server"
+        },
+        {
+          "nativeId": 109009,
+          "clientId": "109009",
+          "identity": "skeletal-frost-dragon",
+          "localizationKey": "9712333",
+          "nameSha256": "1dc02c012f525daf7464adc1a22a4cc9fee497790146da97941f4903243e9c95",
+          "availability": "server"
+        },
+        {
+          "nativeId": 109010,
+          "clientId": "109010",
+          "identity": "hestal",
+          "localizationKey": "52045090",
+          "nameSha256": "83ac9057083330fadcf0875db358707f4db0c037c07ea1b336516323fa0fdd74",
+          "availability": "server"
+        },
+        {
+          "nativeId": 109011,
+          "clientId": "109011",
+          "identity": "hexa",
+          "localizationKey": "52512335",
+          "nameSha256": "ab9ee4775391ae69bd2504c5449bd04c8acd176f9f1f4248b3b5ddcbad8c1898",
+          "availability": "server"
+        },
+        {
+          "nativeId": 109012,
+          "clientId": "109012",
+          "identity": "carres",
+          "localizationKey": "52512733",
+          "nameSha256": "35b47ff4e4ea8005e079de3e1ed3b82f0599319b021f783a48a43893181b4f1a",
+          "availability": "server"
+        },
+        {
+          "nativeId": 109013,
+          "clientId": "109013",
+          "identity": "vildrin",
+          "localizationKey": "52792081",
+          "nameSha256": "f1cbfb72fdb11dd598df341e5957eb578ca0df68d2aeeafce60c8badbd9d14d0",
+          "availability": "client-only"
+        }
+      ]
+    }
+  ]
+}

@@ -14,6 +14,7 @@ workflow executes both commands on pushes and pull requests before package tests
 - Relative source paths and public workspace exports are resolved against maintained files. Exact aliases and more-specific wildcard exports take precedence; all conditional target branches are inspected.
 - Cross-workspace and external imports must be direct declared dependencies. Development dependencies count for this structural check; production-only installation is a separate build concern.
 - Strongly connected components produce explicit cyclic edges for both modules and workspaces. Adding an edge inside an already cyclic component still creates a new violation.
+- Application/package runtime source cannot transitively import offline `catalog-tools`, including type-only imports; explicit scripts and tests may use it.
 - Package implementation source cannot import applications. Domain/rule source cannot transitively reach the enumerated database, transport, controller, storage, runtime or universal catalog entrypoints.
 - Computed module loads and unresolved paths are explicit evidence gaps rather than silently accepted edges.
 

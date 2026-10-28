@@ -88,7 +88,9 @@ This convention does not mean the current horizontal packages have migrated.
 The inventory and each vertical slice must record owners, callers, tests and facade
 removal work. [Confirmed package meanings](../packages/README.md) constrain the
 migration. Existing realm write authority and deployment boundaries are unchanged;
-new process ownership and named-definition rules remain separate decisions.
+new process ownership follows ADR-0017 and named definitions follow
+[ADR-0018](../docs/decisions/0018-adopt-client-backed-semantic-definitions.md), with
+implementation and verification tracked separately.
 
 ### Implemented API and realm package boundaries
 
@@ -158,7 +160,7 @@ See the [dragon authoring guide](../packages/resources/README.md#named-dragon-de
 
 Packages never import applications. Declare direct workspace dependencies and
 public exports; do not turn helpers into a cross-domain rules container.
-`bun run test:packages` runs resource, policy, shop, player, validation, mapping, controller and rule tests
+`bun run test:packages` runs resource, policy, shop, player, catalog-tool, validation, mapping, controller and rule tests
 within their packages. Follow
 [repository conventions](../packages/repositories/README.md). Current service
 composition uses Effect; [ADR-0012](../docs/decisions/0012-adopt-effect-for-service-composition.md)
