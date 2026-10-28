@@ -43,11 +43,6 @@ export interface CityPersistenceReaders
     readGroupBuy: CityReadField<"groupBuy">;
     readContinuedCost: CityReadFactory<"continuedCost">;
     readTrouble: CityReadField<"trouble", [history: boolean]>;
-    readCosmeticTarget: (
-        tx: CityTransaction,
-        request?: Uint8Array,
-        actor?: string,
-    ) => Promise<CityProgressionState["cosmeticTarget"]>;
     readPrayer: CityReadField<"prayer">;
     readRegionalRecall: CityReadField<"regionalRecall", [realm: number, initialize: boolean]>;
     readAllianceHeart: CityReadField<"allianceHeart", [command: string, request?: Uint8Array]>;

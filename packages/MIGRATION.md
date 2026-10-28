@@ -67,7 +67,7 @@ Counts describe maintained TypeScript/JavaScript source under `src` and named te
 | `scripts`        |                  0 / 0 | Remove the unused workspace. Existing application/package script directories are unrelated and remain intact.                                                                                                  | Retired in #568                                                                                                                                                                                                                                                                               | Confirmed in #567/#568   |
 | `services`       |                149 / 0 | Current global application workflows.                                                                                                                                                                          | Redistribute feature by feature into medium domains; replace broad GameService dispatch with explicit routing and narrow Services. Do not rename the package and preserve its monolith.                                                                                                       | Proposed; pending review |
 | `share`          |                  0 / 0 | Social sharing, including battle reports and related content.                                                                                                                                                  | Retain for confirmed scope; move real implementations in tested slices                                                                                                                                                                                                                        | Confirmed in #567/#568   |
-| `skins`          |                  0 / 0 | Proposed cosmetic definitions, ownership/application and presentation mapping.                                                                                                                                 | Populate existing city/avatar/cosmetic responsibilities only where semantically confirmed; paid media uploads stay in media, not skins.                                                                                                                                                       | Proposed; pending review |
+| `skins`          |                 17 / 1 | City skin/bubble/overlap ownership, activation, projection, notification and transactional target persistence.                                                                                                 | #661 injects existing campaign/effect/numeric collaborators; remaining campaign/trouble/world and aggregate aliases tracked by #558 W20. Media uploads remain separate.                                                                                                                       | Implemented in #661      |
 | `storage`        |                 23 / 0 | Current Redis, coordination, S3, ranking and other adapters.                                                                                                                                                   | Split by owned purpose: sessions/coordination, media, ranking caches and domain adapters. Avoid a universal persistence utility package.                                                                                                                                                      | Proposed; pending review |
 | `store`          |                  9 / 1 | Renamed to `shop`; owns mall/NPC trading contracts, rules, mappings, Services and repository adapters.                                                                                                         | Renamed in #568; gameplay slice and caller retirement in #593                                                                                                                                                                                                                                 | Confirmed in #567/#568   |
 | `tasks`          |                 55 / 4 | Ordinary/main, story, daily, sign-in, target and recall quests; other event missions remain in scope.                                                                                                          | Ordinary quests in #653, target in #655, recall in #657 and reconnect in #659; remaining event workflows and facades tracked by #558.                                                                                                                                                         | Confirmed in #567/#568   |
@@ -923,3 +923,37 @@ assertions, including two-realm login. Architecture tests retain the existing
 build validate the integration. Rollback replaces the realm artifact against the
 same data; no schema, save conversion or native resource changes. Performance,
 semantic catalogs and separate authority acceptance remain tracked by #558.
+
+## City appearances (#661)
+
+Skins now owns 17 source modules and one test file for city skin/bubble/overlap
+ownership, activation, projection, native response/event mapping, participants,
+publication and persistence. Realm factories inject existing feature/numeric,
+campaign-event, temporary-effect and effect-write algorithms. Domain enums retain
+native command and appearance-kind values. No process, gameplay, schema, native
+identity or paid/earned ownership conversion is introduced.
+
+City delegates the original conditional target read and mechanic write through the
+owned repository with the same transaction/owner. Its snapshot and writer flow
+remain equivalent; the session constructor forwards the actual cosmetic adapter.
+Activation specializes Base directly, reducing legacy City context/domain consumers
+to 51/55. Source ownership, exact remaining callers and W20 removal conditions are
+listed in [Skins](skins/README.md#source-ownership-and-compatibility). Services retain
+two campaign consumers; Rules retains trouble/world projection callers; Mappings
+retains trouble's field mapper; Contracts retains three aggregate declarations.
+Zero-caller activation/repository/response/validation paths are removed.
+
+The existing empty workspace gains source wildcard exports and its test command;
+root package tests include Skins. Six actual consumers declare Skins directly.
+Base, Messages, Drizzle, drizzle-orm and Zod use existing pinned versions. The
+architecture suite retains the 79-violation baseline without new exceptions.
+
+Twenty-seven structural comparisons cover original bodies, declarations, schemas,
+command/type lists and complete City read/write/session construction. The baseline
+retains three app tests/ten assertions and ten PostgreSQL tests/77 assertions across
+city-cosmetics/campaign-appearance. Five owned tests add 30 assertions for pending
+expiry, exact boundaries, permanent/counter behavior, activation and publication.
+Full server/package suites, workspace types, root lint/format and realm build verify
+the integration. No production-performance or native-device claim is inferred.
+Rollback restores the prior realm artifact against unchanged storage/effects,
+inventory, receipt and outbox data; no schema or data conversion is required.
