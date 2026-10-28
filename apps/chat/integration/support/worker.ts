@@ -1,8 +1,10 @@
+import { nicknameAccountUid } from "@opencok/account/repositories/nickname-identity";
 import { createChatRepository } from "@opencok/repositories/chat";
 import { realmChatDeliveries } from "@opencok/services/realm-chat-delivery";
 import { isRecord } from "@opencok/contracts/chat";
 import { createChatApp } from "../../src/app";
 const repository: ReturnType<typeof createChatRepository> = createChatRepository({
+    nicknameAccountUid,
     databaseUrl: process.env.SOCIAL_TEST_DATABASE_URL!,
     renderRealmEvents: (realm, owners, events) =>
         realmChatDeliveries(repository, realm, owners, events),

@@ -1,3 +1,4 @@
+import { nicknameChangePayment } from "@opencok/player/repositories/nickname-change";
 import { planRealmInventoryGrants } from "@opencok/services/inventory-runtime";
 import { randomUUID } from "node:crypto";
 import { migrate } from "drizzle-orm/node-postgres/migrator";
@@ -114,8 +115,8 @@ export async function costRankingFixture(extra: readonly CityDomain[] = [])
             .insert(user_building)
             .values({ uuid: "remote-castle", uid: "remote", itemId: 400000, pos: 0, level: 1 });
         const now = () => h.clock.now,
-            source = createCostRankingFacts(h.db.db, h.authority),
-            source2 = createCostRankingFacts(second.db, authority2),
+            source = createCostRankingFacts(h.db.db, h.authority, nicknameChangePayment),
+            source2 = createCostRankingFacts(second.db, authority2, nicknameChangePayment),
             registry = createCostRankingRegistry(global.db, h.authority),
             registry2 = createCostRankingRegistry(global.db, authority2),
             service = new ContinuedCostRankingService(source, registry, h.rules, [1, 2], now),

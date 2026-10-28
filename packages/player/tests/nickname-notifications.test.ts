@@ -1,12 +1,15 @@
 import { expect, test } from "bun:test";
-import { nicknameNotification, nicknameChangeReply } from "@opencok/mappings/nickname-change";
+import {
+    nicknameNotification,
+    nicknameChangeReply,
+} from "@opencok/player/mappings/nickname-change";
 import {
     nicknameItemAddSchema,
     nicknameMobileGoldSchema,
     nicknameChangeReplySchema,
-} from "@opencok/validations/nickname-change";
+} from "@opencok/player/validations/nickname-change";
 import { decode, encode, sfs, Type, type Fields } from "@opencok/messages/sfs";
-import type { NicknameNotification } from "@opencok/contracts/nickname-change";
+import type { NicknameNotification } from "@opencok/player/contracts/nickname-change";
 import type { Rule } from "@opencok/rules/game";
 
 const rules = {

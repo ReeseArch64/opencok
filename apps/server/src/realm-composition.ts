@@ -1,3 +1,5 @@
+import { nicknameChangePayment } from "@opencok/player/repositories/nickname-change";
+import { createRealmNicknameService } from "./composition/nickname.ts";
 import { createRealmCelebrityDescriptionService } from "./composition/celebrity-description.ts";
 import { createRealmPublicProfileService } from "./composition/public-profile.ts";
 import { checkPublicProfileStore } from "@opencok/player/repositories/public-profile";
@@ -309,7 +311,7 @@ import { decodeWorldPowerEffects } from "@opencok/services/power";
 import { worldPowerEffects } from "@opencok/rules/power-world";
 import { checkMutationStore, createMutationExecutor } from "@opencok/repositories/mutation";
 import { createEconomyMutationExecutor } from "@opencok/economy/repositories/balances";
-import { checkNicknameChangeStore } from "@opencok/repositories/nickname-change";
+import { checkNicknameChangeStore } from "@opencok/player/repositories/nickname-change";
 import { nicknameAllianceReward } from "@opencok/rules/nickname-alliance";
 import { createCn1Sessions } from "@opencok/repositories/cn1-session";
 import { createNicknameChangeRuntime } from "./nickname-change.ts";
@@ -620,6 +622,20 @@ export const RealmDependenciesLive = Layer.effect(
                 "realm.createNicknameChangeRuntime",
             )
             : undefined;
+
+        const nicknames = observeAdapter(
+            createRealmNicknameService(db, db.databases, config.kingdomId, {
+                ...nicknameServices,
+                nicknameChange: nickname
+                    ? async (...args) => {
+                        authority.assertReady();
+
+                        return nickname.command(...args);
+                    }
+                    : undefined,
+            }),
+            "realm.NicknameService",
+        );
 
         if (nickname)
         {
@@ -1410,7 +1426,7 @@ export const RealmDependenciesLive = Layer.effect(
         );
 
         const costRankingFacts = observeAdapter(
-            createCostRankingFacts(db.kingdom.db, authority),
+            createCostRankingFacts(db.kingdom.db, authority, nicknameChangePayment),
             "realm.createCostRankingFacts",
         );
         const continuedCostFinality = observeAdapter(
@@ -3458,13 +3474,7 @@ export const RealmDependenciesLive = Layer.effect(
                                     );
                                 },
                                 ...nicknameServices,
-                                nicknameChange: nickname
-                                    ? async (...args) => {
-                                        authority.assertReady();
-
-                                        return nickname.command(...args);
-                                    }
-                                    : undefined,
+                                nickname: nicknames,
                                 worldPointDetail,
                                 worldMarchInspection: observeAdapter(
                                     createWorldMarchInspectionStore(db.kingdom.db),

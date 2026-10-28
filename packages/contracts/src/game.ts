@@ -199,7 +199,6 @@ export interface GameStore extends AuthenticationStore
     getPowerByPlayerId(uid: string, now: number): Promise<PowerState>;
     getPlayerSummariesByIds(uids: string[], allServers: boolean): Promise<PlayerSummary[]>;
     configurationSwitches?(): Promise<Row[] | undefined>;
-    nicknameOccupied?(name: string): Promise<boolean>;
     updateAvatarReport?(owner: string, target: string, now: number): Promise<void>;
     getCityByPlayerId(uid: string, now: number): Promise<CityState>;
     getWorldByPointIds(
@@ -326,12 +325,10 @@ export interface GameServices
         command: string,
         params: Fields,
     ): Promise<import("@opencok/economy/contracts/responses/inventory").InventoryCommandResponse>;
-    nicknameChange?(
-        owner: string,
-        operationId: string,
-        validatedName: string,
-        now: number,
-    ): Promise<import("./nickname-change.ts").NicknameChangeRecord>;
+    nickname?: {
+        check(owner: string, params: Fields): Promise<Fields>;
+        change(owner: string, params: Fields): Promise<Fields>;
+    };
     nicknameForbidden?(name: string): boolean | Promise<boolean>;
     nicknameBadWords?(name: string): boolean | Promise<boolean>;
     nicknameReservedPatterns?(): readonly string[];

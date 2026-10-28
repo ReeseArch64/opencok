@@ -1,3 +1,4 @@
+import { nicknameAccountUid } from "@opencok/account/repositories/nickname-identity";
 import { expect, test } from "bun:test";
 import { createDatabases } from "@opencok/drizzle";
 import { createChatRepository } from "@opencok/repositories/chat";
@@ -65,7 +66,11 @@ test(
             }
             const databaseUrl = () =>
                 `postgres://postgres:${pg.options.password}@127.0.0.1:${pg.options.port}/opencok_global`;
-            store = createChatRepository({ databaseUrl: databaseUrl(), now: () => time });
+            store = createChatRepository({
+                nicknameAccountUid,
+                databaseUrl: databaseUrl(),
+                now: () => time,
+            });
             await store.health();
             expect((await store.getPlayerStateById("player-2"))?.serverId).toBe(2);
             expect((await store.getPlayerStateById("player-1"))?.originalServerId).toBe(1);
@@ -101,7 +106,11 @@ test(
             await store.close();
             store = undefined;
             await pg.restart();
-            store = createChatRepository({ databaseUrl: databaseUrl(), now: () => time });
+            store = createChatRepository({
+                nicknameAccountUid,
+                databaseUrl: databaseUrl(),
+                now: () => time,
+            });
             expect(await store.sessions.getById(hash)).toEqual({ uid: "player-2" });
             expect((await store.messages.getAll("country_2"))[0]?.body).toBe("Olá 世界");
             time = new Date(time.getTime() + 86400000);

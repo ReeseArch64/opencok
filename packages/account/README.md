@@ -56,3 +56,14 @@ creation, retries, authority replacement, restart and composed SFS gameplay.
 Cross-owner transport/signature tests remain in server tests, and discovery-wire
 tests remain in API tests. Synthetic v12.06.0 coverage does not prove physical
 client compatibility or other release tracks.
+
+## Nickname account identity (#631)
+
+`repositories/nickname-identity` resolves a canonical global account UID for nickname
+changes and chat receipt validation. It preserves candidate SQL, exact Unicode key
+comparison, ambiguity checks, locked account selection and SQL-error mapping. Player
+uses it directly; the chat app injects it into its repository, avoiding an account
+import from the horizontal repositories package. The function is shared without a
+reverse compatibility facade. Existing nickname and chat PostgreSQL tests exercise
+its callers; runtime comparison verifies its body is unchanged. No global account
+schema or identity credential behavior changes.

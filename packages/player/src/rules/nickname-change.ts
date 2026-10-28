@@ -1,8 +1,8 @@
 import { errors } from "@opencok/constants/game";
 import { GameError } from "@opencok/errors/game";
-import { javaDecimal } from "./java-integer.ts";
-import { mailBlank } from "./mail.ts";
-import { nicknameCharactersAllowed, nicknameLength, nicknameTrim } from "./nickname.ts";
+import { javaDecimal } from "@opencok/rules/java-integer";
+import { mailBlank } from "@opencok/rules/mail";
+import { nicknameCharactersAllowed, nicknameLength, nicknameTrim } from "@opencok/rules/nickname";
 
 export interface NicknameChangeFilters
 {
