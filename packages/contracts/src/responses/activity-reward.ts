@@ -1,6 +1,6 @@
 import type { GeneralInfoResponse } from "@opencok/hero/contracts/responses/profile-generals";
 import type { InventoryItemResponse } from "@opencok/economy/contracts/responses/inventory";
-import type { PublicEquipmentResponse } from "./equipment-preview";
+import type { PublicEquipmentResponse } from "@opencok/equipment/contracts/responses/equipment-preview";
 
 export interface ActivityRewardAmounts
 {

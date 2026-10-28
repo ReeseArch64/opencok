@@ -19,7 +19,7 @@ import { nicknameLength, nicknameCharactersAllowed } from "@opencok/rules/nickna
 import { containsNicknameBadWords } from "@opencok/policy/rules/nickname-words";
 import { dragonView, dragonSkillView } from "@opencok/mappings/dragon-progression";
 import { rewardPreviewArray } from "@opencok/mappings/rewards";
-import { chooseWeight } from "@opencok/rules/equipment";
+import { chooseWeight } from "@opencok/rules/weighted-choice";
 import {
     pinProgressionReward,
     progressionRewardPreview,

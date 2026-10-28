@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { field } from "@opencok/messages/validations/response";
-import type { PublicEquipmentResponse } from "@opencok/contracts/responses/equipment-preview";
+import type { PublicEquipmentResponse } from "../contracts/responses/equipment-preview";
 
 export const publicEquipmentSchema = z.strictObject({
     uuid: field.string,

@@ -2,7 +2,7 @@ import type { Rules, Rule } from "./game";
 import { cityInteger } from "./city-progression";
 import { javaDecimal } from "./java-integer";
 import { javaHashMapOrder } from "./java-hash-map-order";
-import { chooseWeight } from "./equipment";
+import { chooseWeight } from "./weighted-choice";
 import { num, text, type Row } from "@opencok/contracts/rows";
 import { worldMutationFailure } from "./world-march-runtime";
 

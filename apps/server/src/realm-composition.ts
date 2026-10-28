@@ -268,7 +268,7 @@ import { createAlliancePublicationReader } from "@opencok/repositories/alliance-
 import { publishAllianceMutation } from "@opencok/services/alliance-publication";
 import { relayMutationEvent } from "@opencok/repositories/mutation";
 import { GeneralsDomain } from "@opencok/hero/services/generals";
-import { EquipmentDomain, WorkshopDomain } from "@opencok/services/equipment";
+import { createRealmEquipmentDomains } from "./composition/equipment";
 import { PlayerEffectsDomain } from "@opencok/services/player-effects";
 import { QuestsDomain } from "@opencok/services/quests";
 import { cityQueueCommands } from "@opencok/rules/city-command";
@@ -905,6 +905,7 @@ export const RealmDependenciesLive = Layer.effect(
             ),
             "realm.createGoldEggsRanks",
         );
+        const equipmentDomains = createRealmEquipmentDomains();
         const city: CityProgressionService<MutationTransaction> = observeAdapter(
             createRealmCityProgressionHandlers(
                 (tx: Parameters<typeof readReconnectProgress>[0], owner, now) =>
@@ -925,8 +926,11 @@ export const RealmDependenciesLive = Layer.effect(
                         new GeneralDrawDomain(() => cache.generalDrawRanking()),
                         "realm.GeneralDrawDomain",
                     ),
-                    observeAdapter(new EquipmentDomain(), "realm.EquipmentDomain"),
-                    observeAdapter(new WorkshopDomain(), "realm.WorkshopDomain"),
+                    observeAdapter(
+                        equipmentDomains.equipment,
+                        "realm.EquipmentDomain",
+                    ),
+                    observeAdapter(equipmentDomains.workshop, "realm.WorkshopDomain"),
                     observeAdapter(new PlayerEffectsDomain(), "realm.PlayerEffectsDomain"),
                     observeAdapter(new QuestsDomain(), "realm.QuestsDomain"),
                     observeAdapter(createRealmConstructionDomain(), "realm.ConstructionDomain"),

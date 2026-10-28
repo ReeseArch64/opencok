@@ -168,5 +168,11 @@ City converts legacy rows into the owned update DTOs after aggregate validation,
 and preserves the general-detachment update before deletion. Realm composition
 injects the same transaction and owner. After #649, Building also owns construction
 workflows and receives the existing context through its bounded structural port.
-Current legacy context/domain consumer counts are 53/61; the updated inventory
+At #649 legacy context/domain consumer counts were 53/61; the updated inventory
 tracks their eventual retirement.
+
+After #651, the injected EquipmentRepository owns the equipment snapshot and
+suit/material/equipment writes at their existing transaction positions. Equipment
+and Workshop use owned structural contexts rather than the legacy City aliases,
+reducing current context/domain consumers to 51/59. City bootstrap still uses the
+tracked equipment projection adapter until that boundary moves to constructor ports.

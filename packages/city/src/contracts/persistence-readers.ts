@@ -95,7 +95,6 @@ export interface CityPersistenceReaders
         "generalRoster",
         [command?: string, ranking?: Parameters<CityProgressionStore["getState"]>[1]]
     >;
-    readSuitDecompositions: CityReadField<"suitDecompositions">;
     readAbilityPages: CityReadField<"abilityPages">;
     readProgressionEffects: CityReadField<"effects", [effects: CityProgressionState["effects"]]>;
     readQuests: CityReadField<"quests", [profile: Row, now: bigint]>;

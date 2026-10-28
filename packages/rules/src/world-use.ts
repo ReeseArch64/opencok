@@ -1,7 +1,7 @@
 import { num, text, type Row } from "@opencok/contracts/rows";
 import type { Rules, Rule } from "./game";
 import { cityInteger } from "./city-progression";
-import { chooseWeight } from "./equipment";
+import { chooseWeight } from "./weighted-choice";
 import { worldMutationFailure } from "./world-march-runtime";
 import { worldResourceDuration } from "./world-resource-refresh";
 

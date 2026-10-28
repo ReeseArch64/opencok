@@ -113,6 +113,7 @@ implementation and verification tracked separately.
 | `building`                                                       | Building definitions, policies, construction commands/completion and transactional persistence; realm-injected projection and integration ports.      |
 | `research`                                                       | Ordinary/civilization research, prerequisites, costs, native projections and transactional adapters; realm-injected event/reconnect collaborators.    |
 | `troops`                                                         | Training, healing, fortifications, military policies/projections and persistence; realm-injected scoring and login/reconnect collaborators.           |
+| `equipment`                                                      | Equipment/sets and workshop workflows, recipes, projections and persistence; realm-injected numeric and quest collaborators.                          |
 | `city`                                                           | Transactional plans, dispatch, snapshots, persistence and bootstrap; realm-injected callbacks preserve atomic writes and reconnect order.             |
 | `shop`                                                           | In-game mall and NPC trading contracts, pure rules, Services, offer mappings and transactional adapters; inventory planning is injected by the realm. |
 | `policy`                                                         | Pure content matching, bounded file/worker adapters and the maintained nickname/description dictionary.                                               |
@@ -196,14 +197,16 @@ preserve the existing Effect ownership model and protocol execution order.
 domain contract is generic in `contracts/city-domain.ts`; existing mechanic signatures
 use temporary type-only Services aliases. Realm composition injects world-context and
 campaign/quest/Hero/expedition callbacks before the same aggregate update. Building
-construction specializes the generic Base `ActivityDomain`; legacy city mechanics
+construction, Equipment and Workshop specialize the generic Base `ActivityDomain`; legacy city mechanics
 specialize `CityCommandDomain`, while research and military use `CommandDomain`.
 The realm injects existing construction numeric/projection helpers and completion hooks
 through its bounded runtime contract. Configured
 domains receive gateways, random sources and world size through constructors; their
 factory entrypoints preserve the same contract for existing callers. The realm
 composition instantiates these classes directly. Equipment and workshop have separate
-implementations. `TimedActivityAction` and
+implementations under the Equipment domain, with native/public projection classes
+and transaction-bound persistence. Shared weighted choice remains a bounded Rules
+algorithm used by several domains. `TimedActivityAction` and
 `TimedActivityStatus` name the existing string actions and numeric persistence states.
 
 The experimental web scaffold composes `WebApplication` and `PingController` for
