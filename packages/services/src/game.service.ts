@@ -1,3 +1,5 @@
+import type { AvatarCommands } from "@opencok/contracts/avatar-orchestration";
+import { AvatarOrchestrationService } from "./avatar-orchestration";
 import type { ReconnectResearchProjection } from "@opencok/contracts/reconnect";
 import { planReconnectProgress, validateReconnectResult } from "./reconnect-progress.ts";
 import type { CityBootstrapFactory, CityBootstrapRuntime } from "@opencok/contracts/city-bootstrap";
@@ -28,7 +30,6 @@ import { noticeCommands } from "./chat-notice";
 import { nativeChatCommands } from "./chat-native";
 import { postboxCommands } from "./postbox";
 import { chatSocialCommands } from "./chat-social";
-import { UPLOAD_PATH } from "@opencok/contracts/files";
 import type { MilitaryProjection } from "@opencok/contracts/military-projection";
 import { decodeFightRanking, decodePlayoffTeams } from "./battle-ranking.ts";
 import { fightRanking, playoffRanking } from "@opencok/mappings/battle-ranking";
@@ -67,12 +68,6 @@ import {
 } from "@opencok/rules/player-search";
 import { MAX_FRAME } from "@opencok/messages/frame";
 import { encode, extension } from "@opencok/messages/sfs";
-import {
-    avatarSequence,
-    avatarMinimumLevel,
-    checkAvatarLevel,
-    checkAvatarRecord,
-} from "@opencok/rules/avatar";
 import { realmChatSessionRequest, realmChatSessionResponse } from "./realm-chat-session.ts";
 import { mailDeleted, mailSave, mailStatus } from "@opencok/mappings/mail";
 import { mailCategoryProjection } from "./mail-category.ts";
@@ -206,6 +201,13 @@ export class GameService
         readonly ranking = services.ranking,
         readonly worldQueries = services.worldQueries,
         readonly worldDetail = services.worldDetail,
+        readonly avatars: AvatarCommands = new AvatarOrchestrationService(
+            db,
+            rules,
+            config,
+            now,
+            services,
+        ),
     )
     {
         this.bootstrap = createBootstrap?.({
@@ -878,16 +880,16 @@ export class GameService
                 body = await reportAvatar(this.db, uid, this.config.kingdomId, params, this.now());
                 break;
             case "user.update.picVer":
-                body = await this.avatarVersion(uid);
+                body = await this.avatars.avatarVersion(uid);
                 break;
             case "user.avatar.finish":
-                ({ body, pushes } = await this.avatarFinish(uid, params));
+                ({ body, pushes } = await this.avatars.avatarFinish(uid, params));
                 break;
             case "user.avatar.url":
-                body = await this.avatarUrl(uid, params);
+                body = await this.avatars.avatarUrl(uid, params);
                 break;
             case "user.avatar.grant":
-                body = await this.avatarGrant(uid, params);
+                body = await this.avatars.avatarGrant(uid, params);
                 break;
             case "chat.session.create":
                 body = await this.chatSession(uid);
@@ -1187,255 +1189,6 @@ export class GameService
         }));
 
         return playerSearch(selectPlayerSearch(query, state.local, remote));
-    }
-
-    private async avatarVersion(uid: string): Promise<Fields>
-    {
-        const service = this.services.avatarVersion;
-
-        if (!service)
-        {
-            throw new GameError(errors.unsupported);
-        }
-
-        if (!/^[0-9]{1,20}$/.test(uid))
-        {
-            throw new GameError(errors.invalid);
-        }
-
-        const now = this.now();
-        const state = await service.update(uid, now);
-        const profile = this.checkProfile(state.profile, now);
-        const intent = state.intent;
-
-        if (
-            profile.uid !== uid
-            || profile.serverId !== this.config.kingdomId
-            || !intent
-            || intent.ownerUid !== uid
-            || !/^[a-f0-9]{32}$/.test(intent.operationId)
-            || !Number.isInteger(intent.picVer)
-            || intent.picVer < 1
-            || intent.picVer > 2147483647
-            || (intent.nextUpdateTime !== null
-                && (typeof intent.nextUpdateTime !== "bigint"
-                    || BigInt.asIntN(64, intent.nextUpdateTime) !== intent.nextUpdateTime))
-        )
-        {
-            throw new GameError(errors.invalid);
-        }
-
-        try
-        {
-            await service.deliver(uid, intent.operationId);
-        }
-        catch
-        {
-        }
-
-        const body: Fields = { uid: sfs.string(uid), picVer: sfs.int(intent.picVer) };
-
-        if (intent.nextUpdateTime !== null)
-        {
-            body.nextUpdateTime = sfs.long(intent.nextUpdateTime);
-        }
-
-        return body;
-    }
-
-    private async avatarFinish(uid: string, params: Fields): Promise<Result>
-    {
-        const service = this.services.avatarFinish;
-
-        if (!service)
-        {
-            throw new GameError(errors.unsupported);
-        }
-
-        if (
-            !/^[0-9]{1,20}$/.test(uid)
-            || params.receipt?.type !== Type.String
-            || typeof params.receipt.value !== "string"
-            || !/^[1-9][0-9]{0,5}:[a-f0-9]{64}$/.test(params.receipt.value)
-            || (params.gameuid !== undefined
-                && (params.gameuid.type !== Type.String || params.gameuid.value !== uid))
-        )
-        {
-            throw new GameError(errors.invalid);
-        }
-
-        const now = this.now();
-        const receipt = params.receipt.value;
-        const state = await service.finish(uid, receipt, now);
-        const profile = this.checkProfile(state.profile, now);
-        const sequence = Number(receipt.split(":")[0]);
-
-        if (
-            profile.uid !== uid
-            || profile.serverId !== this.config.kingdomId
-            || !Number.isInteger(state.picVer)
-            || state.picVer! < 0
-            || state.picVer! > 2147483647
-            || state.picVer! % 1000000 < sequence
-            || state.superseded !== sequence < state.picVer! % 1000000
-        )
-        {
-            throw new GameError(errors.invalid);
-        }
-
-        try
-        {
-            await service.deliver(uid, sequence);
-        }
-        catch
-        {
-        }
-
-        const body: Fields = {
-            uid: sfs.string(uid),
-            picVer: sfs.int(state.picVer!),
-            superseded: sfs.bool(state.superseded),
-        };
-
-        return { body, pushes: [{ command: "push.picVer.update", body: { ...body } }] };
-    }
-
-    private async avatarUrl(uid: string, params: Fields): Promise<Fields>
-    {
-        const service = this.services.avatar;
-
-        if (!service)
-        {
-            throw new GameError(errors.unsupported);
-        }
-
-        const now = this.now();
-        const requester = this.checkProfile(await this.db.getProfileById(uid), now);
-
-        if (requester.uid !== uid || requester.serverId !== this.config.kingdomId)
-        {
-            throw new GameError(errors.invalid);
-        }
-
-        const target = params.gameuid === undefined ? uid : params.gameuid.value;
-
-        if (
-            (params.gameuid !== undefined && params.gameuid.type !== Type.String)
-            || typeof target !== "string"
-            || !/^[0-9]{1,20}$/.test(target)
-        )
-        {
-            throw new GameError(errors.invalid);
-        }
-
-        const profile = this.checkProfile(await this.db.getProfileById(target), now);
-
-        if (profile.uid !== target || profile.serverId !== this.config.kingdomId)
-        {
-            throw new GameError(errors.invalid);
-        }
-
-        const version = profile.picVer;
-
-        if (
-            typeof version !== "number"
-            || !Number.isInteger(version)
-            || version < -2147483648
-            || version > 2147483647
-        )
-        {
-            throw new GameError(errors.invalid);
-        }
-
-        const sequence = Math.max(0, version % 1000000);
-
-        return {
-            owner: sfs.string(target),
-            path: sfs.string(sequence ? await service.image(target, sequence) : ""),
-        };
-    }
-
-    private async avatarGrant(uid: string, params: Fields): Promise<Fields>
-    {
-        const service = this.services.avatar;
-
-        if (!service)
-        {
-            throw new GameError(errors.unsupported);
-        }
-
-        if (
-            !/^[0-9]{1,20}$/.test(uid)
-            || (params.gameuid !== undefined
-                && (params.gameuid.type !== Type.String || params.gameuid.value !== uid))
-        )
-        {
-            throw new GameError(errors.invalid);
-        }
-
-        const now = this.now();
-        const state = await service.read(uid, now, async (profile, readers) => {
-            this.checkProfile(profile, now);
-
-            if (profile.uid !== uid || profile.serverId !== this.config.kingdomId)
-            {
-                throw new GameError(errors.invalid);
-            }
-
-            const sequence = avatarSequence(profile.picVer);
-            const minimum = avatarMinimumLevel(this.rules);
-
-            if (minimum !== undefined)
-            {
-                checkAvatarLevel(await readers.castleLevel(), minimum);
-                const record = await readers.uploadRecord();
-
-                if (record && record.uid !== uid)
-                {
-                    throw new GameError(errors.invalid);
-                }
-
-                checkAvatarRecord(this.rules, record, now);
-            }
-
-            const receipt = await service.find(uid, sequence);
-
-            if (
-                receipt
-                && (receipt.owner !== uid
-                    || receipt.sequence !== String(sequence)
-                    || !/^[a-f0-9]{64}$/.test(receipt.hash))
-            )
-            {
-                throw new GameError(errors.invalid);
-            }
-
-            return {
-                owner: uid,
-                sequence,
-                grant: await service.issue(uid, sequence),
-                pendingHash: receipt?.hash ?? "",
-            };
-        });
-        const profile = this.checkProfile(state.profile, now);
-
-        if (
-            profile.uid !== uid
-            || profile.serverId !== this.config.kingdomId
-            || !state.grant
-            || state.grant.owner !== uid
-        )
-        {
-            throw new GameError(errors.invalid);
-        }
-
-        return {
-            owner: sfs.string(state.grant.owner),
-            sequence: sfs.int(state.grant.sequence),
-            grant: sfs.string(state.grant.grant),
-            uploadPath: sfs.string(`${UPLOAD_PATH}?grant=${state.grant.grant}`),
-            pendingHash: sfs.string(state.grant.pendingHash),
-        };
     }
 
     private async chatSession(uid: string): Promise<Fields>
