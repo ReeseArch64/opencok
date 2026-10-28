@@ -2,7 +2,7 @@
 
 This package owns training, healing and fortification workflows extracted in
 [#645](https://github.com/ReeseArch64/opencok/issues/645), under #558 W07 and
-ADR-0016. It contains 11 source modules and one owned test file. Its largest
+[domain layout policy](../../.github/ARCHITECTURE.md#domain-package-migration-convention). It contains 11 source modules and one owned test file. Its largest
 behavioral implementation is below 350 lines.
 
 ## Ownership and composition

@@ -1,11 +1,13 @@
 {
-  "[javascript][javascriptreact][typescript][typescriptreact]": {
+  "[typescript][typescriptreact]": {
     "editor.defaultFormatter": "dprint.dprint",
     "editor.tabSize": 4,
     "editor.insertSpaces": true
   },
   "dprint.path": "./node_modules/.bin/dprint",
-  "[json][jsonc][yaml][markdown][css][scss][less][html][vue][svelte][astro][toml][graphql]": {
-    "editor.defaultFormatter": "oxc.oxc-vscode"
+  "[javascript][javascriptreact][json][jsonc][yaml][markdown][css][scss][less][html][vue][svelte][astro][toml][graphql]": {
+    "editor.defaultFormatter": "oxc.oxc-vscode",
+    "editor.tabSize": 2,
+    "editor.insertSpaces": true
   }
 }

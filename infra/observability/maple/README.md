@@ -7,7 +7,7 @@ JSON-lines stdio. It uses Bun 1.4.2 and the Docker CLI without an SDK or additio
 dependencies. This is a repository-maintained local bridge, not Maple's official
 Cloud MCP service; it does not connect to Maple Cloud or require a Cloud API key.
 Local operational telemetry follows
-[ADR-0013](../../../docs/decisions/0013-adopt-maple-for-local-operational-observability.md).
+[ADR-0004](../../../docs/decisions/0004-adopt-maple.md).
 
 The adapter only exposes three read-only tools:
 

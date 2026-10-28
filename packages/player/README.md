@@ -34,7 +34,7 @@ mutating profile state.
 Persistence remains the existing read-committed transaction over `userprofile` and
 `user_mixed_info`. No schema, saved-row, catalog, price, default or runtime-authority
 change is part of this slice. This adapter's current row checks do not establish
-ADR-0017 epoch fencing or least-privilege database ownership; those remain W17/W21.
+[realm authority design](../../.github/ARCHITECTURE.md#9-authoritative-server-zookeeper-and-scaling) epoch fencing or least-privilege database ownership; those remain W17/W21.
 Rollback uses the previous realm artifact against the unchanged saved state.
 
 Run `bun run --cwd packages/player test` and
@@ -75,7 +75,7 @@ snapshot/switch/cache tests remain in server tests. The real PostgreSQL integrat
 `apps/server/integration/push-preferences.test.ts` covers two-realm isolation,
 concurrent writes, first/saved wire shapes, owner failures, duplicate-insert rollback,
 legacy realm epoch replacement and restart persistence. It does not implement the
-new player/world authority topology from ADR-0017. Current realm fencing still
+new player/world authority topology from [realm authority design](../../.github/ARCHITECTURE.md#9-authoritative-server-zookeeper-and-scaling). Current realm fencing still
 wraps the same transactions; defaults, schema and saved rows are unchanged.
 
 ## Realm character provisioning
@@ -113,7 +113,7 @@ restart and owner replacement; world process/scout integrations exercise the
 migrated creation path before their gameplay flows. New callback-boundary tests
 also ensure a failed fence cannot proceed to locks/reads and a replay never plans
 or grants another starter package. These are structural ownership changes, not
-ADR-0017 process separation: world footprint writes still share the current realm
+[realm authority design](../../.github/ARCHITECTURE.md#9-authoritative-server-zookeeper-and-scaling) process separation: world footprint writes still share the current realm
 transaction. Player/world reservation protocols and least-privilege processes
 remain W17/W18/W21 work. No schema, configuration or data migration is required;
 rollback uses the previous realm artifact with unchanged persisted state.

@@ -3,7 +3,7 @@
 This package owns nickname/description word filtering and reserved-name matching,
 as confirmed in [#558](https://github.com/ReeseArch64/opencok/issues/558). The first
 vertical slice is [#589](https://github.com/ReeseArch64/opencok/issues/589), following
-[ADR-0016](../../docs/decisions/0016-adopt-domain-owned-package-layout.md).
+[domain layout policy](../../.github/ARCHITECTURE.md#domain-package-migration-convention).
 
 ## Boundaries and public entrypoints
 

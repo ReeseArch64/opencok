@@ -3,7 +3,7 @@
 `apps/workers` runs committed mail integration delivery in its own Bun process,
 with one configured realm queue and a separately restricted global projection
 connection. It implements the first W15 integration boundary under
-[ADR-0017](../../docs/decisions/0017-adopt-fenced-realm-process-authorities.md).
+[realm authority design](../../.github/ARCHITECTURE.md#9-authoritative-server-zookeeper-and-scaling).
 The realm remains the sole gameplay writer. This application acquires no
 RealmAuthority token, loads no Rules catalog, connects to no Redis instance and
 cannot grant rewards, change inventory or settle world activity.

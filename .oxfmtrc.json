@@ -9,7 +9,7 @@
     "packages/drizzle/migrations/**",
     "**/__snapshots__/**",
     "packages/drizzle/tests/fixtures/**",
-    "**/*.{js,jsx,ts,tsx,mjs,cjs,mts,cts,mjsx,cjsx,mtsx,ctsx}"
+    "**/*.{ts,tsx,mts,cts,mtsx,ctsx}"
   ],
   "useTabs": false,
   "tabWidth": 2,

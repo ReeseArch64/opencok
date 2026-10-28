@@ -3,7 +3,7 @@
 Scheduler discovers persisted activity deadlines and requests their completion
 from the current realm owner. It implements the first W16 group in
 [#699](https://github.com/ReeseArch64/opencok/issues/699), under
-[ADR-0017](../../docs/decisions/0017-adopt-fenced-realm-process-authorities.md).
+[realm authority design](../../.github/ARCHITECTURE.md#9-authoritative-server-zookeeper-and-scaling).
 The [Queues package](../../packages/queues/README.md) defines the twelve supported
 activity types, existing operation identities and versioned dispatch contract.
 

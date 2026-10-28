@@ -2,7 +2,7 @@
 
 Alliance owns the existing queue-assistance workflow after
 [#663](https://github.com/ReeseArch64/opencok/issues/663), part of #558 W08, under
-[ADR-0016](../../docs/decisions/0016-adopt-domain-owned-package-layout.md).
+[domain layout policy](../../.github/ARCHITECTURE.md#domain-package-migration-convention).
 Shared gifts follow in [#665](https://github.com/ReeseArch64/opencok/issues/665).
 Research and donations follow in [#667](https://github.com/ReeseArch64/opencok/issues/667).
 Governance follows in [#669](https://github.com/ReeseArch64/opencok/issues/669).
@@ -200,7 +200,7 @@ Server integration consumers migrate in #685 as described under policy compositi
 below. The former row/count exports were already removed. Shared power effects and
 semantic catalog definitions retain their own migration work.
 
-The 517-line science Service was reviewed against ADR-0016's size trigger. It
+The 517-line science Service was reviewed against [domain layout policy](../../.github/ARCHITECTURE.md#domain-package-migration-convention)'s size trigger. It
 coordinates one coupled donation/research lifecycle through six methods and a
 context accessor; policy, mapping, transaction operations and recovery have separate
 classes. No catalogs or generated definitions are embedded. Keep this boundary

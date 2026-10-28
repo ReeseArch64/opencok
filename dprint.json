@@ -20,7 +20,7 @@
     "exportDeclaration.sortTypeOnlyExports": "none"
   },
   "plugins": ["./node_modules/@dprint/typescript/plugin.wasm"],
-  "includes": ["**/*.{js,jsx,ts,tsx,mjs,cjs,mts,cts,mjsx,cjsx,mtsx,ctsx}"],
+  "includes": ["**/*.{ts,tsx,mts,cts,mtsx,ctsx}"],
   "excludes": [
     "**/node_modules/**",
     "**/dist/**",

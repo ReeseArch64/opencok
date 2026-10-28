@@ -22,10 +22,7 @@
     "check-types": "vp check-types",
     "test:packages": "bun --no-env-file test packages/resources/tests packages/validations/tests packages/mappings/tests packages/controllers/tests packages/rules/tests packages/policy/tests packages/shop/tests packages/player/tests packages/catalog-tools/tests packages/account/tests packages/economy/tests packages/ledger/tests packages/messages/tests packages/production/tests packages/building/tests packages/city/tests packages/research/tests packages/troops/tests packages/equipment/tests packages/tasks/tests packages/skins/tests packages/alliance/tests packages/share/tests packages/ranking/tests packages/world/tests packages/queues/tests",
     "prepare": "husky",
-    "commitlint": "commitlint",
-    "test:architecture": "bun --no-env-file test tests/architecture",
-    "check-types:architecture": "tsc --noEmit -p tests/architecture/tsconfig.json",
-    "inventory:architecture": "bun --no-env-file tests/architecture/inventory.ts"
+    "commitlint": "commitlint"
   },
   "devDependencies": {
     "@commitlint/cli": "^21.2.4",

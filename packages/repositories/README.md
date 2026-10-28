@@ -61,7 +61,7 @@ A naming convention does not grant new write capabilities. The realm snapshot
 repositories remain read-only. Add mutations only as separately scoped use cases
 with their required ownership, atomicity and recovery semantics. Follow the
 [package boundaries](../../.github/ARCHITECTURE.md#implemented-api-and-realm-package-boundaries)
-and [PostgreSQL decision](../../docs/decisions/0002-adopt-postgresql-for-authoritative-state.md).
+and [PostgreSQL decision](../../docs/decisions/0005-adopt-database-stack.md).
 
 Run the existing server, API and Chat tests and type checks when changing these
 ports. The Chat PostgreSQL integration suite verifies concurrent idempotent
@@ -76,8 +76,8 @@ of importing the broad `Database` class for its kingdom/global fields. The alias
 are derived from the same constructors and preserve schema and transaction types.
 Repository implementation modules, including domain-owned repository directories,
 must not import the broad facade directly or transitively. App composition and
-explicit test fixtures can still use it. This boundary is checked by the
-[architecture suite](../../tests/architecture/README.md).
+explicit test fixtures can still use it. Review this boundary explicitly: the former root architecture suite was removed
+at the owner's request, so it is no longer an automated check.
 
 #605 removes this coupling from 112 horizontal adapters, nine Hero adapters and
 two shop adapters. Query code, SQL, locking, transactions and runtime exports are

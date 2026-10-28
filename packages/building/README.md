@@ -35,7 +35,7 @@ it neither reads XML nor owns the parser.
 The 41 numeric data modules account for almost all source lines. They remain grouped
 under `resources/buildings` separately from the small contracts/rules/mappings.
 This is an ownership migration of the existing typed model, not the semantic
-archetype conversion required by [ADR-0018](../../docs/decisions/0018-adopt-client-backed-semantic-definitions.md).
+archetype conversion required by [semantic definition policy](../../.github/ARCHITECTURE.md#client-backed-semantic-definitions).
 Opaque identities are preserved without invented names. Shared cross-domain plans,
 projection boundaries and semantic identities remain tracked under #558 W07/W14.
 

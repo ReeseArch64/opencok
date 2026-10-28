@@ -83,7 +83,7 @@ test injects typed table/building modules. No environment variable selects XML.
 
 ## Client binding discovery
 
-[ADR-0018](../../docs/decisions/0018-adopt-client-backed-semantic-definitions.md)
+[semantic definition policy](../../.github/ARCHITECTURE.md#client-backed-semantic-definitions)
 governs named-definition migration and its evidence gates. The offline
 [catalog-tools workspace](../catalog-tools/README.md) checks declared client links,
 versioned fingerprints, identity coverage and unresolved entries. Its first
