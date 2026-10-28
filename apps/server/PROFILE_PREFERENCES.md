@@ -56,7 +56,7 @@ plans. Matching runs in a worker with a one-second deadline; a pathological expr
 cannot keep the realm event loop inside a regex match. Existing bad-word snapshot and
 Redis reload behavior remain unchanged.
 
-The 340 public synthetic cases in `test/fixtures/nickname-reserved-vectors.json` were
+The 340 public synthetic cases in [`packages/policy/tests/fixtures/nickname-reserved-vectors.json`](../../packages/policy/tests/fixtures/nickname-reserved-vectors.json) were
 computed independently with `java.util.regex.Pattern` on Temurin Java 8. They cover
 Unicode boundaries and combining marks, quoting, CRLF/NEL anchors, flags, lookarounds
 and escapes. The fixture contains no private implementation or player data.

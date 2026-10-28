@@ -3,7 +3,7 @@ import { drizzle, type NodePgClient } from "drizzle-orm/node-postgres";
 import { saveCelebrityDescription } from "@opencok/repositories/celebrity";
 import { GameService as Game } from "@opencok/services/game";
 import { Rules } from "@opencok/rules/game";
-import { NicknameWordFilter } from "@opencok/resources/nickname-words";
+import { NicknameWordFilter } from "@opencok/policy/resources/nickname-words";
 import type { GameServices, GameStore } from "@opencok/contracts/game";
 import type { Row } from "@opencok/contracts/rows";
 import { decode, encode, sfs, type Fields } from "@opencok/messages/sfs";

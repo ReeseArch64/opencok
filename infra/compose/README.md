@@ -25,7 +25,7 @@ The API, chat and realm images build minified JavaScript with Bun before startin
 their entrypoints. Run `bun run --cwd apps/<service> build` to build an individual
 service locally (`<service>` is `api`, `chat` or `server`). These artifacts target
 Bun and still require the Bun runtime. The realm build also copies its nickname
-filter into `dist/data`. Rebuild images after source or resource changes.
+filter into `dist/src/data`. Rebuild images after source or resource changes.
 
 ## Local inputs and start
 
@@ -61,7 +61,7 @@ and rename receipts are preserved. Custom deployments must configure the endpoin
 explicitly as described in [Profile and preferences](../../apps/server/PROFILE_PREFERENCES.md#activation-and-recovery).
 
 Gameplay catalogs are included as readable TypeScript in `packages/resources/src/catalogs`.
-The nickname filter is bundled as `packages/resources/data/badwords.json`.
+The nickname filter is bundled as `packages/policy/src/resources/data/badwords.json`.
 The server has no resource volume and does not require the ignored reference tree.
 Rebuild and recreate it after catalog edits; see the
 [catalog guide](../../packages/resources/README.md). Original private references

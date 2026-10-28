@@ -2,11 +2,21 @@
   "name": "@opencok/policy",
   "private": true,
   "scripts": {
-    "check-types": "tsc --noEmit"
+    "check-types": "tsc --noEmit",
+    "test": "bun --no-env-file test tests"
   },
   "devDependencies": {
     "@opencok/config": "workspace:*",
     "@types/bun": "catalog:",
     "typescript": "catalog:"
+  },
+  "type": "module",
+  "exports": {
+    "./resources/data/*": "./src/resources/data/*",
+    "./*": "./src/*.ts"
+  },
+  "dependencies": {
+    "@opencok/constants": "workspace:*",
+    "@opencok/errors": "workspace:*"
   }
 }

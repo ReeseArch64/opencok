@@ -101,11 +101,12 @@ new process ownership and named-definition rules remain separate decisions.
 | `rules`, domain rule modules including `hero/rules` and `combat`    | Pure rule evaluation; no sockets, ORM or broker imports.                                                                                        |
 | `hero`                                                              | Hero and general contracts, rules, workflows, mappings, validations, catalog types and persistence adapters, separated by responsibility.       |
 | `dragon`                                                            | Named dragon archetypes, configuration contracts, validation and catalog mapping; existing gameplay workflows remain in their current packages. |
-| `resources`                                                         | Versioned typed gameplay catalogs and JSON nickname filtering.                                                                                  |
+| `resources`                                                         | Versioned typed gameplay catalogs and temporary policy compatibility exports.                                                                   |
+| `policy`                                                            | Pure content matching, bounded file/worker adapters and the maintained nickname/description dictionary.                                         |
 | `repositories`, `drizzle`, `storage`                                | Owned transactional state, schemas, Redis/ZooKeeper and S3 adapters.                                                                            |
 
 The nickname/description word list is versioned in
-`packages/resources/data/badwords.json` and included in the server artifact.
+`packages/policy/src/resources/data/badwords.json` and included in the server artifact.
 It does not depend on the ignored reference tree or a Compose bind mount.
 All authorized gameplay catalogs use maintained domain definitions in
 `packages/resources`: buildings expose costs, prerequisites, effects and star
@@ -155,7 +156,7 @@ See the [dragon authoring guide](../packages/resources/README.md#named-dragon-de
 
 Packages never import applications. Declare direct workspace dependencies and
 public exports; do not turn helpers into a cross-domain rules container.
-`bun run test:packages` runs resource, validation, mapping, controller and rule tests
+`bun run test:packages` runs resource, policy, validation, mapping, controller and rule tests
 within their packages. Follow
 [repository conventions](../packages/repositories/README.md). Current service
 composition uses Effect; [ADR-0012](../docs/decisions/0012-adopt-effect-for-service-composition.md)
