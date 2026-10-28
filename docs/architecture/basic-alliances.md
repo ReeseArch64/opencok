@@ -40,8 +40,8 @@ After #663, the [Alliance package](../../packages/alliance/README.md) owns help
 commands, generation validation, mapping and persistence under ADR-0016. Realm
 composition injects the help factory into the shared coordinator and supplies the
 publication mapper. Shared aggregate repositories delegate help operations within
-the same transaction and at the same read/write/invalidation positions. Membership,
-science and gifts remain in their existing owners pending subsequent #558 slices.
+the same transaction and at the same read/write/invalidation positions. Membership
+and science remain in their existing owners pending subsequent #558 slices.
 
 A new help request records the running timed-activity identity, start time and
 helpers. Queue IDs and client-supplied helper identities confer no authority.
@@ -85,6 +85,12 @@ receipt keys. Recovery keys include the saved research payload and duration so a
 clock rollback cannot alias a later research generation.
 
 ## Shared rewards and notifications
+
+After #665, Alliance owns the gift Service, weighted-choice preparation, native
+Mapper, bounded state/write/catalog ports and transactional gift repository.
+Realm composition injects the existing economy and RNG collaborators. The shared
+coordinator retains stable event/receipt identity and mutation publication, while
+aggregate persistence delegates gift operations at their original positions.
 
 `AllianceService.publishGift` is a trusted server producer. Its caller must already
 have verified the gameplay or purchase entitlement and supply its stable event ID.

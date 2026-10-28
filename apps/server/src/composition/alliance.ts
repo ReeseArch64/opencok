@@ -1,3 +1,10 @@
+import { AllianceGiftService } from "@opencok/alliance/services/gifts";
+import { AllianceGiftPolicy } from "@opencok/alliance/rules/gifts";
+import { AllianceGiftMapper } from "@opencok/alliance/mappings/gifts";
+import type { AllianceGiftContext } from "@opencok/alliance/contracts/gifts";
+import type { RealmInventoryPlanner } from "@opencok/services/inventory-runtime";
+import { inventoryWeighted } from "@opencok/economy/rules/inventory";
+import { activityEconomy } from "@opencok/economy/services/activity-economy";
 import { randomUUID } from "node:crypto";
 import { AllianceHelpService } from "@opencok/alliance/services/help";
 import { AllianceHelpPolicy } from "@opencok/alliance/rules/help-generation";
@@ -23,6 +30,25 @@ export function createRealmAllianceHelp(context: AllianceHelpContext<Rules>)
     );
 }
 
+export function createRealmAllianceGifts(context: AllianceGiftContext<RealmInventoryPlanner>)
+{
+    return new AllianceGiftService(
+        context,
+        {
+            text,
+            num,
+            long,
+            cityInteger,
+            allianceFailure,
+            inventoryWeighted,
+            activityEconomy,
+            randomUUID,
+        },
+        new AllianceGiftPolicy({ cityInteger, allianceFailure }),
+        new AllianceGiftMapper({ text, num, long }),
+    );
+}
+
 export function createRealmAllianceService(
     repository: AllianceRepository,
     rules: Rules,
@@ -30,7 +56,14 @@ export function createRealmAllianceService(
     forbidden: (value: string) => boolean | Promise<boolean> = () => false,
 )
 {
-    return new AllianceService(repository, rules, effects, createRealmAllianceHelp, forbidden);
+    return new AllianceService(
+        repository,
+        rules,
+        effects,
+        createRealmAllianceHelp,
+        createRealmAllianceGifts,
+        forbidden,
+    );
 }
 
 export function publishAllianceMutation(

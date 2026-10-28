@@ -1,10 +1,10 @@
 import { sfs, type Fields } from "@opencok/messages/sfs";
 import type { AllianceRecord as Row } from "../contracts/records";
-import type { AllianceHelpReaders } from "../contracts/help-runtime";
+import type { AllianceRecordReaders } from "../contracts/readers";
 
 export class AllianceHelpMapper
 {
-    public constructor(private readonly runtime: AllianceHelpReaders)
+    public constructor(private readonly runtime: AllianceRecordReaders)
     {}
 
     public readonly snapshot = (
