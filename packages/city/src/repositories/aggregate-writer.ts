@@ -5,7 +5,6 @@ import { and, eq, inArray } from "drizzle-orm";
 import { userprofile } from "@opencok/drizzle/schema/opencok_kingdom/userprofile";
 import { user_building } from "@opencok/drizzle/schema/opencok_kingdom/user_building";
 import { user_building_exp } from "@opencok/drizzle/schema/opencok_kingdom/user_building_exp";
-import { user_science } from "@opencok/drizzle/schema/opencok_kingdom/user_science";
 import { user_army } from "@opencok/drizzle/schema/opencok_kingdom/user_army";
 import { user_hospital } from "@opencok/drizzle/schema/opencok_kingdom/user_hospital";
 import { user_wall } from "@opencok/drizzle/schema/opencok_kingdom/user_wall";
@@ -100,22 +99,7 @@ export class CityAggregateWriter
                 });
         }
 
-        for (const row of write.sciences ?? [])
-        {
-            const value = {
-                uid: owner,
-                itemId: text(row, "itemId"),
-                level: num(row, "level"),
-                cd: long(row, "cd"),
-            };
-            await tx
-                .insert(user_science)
-                .values(value)
-                .onConflictDoUpdate({
-                    target: [user_science.uid, user_science.itemId],
-                    set: value,
-                });
-        }
+        await session.research.writeValidated(write.sciences ?? []);
 
         for (const row of write.armies ?? [])
         {

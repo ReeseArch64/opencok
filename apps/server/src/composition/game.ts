@@ -1,3 +1,5 @@
+import { ResearchMapper } from "@opencok/research/mappings/research";
+import type { ReconnectResearchProjection } from "@opencok/contracts/reconnect";
 import { GameService } from "@opencok/services/game";
 import { CityBootstrapService } from "@opencok/city/services/bootstrap";
 import { CityBootstrapMapper } from "@opencok/city/mappings/bootstrap";
@@ -16,6 +18,10 @@ export function createRealmGameService(
     heroes?: ConstructorParameters<typeof GameService>[5],
 ): GameService
 {
+    const research = new ResearchMapper();
+    const projectResearch: ReconnectResearchProjection = (rows, queues) =>
+        research.data(rows, queues, rules);
+
     return new GameService(
         db,
         rules,
@@ -34,7 +40,7 @@ export function createRealmGameService(
                     kingdomId: config.kingdomId,
                     features: hooks.features,
                     hasReconnect: () => Boolean(services.reconnect),
-                }),
+                }, research),
                 {
                     plan: (progress, context) =>
                         planReconnectProgress(
@@ -45,10 +51,12 @@ export function createRealmGameService(
                             {
                                 specialServer: serverFeature(rules, "araf_mode", context),
                                 cn1: null,
+                                research: projectResearch,
                             },
                         ),
                     validate: validateReconnectResult,
                 },
             ),
+        projectResearch,
     );
 }

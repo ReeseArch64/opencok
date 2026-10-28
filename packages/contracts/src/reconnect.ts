@@ -1,3 +1,4 @@
+import type { Value } from "@opencok/messages/sfs";
 import type { Row } from "./rows.ts";
 
 import type { PlayerEffectSnapshot } from "./power.ts";
@@ -122,3 +123,5 @@ export interface ReconnectProgressWrite
         dead: number;
     }[];
 }
+
+export type ReconnectResearchProjection = (rows: readonly Row[], queues: readonly Row[]) => Value;

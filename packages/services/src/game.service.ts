@@ -1,3 +1,4 @@
+import type { ReconnectResearchProjection } from "@opencok/contracts/reconnect";
 import { planReconnectProgress, validateReconnectResult } from "./reconnect-progress.ts";
 import type { CityBootstrapFactory, CityBootstrapRuntime } from "@opencok/contracts/city-bootstrap";
 import { HeroEventService } from "@opencok/hero/services/hero-event";
@@ -201,6 +202,9 @@ export class GameService
         readonly services: GameServices = {},
         readonly heroes = new HeroEventService(db, rules, config, now, services),
         createBootstrap?: CityBootstrapFactory,
+        readonly projectResearch: ReconnectResearchProjection = () => {
+            throw new GameError(errors.unsupported, "reconnect");
+        },
     )
     {
         this.bootstrap = createBootstrap?.({
@@ -759,6 +763,7 @@ export class GameService
                         {
                             specialServer: serverFeature(this.rules, "araf_mode", context),
                             cn1: null,
+                            research: this.projectResearch,
                         },
                     );
 

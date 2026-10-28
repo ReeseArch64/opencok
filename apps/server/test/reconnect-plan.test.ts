@@ -1,3 +1,5 @@
+import { ResearchMapper } from "@opencok/research/mappings/research";
+import type { ReconnectResearchProjection } from "@opencok/contracts/reconnect";
 import { importBuildingDefinition } from "@opencok/building/mappings/legacy-definition";
 import { expect, test } from "bun:test";
 import type { ReconnectProgressState } from "@opencok/contracts/reconnect";
@@ -79,7 +81,10 @@ function fixture()
     rules.items.set("on_trumpet", { k2: "all" });
     const context = { kingdomId: 1, version: "12.06.0", now: 1000 };
     const services = { worldPowerEffects: async () => new Map<string, string>() };
+    const research: ReconnectResearchProjection = (rows, queues) =>
+        new ResearchMapper().data(rows, queues, rules);
     const environment = {
+        research,
         specialServer: false,
         cn1: null,
         random: () => 0,

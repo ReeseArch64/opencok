@@ -92,6 +92,7 @@
         "@opencok/policy": "workspace:*",
         "@opencok/production": "workspace:*",
         "@opencok/repositories": "workspace:*",
+        "@opencok/research": "workspace:*",
         "@opencok/resources": "workspace:*",
         "@opencok/rules": "workspace:*",
         "@opencok/services": "workspace:*",
@@ -250,6 +251,7 @@
         "@opencok/hero": "workspace:*",
         "@opencok/mappings": "workspace:*",
         "@opencok/messages": "workspace:*",
+        "@opencok/research": "workspace:*",
         "@opencok/rules": "workspace:*",
         "drizzle-orm": "0.45.4",
       },
@@ -746,6 +748,26 @@
         "typescript": "catalog:",
       },
     },
+    "packages/research": {
+      "name": "@opencok/research",
+      "dependencies": {
+        "@opencok/base": "workspace:*",
+        "@opencok/constants": "workspace:*",
+        "@opencok/contracts": "workspace:*",
+        "@opencok/drizzle": "workspace:*",
+        "@opencok/enums": "workspace:*",
+        "@opencok/errors": "workspace:*",
+        "@opencok/messages": "workspace:*",
+        "@opencok/rules": "workspace:*",
+        "drizzle-orm": "0.45.4",
+        "zod": "catalog:",
+      },
+      "devDependencies": {
+        "@opencok/config": "workspace:*",
+        "@types/bun": "catalog:",
+        "typescript": "catalog:",
+      },
+    },
     "packages/resources": {
       "name": "@opencok/resources",
       "dependencies": {
@@ -788,6 +810,7 @@
     "packages/services": {
       "name": "@opencok/services",
       "dependencies": {
+        "@opencok/base": "workspace:*",
         "@opencok/building": "workspace:*",
         "@opencok/constants": "workspace:*",
         "@opencok/contracts": "workspace:*",
@@ -1319,6 +1342,8 @@
     "@opencok/ranking": ["@opencok/ranking@workspace:packages/ranking"],
 
     "@opencok/repositories": ["@opencok/repositories@workspace:packages/repositories"],
+
+    "@opencok/research": ["@opencok/research@workspace:packages/research"],
 
     "@opencok/resources": ["@opencok/resources@workspace:packages/resources"],
 

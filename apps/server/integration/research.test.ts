@@ -1,13 +1,17 @@
+import { ResearchRepository } from "@opencok/research/repositories/progression";
+import { user_civilization_science } from "@opencok/drizzle/schema/opencok_kingdom/user_civilization_science";
 import { expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { eq } from "drizzle-orm";
 import { user_science } from "@opencok/drizzle/schema/opencok_kingdom/user_science";
 import { user_resource } from "@opencok/drizzle/schema/opencok_kingdom/user_resource";
 import { building_production } from "@opencok/drizzle/schema/opencok_kingdom/building_production";
-import { researchDomain } from "@opencok/services/research";
+import { createRealmResearchDomain } from "../src/composition/research";
 import { sfs, fields } from "@opencok/messages/sfs";
 import { idleDeadline } from "@opencok/rules/timed-activity";
 import { cityHarness } from "./support/city";
+
+const researchDomain = createRealmResearchDomain();
 
 test(
     "research enforces trees, persists effects and shares queue recovery, acceleration and cancellation",
@@ -134,6 +138,79 @@ test(
             )[0]!;
             expect(after.amount).toBe(128n);
             expect(after.settledAt).toBe(BigInt(h.clock.now));
+        }
+        finally
+        {
+            await h.close();
+        }
+    },
+    120000,
+);
+
+test(
+    "research persistence shares the caller transaction and rolls back ordinary writes after a foreign civilization rejection",
+    async () => {
+        const h = await cityHarness([researchDomain]);
+        try
+        {
+            const before = await h.db.db.select().from(user_science).where(
+                eq(user_science.uid, "owner"),
+            );
+            await h.db.db.insert(user_science).values({
+                uid: "other",
+                itemId: "700100",
+                level: 9,
+                cd: idleDeadline,
+            });
+            await expect(h.db.db.transaction(async (tx) => {
+                const repository = new ResearchRepository(tx, "owner");
+                await repository.writeValidated([{
+                    uid: "owner",
+                    itemId: "700100",
+                    level: 3,
+                    cd: 9007199254740993n,
+                }]);
+                const rows = await repository.read();
+                expect(rows.every((row) => row.uid === "owner")).toBe(true);
+                expect(rows.find((row) => row.itemId === "700100")?.cd).toBe(9007199254740993n);
+                expect((await repository.levels()).find((row) => row.itemId === "700100")?.level)
+                    .toBe(3);
+                await repository.writeCivilization([{
+                    userID: "other",
+                    baseItemID: 800000,
+                    level: 1,
+                }]);
+            })).rejects.toThrow("Foreign civilization science write");
+            expect(await h.db.db.select().from(user_science).where(eq(user_science.uid, "owner")))
+                .toEqual(before);
+            expect(
+                (await h.db.db.select().from(user_science).where(eq(user_science.uid, "other")))[0]
+                    ?.level,
+            ).toBe(9);
+            await h.db.db.transaction(async (tx) => {
+                const repository = new ResearchRepository(tx, "owner");
+                await repository.writeValidated([{
+                    uid: "owner",
+                    itemId: "700100",
+                    level: 1,
+                    cd: idleDeadline,
+                }]);
+                await repository.writeCivilization([{
+                    userID: "owner",
+                    baseItemID: 800000,
+                    level: 2,
+                }]);
+                expect(await repository.readCivilization()).toHaveLength(1);
+            });
+            expect(
+                (await h.db.db.select().from(user_science).where(eq(user_science.uid, "owner")))[0]
+                    ?.level,
+            ).toBe(1);
+            expect(
+                (await h.db.db.select().from(user_civilization_science).where(
+                    eq(user_civilization_science.userID, "owner"),
+                ))[0]?.level,
+            ).toBe(2);
         }
         finally
         {

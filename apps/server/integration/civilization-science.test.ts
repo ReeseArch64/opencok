@@ -5,10 +5,12 @@ import { eq } from "drizzle-orm";
 import { user_civilization_science } from "@opencok/drizzle/schema/opencok_kingdom/user_civilization_science";
 import { user_resource } from "@opencok/drizzle/schema/opencok_kingdom/user_resource";
 import { queue } from "@opencok/drizzle/schema/opencok_kingdom/queue";
-import { civilizationScienceDomain } from "@opencok/services/civilization-science";
+import { CivilizationScienceDomain } from "@opencok/research/services/civilization";
 import { sfs, fields } from "@opencok/messages/sfs";
 import { idleDeadline } from "@opencok/rules/timed-activity";
 import { cityHarness } from "./support/city";
+
+const civilizationScienceDomain = new CivilizationScienceDomain();
 
 test(
     "civilization research commits one debit across concurrent retries and survives queue recovery",

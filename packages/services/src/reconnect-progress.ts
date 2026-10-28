@@ -1,5 +1,5 @@
+import type { ReconnectResearchProjection } from "@opencok/contracts/reconnect";
 import { woundedTroops, fortification } from "@opencok/mappings/military";
-import { researchData } from "@opencok/mappings/research";
 import { randomInt, randomUUID } from "node:crypto";
 import type { ReconnectProgressState, ReconnectProgressWrite } from "@opencok/contracts/reconnect";
 import type { GameServices } from "@opencok/contracts/game";
@@ -74,6 +74,7 @@ export async function planReconnectProgress(
     context: RuleContext,
     services: Pick<GameServices, "worldPowerEffects" | "emperorVersion" | "expeditionStage">,
     environment: {
+        research: ReconnectResearchProjection;
         specialServer: boolean;
         cn1: Cn1SessionState | null;
         random?: RewardRandom;
@@ -397,7 +398,7 @@ export async function planReconnectProgress(
             ...reconnectMine(friendshipMineView(state.mine, rules)),
             ...reconnectBalances(state.profile),
             ...(rules.power.sciences?.size
-                ? { science: researchData(effects.sciences, state.queues, rules) }
+                ? { science: environment.research(effects.sciences, state.queues) }
                 : {}),
         },
         pushes: taskView.pushes.map((push) => ({ command: push.command, body: push.fields })),

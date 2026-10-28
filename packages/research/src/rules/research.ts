@@ -2,7 +2,7 @@ import { GameError } from "@opencok/errors/game";
 import { errors } from "@opencok/constants/game";
 import type { CityProgressionState } from "@opencok/contracts/city-progression";
 import { num, text } from "@opencok/contracts/rows";
-import type { Rules, Rule } from "./game";
+import type { Rules, Rule } from "@opencok/rules/game";
 import {
     cityInteger,
     cityAmount,
@@ -12,7 +12,7 @@ import {
     reducedCityCost,
     type CityEffect,
     type CityAsset,
-} from "./city-progression";
+} from "@opencok/rules/city-progression";
 
 export function researchDefinition(rules: Rules, itemId: string, level: number): Rule
 {
