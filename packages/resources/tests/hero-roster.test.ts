@@ -7,7 +7,6 @@ import { HeroDefinitionMapper } from "@opencok/hero/mappings/hero-definition";
 import { heroCatalogBindings } from "@opencok/constants/hero-catalog-bindings";
 import { heroDefinitions, heroDefinitionByIdentity } from "../src/heroes/roster.ts";
 import { catalog } from "../src/catalogs/data/general_base.ts";
-import { namedHeroRecord, namedHeroDefinition } from "../scripts/named-hero-records.ts";
 import expected from "./fixtures/hero-roster.json";
 
 const mapper = new HeroDefinitionMapper(heroCatalogBindings);
@@ -28,12 +27,8 @@ test("every reference hero has exactly one concrete named class and catalog entr
         expect(hero.name).toBe(reference.name);
         expect(hero.constructor.name).not.toBe("Hero");
         expect(heroDefinitions[index]).toEqual(reference.definition);
-        expect(namedHeroDefinition({ id: reference.nativeId })).toEqual(reference.definition);
         expect(Number(heroCatalogBindings.heroes[hero.identity].generalId)).toBe(
             reference.nativeId,
-        );
-        expect(namedHeroRecord("general_base", { id: reference.nativeId })?.expression).toContain(
-            `HeroIdentity.${hero.constructor.name}`,
         );
     }
 });

@@ -1,9 +1,7 @@
 import { test, expect } from "bun:test";
 import { XMLParser } from "fast-xml-parser";
-import { convertCatalog } from "../scripts/catalog-conversion";
+import { convertCatalog } from "../src/mappings/catalog-conversion";
 import { CatalogKind } from "@opencok/enums/catalog-kind";
-import { loadCatalog } from "../src/catalog-definitions";
-import { GameplayCatalog } from "@opencok/enums/gameplay-catalog";
 
 test("automation conversion preserves nested Boolean conditions and direct if/else actions", () => {
     const parser = new XMLParser({
@@ -32,17 +30,6 @@ test("automation conversion preserves nested Boolean conditions and direct if/el
     ]);
     expect(branch.onMatch[0]!.branch!.onMatch[0]!.parameters).toBe("10");
     expect(branch.otherwise[0]!.parameters).toBe("$denied;1");
-});
-
-test("anniversary reward gates retain claim flags and grants in the maintained catalog", async () => {
-    const catalog = await loadCatalog(GameplayCatalog.TriggerActivity);
-    const rule = catalog.rules.find((rule) => rule.id === 2207)!;
-    expect(rule.actions[0]!.branch!.conditions[0]!.conditions).toHaveLength(2);
-    expect(rule.actions[0]!.branch!.onMatch[0]).toMatchObject({ code: 48, parameters: "250080" });
-    expect(rule.actions[1]!.branch!.onMatch[0]).toMatchObject({
-        code: 9,
-        parameters: "$3th_anniversary_week1_box_1_flag;+;1",
-    });
 });
 
 test("compound actions retain ordered counter and reward operations", () => {

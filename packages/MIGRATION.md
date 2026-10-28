@@ -220,3 +220,24 @@ all maintained-file semantic assignments, cross-release semantic review and fina
 consumer cutovers remain pending. The generic tool reports every unassigned catalog
 and row in its supplied inventory; a partial inventory cannot establish W01 or W14
 completion. No client source or bulk localization is versioned or needed in CI.
+
+## Offline catalog importer slice (#601)
+
+Owner: `catalog-tools`; no composing runtime application. The six old
+`resources/scripts` modules are retired after moving CLI entrypoints to
+`catalog-tools/scripts`, conversion and named-record adapters to
+`catalog-tools/src/mappings`, and writing to `catalog-tools/src/generators`.
+The catalog generator receives explicit resource/Hero destinations; CLI defaults
+still target the original maintained locations. The building generator also takes
+an explicit destination, with the original building directory as CLI default.
+
+Import-specific automation and named-record assertions move to tool tests.
+Runtime Hero/Dragon roster, compatibility and automation catalog assertions stay
+in resources. This avoids a reverse resource-to-tool dependency. Tool-only enum
+and Hero dependencies are development dependencies using existing workspace
+versions. No runtime catalog, provenance, native binding or player state changes.
+
+The fixture XML adapter and building compatibility conversion stay with resources
+until their runtime/test callers migrate. This slice does not complete exhaustive
+catalog ownership or named-definition migration. Synthetic output baselines and
+the existing package/architecture suites are the cutover gates.

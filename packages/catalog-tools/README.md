@@ -1,7 +1,8 @@
-# Client binding discovery
+# Catalog tooling
 
 Offline tooling for [ADR-0018](../../docs/decisions/0018-adopt-client-backed-semantic-definitions.md)
-and [#598](https://github.com/ReeseArch64/opencok/issues/598), under #558 W13.
+and [#598](https://github.com/ReeseArch64/opencok/issues/598) /
+[#601](https://github.com/ReeseArch64/opencok/issues/601), under #558 W13.
 The architecture suite rejects direct/transitive imports from application or domain
 `src` into this workspace, including types. Offline scripts and tests may use it.
 Its parser and other dependencies
@@ -114,3 +115,50 @@ maintained public facts only, so CI requires no private files.
 
 On POSIX, the FIFO regression test requires `mkfifo` and verifies rejection without
 a writer. Windows skips that test because it does not expose POSIX named pipes.
+
+## Catalog and building imports
+
+The existing authoring tools moved from `resources/scripts` in #601. Conversion
+and named-record adapters live in `src/mappings`, file generators in `src/generators`,
+and CLI entrypoints in `scripts`. Imports preserve source declaration order, exact
+values, provenance, shared-table output and existing Hero/Dragon named authorship.
+No identities or missing server configurations are inferred by this relocation.
+
+```sh
+bun run --cwd packages/catalog-tools import:catalogs /authorized/xml
+bun run --cwd packages/catalog-tools import:buildings /authorized/building.xml
+```
+
+These commands overwrite the existing maintained destinations: `resources/src`
+(catalog data/types, registry, codecs and provenance), `hero/src/resources/catalogs/types`,
+and `resources/src/buildings`. The general importer removes obsolete files in its
+three generated catalog/type directories as before. Do not use those directories
+for unrelated files. Originals are read-only; neither command rewrites input XML.
+The general importer requires the complete catalog directory declared by
+`GameplayCatalog`, excluding `building.xml`. These are authoring commands, distinct
+from the read-only discovery/report command above.
+
+For isolated output review, pass both resource and Hero type destinations to the
+general importer, or one building destination to the building importer. Paths are
+relative to the command's current working directory; defaults are resolved from
+the tool location. Supplying only one general-import destination fails before
+writing. Destinations must be separate from authorized inputs. Both CLIs reject overlapping
+input/output paths, resolving existing symbolic links before any generation.
+
+```sh
+bun run --cwd packages/catalog-tools import:catalogs /authorized/xml /tmp/review/resources /tmp/review/hero-types
+bun run --cwd packages/catalog-tools import:buildings /authorized/building.xml /tmp/review/buildings
+```
+
+Formatting and review remain required before publishing generated output. Existing
+converter mechanics are preserved; this relocation does not make all catalogs
+semantic authoring sources or provide atomic rollback of an interrupted import.
+The resource fixture parser and building compatibility mapper remain in resources
+for existing consumers; runtime code has no import back into catalog-tools.
+
+Synthetic generation tests compare 22 files against SHA-256 baselines captured
+from the pre-move implementation: tables, duplicate tables, named Hero/Dragon
+projections, automation, variables, web routing, tile maps and buildings. They also
+exercise isolated CLI output, incomplete-input rejection, stale-output cleanup and
+source immutability. Runtime roster/parity checks remain with resources; only
+import-specific assertions moved here. No test requires private reference files.

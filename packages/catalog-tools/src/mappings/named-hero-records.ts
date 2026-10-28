@@ -1,7 +1,7 @@
 import { heroCatalogBindings } from "@opencok/constants/hero-catalog-bindings";
 import { HeroIdentity } from "@opencok/enums/hero-identity";
 import { GameplayCatalog } from "@opencok/enums/gameplay-catalog";
-import { heroDefinitionByIdentity } from "../src/heroes/roster.ts";
+import { heroDefinitionByIdentity } from "@opencok/resources/heroes/roster";
 
 const identities = new Map<number, string>(
     Object.entries(heroCatalogBindings.heroes).map(([identity, binding]) => [

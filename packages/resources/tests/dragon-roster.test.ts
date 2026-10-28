@@ -10,7 +10,6 @@ import { Vildrin } from "@opencok/dragon/domain/vildrin";
 import { DragonDefinitionMapper } from "@opencok/dragon/mappings/dragon-definition";
 import { dragonDefinitions, dragonDefinitionByIdentity } from "../src/dragons/roster.ts";
 import { catalog } from "../src/catalogs/data/dragon_base.ts";
-import { namedDragonDefinition, namedDragonRecord } from "../scripts/named-dragon-records.ts";
 import expected from "./fixtures/dragon-roster.json";
 
 const mapper = new DragonDefinitionMapper(dragonCatalogBindings);
@@ -26,17 +25,6 @@ test("the complete client roster has concrete dragon classes and preserves every
     for (const dragon of dragonRoster)
     {
         dragon.validate();
-
-        if (!dragon.server)
-        {
-            continue;
-        }
-
-        const nativeId = dragonCatalogBindings.dragons[dragon.identity];
-        expect(namedDragonDefinition({ id: nativeId })).toEqual(mapper.toDefinition(dragon));
-        expect(namedDragonRecord("dragon_base", { id: nativeId })?.expression).toContain(
-            `DragonIdentity.${dragon.constructor.name}`,
-        );
     }
 });
 
@@ -48,13 +36,6 @@ test("client-only Vildrin is named without inventing playable server configurati
     expect(dragon.skillSlots.at(-1)?.maximumQualityRank).toBeUndefined();
     expect(dragonDefinitionByIdentity.has(DragonIdentity.Vildrin)).toBe(false);
     expect(() => mapper.toDefinition(dragon)).toThrow("no server configuration");
-    expect(() => namedDragonRecord("dragon_base", { id: 109013 })).toThrow(
-        "named server configuration",
-    );
-    expect(() => namedDragonRecord("dragon_base", { id: 999999 })).toThrow(
-        "named server configuration",
-    );
-    expect(namedDragonRecord("dragon_skill", { id: 109000 })).toBeUndefined();
 });
 
 test("readable dragon mechanics drive projection without hidden balance literals", () => {

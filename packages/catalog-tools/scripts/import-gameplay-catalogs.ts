@@ -3,14 +3,21 @@ import { join, basename } from "node:path";
 import { createHash } from "node:crypto";
 import { XMLParser, XMLValidator } from "fast-xml-parser";
 import { GameplayCatalog } from "@opencok/enums/gameplay-catalog";
-import { writeCatalogModules, type CatalogSource } from "./write-catalogs.ts";
-import type { SourceElement } from "./catalog-conversion.ts";
+import { writeCatalogModules, type CatalogSource } from "../src/generators/catalog-modules.ts";
+import { validateImportDestinations } from "../src/resources/import-destinations.ts";
+import type { SourceElement } from "../src/mappings/catalog-conversion.ts";
 
 const directory = process.argv[2];
+
 if (!directory)
 {
     throw new Error("Supply an authorized XML source directory");
 }
+if (![3, 5].includes(process.argv.length))
+{
+    throw new Error("Supply both resource and Hero type destinations, or neither");
+}
+
 const parser = new XMLParser({
     preserveOrder: true,
     ignoreAttributes: false,
@@ -50,4 +57,17 @@ async function* sources(): AsyncIterable<CatalogSource>
         };
     }
 }
-await writeCatalogModules(sources());
+
+const destinations = {
+    resources: process.argv[3] ?? new URL("../../resources/src/", import.meta.url).pathname,
+    heroTypes: process.argv[4]
+        ?? new URL("../../hero/src/resources/catalogs/types/", import.meta.url).pathname,
+};
+
+await validateImportDestinations(directory, [
+    destinations.resources,
+    join(destinations.resources, "catalogs", "data"),
+    join(destinations.resources, "catalogs", "types"),
+    destinations.heroTypes,
+]);
+await writeCatalogModules(sources(), destinations);

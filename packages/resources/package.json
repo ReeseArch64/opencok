@@ -3,9 +3,7 @@
   "private": true,
   "scripts": {
     "check-types": "tsc --noEmit",
-    "test": "bun --no-env-file test tests",
-    "import:catalogs": "bun --no-env-file scripts/import-gameplay-catalogs.ts",
-    "import:buildings": "bun --no-env-file scripts/import-building-definitions.ts"
+    "test": "bun --no-env-file test tests"
   },
   "devDependencies": {
     "@opencok/config": "workspace:*",
