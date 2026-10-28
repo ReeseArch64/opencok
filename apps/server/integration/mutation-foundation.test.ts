@@ -8,7 +8,7 @@ import { economy_posting } from "@opencok/drizzle/schema/opencok_kingdom/economy
 import { mutation_outbox } from "@opencok/drizzle/schema/opencok_kingdom/mutation_outbox";
 import { acquireRealmAuthority, fenceRealmDatabase } from "@opencok/repositories/realm-authority";
 import { createMutationExecutor, relayMutationEvent } from "@opencok/repositories/mutation";
-import { createEconomyMutationExecutor } from "@opencok/repositories/economy-mutation";
+import { createEconomyMutationExecutor } from "@opencok/economy/repositories/balances";
 import { updateProfilePreference } from "@opencok/player/repositories/profile-preferences";
 import { user_mixed_info } from "@opencok/drizzle/schema/opencok_kingdom/user_mixed_info";
 import { eq } from "drizzle-orm";
@@ -137,7 +137,7 @@ test(
             }
             let ready = true;
             const owner = await acquireRealmAuthority(first.db, 1, () => ready);
-            const execute = createEconomyMutationExecutor(first.db, owner);
+            const execute = createEconomyMutationExecutor(createMutationExecutor(first.db, owner));
             let applications = 0;
             const purchase = async () => {
                 applications++;
@@ -270,7 +270,7 @@ test(
             expect(competing.filter((result) => result.status === "fulfilled")).toHaveLength(1);
             expect((await first.db.select().from(user_resource))[0]!.food).toBe(10n);
             const otherOwner = await acquireRealmAuthority(other.db, 2, () => true);
-            await createEconomyMutationExecutor(other.db, otherOwner)(
+            await createEconomyMutationExecutor(createMutationExecutor(other.db, otherOwner))(
                 command("duplicate"),
                 purchase,
             );
@@ -342,7 +342,9 @@ test(
                 ),
             ).rejects.toThrow();
             await expect(execute(command("duplicate"), purchase)).rejects.toThrow();
-            const resumed = createEconomyMutationExecutor(second.db, replacement);
+            const resumed = createEconomyMutationExecutor(
+                createMutationExecutor(second.db, replacement),
+            );
             expect(await resumed(command("duplicate"), purchase)).toEqual(replies[0]!);
             expect(applications).toBe(2);
             const loss = loseCommit(
@@ -368,7 +370,9 @@ test(
             const restarted = open("mutation_one");
             const restartOwner = await acquireRealmAuthority(restarted.db, 1, () => true);
             expect(
-                await createEconomyMutationExecutor(restarted.db, restartOwner)(
+                await createEconomyMutationExecutor(
+                    createMutationExecutor(restarted.db, restartOwner),
+                )(
                     command("duplicate"),
                     purchase,
                 ),
