@@ -1,6 +1,6 @@
-import type { InventoryPlan, InventoryState } from "./inventory.ts";
-import type { MutationCommand } from "./mutation.ts";
-import type { Row } from "./rows.ts";
+import type { InventoryPlan, InventoryState } from "@opencok/contracts/inventory";
+import type { MutationCommand } from "@opencok/contracts/mutation";
+import type { Row } from "@opencok/contracts/rows";
 
 export interface ShopState
 {

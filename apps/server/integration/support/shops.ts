@@ -1,3 +1,4 @@
+import { planInventoryGrants } from "@opencok/services/inventory";
 import { randomUUID } from "node:crypto";
 import { migrate } from "drizzle-orm/node-postgres/migrator";
 import { createDatabase } from "@opencok/drizzle";
@@ -5,10 +6,10 @@ import { userprofile } from "@opencok/drizzle/schema/opencok_kingdom/userprofile
 import { user_resource } from "@opencok/drizzle/schema/opencok_kingdom/user_resource";
 import { user_item } from "@opencok/drizzle/schema/opencok_kingdom/user_item";
 import { acquireRealmAuthority } from "@opencok/repositories/realm-authority";
-import { createShopRepository } from "@opencok/repositories/shops";
-import { createTradeExecutor } from "@opencok/repositories/trade";
-import { ShopService } from "@opencok/services/shops";
-import { TradeService } from "@opencok/services/trade";
+import { createShopRepository } from "@opencok/shop/repositories/shops";
+import { createTradeExecutor } from "@opencok/shop/repositories/trade";
+import { ShopService } from "@opencok/shop/services/shops";
+import { TradeService } from "@opencok/shop/services/trade";
 import { loadRules } from "@opencok/resources/rules";
 import { sfs } from "@opencok/messages/sfs";
 import { DisposablePostgres } from "../../../../packages/drizzle/tests/support/postgres";
@@ -88,8 +89,16 @@ export async function shopHarness()
         const clock = { now: Date.UTC(2026, 0, 5, 12) };
         const now = () => clock.now;
         const authority = await acquireRealmAuthority(db.db, 1, () => true);
-        const shops = new ShopService(createShopRepository(db.db, authority, now), rules);
-        const trade = new TradeService(createTradeExecutor(db.db, authority, now), rules);
+        const shops = new ShopService(
+            createShopRepository(db.db, authority, now),
+            rules,
+            planInventoryGrants,
+        );
+        const trade = new TradeService(
+            createTradeExecutor(db.db, authority, now),
+            rules,
+            planInventoryGrants,
+        );
         let database = db;
         return {
             pg,

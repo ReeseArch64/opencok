@@ -1,3 +1,4 @@
+import { planInventoryGrants } from "@opencok/services/inventory";
 import { expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { eq, sql } from "drizzle-orm";
@@ -10,11 +11,11 @@ import { shopping_mall } from "@opencok/drizzle/schema/opencok_kingdom/shopping_
 import { shop_stock } from "@opencok/drizzle/schema/opencok_kingdom/shop_stock";
 import { command_receipt } from "@opencok/drizzle/schema/opencok_kingdom/command_receipt";
 import { acquireRealmAuthority } from "@opencok/repositories/realm-authority";
-import { createShopRepository } from "@opencok/repositories/shops";
-import { createTradeExecutor } from "@opencok/repositories/trade";
-import { TradeService } from "@opencok/services/trade";
+import { createShopRepository } from "@opencok/shop/repositories/shops";
+import { createTradeExecutor } from "@opencok/shop/repositories/trade";
+import { TradeService } from "@opencok/shop/services/trade";
 import { npc_trade } from "@opencok/drizzle/schema/opencok_kingdom/npc_trade";
-import { ShopService } from "@opencok/services/shops";
+import { ShopService } from "@opencok/shop/services/shops";
 import { loadRules } from "@opencok/resources/rules";
 import { sfs } from "@opencok/messages/sfs";
 import { DisposablePostgres } from "../../../packages/drizzle/tests/support/postgres.ts";
@@ -89,6 +90,7 @@ test(
             let service = new ShopService(
                 createShopRepository(first.db, authority, () => now),
                 rules,
+                planInventoryGrants,
             );
             const buy = (owner = "buyer", operationId = randomUUID(), id = "test", count = 1) =>
                 service.command(owner, "shoppingMall.buy", {
@@ -194,6 +196,7 @@ test(
             const tradeService = new TradeService(
                 createTradeExecutor(first.db, authority, () => now),
                 rules,
+                planInventoryGrants,
             );
             const offered = await tradeService.command("buyer", "trade.info", {});
             expect(offered.body.trade).toEqual(sfs.string("200300;1|200301;2"));
@@ -250,6 +253,7 @@ test(
                     },
                 },
                 rules,
+                planInventoryGrants,
             );
             const lostRequest = {
                 id: sfs.string("failure"),
@@ -275,11 +279,13 @@ test(
             service = new ShopService(
                 createShopRepository(reopened.db, nextAuthority, () => now),
                 rules,
+                planInventoryGrants,
             );
             expect((await buy("buyer", operation)).body.gold!.value).toBe(90n);
             const stale = new ShopService(
                 createShopRepository(reopened.db, authority, () => now),
                 rules,
+                planInventoryGrants,
             );
             await expect(
                 stale.command("buyer", "shoppingMall.buy", {

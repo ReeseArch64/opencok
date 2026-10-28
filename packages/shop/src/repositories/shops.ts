@@ -1,17 +1,17 @@
 import type { InventoryPlan } from "@opencok/contracts/inventory";
 import type { MutationResult } from "@opencok/contracts/mutation";
-import type { ShopPurchase } from "@opencok/contracts/shops";
-import type { MutationTransaction } from "./mutation";
+import type { ShopPurchase } from "@opencok/shop/contracts/shops";
+import type { MutationTransaction } from "@opencok/repositories/mutation";
 import { and, eq } from "drizzle-orm";
 import { shopping_mall } from "@opencok/drizzle/schema/opencok_kingdom/shopping_mall";
 import { shop_stock } from "@opencok/drizzle/schema/opencok_kingdom/shop_stock";
 import { userprofile } from "@opencok/drizzle/schema/opencok_kingdom/userprofile";
 import { user_building } from "@opencok/drizzle/schema/opencok_kingdom/user_building";
-import type { ShopRepository } from "@opencok/contracts/shops";
-import type { Database } from "./game.ts";
-import type { RealmAuthority } from "./realm-authority.ts";
-import { createMutationExecutor } from "./mutation.ts";
-import { executeInventoryTransaction } from "./inventory.ts";
+import type { ShopRepository } from "@opencok/shop/contracts/shops";
+import type { Database } from "@opencok/repositories/game";
+import type { RealmAuthority } from "@opencok/repositories/realm-authority";
+import { createMutationExecutor } from "@opencok/repositories/mutation";
+import { executeInventoryTransaction } from "@opencok/repositories/inventory";
 
 export function createShopRepository(
     db: Database["kingdom"]["db"],

@@ -6,10 +6,10 @@ import {
     shopLimit,
     shopPrice,
     shopWindow,
-} from "@opencok/rules/shops";
-import { shopOffer } from "@opencok/mappings/shops";
-import type { ShopState, ShopPlan } from "@opencok/contracts/shops";
-import { ShopService } from "@opencok/services/shops";
+} from "@opencok/shop/rules/shops";
+import { shopOffer } from "@opencok/shop/mappings/shops";
+import type { ShopState, ShopPlan } from "@opencok/shop/contracts/shops";
+import { ShopService } from "@opencok/shop/services/shops";
 import { planInventoryGrants } from "@opencok/services/inventory";
 import { sfs, fields } from "@opencok/messages/sfs";
 
@@ -144,6 +144,7 @@ test("shop service splits gold pools and preserves both item debit and grant pos
             },
         },
         rules,
+        planInventoryGrants,
     );
     const result = await service.command("buyer", "shoppingMall.buy", {
         id: sfs.string("offer"),

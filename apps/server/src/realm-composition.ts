@@ -1,3 +1,4 @@
+import { planInventoryGrants } from "@opencok/services/inventory";
 import { ActivityRecoveryJob } from "./activity-recovery-job.ts";
 import { WorldMarchRecoveryJob } from "./world-march-recovery-job.ts";
 import { WorldPopulationJob } from "./world-population-job.ts";
@@ -285,10 +286,10 @@ import {
     createMailRewardExecutor,
     mailRewardRealmAllowed,
 } from "@opencok/repositories/mail-rewards";
-import { createShopRepository } from "@opencok/repositories/shops";
-import { createTradeExecutor } from "@opencok/repositories/trade";
-import { TradeService } from "@opencok/services/trade";
-import { ShopService } from "@opencok/services/shops";
+import { createShopRepository } from "@opencok/shop/repositories/shops";
+import { createTradeExecutor } from "@opencok/shop/repositories/trade";
+import { TradeService } from "@opencok/shop/services/trade";
+import { ShopService } from "@opencok/shop/services/shops";
 import { MailRewardService } from "@opencok/services/mail-rewards";
 import {
     createInventoryExecutor,
@@ -2780,6 +2781,7 @@ export const RealmDependenciesLive = Layer.effect(
                     "realm.createTradeExecutor",
                 ),
                 rules,
+                planInventoryGrants,
             ),
             "realm.TradeService",
         );
@@ -2848,6 +2850,7 @@ export const RealmDependenciesLive = Layer.effect(
                     "realm.createShopRepository",
                 ),
                 rules,
+                planInventoryGrants,
             ),
             "realm.ShopService",
         );
