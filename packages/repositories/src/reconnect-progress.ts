@@ -23,12 +23,12 @@ import { user_item } from "@opencok/drizzle/schema/opencok_kingdom/user_item";
 import type { ReconnectProgressState } from "@opencok/contracts/reconnect";
 import { GameError } from "@opencok/errors/game";
 import { errors } from "@opencok/constants/game";
-import type { Database } from "./game.ts";
+import type { DatabaseClient } from "@opencok/drizzle/contracts/database";
 import { readPlayerEffects } from "./power.ts";
 import { readResourceNewGenerals } from "@opencok/hero/repositories/general-resource-owner";
 import { readReconnectMarches } from "./reconnect-marches.ts";
 
-type Transaction = Parameters<Parameters<Database["kingdom"]["db"]["transaction"]>[0]>[0];
+type Transaction = Parameters<Parameters<DatabaseClient<"kingdom">["transaction"]>[0]>[0];
 
 export async function readReconnectProgress(
     tx: Transaction,

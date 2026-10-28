@@ -6,10 +6,10 @@ import { chat_message } from "@opencok/drizzle/schema/opencok_chat/chat_message"
 import type { ChatDeliveryStore } from "@opencok/contracts/chat-delivery";
 import type { Frame } from "@opencok/contracts/chat";
 import { chatMessage } from "./chat-messages.ts";
-import type { Database } from "./game.ts";
+import type { DatabaseClient } from "@opencok/drizzle/contracts/database";
 
 export function createChatDeliveryStore(
-    db: Database["databases"]["global"]["db"],
+    db: DatabaseClient<"global">,
     clock: () => Date,
 ): ChatDeliveryStore
 {

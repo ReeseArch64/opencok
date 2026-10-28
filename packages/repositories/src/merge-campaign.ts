@@ -11,7 +11,7 @@ import {
     overlayMergeEffects,
 } from "@opencok/rules/merge-campaign";
 import type { CampaignRule } from "@opencok/contracts/local-campaign";
-import type { Database } from "./game";
+import type { DatabaseClient } from "@opencok/drizzle/contracts/database";
 import { appendMutationRecords, type MutationTransaction } from "./mutation";
 import { fenceRealmTransaction, type RealmAuthority } from "./realm-authority";
 
@@ -20,7 +20,7 @@ const snapshotKey = "realm.merge.effects";
 export const mergeCampaignActor = "realm.merge.campaign";
 
 export function createMergeCampaignStore(
-    db: Database["kingdom"]["db"],
+    db: DatabaseClient<"kingdom">,
     authority: RealmAuthority,
     rules: readonly CampaignRule[],
 )

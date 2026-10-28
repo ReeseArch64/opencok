@@ -3,11 +3,11 @@ import { fight_king_status } from "@opencok/drizzle/schema/opencok_kingdom/fight
 import { user_cross_throne } from "@opencok/drizzle/schema/opencok_kingdom/user_cross_throne";
 import { server_king_info } from "@opencok/drizzle/schema/opencok_global/server_king_info";
 import type { ThroneRankingPeriod, ThroneRankingSnapshot } from "@opencok/contracts/throne-ranking";
-import type { Database } from "./game.ts";
+import type { DatabaseClient } from "@opencok/drizzle/contracts/database";
 
 export async function readThroneRanking(
-    db: Database["kingdom"]["db"],
-    global: Database["databases"]["global"]["db"],
+    db: DatabaseClient<"kingdom">,
+    global: DatabaseClient<"global">,
     publication?: ThroneRankingPeriod,
 ): Promise<ThroneRankingSnapshot>
 {

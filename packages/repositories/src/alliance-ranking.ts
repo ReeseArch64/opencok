@@ -9,10 +9,10 @@ import type {
     AllianceRankingQuery,
     AllianceRankingSnapshot,
 } from "@opencok/contracts/alliance-ranking";
-import type { Database } from "./game.ts";
+import type { DatabaseClient } from "@opencok/drizzle/contracts/database";
 
 export function readAllianceRanking(
-    db: Database["kingdom"]["db"],
+    db: DatabaseClient<"kingdom">,
     uid: string,
     query: AllianceRankingQuery,
 ): Promise<AllianceRankingSnapshot>

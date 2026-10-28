@@ -14,7 +14,7 @@ import { versionAtLeast } from "@opencok/rules/availability";
 import { createMutationExecutor, appendMutationRecords } from "./mutation.ts";
 import { executeInventoryTransaction } from "./inventory.ts";
 import type { RealmAuthority } from "./realm-authority.ts";
-import type { Database } from "./game.ts";
+import type { DatabaseClient } from "@opencok/drizzle/contracts/database";
 
 function category(label: number)
 {
@@ -40,7 +40,7 @@ function category(label: number)
 }
 
 export function createMailRewardExecutor(
-    db: Database["kingdom"]["db"],
+    db: DatabaseClient<"kingdom">,
     authority: RealmAuthority,
     now = Date.now,
     allowed: () => Promise<boolean> = async () => true,
@@ -247,7 +247,7 @@ export function createMailRewardExecutor(
 }
 
 export async function mailRewardRealmAllowed(
-    db: Database["databases"]["global"]["db"],
+    db: DatabaseClient<"global">,
     kingdomId: number,
 ): Promise<boolean>
 {

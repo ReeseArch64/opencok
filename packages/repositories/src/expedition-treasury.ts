@@ -13,10 +13,10 @@ import { decode, str } from "@opencok/messages/sfs";
 import { createMutationExecutor } from "./mutation";
 import { insertSystemMail } from "./system-mail";
 import type { RealmAuthority } from "./realm-authority";
-import type { Database } from "./game";
+import type { DatabaseClient } from "@opencok/drizzle/contracts/database";
 
 export function createExpeditionTreasuryExecutor(
-    db: Database["kingdom"]["db"],
+    db: DatabaseClient<"kingdom">,
     authority: RealmAuthority,
     now = Date.now,
 ): ExpeditionTreasuryExecutor

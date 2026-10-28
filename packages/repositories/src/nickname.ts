@@ -4,14 +4,14 @@ import { DependencyError } from "@opencok/errors/dependency";
 import { mysqlUtf8UnicodeCandidates, mysqlUtf8UnicodeKey } from "@opencok/rules/mysql-unicode";
 import { nicknameTrim } from "@opencok/rules/nickname";
 import { and, DrizzleQueryError, ne, sql } from "drizzle-orm";
-import type { Database } from "./game.ts";
+import type { DatabaseClient } from "@opencok/drizzle/contracts/database";
 
 const nameTypeKey = mysqlUtf8UnicodeKey("name");
 
 const nameTypeCandidates = mysqlUtf8UnicodeCandidates(["name"]);
 
 export async function nicknameOccupied(
-    db: Database["databases"]["global"]["db"],
+    db: DatabaseClient<"global">,
     name: string,
 ): Promise<boolean>
 {
@@ -39,7 +39,7 @@ export async function nicknameOccupied(
 }
 
 export async function readNicknameOccupation(
-    db: Pick<Database["databases"]["global"]["db"], "select">,
+    db: Pick<DatabaseClient<"global">, "select">,
     name: string,
 ): Promise<boolean>
 {

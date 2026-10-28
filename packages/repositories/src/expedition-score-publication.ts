@@ -19,10 +19,10 @@ import { expeditionPhase } from "@opencok/rules/new-expedition";
 import { GameError } from "@opencok/errors/game";
 import { errors } from "@opencok/constants/game";
 import { fenceRealmTransaction, type RealmAuthority } from "./realm-authority";
-import type { Database } from "./game";
+import type { DatabaseClient } from "@opencok/drizzle/contracts/database";
 
 export function createExpeditionScoreSource(
-    db: Database["kingdom"]["db"],
+    db: DatabaseClient<"kingdom">,
     authority: RealmAuthority,
 ): ExpeditionScoreSource
 {
@@ -107,7 +107,7 @@ export function createExpeditionScoreSource(
 }
 
 export function createExpeditionScoreProjection(
-    db: Database["databases"]["global"]["db"],
+    db: DatabaseClient<"global">,
     authority: RealmAuthority,
 ): ExpeditionScoreProjection
 {
@@ -274,8 +274,8 @@ export function createExpeditionScoreProjection(
 }
 
 export function createExpeditionLiveSource(
-    owned: Database["kingdom"]["db"],
-    global: Database["databases"]["global"]["db"],
+    owned: DatabaseClient<"kingdom">,
+    global: DatabaseClient<"global">,
     authority: RealmAuthority,
 ): ExpeditionLiveSource
 {

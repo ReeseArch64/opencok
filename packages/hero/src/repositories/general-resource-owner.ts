@@ -1,4 +1,4 @@
-import type { Database } from "@opencok/repositories/game";
+import type { DatabaseClient } from "@opencok/drizzle/contracts/database";
 import {
     generalColumns,
     statusColumns,
@@ -19,7 +19,7 @@ import { user_equip } from "@opencok/drizzle/schema/opencok_kingdom/user_equip";
 import { hero_office } from "@opencok/drizzle/schema/opencok_kingdom/hero_office";
 import { and, asc, eq, gt } from "drizzle-orm";
 
-type Reader = Pick<Database["kingdom"]["db"], "select">;
+type Reader = Pick<DatabaseClient<"kingdom">, "select">;
 
 export async function readResourceNewGenerals(
     db: Reader,

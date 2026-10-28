@@ -7,7 +7,7 @@ import {
     type ChatAvatarProfileStore,
 } from "@opencok/contracts/chat-avatar-profile";
 import type { AvatarProfileUpdate } from "@opencok/contracts/files";
-import type { Database } from "./game.ts";
+import type { DatabaseClient } from "@opencok/drizzle/contracts/database";
 
 function project(row: typeof chat_avatar_profile.$inferSelect): AvatarProfileUpdate
 {
@@ -37,7 +37,7 @@ function project(row: typeof chat_avatar_profile.$inferSelect): AvatarProfileUpd
 }
 
 export function createChatAvatarProfileStore(
-    db: Database["databases"]["global"]["db"],
+    db: DatabaseClient<"global">,
 ): ChatAvatarProfileStore
 {
     return {

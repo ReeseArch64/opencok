@@ -6,10 +6,10 @@ import { post_box } from "@opencok/drizzle/schema/opencok_kingdom/post_box";
 import { post_mail } from "@opencok/drizzle/schema/opencok_kingdom/post_mail";
 import { post_relation } from "@opencok/drizzle/schema/opencok_kingdom/post_relation";
 import { fenceRealmTransaction, type RealmAuthority } from "./realm-authority.ts";
-import type { Database } from "./game.ts";
+import type { DatabaseClient } from "@opencok/drizzle/contracts/database";
 
 export async function cleanupSocialRealm(
-    db: Database["kingdom"]["db"],
+    db: DatabaseClient<"kingdom">,
     authority: RealmAuthority,
     now = Date.now(),
 )

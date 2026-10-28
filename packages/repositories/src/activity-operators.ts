@@ -8,10 +8,10 @@ import { activity_group_buys } from "@opencok/drizzle/schema/opencok_kingdom/act
 import { user_comeback_record } from "@opencok/drizzle/schema/opencok_kingdom/user_comeback_record";
 import { stat_reg } from "@opencok/drizzle/schema/opencok_kingdom/stat_reg";
 import type { ActivityOperatorsSnapshot } from "@opencok/contracts/activity-operators";
-import type { Database } from "./game";
+import type { DatabaseClient } from "@opencok/drizzle/contracts/database";
 
 export async function readActivityOperators(
-    db: Database["kingdom"]["db"],
+    db: DatabaseClient<"kingdom">,
     owner: string,
     now: number,
 ): Promise<ActivityOperatorsSnapshot>

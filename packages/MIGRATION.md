@@ -276,3 +276,31 @@ progression and other W06 responsibilities remain open.
 Removing the broad Database setter and its type back-reference also removes two
 pre-existing module-cycle edges. The architecture baseline shrinks from 176 to
 174 entries; no new exception is added.
+
+## Repository database-type foundation (#605)
+
+`drizzle/src/contracts/database.ts` owns type-only aliases derived from its existing
+constructors: `DatabaseClient<Role>`, `DatabaseConnection<Role>` and
+`DatabaseConnections`. No new runtime abstraction or persistence implementation is
+introduced. 112 horizontal repositories, nine Hero repositories and two shop
+repositories stop indexing connection types through the broad `Database` facade.
+An inline import type in red-packets is included; applications and explicit test
+fixtures may still compose the facade while its runtime decomposition continues.
+
+All 123 edited modules emit identical JavaScript before/after type erasure. The
+normal server bundle and copied policy asset also retain their exact bytes. Type
+checks cover the affected adapters and consuming apps. Repository code, SQL,
+transaction isolation, locking, authority and public runtime exports are unchanged.
+
+The architecture guard rejects direct and transitive facade dependencies from
+repository implementation paths, including type imports and intermediary contract
+re-exports. Removing the type back-references eliminates 65 facade-related cyclic
+edges and nine other edges that no longer participate in those strongly connected
+components. Only those 74 reviewed cycle entries are removed: the baseline falls
+from 174 to 100, with no new exception. The nine indirect edges concern the existing
+mail window/presentation/intents, profile-alliance and ranking-building paths;
+their runtime imports remain intact.
+
+This is a dependency foundation for W06-W12, not completion of their domain
+ownership or retirement of the broad runtime facade. The remaining baseline debt
+and the full package/file/catalog/command disposition remain #558 work.

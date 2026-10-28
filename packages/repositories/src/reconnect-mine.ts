@@ -5,7 +5,7 @@ import { and, eq } from "drizzle-orm";
 import type { FriendshipMine } from "@opencok/contracts/reconnect";
 import type { Row } from "@opencok/contracts/rows";
 import { DependencyError } from "@opencok/errors/dependency";
-import type { Database } from "./game.ts";
+import type { DatabaseClient } from "@opencok/drizzle/contracts/database";
 
 const mineFields = {
     itemId: user_mine.itemId,
@@ -17,8 +17,8 @@ const mineFields = {
 };
 
 export async function loadFriendshipMine(
-    global: Database["databases"]["global"]["db"],
-    kingdom: Database["kingdom"]["db"],
+    global: DatabaseClient<"global">,
+    kingdom: DatabaseClient<"kingdom">,
     kingdomId: number,
     uid: string,
     initial: () => FriendshipMine,
@@ -60,7 +60,7 @@ export async function loadFriendshipMine(
 }
 
 export async function readFriendshipBinding(
-    global: Database["databases"]["global"]["db"],
+    global: DatabaseClient<"global">,
     kingdomId: number,
     uid: string,
 ): Promise<string | null>
@@ -88,7 +88,7 @@ export async function readFriendshipBinding(
 }
 
 export async function readFriendshipMine(
-    tx: Pick<Database["kingdom"]["db"], "select" | "insert">,
+    tx: Pick<DatabaseClient<"kingdom">, "select" | "insert">,
     uid: string,
     binding: string | null,
     initial: () => FriendshipMine,

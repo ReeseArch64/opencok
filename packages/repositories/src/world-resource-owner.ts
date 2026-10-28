@@ -22,10 +22,10 @@ import { text } from "@opencok/repositories/world-resource-owner-values";
 import type { WorldResourceOwnerSnapshot } from "@opencok/contracts/world-point-detail";
 
 import { asc, eq } from "drizzle-orm";
-import type { Database } from "./game.ts";
+import type { DatabaseClient } from "@opencok/drizzle/contracts/database";
 import { readPlayerEffects } from "./power.ts";
 
-type Reader = Pick<Database["kingdom"]["db"], "select">;
+type Reader = Pick<DatabaseClient<"kingdom">, "select">;
 
 export async function readWorldResourceOwner(
     db: Reader,

@@ -2,10 +2,10 @@ import { eq } from "drizzle-orm";
 import { realm_authority } from "@opencok/drizzle/schema/opencok_kingdom/realm_authority";
 import type { ChatRepository } from "@opencok/contracts/chat";
 import { ChatCommandError } from "@opencok/errors/chat";
-import type { Database } from "./game.ts";
+import type { DatabaseConnections } from "@opencok/drizzle/contracts/database";
 
 export function createRealmChatEvents(
-    databases: Database["databases"],
+    databases: DatabaseConnections,
     repository: ChatRepository,
     render: (
         realm: number,

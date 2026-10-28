@@ -7,13 +7,13 @@ import { readFriendshipBinding } from "./reconnect-mine.ts";
 import type { FriendshipMineExecutor, MineHelper } from "@opencok/contracts/friendship-mine";
 import { text, num, long } from "@opencok/contracts/rows";
 import type { RealmAuthority } from "./realm-authority.ts";
-import type { Database } from "./game.ts";
+import type { DatabaseConnection } from "@opencok/drizzle/contracts/database";
 import type { FriendshipMine } from "@opencok/contracts/reconnect";
 
 export function createFriendshipMineExecutor(
     database: {
-        kingdom: Pick<Database["kingdom"], "db">;
-        databases: { global: Pick<Database["databases"]["global"], "db">; };
+        kingdom: Pick<DatabaseConnection<"kingdom">, "db">;
+        databases: { global: Pick<DatabaseConnection<"global">, "db">; };
     },
     authority: RealmAuthority,
     initial: () => FriendshipMine,

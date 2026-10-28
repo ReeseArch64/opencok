@@ -14,7 +14,7 @@ import type {
 } from "@opencok/contracts/continued-cost-ranking";
 import type { Row } from "@opencok/contracts/rows";
 import type { RealmAuthority } from "./realm-authority";
-import type { Database } from "./game";
+import type { DatabaseClient } from "@opencok/drizzle/contracts/database";
 
 function validate(period: CostRankingPeriod)
 {
@@ -63,7 +63,7 @@ function fingerprint(rows: readonly CostRankingScore[])
 }
 
 export function createCostRankingRegistry(
-    db: Database["databases"]["global"]["db"],
+    db: DatabaseClient<"global">,
     authority: RealmAuthority,
 ): CostRankingRegistry
 {
@@ -164,7 +164,7 @@ export function createCostRankingRegistry(
 }
 
 export async function writeCostRankingSnapshot(
-    db: Database["databases"]["global"]["db"],
+    db: DatabaseClient<"global">,
     authority: RealmAuthority,
     period: CostRankingPeriod,
     rows: readonly CostRankingScore[],

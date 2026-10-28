@@ -15,7 +15,7 @@ import type {
     HeroRankPeriod,
 } from "@opencok/hero/contracts/hero-ranking-finality";
 import type { RealmAuthority } from "@opencok/repositories/realm-authority";
-import type { Database } from "@opencok/repositories/game";
+import type { DatabaseClient } from "@opencok/drizzle/contracts/database";
 
 function periodRow(row: Row): HeroRankPeriod
 {
@@ -43,7 +43,7 @@ function periodRow(row: Row): HeroRankPeriod
 }
 
 export function createHeroRankFinalityRegistry(
-    db: Database["databases"]["global"]["db"],
+    db: DatabaseClient<"global">,
     authority: RealmAuthority,
 ): HeroRankFinalityRegistry
 {

@@ -7,7 +7,7 @@ import { text, type Row } from "@opencok/contracts/rows";
 import type { OlympicState, OlympicWrite } from "@opencok/contracts/olympic";
 import { fenceRealmTransaction, type RealmAuthority } from "./realm-authority";
 import type { MutationTransaction } from "./mutation";
-import type { Database } from "./game";
+import type { DatabaseClient } from "@opencok/drizzle/contracts/database";
 
 export async function readOlympic(tx: MutationTransaction, owner: string): Promise<OlympicState>
 {
@@ -145,7 +145,7 @@ export async function writeOlympic(tx: MutationTransaction, owner: string, write
 }
 
 export function createOlympicScheduleStore(
-    db: Database["kingdom"]["db"],
+    db: DatabaseClient<"kingdom">,
     authority: RealmAuthority,
 )
 {
@@ -169,7 +169,7 @@ export function createOlympicScheduleStore(
     };
 }
 
-export async function pendingOlympicSettlements(db: Database["kingdom"]["db"], after?: string)
+export async function pendingOlympicSettlements(db: DatabaseClient<"kingdom">, after?: string)
 {
     return db
         .select({

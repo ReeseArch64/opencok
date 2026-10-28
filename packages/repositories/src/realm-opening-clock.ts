@@ -2,10 +2,10 @@ import { eq, sql } from "drizzle-orm";
 import { server_info } from "@opencok/drizzle/schema/opencok_kingdom/server_info";
 import { userprofile } from "@opencok/drizzle/schema/opencok_kingdom/userprofile";
 import { fenceRealmTransaction, type RealmAuthority } from "./realm-authority";
-import type { Database } from "./game";
+import type { DatabaseClient } from "@opencok/drizzle/contracts/database";
 
 export async function initializeRealmOpeningClock(
-    db: Database["kingdom"]["db"],
+    db: DatabaseClient<"kingdom">,
     authority: RealmAuthority,
     now = Date.now(),
 )

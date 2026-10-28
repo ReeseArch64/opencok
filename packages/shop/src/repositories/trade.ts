@@ -1,13 +1,13 @@
 import { eq } from "drizzle-orm";
 import { npc_trade } from "@opencok/drizzle/schema/opencok_kingdom/npc_trade";
 import type { TradeExecutor } from "@opencok/shop/contracts/trade";
-import type { Database } from "@opencok/repositories/game";
+import type { DatabaseClient } from "@opencok/drizzle/contracts/database";
 import type { RealmAuthority } from "@opencok/repositories/realm-authority";
 import { createMutationExecutor } from "@opencok/repositories/mutation";
 import { executeInventoryTransaction } from "@opencok/repositories/inventory";
 
 export function createTradeExecutor(
-    db: Database["kingdom"]["db"],
+    db: DatabaseClient<"kingdom">,
     authority: RealmAuthority,
     now = Date.now,
 ): TradeExecutor

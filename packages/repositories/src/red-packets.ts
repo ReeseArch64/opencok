@@ -1,3 +1,4 @@
+import type { DatabaseClient } from "@opencok/drizzle/contracts/database";
 import { alias } from "drizzle-orm/pg-core";
 import { appendMutationRecords } from "./mutation";
 import { fenceRealmTransaction } from "./realm-authority";
@@ -158,7 +159,7 @@ export async function writeRedPackets(
 }
 
 export function createRedPacketExpiryStore(
-    db: import("./game").Database["kingdom"]["db"],
+    db: DatabaseClient<"kingdom">,
     authority: import("./realm-authority").RealmAuthority,
 ): import("@opencok/contracts/paid-gifts").RedPacketExpiryStore
 {

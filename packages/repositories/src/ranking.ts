@@ -5,10 +5,10 @@ import { playerinfo } from "@opencok/drizzle/schema/opencok_kingdom/playerinfo";
 import { alliance } from "@opencok/drizzle/schema/opencok_kingdom/alliance";
 import { and, eq, gt, lte, ne, sql } from "drizzle-orm";
 import type { PlayerRankingQuery, PlayerRankingSnapshot } from "@opencok/contracts/ranking";
-import type { Database } from "./game.ts";
+import type { DatabaseClient } from "@opencok/drizzle/contracts/database";
 
 export function readPlayerRanking(
-    db: Database["kingdom"]["db"],
+    db: DatabaseClient<"kingdom">,
     uid: string,
     query: PlayerRankingQuery,
 ): Promise<PlayerRankingSnapshot>

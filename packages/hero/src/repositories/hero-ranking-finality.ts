@@ -8,12 +8,12 @@ import { heroEmptyDigest } from "@opencok/hero/rules/hero-ranking-finality";
 import { long, num, text } from "@opencok/contracts/rows";
 import type { HeroRankFinalityRealm } from "@opencok/hero/contracts/hero-ranking-finality";
 import { fenceRealmTransaction, type RealmAuthority } from "@opencok/repositories/realm-authority";
-import type { Database } from "@opencok/repositories/game";
+import type { DatabaseClient } from "@opencok/drizzle/contracts/database";
 
 export { createHeroRankFinalityRegistry } from "./hero-ranking-finality-global.ts";
 
 export function createHeroRankFinalityRealm(
-    db: Database["kingdom"]["db"],
+    db: DatabaseClient<"kingdom">,
     authority: RealmAuthority,
 ): HeroRankFinalityRealm
 {

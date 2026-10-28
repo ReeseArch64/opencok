@@ -5,10 +5,10 @@ import { avatar_version_update } from "@opencok/drizzle/schema/opencok_kingdom/a
 import { avatarModerationPlan } from "@opencok/rules/avatar-moderation";
 import { avatarVersionProfile } from "@opencok/rules/avatar-version";
 import { nextAvatarRevision } from "./avatar-publication.ts";
-import type { Database } from "./game.ts";
+import type { DatabaseClient } from "@opencok/drizzle/contracts/database";
 
 export async function moderateAvatar(
-    db: Database["kingdom"]["db"],
+    db: DatabaseClient<"kingdom">,
     kingdomId: number,
     request: {
         owner: string;

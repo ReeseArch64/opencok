@@ -10,10 +10,10 @@ import { account_new } from "@opencok/drizzle/schema/opencok_global/account_new"
 import { user_mine } from "@opencok/drizzle/schema/opencok_kingdom/user_mine";
 import type { ChatRepository } from "@opencok/contracts/chat";
 import { ChatCommandError } from "@opencok/errors/chat";
-import type { Database } from "./game.ts";
+import type { DatabaseConnections } from "@opencok/drizzle/contracts/database";
 
 export function createChatMineCommands(
-    databases: Database["databases"],
+    databases: DatabaseConnections,
     repository: ChatRepository,
     clock: () => Date,
 )

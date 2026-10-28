@@ -18,9 +18,9 @@ import { cityAmount, cityInteger } from "@opencok/rules/city-progression";
 import { text, type Row } from "@opencok/contracts/rows";
 import { appendMutationRecords, type MutationTransaction } from "./mutation";
 import { fenceRealmTransaction, type RealmAuthority } from "./realm-authority";
-import type { Database } from "./game";
+import type { DatabaseClient } from "@opencok/drizzle/contracts/database";
 
-type Realm = Database["kingdom"]["db"];
+type Realm = DatabaseClient<"kingdom">;
 
 const prefix = "gold.eggs.period.v1.",
     ownerKey = "gold.eggs.owner.v1";

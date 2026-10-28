@@ -1,11 +1,11 @@
 import { mail_gift_log } from "@opencok/drizzle/schema/opencok_global/mail_gift_log";
 import { mail_gift_opening } from "@opencok/drizzle/schema/opencok_kingdom/mail_gift_opening";
 import { and, asc, eq, or } from "drizzle-orm";
-import type { Database } from "./game.ts";
+import type { DatabaseClient } from "@opencok/drizzle/contracts/database";
 
 export function relayMailGiftOpenings(
-    kingdom: Database["kingdom"]["db"],
-    global: Database["databases"]["global"]["db"],
+    kingdom: DatabaseClient<"kingdom">,
+    global: DatabaseClient<"global">,
     limit = 100,
 ): Promise<number>
 {

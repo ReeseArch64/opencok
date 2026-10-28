@@ -2,10 +2,10 @@ import type { AvatarSystemMail } from "@opencok/contracts/files";
 import { mail } from "@opencok/drizzle/schema/opencok_kingdom/mail";
 import { mail_contents } from "@opencok/drizzle/schema/opencok_kingdom/mail_contents";
 import { mail_group } from "@opencok/drizzle/schema/opencok_kingdom/mail_group";
-import type { Database } from "./game.ts";
+import type { DatabaseClient } from "@opencok/drizzle/contracts/database";
 
 export async function insertSystemMail(
-    tx: Pick<Database["kingdom"]["db"], "insert">,
+    tx: Pick<DatabaseClient<"kingdom">, "insert">,
     input: AvatarSystemMail,
     owner: string,
     stem: string,

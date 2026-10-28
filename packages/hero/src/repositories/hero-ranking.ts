@@ -15,10 +15,10 @@ import { user_building } from "@opencok/drizzle/schema/opencok_kingdom/user_buil
 import { alliance_member } from "@opencok/drizzle/schema/opencok_kingdom/alliance_member";
 import { alliance as globalAlliance } from "@opencok/drizzle/schema/opencok_global/alliance";
 import { server_king_info } from "@opencok/drizzle/schema/opencok_global/server_king_info";
-import type { Database } from "@opencok/repositories/game";
+import type { DatabaseClient } from "@opencok/drizzle/contracts/database";
 
 export async function readHeroRanking(
-    db: Database["kingdom"]["db"],
+    db: DatabaseClient<"kingdom">,
     uid: string,
     activityId: string,
     now: number,
@@ -111,7 +111,7 @@ export async function readHeroRanking(
 }
 
 export async function readHeroInsideRanking(
-    db: Database["kingdom"]["db"],
+    db: DatabaseClient<"kingdom">,
     uid: string,
     eventId: string,
     now: number,
@@ -214,7 +214,7 @@ export async function readHeroInsideRanking(
 }
 
 export async function readHeroHistory(
-    db: Database["kingdom"]["db"],
+    db: DatabaseClient<"kingdom">,
     uid: string,
     type: number,
     now: number,
@@ -333,7 +333,7 @@ export async function readHeroHistory(
 }
 
 export async function readHeroHistoryPresentation(
-    db: Database["databases"]["global"]["db"],
+    db: DatabaseClient<"global">,
     alliances: readonly string[],
     realms: readonly number[],
 )

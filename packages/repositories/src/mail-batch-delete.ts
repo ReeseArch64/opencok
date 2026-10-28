@@ -16,9 +16,9 @@ import type {
 } from "@opencok/contracts/mail";
 import { mailCategoryDeleteQuery } from "@opencok/rules/mail-batch-delete";
 import { and, eq, gt, gte, inArray, isNull, lt, lte, ne, or, sql, type SQL } from "drizzle-orm";
-import type { Database } from "./game.ts";
+import type { DatabaseClient } from "@opencok/drizzle/contracts/database";
 
-type RealmDatabase = Database["kingdom"]["db"];
+type RealmDatabase = DatabaseClient<"kingdom">;
 
 type Transaction = Parameters<Parameters<RealmDatabase["transaction"]>[0]>[0];
 

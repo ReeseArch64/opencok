@@ -12,12 +12,12 @@ import { captureCostFact } from "./continued-cost-facts";
 import { cityInteger } from "@opencok/rules/city-progression";
 import type { CostRankingFacts } from "@opencok/contracts/continued-cost-ranking";
 import { fenceRealmTransaction, type RealmAuthority } from "./realm-authority";
-import type { Database } from "./game";
+import type { DatabaseClient } from "@opencok/drizzle/contracts/database";
 
 export { createCostRankingRegistry } from "./continued-cost-ranking-global";
 
 export function createCostRankingFacts(
-    db: Database["kingdom"]["db"],
+    db: DatabaseClient<"kingdom">,
     authority: RealmAuthority,
 ): CostRankingFacts
 {

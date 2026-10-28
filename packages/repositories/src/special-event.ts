@@ -5,10 +5,10 @@ import { exchange_time } from "@opencok/drizzle/schema/opencok_kingdom/exchange_
 import { cityInteger, cityAmount } from "@opencok/rules/city-progression";
 import { text } from "@opencok/contracts/rows";
 import type { SpecialEventStock, SpecialEventReservation } from "@opencok/contracts/special-event";
-import type { Database } from "./game";
+import type { DatabaseClient, DatabaseConnections } from "@opencok/drizzle/contracts/database";
 import type { MutationTransaction } from "./mutation";
 
-type Global = Database["databases"]["global"]["db"];
+type Global = DatabaseClient<"global">;
 
 function identity(value: string, limit: number)
 {
@@ -342,7 +342,7 @@ export async function writeSpecialEventPurchase(
 }
 
 export function createSpecialEventBuyer(
-    databases: Pick<Database["databases"], "getKingdom">,
+    databases: Pick<DatabaseConnections, "getKingdom">,
 ): import("@opencok/contracts/special-event").SpecialEventBuyer
 {
     return {

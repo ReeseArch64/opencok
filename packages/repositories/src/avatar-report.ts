@@ -5,10 +5,10 @@ import { DependencyError } from "@opencok/errors/dependency";
 import { mailBlank } from "@opencok/rules/mail";
 import { mysqlUtf8UnicodeCandidates, mysqlUtf8UnicodeKey } from "@opencok/rules/mysql-unicode";
 import { eq, sql } from "drizzle-orm";
-import type { Database } from "./game.ts";
+import type { DatabaseClient } from "@opencok/drizzle/contracts/database";
 
 export async function reportAvatar(
-    db: Database["kingdom"]["db"],
+    db: DatabaseClient<"kingdom">,
     kingdomId: number,
     owner: string,
     target: string,

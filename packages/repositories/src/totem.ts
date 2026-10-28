@@ -17,7 +17,7 @@ import { insertSystemMail } from "./system-mail";
 import { writePlayerEffects } from "./player-effects";
 import type { ProgressionBoundary } from "./city-progression";
 import type { MutationTransaction } from "./mutation";
-import type { Database } from "./game";
+import type { DatabaseClient } from "@opencok/drizzle/contracts/database";
 
 export async function readTotems(tx: MutationTransaction, owner: string)
 {
@@ -369,7 +369,7 @@ export function createTotemEffectStore(
     };
 }
 
-export async function pendingTotemOwners(db: Database["kingdom"]["db"], now: bigint)
+export async function pendingTotemOwners(db: DatabaseClient<"kingdom">, now: bigint)
 {
     const due = await db
         .select({ owner: totem_activation.ownerUid })

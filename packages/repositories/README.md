@@ -68,3 +68,18 @@ ports. The Chat PostgreSQL integration suite verifies concurrent idempotent
 creates, hashed session lookups, realm routing, expiration and restart behavior;
 the realm integration suite verifies login/city/map reads and saved-state retention
 across both kingdoms using disposable dependencies.
+
+## Database type dependencies
+
+Adapters use type-only aliases from `@opencok/drizzle/contracts/database` instead
+of importing the broad `Database` class for its kingdom/global fields. The aliases
+are derived from the same constructors and preserve schema and transaction types.
+Repository implementation modules, including domain-owned repository directories,
+must not import the broad facade directly or transitively. App composition and
+explicit test fixtures can still use it. This boundary is checked by the
+[architecture suite](../../tests/architecture/README.md).
+
+#605 removes this coupling from 112 horizontal adapters, nine Hero adapters and
+two shop adapters. Query code, SQL, locking, transactions and runtime exports are
+unchanged. Remaining domain ownership and genuine dependency cycles are tracked
+under #558; this type-only change does not complete those migrations.

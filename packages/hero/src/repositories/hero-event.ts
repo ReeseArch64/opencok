@@ -10,10 +10,10 @@ import { user_building } from "@opencok/drizzle/schema/opencok_kingdom/user_buil
 import { alliance_member } from "@opencok/drizzle/schema/opencok_kingdom/alliance_member";
 import { playerinfo } from "@opencok/drizzle/schema/opencok_kingdom/playerinfo";
 import type { HeroEventSelection, HeroEventSnapshot } from "@opencok/hero/contracts/hero-event";
-import type { Database } from "@opencok/repositories/game";
+import type { DatabaseClient } from "@opencok/drizzle/contracts/database";
 
 export async function readHeroEvents(
-    db: Database["kingdom"]["db"],
+    db: DatabaseClient<"kingdom">,
     owner: string,
     selection: HeroEventSelection,
     now: number,

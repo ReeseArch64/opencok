@@ -1,10 +1,10 @@
 import { server_info } from "@opencok/drizzle/schema/opencok_global/server_info";
 import { DependencyError } from "@opencok/errors/dependency";
 import { DrizzleQueryError, eq } from "drizzle-orm";
-import type { Database } from "./game.ts";
+import type { DatabaseClient } from "@opencok/drizzle/contracts/database";
 
 export async function readNormalRankingRealm(
-    db: Database["databases"]["global"]["db"],
+    db: DatabaseClient<"global">,
     kingdomId: number,
 ): Promise<boolean>
 {
@@ -59,7 +59,7 @@ export async function readNormalRankingRealm(
 }
 
 export async function readCrossRankingRealm(
-    db: Database["databases"]["global"]["db"],
+    db: DatabaseClient<"global">,
     kingdomId: number,
 ): Promise<boolean>
 {
