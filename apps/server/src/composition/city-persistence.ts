@@ -223,21 +223,30 @@ export function createRealmCityProgressionStore(
     boundary: CityProductionBoundary,
     mapSize = 1200,
     authority?: RealmAuthority,
+    projectInitialization = true,
 ): CityProgressionStore
 {
-    return new CityProgressionRepository(tx, owner, now, boundary, {
-        readers,
-        writers,
-        research: new ResearchRepository(tx, owner),
-        troops: new TroopsRepository(tx, owner),
-        buildings: new BuildingRepository(tx, owner),
-        equipment: new EquipmentRepository(tx, owner, { text, num, long }),
-        quests: createRealmQuestRepository(tx, owner),
-        targetTasks: createRealmTargetTaskRepository(tx, owner),
-        cosmetics: createRealmCosmeticRepository(tx, owner),
-        recallTasks: createRealmRecallTaskRepository(tx, owner),
-        birth: authority
-            ? (rules, mode) => allocateWorldBirth(tx, authority, mapSize, rules, now, mode)
-            : undefined,
-    }, mapSize);
+    return new CityProgressionRepository(
+        tx,
+        owner,
+        now,
+        boundary,
+        {
+            readers,
+            writers,
+            research: new ResearchRepository(tx, owner),
+            troops: new TroopsRepository(tx, owner),
+            buildings: new BuildingRepository(tx, owner),
+            equipment: new EquipmentRepository(tx, owner, { text, num, long }),
+            quests: createRealmQuestRepository(tx, owner),
+            targetTasks: createRealmTargetTaskRepository(tx, owner),
+            cosmetics: createRealmCosmeticRepository(tx, owner),
+            recallTasks: createRealmRecallTaskRepository(tx, owner),
+            birth: authority
+                ? (rules, mode) => allocateWorldBirth(tx, authority, mapSize, rules, now, mode)
+                : undefined,
+        },
+        mapSize,
+        projectInitialization,
+    );
 }

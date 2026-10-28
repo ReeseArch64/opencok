@@ -45,6 +45,12 @@ export function activityEconomy(ledger: ActivityLedger): ActivityEconomy
         {
             ledger.pushes.push({ command, body: decode(Buffer.from(body)) });
         },
+        hasPendingItemGrants()
+        {
+            return ledger.postings.slice(ledger.campaignPostingCursor).some((posting) =>
+                posting.asset.startsWith("item.") && posting.after > posting.before
+            );
+        },
         takeItemGrants()
         {
             const grants = new Map<string, number>();

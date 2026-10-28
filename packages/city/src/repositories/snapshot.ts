@@ -11,17 +11,29 @@ import { user_glory_info } from "@opencok/drizzle/schema/opencok_kingdom/user_gl
 import type { CityProgressionStore } from "@opencok/contracts/city-progression";
 import { num } from "@opencok/contracts/rows";
 import type { CityPersistenceSession } from "../contracts/persistence-session";
+import { CityInitializationReader } from "./initialization";
 
 export class CitySnapshotReader
 {
-    public constructor(private readonly session: CityPersistenceSession)
+    public constructor(
+        private readonly session: CityPersistenceSession,
+        private readonly projectInitialization = true,
+    )
     {}
 
     public readonly getState: CityProgressionStore["getState"] = async (
         command,
         ranking,
         request,
+        full = false,
     ) => {
+        const initialization = new CityInitializationReader(this.session);
+
+        if (!full && this.projectInitialization && initialization.supports(command))
+        {
+            return initialization.getState(command!);
+        }
+
         const session = this.session;
         const { tx, owner, now, mapSize, readers } = session;
         const [profile] = await tx.select().from(userprofile).where(eq(userprofile.uid, owner));

@@ -160,7 +160,11 @@ test("campaign item observations advance once and count only positive grants", (
     ledger.post("item.a", 0n, 2n, "reward");
     ledger.post("item.b", 0n, 3n, "reward");
     ledger.post("item.a", 2n, 1n, "cost");
+    expect(economy.hasPendingItemGrants!()).toBe(true);
+    expect(economy.hasPendingItemGrants!()).toBe(true);
+    expect(ledger.campaignPostingCursor).toBe(0);
     expect(economy.takeItemGrants!()).toEqual([{ itemId: "100", count: 5 }]);
+    expect(economy.hasPendingItemGrants!()).toBe(false);
     expect(ledger.campaignPostingCursor).toBe(4);
     expect(economy.takeItemGrants!()).toEqual([]);
     ledger.post("item.missing", 0n, 1n, "reward");

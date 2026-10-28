@@ -2,6 +2,7 @@ import type { PoolClient } from "pg";
 import { observeDependencyOperation } from "@opencok/core/operation";
 import { errorReason, logEvent } from "@opencok/core/logging";
 import { afterCommit } from "@opencok/core/transaction";
+import { postgresFailureKind } from "./query-failure";
 
 const commands = new Set([
     "SELECT",
@@ -81,6 +82,7 @@ export function observePostgresClient(
                                 table,
                                 databaseRole: role,
                                 reason: errorReason(error),
+                                failureKind: postgresFailureKind(error),
                                 sqlState: typeof code === "string" && /^[0-9A-Z]{5}$/.test(code)
                                     ? code
                                     : undefined,

@@ -202,6 +202,7 @@ export interface CityProgressionStore
         command?: string,
         ranking?: GeneralRankingWeights,
         request?: Uint8Array,
+        full?: boolean,
     ): Promise<CityProgressionState>;
     update(write: CityProgressionWrite, economy: ActivityEconomy): Promise<void>;
 }

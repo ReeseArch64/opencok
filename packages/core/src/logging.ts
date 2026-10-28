@@ -218,6 +218,11 @@ function classifiedErrorReason(error: unknown): string
         return "operation_cancelled";
     }
 
+    if (error.name === "ApplicationDeadlineError")
+    {
+        return "application_deadline";
+    }
+
     if (error.name === "TimeoutError")
     {
         return "dependency_timeout";

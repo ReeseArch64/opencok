@@ -42,10 +42,12 @@ export class CityProgressionContextFactory<T>
                     }
                     : undefined,
                 request,
+                economy.hasPendingItemGrants?.() !== false,
             );
-        const world = await effects.world(),
-            emperor = await effects.emperor();
-        const abilities = generalSkillPoints(state.effects.generals),
+        const hasEffects = Object.hasOwn(state, "effects");
+        const world = hasEffects ? await effects.world() : new Map<number, number>(),
+            emperor = hasEffects ? await effects.emperor() : undefined;
+        const abilities = generalSkillPoints(hasEffects ? state.effects.generals : []),
             cache = new Map<number, number>();
         const resolve = (id: number) => {
             let value = cache.get(id);
