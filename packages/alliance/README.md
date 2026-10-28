@@ -661,3 +661,56 @@ complete realm artifact and workspace lockfile. No schema/save conversion,
 environment or client packaging change is required. Preserve operation receipts,
 mail/gift/recovery identities, player progress and outbox. Native-device,
 production-load and process-separation acceptance remain separate.
+
+## Aggregate persistence and participant locking
+
+After #683, `repositories/participants`, `repositories/gameplay`,
+`repositories/writes` and `repositories/commit` own discovery, locked state reads,
+ordered domain writes and commit coordination. The realm composes the existing
+mutation executor, concrete inventory transaction, production boundary, activity
+domains, clock and optional quest-action recorder. Generic state/runtime contracts
+keep the concrete inventory binding in the application. The obsolete shared
+`Repositories/alliance-gameplay` and `Contracts/alliance-gameplay` modules are
+removed after their realm and integration consumers migrate.
+
+Discovery still combines profiles, the selected alliance, owned mail and saved
+applications. It retains imported applicant fallback, the 2,049-member discovery
+bound and sorted unique participant sets. Inside the same mutation transaction,
+profile membership and locked members are revalidated before inventory execution.
+Alliance locks precede member locks, with the same ascending identifiers. All
+aggregate state reads retain their original position and selection.
+
+Help rescheduling merges only deadline and version into the saved activity and
+rejects unsupported activities or unexpected economic changes. Aggregate writes
+retain their order, participant/alliance checks, membership cleanup, mail updates
+and deletion cleanup. Quest actions follow writes and reject foreign participants.
+Production owners remain deduplicated and sorted, with nested settlement around
+the commit and the original deadline fallback. Existing fences, receipts,
+inventory postings and outbox ownership remain unchanged.
+
+| Former source                                              | Owned destination                                        | Composition and retirement                                                |
+| ---------------------------------------------------------- | -------------------------------------------------------- | ------------------------------------------------------------------------- |
+| Repository participant discovery and locked state assembly | `repositories/participants`, `repositories/gameplay`     | Realm injects mutation/inventory executors; shared implementation removed |
+| Aggregate domain writes and commit coordination            | `repositories/writes`, `repositories/commit`             | Actual activity/production/action adapters retain execution order         |
+| Shared concrete inventory-state binding                    | `contracts/gameplay-state`, `contracts/gameplay-runtime` | Realm specializes with existing InventoryState; shared facade removed     |
+
+Base's existing activity contract and Enums' existing reschedule value are direct
+workspace dependencies; only their two lockfile entries are added. No package or
+third-party version is introduced. The domain has 90 source modules and 11 test
+modules; this slice splits responsibilities without changing gameplay.
+
+Seven persistence tests add 59 assertions covering discovery, transaction retry
+checks, lock ordering, production nesting, action ownership, help activity
+preservation and deletion cleanup. The owned suite has 76 tests/722 assertions;
+package tests have 469 tests/558,109 assertions. Six structural/wiring comparisons
+verify discovery, complete transaction reads, aggregate writes, commit ordering,
+factory defaults and actual realm collaborators against the parent implementation.
+Four disposable PostgreSQL suites retain 28 tests/284 assertions; server tests
+retain 1,501 tests/245,699 assertions. Affected workspace types, architecture
+checks, frozen install, lint, formatting and realm build pass.
+
+Deploy or roll back the complete realm artifact and lockfile. No schema, save,
+environment or client resource conversion is required. Preserve memberships,
+production checkpoints, inventories, receipts and outbox. Remaining policy bindings,
+semantic catalogs and effect ownership stay tracked under #558 W08/W14/W20.
+Native-device, production-load and process-authority acceptance remain separate.

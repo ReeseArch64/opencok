@@ -189,6 +189,22 @@ Client operation identities are UUIDs, keeping them separate from internal worke
 receipt keys. Recovery keys include the saved research payload and duration so a
 clock rollback cannot alias a later research generation.
 
+## Aggregate persistence ownership
+
+After #683, Alliance owns participant discovery, locked aggregate reads, ordered
+writes and commit coordination. Application composition supplies the existing
+mutation executor, inventory transaction, production boundary, activity domains,
+clock and quest recorder through bounded ports. The shared Alliance repository
+and concrete inventory-state facade are retired; the application binds the owned
+generic state to its existing inventory state.
+
+Discovery retains profile/mail/application fallback and sorted participant sets.
+The mutation revalidates current membership before inventory planning and preserves
+alliance/member lock and state-read order. Help rescheduling, aggregate writes,
+quest actions and nested production settlement retain their original positions.
+This moves source ownership without changing realm authority, fences, receipts,
+outbox, saved keys or native wire contracts.
+
 ## Shared rewards and notifications
 
 After #665, Alliance owns the gift Service, weighted-choice preparation, native
