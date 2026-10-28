@@ -1,8 +1,17 @@
 {
   "name": "@opencok/queues",
   "private": true,
+  "type": "module",
+  "exports": {
+    "./*": "./src/*.ts"
+  },
   "scripts": {
     "check-types": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@opencok/core": "workspace:*",
+    "@opencok/drizzle": "workspace:*",
+    "drizzle-orm": "0.45.4"
   },
   "devDependencies": {
     "@opencok/config": "workspace:*",

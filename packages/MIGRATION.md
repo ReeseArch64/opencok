@@ -58,7 +58,7 @@ Counts describe maintained TypeScript/JavaScript source under `src` and named te
 | `policy`         |                  7 / 4 | Content matching, reserved-name rules, bounded file/worker adapters and the maintained word dictionary.                                                                                                        | Implemented in #589; five compatibility paths retired in #590. Player nickname mutations remain separate.                                                                                                                                                                                     | Confirmed in #567/#568   |
 | `production`     |                  9 / 2 | Building production accounts, accumulation, collection/boosts, rate schedules and atomic city settlement.                                                                                                      | New owned domain in #633 under W07; current realm authority and shared economic transactions remain. Catalog authoring and broader city/building ownership remain tracked separately.                                                                                                         | Implemented in #633      |
 | `prompts`        |                  0 / 0 | No current use. Remove the unused workspace.                                                                                                                                                                   | Retired in #568                                                                                                                                                                                                                                                                               | Confirmed in #567/#568   |
-| `queues`         |                  0 / 0 | Persistent timed-activity lifecycle, dispatch contracts and shared queue invariants.                                                                                                                           | Populate current timed-activity mechanism; keep economic completion inside owned transactions. Transport queues and broker clients are distinct infrastructure responsibilities.                                                                                                              | Proposed; pending review |
+| `queues`         |                 16 / 1 | Persisted timed-activity discovery, versioned dispatch and shared lifecycle invariants.                                                                                                                        | #699 implements the complete twelve-type discovery group and legacy restoration, composed by the real Scheduler. Gameplay completion remains in the realm transaction; other deadline families remain W16 work.                                                                               | Implemented group #699   |
 | `ranking`        |                  0 / 0 | Common ranking contracts, exact arithmetic, tie-breaking, publication/finality primitives and bounded ranking use cases.                                                                                       | Populate existing code; move large event-specific families to their event packages. A projection may be asynchronous; prize funding remains authoritative.                                                                                                                                    | Proposed; pending review |
 | `repositories`   |                160 / 0 | Current global persistence implementations.                                                                                                                                                                    | Redistribute by domain and approved write ownership; retain schema/pool plumbing in `drizzle`. Remove compatibility exports only after callers migrate.                                                                                                                                       | Proposed; pending review |
 | `resources`      |               1373 / 9 | Current gameplay definitions, generated catalog records, provenance and import tools.                                                                                                                          | Distribute definitions/tables to domain owners and tooling to `catalog-tools`. Keep a bounded temporary compatibility facade. Do not rename all of it to one giant `game-data` package.                                                                                                       | Proposed; pending review |
@@ -1070,3 +1070,44 @@ mailbox/reward ownership, other workers, scheduler duties, player/world authorit
 shared runtime/data boundaries and the rest of #558 remain incomplete. Operator-owned access bindings are additive provisioning
 metadata; no gameplay schema, reward grant, saved identity or client payload
 conversion is introduced.
+
+## Timed-activity discovery and Scheduler (W16)
+
+Tracked by [#699](https://github.com/ReeseArch64/opencok/issues/699) under #558.
+The existing Queues workspace now owns persisted discovery, bounded scan
+coordination, strict snapshot contracts and signed request/response transport.
+The real `apps/scheduler` composes restricted PostgreSQL access and an owner
+endpoint; it receives no gameplay write role, Rules catalog, Redis connection or
+RealmAuthority token. Its operator-owned access binding is additive metadata.
+Kingdom migration `0045_timed_activity_discovery.sql` additionally creates the
+`(status, dueAt, id)` discovery index without changing saved rows or dropping the
+existing due index; build-time write blocking and index maintenance cost require
+operator planning before cutover.
+
+This process group includes construction, all five training types, fortifications,
+hospital healing, ordinary/civilization research, crafting and workshop production,
+plus their supported legacy queue restoration. The owner advertises its actual
+capabilities. Unsupported types remain persisted and untouched. Finite scan
+horizons, periodic head retries and a shared per-owner admission budget bound each
+pass without changing same-owner chronological completion order.
+
+The realm validates the exact saved generation, version, deadline or restoration
+fingerprint under its current transaction fence. Strict recovery uses actual due
+time while native client completion keeps its timing grace. Earlier supported
+activity remains a barrier. Existing economic operation keys and inner SFS receipt
+bytes survive local/external overlap and uncertain HTTP acknowledgment. State,
+ledger, receipt and outbox stay in the same owner transaction.
+
+Local discovery remains the default. External mode suppresses only the global
+activity loop; owner-specific foreground/reconnect recovery remains local. The
+existing Server `ActivityRecoveryJob` still owns that caller-specific orchestration
+and its stop-queue behavior. Generic timed-activity execution and current domain
+adapters remain in their existing shared Services/repositories pending the wider
+W20 ownership migration; this slice does not claim their complete retirement.
+
+The [Scheduler guide](../apps/scheduler/README.md) records the permission boundary,
+cutover, operational bounds and remaining deadline families. Alliance research,
+marches/gathering, world expiry, temporary effects, event phases and awards still
+require explicit owner protocols. W16, W17/W18 and #558 remain incomplete. This
+process extraction alone establishes neither a performance improvement nor a new
+player/world writer.

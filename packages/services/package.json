@@ -36,6 +36,7 @@
     "@opencok/skins": "workspace:*",
     "@opencok/alliance": "workspace:*",
     "@opencok/share": "workspace:*",
-    "@opencok/world": "workspace:*"
+    "@opencok/world": "workspace:*",
+    "@opencok/queues": "workspace:*"
   }
 }

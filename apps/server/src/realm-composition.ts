@@ -1,3 +1,8 @@
+import {
+    createRealmActivityDeadlineDispatcher,
+    validateRealmActivitySchedulerConfig,
+} from "./composition/activity-deadlines";
+import { ActivityDeadlineController } from "@opencok/queues/controllers/deadline";
 import { createRealmCityProgressionHandlers } from "./composition/city";
 import {
     createRealmProductionService,
@@ -2453,6 +2458,27 @@ export const RealmDependenciesLive = Layer.effect(
             ),
             "realm.ProductionService",
         );
+        validateRealmActivitySchedulerConfig(config);
+        const activityDispatcher = createRealmActivityDeadlineDispatcher(
+            activities,
+            activityDomains,
+            () => authority.assertReady(),
+            () => db.kingdom.db.transaction((tx) => fenceRealmTransaction(tx, authority)),
+        );
+        const activityDeadlineController = config.activitySchedulerSecret
+            ? yield* acquireResource(
+                "realm.activity-deadline-controller",
+                async () =>
+                    new ActivityDeadlineController({
+                        kingdomId: config.kingdomId,
+                        signingSecret: config.activitySchedulerSecret!,
+                        dispatcher: activityDispatcher,
+                        ready: () => coordination.ready,
+                        timeoutMs: config.timeoutMs,
+                    }),
+                (controller) => controller.close(),
+            )
+            : undefined;
         const activityRecovery = new ActivityRecoveryJob(
             () => authority.assertReady(),
             () => [...activityDomains.keys()],
@@ -2460,8 +2486,8 @@ export const RealmDependenciesLive = Layer.effect(
                 unregisteredActivities(db.kingdom.db, types, limit, owner, after),
             (types, now, limit, owner, after) =>
                 dueActivities(db.kingdom.db, types, now, limit, owner, after),
-            (owner, operationId, queueId) => activities.restore(owner, operationId, queueId),
-            (owner, command, params) => activities.command(owner, command, params),
+            (_owner, _operationId, _queueId, snapshot) => activityDispatcher.restore(snapshot),
+            (_owner, _command, _params, snapshot) => activityDispatcher.finish(snapshot),
             (event) => logEvent(event, { kingdom: config.kingdomId, outcome: "failure" }, "error"),
         );
         const recoverActivities = (owner?: string, stopQueue?: string) =>
@@ -2817,15 +2843,18 @@ export const RealmDependenciesLive = Layer.effect(
             Effect.forever,
             Effect.forkScoped,
         );
-        yield* Effect.tryPromise({
-            try: () => observeJob("realm.activity_recovery", () => recoverActivities()),
-            catch: () => new Error("Activity recovery unavailable"),
-        }).pipe(
-            Effect.catch(() => Effect.void),
-            Effect.andThen(Effect.sleep(1000)),
-            Effect.forever,
-            Effect.forkScoped,
-        );
+        if (config.activitySchedulerMode !== "external")
+        {
+            yield* Effect.tryPromise({
+                try: () => observeJob("realm.activity_recovery", () => recoverActivities()),
+                catch: () => new Error("Activity recovery unavailable"),
+            }).pipe(
+                Effect.catch(() => Effect.void),
+                Effect.andThen(Effect.sleep(1000)),
+                Effect.forever,
+                Effect.forkScoped,
+            );
+        }
         const trade = observeAdapter(
             new TradeService(
                 observeAdapter(
@@ -3245,6 +3274,7 @@ export const RealmDependenciesLive = Layer.effect(
 
         return {
             paidGifts: { consume: paymentObservers.consume },
+            activityDeadlines: activityDeadlineController?.handle,
             provisioning: config.provisioningSecret
                 ? characterProvisioningHandler(
                     observeAdapter(

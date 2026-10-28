@@ -446,6 +446,18 @@ idempotent completion. Offline progress uses bounded catch-up rather than a time
 per player or an unbounded replay. Independent calculations cannot bypass owner
 ordering or economic invariants. [Simulation policy](../docs/architecture/persistence.md#16-simulation-execution-and-offline-progress).
 
+The implemented timed-activity Scheduler reads only scheduling metadata and
+requests transitions from the current realm owner. It covers all twelve registered
+city activity types and supported legacy restoration. Owner capability discovery,
+finite scan horizons, periodic head retries and per-owner admission bound discovery;
+locked owner validation preserves actual due time and earlier-activity ordering.
+Native client timing grace and existing economic operation/receipt identities stay
+compatible. Foreground/reconnect recovery remains local when external mode disables
+the global loop. Readiness and backlog are separate operational facts. The
+[Scheduler guide](../apps/scheduler/README.md) defines restricted role provisioning,
+signed realm transport, cutover and the remaining W16 deadline register. This
+process owns discovery, not gameplay writes or a RealmAuthority epoch.
+
 ## 17. Data model and write ownership
 
 The realm owns game/economy/combat state; API owns identity, payment and media

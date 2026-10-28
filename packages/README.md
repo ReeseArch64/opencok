@@ -149,3 +149,10 @@ collaborators come from realm composition. The existing sequential population jo
 writer, lock ordering and outbox remain unchanged. Bounded PostgreSQL and
 calculation benchmarks provide partial W02 evidence without establishing a new
 worker backend or completing W10.
+
+The [Queues package](queues/README.md) owns persisted timed-activity discovery,
+versioned dispatch contracts and their transport after #699. The real
+[Scheduler application](../apps/scheduler/README.md) discovers all twelve currently
+registered activity types and restores supported legacy queues with a restricted
+read-only role. Completion and economic effects remain in the realm transaction;
+other deadline families are explicitly pending under W16.

@@ -28,6 +28,7 @@
     "@opencok/mappings": "workspace:*",
     "@opencok/account": "workspace:*",
     "@opencok/player": "workspace:*",
-    "@opencok/world": "workspace:*"
+    "@opencok/world": "workspace:*",
+    "@opencok/queues": "workspace:*"
   }
 }

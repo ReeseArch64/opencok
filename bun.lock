@@ -76,6 +76,31 @@
         "ws": "8.22.0",
       },
     },
+    "apps/scheduler": {
+      "name": "@opencok/scheduler",
+      "dependencies": {
+        "@opencok/core": "workspace:*",
+        "@opencok/drizzle": "workspace:*",
+        "@opencok/env": "workspace:*",
+        "@opencok/queues": "workspace:*",
+        "effect": "catalog:",
+        "pg": "8.23.1",
+      },
+      "devDependencies": {
+        "@opencok/config": "workspace:*",
+        "@opencok/connection": "workspace:*",
+        "@opencok/messages": "workspace:*",
+        "@opencok/repositories": "workspace:*",
+        "@opencok/research": "workspace:*",
+        "@opencok/rules": "workspace:*",
+        "@opencok/server": "workspace:*",
+        "@opencok/services": "workspace:*",
+        "@types/bun": "catalog:",
+        "@types/pg": "8.23.1",
+        "drizzle-orm": "0.45.4",
+        "typescript": "catalog:",
+      },
+    },
     "apps/server": {
       "name": "@opencok/server",
       "dependencies": {
@@ -98,6 +123,7 @@
         "@opencok/player": "workspace:*",
         "@opencok/policy": "workspace:*",
         "@opencok/production": "workspace:*",
+        "@opencok/queues": "workspace:*",
         "@opencok/ranking": "workspace:*",
         "@opencok/repositories": "workspace:*",
         "@opencok/research": "workspace:*",
@@ -356,6 +382,7 @@
         "@opencok/mappings": "workspace:*",
         "@opencok/messages": "workspace:*",
         "@opencok/player": "workspace:*",
+        "@opencok/queues": "workspace:*",
         "@opencok/validations": "workspace:*",
         "@opencok/world": "workspace:*",
         "effect": "catalog:",
@@ -817,6 +844,11 @@
     },
     "packages/queues": {
       "name": "@opencok/queues",
+      "dependencies": {
+        "@opencok/core": "workspace:*",
+        "@opencok/drizzle": "workspace:*",
+        "drizzle-orm": "0.45.4",
+      },
       "devDependencies": {
         "@opencok/config": "workspace:*",
         "@types/bun": "catalog:",
@@ -946,6 +978,7 @@
         "@opencok/mappings": "workspace:*",
         "@opencok/messages": "workspace:*",
         "@opencok/policy": "workspace:*",
+        "@opencok/queues": "workspace:*",
         "@opencok/rules": "workspace:*",
         "@opencok/share": "workspace:*",
         "@opencok/skins": "workspace:*",
@@ -1537,6 +1570,8 @@
     "@opencok/resources": ["@opencok/resources@workspace:packages/resources"],
 
     "@opencok/rules": ["@opencok/rules@workspace:packages/rules"],
+
+    "@opencok/scheduler": ["@opencok/scheduler@workspace:apps/scheduler"],
 
     "@opencok/server": ["@opencok/server@workspace:apps/server"],
 

@@ -1,5 +1,8 @@
-import { createHash } from "node:crypto";
-import { observeAdapter } from "@opencok/core/operation";
+import { ActivityOperationMapper } from "@opencok/queues/mappings/operation-id";
+import type {
+    DueActivitySnapshot,
+    LegacyActivitySnapshot,
+} from "@opencok/queues/contracts/deadline";
 import { sfs, type Fields } from "@opencok/messages/sfs";
 import type { dueActivities, unregisteredActivities } from "@opencok/repositories/timed-activity";
 
@@ -7,6 +10,7 @@ type RecoveryCursor = Parameters<typeof dueActivities>[5];
 
 export class ActivityRecoveryJob
 {
+    private readonly operationIds = new ActivityOperationMapper();
     private importCursor: string | undefined;
     private recoveryCursor: RecoveryCursor;
 
@@ -30,11 +34,13 @@ export class ActivityRecoveryJob
             owner: string,
             operationId: string,
             queueId: string,
+            snapshot: LegacyActivitySnapshot,
         ) => Promise<unknown>,
         private readonly command: (
             owner: string,
             command: string,
             params: Fields,
+            snapshot: DueActivitySnapshot,
         ) => Promise<unknown>,
         private readonly reportFailure: (event: string) => void,
         private readonly now: () => number = Date.now,
@@ -58,22 +64,19 @@ export class ActivityRecoveryJob
 
         for (const saved of pending)
         {
-            const operationId = "restore:"
-                + observeAdapter(createHash("sha256"), "realm.createHash")
-                    .update(
-                        [
-                            saved.uuid,
-                            saved.ownerId,
-                            saved.itemId,
-                            String(saved.startTime),
-                            String(saved.updateTime),
-                        ].join(":"),
-                    )
-                    .digest("hex");
+            const snapshot: LegacyActivitySnapshot = {
+                uuid: saved.uuid,
+                ownerId: saved.ownerId,
+                type: saved.type,
+                itemId: saved.itemId!,
+                startTime: saved.startTime,
+                updateTime: saved.updateTime,
+            };
+            const operationId = this.operationIds.restore(snapshot);
 
             try
             {
-                await this.restore(saved.ownerId, operationId, saved.uuid);
+                await this.restore(saved.ownerId, operationId, saved.uuid, snapshot);
             }
             catch
             {
@@ -107,7 +110,14 @@ export class ActivityRecoveryJob
                     uuid: sfs.string(activity.queueId),
                     activityId: sfs.string(activity.id),
                     version: sfs.int(activity.version),
-                    operationId: sfs.string(`finish:${activity.id}:${activity.version}`),
+                    operationId: sfs.string(this.operationIds.finish(activity)),
+                }, {
+                    id: activity.id,
+                    ownerId: activity.ownerId,
+                    queueId: activity.queueId,
+                    type: activity.type,
+                    dueAt: activity.dueAt,
+                    version: activity.version,
                 });
             }
             catch

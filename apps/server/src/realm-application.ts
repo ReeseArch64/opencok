@@ -1,3 +1,4 @@
+import { validateRealmActivitySchedulerConfig } from "./composition/activity-deadlines";
 import { Layer, ManagedRuntime } from "effect";
 import type { Rules } from "@opencok/rules/game";
 import { RealmConfig, type Config } from "./config.ts";
@@ -11,6 +12,8 @@ export class RealmApplication
 
     public constructor(config: Config, rules?: Rules)
     {
+        validateRealmActivitySchedulerConfig(config);
+
         if (rules && rules.kingdomId !== config.kingdomId)
         {
             throw new Error("Rules do not belong to the configured realm");

@@ -45,7 +45,8 @@
     "@opencok/ranking": "workspace:*",
     "@opencok/validations": "workspace:*",
     "@opencok/world": "workspace:*",
-    "@opencok/mail": "workspace:*"
+    "@opencok/mail": "workspace:*",
+    "@opencok/queues": "workspace:*"
   },
   "devDependencies": {
     "@opencok/api": "workspace:*",

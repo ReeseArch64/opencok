@@ -40,16 +40,31 @@ export async function cityHarness(
     totems = false,
     participants?: ConstructorParameters<typeof TimedActivityService>[3],
     mapSize = 1200,
+    options: {
+        kingdomId?: number;
+        connection?: Parameters<typeof createDatabase>[1];
+        seed?: boolean;
+        now?: number;
+        queueTypes?: readonly number[];
+    } = {},
 )
 {
     const pg = new DisposablePostgres();
-    const admin = await pg.start();
-    await admin.query("CREATE DATABASE \"city\"");
-    await admin.end();
-    const db = createDatabase("kingdom", { ...pg.options, database: "city", max: 8 });
+    const kingdomId = options.kingdomId ?? 1;
+    if (!options.connection)
+    {
+        const admin = await pg.start();
+        await admin.query("CREATE DATABASE \"city\"");
+        await admin.end();
+    }
+    const connection = options.connection ?? { ...pg.options, database: "city" };
+    const db = createDatabase("kingdom", { ...connection, max: 8 });
     const close = async () => {
         await db.close();
-        await pg.stop();
+        if (!options.connection)
+        {
+            await pg.stop();
+        }
     };
     try
     {
@@ -58,7 +73,7 @@ export async function cityHarness(
                 new URL("../../../../packages/drizzle/migrations/kingdom", import.meta.url)
                     .pathname,
         });
-        const rules = await loadRules();
+        const rules = await loadRules(undefined, kingdomId);
         if (!extra.some((domain) => domain.commands.includes("target.task.ui")))
         {
             const target = rules.features.get("target_quest");
@@ -67,76 +82,79 @@ export async function cityHarness(
                 rules.features.set("target_quest", { ...target, online: "close", test: "close" });
             }
         }
-        let now = 1000000;
+        let now = options.now ?? 1000000;
         const effects = { world: async () => new Map<number, number>(), emperor: async () => null };
-        const authority = await acquireRealmAuthority(db.db, 1, () => true);
-        for (const owner of ["owner", "other"])
+        const authority = await acquireRealmAuthority(db.db, kingdomId, () => true);
+        if (options.seed !== false)
         {
-            await db.db.insert(userprofile).values({
-                uid: owner,
-                name: "Synthetic",
-                country: "BR",
-                serverId: 1,
-                level: 1,
-                exp: 0,
-                gold: 100000n,
-            });
-            await db.db.insert(user_resource).values({
-                uid: owner,
-                wood: 1000000n,
-                food: 1000000n,
-                stone: 1000000n,
-                iron: 1000000n,
-                silver: 1000000,
-                chip: 0,
-                diamond: 0,
-                dragon_food: 0,
-                dragon_gold: 0,
-                lastUpdateTime: BigInt(now),
-            });
-            let power = 0n;
-            for (
-                const [itemId, pos] of [
-                    [400000, 0],
-                    [419000, 1],
-                    [403000, 6],
-                    [423000, 10],
-                    [416000, 7],
-                    [411000, 18],
-                    [410000, 19],
-                    [413000, 17],
-                ] as const
-            )
+            for (const owner of ["owner", "other"])
             {
-                await db.db.insert(user_building).values({
-                    uuid: `${owner}-${itemId}`,
+                await db.db.insert(userprofile).values({
                     uid: owner,
-                    itemId,
-                    pos,
+                    name: "Synthetic",
+                    country: "BR",
+                    serverId: kingdomId,
                     level: 1,
-                    refreshTime: BigInt(now),
-                    opType: 0,
+                    exp: 0,
+                    gold: 100000n,
                 });
-                power += BigInt(rules.building(String(itemId), 1).power ?? 0);
-            }
-            await db.db.insert(playerinfo).values({
-                uid: owner,
-                power: power + BigInt(rules.role(1).power ?? 0),
-                buildingPower: power,
-            });
-            for (const type of [0, 1, 2, 3, 6, 8, 9, 10, 11, 12])
-            {
-                await db.db.insert(queue).values({
-                    uuid: `${owner}-q${type}`,
-                    ownerId: owner,
-                    qid: 1,
-                    type,
-                    itemId: "",
-                    startTime: idleDeadline,
-                    endTime: idleDeadline,
-                    updateTime: idleDeadline,
-                    totalTime: 0n,
+                await db.db.insert(user_resource).values({
+                    uid: owner,
+                    wood: 1000000n,
+                    food: 1000000n,
+                    stone: 1000000n,
+                    iron: 1000000n,
+                    silver: 1000000,
+                    chip: 0,
+                    diamond: 0,
+                    dragon_food: 0,
+                    dragon_gold: 0,
+                    lastUpdateTime: BigInt(now),
                 });
+                let power = 0n;
+                for (
+                    const [itemId, pos] of [
+                        [400000, 0],
+                        [419000, 1],
+                        [403000, 6],
+                        [423000, 10],
+                        [416000, 7],
+                        [411000, 18],
+                        [410000, 19],
+                        [413000, 17],
+                    ] as const
+                )
+                {
+                    await db.db.insert(user_building).values({
+                        uuid: `${owner}-${itemId}`,
+                        uid: owner,
+                        itemId,
+                        pos,
+                        level: 1,
+                        refreshTime: BigInt(now),
+                        opType: 0,
+                    });
+                    power += BigInt(rules.building(String(itemId), 1).power ?? 0);
+                }
+                await db.db.insert(playerinfo).values({
+                    uid: owner,
+                    power: power + BigInt(rules.role(1).power ?? 0),
+                    buildingPower: power,
+                });
+                for (const type of options.queueTypes ?? [0, 1, 2, 3, 6, 8, 9, 10, 11, 12])
+                {
+                    await db.db.insert(queue).values({
+                        uuid: `${owner}-q${type}`,
+                        ownerId: owner,
+                        qid: 1,
+                        type,
+                        itemId: "",
+                        startTime: idleDeadline,
+                        endTime: idleDeadline,
+                        updateTime: idleDeadline,
+                        totalTime: 0n,
+                    });
+                }
             }
         }
         const basePreparation = {
@@ -146,7 +164,7 @@ export async function cityHarness(
                 at: bigint,
             )
             {
-                const state = await readReconnectProgress(tx, owner, 1, at);
+                const state = await readReconnectProgress(tx, owner, kingdomId, at);
                 const planned = await planRealmProductionContext(state, rules, at, {
                     worldPowerEffects: async () => new Map<string, string>(),
                     emperorVersion: async () => null,
@@ -174,7 +192,7 @@ export async function cityHarness(
             if (totems)
             {
                 await settleTotemEffects(
-                    createTotemEffectStore(tx, owner, at, mapSize, 1, baseBoundary),
+                    createTotemEffectStore(tx, owner, at, mapSize, kingdomId, baseBoundary),
                     rules,
                     mapSize,
                 );
@@ -260,7 +278,7 @@ export async function cityHarness(
             (await db.db.select().from(user_building).where(eq(user_building.uuid, id)))[0];
         return {
             db,
-            connection: { ...pg.options, database: "city" },
+            connection,
             rules,
             service,
             production: createRealmProductionService(

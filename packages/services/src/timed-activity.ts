@@ -1,3 +1,15 @@
+import type {
+    DueActivitySnapshot,
+    LegacyActivitySnapshot,
+} from "@opencok/queues/contracts/deadline";
+import { ActivityDispatchResult } from "@opencok/queues/enums/dispatch-result";
+import { ActivityDispatchRejected } from "@opencok/queues/errors/dispatch-rejected";
+import { ActivityOperationMapper } from "@opencok/queues/mappings/operation-id";
+import {
+    validDueActivitySnapshot,
+    validLegacyActivitySnapshot,
+    validDeadlineTypes,
+} from "@opencok/queues/validations/deadline";
 import { activityEconomy, debit } from "@opencok/economy/services/activity-economy";
 import { citySpeedGold } from "@opencok/rules/city-progression";
 import { GameError } from "@opencok/errors/game";
@@ -31,6 +43,8 @@ import {
 
 export class TimedActivityService
 {
+    private readonly operationIds = new ActivityOperationMapper();
+
     constructor(
         readonly execute: ActivityExecutor,
         readonly rules: Rules,
@@ -246,7 +260,12 @@ export class TimedActivityService
         }
     }
 
-    async restore(owner: string, operationId: string, queueId: string)
+    async restore(
+        owner: string,
+        operationId: string,
+        queueId: string,
+        expected?: LegacyActivitySnapshot,
+    )
     {
         return this.run(
             owner,
@@ -255,6 +274,18 @@ export class TimedActivityService
             { uuid: sfs.string(queueId) },
             async (state, ledger) => {
                 const saved = state.queues.find((row) => row.uuid === queueId);
+
+                if (
+                    expected && (!saved || state.activities.some((row) => row.queueId === queueId)
+                        || text(saved, "ownerId") !== expected.ownerId
+                        || num(saved, "type") !== expected.type
+                        || text(saved, "itemId") !== expected.itemId
+                        || (saved.startTime ?? null) !== expected.startTime
+                        || long(saved, "updateTime") !== expected.updateTime)
+                )
+                {
+                    throw new ActivityDispatchRejected(ActivityDispatchResult.Obsolete);
+                }
 
                 if (
                     !saved
@@ -302,7 +333,12 @@ export class TimedActivityService
         );
     }
 
-    async command(owner: string, command: string, params: Fields)
+    async command(
+        owner: string,
+        command: string,
+        params: Fields,
+        deadlineExpectation?: { snapshot: DueActivitySnapshot; supportedTypes: readonly number[]; },
+    )
     {
         const alias = cityQueueCommands[command];
         const queueCommand = alias?.action ?? command;
@@ -329,6 +365,15 @@ export class TimedActivityService
         }
 
         return this.run(owner, operationId, command, params, async (state, ledger) => {
+            if (deadlineExpectation)
+            {
+                this.assertDeadline(
+                    state,
+                    deadlineExpectation.snapshot,
+                    deadlineExpectation.supportedTypes,
+                );
+            }
+
             if (queueCommand === "queue.open")
             {
                 const item = ledger.own(str(params, "uuid"));
@@ -745,6 +790,121 @@ export class TimedActivityService
                 ledger,
             };
         });
+    }
+
+    public async restoreSnapshot(
+        snapshot: LegacyActivitySnapshot,
+        supportedTypes: readonly number[],
+    ): Promise<ActivityDispatchResult>
+    {
+        if (!validLegacyActivitySnapshot(snapshot) || !validDeadlineTypes(supportedTypes))
+        {
+            throw new Error("Invalid activity restoration snapshot");
+        }
+        if (!supportedTypes.includes(snapshot.type))
+        {
+            return ActivityDispatchResult.Blocked;
+        }
+        try
+        {
+            await this.restore(
+                snapshot.ownerId,
+                this.operationIds.restore(snapshot),
+                snapshot.uuid,
+                snapshot,
+            );
+
+            return ActivityDispatchResult.Applied;
+        }
+        catch (error)
+        {
+            if (error instanceof ActivityDispatchRejected)
+            {
+                return error.result;
+            }
+
+            throw error;
+        }
+    }
+
+    public async finishSnapshot(
+        snapshot: DueActivitySnapshot,
+        supportedTypes: readonly number[],
+    ): Promise<ActivityDispatchResult>
+    {
+        if (!validDueActivitySnapshot(snapshot) || !validDeadlineTypes(supportedTypes))
+        {
+            throw new Error("Invalid activity completion snapshot");
+        }
+        if (!supportedTypes.includes(snapshot.type))
+        {
+            return ActivityDispatchResult.Blocked;
+        }
+        try
+        {
+            await this.command(snapshot.ownerId, "queue.finish", {
+                uuid: sfs.string(snapshot.queueId),
+                activityId: sfs.string(snapshot.id),
+                version: sfs.int(snapshot.version),
+                operationId: sfs.string(this.operationIds.finish(snapshot)),
+            }, { snapshot, supportedTypes });
+
+            return ActivityDispatchResult.Applied;
+        }
+        catch (error)
+        {
+            if (error instanceof ActivityDispatchRejected)
+            {
+                return error.result;
+            }
+
+            throw error;
+        }
+    }
+
+    private assertDeadline(
+        state: ActivityState,
+        snapshot: DueActivitySnapshot,
+        supportedTypes: readonly number[],
+    ): void
+    {
+        const activeIndex = state.activities.findIndex((row) => row.id === snapshot.id);
+        const active = state.activities[activeIndex];
+        if (
+            !active || active.status !== 0 || active.ownerId !== snapshot.ownerId
+            || active.queueId !== snapshot.queueId || active.type !== snapshot.type
+            || active.dueAt !== snapshot.dueAt || active.version !== snapshot.version
+        )
+        {
+            throw new ActivityDispatchRejected(ActivityDispatchResult.Obsolete);
+        }
+        if (active.dueAt > state.now)
+        {
+            throw new ActivityDispatchRejected(ActivityDispatchResult.NotDue);
+        }
+        const saved = state.queues.find((row) => row.uuid === snapshot.queueId);
+        if (
+            !saved || text(saved, "ownerId") !== snapshot.ownerId
+            || num(saved, "type") !== snapshot.type
+            || long(saved, "updateTime") !== snapshot.dueAt
+        )
+        {
+            throw new ActivityDispatchRejected(ActivityDispatchResult.Blocked);
+        }
+        const earlier = state.activities.some((row, index) =>
+            row.status === 0 && supportedTypes.includes(row.type)
+            && (row.dueAt < active.dueAt || (row.dueAt === active.dueAt && index < activeIndex))
+        );
+        const legacy = state.queues.some((row) =>
+            supportedTypes.includes(num(row, "type"))
+            && text(row, "itemId") !== "" && long(row, "updateTime") !== idleDeadline
+            && long(row, "updateTime") <= active.dueAt
+            && !state.activities.some((activity) => activity.queueId === row.uuid)
+        );
+        if (earlier || legacy)
+        {
+            throw new ActivityDispatchRejected(ActivityDispatchResult.Blocked);
+        }
     }
 
     private async run(

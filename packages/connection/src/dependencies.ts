@@ -12,6 +12,7 @@ export type ConnectionConfig = Pick<
 export interface ServerDependencies
 {
     paidGifts?: { consume(owner: string, orderId: string, platform: string): Promise<void>; };
+    activityDeadlines?: (request: Request) => Promise<Response>;
     provisioning?: (request: Request) => Promise<Response>;
     profileSessions?: {
         open(owner: string, sessionId: string, now: number): Promise<void>;
