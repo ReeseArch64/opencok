@@ -1,23 +1,24 @@
 import { randomUUID } from "node:crypto";
-import type { ShopRepository, ShopState } from "@opencok/contracts/shops";
+import type { ShopRepository, ShopState } from "@opencok/shop/contracts/shops";
 import type { InventoryCommandResponse } from "@opencok/contracts/responses/inventory";
 import { long, text } from "@opencok/contracts/rows";
 import { GameError } from "@opencok/errors/game";
 import { errors } from "@opencok/constants/game";
 import { sfs, encode, str, int, Type, type Fields } from "@opencok/messages/sfs";
 import type { Rules } from "@opencok/rules/game";
-import { shopAvailable, shopInteger, shopLimit, shopPrice } from "@opencok/rules/shops";
+import { shopAvailable, shopInteger, shopLimit, shopPrice } from "@opencok/shop/rules/shops";
 import { inventoryCount } from "@opencok/rules/inventory";
-import { shopOffer } from "@opencok/mappings/shops";
+import { shopOffer } from "@opencok/shop/mappings/shops";
 import { inventoryItem } from "@opencok/mappings/bootstrap";
 import { inventoryResponse, inventoryReplay, inventoryEvent } from "@opencok/mappings/inventory";
-import { planInventoryGrants } from "./inventory.ts";
+import type { InventoryGrantPlanner } from "../contracts/inventory-grant-planner";
 
 export class ShopService
 {
     constructor(
         readonly repository: ShopRepository,
         readonly rules: Rules,
+        readonly planInventoryGrants: InventoryGrantPlanner,
     )
     {}
 
@@ -125,7 +126,7 @@ export class ShopService
                     throw new GameError(errors.unsupported);
                 }
 
-                const plan = planInventoryGrants(
+                const plan = this.planInventoryGrants(
                     original,
                     this.rules,
                     [{ itemId: rule.item_id!, count }],

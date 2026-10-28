@@ -1,10 +1,10 @@
-import type { ShopState } from "@opencok/contracts/shops";
+import type { ShopState } from "@opencok/shop/contracts/shops";
 import { long, num, text } from "@opencok/contracts/rows";
 import { errors, MOBILE_CLIENT_VERSION } from "@opencok/constants/game";
 import { GameError } from "@opencok/errors/game";
-import type { Rule, Rules } from "./game.ts";
-import { versionAtLeast, featureRealmEnabled } from "./availability.ts";
-import { inventoryCount } from "./inventory.ts";
+import type { Rule, Rules } from "@opencok/rules/game";
+import { versionAtLeast, featureRealmEnabled } from "@opencok/rules/availability";
+import { inventoryCount } from "@opencok/rules/inventory";
 
 export function shopInteger(value: string | undefined, fallback = 0): number
 {

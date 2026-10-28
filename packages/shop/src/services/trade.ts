@@ -1,5 +1,5 @@
 import { randomInt, randomUUID } from "node:crypto";
-import type { TradeExecutor, TradeState } from "@opencok/contracts/trade";
+import type { TradeExecutor, TradeState } from "@opencok/shop/contracts/trade";
 import type { InventoryCommandResponse } from "@opencok/contracts/responses/inventory";
 import { num } from "@opencok/contracts/rows";
 import { GameError } from "@opencok/errors/game";
@@ -7,10 +7,10 @@ import { errors } from "@opencok/constants/game";
 import { encode, sfs, Type, type Fields } from "@opencok/messages/sfs";
 import type { Rules } from "@opencok/rules/game";
 import { inventoryCount, inventoryInteger } from "@opencok/rules/inventory";
-import { shopInteger, shopItemSupported } from "@opencok/rules/shops";
+import { shopInteger, shopItemSupported } from "@opencok/shop/rules/shops";
 import { inventoryItem } from "@opencok/mappings/bootstrap";
 import { inventoryResponse, inventoryReplay, inventoryChanges } from "@opencok/mappings/inventory";
-import { planInventoryGrants } from "./inventory.ts";
+import type { InventoryGrantPlanner } from "../contracts/inventory-grant-planner";
 
 function wire(trade: TradeState): Fields
 {
@@ -55,6 +55,7 @@ export class TradeService
     constructor(
         readonly execute: TradeExecutor,
         readonly rules: Rules,
+        readonly planInventoryGrants: InventoryGrantPlanner,
     )
     {}
 
@@ -85,7 +86,7 @@ export class TradeService
             { owner, command, requestId, request: encode({}) },
             async (inventory, current, now) => {
                 const trade = { ...current };
-                let plan = planInventoryGrants(inventory, this.rules, [], now);
+                let plan = this.planInventoryGrants(inventory, this.rules, [], now);
                 let body: Fields;
 
                 if (command === "trade.info" && !trade.trade)
@@ -199,7 +200,7 @@ export class TradeService
                         throw new GameError(errors.unsupported);
                     }
 
-                    plan = planInventoryGrants(
+                    plan = this.planInventoryGrants(
                         inventory,
                         this.rules,
                         [{ itemId: destination[0]!, count: inventoryInteger(destination[1]) }],

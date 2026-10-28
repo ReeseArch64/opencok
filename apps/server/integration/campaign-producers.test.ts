@@ -1,11 +1,12 @@
+import { planInventoryGrants } from "@opencok/services/inventory";
 import { test, expect } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { eq } from "drizzle-orm";
 import { anniversaryDomain } from "@opencok/services/anniversary";
 import { continuedCostDomain } from "@opencok/services/continued-cost";
-import { ShopService } from "@opencok/services/shops";
+import { ShopService } from "@opencok/shop/services/shops";
 import { MailRewardService } from "@opencok/services/mail-rewards";
-import { createShopRepository } from "@opencok/repositories/shops";
+import { createShopRepository } from "@opencok/shop/repositories/shops";
 import { createMailRewardExecutor } from "@opencok/repositories/mail-rewards";
 import { executeInventoryTransaction } from "@opencok/repositories/inventory";
 import {
@@ -86,6 +87,7 @@ async function fixture()
                     ),
             ),
             h.rules,
+            planInventoryGrants,
         ),
         claims = new MailRewardService(
             createMailRewardExecutor(

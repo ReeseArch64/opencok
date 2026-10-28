@@ -90,6 +90,7 @@
         "@opencok/resources": "workspace:*",
         "@opencok/rules": "workspace:*",
         "@opencok/services": "workspace:*",
+        "@opencok/shop": "workspace:*",
         "@opencok/storage": "workspace:*",
         "effect": "catalog:",
       },
@@ -699,6 +700,26 @@
         "typescript": "catalog:",
       },
     },
+    "packages/shop": {
+      "name": "@opencok/shop",
+      "dependencies": {
+        "@opencok/constants": "workspace:*",
+        "@opencok/contracts": "workspace:*",
+        "@opencok/drizzle": "workspace:*",
+        "@opencok/errors": "workspace:*",
+        "@opencok/mappings": "workspace:*",
+        "@opencok/messages": "workspace:*",
+        "@opencok/repositories": "workspace:*",
+        "@opencok/rules": "workspace:*",
+        "drizzle-orm": "0.45.4",
+      },
+      "devDependencies": {
+        "@opencok/config": "workspace:*",
+        "@opencok/services": "workspace:*",
+        "@types/bun": "catalog:",
+        "typescript": "catalog:",
+      },
+    },
     "packages/skins": {
       "name": "@opencok/skins",
       "devDependencies": {
@@ -722,14 +743,6 @@
         "@opencok/config": "workspace:*",
         "@types/bun": "catalog:",
         "@types/node-zookeeper-client": "0.2.13",
-        "typescript": "catalog:",
-      },
-    },
-    "packages/shop": {
-      "name": "@opencok/shop",
-      "devDependencies": {
-        "@opencok/config": "workspace:*",
-        "@types/bun": "catalog:",
         "typescript": "catalog:",
       },
     },
@@ -1190,11 +1203,11 @@
 
     "@opencok/share": ["@opencok/share@workspace:packages/share"],
 
+    "@opencok/shop": ["@opencok/shop@workspace:packages/shop"],
+
     "@opencok/skins": ["@opencok/skins@workspace:packages/skins"],
 
     "@opencok/storage": ["@opencok/storage@workspace:packages/storage"],
-
-    "@opencok/shop": ["@opencok/shop@workspace:packages/shop"],
 
     "@opencok/tasks": ["@opencok/tasks@workspace:packages/tasks"],
 
