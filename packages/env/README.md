@@ -45,8 +45,12 @@ The read-only object is a snapshot at import and does not mutate `process.env`.
 Only the listed keys are exposed. Parsing uses native `node:util.parseEnv`: quoted
 values and comments are supported; `$VARIABLE` expansion is not performed.
 
-The root is discovered from the package location using the ancestor workspace
-`package.json`, rather than the current working directory. Deployments must retain
+The root is discovered from the executing ESM module URL using the ancestor workspace
+`package.json`, rather than the current working directory. Source execution starts
+at the package location; bundled execution starts at the emitted entrypoint. This
+keeps relocated bundles from reading the build workspace's `.env`; avoid `__dirname`,
+which Bun can replace with the original source directory during bundling.
+Deployments must retain
 that workspace layout and manifest. Inject production secrets through the process
 environment; no local file is required. This package uses server filesystem APIs
 and must not be imported into browser/mobile bundles.
@@ -67,6 +71,9 @@ local files before this package runs. External loaders must follow the same rule
 
 Tests use temporary synthetic workspaces and subprocesses to verify cwd independence,
 process precedence, missing files, required keys, validation and secret redaction.
+Bundled mutation tests use `.github/testing/mutation-workspace.ts` to create an
+isolated workspace manifest and link installed runtime dependencies. Their emitted
+tests resolve their own root without reading the source workspace's `.env`.
 
 The realm server loads its dedicated settings with `loadServerEnvironment()` from
 `@opencok/env/server`; the pure validator is `@opencok/env/server/schema`.

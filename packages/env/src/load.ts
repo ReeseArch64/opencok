@@ -3,9 +3,7 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { parseEnv } from "node:util";
 
-const moduleDirectory = typeof __dirname === "string"
-    ? __dirname
-    : dirname(fileURLToPath(import.meta.url));
+const moduleDirectory = dirname(fileURLToPath(import.meta.url));
 
 function findWorkspaceRoot(start: string): string
 {
