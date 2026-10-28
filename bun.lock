@@ -153,8 +153,10 @@
     "packages/alliance": {
       "name": "@opencok/alliance",
       "dependencies": {
+        "@opencok/base": "workspace:*",
         "@opencok/drizzle": "workspace:*",
         "@opencok/economy": "workspace:*",
+        "@opencok/enums": "workspace:*",
         "@opencok/ledger": "workspace:*",
         "@opencok/messages": "workspace:*",
         "drizzle-orm": "0.45.4",

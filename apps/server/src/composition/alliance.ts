@@ -39,7 +39,17 @@ import { AllianceHelpPolicy } from "@opencok/alliance/rules/help-generation";
 import { AllianceHelpMapper } from "@opencok/alliance/mappings/help";
 import type { AllianceHelpContext } from "@opencok/alliance/contracts/help";
 import type { Rules } from "@opencok/rules/game";
-import type { AllianceRepository, AllianceState } from "@opencok/contracts/alliance-gameplay";
+import type { AllianceRepository } from "@opencok/alliance/contracts/mutation";
+import type { AllianceGameplayState } from "@opencok/alliance/contracts/gameplay-state";
+import type { InventoryState } from "@opencok/contracts/inventory";
+import { AllianceGameplayRepository } from "@opencok/alliance/repositories/gameplay";
+import { AllianceParticipantRepository } from "@opencok/alliance/repositories/participants";
+import { AllianceWriteRepository } from "@opencok/alliance/repositories/writes";
+import { AllianceCommitRepository } from "@opencok/alliance/repositories/commit";
+import { createMutationExecutor, type MutationTransaction } from "@opencok/repositories/mutation";
+import { executeRealmInventoryTransaction } from "@opencok/repositories/inventory-runtime";
+import type { ProgressionBoundary } from "@opencok/contracts/progression-boundary";
+import type { ActivityDomain } from "@opencok/repositories/timed-activity";
 import type { InventoryEffects } from "@opencok/services/inventory-runtime";
 import { AllianceService } from "@opencok/alliance/services/alliance";
 import { AllianceIdentity } from "@opencok/alliance/services/identity";
@@ -60,6 +70,40 @@ import { text, num, long } from "@opencok/contracts/rows";
 import { cityInteger } from "@opencok/rules/city-progression";
 import { cityBuildingParameter } from "@opencok/rules/military";
 import { allianceFailure } from "@opencok/rules/alliance";
+
+type RealmAllianceState = AllianceGameplayState<InventoryState>;
+
+export function createAllianceRepository(
+    db: DatabaseClient<"kingdom">,
+    authority: RealmAuthority,
+    boundary: ProgressionBoundary<MutationTransaction>,
+    now = Date.now,
+    domains: ReadonlyMap<number, ActivityDomain> = new Map(),
+    recordAction?: (
+        tx: MutationTransaction,
+        owner: string,
+        kind: string,
+        count: number,
+        now: bigint,
+    ) => Promise<void>,
+): AllianceRepository<RealmAllianceState>
+{
+    const execute = createMutationExecutor(db, authority, now);
+
+    return new AllianceGameplayRepository(
+        {
+            execute,
+            now,
+            kingdomId: authority.kingdomId,
+            executeInventory: executeRealmInventoryTransaction,
+        },
+        new AllianceParticipantRepository(db),
+        new AllianceCommitRepository(
+            { text, long, domains, boundary, recordAction },
+            new AllianceWriteRepository({ text, long }),
+        ),
+    );
+}
 
 export function createRealmAllianceHelp(context: AllianceHelpContext<Rules>)
 {
@@ -202,7 +246,7 @@ export function createRealmAllianceSnapshot(context: AllianceSnapshotContext)
 
 export function createRealmAllianceContext(
     owner: string,
-    state: AllianceState,
+    state: RealmAllianceState,
     rules: Rules,
     ledger: RealmInventoryPlanner,
     effects: InventoryEffects,
@@ -252,7 +296,7 @@ export function createRealmAllianceContext(
 }
 
 export function createRealmAllianceService(
-    repository: AllianceRepository,
+    repository: AllianceRepository<RealmAllianceState>,
     rules: Rules,
     effects: InventoryEffects,
     forbidden: (value: string) => boolean | Promise<boolean> = () => false,
