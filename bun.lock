@@ -78,6 +78,7 @@
     "apps/server": {
       "name": "@opencok/server",
       "dependencies": {
+        "@opencok/alliance": "workspace:*",
         "@opencok/building": "workspace:*",
         "@opencok/city": "workspace:*",
         "@opencok/connection": "workspace:*",
@@ -149,6 +150,11 @@
     },
     "packages/alliance": {
       "name": "@opencok/alliance",
+      "dependencies": {
+        "@opencok/drizzle": "workspace:*",
+        "@opencok/messages": "workspace:*",
+        "drizzle-orm": "0.45.4",
+      },
       "devDependencies": {
         "@opencok/config": "workspace:*",
         "@types/bun": "catalog:",
@@ -348,6 +354,7 @@
     "packages/contracts": {
       "name": "@opencok/contracts",
       "dependencies": {
+        "@opencok/alliance": "workspace:*",
         "@opencok/base": "workspace:*",
         "@opencok/economy": "workspace:*",
         "@opencok/enums": "workspace:*",
@@ -784,6 +791,7 @@
     "packages/repositories": {
       "name": "@opencok/repositories",
       "dependencies": {
+        "@opencok/alliance": "workspace:*",
         "@opencok/constants": "workspace:*",
         "@opencok/contracts": "workspace:*",
         "@opencok/core": "workspace:*",
@@ -868,6 +876,7 @@
     "packages/services": {
       "name": "@opencok/services",
       "dependencies": {
+        "@opencok/alliance": "workspace:*",
         "@opencok/base": "workspace:*",
         "@opencok/building": "workspace:*",
         "@opencok/constants": "workspace:*",

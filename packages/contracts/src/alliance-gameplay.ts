@@ -1,3 +1,4 @@
+import type { AllianceHelpState, AllianceHelpWrite } from "@opencok/alliance/contracts/help";
 import type { Row } from "./rows";
 import type { InventoryState } from "./inventory";
 import type { InventoryPlan } from "@opencok/economy/contracts/inventory-planning";
@@ -17,7 +18,7 @@ export interface AllianceSelection
     page?: number;
 }
 
-export interface AllianceState
+export interface AllianceState extends AllianceHelpState
 {
     now: bigint;
     inventory: InventoryState;
@@ -27,7 +28,6 @@ export interface AllianceState
     members: readonly Row[];
     applications: readonly Row[];
     lords: readonly Row[];
-    cities: readonly Row[];
     points: readonly Row[];
     powers: readonly Row[];
     marches: readonly Row[];
@@ -35,9 +35,6 @@ export interface AllianceState
     research: readonly Row[];
     donations: readonly Row[];
     history: readonly Row[];
-    helps: readonly Row[];
-    queues: readonly Row[];
-    activities: readonly Row[];
     gifts: readonly Row[];
     blacklist: readonly Row[];
     directory: readonly Row[];
@@ -47,13 +44,8 @@ export interface AllianceState
     mails: readonly Row[];
 }
 
-export interface AllianceWrite
+export interface AllianceWrite extends AllianceHelpWrite
 {
-    actions?: readonly {
-        uid: string;
-        kind: "alliance.join" | "alliance.donate" | "alliance.help";
-        count: number;
-    }[];
     alliances?: readonly Row[];
     deletedAlliances?: readonly string[];
     members?: readonly Row[];
@@ -67,9 +59,6 @@ export interface AllianceWrite
     deletedResearch?: readonly string[];
     donations?: readonly Row[];
     history?: readonly Row[];
-    helps?: readonly Row[];
-    queues?: readonly Row[];
-    activities?: readonly Row[];
     gifts?: readonly Row[];
     sharedGifts?: readonly Row[];
     publishedGift?: Row;

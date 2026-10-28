@@ -262,11 +262,12 @@ import { createPostboxExecutor } from "@opencok/repositories/postbox";
 import { createRealmSocialExecutor } from "@opencok/connection/realm-social";
 import { createAvatarTickets } from "@opencok/storage/avatar-tickets";
 import { GeneralDrawDomain } from "@opencok/hero/services/general-draws";
-import { AllianceService, allianceStableId } from "@opencok/services/alliances";
+import { allianceStableId } from "@opencok/services/alliances";
+import { createRealmAllianceService } from "./composition/alliance";
 import { createAllianceRepository } from "@opencok/repositories/alliance-gameplay";
 import { dueAllianceResearch } from "@opencok/repositories/alliance-recovery";
 import { createAlliancePublicationReader } from "@opencok/repositories/alliance-publication";
-import { publishAllianceMutation } from "@opencok/services/alliance-publication";
+import { publishAllianceMutation } from "./composition/alliance";
 import { relayMutationEvent } from "@opencok/repositories/mutation";
 import { GeneralsDomain } from "@opencok/hero/services/generals";
 import { createRealmEquipmentDomains } from "./composition/equipment";
@@ -1047,7 +1048,7 @@ export const RealmDependenciesLive = Layer.effect(
             "realm.CityProgressionService",
         );
         const alliances = observeAdapter(
-            new AllianceService(
+            createRealmAllianceService(
                 observeAdapter(
                     createAllianceRepository(
                         db.kingdom.db,

@@ -1,53 +1,28 @@
-import { randomUUID } from "node:crypto";
 import { sfs, str, int, type Fields } from "@opencok/messages/sfs";
-import { text, num, long, type Row } from "@opencok/contracts/rows";
-import { allianceFailure } from "@opencok/rules/alliance";
-import { cityInteger } from "@opencok/rules/city-progression";
-import { cityBuildingParameter } from "@opencok/rules/military";
-import type { AllianceContext } from "./alliances";
+import type { AllianceRecord as Row } from "../contracts/records";
+import type { HelpGeneration, AllianceHelpContext } from "../contracts/help";
+import type { AllianceHelpRuntime } from "../contracts/help-runtime";
+import { AllianceHelpPolicy } from "../rules/help-generation";
+import { AllianceHelpMapper } from "../mappings/help";
+import { AllianceHelpCommand, AllianceHelpPush } from "../enums/help-command";
+import { AllianceProgressAction } from "../enums/progress-action";
 
-interface HelpGeneration
+export class AllianceHelpService<TCatalog>
 {
-    version: 1;
-    activityId: string;
-    helpers: string[];
-}
-
-function generation(row: Row): HelpGeneration
-{
-    let value: HelpGeneration;
-
-    try
-    {
-        value = JSON.parse(Buffer.isBuffer(row.helpers) ? row.helpers.toString("utf8") : "");
-    }
-    catch
-    {
-        allianceFailure();
-    }
-
-    if (
-        value.version !== 1
-        || typeof value.activityId !== "string"
-        || !Array.isArray(value.helpers)
-        || value.helpers.length > 2048
-        || new Set(value.helpers).size !== value.helpers.length
-        || value.helpers.some((id) => typeof id !== "string" || !id || id.length > 40)
+    public constructor(
+        readonly c: AllianceHelpContext<TCatalog>,
+        private readonly runtime: AllianceHelpRuntime<TCatalog>,
+        private readonly policy: AllianceHelpPolicy,
+        private readonly mapper: AllianceHelpMapper,
     )
-    {
-        allianceFailure();
-    }
-
-    return value;
-}
-
-export class AllianceHelpContext
-{
-    constructor(readonly c: AllianceContext)
     {}
 
     activity(help: Row)
     {
+        const { text, num, long } = this.runtime;
+        const allianceFailure: () => never = this.runtime.allianceFailure;
+        const { generation } = this.policy;
+
         let saved: HelpGeneration,
             legacy = false;
 
@@ -119,38 +94,18 @@ export class AllianceHelpContext
 
     snapshot(help: Row): Fields
     {
+        const { text } = this.runtime;
         const { activity } = this.activity(help),
             profile = this.c.profile(text(help, "senderId"));
 
-        return {
-            uid: sfs.string(text(help, "helpId")),
-            helpId: sfs.string(text(help, "helpId")),
-            allianceId: sfs.string(this.c.allianceId),
-            senderId: sfs.string(text(help, "senderId")),
-            recvId: sfs.string(this.c.owner),
-            content: sfs.string(text(help, "content")),
-            queueId: sfs.string(text(help, "content")),
-            name: sfs.string(text(profile, "name")),
-            pic: sfs.string(text(profile, "pic")),
-            picVer: sfs.int(num(profile, "picVer")),
-            qType: sfs.int(num(help, "type")),
-            type: sfs.int(num(help, "type")),
-            itemId: sfs.string(text(help, "itemId")),
-            level: sfs.int(num(help, "level")),
-            maxcount: sfs.int(num(help, "maxcount")),
-            nowcount: sfs.int(num(help, "nowcount")),
-            maxCount: sfs.int(num(help, "maxcount")),
-            nowCount: sfs.int(num(help, "nowcount")),
-            star: sfs.int(num(help, "star")),
-            progress: sfs.int(num(help, "progress")),
-            stats: sfs.int(help.senderId === this.c.owner ? 0 : 1),
-            updateTime: sfs.long(long(activity, "dueAt")),
-            startTime: sfs.long(long(help, "startTime")),
-        };
+        return this.mapper.snapshot(help, activity, profile, this.c.allianceId, this.c.owner);
     }
 
     available()
     {
+        const { num } = this.runtime;
+        const allianceFailure: () => never = this.runtime.allianceFailure;
+
         if (this.c.state.helps.length > 4096)
         {
             allianceFailure();
@@ -176,6 +131,9 @@ export class AllianceHelpContext
 
     help(row: Row): Fields
     {
+        const { num, long, cityInteger } = this.runtime;
+        const allianceFailure: () => never = this.runtime.allianceFailure;
+
         const { activity, saved } = this.activity(row);
 
         if (
@@ -232,37 +190,34 @@ export class AllianceHelpContext
             ...(this.c.write.helps ?? []).filter((value) => value.helpId !== row.helpId),
             next,
         ];
-        const response = {
-            queueId: sfs.string(text(queue, "uuid")),
-            updateTime: sfs.long(dueAt),
-            senderId: sfs.string(text(row, "senderId")),
-            helpName: sfs.string(text(this.c.profile(), "name")),
-            helpId: sfs.string(text(row, "helpId")),
-            itemId: sfs.string(text(row, "itemId")),
-            level: sfs.int(num(row, "level")),
-            type: sfs.int(num(row, "type")),
-            maxCount: sfs.int(num(row, "maxcount")),
-            nowCount: sfs.int(num(next, "nowcount")),
-        };
-        const previous = this.c.write.actions?.find((row) => row.kind === "alliance.help")?.count
-            ?? 0;
-        this.c.write.actions = [{ uid: this.c.owner, kind: "alliance.help", count: previous + 1 }];
+        const response = this.mapper.result(row, next, queue, dueAt, () => this.c.profile());
+        const previous =
+            this.c.write.actions?.find((row) => row.kind === AllianceProgressAction.Help)?.count
+                ?? 0;
+        this.c.write.actions = [{
+            uid: this.c.owner,
+            kind: AllianceProgressAction.Help,
+            count: previous + 1,
+        }];
 
         return response;
     }
 
     async command(command: string, params: Fields): Promise<Fields>
     {
+        const { text, num, long, cityInteger, cityBuildingParameter, randomUUID } = this.runtime;
+        const allianceFailure: () => never = this.runtime.allianceFailure;
+
         this.c.right("help");
 
-        if (command === "al.showhelp")
+        if (command === AllianceHelpCommand.Show)
         {
             return {
                 helps: sfs.array(this.available().map((row) => sfs.object(this.snapshot(row)))),
             };
         }
 
-        if (command === "al.helpall")
+        if (command === AllianceHelpCommand.All)
         {
             return {
                 helps: sfs.array(
@@ -274,7 +229,7 @@ export class AllianceHelpContext
             };
         }
 
-        if (command === "al.renderhelp")
+        if (command === AllianceHelpCommand.Render)
         {
             if (params.uid && str(params, "uid") !== this.c.owner)
             {
@@ -366,7 +321,7 @@ export class AllianceHelpContext
         this.c.write.helps = [help];
         this.c.write.queues = [{ ...queue, isHelped: 1 }];
         const response = this.snapshot(help);
-        this.c.ledger.pushes.push({ command: "push.al.help.new", body: response });
+        this.c.ledger.pushes.push({ command: AllianceHelpPush.New, body: response });
 
         return response;
     }

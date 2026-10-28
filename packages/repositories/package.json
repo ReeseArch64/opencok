@@ -26,6 +26,7 @@
     "@opencok/hero": "workspace:*",
     "@opencok/core": "workspace:*",
     "@opencok/economy": "workspace:*",
-    "@opencok/tasks": "workspace:*"
+    "@opencok/tasks": "workspace:*",
+    "@opencok/alliance": "workspace:*"
   }
 }
