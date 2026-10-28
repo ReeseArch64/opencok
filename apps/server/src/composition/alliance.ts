@@ -39,7 +39,16 @@ import type { Rules } from "@opencok/rules/game";
 import type { AllianceRepository } from "@opencok/contracts/alliance-gameplay";
 import type { InventoryEffects } from "@opencok/services/inventory-runtime";
 import { AllianceService, allianceStableId } from "@opencok/services/alliances";
-import { publishAllianceMutation as publishSharedAllianceMutation } from "@opencok/services/alliance-publication";
+import { AlliancePublicationService } from "@opencok/alliance/services/publication";
+import { AlliancePublicationMapper } from "@opencok/alliance/mappings/publication";
+import { AlliancePublicationRepository } from "@opencok/alliance/repositories/publication";
+import type {
+    AlliancePublicationReader,
+    AlliancePublisher,
+} from "@opencok/alliance/contracts/publication";
+import type { DatabaseClient } from "@opencok/drizzle/contracts/database";
+import { fenceRealmTransaction, type RealmAuthority } from "@opencok/repositories/realm-authority";
+import { allianceScienceEffects } from "@opencok/rules/power-memberships";
 import { text, num, long } from "@opencok/contracts/rows";
 import { cityInteger } from "@opencok/rules/city-progression";
 import { cityBuildingParameter } from "@opencok/rules/military";
@@ -204,22 +213,36 @@ export function createRealmAllianceService(
     );
 }
 
+export function createAlliancePublicationReader(
+    db: DatabaseClient<"kingdom">,
+    authority: RealmAuthority,
+)
+{
+    const repository = new AlliancePublicationRepository(
+        db,
+        authority.kingdomId,
+        (tx) => fenceRealmTransaction(tx, authority),
+    );
+
+    return (id: string, players?: readonly string[]) => repository.read(id, players);
+}
+
 export function publishAllianceMutation(
-    read: Parameters<typeof publishSharedAllianceMutation>[0],
-    payload: Parameters<typeof publishSharedAllianceMutation>[1],
-    publish: Parameters<typeof publishSharedAllianceMutation>[2],
+    read: AlliancePublicationReader,
+    payload: Buffer,
+    publish: AlliancePublisher,
     rules: Rules,
 )
 {
-    return publishSharedAllianceMutation(
+    const runtime = { text, num, long, cityInteger, allianceFailure, errors };
+
+    return new AlliancePublicationService(
         read,
-        payload,
         publish,
         rules,
-        new AllianceHelpMapper({ text, num, long }),
-        new AllianceScienceMapper(
-            { text, num, long },
-            new AllianceSciencePolicy({ num, cityInteger, allianceFailure }),
-        ),
-    );
+        { ...runtime, scienceEffects: (sciences) => allianceScienceEffects(sciences, rules) },
+        new AlliancePublicationMapper(runtime, new AllianceMembershipPolicy(runtime)),
+        new AllianceHelpMapper(runtime),
+        new AllianceScienceMapper(runtime, new AllianceSciencePolicy(runtime)),
+    ).deliver(payload);
 }
