@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { field } from "./response";
+import { field } from "@opencok/messages/validations/response";
 import { inventoryItemSchema } from "./bootstrap";
 import { publicEquipmentSchema } from "./profile";
 import { generalInfoSchema } from "@opencok/hero/validations/profile-generals";

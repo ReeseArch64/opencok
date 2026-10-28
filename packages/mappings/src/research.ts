@@ -5,7 +5,7 @@ import { cityInteger } from "@opencok/rules/city-progression";
 import { GameError } from "@opencok/errors/game";
 import { errors } from "@opencok/constants/game";
 import { researchSchema } from "@opencok/validations/research";
-import { validateFields } from "./validation";
+import { validateFields } from "@opencok/messages/validations/fields";
 
 export function research(row: Row, rules: Rules, deadline = 0n): Fields
 {

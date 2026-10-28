@@ -4,7 +4,7 @@ import {
     publishedRankingSchema,
     attributeRankingSchema,
 } from "@opencok/validations/published-ranking";
-import { validateFields } from "./validation.ts";
+import { validateFields } from "@opencok/messages/validations/fields";
 
 function rows(entries: readonly string[], maximum: number): Fields[]
 {

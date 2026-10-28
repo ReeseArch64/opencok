@@ -1,7 +1,7 @@
 import { sfs, type Fields } from "@opencok/messages/sfs";
 import type { RechargeActivityLoginResponse } from "@opencok/contracts/responses/recharge-activity";
 import { rechargeActivityLoginSchema } from "@opencok/validations/recharge-activity";
-import { validateFields } from "./validation";
+import { validateFields } from "@opencok/messages/validations/fields";
 
 export function rechargeActivityLogin(row: RechargeActivityLoginResponse): Fields
 {

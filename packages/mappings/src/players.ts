@@ -1,4 +1,4 @@
-import { validateFields } from "./validation.ts";
+import { validateFields } from "@opencok/messages/validations/fields";
 import { playerSummarySchema, guidePlayerSummarySchema } from "@opencok/validations/players";
 
 import type { PlayerSummary } from "@opencok/contracts/game";

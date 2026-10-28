@@ -4,7 +4,7 @@ import type {
     ThroneRankingBoardResponse,
     ThroneRankingResponse,
 } from "@opencok/contracts/responses/throne-ranking";
-import { field } from "./response.ts";
+import { field } from "@opencok/messages/validations/response";
 
 export const throneRankingEntrySchema = z.strictObject({
     uid: field.string,

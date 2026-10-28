@@ -1,6 +1,6 @@
 import { sfs, type Value } from "@opencok/messages/sfs";
 import { groupBuySchema } from "@opencok/validations/groupbuy";
-import { validateFields } from "./validation";
+import { validateFields } from "@opencok/messages/validations/fields";
 import type { GroupBuyResponse } from "@opencok/contracts/responses/groupbuy";
 
 export function groupBuyInfo(

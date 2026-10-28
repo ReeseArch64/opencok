@@ -1,4 +1,4 @@
-import type { ResponseValue } from "./value.ts";
+import type { ResponseValue } from "@opencok/messages/contracts/response-value";
 
 export interface PublishedRankingResponse
 {

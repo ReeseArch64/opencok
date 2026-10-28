@@ -7,7 +7,7 @@ import {
     heroInsideRankingSchema,
     heroHistorySchema,
 } from "@opencok/hero/validations/hero-ranking";
-import { validateFields } from "@opencok/mappings/validation";
+import { validateFields } from "@opencok/messages/validations/fields";
 
 export function heroSelfRanking(result: HeroSelfRanking): Fields
 {

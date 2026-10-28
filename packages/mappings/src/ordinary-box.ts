@@ -1,7 +1,7 @@
 import { sfs, type Fields } from "@opencok/messages/sfs";
 import type { OrdinaryBoxPreviewResponse } from "@opencok/contracts/responses/ordinary-box";
 import { ordinaryBoxPreviewSchema } from "@opencok/validations/ordinary-box";
-import { validateFields } from "./validation";
+import { validateFields } from "@opencok/messages/validations/fields";
 
 export function ordinaryBoxPreview(row: OrdinaryBoxPreviewResponse): Fields
 {

@@ -1,7 +1,7 @@
 import { sfs, type Fields } from "@opencok/messages/sfs";
 import type { ActivityOperatorResponse } from "@opencok/contracts/responses/activity-operators";
 import { activityOperatorsSchema } from "@opencok/validations/activity-operators";
-import { validateFields } from "./validation";
+import { validateFields } from "@opencok/messages/validations/fields";
 
 export function activityOperatorsView(rows: readonly ActivityOperatorResponse[]): Fields
 {

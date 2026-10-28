@@ -3,7 +3,7 @@ import type {
     WorldMonsterHealthResponse,
     WorldMonsterExplorationResponse,
 } from "@opencok/contracts/responses/world-monster-detail";
-import { field, responseValueSchema } from "./response.ts";
+import { field, responseValueSchema } from "@opencok/messages/validations/response";
 
 export const worldMonsterHealthSchema = z.union([
     z.strictObject({}),

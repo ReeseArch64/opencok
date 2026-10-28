@@ -94,23 +94,24 @@ implementation and verification tracked separately.
 
 ### Implemented API and realm package boundaries
 
-| Packages                                                            | Boundary                                                                                                                                              |
-| ------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `env`, `config`, `core`                                             | Validated root environment, strict compiler settings, scoped runtime/resources, HTTP and filtered logging.                                            |
-| `api`, `connection`, `controllers`, `identity`                      | HTTP/SFS entry, authentication and thin command Controllers.                                                                                          |
-| `contracts`, `messages`, `dtos`, `enums`, `validations`, `mappings` | Versioned ports, wire types, DTOs, runtime validation and serialization.                                                                              |
-| `services`                                                          | Application workflows and orchestration of rules, contracts and persistence ports.                                                                    |
-| `rules`, domain rule modules including `hero/rules` and `combat`    | Pure rule evaluation; no sockets, ORM or broker imports.                                                                                              |
-| `ledger`                                                            | Shared mutation/posting/outbox message contracts and signed-64 posting validation; no domain or persistence dependency.                               |
-| `economy`                                                           | Owned balance/item/activity contracts, inventory rules and adapters; injected transactions and structural planner/catalog ports.                      |
-| `account`                                                           | Global account discovery, reservations, activation, contracts, input DTO, Controller, Service and persistence; realm seeds remain separate.           |
-| `hero`                                                              | Hero and general contracts, rules, workflows, mappings, validations, catalog types and persistence adapters, separated by responsibility.             |
-| `dragon`                                                            | Named dragon archetypes, configuration contracts, validation and catalog mapping; existing gameplay workflows remain in their current packages.       |
-| `resources`                                                         | Versioned typed gameplay catalogs.                                                                                                                    |
-| `player`                                                            | Profile/push preferences and realm character provisioning, including starter rules and transactional adapters with app-injected collaborators.        |
-| `shop`                                                              | In-game mall and NPC trading contracts, pure rules, Services, offer mappings and transactional adapters; inventory planning is injected by the realm. |
-| `policy`                                                            | Pure content matching, bounded file/worker adapters and the maintained nickname/description dictionary.                                               |
-| `repositories`, `drizzle`, `storage`                                | Owned transactional state, schemas, Redis/ZooKeeper and S3 adapters.                                                                                  |
+| Packages                                                         | Boundary                                                                                                                                              |
+| ---------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `env`, `config`, `core`                                          | Validated root environment, strict compiler settings, scoped runtime/resources, HTTP and filtered logging.                                            |
+| `api`, `connection`, `controllers`, `identity`                   | HTTP/SFS entry, authentication and thin command Controllers.                                                                                          |
+| `contracts`, `dtos`, `enums`, `validations`, `mappings`          | Versioned ports, wire types, DTOs, runtime validation and serialization.                                                                              |
+| `services`                                                       | Application workflows and orchestration of rules, contracts and persistence ports.                                                                    |
+| `rules`, domain rule modules including `hero/rules` and `combat` | Pure rule evaluation; no sockets, ORM or broker imports.                                                                                              |
+| `messages`                                                       | SFS codecs, shared response values and wire/schema validation primitives; domain schemas remain with their owners.                                    |
+| `ledger`                                                         | Shared mutation/posting/outbox message contracts and signed-64 posting validation; no domain or persistence dependency.                               |
+| `economy`                                                        | Owned balance/item/activity contracts, inventory rules and adapters; injected transactions and structural planner/catalog ports.                      |
+| `account`                                                        | Global account discovery, reservations, activation, contracts, input DTO, Controller, Service and persistence; realm seeds remain separate.           |
+| `hero`                                                           | Hero and general contracts, rules, workflows, mappings, validations, catalog types and persistence adapters, separated by responsibility.             |
+| `dragon`                                                         | Named dragon archetypes, configuration contracts, validation and catalog mapping; existing gameplay workflows remain in their current packages.       |
+| `resources`                                                      | Versioned typed gameplay catalogs.                                                                                                                    |
+| `player`                                                         | Profile/push preferences and realm character provisioning, including starter rules and transactional adapters with app-injected collaborators.        |
+| `shop`                                                           | In-game mall and NPC trading contracts, pure rules, Services, offer mappings and transactional adapters; inventory planning is injected by the realm. |
+| `policy`                                                         | Pure content matching, bounded file/worker adapters and the maintained nickname/description dictionary.                                               |
+| `repositories`, `drizzle`, `storage`                             | Owned transactional state, schemas, Redis/ZooKeeper and S3 adapters.                                                                                  |
 
 The nickname/description word list is versioned in
 `packages/policy/src/resources/data/badwords.json` and included in the server artifact.

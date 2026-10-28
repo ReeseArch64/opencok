@@ -1,6 +1,6 @@
 import { z } from "zod";
 import type { AvatarMailPushResponse } from "@opencok/contracts/responses/avatar-mail";
-import { field } from "./response.ts";
+import { field } from "@opencok/messages/validations/response";
 
 export const avatarMailPushSchema = z.strictObject({
     title: field.string,

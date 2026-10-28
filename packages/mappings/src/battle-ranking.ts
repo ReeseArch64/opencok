@@ -3,7 +3,7 @@ import type { Row } from "@opencok/contracts/rows";
 import { sfs, type Fields } from "@opencok/messages/sfs";
 import { fightRankingSchema, playoffRankingSchema } from "@opencok/validations/battle-ranking";
 import { playoffBattleStart, playoffTimes, playoffPairs } from "@opencok/rules/battle-ranking";
-import { validateFields } from "./validation.ts";
+import { validateFields } from "@opencok/messages/validations/fields";
 
 export function fightRanking(rows?: readonly Row[]): Fields
 {

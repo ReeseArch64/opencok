@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { field, responseFieldsSchema } from "./response";
+import { field, responseFieldsSchema } from "@opencok/messages/validations/response";
 import type { VipBoxResponse } from "@opencok/contracts/responses/vip-box";
 
 export const vipBoxNoticeSchema = z.strictObject({

@@ -1,6 +1,6 @@
 import { z } from "zod";
 import type { RewardPreviewResponse } from "@opencok/contracts/responses/rewards";
-import { field } from "./response.ts";
+import { field } from "@opencok/messages/validations/response";
 
 export const rewardPreviewArraySchema = z
     .array(

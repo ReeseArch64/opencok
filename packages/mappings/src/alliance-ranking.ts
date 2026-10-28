@@ -1,4 +1,4 @@
-import { validateFields } from "./validation.ts";
+import { validateFields } from "@opencok/messages/validations/fields";
 import { allianceRankingSchema } from "@opencok/validations/alliance-ranking";
 import type {
     AllianceRankingKind,

@@ -3,7 +3,7 @@ import type {
     MilitaryRankingResponse,
     MilitaryRankingEntryResponse,
 } from "@opencok/contracts/responses/military-ranking";
-import { field } from "./response.ts";
+import { field } from "@opencok/messages/validations/response";
 
 export const militaryRankingEntrySchema = z.strictObject({
     serverId: field.string,

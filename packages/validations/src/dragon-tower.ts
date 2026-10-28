@@ -4,7 +4,7 @@ import type {
     DragonTowerUserResponse,
     DragonTowerLayerResponse,
 } from "@opencok/contracts/responses/dragon-tower";
-import { field, responseValueSchema } from "./response";
+import { field, responseValueSchema } from "@opencok/messages/validations/response";
 
 const units = z.array(z.strictObject({ id: field.int, num: field.int, star: field.int })).max(128);
 

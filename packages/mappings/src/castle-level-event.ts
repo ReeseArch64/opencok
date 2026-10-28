@@ -1,7 +1,7 @@
 import { num, text, type Row } from "@opencok/contracts/rows";
 import { sfs, Type, type Fields } from "@opencok/messages/sfs";
 import { castleLevelStateSchema } from "@opencok/validations/castle-level-event";
-import { validateFields } from "./validation";
+import { validateFields } from "@opencok/messages/validations/fields";
 
 export function castleLevelState(row: Row): Fields
 {

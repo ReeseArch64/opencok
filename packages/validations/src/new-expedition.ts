@@ -1,6 +1,6 @@
 import { z } from "zod";
 import type { ExpeditionActivityResponse } from "@opencok/contracts/responses/new-expedition";
-import { field } from "./response";
+import { field } from "@opencok/messages/validations/response";
 import type { ExpeditionPanelResponse } from "@opencok/contracts/responses/new-expedition";
 import { rewardPreviewArraySchema } from "./rewards";
 

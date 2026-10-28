@@ -1,6 +1,6 @@
 import { reconnectMarchGeneralSchema } from "@opencok/hero/validations/reconnect-march-general";
 import { z } from "zod";
-import { field, responseValueSchema } from "./response.ts";
+import { field, responseValueSchema } from "@opencok/messages/validations/response";
 
 import type {
     ReconnectMarchArmyResponse,

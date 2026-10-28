@@ -5,7 +5,7 @@ import type { WorldResourceOwnerResponse } from "@opencok/contracts/responses/wo
 import { mailDeletedSchema } from "@opencok/validations/mail";
 import { worldSearchSchema } from "@opencok/validations/world-search";
 import { worldResourceOwnerSchema } from "@opencok/validations/world-resource-detail";
-import { responseFieldsSchema, responseValueSchema } from "@opencok/validations/response";
+import { responseFieldsSchema, responseValueSchema } from "@opencok/messages/validations/response";
 
 test("response contracts are validated independently", () => {
     const dto: MailDeletedResponse = { delete: 3 };

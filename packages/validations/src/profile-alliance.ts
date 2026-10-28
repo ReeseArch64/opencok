@@ -3,7 +3,7 @@ import type {
     AllianceVideoResponse,
     PublicAllianceInfoResponse,
 } from "@opencok/contracts/responses/profile-alliance";
-import { field, responseRecord } from "./response.ts";
+import { field, responseRecord } from "@opencok/messages/validations/response";
 
 export const allianceStringFields = [
     "uid",

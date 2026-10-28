@@ -1,4 +1,4 @@
-import { validateValue } from "./validation.ts";
+import { validateValue } from "@opencok/messages/validations/fields";
 import { rewardPreviewArraySchema } from "@opencok/validations/rewards";
 
 import type { RewardPreview } from "@opencok/contracts/rewards";

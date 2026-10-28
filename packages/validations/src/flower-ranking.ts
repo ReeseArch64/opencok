@@ -3,7 +3,7 @@ import type {
     FlowerRankingResponse,
     FlowerRankingMemberResponse,
 } from "@opencok/contracts/responses/flower-ranking";
-import { field, responseFieldsSchema } from "./response.ts";
+import { field, responseFieldsSchema } from "@opencok/messages/validations/response";
 
 export const flowerRankingMemberSchema = z.strictObject({
     uid: field.string,

@@ -1,7 +1,7 @@
 import { num, long, text, type Row } from "@opencok/contracts/rows";
 import { sfs, type Fields } from "@opencok/messages/sfs";
 import { lotteryInfoSchema } from "@opencok/validations/lottery";
-import { validateFields } from "./validation";
+import { validateFields } from "@opencok/messages/validations/fields";
 
 export function lotteryInfo(row: Row, display?: string): Fields
 {

@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { field, responseValueSchema } from "./response";
+import { field, responseValueSchema } from "@opencok/messages/validations/response";
 import type {
     RegionalRecallResponse,
     RegionalRecallLoginResponse,

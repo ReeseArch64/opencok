@@ -1,4 +1,4 @@
-import { validateFields } from "./validation.ts";
+import { validateFields } from "@opencok/messages/validations/fields";
 import {
     worldResourceOwnerSchema,
     worldResourceGroupSchema,

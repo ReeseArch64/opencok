@@ -1,6 +1,6 @@
 import { sfs, type Fields } from "@opencok/messages/sfs";
 import { targetTaskSchema } from "@opencok/validations/target-task";
-import { validateFields } from "./validation";
+import { validateFields } from "@opencok/messages/validations/fields";
 
 export function targetTaskView(
     rows: readonly Fields[],

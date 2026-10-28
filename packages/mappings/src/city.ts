@@ -4,7 +4,7 @@ import {
     buildingItemCosts,
     buildingUnlockValues,
 } from "./building.ts";
-import { validateFields } from "./validation.ts";
+import { validateFields } from "@opencok/messages/validations/fields";
 import { buildingSchema, queueSchema, resourceSchema, userSchema } from "@opencok/validations/city";
 
 import { sfs, type Fields } from "@opencok/messages/sfs";

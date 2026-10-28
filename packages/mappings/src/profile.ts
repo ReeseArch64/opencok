@@ -1,6 +1,6 @@
 import { integer } from "@opencok/mappings/profile-values";
 import { signed } from "@opencok/mappings/profile-values";
-import { validateFields } from "./validation.ts";
+import { validateFields } from "@opencok/messages/validations/fields";
 import {
     publicStatisticsSchema,
     publicMedalSchema,

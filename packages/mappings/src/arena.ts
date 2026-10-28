@@ -1,7 +1,7 @@
 import { num, long, text, type Row } from "@opencok/contracts/rows";
 import { sfs, type Fields } from "@opencok/messages/sfs";
 import { arenaInfoSchema, arenaArmySchema } from "@opencok/validations/arena";
-import { validateFields } from "./validation";
+import { validateFields } from "@opencok/messages/validations/fields";
 
 export function arenaInfo(row: Row): Fields
 {

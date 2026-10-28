@@ -6,7 +6,7 @@ import {
     anniversarySchema,
     campaignTriggerSchema,
 } from "@opencok/validations/anniversary";
-import { validateFields } from "./validation";
+import { validateFields } from "@opencok/messages/validations/fields";
 
 export function anniversaryView(response: AnniversaryResponse): Fields
 {
