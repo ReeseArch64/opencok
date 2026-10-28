@@ -1,6 +1,6 @@
 import type { TargetTaskCatalog } from "../contracts/target-context";
 import type { QuestRule as Rule } from "../contracts/records";
-import type { TargetTaskNumericRuntime } from "../contracts/target-runtime";
+import type { QuestNumericRuntime } from "../contracts/runtime";
 import { targetTaskTypes } from "../constants/target-types";
 import { targetFailure } from "../validations/target-failure";
 
@@ -8,7 +8,7 @@ const day = 86400000n, week = 7n * day;
 
 export class TargetTaskPolicy<TCatalog extends TargetTaskCatalog>
 {
-    public constructor(private readonly runtime: TargetTaskNumericRuntime)
+    public constructor(private readonly runtime: QuestNumericRuntime)
     {}
 
     private readonly monday = (now: bigint) => {

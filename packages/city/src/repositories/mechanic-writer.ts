@@ -102,7 +102,7 @@ export class CityMechanicWriter
 
         if (write.recallTask)
         {
-            await writers.writeRecallTasks(tx, owner, write.recallTask);
+            await session.recallTasks.writeRecallTasks(write.recallTask);
         }
 
         if (write.regionalRecall)

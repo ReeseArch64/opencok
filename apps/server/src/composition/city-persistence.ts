@@ -49,7 +49,7 @@ import {
 import { readTrouble, writeTrouble } from "@opencok/repositories/trouble";
 import { readCosmeticTarget, writeCosmeticTarget } from "@opencok/repositories/city-cosmetics";
 import { readPrayer, writePrayer } from "@opencok/repositories/prayer";
-import { readRecallTasks, writeRecallTasks } from "@opencok/repositories/recall-task";
+import { createRealmRecallTaskRepository } from "./recall-task-persistence";
 import { readRegionalRecall, writeRegionalRecall } from "@opencok/repositories/regional-recall";
 import { readAllianceHeart, writeAllianceHeart } from "@opencok/repositories/alliance-heart";
 import { readPlayerItemGifts, writePlayerItemGifts } from "@opencok/repositories/player-item-gifts";
@@ -139,7 +139,6 @@ const readers: CityPersistenceReaders = {
     readTrouble,
     readCosmeticTarget,
     readPrayer,
-    readRecallTasks,
     readRegionalRecall,
     readAllianceHeart,
     readPlayerItemGifts,
@@ -193,7 +192,6 @@ const writers: CityPersistenceWriters = {
     writeTrouble,
     writeCosmeticTarget,
     writePrayer,
-    writeRecallTasks,
     writeRegionalRecall,
     writeAllianceHeart,
     writePlayerItemGifts,
@@ -238,6 +236,7 @@ export function createRealmCityProgressionStore(
         equipment: new EquipmentRepository(tx, owner, { text, num, long }),
         quests: createRealmQuestRepository(tx, owner),
         targetTasks: createRealmTargetTaskRepository(tx, owner),
+        recallTasks: createRealmRecallTaskRepository(tx, owner),
         birth: authority
             ? (rules, mode) => allocateWorldBirth(tx, authority, mapSize, rules, now, mode)
             : undefined,

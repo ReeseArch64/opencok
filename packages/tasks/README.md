@@ -3,8 +3,8 @@
 Tasks owns ordinary/main, story, daily, legacy daily and sign-in quests after
 [#653](https://github.com/ReeseArch64/opencok/issues/653), under
 [ADR-0016](../../docs/decisions/0016-adopt-domain-owned-package-layout.md).
-Target missions are owned after #655. Recall and other event-specific mission
-workflows remain in their current owners for later #558 slices. Background work belongs to jobs.
+Target missions are owned after #655 and recall missions after #657. Other
+event-specific workflows remain in their current owners for later #558 slices. Background work belongs to jobs.
 
 ## Responsibilities and composition
 
@@ -141,3 +141,56 @@ owned tests add 33 assertions for selection, progress gates/clamps, identity bou
 wire validation and publication. Rollback uses the previous artifact against the
 same target notes/tasks, mail, inventory, receipts and outbox; no data conversion,
 configuration change or production-performance claim is introduced.
+
+## Recall missions (#657)
+
+Recall missions add 11 source modules and one test file, bringing Tasks to 47 source
+modules and three tests. `RecallTaskAccess` reads enabled/pending state;
+`RecallTaskProgression` records mission counters; `RecallTaskDomain` owns the three
+existing commands, initialization, login counts and claims. Its command implementation
+stays below 350 lines. The native Mapper, three response interfaces and two schemas
+move together. No rules are copied from shared regional recall or reward algorithms.
+
+`apps/server/src/composition/recall-task.ts` binds the actual country/eligibility,
+numeric, event timestamp, reward preview/grant and status callbacks. Target app
+composition receives its owned bound `recordRecallTask`. Region-recall campaign
+workflows remain separate. Progress preserves the inclusive end instant, bigint
+saturation, pending updates and completed-row gates. Initialization preserves castle
+stars, country, native quantity expression and login counters 26/27. Claiming keeps
+the same reward/status milestone scan order and pending claim suppression.
+
+`RecallTaskRepository` receives the current transaction and owner from realm
+persistence composition. It preserves ordered task locks, the 65-row sentinel,
+64-row bound, conditional registration-country lookup (type 2 first), notes/row
+validation and reset/update ordering. City delegates at the original aggregate
+positions. Numeric ports are now shared as `QuestNumericRuntime` and
+`QuestPersistenceValueRuntime` in `contracts/runtime`; the former target-only type
+names had no external consumers, and both owned target policy/repository use the
+shared ports. Ordinary quest and target runtime contract shapes remain identical.
+
+| Former module                                          | Owned destination                                                                    | Composition and verification                                       |
+| ------------------------------------------------------ | ------------------------------------------------------------------------------------ | ------------------------------------------------------------------ |
+| `services/src/recall-task.ts`                          | `services/recall-{access,progression,task}` and `enums/recall-command`               | Realm factory, target callback and recall/prayer integration tests |
+| `repositories/src/recall-task.ts`                      | `repositories/recall-task`                                                           | Realm persistence factory and City adapter; PostgreSQL suites      |
+| `contracts/src/recall-task.ts`                         | `contracts/recall-task` plus bounded context/runtime ports                           | City aggregate facade and affected type checks                     |
+| Shared recall response, validation and mapping modules | `contracts/responses/recall-task`, `validations/recall-task`, `mappings/recall-task` | Owned wire tests and app/PG protocol scenarios                     |
+
+### Recall compatibility and retirement
+
+Tasks owns the remaining aliases under #558 W20. `services/src/recall-task.ts`
+exports only a bound `recordRecallTask` for `services/src/target-task.ts`; migrate
+that legacy target adapter to an app-injected recall callback before removing the
+facade. `contracts/src/recall-task.ts` re-exports state/write types embedded through
+import-type expressions in `contracts/src/city-progression.ts`; remove that facade
+with the aggregate-contract and public-export audit. The old repository, mapping,
+validation and response modules have no maintained consumers and are removed.
+
+Verification includes 25 structural comparisons of original runtime bodies,
+complete City flows, five recall declarations, two schemas, command order and
+unchanged numeric contracts/target classes. Four new tests add 30 assertions for
+inclusive expiry, pending counters, login recovery, milestone ordering and wire
+shapes. Existing reference suites retain seven unit tests/39 assertions and 14
+PostgreSQL tests/110 assertions across recall, target and prayer. Deploy or roll
+back the realm artifact against the same recall notes/tasks, registration, effects,
+inventory, receipts and outbox. No schema, configuration, native resource or data
+conversion is introduced; native-device and production-load acceptance stay separate.

@@ -8,7 +8,7 @@ import type { Rules } from "@opencok/rules/game";
 import { text, num, long } from "@opencok/contracts/rows";
 import { cityInteger } from "@opencok/rules/city-progression";
 import { serverFeature } from "@opencok/rules/power-context";
-import { recordRecallTask } from "@opencok/services/recall-task";
+import { recordRecallTask } from "./recall-task";
 import {
     pinProgressionReward,
     grantNativeProgressionReward,

@@ -161,9 +161,7 @@ export class CitySnapshotReader
                 ? readers.readContinuedCost(tx, owner)
                 : undefined,
             prayer: await readers.readPrayer(tx, owner),
-            recallTask: await readers.readRecallTasks(
-                tx,
-                owner,
+            recallTask: await session.recallTasks.readRecallTasks(
                 command?.startsWith("recall.task.") ?? false,
             ),
             regionalRecall: command?.startsWith("region.recall.")

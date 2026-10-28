@@ -4,14 +4,14 @@ import { user_target_task_notes } from "@opencok/drizzle/schema/opencok_kingdom/
 import { server_info } from "@opencok/drizzle/schema/opencok_kingdom/server_info";
 import type { TargetTaskWrite } from "../contracts/target-task";
 import type { QuestTransaction } from "../contracts/persistence";
-import type { TargetTaskPersistenceRuntime } from "../contracts/target-runtime";
+import type { QuestPersistenceValueRuntime } from "../contracts/runtime";
 
 export class TargetTaskRepository
 {
     public constructor(
         private readonly tx: QuestTransaction,
         private readonly owner: string,
-        private readonly runtime: TargetTaskPersistenceRuntime,
+        private readonly runtime: QuestPersistenceValueRuntime,
     )
     {}
 
