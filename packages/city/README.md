@@ -157,3 +157,8 @@ reads, the production-boundary level query and ordinary/civilization upserts kee
 their original positions; aggregate validation and the shared transaction remain
 here. Bootstrap receives the research Mapper. Research's two workflows no longer
 use the legacy city context/domain aliases, reducing their consumers to 56/66.
+
+After #645, troop/hospital/wall reads and writes similarly delegate to the injected
+TroopsRepository inside this transaction. City retains aggregate validation and
+production settlement. Three more workflows stop using the legacy city aliases;
+the current context/domain consumer counts are 53/63.

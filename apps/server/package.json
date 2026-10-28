@@ -33,7 +33,8 @@
     "@opencok/ledger": "workspace:*",
     "@opencok/production": "workspace:*",
     "@opencok/city": "workspace:*",
-    "@opencok/research": "workspace:*"
+    "@opencok/research": "workspace:*",
+    "@opencok/troops": "workspace:*"
   },
   "devDependencies": {
     "@opencok/api": "workspace:*",

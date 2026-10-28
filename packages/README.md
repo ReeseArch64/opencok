@@ -71,3 +71,8 @@ completion, prerequisites, costs, Mappers, validation and transactional adapters
 after #643. Realm composition preserves shared city transactions and injects event
 and reconnect collaborators. The [domain base](base/README.md) supplies shared
 command selection. Named research definitions remain W14 work.
+
+The [troops domain](troops/README.md) owns training, healing and fortification
+workflows, military policies/projections and transaction-bound persistence after
+#645. The realm injects scoring and projection collaborators; shared helper and
+world/march dependencies remain tracked in its ownership register.

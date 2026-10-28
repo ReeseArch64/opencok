@@ -20,3 +20,8 @@ at the serialization boundary. Image validation remains under `image`.
 
 Run `bun run --cwd packages/validations test` for validation tests and
 `bun run test:packages` for validation, mapping, controller, rule and resource tests.
+
+`city-parameters.ts` contains `progressionBoolean`, the shared native boolean
+parameter parser used by training, fortifications and dragon-tower purchases after
+#645. It retains the former `services/training` parser's fallback and error behavior.
+Domain-specific military response schemas now belong to `troops/validations/military`.

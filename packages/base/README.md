@@ -9,3 +9,6 @@ This is the confirmed domain-base responsibility implemented for real consumers
 in #643. The package has no runtime dependencies, imports, database access or
 catalog loading. Existing workflow tests and the research command-contract test
 exercise the inherited behavior. Run `bun run --cwd packages/base check-types`.
+
+Training, hospital and fortification domains in `troops` also inherit command
+matching after #645. Their completion collaborators are injected by the realm.

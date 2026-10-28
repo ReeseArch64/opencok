@@ -2,7 +2,7 @@ import { test, expect } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { eq } from "drizzle-orm";
 import { expeditionDomain, recordExpeditionScore } from "@opencok/services/new-expedition";
-import { trainingDomain } from "@opencok/services/training";
+import { createRealmTrainingDomain } from "../src/composition/troops";
 import { installExpeditionPeriod } from "@opencok/repositories/new-expedition";
 import { expedition_progress } from "@opencok/drizzle/schema/opencok_kingdom/expedition_progress";
 import { userprofile } from "@opencok/drizzle/schema/opencok_kingdom/userprofile";
@@ -10,6 +10,8 @@ import { command_receipt } from "@opencok/drizzle/schema/opencok_kingdom/command
 import { sfs, encode, int } from "@opencok/messages/sfs";
 import type { CityDomain } from "@opencok/city/contracts/domain";
 import { cityHarness } from "./support/city";
+
+const trainingDomain = createRealmTrainingDomain();
 
 const trustedProducer: CityDomain = {
     commands: ["trusted.test.score"],

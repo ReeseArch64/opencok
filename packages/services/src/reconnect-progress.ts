@@ -1,5 +1,5 @@
 import type { ReconnectResearchProjection } from "@opencok/contracts/reconnect";
-import { woundedTroops, fortification } from "@opencok/mappings/military";
+import type { MilitaryProjection } from "@opencok/contracts/military-projection";
 import { randomInt, randomUUID } from "node:crypto";
 import type { ReconnectProgressState, ReconnectProgressWrite } from "@opencok/contracts/reconnect";
 import type { GameServices } from "@opencok/contracts/game";
@@ -75,6 +75,7 @@ export async function planReconnectProgress(
     services: Pick<GameServices, "worldPowerEffects" | "emperorVersion" | "expeditionStage">,
     environment: {
         research: ReconnectResearchProjection;
+        military: Pick<MilitaryProjection, "wounded" | "fortification">;
         specialServer: boolean;
         cn1: Cn1SessionState | null;
         random?: RewardRandom;
@@ -380,14 +381,16 @@ export async function planReconnectProgress(
             ...(state.hospital
                 ? {
                     hospital: sfs.array(
-                        state.hospital.map((row) => sfs.object(woundedTroops(row))),
+                        state.hospital.map((row) => sfs.object(environment.military.wounded(row))),
                     ),
                 }
                 : {}),
             ...(state.walls.length
                 ? {
                     fort: sfs.array(
-                        state.walls.map((row) => sfs.object(fortification(row, rules))),
+                        state.walls.map((row) =>
+                            sfs.object(environment.military.fortification(row))
+                        ),
                     ),
                 }
                 : {}),

@@ -30,7 +30,7 @@ import { nativeChatCommands } from "./chat-native";
 import { postboxCommands } from "./postbox";
 import { chatSocialCommands } from "./chat-social";
 import { UPLOAD_PATH } from "@opencok/contracts/files";
-import { militarySnapshot } from "@opencok/mappings/military";
+import type { MilitaryProjection } from "@opencok/contracts/military-projection";
 import type { CreateWorldFavoriteDto } from "@opencok/dtos/world-favorites/create-world-favorite.dto";
 import { decodeFightRanking, decodePlayoffTeams } from "./battle-ranking.ts";
 import { fightRanking, playoffRanking } from "@opencok/mappings/battle-ranking";
@@ -190,6 +190,11 @@ export interface Result
     pushes: { command: string; body: Fields; }[];
 }
 
+function missingMilitaryProjection(): never
+{
+    throw new GameError(errors.unsupported, "city_progression");
+}
+
 export class GameService
 {
     private readonly bootstrap?: CityBootstrapRuntime;
@@ -204,6 +209,11 @@ export class GameService
         createBootstrap?: CityBootstrapFactory,
         readonly projectResearch: ReconnectResearchProjection = () => {
             throw new GameError(errors.unsupported, "reconnect");
+        },
+        readonly military: MilitaryProjection = {
+            wounded: missingMilitaryProjection,
+            fortification: missingMilitaryProjection,
+            snapshot: missingMilitaryProjection,
         },
     )
     {
@@ -764,6 +774,7 @@ export class GameService
                             specialServer: serverFeature(this.rules, "araf_mode", context),
                             cn1: null,
                             research: this.projectResearch,
+                            military: this.military,
                         },
                     );
 
@@ -3495,11 +3506,10 @@ export class GameService
         {
             return {
                 resource: sfs.object(resource(state.resource)),
-                ...militarySnapshot(
+                ...this.military.snapshot(
                     state.armies,
                     state.hospital ?? [],
                     state.forts ?? [],
-                    this.rules,
                 ),
                 items: sfs.array(state.items.map((r) => sfs.object(inventoryItem(r, this.rules)))),
             };

@@ -21,6 +21,7 @@
     "@opencok/messages": "workspace:*",
     "zod": "catalog:",
     "@opencok/hero": "workspace:*",
-    "@opencok/economy": "workspace:*"
+    "@opencok/economy": "workspace:*",
+    "@opencok/constants": "workspace:*"
   }
 }

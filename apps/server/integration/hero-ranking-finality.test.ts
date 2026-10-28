@@ -15,7 +15,7 @@ import {
     acquireRealmAuthority,
 } from "@opencok/repositories/realm-authority";
 import { heroFinalityPeriod } from "@opencok/hero/rules/hero-ranking-finality";
-import { trainingDomain } from "@opencok/services/training";
+import { createRealmTrainingDomain } from "../src/composition/troops";
 import { sfs } from "@opencok/messages/sfs";
 import { hero_event } from "@opencok/drizzle/schema/opencok_kingdom/hero_event";
 import { hero_activity } from "@opencok/drizzle/schema/opencok_kingdom/hero_activity";
@@ -26,6 +26,9 @@ import { hero_rank_period } from "@opencok/drizzle/schema/opencok_global/hero_ra
 import { hero_rank_watermark } from "@opencok/drizzle/schema/opencok_global/hero_rank_watermark";
 import { hero_rank_score } from "@opencok/drizzle/schema/opencok_global/hero_rank_score";
 import { cityHarness } from "./support/city";
+
+const trainingDomain = createRealmTrainingDomain();
+
 async function fixture(types = [1])
 {
     const h = await cityHarness([trainingDomain]),

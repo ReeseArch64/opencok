@@ -6,9 +6,6 @@ import { userprofile } from "@opencok/drizzle/schema/opencok_kingdom/userprofile
 import { user_resource } from "@opencok/drizzle/schema/opencok_kingdom/user_resource";
 import { user_building } from "@opencok/drizzle/schema/opencok_kingdom/user_building";
 import { user_building_exp } from "@opencok/drizzle/schema/opencok_kingdom/user_building_exp";
-import { user_army } from "@opencok/drizzle/schema/opencok_kingdom/user_army";
-import { user_hospital } from "@opencok/drizzle/schema/opencok_kingdom/user_hospital";
-import { user_wall } from "@opencok/drizzle/schema/opencok_kingdom/user_wall";
 import { playerinfo } from "@opencok/drizzle/schema/opencok_kingdom/playerinfo";
 import { queue } from "@opencok/drizzle/schema/opencok_kingdom/queue";
 import { user_task } from "@opencok/drizzle/schema/opencok_kingdom/user_task";
@@ -55,24 +52,9 @@ export class CitySnapshotReader
             .orderBy(asc(user_building.uuid))
             .limit(257);
         const sciences = await session.research.read();
-        const armies = await tx
-            .select()
-            .from(user_army)
-            .where(eq(user_army.uid, owner))
-            .orderBy(asc(user_army.armyId))
-            .limit(1025);
-        const hospital = await tx
-            .select()
-            .from(user_hospital)
-            .where(eq(user_hospital.uid, owner))
-            .orderBy(asc(user_hospital.armyId))
-            .limit(1025);
-        const forts = await tx
-            .select()
-            .from(user_wall)
-            .where(eq(user_wall.uid, owner))
-            .orderBy(asc(user_wall.armyId))
-            .limit(1025);
+        const armies = await session.troops.readArmies();
+        const hospital = await session.troops.readHospital();
+        const forts = await session.troops.readForts();
         const queues = await tx.select().from(queue).where(eq(queue.ownerId, owner)).limit(257);
 
         if (

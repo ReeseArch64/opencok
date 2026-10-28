@@ -5,9 +5,6 @@ import { and, eq, inArray } from "drizzle-orm";
 import { userprofile } from "@opencok/drizzle/schema/opencok_kingdom/userprofile";
 import { user_building } from "@opencok/drizzle/schema/opencok_kingdom/user_building";
 import { user_building_exp } from "@opencok/drizzle/schema/opencok_kingdom/user_building_exp";
-import { user_army } from "@opencok/drizzle/schema/opencok_kingdom/user_army";
-import { user_hospital } from "@opencok/drizzle/schema/opencok_kingdom/user_hospital";
-import { user_wall } from "@opencok/drizzle/schema/opencok_kingdom/user_wall";
 import { playerinfo } from "@opencok/drizzle/schema/opencok_kingdom/playerinfo";
 import { queue } from "@opencok/drizzle/schema/opencok_kingdom/queue";
 import type { CityProgressionWrite } from "@opencok/contracts/city-progression";
@@ -101,65 +98,11 @@ export class CityAggregateWriter
 
         await session.research.writeValidated(write.sciences ?? []);
 
-        for (const row of write.armies ?? [])
-        {
-            const value = {
-                uid: owner,
-                armyId: text(row, "armyId"),
-                level: num(row, "level"),
-                free: num(row, "free"),
-                pve: num(row, "pve"),
-                march: num(row, "march"),
-                defence: num(row, "defence"),
-                train: num(row, "train"),
-                finishTime: long(row, "finishTime"),
-                foodCostTime: long(row, "foodCostTime"),
-            };
-            await tx
-                .insert(user_army)
-                .values(value)
-                .onConflictDoUpdate({
-                    target: [user_army.uid, user_army.armyId],
-                    set: value,
-                });
-        }
+        await session.troops.writeArmiesValidated(write.armies ?? []);
 
-        for (const row of write.hospital ?? [])
-        {
-            const value = {
-                uid: owner,
-                armyId: text(row, "armyId"),
-                dead: num(row, "dead"),
-                heal: num(row, "heal"),
-                finishTime: long(row, "finishTime"),
-            };
-            await tx
-                .insert(user_hospital)
-                .values(value)
-                .onConflictDoUpdate({
-                    target: [user_hospital.uid, user_hospital.armyId],
-                    set: value,
-                });
-        }
+        await session.troops.writeHospitalValidated(write.hospital ?? []);
 
-        for (const row of write.forts ?? [])
-        {
-            const value = {
-                uid: owner,
-                armyId: text(row, "armyId"),
-                num: num(row, "num"),
-                build: num(row, "build"),
-                level: num(row, "level"),
-                finishTime: long(row, "finishTime"),
-            };
-            await tx
-                .insert(user_wall)
-                .values(value)
-                .onConflictDoUpdate({
-                    target: [user_wall.uid, user_wall.armyId],
-                    set: value,
-                });
-        }
+        await session.troops.writeFortsValidated(write.forts ?? []);
 
         for (const row of write.queues ?? [])
         {

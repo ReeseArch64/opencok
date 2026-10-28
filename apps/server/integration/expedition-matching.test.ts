@@ -1,4 +1,4 @@
-import { trainingDomain } from "@opencok/services/training";
+import { createRealmTrainingDomain } from "../src/composition/troops";
 import { sfs } from "@opencok/messages/sfs";
 import { expedition_progress } from "@opencok/drizzle/schema/opencok_kingdom/expedition_progress";
 import { createHeroCalendarStore } from "@opencok/hero/repositories/hero-calendar";
@@ -25,6 +25,9 @@ import { expedition_match_realm } from "@opencok/drizzle/schema/opencok_global/e
 import { expedition_match_batch } from "@opencok/drizzle/schema/opencok_global/expedition_match_batch";
 import { playerinfo } from "@opencok/drizzle/schema/opencok_kingdom/playerinfo";
 import { cityHarness } from "./support/city";
+
+const trainingDomain = createRealmTrainingDomain();
+
 async function fixture()
 {
     const h = await cityHarness([expeditionDomain, trainingDomain]),

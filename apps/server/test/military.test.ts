@@ -1,14 +1,20 @@
-import { reserveTroops } from "@opencok/rules/military";
+import { reserveTroops } from "@opencok/troops/rules/military";
 import { expect, test } from "bun:test";
 import { loadRules } from "@opencok/resources/rules";
 import { Type, sfs, fields } from "@opencok/messages/sfs";
 import { idleDeadline } from "@opencok/rules/timed-activity";
-import { transferTroops, troopCosts, unitPower, healingSelection } from "@opencok/rules/military";
-import { trainingDomain, trainingCapacity } from "@opencok/services/training";
-import { hospitalDomain } from "@opencok/services/hospital";
-import { fortificationDomain } from "@opencok/services/fortifications";
-import { militarySnapshot } from "@opencok/mappings/military";
+import { transferTroops, troopCosts, healingSelection } from "@opencok/troops/rules/military";
+import { unitPower } from "@opencok/rules/military";
+import { createRealmTrainingDomain } from "../src/composition/troops";
+import { trainingCapacity } from "@opencok/troops/rules/capacity";
+import { createRealmHospitalDomain } from "../src/composition/troops";
+import { createRealmFortificationDomain } from "../src/composition/troops";
+import { MilitaryMapper } from "@opencok/troops/mappings/military";
 import { cityFixture } from "./fixtures/city-progression";
+
+const trainingDomain = createRealmTrainingDomain();
+const hospitalDomain = createRealmHospitalDomain();
+const fortificationDomain = createRealmFortificationDomain();
 
 const rules = await loadRules();
 function fixture()
@@ -195,7 +201,7 @@ test("fortifications reserve total capacity across types and reject excessive de
     expect(context.write.forts![0]).toMatchObject({ num: 999, build: 1 });
 });
 test("military initialization includes zero-count ordinary units and preserves pending hospital deadlines", () => {
-    const result = militarySnapshot(
+    const result = new MilitaryMapper().militarySnapshot(
         [],
         [{ armyId: "107000", dead: 3, heal: 2, finishTime: 5n }],
         [],

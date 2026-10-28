@@ -1,3 +1,4 @@
+import type { TroopsRepository } from "@opencok/troops/repositories/progression";
 import type { ResearchRepository } from "@opencok/research/repositories/progression";
 import type { CityProgressionState } from "@opencok/contracts/city-progression";
 import type { CityTransaction, CityProductionBoundary, CityBirthAllocator } from "./transaction";
@@ -6,6 +7,15 @@ import type { CityPersistenceWriters } from "./persistence-writers";
 
 export interface CityPersistenceAdapters
 {
+    readonly troops: Pick<
+        TroopsRepository,
+        | "readArmies"
+        | "readHospital"
+        | "readForts"
+        | "writeArmiesValidated"
+        | "writeHospitalValidated"
+        | "writeFortsValidated"
+    >;
     readonly research: Pick<
         ResearchRepository,
         "read" | "readCivilization" | "levels" | "writeValidated" | "writeCivilization"

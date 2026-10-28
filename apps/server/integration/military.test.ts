@@ -5,13 +5,109 @@ import { user_army } from "@opencok/drizzle/schema/opencok_kingdom/user_army";
 import { user_hospital } from "@opencok/drizzle/schema/opencok_kingdom/user_hospital";
 import { user_wall } from "@opencok/drizzle/schema/opencok_kingdom/user_wall";
 import { userprofile } from "@opencok/drizzle/schema/opencok_kingdom/userprofile";
-import { trainingDomain } from "@opencok/services/training";
-import { hospitalDomain } from "@opencok/services/hospital";
-import { fortificationDomain } from "@opencok/services/fortifications";
+import { createRealmTrainingDomain } from "../src/composition/troops";
+import { createRealmHospitalDomain } from "../src/composition/troops";
+import { createRealmFortificationDomain } from "../src/composition/troops";
 import { sfs } from "@opencok/messages/sfs";
 import { cityHarness } from "./support/city";
+import { TroopsRepository } from "@opencok/troops/repositories/progression";
+
+const trainingDomain = createRealmTrainingDomain();
+const hospitalDomain = createRealmHospitalDomain();
+const fortificationDomain = createRealmFortificationDomain();
 
 const domains = [trainingDomain, hospitalDomain, fortificationDomain];
+
+test(
+    "owned military persistence shares rollback and isolates the bound owner across all three tables",
+    async () => {
+        const h = await cityHarness(domains);
+        try
+        {
+            await h.db.db.insert(user_army).values({ uid: "foreign", armyId: "107000", free: 99 });
+            const deadline = 9007199254740993n;
+            const persist = async (repository: TroopsRepository) => {
+                await repository.writeArmiesValidated([
+                    { uid: "owner", armyId: "107001", free: 2 },
+                    {
+                        uid: "owner",
+                        armyId: "107000",
+                        free: 3,
+                        train: 4,
+                        finishTime: deadline,
+                        foodCostTime: deadline,
+                    },
+                ]);
+                await repository.writeHospitalValidated([{
+                    uid: "owner",
+                    armyId: "107000",
+                    dead: 5,
+                    heal: 6,
+                    finishTime: deadline,
+                }]);
+                await repository.writeFortsValidated([{
+                    uid: "owner",
+                    armyId: "107900",
+                    num: 7,
+                    build: 8,
+                    level: 1,
+                    finishTime: deadline,
+                }]);
+            };
+            await expect(h.db.db.transaction(async (tx) => {
+                const repository = new TroopsRepository(tx, "owner");
+                await persist(repository);
+                expect((await repository.readArmies()).map((row) => row.armyId)).toEqual([
+                    "107000",
+                    "107001",
+                ]);
+                expect((await repository.readHospital())[0]).toMatchObject({ dead: 5, heal: 6 });
+                expect((await repository.readForts())[0]).toMatchObject({ num: 7, build: 8 });
+                throw new Error("rollback military writes");
+            })).rejects.toThrow("rollback military writes");
+            expect(await h.db.db.select().from(user_army).where(eq(user_army.uid, "owner")))
+                .toEqual([]);
+            expect(await h.db.db.select().from(user_hospital).where(eq(user_hospital.uid, "owner")))
+                .toEqual([]);
+            expect(await h.db.db.select().from(user_wall).where(eq(user_wall.uid, "owner")))
+                .toEqual([]);
+            await h.db.db.transaction(async (tx) => {
+                const repository = new TroopsRepository(tx, "owner");
+                await persist(repository);
+                expect((await repository.readArmies())[0]).toMatchObject({
+                    uid: "owner",
+                    armyId: "107000",
+                    free: 3,
+                    train: 4,
+                    finishTime: deadline,
+                    foodCostTime: deadline,
+                });
+                expect((await repository.readHospital())[0]).toMatchObject({
+                    finishTime: deadline,
+                });
+                expect((await repository.readForts())[0]).toMatchObject({ finishTime: deadline });
+            });
+            expect(
+                (await h.db.db.select().from(user_army).where(eq(user_army.uid, "owner"))).length,
+            ).toBe(2);
+            expect(
+                (await h.db.db.select().from(user_hospital).where(eq(user_hospital.uid, "owner")))
+                    .length,
+            ).toBe(1);
+            expect(
+                (await h.db.db.select().from(user_wall).where(eq(user_wall.uid, "owner"))).length,
+            ).toBe(1);
+            expect((await h.db.db.select().from(user_army).where(eq(user_army.uid, "foreign")))[0])
+                .toMatchObject({ free: 99 });
+        }
+        finally
+        {
+            await h.close();
+        }
+    },
+    120000,
+);
+
 test(
     "training, dismissal, healing and defenses conserve quantities under retry and recovery",
     async () => {
