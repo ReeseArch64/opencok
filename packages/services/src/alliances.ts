@@ -1,3 +1,5 @@
+import type { AllianceGovernanceFactory } from "@opencok/alliance/contracts/governance";
+import { AllianceGovernanceCommand } from "@opencok/alliance/enums/governance-command";
 import { randomUUID, randomInt, createHash } from "node:crypto";
 import { errors } from "@opencok/constants/game";
 import { GameError } from "@opencok/errors/game";
@@ -16,7 +18,6 @@ import {
     allianceRight,
     alliancePermissions,
     allianceTargets,
-    changeAlliancePermissions,
     newAllianceMember,
     allianceCreationCost,
     allianceJoinAllowed,
@@ -45,8 +46,8 @@ import { AllianceGiftCommand } from "@opencok/alliance/enums/gift-command";
 
 export const allianceCommands = [
     "al.create",
-    "al.attr",
-    "al.changeattr",
+    AllianceGovernanceCommand.Attributes,
+    AllianceGovernanceCommand.ChangeAttributes,
     "al.checkname",
     "al.name",
     "al.abbr",
@@ -65,22 +66,22 @@ export const allianceCommands = [
     "al.userinvitelist",
     "al.apply.message",
     "al.apply.message.get",
-    "al.leave",
-    "al.leave.v2",
-    "al.dismiss",
-    "al.kick",
-    "al.setrank",
-    "al.leader.trans",
-    "al.leader.replace",
+    AllianceGovernanceCommand.Leave,
+    AllianceGovernanceCommand.LeaveV2,
+    AllianceGovernanceCommand.Dismiss,
+    AllianceGovernanceCommand.Kick,
+    AllianceGovernanceCommand.Rank,
+    AllianceGovernanceCommand.Transfer,
+    AllianceGovernanceCommand.Replace,
     "al.get.firstjoin",
     "al.rank",
     "al.view",
     "al.check",
     "al.search",
-    "al.permission.get",
-    "al.permission.modify",
-    "al.rankname.set",
-    "alliance.flag.choose",
+    AllianceGovernanceCommand.PermissionGet,
+    AllianceGovernanceCommand.PermissionModify,
+    AllianceGovernanceCommand.RankNames,
+    AllianceGovernanceCommand.Flag,
     AllianceScienceCommand.Target,
     AllianceScienceCommand.Fresh,
     AllianceScienceCommand.Donate,
@@ -93,9 +94,9 @@ export const allianceCommands = [
     AllianceGiftCommand.Show,
     AllianceGiftCommand.Open,
     AllianceGiftCommand.Clear,
-    "al.diplo",
-    "al.blacklist.query",
-    "al.blacklist.modify",
+    AllianceGovernanceCommand.Diplomacy,
+    AllianceGovernanceCommand.BlacklistQuery,
+    AllianceGovernanceCommand.BlacklistModify,
 ] as const;
 
 export class AllianceService
@@ -107,6 +108,7 @@ export class AllianceService
         readonly help: AllianceHelpFactory<Rules>,
         readonly gifts: AllianceGiftFactory<RealmInventoryPlanner>,
         readonly science: AllianceScienceFactory<RealmInventoryPlanner>,
+        readonly governance: AllianceGovernanceFactory,
         readonly forbidden: (value: string) => boolean | Promise<boolean> = () => false,
     )
     {}
@@ -140,6 +142,7 @@ export class AllianceService
                     this.help,
                     this.gifts,
                     this.science,
+                    this.governance,
                 );
                 context.member();
                 const body = this.gifts(context).publish(giftEvent, type),
@@ -369,6 +372,7 @@ export class AllianceService
                     this.help,
                     this.gifts,
                     this.science,
+                    this.governance,
                 );
                 const body = await context.command(command, params);
                 const inventory = context.ledger.result(body);
@@ -428,6 +432,7 @@ export class AllianceContext
         private readonly help: AllianceHelpFactory<Rules>,
         private readonly gifts: AllianceGiftFactory<RealmInventoryPlanner>,
         private readonly science: AllianceScienceFactory<RealmInventoryPlanner>,
+        private readonly governance: AllianceGovernanceFactory,
     )
     {
         this.allianceId = text(state.inventory.profile, "allianceId");
@@ -1134,142 +1139,7 @@ export class AllianceContext
             return this.gifts(this).command(command, params);
         }
 
-        if (command === "al.permission.get")
-        {
-            return { permission: this.snapshot().permission! };
-        }
-
-        if (command === "al.permission.modify")
-        {
-            const values = changeAlliancePermissions(
-                this.member(),
-                text(this.alliance(), "permission"),
-                str(params, "rankData"),
-            );
-            this.setAlliance({ ...this.alliance(), permission: JSON.stringify(values) });
-
-            return {
-                permission: sfs.object(
-                    Object.fromEntries(
-                        Object.entries(values).map(([key, value]) => [key, sfs.int(value)]),
-                    ),
-                ),
-            };
-        }
-
-        if (command === "al.leave" || command === "al.leave.v2")
-        {
-            this.right("quit");
-
-            return this.remove(this.owner);
-        }
-
-        if (command === "al.dismiss")
-        {
-            this.right("dissolve");
-
-            if (this.list().length !== 1)
-            {
-                allianceFailure(errors.locked);
-            }
-
-            const body = this.remove(this.owner);
-            this.write.alliances = [];
-            this.write.deletedAlliances = [this.allianceId];
-
-            return body;
-        }
-
-        if (command === "al.kick")
-        {
-            this.right("kick");
-            const target = this.member(str(params, "playerId"));
-
-            if (num(target, "rank") === 5 || target.uid === this.owner)
-            {
-                allianceFailure(errors.locked);
-            }
-
-            return this.remove(text(target, "uid"));
-        }
-
-        if (command === "al.setrank")
-        {
-            const target = this.member(str(params, "playerId")),
-                rank = cityInteger(int(params, "rank"), 1, 4),
-                own = this.member();
-            this.right(rank > num(target, "rank") ? "rankup" : "rankdown");
-
-            if (
-                target.uid === this.owner
-                || rank >= num(own, "rank")
-                || num(target, "rank") > num(own, "rank")
-            )
-            {
-                allianceFailure(errors.locked);
-            }
-
-            this.setMember({ ...target, rank });
-
-            return { uid: sfs.string(text(target, "uid")), rank: sfs.int(rank) };
-        }
-
-        if (command === "al.leader.trans" || command === "al.leader.replace")
-        {
-            const leader = this.list().find((row) => num(row, "rank") === 5);
-
-            if (!leader || this.list().filter((row) => num(row, "rank") === 5).length !== 1)
-            {
-                allianceFailure();
-            }
-
-            const target = command === "al.leader.trans"
-                ? this.member(str(params, "playerId"))
-                : this.member();
-
-            if (
-                target.uid === leader.uid
-                || num(this.profile(text(leader, "uid")), "crossFightSrcServerId") > 0
-                || num(this.profile(text(target, "uid")), "crossFightSrcServerId") > 0
-            )
-            {
-                allianceFailure(errors.locked);
-            }
-
-            if (command === "al.leader.trans")
-            {
-                this.right("transfer");
-            }
-            else
-            {
-                const days = cityInteger(
-                        this.rules.items.get("alliance_cost")
-                            ?.[num(target, "rank") <= 2 ? "k12" : "k11"],
-                        1,
-                    ),
-                    offline = long(this.profile(text(leader, "uid")), "offLineTime");
-
-                if (!offline || this.now - offline < BigInt(days) * 86400000n)
-                {
-                    allianceFailure(errors.locked);
-                }
-
-                this.cost("k7");
-            }
-
-            this.setMember({ ...leader, rank: 4 });
-            this.setMember({ ...target, rank: 5 });
-            this.setAlliance({ ...this.alliance(), rallyPoint: 0 });
-
-            return {
-                alliance: sfs.object(this.snapshot()),
-                oldLeaderId: sfs.string(text(leader, "uid")),
-                oldLeaderRank: sfs.int(4),
-                gold: sfs.long(this.ledger.total()),
-            };
-        }
-
-        return this.attributes(command, params);
+        return this.governance(this).command(command, params);
     }
 
     membership(command: string, params: Fields): Fields
@@ -1563,166 +1433,6 @@ export class AllianceContext
             ),
             page: sfs.int(this.state.selection.page ?? 0),
         };
-    }
-
-    attributes(command: string, params: Fields): Fields
-    {
-        const alliance = this.alliance(),
-            next = { ...alliance };
-
-        if (command === "al.changeattr" || command === "al.attr")
-        {
-            const changes: readonly [string, string, string, number, number, string?][] = [
-                ["name", "alliancename", "name", 3, 20, "k1"],
-                ["abbr", "abbr", "briefname", 3, 3],
-                ["intro", "intro", "slogan", 0, 200],
-                ["announce", "announce", "announcement", 0, 200],
-                ["language", "language", "alliancelanguage", 0, 40],
-                ["icon", "icon", "flag", 1, 40, "k3"],
-            ];
-
-            for (const [input, key, right, min, max, cost] of changes)
-            {
-                if (params[input])
-                {
-                    this.right(right);
-                    next[key] = allianceText(str(params, input).trim(), min, max);
-
-                    if (cost)
-                    {
-                        this.cost(cost);
-                    }
-
-                    if (input === "abbr")
-                    {
-                        if (num(alliance, "abbrRename") > 0)
-                        {
-                            this.cost("k2");
-                        }
-
-                        next.abbrRename = num(alliance, "abbrRename") + 1;
-                    }
-                }
-            }
-
-            if (params.recruit)
-            {
-                this.right("recruitment");
-                next.recruit = cityInteger(int(params, "recruit"), 0, 1);
-            }
-
-            for (const key of ["powerRestriction", "castleRestriction"])
-            {
-                if (params[key])
-                {
-                    this.right("quest");
-                    const value = Number(str(params, key));
-                    next[key] = key === "powerRestriction"
-                        ? BigInt(
-                            cityInteger(
-                                value,
-                                0,
-                                cityInteger(this.rules.items.get("alliance_gift")?.k3),
-                            ),
-                        )
-                        : cityInteger(value, 0, 30);
-                }
-            }
-        }
-        else if (command === "al.rankname.set")
-        {
-            this.right("rankname");
-
-            for (
-                const [input, key] of [
-                    ["rankOne", "rankone"],
-                    ["rankTwo", "ranktwo"],
-                    ["rankThree", "rankthree"],
-                    ["rankFour", "rankfour"],
-                    ["rankFive", "rankfive"],
-                ]
-            )
-            {
-                next[key!] = allianceText(str(params, input!), 0, 10);
-            }
-        }
-        else if (command === "alliance.flag.choose")
-        {
-            this.right("flag");
-            next.bannerStyle = allianceText(str(params, "banner"), 1, 50);
-        }
-        else if (command === "al.diplo")
-        {
-            this.right("announcement");
-
-            for (const key of ["ally", "enemy", "other"])
-            {
-                next[key] = allianceText(str(params, key, ""), 0, 255);
-            }
-        }
-        else if (command === "al.blacklist.query" || command === "al.blacklist.modify")
-        {
-            const row = this.state.blacklist.find((row) => row.allianceId === this.allianceId) ?? {
-                allianceId: this.allianceId,
-                black: "[]",
-                white: "[]",
-            };
-
-            if (command.endsWith("modify"))
-            {
-                if (num(this.member(), "rank") !== 5)
-                {
-                    allianceFailure(errors.locked);
-                }
-
-                const field = cityInteger(int(params, "isBlack"), 0, 1) ? "black" : "white",
-                    id = allianceText(str(params, "allianceId"), 1, 40);
-                let values: string[];
-
-                try
-                {
-                    values = JSON.parse(text(row, field) || "[]");
-                }
-                catch
-                {
-                    allianceFailure();
-                }
-
-                if (!Array.isArray(values) || values.some((value) => typeof value !== "string"))
-                {
-                    allianceFailure();
-                }
-
-                values = values.filter((value) => value !== id);
-
-                if (cityInteger(int(params, "isAdd"), 0, 1))
-                {
-                    values.push(id);
-                }
-
-                if (JSON.stringify(values).length > 500)
-                {
-                    allianceFailure(errors.full);
-                }
-
-                this.write.blacklist = [{ ...row, [field]: JSON.stringify(values) }];
-            }
-
-            const value = this.write.blacklist?.[0] ?? row;
-
-            return {
-                black: sfs.string(text(value, "black")),
-                white: sfs.string(text(value, "white")),
-            };
-        }
-        else
-        {
-            throw new GameError(errors.unsupported);
-        }
-
-        this.setAlliance(next);
-
-        return { alliance: sfs.object(this.snapshot(next)), gold: sfs.long(this.ledger.total()) };
     }
 }
 

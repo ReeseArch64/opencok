@@ -1,3 +1,4 @@
+import { AllianceGovernanceRepository } from "@opencok/alliance/repositories/governance";
 import { AllianceScienceRepository } from "@opencok/alliance/repositories/science";
 import { AllianceGiftRepository } from "@opencok/alliance/repositories/gifts";
 import { AllianceHelpRepository } from "@opencok/alliance/repositories/help";
@@ -8,7 +9,6 @@ import { and, asc, eq, inArray, or, sql } from "drizzle-orm";
 import { alliance } from "@opencok/drizzle/schema/opencok_kingdom/alliance";
 import { alliance_member } from "@opencok/drizzle/schema/opencok_kingdom/alliance_member";
 import { alliance_apply } from "@opencok/drizzle/schema/opencok_kingdom/alliance_apply";
-import { alliance_blacklist } from "@opencok/drizzle/schema/opencok_kingdom/alliance_blacklist";
 import { userprofile } from "@opencok/drizzle/schema/opencok_kingdom/userprofile";
 import { user_lord } from "@opencok/drizzle/schema/opencok_kingdom/user_lord";
 import { worldpoint } from "@opencok/drizzle/schema/opencok_kingdom/worldpoint";
@@ -311,12 +311,7 @@ export function createAllianceRepository(
                                     .limit(10)
                                     .offset(((selection.page ?? 1) - 1) * 10)
                                 : [],
-                            blacklist: groups.length
-                                ? await tx
-                                    .select()
-                                    .from(alliance_blacklist)
-                                    .where(inArray(alliance_blacklist.allianceId, groups))
-                                : [],
+                            blacklist: await AllianceGovernanceRepository.readBlacklist(tx, groups),
                         });
                         const apply = async () => {
                             for (const row of result.write.activities ?? [])
@@ -427,55 +422,7 @@ async function writeAlliance(
 {
     const allowed = new Set(groups);
 
-    for (const row of write.alliances ?? [])
-    {
-        const id = text(row, "uid");
-
-        if (!allowed.has(id))
-        {
-            if (
-                !(write.memberships ?? []).some((entry) =>
-                    entry.uid === owner && entry.allianceId === id
-                )
-            )
-            {
-                throw new Error("Foreign alliance creation");
-            }
-
-            allowed.add(id);
-        }
-
-        for (
-            const [kind, value] of [
-                ["name", text(row, "alliancename")],
-                ["abbr", text(row, "abbr")],
-            ].sort((a, b) => String(a).localeCompare(String(b)))
-        )
-        {
-            await tx.execute(
-                sql`select pg_advisory_xact_lock(hashtextextended(${`alliance:${kind}:${value?.toLowerCase()}`}, 0))`,
-            );
-            const existing = await tx
-                .select({ id: alliance.uid })
-                .from(alliance)
-                .where(
-                    kind === "name"
-                        ? sql`lower(${alliance.alliancename}) = ${value?.toLowerCase()}`
-                        : sql`lower(${alliance.abbr}) = ${value?.toLowerCase()}`,
-                );
-
-            if (existing.some((entry) => entry.id !== id))
-            {
-                throw new Error("Alliance name already exists");
-            }
-        }
-
-        const value = row as typeof alliance.$inferInsert;
-        await tx
-            .insert(alliance)
-            .values(value)
-            .onConflictDoUpdate({ target: alliance.uid, set: value });
-    }
+    await AllianceGovernanceRepository.writeAlliances(tx, owner, allowed, write, text);
 
     const check = (row: Row, field = "allianceId") => {
         if (!allowed.has(text(row, field)))
@@ -484,21 +431,7 @@ async function writeAlliance(
         }
     };
 
-    for (const row of write.members ?? [])
-    {
-        check(row);
-
-        if (!participants.includes(text(row, "uid")))
-        {
-            throw new Error("Foreign alliance member");
-        }
-
-        const value = row as typeof alliance_member.$inferInsert;
-        await tx
-            .insert(alliance_member)
-            .values(value)
-            .onConflictDoUpdate({ target: alliance_member.uid, set: value });
-    }
+    await new AllianceGovernanceRepository(tx, { text, check }).writeMembers(write, participants);
 
     for (const id of write.removedMembers ?? [])
     {
@@ -622,15 +555,7 @@ async function writeAlliance(
         }
     }
 
-    for (const row of write.blacklist ?? [])
-    {
-        check(row);
-        const value = row as typeof alliance_blacklist.$inferInsert;
-        await tx
-            .insert(alliance_blacklist)
-            .values(value)
-            .onConflictDoUpdate({ target: alliance_blacklist.allianceId, set: value });
-    }
+    await new AllianceGovernanceRepository(tx, { text, check }).writeBlacklist(write);
 
     for (const id of write.deletedAlliances ?? [])
     {

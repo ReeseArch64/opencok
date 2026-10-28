@@ -1,3 +1,9 @@
+import { errors } from "@opencok/constants/game";
+import { GameError } from "@opencok/errors/game";
+import { AllianceGovernanceService } from "@opencok/alliance/services/governance";
+import { AllianceMembershipPolicy } from "@opencok/alliance/rules/membership";
+import { AllianceGovernanceMapper } from "@opencok/alliance/mappings/governance";
+import type { AllianceGovernanceContext } from "@opencok/alliance/contracts/governance";
 import { AllianceScienceService } from "@opencok/alliance/services/science";
 import { AllianceSciencePolicy } from "@opencok/alliance/rules/science";
 import { AllianceScienceMapper } from "@opencok/alliance/mappings/science";
@@ -75,6 +81,28 @@ export function createRealmAllianceScience(context: AllianceScienceContext<Realm
     );
 }
 
+export function createRealmAllianceGovernance(context: AllianceGovernanceContext)
+{
+    const runtime = {
+        text,
+        num,
+        long,
+        cityInteger,
+        allianceFailure,
+        errors,
+        unsupportedFailure: (): never => {
+            throw new GameError(errors.unsupported);
+        },
+    };
+
+    return new AllianceGovernanceService(
+        context,
+        runtime,
+        new AllianceMembershipPolicy(runtime),
+        new AllianceGovernanceMapper({ text }),
+    );
+}
+
 export function createRealmAllianceService(
     repository: AllianceRepository,
     rules: Rules,
@@ -89,6 +117,7 @@ export function createRealmAllianceService(
         createRealmAllianceHelp,
         createRealmAllianceGifts,
         createRealmAllianceScience,
+        createRealmAllianceGovernance,
         forbidden,
     );
 }
