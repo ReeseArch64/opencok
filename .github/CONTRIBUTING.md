@@ -100,8 +100,12 @@ behavior. Use abstract classes for shared workflows, lifecycle ownership and
 invariants, with concrete classes implementing the domain-specific steps. Inject
 collaborators through constructors. Keep wire serialization in Mapper classes,
 boundary checks in validations and structural ports and response shapes in contracts.
-Hero and general code follows these same responsibilities inside `packages/hero/src`;
-its constants, enums and Controllers stay in their existing packages.
+Follow [ADR-0016](../docs/decisions/0016-adopt-domain-owned-package-layout.md) for
+domain-owned packages and responsibility directories. Domain-specific Controllers,
+enums and constants may move with their domain, including Hero and Dragon, while
+shared protocol declarations remain bounded. Preserve existing public paths through
+temporary re-exports with tracked callers and removal tasks. Do not copy implementations
+or introduce dependency cycles.
 Use enums for finite named alternatives, including command names and protocol groups;
 keep limits and durations as configuration values. Compatibility entrypoints may
 delegate to concrete classes while callers migrate.
@@ -121,9 +125,11 @@ methods, static schemas, definite-assignment or non-null assertions. Use `?`
 only for optional input fields. See the [DTO package](../packages/dtos/README.md).
 Read queries, deletion selections, response payloads and protocol snapshots use
 contracts, with response interfaces named `<Resource>Response` in
-`packages/contracts/src/responses`. Keep Zod schemas in `packages/validations`
-and serialization in `packages/mappings`. Validate at the mapping or application
-boundary and preserve mobile wire types and field order.
+the owning domain's `contracts/responses`. Domain-local create/update DTOs,
+Zod schemas and serializers belong in `dtos`, `validations` and `mappings`.
+Existing centralized packages remain compatibility locations during migration.
+Validate at the mapping or application boundary and preserve mobile wire types
+and field order.
 
 ## Commits
 

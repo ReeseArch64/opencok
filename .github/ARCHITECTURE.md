@@ -75,6 +75,21 @@ contracts, rules and adapters; `infra/` owns gateway and deployment configuratio
 detailed design and migration evidence. Ignored `data/`, mobile and legacy inputs
 are local references, never required private artifacts committed as dependencies.
 
+### Domain package migration convention
+
+[ADR-0016](../docs/decisions/0016-adopt-domain-owned-package-layout.md) governs
+incremental domain ownership with responsibility directories inside `src`.
+Domain-specific Controllers, enums/constants, DTOs, response contracts, validations
+and mappings may migrate alongside Services, rules and repository implementations.
+Pure entrypoints stay independent of infrastructure, packages never import apps,
+and each slice preserves public compatibility with tracked temporary facades.
+
+This convention does not mean the current horizontal packages have migrated.
+The inventory and each vertical slice must record owners, callers, tests and facade
+removal work. [Confirmed package meanings](../packages/README.md) constrain the
+migration. Existing realm write authority and deployment boundaries are unchanged;
+new process ownership and named-definition rules remain separate decisions.
+
 ### Implemented API and realm package boundaries
 
 | Packages                                                            | Boundary                                                                                                                                        |
@@ -124,7 +139,7 @@ in those bindings; domain definitions use semantic enums from `enums`. See the
 [named hero migration proposal](../packages/resources/README.md#named-hero-definitions-and-migration-proposal)
 for the implemented boundary and proposed typed-consumer migration.
 Other packages import these modules through `@opencok/hero/<responsibility>/*`.
-Constants, enums and Controllers remain in their existing packages; database schema
+Currently, constants, enums and Controllers remain in their existing packages; database schema
 constants and catalog records remain in `drizzle` and `resources`. Catalog import
 tooling writes hero and general type definitions into the hero domain. Shared
 profile, power and city workflows delegate their hero operations to this package.

@@ -40,3 +40,4 @@ This index bootstraps the ADR practice without introducing an extra technology d
 - [ADR-0013: Adopt Maple for local operational observability](0013-adopt-maple-for-local-operational-observability.md) — proposed
 - [ADR-0014: Adopt dprint for TypeScript formatting](0014-adopt-dprint-for-typescript-formatting.md) — accepted
 - [ADR-0015: Adopt measured per-application build selection](0015-adopt-measured-per-application-build-selection.md) — proposed
+- [ADR-0016: Adopt domain-owned package layout](0016-adopt-domain-owned-package-layout.md) — accepted
