@@ -4147,3 +4147,19 @@ Generated effects are distinguished from committed transactions and deferred
 delivery. See the [shared contract](../../packages/core/README.md#operational-logging)
 and [Compose runbook](../../infra/compose/README.md#observability) for the dashboard,
 configuration, credentials and retention/alerting limitations.
+
+## Population recovery composition
+
+`WorldPopulationJob` in `src/world-population-job.ts` runs shared-resource,
+ordinary-resource and monster recovery sequentially. Each family retains its
+failure event and can fail without skipping the later families. Realm composition
+injects the existing fenced transaction executors, rules, map size, world effects
+and failure reporter. Effects are still loaded inside the ordinary-resource
+transaction callback; each executor still captures its own timestamp.
+
+The existing `recoverWorld` Effect fiber awaits this job before its delivery and
+march recovery work. It retains the same scope, shutdown behavior and one-second
+sleep after each iteration; the job starts no timer or independent process.
+PostgreSQL authority, advisory locks, rules and protocol payloads are unchanged.
+This is a preparatory composition slice of #558, not world authority extraction,
+a scheduler implementation or a measured performance improvement.
