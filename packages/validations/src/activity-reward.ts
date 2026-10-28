@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { field } from "@opencok/messages/validations/response";
-import { inventoryItemSchema } from "./bootstrap";
+import { inventoryItemSchema } from "@opencok/economy/validations/inventory";
 import { publicEquipmentSchema } from "./profile";
 import { generalInfoSchema } from "@opencok/hero/validations/profile-generals";
 import type { ActivityRewardResponse } from "@opencok/contracts/responses/activity-reward";

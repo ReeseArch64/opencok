@@ -20,7 +20,7 @@ import {
 } from "@opencok/rules/monster-exchange";
 import { monsterExchangeView } from "@opencok/mappings/monster-exchange";
 import { rewardPreviewArray } from "@opencok/mappings/rewards";
-import { inventoryItem } from "@opencok/mappings/bootstrap";
+import { inventoryItem } from "@opencok/economy/mappings/inventory-item";
 import { pinProgressionReward, grantNativeProgressionReward } from "./progression-rewards";
 import { CampaignPlanner, refreshCampaignGrants } from "./local-campaign";
 import type { MonsterExchangeConfig } from "@opencok/contracts/monster-exchange";

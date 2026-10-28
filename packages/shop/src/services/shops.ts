@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 import type { ShopRepository, ShopState } from "@opencok/shop/contracts/shops";
-import type { InventoryCommandResponse } from "@opencok/contracts/responses/inventory";
+import type { InventoryCommandResponse } from "@opencok/economy/contracts/responses/inventory";
 import { long, text } from "@opencok/contracts/rows";
 import { GameError } from "@opencok/errors/game";
 import { errors } from "@opencok/constants/game";
@@ -9,8 +9,12 @@ import type { Rules } from "@opencok/rules/game";
 import { shopAvailable, shopInteger, shopLimit, shopPrice } from "@opencok/shop/rules/shops";
 import { inventoryCount } from "@opencok/economy/rules/inventory";
 import { shopOffer } from "@opencok/shop/mappings/shops";
-import { inventoryItem } from "@opencok/mappings/bootstrap";
-import { inventoryResponse, inventoryReplay, inventoryEvent } from "@opencok/mappings/inventory";
+import { inventoryItem } from "@opencok/economy/mappings/inventory-item";
+import {
+    inventoryResponse,
+    inventoryReplay,
+    inventoryEvent,
+} from "@opencok/economy/mappings/inventory";
 import type { InventoryGrantPlanner } from "../contracts/inventory-grant-planner";
 
 export class ShopService

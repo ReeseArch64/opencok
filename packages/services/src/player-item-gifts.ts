@@ -7,7 +7,7 @@ import {
     playerItemGiftFailure,
 } from "@opencok/rules/player-item-gifts";
 import { playerItemGiftView, playerItemGiftLogin } from "@opencok/mappings/player-item-gifts";
-import { inventoryChanges } from "@opencok/mappings/inventory";
+import { inventoryChanges } from "@opencok/economy/mappings/inventory";
 import type { CityDomain } from "./city-domain.ts";
 
 export class PlayerItemGiftDomain extends CityCommandDomain

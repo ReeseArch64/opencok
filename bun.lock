@@ -412,6 +412,7 @@
         "@opencok/ledger": "workspace:*",
         "@opencok/messages": "workspace:*",
         "drizzle-orm": "0.45.4",
+        "zod": "catalog:",
       },
       "devDependencies": {
         "@opencok/config": "workspace:*",
@@ -843,6 +844,7 @@
       "name": "@opencok/validations",
       "dependencies": {
         "@opencok/contracts": "workspace:*",
+        "@opencok/economy": "workspace:*",
         "@opencok/errors": "workspace:*",
         "@opencok/hero": "workspace:*",
         "@opencok/messages": "workspace:*",

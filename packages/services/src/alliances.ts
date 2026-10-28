@@ -24,7 +24,7 @@ import {
 import { cityInteger } from "@opencok/rules/city-progression";
 import { createAllianceSchema } from "@opencok/validations/alliance";
 import { allianceMailData, allianceSnapshot } from "@opencok/mappings/alliance";
-import { inventoryReplay } from "@opencok/mappings/inventory";
+import { inventoryReplay } from "@opencok/economy/mappings/inventory";
 import { previewRewards } from "@opencok/rules/rewards";
 import { javaMailBytes } from "@opencok/rules/avatar-mail";
 import type { CreateAllianceDto } from "@opencok/dtos/create-alliance.dto";

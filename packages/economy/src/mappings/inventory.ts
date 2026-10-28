@@ -10,12 +10,12 @@ import {
     type Value,
     type Fields,
 } from "@opencok/messages/sfs";
-import type { Rules } from "@opencok/rules/game";
-import { inventoryItem } from "./bootstrap.ts";
+import type { InventoryCatalogs } from "../contracts/inventory-catalogs.ts";
+import { inventoryItem } from "./inventory-item.ts";
 
 export function inventoryPurchase(
     item: InventoryItem,
-    rules: Rules,
+    rules: InventoryCatalogs,
     gold: bigint,
     cost: number,
 ): Fields
@@ -56,7 +56,7 @@ export function inventoryComposition(items: readonly InventoryItem[]): Fields
     };
 }
 
-export function inventoryChanges(items: readonly InventoryItem[], rules: Rules): Fields
+export function inventoryChanges(items: readonly InventoryItem[], rules: InventoryCatalogs): Fields
 {
     return {
         useritemlist: sfs.array(items.map((item) => sfs.object(inventoryItem({ ...item }, rules)))),

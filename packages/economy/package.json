@@ -15,7 +15,8 @@
     "drizzle-orm": "0.45.4",
     "@opencok/constants": "workspace:*",
     "@opencok/errors": "workspace:*",
-    "@opencok/messages": "workspace:*"
+    "@opencok/messages": "workspace:*",
+    "zod": "catalog:"
   },
   "devDependencies": {
     "@opencok/config": "workspace:*",
