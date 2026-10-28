@@ -5,6 +5,9 @@ These decisions establish intended responsibility; they do not claim implemented
 features or approve process ownership changes. Existing gameplay authority remains
 in the realm server. The other package dispositions in #558 remain proposals.
 
+The [migration register](MIGRATION.md) accounts for all 64 original directories,
+their current source/test counts, confirmed decisions and remaining proposals.
+
 | Package          | Confirmed responsibility and disposition                                                                                                                                                                       |
 | ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `base`           | Domain base classes. Populate only from concrete domain needs.                                                                                                                                                 |
