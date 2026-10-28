@@ -1,4 +1,4 @@
-import { importBuildingDefinition } from "@opencok/resources/buildings/import";
+import { importBuildingDefinition } from "@opencok/building/mappings/legacy-definition";
 import { expect, test } from "bun:test";
 import type { ReconnectProgressState } from "@opencok/contracts/reconnect";
 import { planReconnectProgress } from "@opencok/services/reconnect-progress";

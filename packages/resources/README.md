@@ -1,7 +1,7 @@
 # Gameplay resources
 
 All 381 authorized catalogs are maintained as typed TypeScript data. Buildings
-live in `src/buildings`; the other 380 identifiers load 362 distinct definitions
+live in [building](../building/README.md); the other 380 identifiers load 362 distinct definitions
 from `src/catalogs/data`, including catalogs not yet used by the server. There are
 no XML-shaped catalog documents, encoded payloads or external resource mounts.
 
@@ -54,10 +54,10 @@ then rebuild and recreate the server. There is no administrative reload endpoint
 
 ## Building mechanics
 
-Edit `src/buildings/<buildingId>.ts`. All 1,511 levels across 41 types use numeric
+Edit `packages/building/src/resources/buildings/<buildingId>.ts`. All 1,511 levels across 41 types use numeric
 identities, bigint costs, prerequisites, durations, named effects and typed star
 steps. `getBuildingDefinition` exposes `id`, `levelMax`, `resourceId` and levels.
-`createBuildingCatalog` creates isolated realm maps. `rules/building` evaluates
+`createBuildingCatalog` creates isolated realm maps. `building/rules/levels` evaluates
 progression and mappings alone translate client display parameters.
 
 ## Compatibility boundaries
@@ -112,9 +112,9 @@ committing. Importers and original XMLs are not deployment requirements.
 
 The former `resources/scripts` entrypoints are retired in #601. The CLI and generators
 now belong to [catalog-tools](../catalog-tools/README.md#catalog-and-building-imports),
-with unchanged default resource/Hero destinations and explicit isolated-output options.
-Runtime fixture loading and the building compatibility mapper remain in resources
-because maintained runtime/test callers still use them.
+with unchanged general catalog/Hero destinations and explicit isolated-output options.
+After #635, the building importer defaults to `building/src/resources/buildings` and
+its record adapter belongs to building. Runtime XML fixture loading remains in resources.
 
 No wire, database, account, inventory or queue migration is introduced. Roll back
 the complete application artifact to restore prior behavior. Native mobile client

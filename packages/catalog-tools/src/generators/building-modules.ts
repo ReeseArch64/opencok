@@ -1,6 +1,6 @@
 import { mkdir, writeFile } from "node:fs/promises";
 import { createHash } from "node:crypto";
-import { importBuildingDefinition } from "@opencok/resources/buildings/import";
+import { importBuildingDefinition } from "@opencok/building/mappings/legacy-definition";
 import { parseRules } from "@opencok/resources/fixtures";
 
 export async function writeBuildingModules(source: string, directory: URL): Promise<void>
@@ -51,7 +51,7 @@ export async function writeBuildingModules(source: string, directory: URL): Prom
         const name = "building" + id;
         await writeFile(
             new URL(String(id) + ".ts", directory),
-            "import type { BuildingLevelDefinition } from \"@opencok/contracts/building\";\nexport const "
+            "import type { BuildingLevelDefinition } from \"@opencok/building/contracts/building\";\nexport const "
                 + name
                 + ": readonly BuildingLevelDefinition[] = "
                 + render(levels)
@@ -61,7 +61,7 @@ export async function writeBuildingModules(source: string, directory: URL): Prom
     }
     await writeFile(
         new URL("levels.ts", directory),
-        "import type { BuildingLevelDefinition } from \"@opencok/contracts/building\";\n"
+        "import type { BuildingLevelDefinition } from \"@opencok/building/contracts/building\";\n"
             + imports.join("\n")
             + "\nexport const BUILDING_LEVELS: readonly BuildingLevelDefinition[] = [\n"
             + [...groups.keys()].map((id) => "...building" + id).join(",\n")

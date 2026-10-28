@@ -1,6 +1,6 @@
 import nicknameWords from "@opencok/policy/resources/data/badwords.json";
-import { createBuildingCatalog } from "./buildings/index.ts";
-import { importBuildingCatalog } from "./buildings/import.ts";
+import { createBuildingCatalog } from "@opencok/building/resources/buildings/index";
+import { importBuildingCatalog } from "@opencok/building/mappings/legacy-definition";
 import { GameplayCatalog } from "@opencok/enums/gameplay-catalog";
 import { CatalogKind } from "@opencok/enums/catalog-kind";
 import { catalogDefinitions } from "./catalog-definitions.ts";

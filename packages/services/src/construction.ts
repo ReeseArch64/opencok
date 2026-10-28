@@ -18,7 +18,7 @@ import { text, num, long } from "@opencok/contracts/rows";
 import { sfs, str, int, encode, type Fields } from "@opencok/messages/sfs";
 import { building } from "@opencok/mappings/city";
 import { rewardPreviewArray } from "@opencok/mappings/rewards";
-import { buildingDisplayParameters } from "@opencok/mappings/building";
+import { buildingDisplayParameters } from "@opencok/building/mappings/display";
 import { previewRewards } from "@opencok/rules/rewards";
 import {
     cityInteger,

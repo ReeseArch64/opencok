@@ -1,4 +1,4 @@
-import { importBuildingDefinition } from "@opencok/resources/buildings/import";
+import { importBuildingDefinition } from "@opencok/building/mappings/legacy-definition";
 import { expect, test } from "bun:test";
 import {
     switchRealmEnabled,

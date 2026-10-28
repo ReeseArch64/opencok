@@ -110,6 +110,7 @@ implementation and verification tracked separately.
 | `resources`                                                      | Versioned typed gameplay catalogs.                                                                                                                    |
 | `player`                                                         | Profiles, descriptions, preferences, nicknames and character provisioning, with app-injected integration collaborators.                               |
 | `production`                                                     | Building resource accumulation, collection/boosts, effect schedules and atomic city settlement, with app-injected runtime adapters.                   |
+| `building`                                                       | Typed building catalogs, level/star contracts and rules, display and legacy-record mappings; construction coordination remains horizontal.            |
 | `shop`                                                           | In-game mall and NPC trading contracts, pure rules, Services, offer mappings and transactional adapters; inventory planning is injected by the realm. |
 | `policy`                                                         | Pure content matching, bounded file/worker adapters and the maintained nickname/description dictionary.                                               |
 | `repositories`, `drizzle`, `storage`                             | Owned transactional state, schemas, Redis/ZooKeeper and S3 adapters.                                                                                  |
@@ -117,9 +118,9 @@ implementation and verification tracked separately.
 The nickname/description word list is versioned in
 `packages/policy/src/resources/data/badwords.json` and included in the server artifact.
 It does not depend on the ignored reference tree or a Compose bind mount.
-All authorized gameplay catalogs use maintained domain definitions in
-`packages/resources`: buildings expose costs, prerequisites, effects and star
-progression; the other 380 catalogs expose typed table records, numeric tile maps,
+All authorized gameplay catalogs use maintained typed definitions.
+`packages/building` owns building costs, prerequisites, effects and star
+progression; the other 380 catalogs in `packages/resources` expose typed table records, numeric tile maps,
 automation declarations, variables and routing. `enums/gameplay-catalog` identifies
 catalogs and `enums/catalog-kind` distinguishes their models. New mechanics can
 consume the typed registry directly. An explicit flat-record compatibility adapter
