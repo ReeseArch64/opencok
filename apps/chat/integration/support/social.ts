@@ -1,5 +1,5 @@
 import { ChatNoticeService } from "@opencok/services/chat-notice";
-import { createInventoryExecutor } from "@opencok/repositories/inventory";
+import { createRealmInventoryExecutor } from "@opencok/repositories/inventory-runtime";
 import { createChatNoticeCostReader } from "@opencok/repositories/chat-notice-cost";
 import { relayMutationEvent } from "@opencok/repositories/mutation";
 import { user_item } from "@opencok/drizzle/schema/opencok_kingdom/user_item";
@@ -404,7 +404,7 @@ export async function verifySocialTransports(
             emperor: async () => null,
         };
         const notices = new ChatNoticeService(
-            createInventoryExecutor(realmDb, authority1),
+            createRealmInventoryExecutor(realmDb, authority1),
             rules,
             economyEffects,
             Date.now,
@@ -429,7 +429,7 @@ export async function verifySocialTransports(
         ).toEqual(published.seqId);
         const past = () => Date.now() - 2 * 86_400_000;
         const delayed = new ChatNoticeService(
-            createInventoryExecutor(realmDb, authority1, past),
+            createRealmInventoryExecutor(realmDb, authority1, past),
             rules,
             economyEffects,
             past,

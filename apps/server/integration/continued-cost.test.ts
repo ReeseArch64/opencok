@@ -8,7 +8,7 @@ import { continuedCostDomain, continuedCostOperation } from "@opencok/services/c
 import { readContinuedCostSpending } from "@opencok/mappings/continued-cost";
 import { createInventoryService } from "@opencok/services/inventory-runtime";
 import { ShopService } from "@opencok/shop/services/shops";
-import { createInventoryExecutor } from "@opencok/repositories/inventory";
+import { createRealmInventoryExecutor } from "@opencok/repositories/inventory-runtime";
 import { createShopRepository } from "@opencok/shop/repositories/shops";
 import { relayMutationEvent } from "@opencok/repositories/mutation";
 import { pendingContinuedCosts } from "@opencok/repositories/continued-cost";
@@ -69,7 +69,7 @@ async function fixture()
         ]),
     );
     const inventory = createInventoryService(
-        createInventoryExecutor(h.db.db, h.authority, () => h.clock.now),
+        createRealmInventoryExecutor(h.db.db, h.authority, () => h.clock.now),
         h.rules,
         h.effects,
         () => h.clock.now,

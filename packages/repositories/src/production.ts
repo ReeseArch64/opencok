@@ -11,13 +11,16 @@ import { long, text } from "@opencok/contracts/rows";
 import { encodeProductionRates, decodeProductionRates } from "@opencok/mappings/production";
 import { changeProductionRate, settleProduction } from "@opencok/rules/timed-activity";
 import { createMutationExecutor, type MutationTransaction } from "./mutation";
-import { executeInventoryTransaction } from "./inventory";
+import { executeRealmInventoryTransaction } from "@opencok/repositories/inventory-runtime";
 import type { DatabaseClient } from "@opencok/drizzle/contracts/database";
 import type { RealmAuthority } from "./realm-authority";
 
 export interface ProductionPreparation
 {
-    recordAction?: import("./inventory").InventoryPreparation["recordAction"];
+    recordAction?:
+        import("@opencok/economy/repositories/inventory-transaction").InventoryPreparation[
+            "recordAction"
+        ];
     prepare(
         tx: MutationTransaction,
         owner: string,
@@ -39,7 +42,7 @@ export function createProductionExecutor(
             const captured = BigInt(now());
             const rates = await preparation.prepare(tx, command.owner, captured);
 
-            return executeInventoryTransaction(
+            return executeRealmInventoryTransaction(
                 tx,
                 command.owner,
                 async (inventory) => {

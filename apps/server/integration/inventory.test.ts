@@ -11,7 +11,7 @@ import { mutation_outbox } from "@opencok/drizzle/schema/opencok_kingdom/mutatio
 import { command_receipt } from "@opencok/drizzle/schema/opencok_kingdom/command_receipt";
 import { user_item_cd } from "@opencok/drizzle/schema/opencok_kingdom/user_item_cd";
 import { acquireRealmAuthority } from "@opencok/repositories/realm-authority";
-import { createInventoryExecutor } from "@opencok/repositories/inventory";
+import { createRealmInventoryExecutor } from "@opencok/repositories/inventory-runtime";
 import { createInventoryService } from "@opencok/services/inventory-runtime";
 import type { Rule } from "@opencok/rules/game";
 import { loadRules } from "@opencok/resources/rules";
@@ -110,7 +110,7 @@ test(
                 clock = 1000000;
             const authority = await acquireRealmAuthority(first.db, 1, () => ready);
             const service = createInventoryService(
-                createInventoryExecutor(first.db, authority),
+                createRealmInventoryExecutor(first.db, authority),
                 rules,
                 effects,
                 () => clock,
@@ -277,7 +277,7 @@ test(
             expect(suite.body.errorCode).toBeUndefined();
             expect((await items()).find((row) => row.itemId === "991009")?.count).toBe(0);
             const boosted = createInventoryService(
-                createInventoryExecutor(first.db, authority),
+                createRealmInventoryExecutor(first.db, authority),
                 rules,
                 { ...effects, world: async () => new Map([[100, 50]]) },
                 () => clock,
@@ -288,7 +288,7 @@ test(
                 num: sfs.int(1),
             });
             expect(fields(bonus.body.itemEffectObj).delta).toEqual(sfs.int(7));
-            const realExecute = createInventoryExecutor(first.db, authority);
+            const realExecute = createRealmInventoryExecutor(first.db, authority);
             let loseReply = true;
             const unreliable = createInventoryService(
                 async (input, plan) => {
@@ -345,7 +345,7 @@ test(
             await pg.restart();
             const second = open();
             const restarted = createInventoryService(
-                createInventoryExecutor(second.db, authority),
+                createRealmInventoryExecutor(second.db, authority),
                 rules,
                 effects,
             );
