@@ -3,7 +3,7 @@ import { and, eq, inArray, sql } from "drizzle-orm";
 import { createDatabase } from "@opencok/drizzle";
 import { requireEnv } from "@opencok/env/database";
 import { loadRules } from "@opencok/resources/rules";
-import { characterSeed } from "@opencok/rules/character-seed";
+import { characterSeed } from "@opencok/player/rules/character-seed";
 import { generalRecruit } from "@opencok/hero/rules/general-progression";
 import { calculatePlayerPower } from "@opencok/rules/power";
 import { powerContext } from "@opencok/services/power";

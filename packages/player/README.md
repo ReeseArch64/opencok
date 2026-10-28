@@ -75,3 +75,43 @@ concurrent writes, first/saved wire shapes, owner failures, duplicate-insert rol
 legacy realm epoch replacement and restart persistence. It does not implement the
 new player/world authority topology from ADR-0017. Current realm fencing still
 wraps the same transactions; defaults, schema and saved rows are unchanged.
+
+## Realm character provisioning
+
+`contracts/character-provisioning`, `rules/character-seed`,
+`services/character-provisioning`, `controllers/character-provisioning` and
+`repositories/character-provisioning` own realm character initialization after
+[#609](https://github.com/ReeseArch64/opencok/issues/609). The starter-rule test
+moves with the implementation; focused creation tests cover validation, the
+writer-captured clock, replay and rejection of stale/draining owners.
+
+The repository receives `CharacterProvisioningTransactions` from
+`apps/server/src/character-provisioning.ts`. That composition binds the existing
+world-birth allocator, epoch fence and mutation-record writer to the current realm
+authority. Every callback receives the same active database transaction; no callback
+starts a separate transaction or process. Player implementation imports neither
+horizontal repositories nor applications. The SQL, locks, receipt hash, grant
+postings, outbox payload and ordering remain unchanged.
+
+Creation still atomically initializes the profile, inventory balances, starter
+city/queues/quests/general, shield and world footprint. It rejects existing
+characters/cities and receipt conflicts; replays verify authority before returning
+the stored receipt. Captured transaction time controls starter timestamps while
+the original reservation controls the request hash. Starter catalogs, IDs, values
+and wire types are unchanged. Shared reservation/receipt contracts, schemas and
+canonical hashing stay bounded and common to global account and realm workflows.
+
+All maintained callers migrate, including synthetic-player tooling and world
+integration fixtures. Former horizontal character seed, repository, Service,
+Controller and provisioning aggregate paths are removed without reverse facades.
+Global account reservation and activation remain in `account`.
+
+The existing PostgreSQL provisioning integration verifies creation, retries,
+restart and owner replacement; world process/scout integrations exercise the
+migrated creation path before their gameplay flows. New callback-boundary tests
+also ensure a failed fence cannot proceed to locks/reads and a replay never plans
+or grants another starter package. These are structural ownership changes, not
+ADR-0017 process separation: world footprint writes still share the current realm
+transaction. Player/world reservation protocols and least-privilege processes
+remain W17/W18/W21 work. No schema, configuration or data migration is required;
+rollback uses the previous realm artifact with unchanged persisted state.

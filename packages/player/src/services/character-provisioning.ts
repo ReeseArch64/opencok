@@ -1,5 +1,6 @@
-import { characterSeed } from "@opencok/rules/character-seed";
-import type { CharacterCreator, CharacterReservation } from "@opencok/contracts/provisioning";
+import type { CharacterCreator } from "../contracts/character-provisioning";
+import { characterSeed } from "../rules/character-seed";
+import type { CharacterReservation } from "@opencok/contracts/provisioning";
 import type { Rules } from "@opencok/rules/game";
 import { reservationSchema } from "@opencok/validations/provisioning";
 

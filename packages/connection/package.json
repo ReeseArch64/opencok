@@ -26,6 +26,7 @@
     "ws": "8.22.0",
     "@opencok/validations": "workspace:*",
     "@opencok/mappings": "workspace:*",
-    "@opencok/account": "workspace:*"
+    "@opencok/account": "workspace:*",
+    "@opencok/player": "workspace:*"
   }
 }

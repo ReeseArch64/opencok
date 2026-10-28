@@ -89,5 +89,6 @@ under #558; this type-only change does not complete those migrations.
 Global discovery reads and reservation/activation transactions belong to
 [`account`](../account/README.md) after #607. The former `account` and `provisioning`
 repository paths are retired with all callers migrated. Realm character creation
-remains here until its player-domain slice; global account linkage and realm seeds
-must keep their separate transaction ownership.
+also moved to `player` in #609. Its app composition supplies the existing world
+allocator, fencing and mutation-record callbacks inside the same transaction.
+Global account linkage and realm seeds keep their separate transaction ownership.

@@ -8,7 +8,7 @@ import {
     reservationSchema,
     provisionReceiptSchema,
 } from "@opencok/validations/provisioning";
-import type { CharacterProvisioningController } from "@opencok/controllers/provisioning";
+import type { CharacterProvisioningController } from "@opencok/player/controllers/character-provisioning";
 import { HttpError } from "@opencok/errors/http";
 
 async function limitedBody(
