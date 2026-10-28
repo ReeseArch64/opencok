@@ -1,4 +1,4 @@
-import type { CharacterProvisioningService } from "@opencok/services/provisioning";
+import type { CharacterProvisioningService } from "../services/character-provisioning";
 import type { CharacterReservation } from "@opencok/contracts/provisioning";
 
 export class CharacterProvisioningController

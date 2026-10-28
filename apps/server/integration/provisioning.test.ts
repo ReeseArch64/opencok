@@ -19,11 +19,11 @@ import { account_new } from "@opencok/drizzle/schema/opencok_global/account_new"
 import { game_identity } from "@opencok/drizzle/schema/opencok_global/game_identity";
 import { character_provisioning } from "@opencok/drizzle/schema/opencok_global/character_provisioning";
 import { acquireRealmAuthority } from "@opencok/repositories/realm-authority";
-import { createCharacterCreator } from "@opencok/repositories/character-provisioning";
+import { createCharacterCreator } from "../src/character-provisioning";
 import { createProvisioningStore } from "@opencok/account/repositories/provisioning";
-import { CharacterProvisioningService } from "@opencok/services/provisioning";
+import { CharacterProvisioningService } from "@opencok/player/services/character-provisioning";
 import { ProvisioningService } from "@opencok/account/services/provisioning";
-import { CharacterProvisioningController } from "@opencok/controllers/provisioning";
+import { CharacterProvisioningController } from "@opencok/player/controllers/character-provisioning";
 import {
     characterProvisioningHandler,
     provisioningHandler,

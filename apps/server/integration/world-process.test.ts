@@ -16,9 +16,9 @@ import { world_march } from "@opencok/drizzle/schema/opencok_kingdom/world_march
 import { receive_item } from "@opencok/drizzle/schema/opencok_kingdom/receive_item";
 import { realm_authority } from "@opencok/drizzle/schema/opencok_kingdom/realm_authority";
 import { acquireRealmAuthority } from "@opencok/repositories/realm-authority";
-import { createCharacterCreator } from "@opencok/repositories/character-provisioning";
+import { createCharacterCreator } from "../src/character-provisioning";
 import { createProvisioningStore } from "@opencok/account/repositories/provisioning";
-import { CharacterProvisioningService } from "@opencok/services/provisioning";
+import { CharacterProvisioningService } from "@opencok/player/services/character-provisioning";
 import { loadRules } from "@opencok/resources/rules";
 import { fields, sfs, str, Type, type Fields } from "@opencok/messages/sfs";
 import type { CharacterReservation } from "@opencok/contracts/provisioning";
