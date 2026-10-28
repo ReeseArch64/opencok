@@ -1,5 +1,4 @@
 import type { AllianceRecordReaders } from "./readers";
-import type { AllianceRecord } from "./records";
 
 export interface AlliancePolicyRuntime extends AllianceRecordReaders
 {
@@ -11,9 +10,4 @@ export interface AlliancePolicyRuntime extends AllianceRecordReaders
 export interface AllianceGovernanceRuntime extends AlliancePolicyRuntime
 {
     unsupportedFailure(): never;
-}
-
-export interface AllianceGovernancePersistenceRuntime extends Pick<AllianceRecordReaders, "text">
-{
-    check(row: AllianceRecord, field?: string): void;
 }

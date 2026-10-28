@@ -1,3 +1,6 @@
+import { AllianceApplicationsService } from "@opencok/alliance/services/applications";
+import { AllianceApplicationsMapper } from "@opencok/alliance/mappings/applications";
+import type { AllianceApplicationContext } from "@opencok/alliance/contracts/applications";
 import { errors } from "@opencok/constants/game";
 import { GameError } from "@opencok/errors/game";
 import { AllianceGovernanceService } from "@opencok/alliance/services/governance";
@@ -103,6 +106,18 @@ export function createRealmAllianceGovernance(context: AllianceGovernanceContext
     );
 }
 
+export function createRealmAllianceApplications(context: AllianceApplicationContext)
+{
+    const runtime = { text, num, long, randomUUID, allianceFailure, errors };
+
+    return new AllianceApplicationsService(
+        context,
+        runtime,
+        new AllianceMembershipPolicy({ ...runtime, cityInteger }),
+        new AllianceApplicationsMapper(runtime),
+    );
+}
+
 export function createRealmAllianceService(
     repository: AllianceRepository,
     rules: Rules,
@@ -118,6 +133,7 @@ export function createRealmAllianceService(
         createRealmAllianceGifts,
         createRealmAllianceScience,
         createRealmAllianceGovernance,
+        createRealmAllianceApplications,
         forbidden,
     );
 }
