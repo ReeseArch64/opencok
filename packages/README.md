@@ -114,3 +114,9 @@ The membership/science policy bindings are retired in #685 through realm composi
 That delivery also moves Alliance Heart commands, publication, rules, native mapping,
 contracts and persistence into Alliance. Shared science-effect projection and semantic
 catalogs remain tracked migration work.
+
+The [Share domain](share/README.md) owns existing social-feed commands, visibility,
+native envelope fields, validation, persistence and expiration after #687. Chat
+injects the domain through its existing transaction and process boundaries. Opaque
+feed content does not establish a dedicated battle-report rendering workflow;
+remaining client/provider integration stays explicit.

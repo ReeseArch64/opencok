@@ -5,7 +5,7 @@ import { loadChatEnvironment } from "@opencok/env/chat";
 import { loadEnvironment } from "@opencok/env/load";
 import { telemetrySchema } from "@opencok/env/telemetry";
 import { validateEnvironment } from "@opencok/env/validation";
-import { createChatRepository } from "@opencok/repositories/chat";
+import { createChatRepository } from "./composition/chat-persistence";
 import { ChatApplication } from "./chat-application.ts";
 
 import { createChatArchiveStore } from "@opencok/mongoose/chat-archive";

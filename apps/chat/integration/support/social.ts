@@ -20,7 +20,7 @@ import { account_new } from "@opencok/drizzle/schema/opencok_global/account_new"
 import { eq } from "drizzle-orm";
 import { sfs, str, fields, type Value, type Fields } from "@opencok/messages/sfs";
 import type { createDatabases } from "@opencok/drizzle";
-import type { createChatRepository } from "@opencok/repositories/chat";
+import type { createChatRepository } from "../../src/composition/chat-persistence";
 
 export async function verifySocialTransports(
     first: ReturnType<typeof createChatRepository>,

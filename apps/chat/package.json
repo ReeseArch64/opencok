@@ -22,7 +22,8 @@
     "@opencok/mongoose": "workspace:*",
     "@opencok/errors": "workspace:*",
     "@opencok/enums": "workspace:*",
-    "@opencok/account": "workspace:*"
+    "@opencok/account": "workspace:*",
+    "@opencok/share": "workspace:*"
   },
   "devDependencies": {
     "@opencok/config": "workspace:*",

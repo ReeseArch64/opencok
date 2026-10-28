@@ -148,6 +148,22 @@ binaries and a reviewed data plan: older Chat code does not understand compacted
 new retention, cursors or tombstones. Do not drop social tables or recreate volumes to
 roll back. Session secret rotation alone does not revoke existing opaque tokens.
 
+## Share source ownership
+
+After #687, the existing feed commands, access rules, feed envelopes, schemas,
+transactional feed/notice persistence and bounded expiration belong to
+`packages/share`. Chat application composition supplies the actual UUID/error
+adapters and repositories. The shared Chat workflow retains admission, the complete
+19-field normalized receipt hash, transaction locking, clock and event writing.
+Contacts, rooms, moderation, transport and process authority are unchanged.
+
+Share receives the same opaque feed data and preserves numeric parent semantics,
+owner/alliance visibility, notice blocking and expiration. The old feed bodies
+are removed from the shared planner and repositories; their adapters delegate at
+the original execution positions. This ownership migration does not implement the
+legacy Firebase reader or prove native battle-report presentation. See the
+[Share package](../packages/share/README.md) for contracts and remaining adapters.
+
 ## Validation and compatibility limits
 
 Automated acceptance uses disposable PostgreSQL and MongoDB containers and synthetic

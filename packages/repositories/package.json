@@ -27,6 +27,7 @@
     "@opencok/core": "workspace:*",
     "@opencok/economy": "workspace:*",
     "@opencok/tasks": "workspace:*",
-    "@opencok/alliance": "workspace:*"
+    "@opencok/alliance": "workspace:*",
+    "@opencok/share": "workspace:*"
   }
 }

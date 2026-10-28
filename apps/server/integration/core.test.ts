@@ -16,7 +16,7 @@ import { user_mixed_info } from "@opencok/drizzle/schema/opencok_kingdom/user_mi
 import type { AddressInfo } from "node:net";
 import { randomUUID } from "node:crypto";
 import { createChatApp } from "../../chat/src/app.ts";
-import { createChatRepository } from "@opencok/repositories/chat";
+import { createChatRepository } from "../../chat/src/composition/chat-persistence";
 import { expect, test } from "bun:test";
 import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";

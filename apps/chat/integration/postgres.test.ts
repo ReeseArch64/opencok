@@ -1,7 +1,7 @@
 import { nicknameAccountUid } from "@opencok/account/repositories/nickname-identity";
 import { expect, test } from "bun:test";
 import { createDatabases } from "@opencok/drizzle";
-import { createChatRepository } from "@opencok/repositories/chat";
+import { createChatRepository } from "../src/composition/chat-persistence";
 import { account_new } from "@opencok/drizzle/schema/opencok_global/account_new";
 import { userprofile } from "@opencok/drizzle/schema/opencok_kingdom/userprofile";
 import { migrate } from "drizzle-orm/node-postgres/migrator";

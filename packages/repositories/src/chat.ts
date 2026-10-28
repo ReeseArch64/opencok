@@ -5,9 +5,7 @@ import { createChatMineCommands } from "./chat-mine.ts";
 import {
     chat_event,
     chat_owner_command,
-    chat_feed,
     chat_report,
-    chat_feed_notice,
     chat_mailbox_intent,
 } from "@opencok/drizzle/schema/opencok_chat/chat_social";
 import { createChatNoticePublisher } from "./chat-notice.ts";
@@ -33,11 +31,13 @@ import { userprofile } from "@opencok/drizzle/schema/opencok_kingdom/userprofile
 import { alliance_member } from "@opencok/drizzle/schema/opencok_kingdom/alliance_member";
 import { and, asc, eq, gt, inArray, lte, sql } from "drizzle-orm";
 import type { ChatRepository } from "@opencok/contracts/chat";
+import type { ShareFeedPersistence } from "@opencok/share/contracts/persistence";
 
 const utc = (date: Date) => date.toISOString().slice(0, 23).replace("T", " ");
 
 export function createChatRepository(config: {
     nicknameAccountUid: Parameters<typeof createChatNicknameStore>[1];
+    share: ShareFeedPersistence;
     databaseUrl: string;
     topology?: DatabaseTopology;
     now?: () => Date;
@@ -66,6 +66,7 @@ export function createChatRepository(config: {
     }
 
     const db = databases.global.db;
+    const shareMaintenance = config.share.maintenance(db);
     const now = () => utc(config.now?.() ?? new Date());
     const repository: ChatRepository = {
         async authorizeRealm(realm, token, epoch)
@@ -257,27 +258,7 @@ export function createChatRepository(config: {
                 );
             }
 
-            const feeds = await db
-                .select({ id: chat_feed.id })
-                .from(chat_feed)
-                .where(lte(chat_feed.expiresAt, cutoff))
-                .limit(500);
-
-            if (feeds.length)
-            {
-                await db.delete(chat_feed_notice).where(
-                    inArray(
-                        chat_feed_notice.feed,
-                        feeds.map((row) => row.id),
-                    ),
-                );
-                await db.delete(chat_feed).where(
-                    inArray(
-                        chat_feed.id,
-                        feeds.map((row) => row.id),
-                    ),
-                );
-            }
+            await shareMaintenance.deleteExpired(cutoff);
 
             const ownerCommands = await db
                 .select({ id: chat_owner_command.id })
@@ -350,7 +331,7 @@ export function createChatRepository(config: {
         async health()
         {
             await db.select().from(chat_event).limit(0);
-            await db.select().from(chat_feed).limit(0);
+            await shareMaintenance.health();
             await db.select().from(chat_mailbox_intent).limit(0);
             await db.select().from(nickname_change_receipt).limit(0);
             await db.select().from(chat_avatar_profile).limit(0);
@@ -374,6 +355,7 @@ export function createChatRepository(config: {
         db,
         repository.getPlayerStateById,
         clock,
+        config.share.transaction,
         async (uid) => {
             const state = await repository.getPlayerStateById(uid);
             const kingdom = state && databases.kingdoms.get(state.serverId);

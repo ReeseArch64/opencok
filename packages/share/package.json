@@ -2,11 +2,21 @@
   "name": "@opencok/share",
   "private": true,
   "scripts": {
-    "check-types": "tsc --noEmit"
+    "check-types": "tsc --noEmit",
+    "test": "bun --no-env-file test tests"
   },
   "devDependencies": {
     "@opencok/config": "workspace:*",
     "@types/bun": "catalog:",
     "typescript": "catalog:"
+  },
+  "type": "module",
+  "exports": {
+    "./*": "./src/*.ts"
+  },
+  "dependencies": {
+    "@opencok/drizzle": "workspace:*",
+    "drizzle-orm": "0.45.4",
+    "zod": "catalog:"
   }
 }

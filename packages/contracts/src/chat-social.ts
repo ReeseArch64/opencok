@@ -1,4 +1,5 @@
 import type { ChatSocialAction } from "@opencok/enums/chat-social-action";
+import type { ShareFeedOperation, ShareFeedTransaction } from "@opencok/share/contracts/feed";
 
 export interface ChatLegacyRelations
 {
@@ -9,27 +10,18 @@ export interface ChatLegacyRelations
 
 export type ChatSocialCommand = `${ChatSocialAction}`;
 
-export interface ChatSocialOperation
+export interface ChatSocialOperation extends ShareFeedOperation
 {
-    owner: string;
     operationId: string;
     command: ChatSocialCommand;
     target: string;
     room: string;
     name: string;
-    body: string;
     description: string;
     members: string[];
-    ids: string[];
     duration: number;
     sequence: number;
     limit: number;
-    feedId: string;
-    feedType: number;
-    feedData: string;
-    feedAuth: string;
-    notices: string[];
-    localId: string;
 }
 
 export type { ChatSocialResponse } from "./responses/chat-social.ts";
@@ -77,30 +69,14 @@ export interface SocialMember
     readSequence: bigint;
 }
 
-export interface SocialFeed
+export interface ChatSocialTransaction extends ShareFeedTransaction
 {
-    id: string;
-    owner: string;
-    realm: number;
-    alliance: string;
-    parent: string | null;
-    type: number;
-    body: unknown;
-    createdAt: bigint;
-    expiresAt: bigint;
-    deletedAt: bigint | null;
-}
-
-export interface ChatSocialTransaction
-{
-    now: bigint;
     actor: import("./chat.ts").PlayerState;
     target: import("./chat.ts").PlayerState | null;
     players: ReadonlyMap<string, import("./chat.ts").PlayerState | null>;
     invitees: { uid: string; name: string; }[];
     facebookPlayers: { uid: string; facebookId: string; }[];
     canSend: boolean;
-    blocked(first: string, second: string): Promise<boolean>;
     relations(owner: string, kind: string): Promise<SocialRelation[]>;
     pair(owner: string, other: string): Promise<SocialRelation[]>;
     putRelation(row: SocialRelation): Promise<void>;
@@ -140,17 +116,4 @@ export interface ChatSocialTransaction
         senderRealm: number,
         recipientRealm: number,
     ): Promise<string>;
-    event(
-        owner: string,
-        command: string,
-        data: Record<string, unknown>,
-        target?: string | null,
-        room?: string,
-    ): Promise<void>;
-    feed(id: string): Promise<SocialFeed | null>;
-    feeds(owner: string, realm: number, alliance: string): Promise<SocialFeed[]>;
-    putFeed(row: SocialFeed): Promise<void>;
-    removeFeed(id: string): Promise<void>;
-    feedNotice(owner: string, id: string): Promise<void>;
-    removeFeedNotices(owner: string, ids: string[]): Promise<void>;
 }

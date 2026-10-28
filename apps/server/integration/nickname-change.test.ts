@@ -13,7 +13,7 @@ import { user_item } from "@opencok/drizzle/schema/opencok_kingdom/user_item";
 import { worldpoint } from "@opencok/drizzle/schema/opencok_kingdom/worldpoint";
 import { account_new } from "@opencok/drizzle/schema/opencok_global/account_new";
 import { usermapping } from "@opencok/drizzle/schema/opencok_global/usermapping";
-import { createChatRepository } from "@opencok/repositories/chat";
+import { createChatRepository } from "../../chat/src/composition/chat-persistence";
 import { createChatAvatarProfileStore } from "@opencok/repositories/chat-avatar-profile";
 import { createChatNicknamePublisher } from "@opencok/connection/chat-nickname";
 import type { AvatarProfileUpdate } from "@opencok/contracts/files";

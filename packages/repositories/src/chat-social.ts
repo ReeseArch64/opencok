@@ -1,8 +1,6 @@
 import { createHash, randomUUID } from "node:crypto";
 import { and, asc, desc, eq, gt, inArray, isNull, or, sql } from "drizzle-orm";
 import {
-    chat_feed,
-    chat_feed_notice,
     chat_mailbox_intent,
     chat_social_import,
     chat_operation,
@@ -25,11 +23,13 @@ import type { PlayerStateLoader } from "@opencok/contracts/chat";
 import { ChatCommandError } from "@opencok/errors/chat";
 import { chatMessage, chatUtc } from "./chat-messages.ts";
 import type { DatabaseClient } from "@opencok/drizzle/contracts/database";
+import type { ShareFeedPersistence } from "@opencok/share/contracts/persistence";
 
 export function createChatSocialStore(
     db: DatabaseClient<"global">,
     load: PlayerStateLoader,
     clock: () => Date,
+    share: ShareFeedPersistence["transaction"],
     legacy?: (uid: string) => Promise<ChatLegacyRelations>,
     facebook?: (ids: string[]) => Promise<{ uid: string; facebookId: string; }[]>,
     alliancePlayers?: (uid: string) => Promise<{ uid: string; name: string; }[]>,
@@ -576,6 +576,8 @@ export function createChatSocialStore(
                         expiresAt: now + 86_400_000n,
                     });
                 }
+
+                const feed = share(tx, now);
                 const unit: ChatSocialTransaction = {
                     now,
                     actor,
@@ -971,76 +973,12 @@ export function createChatSocialStore(
                         return id;
                     },
                     event,
-                    async feed(id)
-                    {
-                        const [row] = await tx
-                            .select()
-                            .from(chat_feed)
-                            .where(
-                                and(
-                                    eq(chat_feed.id, id),
-                                    isNull(chat_feed.deletedAt),
-                                    gt(chat_feed.expiresAt, now),
-                                ),
-                            );
-
-                        return row ?? null;
-                    },
-                    feeds(owner, realm, alliance)
-                    {
-                        return tx
-                            .select()
-                            .from(chat_feed)
-                            .where(
-                                and(
-                                    gt(chat_feed.expiresAt, now),
-                                    isNull(chat_feed.deletedAt),
-                                    or(
-                                        eq(chat_feed.owner, owner),
-                                        alliance
-                                            ? and(
-                                                eq(chat_feed.realm, realm),
-                                                eq(chat_feed.alliance, alliance),
-                                            )
-                                            : undefined,
-                                    ),
-                                ),
-                            )
-                            .orderBy(desc(chat_feed.createdAt), desc(chat_feed.id))
-                            .limit(100);
-                    },
-                    async putFeed(row)
-                    {
-                        await tx.insert(chat_feed).values(row);
-                    },
-                    async removeFeed(id)
-                    {
-                        await tx
-                            .update(chat_feed)
-                            .set({ deletedAt: now, body: {} })
-                            .where(or(eq(chat_feed.id, id), eq(chat_feed.parent, id)));
-                    },
-                    async feedNotice(owner, id)
-                    {
-                        await tx
-                            .insert(chat_feed_notice)
-                            .values({ owner, feed: id, createdAt: now })
-                            .onConflictDoNothing();
-                    },
-                    async removeFeedNotices(owner, ids)
-                    {
-                        if (ids.length)
-                        {
-                            await tx
-                                .delete(chat_feed_notice)
-                                .where(
-                                    and(
-                                        eq(chat_feed_notice.owner, owner),
-                                        inArray(chat_feed_notice.feed, ids),
-                                    ),
-                                );
-                        }
-                    },
+                    feed: (id) => feed.feed(id),
+                    feeds: (owner, realm, alliance) => feed.feeds(owner, realm, alliance),
+                    putFeed: (row) => feed.putFeed(row),
+                    removeFeed: (id) => feed.removeFeed(id),
+                    feedNotice: (owner, id) => feed.feedNotice(owner, id),
+                    removeFeedNotices: (owner, ids) => feed.removeFeedNotices(owner, ids),
                 };
                 const result = await plan(unit);
                 const reads = [
