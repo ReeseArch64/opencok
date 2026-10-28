@@ -14,6 +14,14 @@ test(
         expect(baseline.violations.filter((violation) => !actual.has(violation))).toEqual([]);
         expect(report.workspaces.length).toBeGreaterThan(0);
         expect(report.modules.length).toBeGreaterThan(0);
+        expect(
+            report.files.every((file) =>
+                typeof file.currentOwner === "string" && file.currentOwner.length > 0
+            ),
+        ).toBe(true);
+        expect(report.files.find((file) => file.path === "packages/README.md")?.currentOwner).toBe(
+            "repository",
+        );
     },
     60000,
 );

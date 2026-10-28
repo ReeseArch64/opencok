@@ -25,3 +25,30 @@ export interface ArchitectureReport
     modules: ModuleRecord[];
     violations: string[];
 }
+
+export enum InventoryFileRole
+{
+    Source = "source",
+    Test = "test",
+    Catalog = "catalog",
+    Schema = "schema",
+    Tooling = "tooling",
+    Documentation = "documentation",
+    Configuration = "configuration",
+    Asset = "asset",
+}
+
+export enum SourceEvidenceKind
+{
+    Commands = "command-list",
+    Dispatch = "command-dispatch",
+    Catalog = "catalog-membership",
+}
+
+export interface SourceEvidence
+{
+    kind: SourceEvidenceKind;
+    name: string;
+    values: string[];
+    unresolved: string[];
+}

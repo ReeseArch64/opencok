@@ -41,7 +41,23 @@ introduced; this suite supplies dependency evidence, not automatic approval.
 Run `bun --no-env-file tests/architecture/inventory.ts` and redirect stdout into a
 task-owned temporary directory outside the repository. The deterministic report
 lists every maintained workspace file, current workspace owner, source imports,
-direct dependents and graph violations. `proposedOwner: null` and
+direct dependents and graph violations. Root workspace documentation has the
+explicit owner `repository`; path-based roles distinguish source, catalog data,
+schemas, tests, tooling, documentation, configuration and assets. The revision
+identifies HEAD, while file contents include current nonignored working-tree edits.
+`sourceLines` counts physical lines for code files only; roles allow separate
+catalog/schema/test totals. This is not an automatic measure of handwritten behavior.
+
+Reverse dependency traversal supplies `applicationSourceConsumers` and
+`verificationCandidates`. These include type-only edges and are static candidates,
+not proof that a module executes in those processes or that a test fully covers it.
+Source evidence records command arrays/sets, command-enum values, command switches,
+comparisons and includes/has checks, plus GameplayCatalog membership. Imported
+registries, spread elements and computed values stay explicit unresolved references.
+Other routing styles require manual review; test-file evidence is not a production
+handler declaration. Native catalog values preserve their exact strings.
+
+`proposedOwner: null` and
 `migrationStatus: unreviewed` are intentional: package/domain meaning must be
 reviewed, not inferred from filenames. The report is an input to W01, not proof
 that W01's catalog/command/application assignment is complete.
