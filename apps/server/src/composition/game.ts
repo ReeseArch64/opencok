@@ -1,3 +1,4 @@
+import { PostboxOrchestrationService } from "@opencok/services/postbox-orchestration";
 import { AvatarOrchestrationService } from "@opencok/services/avatar-orchestration";
 import { AvatarMapper } from "@opencok/mappings/avatar";
 import { observeOperation } from "@opencok/core/operation";
@@ -22,8 +23,8 @@ export function createRealmGameService(
     rules: ConstructorParameters<typeof GameService>[1],
     config: ConstructorParameters<typeof GameService>[2],
     now = Date.now,
-    services: ConstructorParameters<typeof GameService>[4] = {},
-    heroes?: ConstructorParameters<typeof GameService>[5],
+    services: ConstructorParameters<typeof GameService>[5] = {},
+    heroes?: ConstructorParameters<typeof GameService>[6],
 ): GameService
 {
     const detail = createRealmWorldPointDetailService(rules, services);
@@ -42,6 +43,7 @@ export function createRealmGameService(
         db,
         rules,
         config,
+        new PostboxOrchestrationService(db, config, now, services),
         now,
         services,
         heroes,

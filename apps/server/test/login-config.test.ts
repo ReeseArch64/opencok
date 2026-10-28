@@ -20,7 +20,7 @@ function createGame(
     rules: Rules,
     config: ConstructorParameters<typeof Game>[2],
     now: () => number = Date.now,
-    services: NonNullable<ConstructorParameters<typeof Game>[4]> = {},
+    services: NonNullable<ConstructorParameters<typeof Game>[5]> = {},
 )
 {
     return createRealmGameService(db, rules, config, now, {

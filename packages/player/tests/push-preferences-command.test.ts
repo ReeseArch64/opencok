@@ -1,3 +1,4 @@
+import { PostboxOrchestrationService } from "@opencok/services/postbox-orchestration";
 import { PushPreferenceService } from "../src/services/push-preferences";
 import { expect, test } from "bun:test";
 import type { GameStore } from "@opencok/contracts/game";
@@ -44,13 +45,20 @@ function fixture()
     };
     const rules = new Rules(new Map(), new Map(), new Map());
     rules.features.set("broken", {});
-    const game = new Game(db as unknown as GameStore, rules, { kingdomId: 2 }, () => now, {
-        playerPreferences: new PushPreferenceService(db, () => now),
-        changeAccountCount: unexpected,
-        featureAvailability: () => {
-            throw new Error("Unexpected announcement");
+    const game = new Game(
+        db as unknown as GameStore,
+        rules,
+        { kingdomId: 2 },
+        new PostboxOrchestrationService(db as unknown as GameStore, { kingdomId: 2 }, () => now),
+        () => now,
+        {
+            playerPreferences: new PushPreferenceService(db, () => now),
+            changeAccountCount: unexpected,
+            featureAvailability: () => {
+                throw new Error("Unexpected announcement");
+            },
         },
-    });
+    );
     return {
         game,
         db,
@@ -256,6 +264,11 @@ test("unknown push commands and missing player composition reject before accessi
         instance.db as unknown as GameStore,
         new Rules(new Map(), new Map(), new Map()),
         { kingdomId: 2 },
+        new PostboxOrchestrationService(
+            instance.db as unknown as GameStore,
+            { kingdomId: 2 },
+            () => now,
+        ),
         () => now,
     );
 
