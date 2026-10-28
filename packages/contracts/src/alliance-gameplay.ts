@@ -1,4 +1,8 @@
 import type {
+    AllianceQuerySelection,
+    AllianceQueryState,
+} from "@opencok/alliance/contracts/queries";
+import type {
     AllianceMembershipState,
     AllianceMembershipWrite,
 } from "@opencok/alliance/contracts/membership";
@@ -21,18 +25,11 @@ import type { InventoryState } from "./inventory";
 import type { InventoryPlan } from "@opencok/economy/contracts/inventory-planning";
 import type { MutationCommand } from "@opencok/ledger/contracts/mutation";
 
-export interface AllianceSelection
+export interface AllianceSelection extends AllianceQuerySelection
 {
-    allianceId?: string;
-    playerId?: string;
     mailId?: string;
     helpId?: string;
     giftEvent?: string;
-    key?: string;
-    searchPlayers?: boolean;
-    language?: string;
-    pageSize?: number;
-    page?: number;
 }
 
 export interface AllianceState
@@ -42,7 +39,8 @@ export interface AllianceState
         AllianceScienceState,
         AllianceGovernanceState,
         AllianceApplicationState,
-        AllianceMembershipState
+        AllianceMembershipState,
+        AllianceQueryState
 {
     now: bigint;
     inventory: InventoryState;
@@ -51,9 +49,6 @@ export interface AllianceState
     alliances: readonly Row[];
     members: readonly Row[];
     powers: readonly Row[];
-    directory: readonly Row[];
-    candidates: readonly Row[];
-    directoryTotal: bigint;
 }
 
 export interface AllianceWrite

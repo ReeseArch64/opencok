@@ -8,10 +8,11 @@ Research and donations follow in [#667](https://github.com/ReeseArch64/opencok/i
 Governance follows in [#669](https://github.com/ReeseArch64/opencok/issues/669).
 Applications and invitations follow in [#671](https://github.com/ReeseArch64/opencok/issues/671).
 Creation and membership follow in [#673](https://github.com/ReeseArch64/opencok/issues/673).
-Its fifty-three source modules and six test files cover help, gifts, research,
-donations, governance, applications/invitations, creation/membership, native mapping
-and transactional persistence/recovery. Directory, snapshot/effects and the broad
-coordinator remain subsequent domain slices.
+Queries and snapshots follow in [#675](https://github.com/ReeseArch64/opencok/issues/675).
+Its sixty-three source modules and seven test files cover help, gifts, research,
+donations, governance, applications/invitations, creation/membership, queries,
+snapshots, native mapping and transactional persistence/recovery. Effects and the
+broad coordinator remain subsequent domain slices.
 
 ## Responsibilities and composition
 
@@ -418,3 +419,58 @@ No schema, environment, save conversion, third-party version or client packaging
 change. Preserve memberships, first-join flags/rewards, production checkpoints,
 applications, receipts and outbox. Do not reset reward identities or player progress
 during rollback. Native-device and production-load acceptance remain separate.
+
+## Queries and native snapshots
+
+`services/queries` owns initialization, alliance lookup, name/abbreviation checks,
+candidate search, directory search, first-join status, profile view and member ranks.
+`services/snapshot` projects current members plus pending additions, replacements
+and removals, checks exactly one projected leader and composes profile, power and
+science through bounded ports. Realm composition injects the actual readers,
+failures, membership policy and native Mappers. Existing snapshot callers use the
+shared delegation port until aggregate retirement.
+
+Initialization retains saved-alliance/current-member/unique-leader checks and its
+empty response for missing membership. Pending member writes retain precedence in
+the default member selection. Capacity includes the truncated science effect and
+power sums stay bigint. Native aliases, field order, SFS types and misspellings
+`learderUid`/`learderName` remain unchanged. Science serialization is evaluated at
+its original position; gift level, permissions and research targets retain their
+existing interpretation.
+
+Name and abbreviation queries still return true for invalid or unavailable values;
+check-name returns true when no exact name matches. Candidates retain invitation
+rights, application-type filtering and language-prefix preference with fallback.
+The existing database pagination followed by in-memory pagination is preserved,
+including later-page behavior. Rank rows retain descending rank, UID tie-breaking
+and profile-before-power evaluation. First-join status uses the existing saved flag.
+
+`repositories/queries` owns directory, total and candidate reads at their original
+transaction positions. Exact/prefix-derived/substring predicates, directory totals,
+UID ordering, page sizes and candidate realm/membership/ban scopes are unchanged.
+No transaction, lock, receipt, outbox or authority boundary changes.
+
+| Former source                                              | Owned destination                                           | Integration and retirement                             |
+| ---------------------------------------------------------- | ----------------------------------------------------------- | ------------------------------------------------------ |
+| Services `alliances` query branches and snapshot assembly  | Query and snapshot Services, bounded ports and command enum | Required realm factories; shared coordinator delegates |
+| Inline query/snapshot wire objects and Mappings `alliance` | `mappings/queries` and `mappings/snapshot`                  | Legacy mapper removed after its sole consumer migrated |
+| Contracts `responses/alliance`                             | `contracts/responses/alliance`                              | Exact declaration move; legacy path removed            |
+| Aggregate directory/total/candidate reads                  | `repositories/queries`                                      | Same transaction and read order                        |
+| Shared selection and directory-state fields                | `contracts/queries`                                         | Shared aggregate contracts extend owned interfaces     |
+
+Seven tests add 63 assertions covering projected leadership/membership, exact long
+values, native roundtrips, initialization, availability semantics, candidate gates,
+language fallback, existing pagination, directory totals, first-join flags and rank
+evaluation order. All Alliance tests total 47 tests and 474 assertions. Thirty-six
+structural comparisons verify workflows, inlined mapping, defaults, complete shared
+coordinator methods, command admission, aggregate reads/writes and contract fields.
+The four disposable PostgreSQL suites pass 28 tests and 284 assertions. Root package
+tests pass 440 tests; server tests pass 1,501 tests. Six affected workspace type
+checks, architecture tests/types, lint, formatting and realm build also pass.
+The architecture baseline remains 71 existing violations; no rule is relaxed.
+
+Deploy or roll back the complete realm artifact without dependency, configuration,
+schema/save conversion or client packaging changes. Preserve memberships, science,
+inventory, receipts and outbox. Effects, transaction discovery, aggregate/publication
+ownership and semantic catalog definitions remain #558 work. Native-device and
+production-load acceptance remain separate.
