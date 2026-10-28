@@ -1,21 +1,19 @@
+import { AllianceMembershipRepository } from "@opencok/alliance/repositories/membership";
+import { AllianceMembershipCommand } from "@opencok/alliance/enums/membership-command";
 import { AllianceApplicationsRepository } from "@opencok/alliance/repositories/applications";
 import { AllianceGovernanceRepository } from "@opencok/alliance/repositories/governance";
 import { AllianceScienceRepository } from "@opencok/alliance/repositories/science";
 import { AllianceGiftRepository } from "@opencok/alliance/repositories/gifts";
 import { AllianceHelpRepository } from "@opencok/alliance/repositories/help";
 import { AllianceApplicationsMapper } from "@opencok/alliance/mappings/applications";
-import { mail_group } from "@opencok/drizzle/schema/opencok_kingdom/mail_group";
 import { mail } from "@opencok/drizzle/schema/opencok_kingdom/mail";
 import { and, asc, eq, inArray, or, sql } from "drizzle-orm";
 import { alliance } from "@opencok/drizzle/schema/opencok_kingdom/alliance";
 import { alliance_member } from "@opencok/drizzle/schema/opencok_kingdom/alliance_member";
 import { alliance_apply } from "@opencok/drizzle/schema/opencok_kingdom/alliance_apply";
 import { userprofile } from "@opencok/drizzle/schema/opencok_kingdom/userprofile";
-import { user_lord } from "@opencok/drizzle/schema/opencok_kingdom/user_lord";
-import { worldpoint } from "@opencok/drizzle/schema/opencok_kingdom/worldpoint";
 import { user_building } from "@opencok/drizzle/schema/opencok_kingdom/user_building";
 import { playerinfo } from "@opencok/drizzle/schema/opencok_kingdom/playerinfo";
-import { world_march } from "@opencok/drizzle/schema/opencok_kingdom/world_march";
 import { queue } from "@opencok/drizzle/schema/opencok_kingdom/queue";
 import { timed_activity } from "@opencok/drizzle/schema/opencok_kingdom/timed_activity";
 import type { AllianceRepository, AllianceWrite } from "@opencok/contracts/alliance-gameplay";
@@ -163,9 +161,7 @@ export function createAllianceRepository(
                             alliances,
                             members,
                             applications,
-                            lords: await tx.select().from(user_lord).where(
-                                inArray(user_lord.uid, participants),
-                            ),
+                            lords: await AllianceMembershipRepository.lords(tx, participants),
                             cities: await tx
                                 .select()
                                 .from(user_building)
@@ -174,27 +170,8 @@ export function createAllianceRepository(
                                 .select()
                                 .from(playerinfo)
                                 .where(inArray(playerinfo.uid, participants)),
-                            points: await tx
-                                .select()
-                                .from(worldpoint)
-                                .where(inArray(worldpoint.ownerId, participants)),
-                            marches: await tx
-                                .select()
-                                .from(world_march)
-                                .where(
-                                    or(
-                                        inArray(world_march.ownerUid, participants),
-                                        inArray(world_march.targetUid, participants),
-                                        inArray(
-                                            world_march.targetId,
-                                            tx
-                                                .select({ id: worldpoint.id })
-                                                .from(worldpoint)
-                                                .where(inArray(worldpoint.ownerId, participants)),
-                                        ),
-                                    ),
-                                )
-                                .limit(8193),
+                            points: await AllianceMembershipRepository.points(tx, participants),
+                            marches: await AllianceMembershipRepository.marches(tx, participants),
                             sciences: await AllianceScienceRepository.readSciences(tx, groups),
                             research: await AllianceScienceRepository.readResearch(tx, groups),
                             history: await AllianceScienceRepository.readHistory(tx, input.owner),
@@ -243,7 +220,7 @@ export function createAllianceRepository(
                                             ? sql`lower(${alliance.abbr})=${selection.key.toLowerCase()}`
                                             : ["al.name", "al.checkname"].includes(input.command)
                                             ? sql`lower(${alliance.alliancename})=${selection.key.toLowerCase()}`
-                                            : input.command === "al.create"
+                                            : input.command === AllianceMembershipCommand.Create
                                             ? sql`lower(${alliance.abbr})=${
                                                 [...selection.key].slice(0, 3).join("")
                                                     .toLowerCase()
@@ -425,58 +402,13 @@ async function writeAlliance(
 
     await new AllianceGovernanceRepository(tx, { text, check }).writeMembers(write, participants);
 
-    for (const id of write.removedMembers ?? [])
-    {
-        if (!participants.includes(id))
-        {
-            throw new Error("Foreign alliance removal");
-        }
+    const membership = new AllianceMembershipRepository(tx, participants, allowed, { text, check });
 
-        await tx
-            .update(alliance_member)
-            .set({ allianceId: "", rank: 0 })
-            .where(eq(alliance_member.uid, id));
-        await AllianceHelpRepository.invalidateSender(tx, id);
-    }
+    await membership.remove(write);
 
-    for (const member of write.memberships ?? [])
-    {
-        if (
-            !participants.includes(member.uid)
-            || (member.allianceId && !allowed.has(member.allianceId))
-        )
-        {
-            throw new Error("Foreign membership");
-        }
+    await membership.memberships(write);
 
-        await tx
-            .update(userprofile)
-            .set({ allianceId: member.allianceId })
-            .where(eq(userprofile.uid, member.uid));
-        await tx
-            .update(worldpoint)
-            .set({ allianceId: member.allianceId })
-            .where(eq(worldpoint.ownerId, member.uid));
-        await tx.delete(alliance_apply).where(eq(alliance_apply.userId, member.uid));
-        await AllianceScienceRepository.removeDonations(tx, member.uid);
-        await tx
-            .update(world_march)
-            .set({ allianceId: member.allianceId })
-            .where(eq(world_march.ownerUid, member.uid));
-    }
-
-    for (const uid of write.firstJoin ?? [])
-    {
-        if (!participants.includes(uid))
-        {
-            throw new Error("Foreign first join");
-        }
-
-        await tx
-            .insert(user_lord)
-            .values({ uid, firstJoinAllianceFlag: 0 })
-            .onConflictDoUpdate({ target: user_lord.uid, set: { firstJoinAllianceFlag: 0 } });
-    }
+    await membership.firstJoin(write);
 
     await new AllianceApplicationsRepository(tx, { text, check }).write(
         write,
@@ -492,30 +424,7 @@ async function writeAlliance(
 
     await new AllianceApplicationsRepository(tx, { text, check }).updateMail(write, owner);
 
-    for (const row of write.mails ?? [])
-    {
-        if (!participants.includes(text(row, "toUser")))
-        {
-            throw new Error("Foreign alliance mail");
-        }
-
-        const value = row as typeof mail.$inferInsert;
-        const inserted = await tx
-            .insert(mail)
-            .values(value)
-            .onConflictDoNothing()
-            .returning({ id: mail.uid });
-
-        if (inserted.length && value.type === 2)
-        {
-            await tx.insert(mail_group).values({
-                uid: value.toUser,
-                groupType: 2,
-                groupIndex: value.uid,
-                updateTime: value.createTime,
-            });
-        }
-    }
+    await membership.mail(write);
 
     await new AllianceGovernanceRepository(tx, { text, check }).writeBlacklist(write);
 
