@@ -1,7 +1,5 @@
 import { activity_minstrel } from "@opencok/drizzle/schema/opencok_kingdom/activity_minstrel";
-import { user_civilization_science } from "@opencok/drizzle/schema/opencok_kingdom/user_civilization_science";
 import { and, eq, inArray } from "drizzle-orm";
-import { user_science } from "@opencok/drizzle/schema/opencok_kingdom/user_science";
 import { building_production } from "@opencok/drizzle/schema/opencok_kingdom/building_production";
 import type { CityProgressionStore } from "@opencok/contracts/city-progression";
 import { num, long } from "@opencok/contracts/rows";
@@ -26,29 +24,7 @@ export class CityPlanWriter
         const { tx, owner, now, boundary } = session;
         validateCityWrite(write, owner);
         const persist = async () => {
-            for (const row of write.civilizationSciences ?? [])
-            {
-                if (row.userID !== owner)
-                {
-                    throw new Error("Foreign civilization science write");
-                }
-
-                const value = {
-                    userID: owner,
-                    baseItemID: num(row, "baseItemID"),
-                    level: num(row, "level"),
-                };
-                await tx
-                    .insert(user_civilization_science)
-                    .values(value)
-                    .onConflictDoUpdate({
-                        target: [
-                            user_civilization_science.baseItemID,
-                            user_civilization_science.userID,
-                        ],
-                        set: { level: value.level },
-                    });
-            }
+            await session.research.writeCivilization(write.civilizationSciences ?? []);
 
             if (write.minstrel)
             {
@@ -82,12 +58,7 @@ export class CityPlanWriter
             await this.mechanics.persist(write);
             await this.aggregate.persist(write);
         };
-        const scienceBefore = write.sciences?.length
-            ? await tx
-                .select({ itemId: user_science.itemId, level: user_science.level })
-                .from(user_science)
-                .where(eq(user_science.uid, owner))
-            : [];
+        const scienceBefore = write.sciences?.length ? await session.research.levels() : [];
         const changedScience = write.sciences?.some(
             (row) =>
                 num(row, "level")

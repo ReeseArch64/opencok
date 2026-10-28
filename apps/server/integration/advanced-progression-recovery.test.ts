@@ -19,7 +19,7 @@ import { persistReconnectProgress } from "@opencok/repositories/reconnect-write"
 import { createRealmCityProgressionHandlers } from "../src/composition/city.ts";
 import { TimedActivityService } from "@opencok/services/timed-activity";
 import { dragonProgressionDomain } from "@opencok/services/dragon-progression";
-import { civilizationScienceDomain } from "@opencok/services/civilization-science";
+import { CivilizationScienceDomain } from "@opencok/research/services/civilization";
 import { lotteryDomain } from "@opencok/services/lottery";
 import { idleDeadline } from "@opencok/rules/timed-activity";
 import { emptyDragonTravel } from "@opencok/rules/dragon-progression";
@@ -27,6 +27,8 @@ import { text, num } from "@opencok/contracts/rows";
 import { sfs, type Fields } from "@opencok/messages/sfs";
 import type { Rule } from "@opencok/rules/game";
 import { cityHarness } from "./support/city";
+
+const civilizationScienceDomain = new CivilizationScienceDomain();
 
 const domains = [dragonProgressionDomain, civilizationScienceDomain, lotteryDomain];
 const reward = "dragon_food,0,7|dragon_gold,0,11|goods,200300,2";

@@ -65,3 +65,9 @@ shared contracts and remaining mechanic migrations are tracked in W07–W12/W20.
 City bootstrap projection and initialization coordination are owned after #641.
 Realm composition supplies reconnect planning and existing mechanic callbacks;
 remaining shared ports and mechanic ownership are still tracked under #558.
+
+The [research domain](research/README.md) owns ordinary/civilization commands,
+completion, prerequisites, costs, Mappers, validation and transactional adapters
+after #643. Realm composition preserves shared city transactions and injects event
+and reconnect collaborators. The [domain base](base/README.md) supplies shared
+command selection. Named research definitions remain W14 work.

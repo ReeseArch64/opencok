@@ -15,9 +15,11 @@ import { economy_posting } from "@opencok/drizzle/schema/opencok_kingdom/economy
 import { createAllianceRepository } from "@opencok/repositories/alliance-gameplay";
 import { createCityProductionBoundary } from "@opencok/production/repositories/city-boundary";
 import { AllianceService } from "@opencok/services/alliances";
-import { researchDomain } from "@opencok/services/research";
+import { createRealmResearchDomain } from "../src/composition/research";
 import { fields, str, int, sfs, type Fields } from "@opencok/messages/sfs";
 import { cityHarness } from "./support/city";
+
+const researchDomain = createRealmResearchDomain();
 
 let close: (() => Promise<void>) | undefined;
 afterEach(async () => {
