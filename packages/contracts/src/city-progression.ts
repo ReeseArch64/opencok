@@ -48,7 +48,7 @@ export interface CityProgressionState
     prayer?: import("./prayer").PrayerState;
     recallTask?: import("./recall-task").RecallTaskState;
     regionalRecall?: import("./regional-recall").RegionalRecallState;
-    allianceHeart?: import("./alliance-heart").AllianceHeartState;
+    allianceHeart?: import("@opencok/alliance/contracts/heart").AllianceHeartState;
     playerItemGifts?: import("./player-item-gifts").PlayerItemGiftState;
     seasonalExchange?: import("./seasonal-exchange").SeasonalExchangeState;
     fragmentExchange?: readonly Row[];
@@ -126,7 +126,7 @@ export interface CityProgressionWrite
     prayer?: import("./prayer").PrayerWrite;
     recallTask?: import("./recall-task").RecallTaskWrite;
     regionalRecall?: import("./regional-recall").RegionalRecallWrite;
-    allianceHeart?: import("./alliance-heart").AllianceHeartWrite;
+    allianceHeart?: import("@opencok/alliance/contracts/heart").AllianceHeartWrite;
     playerItemGifts?: import("./player-item-gifts").PlayerItemGiftWrite;
     seasonalExchange?: import("./rows").Row;
     fragmentExchange?: readonly Row[];

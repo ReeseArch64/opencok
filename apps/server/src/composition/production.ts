@@ -10,6 +10,7 @@ import { executeRealmInventoryTransaction } from "@opencok/repositories/inventor
 import type { DatabaseClient } from "@opencok/drizzle/contracts/database";
 import type { RealmAuthority } from "@opencok/repositories/realm-authority";
 import type { Rules } from "@opencok/rules/game";
+import { createRealmAllianceSciencePolicy } from "./alliance-policy";
 
 export function createRealmProductionService(
     execute: ProductionExecutor,
@@ -48,5 +49,14 @@ export function planRealmProductionContext(
     providers: Parameters<typeof productionContext>[3],
 )
 {
-    return productionContext(state, rules, now, providers, decodeWorldPowerEffects);
+    const policy = createRealmAllianceSciencePolicy();
+
+    return productionContext(
+        state,
+        rules,
+        now,
+        providers,
+        decodeWorldPowerEffects,
+        (id, level) => policy.allianceScienceRule(rules, id, level),
+    );
 }

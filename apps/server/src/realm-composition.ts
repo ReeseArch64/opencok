@@ -204,10 +204,10 @@ import { createRealmRecallTaskDomain } from "./composition/recall-task";
 import { RegionalRecallDomain } from "@opencok/services/regional-recall";
 import { initializeRealmOpeningClock } from "@opencok/repositories/realm-opening-clock";
 import {
-    AllianceHeartDomain,
+    createRealmAllianceHeartDomain,
     publishAllianceHeartMutation,
-} from "@opencok/services/alliance-heart";
-import { pendingAllianceHeartOwners } from "@opencok/repositories/alliance-heart";
+    pendingAllianceHeartOwners,
+} from "./composition/alliance-heart";
 import {
     PlayerItemGiftDomain,
     publishPlayerItemGiftMutation,
@@ -997,7 +997,9 @@ export const RealmDependenciesLive = Layer.effect(
                         "realm.RedPacketDomain",
                     ),
                     observeAdapter(
-                        new AllianceHeartDomain((uid) => notifications.owners().includes(uid)),
+                        createRealmAllianceHeartDomain((uid) =>
+                            notifications.owners().includes(uid)
+                        ),
                         "realm.AllianceHeartDomain",
                     ),
                     observeAdapter(new PrayerDomain(), "realm.PrayerDomain"),

@@ -2,10 +2,10 @@ import { test, expect } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { eq, sql } from "drizzle-orm";
 import {
-    createAllianceHeartDomain,
+    createRealmAllianceHeartDomain,
     publishAllianceHeartMutation,
-} from "@opencok/services/alliance-heart";
-import { pendingAllianceHeartOwners } from "@opencok/repositories/alliance-heart";
+    pendingAllianceHeartOwners,
+} from "../src/composition/alliance-heart";
 import { receive_heart } from "@opencok/drizzle/schema/opencok_kingdom/receive_heart";
 import { user_item } from "@opencok/drizzle/schema/opencok_kingdom/user_item";
 import { alliance_member } from "@opencok/drizzle/schema/opencok_kingdom/alliance_member";
@@ -17,7 +17,7 @@ import { compactPoint } from "@opencok/services/world";
 import { cityHarness } from "./support/city";
 async function fixture(online = false)
 {
-    const h = await cityHarness([createAllianceHeartDomain(() => online)]);
+    const h = await cityHarness([createRealmAllianceHeartDomain(() => online)]);
     await h.db.db.insert(user_item).values([
         { uuid: "heart-first", ownerId: "owner", itemId: "209818", count: 3, value: 0 },
         { uuid: "heart-selected", ownerId: "owner", itemId: "209818", count: 3, value: 0 },

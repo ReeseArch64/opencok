@@ -110,4 +110,7 @@ follow in #675. Publication and its transactional reader follow in #677; executi
 context and dispatch follow in #679. Mutation coordination, request validation
 and event/identity mapping follow in #681. Aggregate persistence and participant
 locking follow in #683, with realm transaction adapters injected by the application.
-Remaining policy bindings have tracked retirement tasks.
+The membership/science policy bindings are retired in #685 through realm composition.
+That delivery also moves Alliance Heart commands, publication, rules, native mapping,
+contracts and persistence into Alliance. Shared science-effect projection and semantic
+catalogs remain tracked migration work.
