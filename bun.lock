@@ -313,6 +313,7 @@
         "@opencok/enums": "workspace:*",
         "@opencok/hero": "workspace:*",
         "@opencok/resources": "workspace:*",
+        "@swc/core": "1.16.20",
         "@types/bun": "catalog:",
         "fast-xml-parser": "^5.0.0",
         "typescript": "catalog:",

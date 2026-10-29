@@ -162,3 +162,55 @@ projections, automation, variables, web routing, tile maps and buildings. They a
 exercise isolated CLI output, incomplete-input rejection, stale-output cleanup and
 source immutability. Runtime roster/parity checks remain with resources; only
 import-specific assertions moved here. No test requires private reference files.
+
+## Maintained source ownership inventory (#580)
+
+Run the read-only inventory from the repository root:
+
+```sh
+bun --no-env-file packages/catalog-tools/scripts/source-ownership.ts > /tmp/opencok-580-inventory.json
+```
+
+Use a task-owned temporary destination for reports. The command reads maintained
+Git-indexed and nonignored untracked files; deleted files, symlinks, `data/` and
+all `.env*` paths are excluded. Only workspace manifests and JavaScript/TypeScript
+source contents are opened. Other paths contribute metadata only. No private
+client inputs, environment values, runtime services or database are required.
+
+Every included path has a `currentOwner` (workspace directory or `repository`) and
+one `role`. These are current structural ownership and path-based classifications,
+not approved future domain assignments. `sourceLines` counts physical source lines.
+`proposedOwner: null` and `migrationStatus: "unreviewed"` preserve that distinction.
+The [64-package register](../MIGRATION.md#existing-package-disposition-review)
+retains the original dispositions, retired names and store-to-shop history.
+
+The schema-version-1 JSON includes revision, workspaces, files, module imports,
+resolved dependency edges and unresolved imports. It represents working files at
+the recorded revision, including uncommitted changes; it is not an immutable Git
+snapshot. Root documentation and maintained tooling outside workspaces belong to
+`repository`. Generated/ignored artifacts are outside the inventory.
+
+AST evidence recognizes command-named arrays/sets/properties and assignments, command enums,
+`command`/`cmd` switches and comparisons, literal membership checks and exact
+`GameplayCatalog` enum membership. Literal spelling, case and leading zeros are
+preserved. Aliases, spreads and computed expressions retain their references as unresolved evidence; standalone
+strings do not prove a command exists. Evidence records declarations and dispatch
+references, never handler implementation, runtime reachability or semantic identity.
+The parser supports maintained TypeScript/JavaScript syntax and fails on malformed
+source rather than silently dropping it.
+
+Application consumers and verification candidates follow reverse dependency edges,
+including re-exports, literal dynamic imports and type imports. Workspace export
+patterns/conditions and relative source paths are resolved statically. Conditional
+exports are conservative candidates; external packages, computed imports, custom
+aliases and runtime registration are not followed. Unresolved references remain
+visible. These relationships establish neither runtime composition nor test coverage.
+No architecture-violation baseline or CI authority is reinstated by this tool.
+
+Run `bun --no-env-file test packages/catalog-tools/tests` and
+`bun run --cwd packages/catalog-tools check-types`. Unit fixtures cover evidence,
+roles and cyclic graphs; disposable Git checkouts cover filesystem/import
+integration; the real CLI covers maintained ownership and the 64-package register.
+Exact synthetic JSON assertions provide deterministic contract/snapshot coverage.
+Gameplay mutation, native-device and database checks do not apply to this offline
+inventory; no economic, authorization or gameplay-state rule changes.
