@@ -92,6 +92,23 @@ base-ID and catalog-level checks; login projection does not repair saved rows.
 
 ## Login initialization diagnostics
 
+For temporary module isolation, start the server entrypoint with `--diagnostic-login`.
+The default without this argument remains the complete gameplay runtime. Diagnostic
+mode omits optional bootstrap contributions and suppresses the realm's 30 background
+recovery/publication loops and external activity-deadline handler. It retains normal
+authentication, session ownership, saved city/power reads and fenced reconnect
+settlement. It can therefore still update normal reconnect checkpoints; it does not
+reset progress or fabricate empty authoritative collections.
+
+Only ping, login data/configuration, settings and building information are accepted
+by the game service in this mode. The transport still handles initialization
+acknowledgment and world viewing. Other gameplay commands fail explicitly. This
+mode is for diagnosing city loading, not playing or operating a normal realm. Other
+processes, including external workers, are not stopped by this server argument.
+The startup event records `diagnosticLogin`. Remove the argument and recreate the
+server to restore all initialization and recovery work; pending durable work remains
+for the normal runtime. Native rendering must be checked on the active client.
+
 For #560, each TCP packet starts an independent root trace. Authentication, previous-session
 drain, cache claim, profile-session opening, initialization and response serialization/queueing
 have separate `login.*` operations. Initialization exposes `login.initialize.*` operations for

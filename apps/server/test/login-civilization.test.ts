@@ -23,57 +23,110 @@ function rules()
 const score = 9007199254740993n;
 const prestige = 9007199254740995n;
 
-test("login carries the saved civilization and exact score/prestige in init.user without mutation", async () => {
-    const state: CityState = {
-        profile: { uid: "synthetic", civilizationType: 3, civilizationSorce: score },
-        resource: {},
-        world: { worldId: 0 },
-        lord: undefined,
-        buildings: [],
-        queues: [],
-        armies: [],
-        items: [],
-        hasMarches: false,
-        civilizationPrestige: prestige,
-    };
-    const before = structuredClone(state);
-    const unused = async (): Promise<never> => {
-        throw new Error("Unexpected dependency");
-    };
-    const store: GameStore = {
-        mailGroups: unused,
-        mailBatch: unused,
-        mailCategory: unused,
-        mailContents: unused,
-        mailConversationSave: unused,
-        mailDelete: unused,
-        mailRead: unused,
-        mailSave: unused,
-        mailStatus: unused,
-        allianceRanking: unused,
-        playerRanking: unused,
-        getPowerByPlayerId: async () => emptyPowerState(state.profile!),
-        getProfileById: unused,
-        getAccountsByPlayerId: unused,
-        getPlayerSummariesByIds: unused,
-        getCityByPlayerId: async (uid) => {
-            expect(uid).toBe("synthetic");
-            return state;
-        },
-    };
-    const initial = decode(
-        encode(await createRealmGameService(store, rules(), { kingdomId: 1 }).initial("synthetic")),
-    );
-    expect(fields(initial.user)).toMatchObject({
-        civilization_type: sfs.int(3),
-        civilization_score: sfs.long(score),
-        civilization_prestige: sfs.long(prestige),
-    });
-    expect(initial.newAccount).toEqual(sfs.bool(false));
-    expect(initial.civilization_type).toBeUndefined();
-    expect(fields(initial.user).civilizationType).toBeUndefined();
-    expect(state).toEqual(before);
-});
+test.each([false, true])(
+    "login preserves saved civilization without mutation with diagnostic mode %s",
+    async (diagnosticLogin) => {
+        const state: CityState = {
+            profile: { uid: "synthetic", civilizationType: 3, civilizationSorce: score },
+            resource: {},
+            world: { worldId: 0 },
+            lord: undefined,
+            buildings: [],
+            queues: [],
+            armies: [],
+            items: [],
+            hasMarches: false,
+            civilizationPrestige: prestige,
+        };
+        const before = structuredClone(state);
+        const unused = async (): Promise<never> => {
+            throw new Error("Unexpected dependency");
+        };
+        const store: GameStore = {
+            mailGroups: unused,
+            mailBatch: unused,
+            mailCategory: unused,
+            mailContents: unused,
+            mailConversationSave: unused,
+            mailDelete: unused,
+            mailRead: unused,
+            mailSave: unused,
+            mailStatus: unused,
+            allianceRanking: unused,
+            playerRanking: unused,
+            getPowerByPlayerId: async () => emptyPowerState(state.profile!),
+            getProfileById: unused,
+            getAccountsByPlayerId: unused,
+            getPlayerSummariesByIds: unused,
+            getCityByPlayerId: async (uid) => {
+                expect(uid).toBe("synthetic");
+                return state;
+            },
+        };
+        const optionalServices = {
+            cityProgression: unused,
+            reconcileAlliance: unused,
+            reconcileTimed: unused,
+            hotItemBusinessMan: unused,
+            alliance: unused,
+            expeditionActivity: unused,
+            worldEffectBoard: unused,
+        };
+        const game = createRealmGameService(
+            store,
+            rules(),
+            { kingdomId: 1, diagnosticLogin },
+            () => 1000,
+            diagnosticLogin ? optionalServices : {},
+        );
+        const initial = decode(encode(await game.initial("synthetic")));
+        expect(fields(initial.user)).toMatchObject({
+            civilization_type: sfs.int(3),
+            civilization_score: sfs.long(score),
+            civilization_prestige: sfs.long(prestige),
+        });
+        expect(initial.newAccount).toEqual(sfs.bool(false));
+        expect(initial.civilization_type).toBeUndefined();
+        expect(fields(initial.user).civilizationType).toBeUndefined();
+        expect(state).toEqual(before);
+
+        if (diagnosticLogin)
+        {
+            expect((await game.execute("synthetic", "cmd.ping", {})).body.serverNowTime).toEqual(
+                sfs.long(1000),
+            );
+            await expect(game.execute("synthetic", "build.upgrade", {
+                diagnosticLogin: sfs.bool(false),
+            })).rejects.toMatchObject({ reason: "diagnostic_login" });
+            await expect(game.execute("synthetic", "normal.recharge.init", {})).rejects
+                .toMatchObject({
+                    reason: "diagnostic_login",
+                });
+            const reconnect = new Error("Synthetic required reconnect");
+            const core = createRealmGameService(
+                store,
+                rules(),
+                { kingdomId: 1, diagnosticLogin },
+                () => 1000,
+                {
+                    ...optionalServices,
+                    reconnect: async () => {
+                        throw reconnect;
+                    },
+                },
+            );
+            await expect(core.initialize("synthetic")).rejects.toBe(reconnect);
+            const normal = createRealmGameService(
+                store,
+                rules(),
+                { kingdomId: 1 },
+                () => 1000,
+                optionalServices,
+            );
+            await expect(normal.initialize("synthetic")).rejects.toThrow("Unexpected dependency");
+        }
+    },
+);
 
 test("unselected and absent civilization values remain zero instead of inventing a selection", () => {
     const profiles: Row[] = [

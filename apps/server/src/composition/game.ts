@@ -27,6 +27,9 @@ export function createRealmGameService(
     heroes?: ConstructorParameters<typeof GameService>[6],
 ): GameService
 {
+    const bootstrapServices = config.diagnosticLogin
+        ? { reconnect: services.reconnect }
+        : services;
     const detail = createRealmWorldPointDetailService(rules, services);
     const mapper = new MilitaryMapper();
     const military: MilitaryProjection = {
@@ -52,7 +55,7 @@ export function createRealmGameService(
                 db,
                 config,
                 now,
-                services,
+                bootstrapServices,
                 hooks,
                 new CityBootstrapMapper(rules, now, {
                     kingdomId: config.kingdomId,

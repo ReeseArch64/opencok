@@ -125,6 +125,7 @@ import {
     loginSwitches,
 } from "@opencok/mappings/bootstrap";
 import { inventoryItem } from "@opencok/economy/mappings/inventory-item";
+import { DiagnosticLoginCommand } from "@opencok/enums/diagnostic-login-command";
 
 const playerRankingKinds = {
     "server.rank": "power",
@@ -142,6 +143,7 @@ type GameConfig =
         | "crossSearchEnabled"
         | "chatInterval"
         | "feedMaxCount"
+        | "diagnosticLogin"
     >
     & { mapSize?: number; };
 
@@ -237,6 +239,14 @@ export class GameService
 
     async execute(uid: string, command: string, params: Fields): Promise<Result>
     {
+        if (
+            this.config.diagnosticLogin
+            && !(Object.values(DiagnosticLoginCommand) as string[]).includes(command)
+        )
+        {
+            throw new GameError(errors.unsupported, "diagnostic_login");
+        }
+
         ({ command, params } = generalRequest(command, params));
 
         if ((allianceCommands as readonly string[]).includes(command))
@@ -359,7 +369,7 @@ export class GameService
             );
         }
 
-        if (command !== "activity.operators")
+        if (command !== "activity.operators" && !this.config.diagnosticLogin)
         {
             await this.services.reconcileAlliance?.(uid);
         }

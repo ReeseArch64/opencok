@@ -1,5 +1,6 @@
 export interface ServerConfig
 {
+    diagnosticLogin?: boolean;
     paidGiftGateway?: import("./paid-gifts").PaidGiftGateway;
     provisioningSecret?: string;
     chatInterval?: number;

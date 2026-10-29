@@ -367,6 +367,7 @@ import { Cache } from "@opencok/storage/session";
 import { Coordination } from "@opencok/storage/coordination";
 import { loadRules } from "@opencok/resources/rules";
 import { createRealmGameService } from "./composition/game";
+import { realmBackground } from "./composition/background";
 import { createRealmWorldService } from "./composition/world";
 import { readWorldMap } from "@opencok/world/repositories/map";
 import { createRealmChatSessionIssuer } from "@opencok/connection/realm-chat-session";
@@ -403,6 +404,7 @@ export const RealmDependenciesLive = Layer.effect(
     {
         const config = yield* RealmConfig;
         const rules = yield* RealmRules;
+        const background = realmBackground(config.diagnosticLogin === true);
         const db = yield* acquireResource(
             "realm.database",
             async () => observeAdapter(new Database(config), "realm.Database"),
@@ -1212,7 +1214,7 @@ export const RealmDependenciesLive = Layer.effect(
             Effect.catch(() => Effect.void),
             Effect.andThen(Effect.sleep(1000)),
             Effect.forever,
-            Effect.forkScoped,
+            background,
         );
         const activityDomains: ReadonlyMap<number, ActivityDomain> = city.domains;
         const activities: TimedActivityService = observeAdapter(
@@ -1347,7 +1349,7 @@ export const RealmDependenciesLive = Layer.effect(
             Effect.catch(() => Effect.void),
             Effect.andThen(Effect.sleep(1000)),
             Effect.forever,
-            Effect.forkScoped,
+            background,
         );
 
         yield* Effect.tryPromise({
@@ -1389,7 +1391,7 @@ export const RealmDependenciesLive = Layer.effect(
             Effect.catch(() => Effect.void),
             Effect.andThen(Effect.sleep(1000)),
             Effect.forever,
-            Effect.forkScoped,
+            background,
         );
 
         const costRankingFacts = observeAdapter(
@@ -2415,7 +2417,7 @@ export const RealmDependenciesLive = Layer.effect(
             Effect.catch(() => Effect.void),
             Effect.andThen(Effect.sleep(1000)),
             Effect.forever,
-            Effect.forkScoped,
+            background,
         );
         const production = observeAdapter(
             createRealmProductionService(
@@ -2485,7 +2487,7 @@ export const RealmDependenciesLive = Layer.effect(
             Effect.catch(() => Effect.void),
             Effect.andThen(Effect.sleep(1000)),
             Effect.forever,
-            Effect.forkScoped,
+            background,
         );
         yield* Effect.tryPromise({
             try: () =>
@@ -2498,7 +2500,7 @@ export const RealmDependenciesLive = Layer.effect(
             Effect.catch(() => Effect.void),
             Effect.andThen(Effect.sleep(1000)),
             Effect.forever,
-            Effect.forkScoped,
+            background,
         );
         yield* Effect.tryPromise({
             try: () =>
@@ -2517,7 +2519,7 @@ export const RealmDependenciesLive = Layer.effect(
             Effect.catch(() => Effect.void),
             Effect.andThen(Effect.sleep(1000)),
             Effect.forever,
-            Effect.forkScoped,
+            background,
         );
         yield* Effect.tryPromise({
             try: () =>
@@ -2527,7 +2529,7 @@ export const RealmDependenciesLive = Layer.effect(
             Effect.catch(() => Effect.void),
             Effect.andThen(Effect.sleep(1000)),
             Effect.forever,
-            Effect.forkScoped,
+            background,
         );
         yield* Effect.tryPromise({
             try: () =>
@@ -2583,7 +2585,7 @@ export const RealmDependenciesLive = Layer.effect(
             Effect.catch(() => Effect.void),
             Effect.andThen(Effect.sleep(1000)),
             Effect.forever,
-            Effect.forkScoped,
+            background,
         );
         yield* Effect.tryPromise({
             try: () =>
@@ -2596,7 +2598,7 @@ export const RealmDependenciesLive = Layer.effect(
             Effect.catch(() => Effect.void),
             Effect.andThen(Effect.sleep(1000)),
             Effect.forever,
-            Effect.forkScoped,
+            background,
         );
         yield* Effect.tryPromise({
             try: () =>
@@ -2609,7 +2611,7 @@ export const RealmDependenciesLive = Layer.effect(
             Effect.catch(() => Effect.void),
             Effect.andThen(Effect.sleep(1000)),
             Effect.forever,
-            Effect.forkScoped,
+            background,
         );
         yield* Effect.tryPromise({
             try: () =>
@@ -2622,7 +2624,7 @@ export const RealmDependenciesLive = Layer.effect(
             Effect.catch(() => Effect.void),
             Effect.andThen(Effect.sleep(1000)),
             Effect.forever,
-            Effect.forkScoped,
+            background,
         );
         yield* Effect.tryPromise({
             try: () =>
@@ -2635,7 +2637,7 @@ export const RealmDependenciesLive = Layer.effect(
             Effect.catch(() => Effect.void),
             Effect.andThen(Effect.sleep(1000)),
             Effect.forever,
-            Effect.forkScoped,
+            background,
         );
         yield* Effect.tryPromise({
             try: () =>
@@ -2645,7 +2647,7 @@ export const RealmDependenciesLive = Layer.effect(
             Effect.catch(() => Effect.void),
             Effect.andThen(Effect.sleep(1000)),
             Effect.forever,
-            Effect.forkScoped,
+            background,
         );
         yield* Effect.tryPromise({
             try: () =>
@@ -2655,7 +2657,7 @@ export const RealmDependenciesLive = Layer.effect(
             Effect.catch(() => Effect.void),
             Effect.andThen(Effect.sleep(1000)),
             Effect.forever,
-            Effect.forkScoped,
+            background,
         );
         yield* Effect.tryPromise({
             try: () =>
@@ -2736,7 +2738,7 @@ export const RealmDependenciesLive = Layer.effect(
             Effect.catch(() => Effect.void),
             Effect.andThen(Effect.sleep(1000)),
             Effect.forever,
-            Effect.forkScoped,
+            background,
         );
         yield* Effect.tryPromise({
             try: () => observeJob("realm.olympic_settlement", recoverOlympicBets),
@@ -2745,7 +2747,7 @@ export const RealmDependenciesLive = Layer.effect(
             Effect.catch(() => Effect.void),
             Effect.andThen(Effect.sleep(1000)),
             Effect.forever,
-            Effect.forkScoped,
+            background,
         );
         yield* Effect.tryPromise({
             try: () => observeJob("realm.cup_settlement", recoverCupBets),
@@ -2754,7 +2756,7 @@ export const RealmDependenciesLive = Layer.effect(
             Effect.catch(() => Effect.void),
             Effect.andThen(Effect.sleep(1000)),
             Effect.forever,
-            Effect.forkScoped,
+            background,
         );
         yield* Effect.tryPromise({
             try: () => observeJob("realm.group_buy_settlement", recoverGroupBuys),
@@ -2763,7 +2765,7 @@ export const RealmDependenciesLive = Layer.effect(
             Effect.catch(() => Effect.void),
             Effect.andThen(Effect.sleep(1000)),
             Effect.forever,
-            Effect.forkScoped,
+            background,
         );
         yield* Effect.tryPromise({
             try: () => observeJob("realm.gold_eggs_recovery", () => goldEggsRuntime.refresh()),
@@ -2772,7 +2774,7 @@ export const RealmDependenciesLive = Layer.effect(
             Effect.catch(() => Effect.void),
             Effect.andThen(Effect.sleep(1000)),
             Effect.forever,
-            Effect.forkScoped,
+            background,
         );
         yield* Effect.tryPromise({
             try: () => observeJob("realm.special_event_recovery", recoverSpecialPurchases),
@@ -2781,7 +2783,7 @@ export const RealmDependenciesLive = Layer.effect(
             Effect.catch(() => Effect.void),
             Effect.andThen(Effect.sleep(1000)),
             Effect.forever,
-            Effect.forkScoped,
+            background,
         );
         yield* Effect.tryPromise({
             try: () => observeJob("realm.continued_cost_recovery", () => recoverContinuedCosts()),
@@ -2790,7 +2792,7 @@ export const RealmDependenciesLive = Layer.effect(
             Effect.catch(() => Effect.void),
             Effect.andThen(Effect.sleep(1000)),
             Effect.forever,
-            Effect.forkScoped,
+            background,
         );
         yield* Effect.tryPromise({
             try: () =>
@@ -2800,7 +2802,7 @@ export const RealmDependenciesLive = Layer.effect(
             Effect.catch(() => Effect.void),
             Effect.andThen(Effect.sleep(1000)),
             Effect.forever,
-            Effect.forkScoped,
+            background,
         );
         yield* Effect.tryPromise({
             try: () => observeJob("realm.heart_recovery", recoverAllianceHearts),
@@ -2809,7 +2811,7 @@ export const RealmDependenciesLive = Layer.effect(
             Effect.catch(() => Effect.void),
             Effect.andThen(Effect.sleep(1000)),
             Effect.forever,
-            Effect.forkScoped,
+            background,
         );
         yield* Effect.tryPromise({
             try: () => observeJob("realm.item_gift_recovery", recoverPlayerItemGifts),
@@ -2818,7 +2820,7 @@ export const RealmDependenciesLive = Layer.effect(
             Effect.catch(() => Effect.void),
             Effect.andThen(Effect.sleep(1000)),
             Effect.forever,
-            Effect.forkScoped,
+            background,
         );
         yield* Effect.tryPromise({
             try: () => observeJob("realm.world_recovery", recoverWorld),
@@ -2827,7 +2829,7 @@ export const RealmDependenciesLive = Layer.effect(
             Effect.catch(() => Effect.void),
             Effect.andThen(Effect.sleep(1000)),
             Effect.forever,
-            Effect.forkScoped,
+            background,
         );
         if (config.activitySchedulerMode !== "external")
         {
@@ -2838,7 +2840,7 @@ export const RealmDependenciesLive = Layer.effect(
                 Effect.catch(() => Effect.void),
                 Effect.andThen(Effect.sleep(1000)),
                 Effect.forever,
-                Effect.forkScoped,
+                background,
             );
         }
         const trade = observeAdapter(
@@ -2968,7 +2970,7 @@ export const RealmDependenciesLive = Layer.effect(
             Effect.catch(() => Effect.void),
             Effect.andThen(Effect.sleep(60_000)),
             Effect.forever,
-            Effect.forkScoped,
+            background,
         );
         const socialRemote = config.chatSession
             ? observeAdapter(
@@ -3086,7 +3088,7 @@ export const RealmDependenciesLive = Layer.effect(
                 Effect.catch(() => Effect.void),
                 Effect.andThen(Effect.sleep(1000)),
                 Effect.forever,
-                Effect.forkScoped,
+                background,
             );
         }
 
@@ -3157,7 +3159,7 @@ export const RealmDependenciesLive = Layer.effect(
                 Effect.catch(() => Effect.void),
                 Effect.andThen(Effect.sleep(250)),
                 Effect.forever,
-                Effect.forkScoped,
+                background,
             );
         }
 
@@ -3260,7 +3262,9 @@ export const RealmDependenciesLive = Layer.effect(
 
         return {
             paidGifts: { consume: paymentObservers.consume },
-            activityDeadlines: activityDeadlineController?.handle,
+            activityDeadlines: config.diagnosticLogin
+                ? undefined
+                : activityDeadlineController?.handle,
             provisioning: config.provisioningSecret
                 ? characterProvisioningHandler(
                     observeAdapter(

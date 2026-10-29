@@ -10,6 +10,7 @@ export const config = Effect.gen(function*()
     const settings = yield* readEnvironment(serverSchema);
 
     return {
+        diagnosticLogin: process.argv.includes("--diagnostic-login"),
         provisioningSecret: settings.PROVISIONING_SIGNING_SECRET,
         avatarChat: settings.GAME_AVATAR_CHAT_URL
             ? { url: settings.GAME_AVATAR_CHAT_URL, signingSecret: settings.CHAT_SECRET! }

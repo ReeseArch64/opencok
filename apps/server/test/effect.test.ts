@@ -83,6 +83,25 @@ const configured = Layer.effect(
     ),
 ).pipe(Layer.provide(source));
 
+test("diagnostic login requires an explicit process argument", async () => {
+    const original = process.argv;
+
+    try
+    {
+        process.argv = original.filter((argument) => argument !== "--diagnostic-login");
+        const normal = await Effect.runPromise(config.pipe(Effect.provide(source)));
+        expect(normal.diagnosticLogin).toBe(false);
+
+        process.argv = [...process.argv, "--diagnostic-login"];
+        const diagnostic = await Effect.runPromise(config.pipe(Effect.provide(source)));
+        expect(diagnostic.diagnosticLogin).toBe(true);
+    }
+    finally
+    {
+        process.argv = original;
+    }
+});
+
 test.each([
     undefined,
     "redis://synthetic:synthetic-secret@cache.internal:6380/4",

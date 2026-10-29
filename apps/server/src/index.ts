@@ -30,6 +30,7 @@ runService(
                     port: server.port,
                     healthPort: server.healthPort,
                     experimental: true,
+                    diagnosticLogin: settings.diagnosticLogin === true,
                 });
                 yield* Effect.never;
             }).pipe(Effect.provide(services));

@@ -3,6 +3,7 @@ export class GameError extends Error
     constructor(
         readonly code: string,
         readonly reason?:
+            | "diagnostic_login"
             | "activity_operators"
             | "city_progression"
             | "social_rule"
