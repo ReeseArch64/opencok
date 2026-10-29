@@ -95,9 +95,11 @@ base-ID and catalog-level checks; login projection does not repair saved rows.
 For temporary module isolation, start the server entrypoint with `--diagnostic-login`.
 The default without this argument remains the complete gameplay runtime. Diagnostic
 mode omits optional bootstrap contributions and suppresses the realm's 30 background
-recovery/publication loops and external activity-deadline handler. It retains normal
-authentication, session ownership, saved city/power reads and fenced reconnect
-settlement. It can therefore still update normal reconnect checkpoints; it does not
+recovery/publication loops, in-process mail/avatar/nickname relays, startup hero recovery
+and external activity-deadline handler. It retains normal authentication, session
+ownership, alliance/timed recovery, saved city/power reads and fenced reconnect
+settlement. Required timed transitions finish before the reconnect checkpoint advances.
+It can therefore still update normal reconnect checkpoints; it does not
 reset progress or fabricate empty authoritative collections.
 
 Only ping, login data/configuration, settings and building information are accepted

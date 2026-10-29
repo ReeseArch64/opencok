@@ -65,8 +65,6 @@ test.each([false, true])(
         };
         const optionalServices = {
             cityProgression: unused,
-            reconcileAlliance: unused,
-            reconcileTimed: unused,
             hotItemBusinessMan: unused,
             alliance: unused,
             expeditionActivity: unused,
@@ -103,6 +101,7 @@ test.each([false, true])(
                     reason: "diagnostic_login",
                 });
             const reconnect = new Error("Synthetic required reconnect");
+            const coreCalls: string[] = [];
             const core = createRealmGameService(
                 store,
                 rules(),
@@ -110,12 +109,22 @@ test.each([false, true])(
                 () => 1000,
                 {
                     ...optionalServices,
+                    reconcileAlliance: async () => {
+                        coreCalls.push("alliance");
+                    },
+                    reconcileTimed: async () => {
+                        coreCalls.push("timed");
+                        state.armies = [{ armyId: "100001", free: 5 }];
+                    },
                     reconnect: async () => {
+                        coreCalls.push("reconnect");
+                        expect(state.armies).toEqual([{ armyId: "100001", free: 5 }]);
                         throw reconnect;
                     },
                 },
             );
             await expect(core.initialize("synthetic")).rejects.toBe(reconnect);
+            expect(coreCalls).toEqual(["alliance", "timed", "reconnect"]);
             const normal = createRealmGameService(
                 store,
                 rules(),

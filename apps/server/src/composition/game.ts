@@ -28,7 +28,11 @@ export function createRealmGameService(
 ): GameService
 {
     const bootstrapServices = config.diagnosticLogin
-        ? { reconnect: services.reconnect }
+        ? {
+            reconcileAlliance: services.reconcileAlliance,
+            reconcileTimed: services.reconcileTimed,
+            reconnect: services.reconnect,
+        }
         : services;
     const detail = createRealmWorldPointDetailService(rules, services);
     const mapper = new MilitaryMapper();

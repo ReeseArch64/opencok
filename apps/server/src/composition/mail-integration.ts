@@ -13,12 +13,15 @@ import {
 } from "@opencok/mail/repositories/integration-backlog";
 
 export function createRealmMailIntegrationWorker(
-    config: Pick<ServerConfig, "mailIntegrationMode" | "mailChat" | "kingdomId" | "timeoutMs">,
+    config: Pick<
+        ServerConfig,
+        "mailIntegrationMode" | "mailChat" | "kingdomId" | "timeoutMs" | "diagnosticLogin"
+    >,
     kingdom: DatabaseClient<"kingdom">,
     global: DatabaseClient<"global">,
 ): MailIntegrationWorker | undefined
 {
-    if (config.mailIntegrationMode === "external")
+    if (config.diagnosticLogin || config.mailIntegrationMode === "external")
     {
         return undefined;
     }

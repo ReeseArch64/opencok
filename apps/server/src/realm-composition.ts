@@ -611,7 +611,7 @@ export const RealmDependenciesLive = Layer.effect(
             "realm.NicknameService",
         );
 
-        if (nickname)
+        if (nickname && !config.diagnosticLogin)
         {
             yield* fromPromise(
                 "realm.nickname-store",
@@ -667,7 +667,7 @@ export const RealmDependenciesLive = Layer.effect(
             throw new Error("Avatar files unavailable");
         }
 
-        if (avatar)
+        if (avatar && !config.diagnosticLogin)
         {
             yield* fromPromise(
                 "realm.avatar-version",
@@ -1674,10 +1674,13 @@ export const RealmDependenciesLive = Layer.effect(
             await heroCalendar.refresh();
             await heroMatching.refresh();
         };
-        yield* Effect.tryPromise({
-            try: () => observeJob("realm.hero_calendar_recovery", recoverHeroCalendar),
-            catch: () => new Error("Hero calendar recovery unavailable"),
-        }).pipe(Effect.catch(() => Effect.void));
+        if (!config.diagnosticLogin)
+        {
+            yield* Effect.tryPromise({
+                try: () => observeJob("realm.hero_calendar_recovery", recoverHeroCalendar),
+                catch: () => new Error("Hero calendar recovery unavailable"),
+            }).pipe(Effect.catch(() => Effect.void));
+        }
         const olympicSchedule = observeAdapter(
             new OlympicScheduleService(
                 observeAdapter(
