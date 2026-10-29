@@ -1,4 +1,7 @@
-import type { ReconnectProgressState, ReconnectProgressWrite } from "@opencok/contracts/reconnect";
+import type {
+    ProductionProgressState,
+    ProductionProgressWrite,
+} from "@opencok/contracts/reconnect";
 import type { ProductionRate } from "@opencok/production/contracts/production";
 import type {
     ProductionEffectProviders,
@@ -20,7 +23,7 @@ import { generalSkillPoints } from "@opencok/hero/services/general-power";
 import { resourceGeneralBuildingEffect } from "@opencok/hero/services/general-building-effects";
 
 export async function productionContext(
-    state: ReconnectProgressState,
+    state: ProductionProgressState,
     rules: Rules,
     now: bigint,
     services: ProductionEffectProviders,
@@ -143,7 +146,7 @@ export async function productionContext(
             || num(row, "defence") !== num(before, "defence")
         );
     });
-    const write: ReconnectProgressWrite = {
+    const write: ProductionProgressWrite = {
         resource: {
             food: long(resource, "food"),
             foodbind: long(resource, "foodbind"),
@@ -187,12 +190,6 @@ export async function productionContext(
                 ...(losses.get(String(row.armyId)) ?? { weakened: 0, dead: 0 }),
             };
         }),
-        tasks: { inserts: [], updates: [] },
-        generalResets: [],
-        skillResets: [],
-        skillCooldownResets: [],
-        buildingRefreshes: [],
-        mail: [],
     };
     const rates = async (building: Row, from: bigint): Promise<readonly ProductionRate[]> => {
         const definition = rules.building(

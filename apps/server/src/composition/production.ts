@@ -1,3 +1,5 @@
+import { readProductionProgress } from "@opencok/repositories/reconnect-progress";
+import { persistProductionProgress } from "@opencok/repositories/reconnect-write";
 import { ProductionService } from "@opencok/production/services/production";
 import { productionContext } from "@opencok/production/services/context";
 import { createProductionExecutor } from "@opencok/production/repositories/production";
@@ -40,6 +42,24 @@ export function createRealmProductionExecutor(
         preparation,
         now,
     );
+}
+
+export function createRealmProductionPreparation(
+    rules: Rules,
+    authority: RealmAuthority,
+    providers: Parameters<typeof productionContext>[3],
+): ProductionPreparation
+{
+    return {
+        async prepare(tx, owner, now)
+        {
+            const state = await readProductionProgress(tx, owner, rules.kingdomId, now);
+            const planned = await planRealmProductionContext(state, rules, now, providers);
+            await persistProductionProgress(tx, state, planned.write, authority, now);
+
+            return planned.rates;
+        },
+    };
 }
 
 export function planRealmProductionContext(

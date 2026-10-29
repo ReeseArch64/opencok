@@ -4,7 +4,7 @@ import { createRealmCityProgressionHandlers } from "../src/composition/city.ts";
 import { createRealmCityProgressionStore } from "../src/composition/city-persistence.ts";
 import { createCityProductionBoundary } from "@opencok/production/repositories/city-boundary";
 import { readReconnectProgress } from "@opencok/repositories/reconnect-progress";
-import { persistReconnectProgress } from "@opencok/repositories/reconnect-write";
+import { persistProductionProgress } from "@opencok/repositories/reconnect-write";
 import { num, text } from "@opencok/contracts/rows";
 import { test, expect } from "bun:test";
 import { readFile } from "node:fs/promises";
@@ -166,7 +166,7 @@ test(
                             worldPowerEffects: async () => new Map<string, string>(),
                             emperorVersion: async () => null,
                         });
-                        await persistReconnectProgress(tx, snapshot, plan.write, authority, at);
+                        await persistProductionProgress(tx, snapshot, plan.write, authority, at);
                         return plan.rates;
                     },
                 },
