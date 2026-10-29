@@ -190,10 +190,10 @@ the recorded revision, including uncommitted changes; it is not an immutable Git
 snapshot. Root documentation and maintained tooling outside workspaces belong to
 `repository`. Generated/ignored artifacts are outside the inventory.
 
-AST evidence recognizes command-named arrays/sets/properties, command enums,
+AST evidence recognizes command-named arrays/sets/properties and assignments, command enums,
 `command`/`cmd` switches and comparisons, literal membership checks and exact
 `GameplayCatalog` enum membership. Literal spelling, case and leading zeros are
-preserved. Aliases, spreads and computed expressions remain unresolved; standalone
+preserved. Aliases, spreads and computed expressions retain their references as unresolved evidence; standalone
 strings do not prove a command exists. Evidence records declarations and dispatch
 references, never handler implementation, runtime reachability or semantic identity.
 The parser supports maintained TypeScript/JavaScript syntax and fails on malformed

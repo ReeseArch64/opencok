@@ -170,3 +170,64 @@ test("role_repositoryConfigurationAndLicense_distinguishesConfigurationFromAsset
     expect(classifier.role("LICENSE")).toBe(InventoryFileRole.Documentation);
     expect(classifier.role("assets/logo.png")).toBe(InventoryFileRole.Asset);
 });
+
+test("read_constructorCommandAssignments_preservesLiteralsAndUnresolvedReferences", () => {
+    const facts = new SourceFacts().read(
+        `
+        class Domain {
+            commands: readonly string[];
+            constructor() { this.commands = ["herodraw", ...sharedCommands]; }
+        }
+        target.commands = importedCommands;
+        enabledCommands = Object.values(CityInitializationCommand);
+        const commands = Object.values(AnotherCommand);
+        const unrelated = "not.a.command";
+    `,
+        "synthetic.ts",
+    );
+
+    expect(facts).toEqual([
+        {
+            kind: SourceEvidenceKind.Commands,
+            name: "commands",
+            values: [],
+            unresolved: ["missing"],
+        },
+        {
+            kind: SourceEvidenceKind.Commands,
+            name: "this.commands",
+            values: ["herodraw"],
+            unresolved: ["...sharedCommands"],
+        },
+        {
+            kind: SourceEvidenceKind.Commands,
+            name: "target.commands",
+            values: [],
+            unresolved: ["importedCommands"],
+        },
+        {
+            kind: SourceEvidenceKind.Commands,
+            name: "enabledCommands",
+            values: [],
+            unresolved: ["Object.values(CityInitializationCommand)"],
+        },
+        {
+            kind: SourceEvidenceKind.Commands,
+            name: "commands",
+            values: [],
+            unresolved: ["Object.values(AnotherCommand)"],
+        },
+    ]);
+});
+
+test("read_nonAsciiBeforeComputedReference_preservesExactUtf8Expression", () => {
+    const facts = new SourceFacts().read(
+        `
+        const label = "ação";
+        const commands = lookup("missão");
+    `,
+        "synthetic.ts",
+    );
+
+    expect(facts[0]?.unresolved).toEqual(["lookup(\"missão\")"]);
+});

@@ -211,3 +211,18 @@ test("read_maintainedRepository_accountsForAllOriginalDispositionsAndEveryInvent
         report.files.some((file) => file.path.startsWith("data/") || /(^|\/)\.env/.test(file.path)),
     ).toBe(false);
 }, 60_000);
+
+test("read_trackedDirectoryReplacedBySymlink_excludesDescendantsBeforeReadingSources", () => {
+    fixture({
+        "packages/domain/package.json": JSON.stringify({ name: "@opencok/domain" }),
+        "packages/domain/src/value.ts": "export const value = 1;",
+        "data/reference/value.ts": "not valid source",
+    }, (root) => {
+        rmSync(join(root, "packages/domain/src"), { recursive: true });
+        symlinkSync(join(root, "data/reference"), join(root, "packages/domain/src"));
+        const report = new RepositoryInventory(root).read();
+
+        expect(report.files.map((file) => file.path)).toEqual(["packages/domain/package.json"]);
+        expect(report.modules).toEqual([]);
+    });
+});

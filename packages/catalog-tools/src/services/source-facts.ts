@@ -6,6 +6,7 @@ export class SourceFacts
     public read(source: string, filename: string): SourceEvidence[]
     {
         const result: SourceEvidence[] = [];
+        const encodedSource = Buffer.from(source);
         const node = (value: unknown): Record<string, unknown> =>
             value && typeof value === "object" ? value as Record<string, unknown> : {};
         const name = (value: unknown): string => {
@@ -16,14 +17,16 @@ export class SourceFacts
                 return String(entry.value);
             }
 
-            if (entry.type === "MemberExpression")
-            {
-                return `${name(entry.object)}.${name(entry.property)}`;
-            }
-
             if (entry.type === "SpreadElement")
             {
                 return `...${String(entry.value)}`;
+            }
+
+            const span = node(entry.span);
+
+            if (typeof span.start === "number" && typeof span.end === "number")
+            {
+                return encodedSource.subarray(span.start - 1, span.end - 1).toString("utf8");
             }
 
             return String(entry.type ?? "missing");
@@ -98,6 +101,15 @@ export class SourceFacts
             )
             {
                 record(SourceEvidenceKind.Commands, "commands", list(entry.value));
+            }
+            else if (
+                entry.type === "AssignmentExpression" && entry.operator === "="
+                && ((node(entry.left).type === "Identifier" && /commands$/i.test(name(entry.left)))
+                    || (node(entry.left).type === "MemberExpression"
+                        && name(node(entry.left).property) === "commands"))
+            )
+            {
+                record(SourceEvidenceKind.Commands, name(entry.left), list(entry.right));
             }
             else if (entry.type === "SwitchStatement" && command(entry.discriminant))
             {

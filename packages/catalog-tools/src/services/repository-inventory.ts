@@ -28,7 +28,7 @@ export class RepositoryInventory
             ":(exclude).env*",
         ], { cwd: this.root, encoding: "utf8" });
         const paths = [...new Set(tracked.split("\0").filter(Boolean))].sort().filter((path) =>
-            lstatSync(resolve(this.root, path), { throwIfNoEntry: false })?.isFile()
+            this.isMaintainedFile(path)
         );
         const workspaces: Workspace[] = paths.filter((path) =>
             /^(apps|packages)\/[^/]+\/package.json$/.test(path)
@@ -107,5 +107,34 @@ export class RepositoryInventory
                 ).map((entry) => ({ path: module.path, ...entry }))
             ),
         };
+    }
+
+    private isMaintainedFile(path: string): boolean
+    {
+        const segments = path.split("/");
+
+        for (let index = 0; index < segments.length; index++)
+        {
+            const entry = lstatSync(resolve(this.root, ...segments.slice(0, index + 1)), {
+                throwIfNoEntry: false,
+            });
+
+            if (!entry || entry.isSymbolicLink())
+            {
+                return false;
+            }
+
+            if (index === segments.length - 1)
+            {
+                return entry.isFile();
+            }
+
+            if (!entry.isDirectory())
+            {
+                return false;
+            }
+        }
+
+        return false;
     }
 }
