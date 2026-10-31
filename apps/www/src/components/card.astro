@@ -1,0 +1,35 @@
+---
+import { statusLabel } from "../lib/catalog.mjs";
+const { item } = Astro.props;
+---
+
+<a
+  class:list={["catalog-card", item.category]}
+  href={`/wiki/${item.id}/`}
+  data-item
+  data-name={item.name}
+  data-group={item.group}
+  data-tier={item.tier ?? ""}
+  data-status={item.status}
+  data-reference={item.reference}
+>
+  <div class="card-art">
+    <span class:list={["badge", item.status]}>{statusLabel(item.status)}</span>
+    {item.tier && <span class="tier">T{item.tier}</span>}
+    <img
+      src={item.image}
+      alt={item.name}
+      loading="lazy"
+      width="300"
+      height="280"
+    />
+  </div>
+
+  <div class="card-copy">
+    <span class="eyebrow">{item.group}</span>
+    <h3>{item.name}</h3>
+    <span class="card-link">
+      Explorar ficha <span>↗</span>
+    </span>
+  </div>
+</a>

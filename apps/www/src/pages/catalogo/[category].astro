@@ -1,0 +1,205 @@
+---
+import Layout from "../../layouts/layout.astro";
+import Card from "../../components/card.astro";
+import { catalog, categories } from "../../lib/catalog.mjs";
+export function getStaticPaths() {
+  return Object.entries(categories).map(([category, info]) => ({
+    params: { category },
+    props: { info },
+  }));
+}
+const { category } = Astro.params;
+const { info } = Astro.props;
+const items = catalog.filter((item) => item.category === category);
+const groups = [...new Set(items.map((item) => item.group))];
+const tiers = [...new Set(items.map((item) => item.tier).filter(Boolean))].sort(
+  (a, b) => a - b,
+);
+---
+
+<Layout title={info.name} description={info.description}>
+  <section class="page-heading wrap">
+    <nav class="breadcrumbs" aria-label="Caminho">
+      <a href="/">Início</a>
+      <span>/</span>
+      <a href="/wiki/">Wiki</a>
+      <span>/</span>
+      <span>{info.name}</span>
+    </nav>
+    <p class="eyebrow">{info.eyebrow}</p>
+    <h1>
+      {info.name}
+      <em>.</em>
+    </h1>
+    <p>{info.description}</p>
+  </section>
+
+  <section class="wrap catalog-section">
+    <nav class="catalog-tabs" aria-label="Coleções">
+      {Object.entries(categories).map(([key, c]) => (
+        <a
+          aria-current={category === key ? "page" : undefined}
+          href={`/catalogo/${key}/`}
+        >
+          {c.symbol} {c.name}
+          <small>{catalog.filter((i) => i.category === key).length}</small>
+        </a>
+      ))}
+    </nav>
+
+    <form class="filters" role="search" id="catalog-search">
+      <label class="search-label">
+        Buscar no catálogo
+        <input
+          name="query"
+          type="search"
+          placeholder={`Buscar ${info.name.toLowerCase()}, nome ou código…`}
+          autocomplete="off"
+        />
+      </label>
+      {groups.length > 1 && (
+        <label>
+          Família
+          <select name="group">
+            <option value="">Todas as famílias</option>
+            {groups.map((g) => (
+              <option>{g}</option>
+            ))}
+          </select>
+        </label>
+      )}
+      {tiers.length > 0 && (
+        <label>
+          Tier
+          <select name="tier">
+            <option value="">Todos os tiers</option>
+            {tiers.map((t) => (
+              <option value={t}>T{t}</option>
+            ))}
+          </select>
+        </label>
+      )}
+      <label>
+        Status
+        <select name="status">
+          <option value="">Todos os status</option>
+          <option value="available">Disponível</option>
+          <option value="soon">Em breve</option>
+        </select>
+      </label>
+      <button type="reset" class="reset">
+        Limpar filtros ↺
+      </button>
+    </form>
+
+    <div class="results-line">
+      <p id="result-count" role="status" aria-live="polite">
+        {items.length} itens encontrados
+      </p>
+      <span>Explore hoje. Prepare sua próxima conquista.</span>
+    </div>
+
+    <div
+      class:list={[
+        "card-grid",
+        "catalog-grid",
+        category === "avatares" && "avatar-grid",
+      ]}
+    >
+      {items.map((item) => (
+        <Card item={item} />
+      ))}
+    </div>
+
+    <div id="empty-state" class="empty-state" hidden>
+      <span>⌕</span>
+      <h2>Nenhum item encontrado</h2>
+      <p>Tente outro nome ou remova alguns filtros.</p>
+      <button class="button" id="clear-empty">
+        Limpar filtros
+      </button>
+    </div>
+    <button id="load-more" class="button ghost load-more" hidden>
+      Mostrar mais
+    </button>
+
+    <noscript>
+      <p class="notice">
+        Todos os itens estão listados abaixo. Ative JavaScript para utilizar
+        busca e filtros.
+      </p>
+    </noscript>
+
+    <p class="notice">
+      Itens com o selo “Em breve” ainda aguardam habilitação. As fichas serão
+      atualizadas conforme a disponibilidade no jogo.
+    </p>
+  </section>
+
+  <script>
+    import { matchesItem } from "../../lib/search.mjs";
+    const form = document.querySelector<HTMLFormElement>("#catalog-search");
+    const cards = [...document.querySelectorAll<HTMLElement>("[data-item]")];
+    const more = document.querySelector<HTMLButtonElement>("#load-more");
+    let limit = 24;
+    const params = new URLSearchParams(window.location.search);
+    for (const name of ["query", "group", "tier", "status"]) {
+      const field = form?.elements.namedItem(name) as
+        HTMLInputElement | HTMLSelectElement | null;
+      if (field) {
+        field.value = params.get(name) ?? "";
+      }
+    }
+    function render() {
+      if (!form || !more) {
+        return;
+      }
+      const filters = Object.fromEntries(new FormData(form).entries());
+      const matching = cards.filter((card) =>
+        matchesItem({ ...card.dataset }, filters),
+      );
+      const visible = new Set(matching.slice(0, limit));
+      cards.forEach((card) => {
+        card.hidden = !visible.has(card);
+      });
+      document.querySelector("#result-count")!.textContent =
+        `${matching.length} itens encontrados · ${Math.min(limit, matching.length)} exibidos`;
+      (document.querySelector("#empty-state") as HTMLElement).hidden =
+        matching.length !== 0;
+      more.hidden = matching.length <= limit;
+      const query = new URLSearchParams(
+        Object.entries(filters).filter(([, v]) => Boolean(v)) as [
+          string,
+          string,
+        ][],
+      ).toString();
+      history.replaceState(
+        null,
+        "",
+        `${location.pathname}${query ? `?${query}` : ""}`,
+      );
+    }
+    form?.addEventListener("input", () => {
+      limit = 24;
+      render();
+    });
+    form?.addEventListener("submit", (event) => {
+      event.preventDefault();
+      render();
+    });
+    form?.addEventListener("reset", () => {
+      limit = 24;
+      setTimeout(render, 0);
+    });
+    document
+      .querySelector("#clear-empty")
+      ?.addEventListener("click", () => form?.reset());
+    more?.addEventListener("click", () => {
+      const firstNew = cards.filter((card) => card.hidden);
+      limit += 24;
+      render();
+      firstNew.find((card) => !card.hidden)?.focus();
+    });
+    render();
+  </script>
+</Layout>

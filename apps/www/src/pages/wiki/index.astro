@@ -1,0 +1,75 @@
+---
+import Layout from "../../layouts/layout.astro";
+import { guides } from "../../data/guides.mjs";
+import { categories, catalog } from "../../lib/catalog.mjs";
+---
+
+<Layout title="Wiki e guias">
+  <section class="page-heading wrap">
+    <p class="eyebrow">CENTRAL DE CONHECIMENTO</p>
+    <h1>
+      Conheça seu <em>reino.</em>
+    </h1>
+    <p>
+      Explore as coleções, encontre sua próxima unidade e prepare-se para
+      escrever sua história.
+    </p>
+    <form class="wiki-search" action="/catalogo/tropas/">
+      <label for="wiki-query">Encontre uma tropa</label>
+      <div>
+        <input
+          id="wiki-query"
+          name="query"
+          type="search"
+          placeholder="Nome, família ou tier…"
+        />
+        <button class="button">Buscar ↗</button>
+      </div>
+    </form>
+  </section>
+
+  <section class="wrap section compact">
+    <div class="section-heading">
+      <h2>
+        O atlas do <em>reino.</em>
+      </h2>
+    </div>
+    <div class="category-grid">
+      {Object.entries(categories).map(([key, c]) => (
+        <a class="category-tile" href={`/catalogo/${key}/`}>
+          <span class="category-symbol">{c.symbol}</span>
+          <h3>{c.name}</h3>
+          <p>
+            {catalog.filter((i) => i.category === key).length} fichas para
+            explorar
+          </p>
+          <span class="tile-arrow">↗</span>
+        </a>
+      ))}
+    </div>
+  </section>
+
+  <section class="section wrap">
+    <div class="section-heading">
+      <div>
+        <p class="eyebrow">GUIAS DO EXPLORADOR</p>
+        <h2>
+          Conhecimento para <em>conquistar.</em>
+        </h2>
+      </div>
+    </div>
+    <div class="guide-grid">
+      {guides.map((g) => (
+        <a class="guide-card" href={`/wiki/${g.id}/`}>
+          <img src={g.image} alt="" loading="lazy" width="400" height="220" />
+          <div>
+            <p class="eyebrow">{g.group}</p>
+            <h3>{g.name}</h3>
+            <p>{g.description}</p>
+            <span class="text-link">Ler guia ↗</span>
+          </div>
+        </a>
+      ))}
+    </div>
+  </section>
+</Layout>

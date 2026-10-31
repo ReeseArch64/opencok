@@ -1,0 +1,103 @@
+---
+import Layout from "../layouts/layout.astro";
+import { site } from "../data/site.mjs";
+const platforms = [
+  {
+    id: "android",
+    name: "Android",
+    icon: "◇",
+    text: "Seu reino na palma da mão. O acesso ao instalador Android será publicado aqui.",
+    url: site.androidUrl,
+    label: "Baixar para Android",
+  },
+  {
+    id: "ios",
+    name: "iOS",
+    icon: "◈",
+    text: "Leve sua história com você. A distribuição para iPhone e iPad está em preparação.",
+    url: site.iosUrl,
+    label: "Baixar para iOS",
+  },
+  {
+    id: "web",
+    name: "Navegador",
+    icon: "◎",
+    text: "Uma nova forma de explorar seu reino. O cliente web é uma experiência em desenvolvimento.",
+    url: site.webUrl,
+    label: "Jogar no navegador",
+  },
+];
+---
+
+<Layout title="Comece sua jornada">
+  <section class="page-heading wrap centered">
+    <p class="eyebrow">SEU PRÓXIMO CAPÍTULO</p>
+    <h1>
+      Escolha seu <em>caminho.</em>
+    </h1>
+    <p>Um universo de estratégia. Diferentes formas de entrar.</p>
+  </section>
+
+  <section class="wrap download-grid">
+    {platforms.map((p) => (
+      <article id={p.id} class="download-card">
+        <span class="platform-icon">{p.icon}</span>
+        <span class:list={["badge", p.url ? "available" : "soon"]}>
+          {p.url ? "Disponível" : "Em breve"}
+        </span>
+        <h2>{p.name}</h2>
+        <p>{p.text}</p>
+        {p.url ? (
+          <a class="button" href={p.url}>
+            {p.label} ↗
+          </a>
+        ) : (
+          <>
+            <button class="button" disabled aria-describedby={`${p.id}-status`}>
+              {p.label}
+            </button>
+            <small id={`${p.id}-status`}>
+              Em breve · acesso ainda não liberado
+            </small>
+          </>
+        )}
+      </article>
+    ))}
+  </section>
+
+  <section class="section wrap faq">
+    <p class="eyebrow">ANTES DE COMEÇAR</p>
+    <h2>
+      Prepare sua <em>jornada.</em>
+    </h2>
+    <details open>
+      <summary>Já posso baixar o jogo?</summary>
+      <p>
+        Os acessos liberados exibem “Disponível” e um botão ativo. Quando um
+        acesso mostrar “Em breve”, aguarde a publicação da versão. Você também
+        pode explorar os catálogos e guias da wiki.
+      </p>
+    </details>
+    <details>
+      <summary>Preciso instalar algo para jogar no navegador?</summary>
+      <p>
+        Use o botão Jogar no navegador para abrir o cliente web, uma experiência
+        em desenvolvimento.
+      </p>
+    </details>
+    <details>
+      <summary>Todos os itens da wiki estarão disponíveis?</summary>
+      <p>
+        Cada ficha informa o status do conteúdo. “Em breve” significa que o item
+        ainda aguarda habilitação; “Disponível” será exibido após confirmação.
+      </p>
+    </details>
+    <details>
+      <summary>Por onde começo?</summary>
+      <p>
+        Leia o <a href="/wiki/primeiros-passos/">guia de primeiros passos</a>,
+        descubra as famílias de tropas e combine seu reino com os amigos.
+      </p>
+    </details>
+  </section>
+</Layout>
