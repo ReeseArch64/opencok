@@ -1,132 +1,201 @@
 # OpenCoK Architecture
 
-## Runtime and applications
+## Purpose and governing decisions
 
-TypeScript monorepo with Bun tooling and Effect composition. The former Node.js production mandate is suspended; production runtime is undecided. Source checks do not certify emitted artifacts or native releases.
+This document defines the target architecture for implementation. OpenCoK is a self-hosted persistent strategy game with isolated realms, shared identity, cities, alliances, marches, gathering, combat, progression, events and native clients. Infrastructure serves durable gameplay, predictable latency and recoverable operations.
 
-Current gameplay has one logical writer per realm. Two isolated kingdom databases share global services; local development starts one active realm server. Domain extraction and process separation are distinct migrations.
+The core is a modular TypeScript application with one logical gameplay writer per realm. API, Chat, Scheduler and Workers have separate operational boundaries. Scale across realms first; split authority inside a realm only after measured demand and a proven consistency protocol. Player and World are domain boundaries, not mandatory independent services.
 
-| Application      | Boundary                                                                                                                                                                         |
-| ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `apps/api`       | Discovery, optional Chat metadata proxy, account provisioning and opt-in avatar media. Broader identity/Admin/push/payment endpoints remain targets.                             |
-| `apps/server`    | TCP/SFS transport and sole gameplay writer, including progression, world and combat application. Composition stays in `realm-composition.ts`, lifecycle in `RealmApplication`.   |
-| `apps/chat`      | HTTP/WebSocket messages, session/metadata adapters, persistence, replay receipts and social-feed composition.                                                                    |
-| `apps/workers`   | Opt-in Mail integrations: one realm's committed queues, global gift projection and signed Chat delivery. No gameplay token, Rules catalog or Redis.                              |
-| `apps/scheduler` | Opt-in bounded metadata discovery/dispatch for twelve registered timed activity types and legacy restoration. No gameplay writes/payloads, writer token, Rules catalog or Redis. |
-| `apps/web`       | Experimental browser loading/health scaffold; full gameplay and SSR remain evaluation work.                                                                                      |
+Use Bun for development tooling and Effect for scoped resources and composition. Select the production runtime through protocol, dependency, performance and recovery validation. Runtime selection must preserve numeric behavior and native compatibility.
 
-The accepted target makes Server a gateway with one active Player and World owner per realm/authority kind. These applications, independent epochs and cross-owner protocols are not implemented. Bot/Admin/landing/docs applications remain planned; no separate Files listener or standalone Combat service is selected.
+Authoritative state belongs to a named owner. Every economic effect must be durable, attributable and idempotent. Queues, caches, dashboards and telemetry never determine entitlement. Optional-service outages must not prevent unrelated city and core gameplay operations.
 
-## Package structure and ownership
+## Technology decisions
 
-`apps/` composes processes/configuration; reusable domains/contracts/adapters live in flat `packages/*` workspaces. Packages never import applications. Controllers delegate transport work to constructor-injected Services; concrete runtime wiring stays in applications.
+| Technology                                         | Architectural role                                                              | Adoption decision                                                  |
+| -------------------------------------------------- | ------------------------------------------------------------------------------- | ------------------------------------------------------------------ |
+| PostgreSQL                                         | Identity, gameplay, economy, deadlines, receipts, outbox and audit              | Primary durable database                                           |
+| Drizzle                                            | PostgreSQL schemas, explicit migrations and adapters                            | Persistence tooling                                                |
+| PgBouncer or provider pooler                       | Bound database connections across application replicas                          | Use for production pooling; validate pooling semantics             |
+| MongoDB                                            | Chat, social documents and selected retained histories                          | Secondary database with explicit collection ownership              |
+| Redis operational                                  | Sessions, discovery projections, presence, rankings and operational projections | Separate from disposable cache; classify durability per key family |
+| Redis cache                                        | Disposable, bounded read acceleration                                           | Separate instance when measurements justify caching                |
+| RabbitMQ                                           | Asynchronous integrations and background commands                               | Default broker                                                     |
+| BullMQ                                             | Specialized background job orchestration                                        | Deferred until a disjoint workload justifies it                    |
+| Kubernetes                                         | Production scheduling, service discovery, replica lifecycle and rollout         | Production orchestration                                           |
+| Traefik                                            | HTTP, WebSocket and native TCP ingress                                          | Single application ingress layer                                   |
+| ZooKeeper                                          | Transitional coordination dependency                                            | Remove after replacement and recovery validation                   |
+| MinIO                                              | Development S3-compatible object storage                                        | Development storage                                                |
+| Cloudflare R2                                      | Production private media and public release objects                             | Separate private/public buckets and access policies                |
+| Maple                                              | Filtered logs and traces                                                        | Diagnostic observability                                           |
+| Sentry                                             | Error grouping, release diagnostics and sanitized stack details                 | Error observability                                                |
+| Prometheus, Alertmanager, Grafana                  | Metrics, actionable alerts and dashboards                                       | Operational monitoring                                             |
+| Unleash                                            | Controlled feature activation by realm, environment and client compatibility    | Feature management                                                 |
+| PostGIS                                            | Spatial indexing and geometry queries                                           | Evaluate against integer grid/cell indexing before adoption        |
+| ClickHouse                                         | High-volume economic and progression analytics                                  | Later phase when analytical load warrants isolation                |
+| pgAdmin 4, mongo-express, Redis Insight, Portainer | Database and container inspection                                               | Private, optional development tools                                |
 
-Use responsibility directories inside domain `src`: `domain`, `contracts`, `dtos`, `rules`, `services`, `validations`, `mappings`, `controllers`, `repositories`, `resources`, `bindings`, `enums`, `constants`. Create only implemented directories; keep any feature-first layout consistent. Pure entrypoints must not load ORM, brokers, sockets, process composition or a universal catalog registry.
+Do not add Memcached, Nginx per application, Kong, application-managed etcd or Consul without a specific unmet requirement. Kubernetes manages instances; additional proxies do not provide gameplay ownership. RabbitMQ and BullMQ must not become competing delivery paths for the same operation.
 
-Preserve direct workspace dependencies and selective exports, including `"./*": "./src/*.ts"`, root entries/assets/aliases. Temporary facades delegate/re-export one implementation with an owner, remaining callers and removal task. Check runtime/type-only edges; do not introduce cycles or remove old implementations before moved tests remain discoverable and pass.
+## Applications and domain boundaries
 
-Review cohesion near 10–15k handwritten behavioral lines per package or 400–600 per file; count catalogs/schemas/tests separately. These are review triggers, not hard limits or permission for giant cross-domain packages/empty scaffolding.
+| Application boundary | Responsibilities                                                                                                 |
+| -------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| API                  | Account discovery, authentication integration, realm admission, HTTP endpoints, media access and payment ingress |
+| Game Server          | Native TCP/SFS gateway and realm gameplay composition; authenticate, route and apply authoritative commands      |
+| Chat                 | Authorized conversations, message persistence, replay, retention and social delivery                             |
+| Scheduler            | Discover durable due work and request evaluation from its owner                                                  |
+| Workers              | Process committed integration intents, notifications, email, media work and projections                          |
+| Admin                | Authenticated operator interface submitting audited commands through application APIs                            |
+| Web                  | Browser experience through explicit HTTP/WSS contracts                                                           |
+| Bots                 | Controlled authenticated clients for simulation and load evaluation, with quotas and a kill switch               |
 
-| Packages                                                            | Current ownership                                                                                                                                          |
-| ------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `env`, `config`, `core`                                             | Injectable validated environment, compiler config, scoped Effect resources, transport helpers and filtered logging.                                        |
-| `api`, `connection`, `controllers`, `identity`                      | HTTP/SFS entry, authentication and thin command Controllers.                                                                                               |
-| `contracts`, `dtos`, `enums`, `validations`, `mappings`, `messages` | Shared/versioned ports, inputs, wire types, SFS codecs and boundary primitives; migrated declarations follow their domain.                                 |
-| `rules`, `base`, `ledger`                                           | Remaining pure rules, concrete shared lifecycles, mutation/posting/outbox contracts and signed-64 validation. Ledger has no domain/persistence dependency. |
-| `account`, `player`                                                 | Global account discovery/reservation/activation; realm character provisioning, profiles, preferences, descriptions and nickname workflows.                 |
-| `economy`, `production`, `city`                                     | Balances/inventory/activity economics; accumulation/collection/effect settlement; aggregate planning, dispatch, persistence and bootstrap.                 |
-| `building`, `research`, `troops`, `equipment`                       | Construction/catalogs; ordinary/civilization research; training/healing/fortifications; equipment/sets/workshop.                                           |
-| `tasks`, `skins`, `shop`, `policy`                                  | Quest/sign-in/recall/reconnect; city cosmetics; mall/NPC trading; content filtering and bounded adapters.                                                  |
-| `hero`, `dragon`, `resources`                                       | Hero workflows/archetypes; named dragon definitions/bindings; typed gameplay catalogs. Dragon workflows remain incomplete.                                 |
-| `alliance`, `share`, `ranking`                                      | Alliance context/locking/persistence; feed visibility/expiry/native envelopes; published attribute/payment/consumption boards.                             |
-| `world`                                                             | Map/search/favorites/point details; population admission, quotas, expiry, durable clocks and transactional persistence.                                    |
-| `mail`, `queues`                                                    | Mail leaf contracts/gift projection/Chat relays; persisted activity discovery and versioned owner-dispatch contracts.                                      |
-| `repositories`, `drizzle`, `storage`                                | Remaining persistence, PostgreSQL schemas/migrations/setup and Redis/ZooKeeper/S3 adapters.                                                                |
+Gateway and gameplay may share a deployment initially. Separating the gateway must preserve native session behavior, realm routing and reconnect semantics. Workers and Scheduler cannot acquire gameplay authority or mutate gameplay tables directly.
 
-Composition injects clocks, catalogs, numeric bindings, effects and cross-domain collaborators. `CityProgressionContextFactory` loads state/effects; `CityProgressionContext` plans atomic writes/economics. Domain classes specialize `ActivityDomain`, `CityCommandDomain` or `CommandDomain`; weighted choice remains a bounded Rules algorithm.
+Domain ownership includes Account/Identity, Player, Economy/Ledger, City/Production, Building, Research, Troops, Equipment, Hero/Dragon, World, Alliance, Tasks/Events, Ranking, Mail, Chat/Share and Media. Each domain owns its rules, contracts and persistence operations. Combat calculations belong to gameplay and do not constitute an independently authoritative service.
 
-Domain DTOs, Zod schemas and serializers belong in `dtos`, `validations` and `mappings`; response interfaces belong in `contracts/responses`. Centralized equivalents remain compatibility locations during migration.
+Applications compose configuration and concrete adapters. Reusable packages never import applications. Controllers validate transport input and delegate to injected Services. Domain rules remain independent of sockets, brokers, ORM initialization and process startup. DTOs, contracts, validations and wire mappings have explicit owners; avoid universal registries and dependency cycles.
 
-World population executes sequentially by family under realm fencing, advisory locks, captured clock and outbox ordering; local/remote snapshots remain read-only. March/gathering recovery, ranking finality/funding/rewards, dedicated battle-report rendering and all mailbox/avatar workflows are not completed merely by package extraction.
+## Persistence and data ownership
 
-## Catalogs and native compatibility
+Use a global PostgreSQL database for shared identity and global service records, and isolated physical databases per kingdom for gameplay. Scope credentials, connection budgets and migrations per service and realm. Runtime identities cannot change schemas or repair grants. Immediate reads and mutation preconditions use the primary; replicas serve only reads with defined staleness budgets.
 
-Runtime catalogs are maintained TypeScript artifacts, without XML parsing, mounts or `GAME_RESOURCES`. Building owns costs/prerequisites/effects/star progression; Resources retains other typed tables/maps/variables/routing and a flat-record compatibility adapter. Offline XML tooling is developer-only; the policy dictionary ships in the server artifact.
+| Data                                                            | Durable owner and storage                              | Derived or secondary representation                       |
+| --------------------------------------------------------------- | ------------------------------------------------------ | --------------------------------------------------------- |
+| Accounts and character discovery                                | Global services, PostgreSQL                            | Cached discovery                                          |
+| Characters, balances, inventory, city and progression           | Realm domains, PostgreSQL                              | Read-only caches                                          |
+| Troops, march reservations, gathering cargo and combat outcomes | Realm authority, PostgreSQL                            | Map projections and rendered reports                      |
+| Construction, research, training, quests and event deadlines    | Owning gameplay domain, PostgreSQL                     | Scheduler discovery metadata                              |
+| Reward eligibility, ranking finality and claims                 | Realm economy/event owner, PostgreSQL                  | Published boards in Redis                                 |
+| In-game mail gifts                                              | PostgreSQL entitlement, claim receipt and ledger       | MongoDB message bodies or rendered reports                |
+| Chat and social content                                         | Chat/Share, MongoDB                                    | Ephemeral Redis fan-out                                   |
+| Required jobs, email delivery and integration intent            | Owning service, PostgreSQL outbox and receipts         | RabbitMQ transport; redacted execution history in MongoDB |
+| Operational cron definitions                                    | Versioned deployment configuration                     | Execution observations                                    |
+| Business schedules                                              | Owning service, PostgreSQL                             | Discovery indexes                                         |
+| Media and releases                                              | MinIO in development, R2 in production                 | PostgreSQL metadata, access and lifecycle receipts        |
+| Rules and catalogs                                              | Versioned maintained artifacts and publication records | Injected runtime data and derived caches                  |
+| Analytical events                                               | Committed source events; later ClickHouse projections  | Dashboards and aggregate reports                          |
 
-Hero has 109 named archetypes with injected numeric bindings and stable unknown entries. Dragon has 14 client archetypes, 13 server configurations; Vildrin remains client-only. Use typed properties/units/relationships, deterministic ordered rosters and separate versioned native bindings; homogeneous curves/matrices remain data, not subclasses per level/cell.
+MongoDB is not a category for unimportant data. Authoritative Chat documents require backups, schema versions, bounded document sizes, indexes and retention. Missing message bodies must not destroy gift entitlement or permit duplicate claims. Use PostgreSQL JSONB for flexible documents that need the same transaction as gameplay state.
 
-Preserve numeric/string/leading-zero identities, aliases, save keys and cross-version reuse. Establish identity from native records, entity/localization/relationship linkage and server consumers, never icon similarity, ID prefixes, guessed translations or display names alone.
+Keep a registry of table/collection/key ownership, permitted writers, retention, recovery source and deletion semantics. Database separation does not create atomic cross-database transactions. Use explicit intent, receipts and reconciliation across owners.
 
-Each family records owner, authoring source, client fingerprint/version and migrated/deferred/unresolved status. `catalog-tools` produces safe relative provenance and deterministic collision/reference/coverage diagnostics without modifying originals or silently rewriting maintained source. Builds/tests use maintained artifacts and synthetic fixtures. Unresolved required bindings block promotion; incomplete/client-only entries stay unavailable rather than gaining invented effects/defaults.
+PgBouncer or the provider pooler bounds connections across replicas. Validate transaction/session pooling against prepared statements, advisory locks and session state; session-scoped authority cannot rely on an arbitrary pooled backend. Set both connection and active-work budgets per realm. [PgBouncer compatibility](https://www.pgbouncer.org/features.html)
 
-One authoring source drives definitions/bindings and injected compatibility Mappers. Require record/field/type/default/alias/order parity and semantic-consumer migration before cutover; XML-shaped bags for raw-ID callers are insufficient. Track remaining facades and prevent unrelated startup from loading the universal registry.
+## Realm authority and command processing
 
-## Persistence and realm authority
+Model each realm as an actor-like authority with bounded command admission and explicit ordering for conflicting aggregates. This is an application model, not a requirement for an actor framework or one global queue shared by all realms. Read-only work and pure calculations may execute concurrently; authoritative mutations preserve participant lock order and transaction invariants.
 
-PostgreSQL is transactional authority, with global and physical per-kingdom databases. Immediate reads, balances, costs and preconditions use the writer; target Neon replicas serve delay-tolerant reads with explicit lag budgets. Bound pools and realm/service roles; replicas are not backups. Drizzle owns additive migrations and provisioning; runtime applications do not migrate themselves or repair grants.
+Acquire a monotonically increasing owner epoch in PostgreSQL. Every authoritative transaction verifies the active epoch so a paused or partitioned former owner cannot commit after replacement. Leadership discovery, Kubernetes Leases and Redis locks alone are insufficient. Authority loss stops mutation admission and invalidates pending proposals.
 
-MongoDB holds versioned documents/reconstructible projections. Redis holds cache, sessions and ephemeral coordination, never sole durable progress. Private media uses S3-compatible storage/local MinIO, separate from R2 release distribution.
+Commands carry realm, authenticated participant, operation identity, contract version and expected aggregate version where applicable. Commit state, economic ledger, operation receipt and outbox atomically. Repeated requests return the recorded outcome; uncertain commits are resolved through receipts instead of speculative retry effects.
 
-Current `RealmAuthority` acquires a persisted monotonic `ownerEpoch`. Every authoritative transaction, including recovery, fences stale writers and atomically commits state, ledger postings, receipts and outbox. Membership, ZooKeeper election or cache locks alone are not fencing; authority loss stops mutations. Preserve participant/alliance lock ordering.
+Keep Player and World in one transactional authority while their operations share atomic invariants. If future load requires separate writers, define independent epochs, table permissions, durable reservations, acceptance/results and reconciliation first. A timeout is an uncertain outcome, never permission to release possibly consumed troops. Scale realms across machines before introducing this protocol.
 
-The accepted Player/World split requires distinct persisted owner epochs/instances, readiness and least-privilege roles; replacement acquisition serializes against old commits. Player owns progression/economy/inventory/troops/production; World owns occupancy/placement/populations/spatial march checkpoints. Initial ownership is per realm/authority kind, not per character; independent writers cannot share the existing realm token.
+## World map, marches and realtime updates
 
-Cross-owner work needs registered aggregate/table/command ownership, factual durable reservations, versioned acceptance/results, pinned rule/RNG/reward outcomes and reconciliation. Carry realm, operation identity, participant, contract version and expected state version. World records movement/checkpoints; Player applies losses/releases/rewards once. Timeouts remain uncertain outcomes, never permission to release consumed troops or grant again.
+Partition the map into bounded cells for lookup, visibility subscriptions and update fan-out. Persist integer coordinates and occupancy constraints. Candidate discovery does not authorize placement: the owner rechecks occupancy and policy in the committing transaction.
 
-Keep current atomic paths until equivalent ordering, compensation, database-denial, stale-writer and crash-recovery evidence exists. Transfer admission through drain/checkpoint, fenced acquisition, readiness and reconnect routing. Cutover/rollback preserves in-flight protocol state; more replicas do not establish safe scaling. Marches/gathering remain together until participant recovery is verified.
+Benchmark grid/cell indexes against PostGIS using representative realm density, viewport queries, nearest-resource searches and alliance territory queries. Adopt PostGIS when geometry/intersection requirements or measured query cost justify it. Use game-coordinate geometry with explicit units, not terrestrial geography. Spatial search remains subject to realm and visibility rules. [PostGIS spatial indexes](https://postgis.net/documentation/faq/spatial-indexes/)
 
-## Scheduling, calculations and integrations
+Persist march origin, destination, selected troops/companions, departure time, arrival deadline, state version, reserved costs and pinned rule outcomes. Derive visual position from these values where movement rules permit; avoid writing every animation step. Interception, retargeting and other meaningful transitions produce durable checkpoints. Gathering records recoverable participant cargo and shared-resource consumption.
 
-Persist server-time deadlines and aggregate versions; use bounded catch-up rather than per-player timers/unbounded replay. Starting/cancelling/accelerating work changes deadlines and economics atomically. Scheduler, foreground and reconnect use the same owner transition/stable identity; the owner locks and rechecks actual due time, generation/version and earlier-activity ordering before committing.
+Subscribe players to authorized visible regions rather than broadcasting every world change to the whole realm. Limit subscription count, viewport size, update rate and outbound buffer size. Filter protected information before publication. Coalesce superseded visual updates while preserving authoritative transitions.
 
-Scheduler reads restricted discovery metadata and owner-advertised capabilities. Finite horizons, head retries, per-owner/request/pool budgets bound discovery, not arbitrary-backlog latency. Health counts are bounded observations/lower bounds. Due-cursor indexes need an operator migration window; runtime permission checks supplement grants, not cluster-wide CONNECT/HBA/network isolation. Unsupported/failed work stays durable; alliance research, marches/gathering, World expiry, effects, event finality and integration retries retain their owners until migrated.
+Reconnect uses a consistent snapshot plus versioned subsequent updates. Define the snapshot watermark and replay boundary; detect gaps and request a fresh snapshot when bounded replay is insufficient. Native SFS/TCP and browser HTTP/WSS adapters preserve their own wire contracts. Backend improvements must not assume native clients support new messages or WebSocket replacement.
 
-Combat stays in the gameplay authority. Isolated calculations use immutable snapshots, bounded CPU/concurrency/queues/memory and return proposals; the owner checks versions, epoch and idempotency before applying results. Preserve Java numeric/rounding/order/random behavior with differential vectors, deterministic replay and invariants. Alternative languages require separate review. Planned TypeScript bots use authenticated commands, quotas and a kill switch; NPCs remain simulation-owned.
+## Time, progression and combat
 
-RabbitMQ/CloudAMQP remains target infrastructure, not a Scheduler/Mail dependency. Commit outbox with state; consumers deduplicate and commit owned effects before acknowledgment, with bounded ordering/retries/dead letters/queue budgets. BullMQ is an optional separately adopted persistent-Redis alternative, not a second event path or exactly-once guarantee.
+Persist server-time deadlines and aggregate versions. A scheduler discovers indexed due work within bounded horizons and asks the owner to evaluate it. Broker delays, Kubernetes CronJobs and cron triggers are wake-up mechanisms, not proof that a reward is due.
 
-Mail Workers acknowledge one realm's committed queues after global gift projection or signed Chat receipt commit. Their global mutation scope is only `mail_gift_log.isOpened`/`receiveTime`; this table has no kingdom column. Queue locking also needs narrow timestamp UPDATE privileges. Relays delete acknowledged intents only; lost acknowledgments replay durable values without cross-database exactly-once claims.
+Start, cancellation and acceleration update costs and deadlines atomically. Foreground commands, reconnect and Scheduler use the same transition identity. Recheck eligibility, due time, generation and predecessor ordering under the owner transaction. Use bounded catch-up after downtime rather than one timer per player or unbounded replay.
 
-Local delivery is default. External mode disables only matching realm pollers; drain consumers for cutover/rollback, preserving queues/receipts and avoiding deliberate dual consumers. Missing Chat configuration disables its consumer, without rerouting pending work locally. Distinct credentials/realm bindings are checked before/during delivery; provisioning credentials never enter runtime processes.
+Settle production at rate/effect changes before applying new bonuses. Preserve fractional accumulation, collection caps and already earned balances. Event closure and ranking finality use explicit cutoff rules, durable eligibility and idempotent reward claims.
 
-## Identity, Chat and media
+Combat runs deterministic calculations from immutable snapshots in a bounded worker pool. Record rule version, numeric bindings and reproducible random outcomes. The realm owner checks epoch, input versions and reservations before applying losses, rewards and reports. Worker failure leaves recoverable work; it cannot fabricate victory or free troops prematurely. Preserve native numeric width, rounding and ordering with differential vectors and replay tests.
 
-Target Firebase Guest/provider linking preserves internal identity and realm characters. Client `loginFlag`, realm IDs and cached authentication do not establish authorization. Preserve native SFS/TCP types/order; HTTP/WS adapters use explicit tickets/contracts. Reconnect restores committed state and validates session ownership.
+## Messaging and background work
 
-Chat owns message persistence/authorization, cursors, deduplication, signed updates and retention; Share owns the social feed. Target global/alliance retention archives after one day and deletes after seven days from sending, including archives. Redis fan-out is ephemeral. Chat/Server/external Workers share `CHAT_SECRET`; operation-specific mailbox signatures cover realm and owner fields.
+RabbitMQ is the default transport for committed integration events and asynchronous commands. Publish through an outbox, use publisher confirms and mandatory routing with returned-message handling, and acknowledge consumption only after owned effects and deduplication receipts commit. Use durable queues and persistent messages; choose quorum queues with independent nodes when replicated durability is required. [RabbitMQ reliability](https://www.rabbitmq.com/docs/reliability)
 
-API media supports authenticated JPEG/PNG input, JPEG re-encoding, immutable sequence receipts and SDK-presigned reads. Redis tickets bind realm upload/confirmation purposes; confirmation has no public gateway route. Replacement archives the old receipt/deletes its JPEG, defaults to three days and retries cleanup. Discovery/upload body limits are 64/2112 KiB.
+Delivery is at least once. Define ordering per aggregate, bounded concurrency, retry backoff, attempt limits, dead-letter inspection and controlled replay. Include operation identity, realm, schema version and tracing context. Avoid carrying unnecessary private payloads. Monitor oldest pending work as well as queue depth.
 
-`S3_ENDPOINT` is for API storage traffic; `S3_PUBLIC_ENDPOINT` signs client reads. Local service DNS avoids host-port hairpin routing. PostgreSQL avatar journals/per-owner revisions and signed Chat consumers order replay independently of clocks/sequence wrap. Moderation is an operator CLI. Media survives Chat loss with pending publication intents. GIFs, background transforms, orphan collection and the full pending/validated/ready lifecycle remain planned.
+Broker outages retain durable intent. Enforce admission/backlog limits before storage exhaustion and expose pending/unavailable states truthfully. For external email or other irreversible integrations, use provider idempotency when available and reconcile uncertain results; a local receipt alone cannot guarantee exactly-once external delivery.
 
-## Operator commands, payments and clients
+BullMQ is optional only for a clearly separate job class with demonstrated scheduling or orchestration benefits. For a Redis-backed adoption, use dedicated persistent Redis with no eviction and recovery tests; never use the disposable cache instance. Required business intent still belongs to its durable owner. [BullMQ production guidance](https://docs.bullmq.io/guide/going-to-production)
 
-Planned Admin submits versioned commands with operator, reason, scope and before/after audit. Rules move through draft, validation/simulation and versioned publication; accepted calculations retain their version. Rollback must respect persisted/in-flight state.
+## Redis and caching
 
-Target Stripe packages cost USD $1–$5. API creates orders/verifies signed webhooks; realm commands grant through ledger/idempotent receipts. Reconcile duplicates, delay, reordering, refunds and uncertain outcomes; redirects/client claims never prove payment.
+Separate operational Redis from disposable read cache. Inventory every operational key family: source of truth, lifetime, rebuild procedure, persistence needs and behavior after loss. Sessions may require reauthentication after loss; cached rankings must be rebuildable from committed economic/event records. No gameplay progress or unique configuration may exist only in Redis.
 
-Planned R2 Lua/native updates use immutable signed manifests/objects, hash/package/certificate/version checks, temporary download and recoverable activation. Preserve Android consent, signing identity, Guest recovery and progress; downloading is not installation. Flutter/Dart has no replacement deadline; SSR remains a separate experiment.
+Use a separate cache instance with bounded memory, explicit eviction, TTLs, jitter, stampede protection and invalidation after commit. Include realm and relevant data/rule version in keys. Do not use cached balances or stale replicas to authorize spending. Logical Redis database numbers do not isolate memory, eviction or instance failure. [Redis eviction](https://redis.io/docs/latest/develop/reference/eviction/)
+
+Redis presence and Pub/Sub are ephemeral signals. Durable Chat replay and authoritative gameplay recovery use their owners. Memcached is not part of the target unless a measured requirement warrants another cache technology.
+
+## Identity, social systems and operator access
+
+Keep internal account identity stable across Firebase Guest/provider linking, reconnects and client updates. Realm selection and client flags do not establish authorization. Validate session ownership, realm membership, command scope and character limits server-side.
+
+Chat owns conversation authorization, durable messages, cursors, deduplication and retention. Alliance membership and roles gate access; reconnect must revalidate authorization. Share owns feed visibility. Define retention per collection; global/alliance messages archive after one day and delete after seven days from sending, including archives. Retention cleanup is independent of gameplay deadlines.
+
+Admin submits versioned commands with operator identity, reason, scope and before/after audit. Direct dashboard edits to gameplay databases are not an administration workflow. Separate authentication, operator authorization and service credentials; privileged operations require least privilege and auditable outcomes.
+
+## Live operations and compatibility
+
+Use Unleash to activate features by environment, realm and validated client compatibility. Release first to controlled test realms, then expand based on operational evidence. Define stable evaluation context, cached last-known configuration and safe defaults during feature-service outages. [Unleash activation strategies](https://docs.getunleash.io/concepts/activation-strategies)
+
+Flags control admission to features, not retroactive outcomes. Persist the accepted rule/configuration version with marches, battles, purchases and event participation. A kill switch stops new work while existing work completes or follows a documented recovery path. Avoid player-level competitive experiments that grant unequal economic rules inside the same realm.
+
+Maintain catalogs as typed versioned artifacts with one authoring source. Preserve native identifiers, aliases, numeric widths and wire order; unknown client-only content remains unavailable until behavior is established. Catalog validation covers references, collisions, coverage and semantic consumers. Original resource inputs remain outside runtime dependencies.
+
+Track supported client/resource/protocol/schema/rule combinations. Native device or emulator validation is required for release compatibility. Signed immutable release manifests and objects use hash, package, certificate and version checks, temporary downloads and recoverable activation. Preserve account recovery and saved progress through updates.
+
+## Media, storage and payments
+
+Use MinIO for development and Cloudflare R2 for production through S3-compatible adapters. Verify signing, CORS, object metadata, lifecycle and deletion parity. Separate private uploads and receipts from public release assets. Keep metadata and access decisions in PostgreSQL.
+
+Authenticated media flows validate type and size, re-encode supported images, enforce replacement eligibility and record immutable receipts. Cleanup is retryable; missing Chat publication must not lose accepted media. GIF processing and other transforms use bounded Workers and explicit resource limits.
+
+R2 stores objects; public CDN delivery uses a custom domain and explicit cache policy. Immutable versioned keys avoid stale release replacement. Private media requires authenticated or purpose-bound signed access and must not inherit public bucket policies. [R2 public access and caching](https://developers.cloudflare.com/r2/buckets/public-buckets/)
+
+Payment APIs create orders and verify signed provider webhooks. Stripe is the payment integration target. Client redirects do not prove payment. Apply grants through realm commands with ledger receipts, handling duplicates, reordering, refunds and uncertain outcomes through reconciliation.
 
 ## Deployment and networking
 
-Production target: European 16 GB single-node Kubernetes VPS for API/media, gateway, realm workloads, coordination and Workers; Pages for landing/docs/Admin, Vercel for experimental SSR, Neon, managed Redis/MongoDB, CloudAMQP, Firebase, Stripe and R2. Provider plans/regions, Chat/Bot hosting, private object storage, observability capacity and runtime remain open. A single VPS is one failure domain; the two-realm resource budget is unverified.
+Use Compose for ordinary development and Kubernetes for production, with a representative Kubernetes validation environment before rollout. Traefik terminates and routes HTTP/WSS and exposes native TCP entrypoints. Kubernetes Services/DNS provide service discovery; Leases may coordinate leadership candidates while PostgreSQL enforces mutation authority. [Kubernetes Leases](https://kubernetes.io/docs/concepts/architecture/leases/)
 
-Target domains are `opencok.com`, `docs.opencok.com`, `admin.opencok.com`, `game.opencok.com`, `api.opencok.com`, without verified DNS/hosting. Traefik handles current HTTP/realm TCP ingress; Kong HTTP/WSS policies remain targets. SFS requires reachable per-realm TCP; browsers connect to backend WSS. Cloudflare HTTP proxying is not a TCP compatibility assumption.
+Remove ZooKeeper only after registration, session expiry, startup admission, ownership loss and reconnect semantics have replacements. Do not introduce an application-managed coordination cluster merely to replace it. Nginx per application and additional API gateways require a demonstrated routing or serving requirement.
 
-Ingress allowlists discovery, public Chat metadata, signed uploads, JPEG reads and fixed-prefix CDN paths. Local services include API/Server/Chat, PostgreSQL/setup, MongoDB, Redis, ZooKeeper, MinIO/CDN, Maple and inspection tools. Explicit external database/cache/object endpoints need not depend on local containers. Chat uses direct development WebSocket port 8083. Mail Workers/Scheduler retain restricted opt-in boundaries across service profiles.
+Set resource requests/limits, startup/readiness checks, shutdown drains and restricted service identities. Scale API, Chat and Workers independently within storage and queue budgets. Scale gameplay by realm placement; adding replicas cannot create concurrent authoritative writers. Native TCP sessions require explicit drain and reconnect handling, not just HTTP readiness.
 
-`env` injects validated API/realm configuration from one root `.env`, without app-local files or ambient Bun dotenv loading; Scheduler/Workers consume explicit environments. Local containers/outbound connectivity do not establish production compatibility or Kubernetes readiness.
+Keep durable stores and brokers independently operated or managed where practical. Providers and regions must satisfy measured latency, quotas, recovery and cost; self-hosting remains supported. A European 16 GB single-node VPS is a capacity candidate, not an availability or performance guarantee. Separate nodes/failure domains are required for actual redundancy. Cloudflare HTTP proxying does not imply support for native game TCP.
 
-## Observability, failures and promotion
+Development inspection tools are optional private profiles: pgAdmin 4, mongo-express, Redis Insight and Portainer. Administrative UIs stay off public ingress. Portainer access is privileged; versioned manifests remain the deployment source of truth. Configuration is validated and injected, with isolated development/production credentials and narrowly scoped secrets.
 
-API/Server/Chat use Evlog through Core with filtered local Maple logs/traces, controlled exceptions, durations and process metrics. Traefik exports filtered access logs/HTTP metrics over OTLP; ingress tracing stays disabled. Maple is optional at startup and has no native automatic alerting; private/loopback exposure and production capacity still need verification. The previous Compose port mapping alone did not enforce loopback access.
+## Observability and analytics
 
-Correlate operation start/result/duration and prepared/committed/delivered effects. Telemetry is derived, not durable economic audit: Evelog is the audit concept, Elasticsearch optional search, and Firebase telemetry/FCM replace neither state nor delivery. Grafana/Loki/Prometheus/Axiom/Sentry remain suspended for these signals.
+Maple owns filtered logs and traces. Sentry owns grouped exceptions, release correlation and sanitized stack diagnostics; avoid duplicate tracing pipelines by default. Validate SDK behavior against the production runtime and restrict source-map access. Exporters must redact credentials, player payloads and message bodies and meet [security requirements](SECURITY.md).
 
-Writer loss stops mutations; uncertain commits resolve through receipts. Broker loss retains bounded outbox work. Optional Chat/media/telemetry/search fails promptly without blocking core gameplay; failed calculations leave recoverable reservations, never fabricated victory. Readiness, backlog exhaustion and durable delivery are distinct observations.
+Prometheus collects bounded-cardinality metrics, Grafana presents dashboards, and Alertmanager routes actionable alerts. Do not label metrics by player or operation ID. Track command and combat latency, event-loop delay, CPU/memory, connection pools, queue age, deadline lateness, reconnect failures, authority loss and pending rewards. Test the alert delivery path. [Prometheus alerting](https://prometheus.io/docs/alerting/latest/overview/)
 
-Before activation/promotion, prove stale/wrong-owner denial, real-entrypoint recovery, retry/reordering safety, dependency loss, drain/reconnect and isolated restore with pinned clocks/rules/RNG. Native rendering requires device/emulator evidence; record client/resource/protocol/schema/rule compatibility per artifact. Preserve valid accounts/progress through migrations and rollback.
+Correlate prepared, committed and delivered work with operation/trace identifiers in controlled diagnostics. Economic ledger and audit receipts remain durable application records, independent of log retention. Optional observability outages cannot block gameplay.
 
-Budget simultaneous two-realm peaks/recovery: command/calculation p99, CPU/RSS, event-loop delay, pools, queue age, deadline lateness, reconnect and provider RTT/quotas, including combat/media/infrastructure headroom. Establish SLO/RPO/RTO and incident ownership; VPS snapshots omit remote databases/objects/rules/secrets, so backups must cover them consistently. Administrative tools remain private operator surfaces. More processes or a 16 GB target prove neither performance nor availability.
+Start analytics with bounded PostgreSQL queries and aggregates. Adopt ClickHouse when event volume or analytical queries interfere with transactional workloads. Analyze currency sources/sinks, reward anomalies, progression funnels and combat distributions from committed events. Define schema evolution, deduplication, lateness, retention and privacy before ingestion. Analytical findings never directly establish balance or reward entitlement. [ClickHouse gaming analytics](https://clickhouse.com/industries/gaming)
 
-Complete remaining domain extraction, ownership/dependency registers and equivalent recovery protocols before Player/World cutover. Scheduler/Workers remain initial restricted slices, not completion of #558 W15–W18. Remaining deadline groups, finer partitioning, provider deployment and capacity are open work.
+## Recovery, validation and adoption
+
+Define SLOs, tolerated data loss (RPO), recovery time (RTO) and incident ownership before production promotion. Backups cover PostgreSQL, non-reconstructible MongoDB documents, private objects, rules and required configuration; replicas and VPS snapshots alone are insufficient. Test isolated restoration and reconciliation across stores. Versioned objects and deletion policies must support the recovery plan.
+
+Validate stale-owner denial, duplicate/reordered commands, uncertain commits, broker loss, cache loss, worker crashes, deadline catch-up, march return, reward finality, native reconnect and graceful drain. Exercise two-realm peaks and restart recovery with pinned clocks, rules and random outcomes. Measure p99 latency and backlog recovery alongside throughput.
+
+Implement in this order:
+
+1. Establish domain ownership, PostgreSQL transactions, fencing, ledger, deadlines, outbox and recovery contracts.
+2. Build bounded realm command processing, deterministic combat execution, map cells and compatible snapshot/delta recovery.
+3. Introduce RabbitMQ delivery and isolated secondary document storage with reconciliation and restore tests.
+4. Add pooling, metrics/alerts, Sentry and controlled feature rollout; introduce disposable cache only for measured workloads.
+5. Validate Kubernetes routing, native sessions, drains and authority replacement, then remove ZooKeeper dependencies.
+6. Validate R2 private/public separation and signed client distribution before production release.
+7. Evaluate PostGIS and ClickHouse against representative query and analytical workloads; adopt only with evidence.
+
+This sequence does not authorize destructive migrations. Every schema or ownership change needs a bounded rollout, in-flight-state handling and a rollback/forward-recovery procedure that preserves valid progress. Changes to deployed behavior require the corresponding unit, integration, contract, recovery and native-client evidence.
