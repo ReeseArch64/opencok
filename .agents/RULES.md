@@ -11,7 +11,7 @@ These rules govern Git-tracked content and proposed additions, including changes
 
 ## Protected tracked content
 
-Read-only unless authorized: `.github/`, `.agents/`, `docs/`, `infra/`; agent guides; root product, context, design, glossary and rules documents; tool configuration, manifests and lockfiles. Protection does not require scanning or reading unrelated content.
+Read-only unless authorized: `.github/`, `.agents/`, `docs/`, `docker/`; agent guides; root product, context, design, glossary and rules documents; tool configuration, manifests and lockfiles. Protection does not require scanning or reading unrelated content.
 
 ## Destinations
 

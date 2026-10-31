@@ -1,0 +1,23 @@
+export default {
+  branches: ["main", { name: "develop", channel: "beta", prerelease: "beta" }],
+  tagFormat: "v${version}",
+  plugins: [
+    ["@semantic-release/commit-analyzer", { preset: "conventionalcommits" }],
+    ["@semantic-release/release-notes-generator", { preset: "conventionalcommits" }],
+    [
+      "@semantic-release/changelog",
+      { changelogFile: "CHANGELOG.md", changelogTitle: "# Changelog" },
+    ],
+    [
+      "@semantic-release/git",
+      {
+        assets: ["CHANGELOG.md"],
+        message: "chore(release): ${nextRelease.version} [skip ci]\n\n${nextRelease.notes}",
+      },
+    ],
+    [
+      "@semantic-release/github",
+      { successCommentCondition: false, failCommentCondition: false, releasedLabels: false },
+    ],
+  ],
+};
