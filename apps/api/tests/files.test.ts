@@ -362,7 +362,7 @@ test("API media stays unavailable when its dependency is disabled", async () => 
 
 test("gateway routes exact public avatar paths to API and keeps confirmation private", async () => {
     const gateway = Bun.YAML.parse(
-        await Bun.file(new URL("../../../infra/gateway/dynamic.yml", import.meta.url)).text(),
+        await Bun.file(new URL("../../../docker/gateway/dynamic.yml", import.meta.url)).text(),
     ) as {
         http: {
             routers: Record<string, { rule: string; service: string; middlewares?: string[]; }>;

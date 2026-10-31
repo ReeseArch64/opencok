@@ -20,6 +20,7 @@ services:
   gateway:
     environment:
       CDN_URL: http://minio:9000
+      S3_ENDPOINT: http://minio:9000
       MAPLE_LOCAL_INGEST_KEY: ${MAPLE_LOCAL_INGEST_KEY:-opencok-development-ingest-key}
       OTEL_RESOURCE_ATTRIBUTES: service.namespace=opencok,deployment.environment.name=development
     ports:
@@ -91,15 +92,6 @@ services:
     profiles: [all, devops, redis]
     networks: [opencok-internal-network]
     depends_on: [redis, redis-cache]
-    environment:
-      RI_REDIS_HOST: redis
-      RI_REDIS_PORT: 6379
-      RI_REDIS_ALIAS: OpenCoK operational
-      RI_REDIS_DB: 0
-      RI_REDIS_HOST1: redis-cache
-      RI_REDIS_PORT1: 6379
-      RI_REDIS_ALIAS1: OpenCoK cache
-      RI_REDIS_DB1: 0
     ports:
       - 5540:5540
     volumes:
@@ -125,7 +117,7 @@ services:
     build:
       context: ./maple
       dockerfile: Dockerfile
-    networks: [opencok-internal-network]
+    networks: [opencok-internal-network, opencok-external-network]
     environment:
       MAPLE_LOCAL_INGEST_KEY: ${MAPLE_LOCAL_INGEST_KEY:-opencok-development-ingest-key}
       MAPLE_LOCAL_ACCESS_TOKEN: ${MAPLE_LOCAL_ACCESS_TOKEN:-opencok-development-access-token}
@@ -216,7 +208,7 @@ services:
       KINGDOM_ID: 1
       CHAT_URL: http://chat:8083
       S3_ENDPOINT: http://minio:9000
-      S3_PUBLIC_ENDPOINT: http://localhost:9000
+      S3_PUBLIC_ENDPOINT: ${S3_PUBLIC_ENDPOINT:-http://192.168.1.104}
       S3_REGION: us-east-1
       S3_BUCKET: opencok-uploads
       S3_ACCESS_KEY_ID: opencok

@@ -18,6 +18,10 @@ http:
       rule: Path(`/gameservice/www/gateway/json.php`) && Method(`POST`)
       middlewares: [upload-body]
       service: api
+    avatar-storage:
+      entryPoints: [web]
+      rule: PathRegexp(`^/opencok-uploads/[0-9]{1,6}/[a-f0-9]{32}\.jpg$`) && (Method(`GET`) || Method(`HEAD`))
+      service: avatar-storage
     avatar-images:
       entryPoints: [web]
       rule: PathRegexp(`^/cok/img/[0-9]{1,6}/[a-f0-9]{32}\.jpg$`) && (Method(`GET`) || Method(`HEAD`))
@@ -46,6 +50,12 @@ http:
       buffering:
         maxRequestBodyBytes: 65536
   services:
+    avatar-storage:
+      loadBalancer:
+        passHostHeader: true
+        serversTransport: api-transport
+        servers:
+          - url: '{{ env "S3_ENDPOINT" }}'
     cdn-storage:
       loadBalancer:
         passHostHeader: false
