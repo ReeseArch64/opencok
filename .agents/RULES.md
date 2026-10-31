@@ -1,52 +1,31 @@
-# Rules and Operating Boundaries
+# Tracked Repository Rules
 
-Apply to agents, tools, scripts, generators and delegates, including indirect execution.
+These rules govern Git-tracked content and proposed additions, including changes made by tools, generators or delegates.
 
 ## Scope and authorization
 
-- Inspect Git and relevant paths before writing. Change only the request; preserve existing/staged/untracked work and report unrelated problems. Ask the owner about unclear destinations, ownership or authorization.
-- Protected changes require an **explicit request and subsequent confirmation** after presenting paths, operations, rationale and effects, including generated files. The initial request is not confirmation; expanded scope requires fresh confirmation.
-- Destructive cleanup, discarding changes and history rewrites require specific authorization, including `git reset --hard`, `git clean`, overwriting restores and removing existing tests/experiments.
-- Testing authorizes neither production access, messages, charges, deployment nor real-data mutations; use local resources or explicitly authorized tests.
+- Inspect Git and relevant paths before writing. Stay within the request; preserve staged, unstaged and untracked work. Report unrelated problems and ask about unclear ownership or destinations.
+- Protected changes require an explicit request and subsequent confirmation after presenting paths, operations, rationale and effects, including generated files. Expanded scope requires fresh confirmation.
+- Discarding work, destructive cleanup, removing existing tests/experiments and rewriting history require specific authorization. This includes `git reset --hard`, `git clean` and overwriting restores.
+- Tests and delivery do not authorize production access, messages, charges, deployment or real-data mutations.
 
-## Protection and selective reading
+## Protected tracked content
 
-Read-only recursively: `.github/`, `.agents/`, `docs/`, `infra/`; every `AGENTS.md`; root `PRODUCT.md`, `CONTEXT.md`, `DESIGN.md`, `GLOSSARY.md`, `RULES.md`; tool configuration, manifests and lockfiles; `data/reference/`, `data/resources/`, original client/asset inputs, existing backups, credentials and signing keys. READMEs outside protected directories may be edited within scope.
+Read-only unless authorized: `.github/`, `.agents/`, `docs/`, `infra/`; agent guides; root product, context, design, glossary and rules documents; tool configuration, manifests and lockfiles. Protection does not require scanning or reading unrelated content.
 
-Protection does not require reading. Access only relevant files/sections; never routinely browse, scan, index or reread these directories during startup/general exploration:
+## Destinations
 
-- `data/reference/`, `data/resources/`: legacy information on demand; prefer current code/documentation for current behavior.
-- `data/android/`, `data/ios/`: only for necessary client adjustments.
-- `data/cdn/`: several gigabytes; only for client-asset work.
+- Reuse established locations. New root directories require an explicit request naming their purpose; avoid parallel structures and empty planned applications.
+- Permanent tests/minimal fixtures belong with their component, without a root `tests/` directory. `.agents/` holds agent configuration; `.github/` holds repository automation, not application tests. CI-specific tests require prior authorization and a presented destination.
+- Disposable scripts, reproductions, benchmarks, logs and intermediate reports belong in task-specific system temporary directories outside the repository. Remove only known task-owned files.
+- Keep builds/caches/intermediates out of Git and in configured destinations. Never change `.gitignore` to conceal misplaced files or force-add ignored inputs.
 
-Authorized data exceptions:
+## Tools and configuration
 
-- Client `extracted/` and `patches/`, plus `data/cdn/extracteds/`: scoped client/asset work. Extract/transform originals into separate authorized destinations, never in place.
-- Client `install/`: latest installation artifact only; explicitly authorized updates replace it, without automatic downloads/installs. Preserve reference originals and signing keys elsewhere.
-- `data/cdn/data/`: asset preparation, without publishing/deployment authorization.
-- `data/backups/`: necessary task-scoped backups only; existing backups remain protected.
-
-## Destinations and artifacts
-
-- `apps/`: applications/composition; `packages/`: reusable contracts/rules/components. Permanent tests/minimal fixtures follow component conventions; no root `tests/`.
-- Reuse destinations. New root directories require an explicit request naming their purpose; avoid parallel structures, planned applications, generic experiment areas and artificial depth limits.
-- `.agents/`: instructions/skills/configuration; `.github/`: repository automation, with CI-specific tests requiring prior authorization and a presented destination. Neither holds application tests or temporary work.
-- Disposable scripts/reproductions, benchmarks, logs and intermediate reports belong in task-specific system temporary directories outside the repository, without private inputs. Remove only known task-owned files, never broadly clean ignored/untracked files.
-- Inspect command write effects. Keep normal artifacts in configured destinations (`dist/`, `coverage/`); never version builds/caches/intermediates or change `.gitignore` to hide misplaced files.
-
-## Tools and data
-
-- Use component-adopted formats; prefer Markdown for editable documentation. Reuse tools/dependencies; installations or technology changes require authorization. Prefer commands/temporary files over persistent helpers; images/binaries/exports need an explicit purpose.
-- Run relevant checks, preferably without writes; never weaken rules/exclusions/tests. Restrict fixes/formatting to authorized paths.
-- Never expose credentials, keys, tokens, private Elex code or player data in source, fixtures, logs, reports or external services, or copy private data to unapproved destinations. Never force-add ignored files or make private inputs shared dependencies.
-
-## Environment and configuration
-
-- Reading, enumerating, creating or changing environment variables/files requires the owner's explicit request, including dumps, `.env`, exports and new `process.env`/`Bun.env` equivalents.
-- Prefer nonsecret constants/defaults for stable settings. Never hardcode secrets; secrets/deployment-specific URLs require external configuration and explicit authorization before reading/adding variables. Ask for missing values. Preserve existing runtime configuration unless migration/removal is separately requested.
+- Reuse adopted formats/tools/dependencies; installations and technology changes require authorization. Prefer temporary commands over persistent helpers; images, binaries and exports need an explicit purpose.
+- Restrict automatic fixes to authorized paths. Never weaken rules, exclusions, assertions or failure handling to pass checks.
+- Changes to tracked environment bindings, templates or runtime configuration require an explicit request. Prefer nonsecret constants/defaults for stable settings; request missing deployment-specific values instead of inventing them.
 
 ## Delivery
 
-- Verify relative internal Markdown links/sections; no Obsidian links. Centralize reading instructions in `AGENTS.md`, without recursive reading requirements.
-- Never invent URLs, tests or evidence; distinguish verified execution, environment failures and hypotheses.
-- Review diff/Git; report paths, checks and limitations. Delivery workflows do not expand authorization.
+Use relative internal Markdown links, not Obsidian links. Verify targets/sections. Review the diff and report changed paths, actual validation and limitations; never invent URLs, execution results or evidence.

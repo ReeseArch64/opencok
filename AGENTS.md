@@ -1,52 +1,40 @@
 # AI Agent Guide
 
-Guide contributions to OpenCoK, a self-hosted game platform, within authorized scope and with player/operator data protected.
+OpenCoK is a self-hosted game platform. Use this index to load only the guidance relevant to the task; the documents below are independent and do not form reading chains. Reuse context already read, inspect relevant headings, and reread only after changes or when verification requires it. Report missing sources without inventing their contents.
 
-## Context and sources
+## Task references
 
-Centralize reading here without recursive mandatory chains. Reuse previously read context; reread after changes or to verify guidance. Search headings and read only relevant sections of long documents. Report necessary sources that are missing or inaccessible; do not invent their contents.
+| Source                                  | Scope                                                                |
+| --------------------------------------- | -------------------------------------------------------------------- |
+| [RULES](.agents/RULES.md)               | Authorization, protected tracked content, destinations and delivery. |
+| [SECURITY](.github/SECURITY.md)         | Sensitive data, external transfers, incidents and private reporting. |
+| [CONTRIBUTING](.github/CONTRIBUTING.md) | Branches, tests, commits and GitHub delivery.                        |
+| [CONTEXT](CONTEXT.md)                   | Technical requirements, priorities and acceptance criteria.          |
+| [ARCHITECTURE](.github/ARCHITECTURE.md) | Components, dependencies, state ownership and migration gates.       |
+| [GLOSSARY](GLOSSARY.md)                 | Vocabulary, names, contracts and code presentation.                  |
 
-| Source                                        | When and why                                                                                                                  |
-| --------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
-| [Operating rules](.agents/RULES.md)           | Before writing: scope, protected paths, authorization confirmation and destinations.                                          |
-| [Security](.github/SECURITY.md)               | Data access, secrets, transfers, incidents and private reports.                                                               |
-| [Contribution guide](.github/CONTRIBUTING.md) | Git/GitHub, standards, tests, review and delivery for every contribution.                                                     |
-| [Product](PRODUCT.md)                         | Goals, scope and player/operator behavior.                                                                                    |
-| [Technical context](CONTEXT.md)               | Project identity, technical direction, priorities and evaluation criteria.                                                    |
-| [Architecture](.github/ARCHITECTURE.md)       | Services, responsibilities, infrastructure and compatibility; before creating, moving or reorganizing and before client work. |
-| [Glossary](GLOSSARY.md)                       | Vocabulary, naming, contracts and code presentation.                                                                          |
-| [ADRs](docs/decisions/README.md)              | Accepted decisions before changing technology.                                                                                |
+[PRODUCT](PRODUCT.md) is the optional player/operator description, not required reading for technical tasks.
 
-Use [CONTEXT.md](CONTEXT.md) for technical direction, [CONTRIBUTING.md](.github/CONTRIBUTING.md) for contribution procedures, [PRODUCT.md](PRODUCT.md) for product decisions, [RULES.md](.agents/RULES.md) for authorization, [GLOSSARY.md](GLOSSARY.md) for vocabulary and [ARCHITECTURE.md](.github/ARCHITECTURE.md) for system design. ADRs record stack/tool choices and their implementation gates, not domain layout or process authority. Do not duplicate these sources here. Use relative Markdown links, not Obsidian links.
+## Skills
 
-## Execution and delivery
+- For every implementation, use [generate-tests](.agents/skills/generate-tests/SKILL.md) for unit coverage of changed behavior and acceptance criteria; complete other applicable test layers with existing project tools.
+- After implementation and before opening/updating a PR, use [code-review](.agents/skills/code-review/SKILL.md) against the issue on Standards and Spec. Pin the intended base (the immediate parent for stacked work), resolve blockers, rerun after corrections and record results/limitations. Resolve missing issues/criteria before review.
 
-- Inspect Git and relevant code before editing; preserve existing changes, including staged and untracked work. Stay within the request and established patterns before adding dependencies or abstractions. Confirm protected changes under the operating rules.
-- Use `generate-tests` for every implementation and cover the layers required by the contribution guide. Run relevant tests. Fix introduced violations without weakening checks; record blockers and justified inapplicability.
-- After implementation, use `code-review` against the issue and acceptance criteria before the PR, covering Standards and Spec. Resolve blockers and rerun after changes as the guide requires.
-- Review diff/Git, document assumptions and new dependencies in their proper locations, and report changes, validation and limitations. Follow commit, branch, stack and PR workflows; delivery does not expand authorization.
+## Local/private inputs
 
-## Private data and inputs
+The inventory below describes possible inputs, not their presence or permission to scan them. Access only task-required files; keep originals read-only and derived writes within explicitly authorized destinations. Reading, enumerating or changing environment variables/files requires an explicit request. Do not automatically download, install, publish, synchronize, back up or rewrite local inputs.
 
-Ignored files are local inputs, not shared dependencies; never force-add private files, client artifacts or keys. Keep reference originals read-only; client extraction, patching, packaging and replacement of the latest installation artifact require scoped authorization in the destinations below. Access only necessary data; exclude credentials, keys, tokens, private Elex code and player data from source, logs and reports. On exposure, stop and notify without reproducing the value, following the security policy.
-
-### Consult only when necessary
-
-The owner describes these local inputs and destinations; this inventory does not prove their presence or contents. Do not automatically list, scan or read them. Consult only the minimum files necessary for the requested task; a listed path grants no write or disclosure permission. Environment variables/files require an explicit request under the operating rules.
-
-| Path                                             | Purpose and boundary                                                                                                                                                     |
-| ------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `data/resources/`                                | Legacy server XML resources from v6.12.20, v9.27.0 and v12.06.0; read-only references.                                                                                   |
-| `data/reference/server/`                         | Decompiled legacy Java server; read-only reference.                                                                                                                      |
-| `data/reference/server-jar/`                     | Original legacy Java server JARs; read-only inputs.                                                                                                                      |
-| `data/reference/http/`                           | Original legacy PHP API; read-only reference.                                                                                                                            |
-| `data/ios/`, `data/android/`                     | Platform-specific clients; original inputs remain read-only outside the authorized destinations below.                                                                   |
-| `data/ios/extracted/`, `data/android/extracted/` | Extracted clients; inspect or modify only as needed for an authorized client task.                                                                                       |
-| `data/ios/install/`, `data/android/install/`     | Latest installation artifact for each platform. An authorized update replaces the previous artifact, keeping this destination current rather than accumulating versions. |
-| `data/ios/patches/`, `data/android/patches/`     | Client changes implemented by the project.                                                                                                                               |
-| `data/cdn/`                                      | Client asset inputs; preserve originals outside the derived destinations below.                                                                                          |
-| `data/cdn/data/`                                 | Client assets prepared for serving; update only for an authorized asset task.                                                                                            |
-| `data/cdn/extracteds/`                           | Extracted client assets that may be modified on demand.                                                                                                                  |
-| `data/backups/`                                  | Backups of task-relevant material only when necessary and within authorized scope; no automatic bulk copies.                                                             |
-
-These paths remain local/private inputs, not shared dependencies or permission to download, install, publish, synchronize, back up or rewrite data automatically.
+| Path                                             | Purpose and boundary                                                          |
+| ------------------------------------------------ | ----------------------------------------------------------------------------- |
+| `data/resources/`                                | Legacy XML resources from v6.12.20, v9.27.0 and v12.06.0; read-only.          |
+| `data/reference/server/`                         | Decompiled legacy Java server; read-only.                                     |
+| `data/reference/server-jar/`                     | Original Java server JARs; read-only.                                         |
+| `data/reference/http/`                           | Original PHP API; read-only.                                                  |
+| `data/ios/`, `data/android/`                     | Original platform clients remain read-only outside the destinations below.    |
+| `data/ios/extracted/`, `data/android/extracted/` | Extracted clients; inspect/modify only for an authorized client task.         |
+| `data/ios/install/`, `data/android/install/`     | Latest installation artifact; an authorized update replaces the previous one. |
+| `data/ios/patches/`, `data/android/patches/`     | Project client changes.                                                       |
+| `data/cdn/`                                      | Original client assets remain read-only outside derived destinations.         |
+| `data/cdn/data/`                                 | Serving assets; update only for an authorized asset task.                     |
+| `data/cdn/extracteds/`                           | Extracted assets that may be modified on demand.                              |
+| `data/backups/`                                  | Necessary task-scoped backups only; existing backups remain protected.        |
