@@ -1,29 +1,29 @@
 # Vocabulary and Code Conventions
 
-Use established domain vocabulary, ordinary TypeScript names and readable layout. C# inspires TypeScript block presentation only, never naming, runtime semantics or other languages. Public names/compatibility take precedence. These conventions authorize neither new formatters, mass renaming, structural migration nor unrelated rewrites; operational limits are in [rules](.agents/RULES.md).
+Use established domain vocabulary, ordinary TypeScript names and readable layout. C# inspires block presentation only in files ending in `.ts`; naming and runtime semantics follow JavaScript/TypeScript conventions. Other JavaScript/TypeScript extensions follow community conventions. Public names/compatibility take precedence. These conventions authorize neither new formatters, mass renaming, structural migration nor unrelated rewrites; operational limits are in [rules](.agents/RULES.md).
 
 ## Implementation vocabulary
 
-| Term | Responsibility |
-| --- | --- |
-| Application | Deployable `apps/` composition root; wires collaborators/configuration. |
-| Package | Reusable `packages/` code; never imports applications. |
-| Controller | Transport operations delegated to injected Services. |
-| Service | Use case coordinating rules/persistence through contracts and constructor injection. |
-| Contract | Structural port/input/query/selection/response, without runtime validation. |
-| Port | Required capability independent of infrastructure implementation. |
-| Adapter | Connects transport/infrastructure to contracts; I/O does not confer workflow ownership. |
-| DTO | Plain create/update input class. |
-| Response | Output contract, including mobile; not a DTO. |
-| Mapper | Transport mapping/wire serialization. |
-| Validation | Runtime boundary checks, including Zod; declarations alone do not validate. |
-| Rule | Domain behavior/invariant, separate from parsing/serialization. |
-| Enum | Finite named alternatives. |
-| Constant | Fixed value; tunable limits/durations are configuration. |
-| Abstract class | Shared workflow/lifecycle/invariants with domain-specific steps. |
-| Composition | Application wiring, without hidden domain construction. |
-| Wire contract | Exchanged names/values, numeric widths, optionality and serialization order. |
-| Compatibility entrypoint | Existing import/call boundary delegating during migration. |
+| Term                     | Responsibility                                                                          |
+| ------------------------ | --------------------------------------------------------------------------------------- |
+| Application              | Deployable `apps/` composition root; wires collaborators/configuration.                 |
+| Package                  | Reusable `packages/` code; never imports applications.                                  |
+| Controller               | Transport operations delegated to injected Services.                                    |
+| Service                  | Use case coordinating rules/persistence through contracts and constructor injection.    |
+| Contract                 | Structural port/input/query/selection/response, without runtime validation.             |
+| Port                     | Required capability independent of infrastructure implementation.                       |
+| Adapter                  | Connects transport/infrastructure to contracts; I/O does not confer workflow ownership. |
+| DTO                      | Plain create/update input class.                                                        |
+| Response                 | Output contract, including mobile; not a DTO.                                           |
+| Mapper                   | Transport mapping/wire serialization.                                                   |
+| Validation               | Runtime boundary checks, including Zod; declarations alone do not validate.             |
+| Rule                     | Domain behavior/invariant, separate from parsing/serialization.                         |
+| Enum                     | Finite named alternatives.                                                              |
+| Constant                 | Fixed value; tunable limits/durations are configuration.                                |
+| Abstract class           | Shared workflow/lifecycle/invariants with domain-specific steps.                        |
+| Composition              | Application wiring, without hidden domain construction.                                 |
+| Wire contract            | Exchanged names/values, numeric widths, optionality and serialization order.            |
+| Compatibility entrypoint | Existing import/call boundary delegating during migration.                              |
 
 One responsibility and one behavioral class per implementation file; no empty abstractions/layers to satisfy terminology.
 
@@ -49,10 +49,11 @@ Do not merge identifiers or invent cosmetic synonyms.
 
 ## Presentation and checks
 
-- Pinned dprint exclusively owns maintained TypeScript (TS/TSX/c/m variants): four spaces, no tabs, LF, double quotes, semicolons, 100 columns, multiline-only trailing commas; preserve property quoting and import/export order.
-- Oxfmt exclusively owns JavaScript/JSX/c/m variants and other supported formats, including Markdown/embedded code: retain two-space, same-line-brace defaults. Never manually align columns or incidentally sort imports/bindings/properties/package keys.
+- Pinned dprint exclusively formats maintained `.ts` files: four spaces, no tabs, LF, double quotes, semicolons, 100 columns, multiline-only trailing commas; preserve property quoting and import/export order.
+- Oxfmt exclusively formats all other supported JavaScript/TypeScript extensions, including `.tsx`, `.mts`, `.cts`, `.js`, `.jsx`, `.mjs` and `.cjs`, plus other supported formats, including Markdown/embedded code. Follow community conventions with two-space indentation and same-line braces. Never manually align columns or incidentally sort imports/bindings/properties/package keys.
+- Oxlint checks all maintained JavaScript/TypeScript extensions, including `.ts`, independently of formatter ownership.
 
-TypeScript layout:
+C#-inspired layout applies only to `.ts` files:
 
 - Allman braces for declarations/functions/methods/accessors/constructors/control flow; brace every control body, including guards and `do` (Oxlint `curly` covers formatter gaps). Put `else`, `catch`, `finally` and `do`'s `while` on new lines.
 - Arrow callback braces stay inline; objects retain expression layout. Empty blocks may be `{}` on the next line. Formatter owns wrapping; no per-file rules. Keep `return` with its expression and parenthesize arrow-object returns.
@@ -60,4 +61,4 @@ TypeScript layout:
 
 No code/documentation/suppression comments in tracked files or embedded examples; preserve required interpreter directives. Explain intent in prose and constraints through names/types/tests.
 
-Run `bun run lint`, `bun run format:check`, relevant workspace type checks and affected tests. Warnings are errors; lint does not replace semantic type checks. Review spacing/naming/responsibilities/compatibility separately. Formatting preserves gameplay, protocols, persistence, costs, timers, property order and import side effects; success proves neither behavior preservation nor native-client compatibility. Renaming/structural changes require their own scope and compatibility evidence.
+Run affected tests. Warnings are errors; lint does not replace semantic type checks. Review spacing/naming/responsibilities/compatibility separately. Formatting preserves gameplay, protocols, persistence, costs, timers, property order and import side effects; success proves neither behavior preservation nor native-client compatibility. Renaming/structural changes require their own scope and compatibility evidence.
