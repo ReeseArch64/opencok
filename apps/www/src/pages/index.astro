@@ -6,7 +6,12 @@ import { site } from "../data/site.mjs";
 const troops = ["57580118", "57580318", "57580518", "57580718"].map((id) =>
   catalog.find((item) => item.reference === id),
 );
-const skins = catalog.filter((item) => item.category === "skins");
+const featuredSkin =
+  catalog.find(
+    (item) =>
+      item.category === "skins" && item.artCode === "BlueDragonCastle_face",
+  ) ??
+  catalog.find((item) => item.category === "skins" && item.group === "Castelo");
 const events = catalog.filter((item) => item.category === "eventos");
 ---
 
@@ -152,22 +157,22 @@ const events = catalog.filter((item) => item.category === "eventos");
               height="48"
             />
           ))}
-        <a href="/catalogo/avatares/">Encontre seu avatar ↗</a>
+        <a href="/catalogo/avatares/">Escolha a aparência do senhor ↗</a>
       </div>
     </div>
-    <a href={`/wiki/${skins[1].id}/`} class="featured-skin">
+    <a href={`/wiki/${featuredSkin.id}/`} class="featured-skin">
       <span class="eyebrow">COLEÇÃO DE CASTELOS</span>
       <img
-        src={skins[1].image}
-        alt={skins[1].name}
+        src={featuredSkin.image}
+        alt={featuredSkin.name}
         width="440"
         height="380"
         loading="lazy"
       />
       <div>
-        <h3>{skins[1].name}</h3>
-        <span class:list={["badge", skins[1].status]}>
-          {statusLabel(skins[1].status)}
+        <h3>{featuredSkin.name}</h3>
+        <span class:list={["badge", featuredSkin.status]}>
+          {statusLabel(featuredSkin.status)}
         </span>
       </div>
       <span class="featured-arrow">↗</span>

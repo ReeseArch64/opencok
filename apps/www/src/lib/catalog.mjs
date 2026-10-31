@@ -1,4 +1,5 @@
 import records from "../data/catalog.json";
+import { classifyCosmetic } from "./cosmetics.mjs";
 
 export const categories = {
   tropas: {
@@ -12,14 +13,14 @@ export const categories = {
     name: "Skins",
     eyebrow: "Um reino com a sua identidade",
     description:
-      "De fortalezas congeladas a castelos nas nuvens. Descubra as aparências que transformam sua cidade.",
+      "Explore skins de castelo, asa, balão, marcha, efeito, decoração e perfil. Cada detalhe do reino tem seu próprio estilo.",
     symbol: "♜",
   },
   avatares: {
     name: "Avatares",
     eyebrow: "Toda lenda tem um rosto",
     description:
-      "Explore a coleção de retratos e encontre a identidade do seu próximo conquistador.",
+      "Escolha a aparência do seu senhor: o personagem que representa você no reino. Encontre o visual da sua próxima história.",
     symbol: "♛",
   },
   eventos: {
@@ -31,7 +32,11 @@ export const categories = {
   },
 };
 
-export const catalog = records.map((item) => ({ ...item, image: `/media/${item.id}.png` }));
+export const catalog = records.map((item) => ({
+  ...item,
+  ...classifyCosmetic(item.sourceTable, item.cosmeticType),
+  image: `/media/${item.id}.png`,
+}));
 
 export function statusLabel(status) {
   return status === "available" ? "Disponível" : "Em breve";

@@ -75,15 +75,19 @@ export const guides = [
     name: "Sua identidade no reino",
     group: "Skins e avatares",
     image: "/media/king.jpg",
-    description: "Encontre seu estilo nas coleções de castelos e retratos.",
+    description: "Conheça os sete tipos de skin e escolha a aparência do seu senhor.",
     sections: [
       [
-        "Um novo visual para a cidade",
-        "A coleção de skins apresenta aparências de castelos. As imagens são prévias estáticas: animações e efeitos poderão ser diferentes dentro do jogo.",
+        "Sete tipos de skin",
+        "As skins se dividem em Castelo, Asa, Balão, Marcha, Efeito, Decoração e Perfil. Use os atalhos de tipo ou o filtro da galeria para explorar cada coleção. As imagens são prévias estáticas dos cosméticos.",
       ],
       [
-        "Escolha um retrato",
-        "A galeria de avatares permite navegar pelas imagens e pesquisar seus códigos. Parte dos retratos ainda está em catalogação, por isso preservamos o identificador em vez de atribuir nomes de personagens sem confirmação.",
+        "Avatar é a aparência do senhor",
+        "O avatar define a aparência do personagem que representa você no reino. Molduras e brasões pertencem às skins de Perfil; asas, castelos e marchas têm suas próprias coleções. Os códigos originais das aparências do senhor são preservados quando não há nome de personagem confirmado.",
+      ],
+      [
+        "Balões, perfil e decoração",
+        "Balão reúne as aparências de conversa e os balões do castelo. Perfil reúne brasões e molduras. Decoração corresponde às aparências do terreno da cidade; Efeito reúne os efeitos de castelo. Essas coleções personalizam partes diferentes da experiência.",
       ],
       [
         "Disponibilidade e aquisição",

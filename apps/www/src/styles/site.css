@@ -1545,3 +1545,34 @@ dd {
     animation: none !important;
   }
 }
+
+.skin-types {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 24px;
+}
+.skin-types a {
+  padding: 8px 14px;
+  border: 1px solid var(--line);
+  color: var(--gold);
+  font-size: 12px;
+}
+.skin-types a:hover {
+  border-color: var(--gold);
+  background: var(--panel);
+}
+.skin-types small {
+  color: var(--muted);
+  margin-left: 8px;
+}
+.avatares .card-art {
+  height: 240px;
+}
+.avatares .card-art img {
+  padding: 40px 12px 0;
+  object-position: center bottom;
+}
+.detail-art.avatares > img {
+  max-width: 480px;
+}

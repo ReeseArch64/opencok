@@ -11,7 +11,10 @@ export function getStaticPaths() {
 const { category } = Astro.params;
 const { info } = Astro.props;
 const items = catalog.filter((item) => item.category === category);
-const groups = [...new Set(items.map((item) => item.group))];
+const groups =
+  category === "skins"
+    ? ["Castelo", "Asa", "Balão", "Marcha", "Efeito", "Decoração", "Perfil"]
+    : [...new Set(items.map((item) => item.group))];
 const tiers = [...new Set(items.map((item) => item.tier).filter(Boolean))].sort(
   (a, b) => a - b,
 );
@@ -47,6 +50,16 @@ const tiers = [...new Set(items.map((item) => item.tier).filter(Boolean))].sort(
       ))}
     </nav>
 
+    {category === "skins" && (
+      <nav class="skin-types" aria-label="Tipos de skin">
+        {groups.map((group) => (
+          <a href={`/catalogo/skins/?group=${encodeURIComponent(group)}`}>
+            {group}{" "}
+            <small>{items.filter((item) => item.group === group).length}</small>
+          </a>
+        ))}
+      </nav>
+    )}
     <form class="filters" role="search" id="catalog-search">
       <label class="search-label">
         Buscar no catálogo
@@ -59,9 +72,11 @@ const tiers = [...new Set(items.map((item) => item.tier).filter(Boolean))].sort(
       </label>
       {groups.length > 1 && (
         <label>
-          Família
+          {category === "skins" ? "Tipo de skin" : "Família"}
           <select name="group">
-            <option value="">Todas as famílias</option>
+            <option value="">
+              {category === "skins" ? "Todos os tipos" : "Todas as famílias"}
+            </option>
             {groups.map((g) => (
               <option>{g}</option>
             ))}
