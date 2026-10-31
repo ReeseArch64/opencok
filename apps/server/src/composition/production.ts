@@ -53,7 +53,7 @@ export function createRealmProductionPreparation(
     return {
         async prepare(tx, owner, now)
         {
-            const state = await readProductionProgress(tx, owner, rules.kingdomId, now);
+            const state = await readProductionProgress(tx, owner, rules.kingdomId, now, true);
             const planned = await planRealmProductionContext(state, rules, now, providers);
             await persistProductionProgress(tx, state, planned.write, authority, now);
 

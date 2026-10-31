@@ -3,6 +3,7 @@
 .github/
 .specs/
 .pi/
+.agents/
 
 dist/
 data/
@@ -30,3 +31,11 @@ docker-compose.yml
 .dockerignore
 .editorconfig
 .gitkeep
+
+apps/web/assets/
+
+**/node_modules/
+**/dist/
+**/.astro/
+**/.env
+**/.env.*

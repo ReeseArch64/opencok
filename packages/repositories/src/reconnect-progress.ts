@@ -35,6 +35,7 @@ export async function readProductionProgress(
     uid: string,
     kingdomId: number,
     now: bigint,
+    combineEffects = false,
 ): Promise<ProductionProgressState>
 {
     if (!uid.trim() || uid.length > 40 || !uid.isWellFormed() || uid.includes("\0"))
@@ -121,7 +122,7 @@ export async function readProductionProgress(
         throw new GameError(errors.invalid);
     }
 
-    const effects = await readPlayerEffects(tx, profile, true);
+    const effects = await readPlayerEffects(tx, profile, true, combineEffects);
     const newGenerals = await readResourceNewGenerals(tx, uid, false);
     const armies = await tx
         .select()

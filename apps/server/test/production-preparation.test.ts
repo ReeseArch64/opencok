@@ -42,6 +42,28 @@ function fixture()
         query: async (query: { text: string; }, params: unknown[] = []) => {
             const sql = query.text;
             queries.push({ sql, params });
+            if (sql.includes("as effect_snapshot(seed)"))
+            {
+                const projections = [...sql.matchAll(
+                    /from \(select (.*?) from "opencok_kingdom"\."([^"]+)".*?\) "effect_rows"/g,
+                )];
+
+                return {
+                    rows: [
+                        projections.map((projection) =>
+                            (rows[projection[2]!] ?? []).map((row) =>
+                                projection[1]!.split(", ").map((column) => {
+                                    const value =
+                                        row[[...column.matchAll(/"([^"]+)"/g)].at(-1)![1]!]
+                                            ?? null;
+
+                                    return Buffer.isBuffer(value) ? value.toString("hex") : value;
+                                })
+                            )
+                        ),
+                    ],
+                };
+            }
             const table = /(?:from|update|into) "opencok_kingdom"\."([^"]+)"/.exec(sql)?.[1];
             const fields = /^(?:select (.*?) from |.* returning (.*)$)/.exec(sql);
             const columns = (fields?.[1] ?? fields?.[2])?.split(", ");
@@ -154,7 +176,9 @@ test("prepare_reconnectOnlyDomains_removesQueriesAtProductionExecutorBoundary", 
 
     expect(before).toEqual(after);
     expect(selects(full)).toHaveLength(54);
-    expect(selects(narrow)).toHaveLength(41);
+    expect(selects(narrow)).toHaveLength(24);
+    expect(selects(narrow).filter((query) => query.sql.includes("as effect_snapshot(seed)")))
+        .toHaveLength(1);
     expect(selects(narrow).map((query) => /from "opencok_kingdom"\."([^"]+)"/.exec(query.sql)?.[1]))
         .not.toContain("user_hospital");
     expect(
@@ -182,7 +206,7 @@ test("prepare_elapsedInterval_preservesFoodDebitsAndIntervalReceipts", async () 
     await executor(narrow, rules, undefined, 2000)(command("phase-1"), async () => plan());
 
     expect(selects(full)).toHaveLength(55);
-    expect(selects(narrow)).toHaveLength(42);
+    expect(selects(narrow)).toHaveLength(25);
     expect(writes(narrow)).toEqual(writes(full));
     expect(writes(narrow).map((query) => /"opencok_kingdom"\."([^"]+)"/.exec(query.sql)?.[1]))
         .toEqual([
@@ -399,9 +423,9 @@ test("productionSettle_elapsedHour_preservesAccountsWithFewerExecutorQueries", a
 
     expect(actual).toEqual(original);
     expect(selects(full)).toHaveLength(58);
-    expect(selects(narrow)).toHaveLength(45);
+    expect(selects(narrow)).toHaveLength(26);
     expect(full.queries).toHaveLength(72);
-    expect(narrow.queries).toHaveLength(59);
+    expect(narrow.queries).toHaveLength(40);
     expect(writes(narrow)).toHaveLength(12);
     expect(writes(narrow)).toEqual(writes(full));
     const accounts = writes(narrow).filter((query) =>

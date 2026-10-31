@@ -1,0 +1,75 @@
+name: opencok
+
+networks:
+  opencok-internal-network:
+    name: opencok-internal-network
+    internal: true
+    driver: bridge
+
+  opencok-external-network:
+    internal: false
+    name: opencok-external-network
+    driver: bridge
+
+volumes:
+  postgres-data: ~
+  pgadmin-data: ~
+  portainer-data: ~
+
+services:
+  www:
+    image: opencok-www:local
+    build:
+      context: ../apps/www
+      dockerfile: Dockerfile
+    networks: [opencok-internal-network, opencok-external-network]
+
+  gateway:
+    image: traefik:v3.7.15
+    networks: [opencok-internal-network, opencok-external-network]
+    volumes:
+      - ./gateway/traefik.yml:/etc/traefik/traefik.yml:ro
+      - ./gateway/dynamic.yml:/etc/traefik/dynamic.yml:ro
+
+  postgres:
+    image: postgres:17.11-bookworm
+    networks: [opencok-internal-network]
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+
+  api:
+    image: opencok-api:local
+    build:
+      context: ..
+      dockerfile: apps/api/Dockerfile
+    networks: [opencok-internal-network, opencok-external-network]
+
+  server:
+    image: opencok-server:local
+    build:
+      context: ..
+      dockerfile: apps/server/Dockerfile
+    networks: [opencok-internal-network, opencok-external-network]
+
+  chat:
+    image: opencok-chat:local
+    build:
+      context: ..
+      dockerfile: apps/chat/Dockerfile
+    networks: [opencok-internal-network, opencok-external-network]
+
+  scheduler:
+    image: opencok-scheduler:local
+    build:
+      context: ..
+      dockerfile: apps/scheduler/Dockerfile
+    networks: [opencok-internal-network, opencok-external-network]
+    profiles: [scheduler]
+
+  mail-workers:
+    image: opencok-mail-workers:local
+    build:
+      context: ..
+      dockerfile: apps/workers/Dockerfile
+    networks: [opencok-internal-network, opencok-external-network]
+    profiles: [mail-workers]

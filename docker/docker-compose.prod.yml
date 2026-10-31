@@ -1,0 +1,116 @@
+services:
+  www:
+    container_name: opencok-www
+    profiles: [all, www]
+    restart: unless-stopped
+    stop_signal: SIGWINCH
+    stop_grace_period: 30s
+    init: true
+    user: daemon:daemon
+    privileged: false
+    read_only: true
+    security_opt:
+      - no-new-privileges:true
+    cap_drop: [ALL]
+    cpus: 1.0
+    mem_limit: 256m
+    memswap_limit: 256m
+    pids_limit: 256
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,nodev,size=16m,mode=1777
+    ports:
+      - 8080:8080
+    healthcheck:
+      test: [CMD, wget, -q, -O, /dev/null, "http://127.0.0.1:8080/"]
+      interval: 10s
+      timeout: 3s
+      start_period: 5s
+      retries: 6
+    logging:
+      driver: json-file
+      options:
+        max-size: 20m
+        max-file: "5"
+
+  gateway:
+    container_name: opencok-gateway
+    profiles: [all, gateway]
+    restart: unless-stopped
+    stop_signal: SIGTERM
+    stop_grace_period: 30s
+    init: true
+    user: "65532:65532"
+    privileged: false
+    read_only: true
+    security_opt:
+      - no-new-privileges:true
+    cap_drop: [ALL]
+    cpus: 1.0
+    mem_limit: 256m
+    memswap_limit: 256m
+    pids_limit: 128
+    ulimits:
+      nofile:
+        soft: 65536
+        hard: 65536
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,nodev,size=16m,mode=1777
+    environment:
+      CDN_URL: ${CDN_URL:?Defina CDN_URL no .env}
+    ports:
+      - 80:8080
+      - 9933:9933
+    healthcheck:
+      test: [CMD, traefik, healthcheck]
+      interval: 10s
+      timeout: 3s
+      start_period: 5s
+      retries: 6
+    logging:
+      driver: json-file
+      options:
+        max-size: 20m
+        max-file: "5"
+
+  postgres:
+    container_name: opencok-postgres
+    profiles: [all, database, postgres]
+    restart: unless-stopped
+    stop_signal: SIGINT
+    stop_grace_period: 60s
+    init: true
+    user: postgres:postgres
+    privileged: false
+    read_only: true
+    security_opt:
+      - no-new-privileges:true
+    cap_drop: [ALL]
+    cpus: 2.0
+    mem_limit: 1g
+    memswap_limit: 1g
+    pids_limit: 256
+    shm_size: 256m
+    ulimits:
+      nofile:
+        soft: 65536
+        hard: 65536
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,nodev,size=64m,mode=1777
+      - /var/run/postgresql:rw,noexec,nosuid,nodev,size=16m,uid=999,gid=999,mode=3775
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:?Defina POSTGRES_USER no .env}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Defina POSTGRES_PASSWORD no .env}
+      POSTGRES_DB: ${POSTGRES_DB:?Defina POSTGRES_DB no .env}
+      POSTGRES_INITDB_ARGS: --auth-host=scram-sha-256
+      PGDATA: /var/lib/postgresql/data/pgdata
+    healthcheck:
+      test: [CMD-SHELL, 'pg_isready -U "$${POSTGRES_USER}" -d "$${POSTGRES_DB}"']
+      interval: 5s
+      timeout: 5s
+      retries: 12
+      start_period: 10s
+    logging:
+      driver: json-file
+      options:
+        max-size: 20m
+        max-file: "5"

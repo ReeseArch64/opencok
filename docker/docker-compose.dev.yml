@@ -1,0 +1,333 @@
+volumes:
+  mongodb-data: ~
+  mongodb-config: ~
+  redis-data: ~
+  redisinsight-data: ~
+  zookeeper-data: ~
+  zookeeper-datalog: ~
+  zookeeper-logs: ~
+  maple-data: ~
+  pgadmin-servers: ~
+  minio-data: ~
+
+services:
+  www:
+    ports:
+      - 8080:8080
+    volumes:
+      - ../apps/www/dist:/usr/local/apache2/htdocs:ro
+
+  gateway:
+    environment:
+      CDN_URL: http://minio:9000
+      MAPLE_LOCAL_INGEST_KEY: ${MAPLE_LOCAL_INGEST_KEY:-opencok-development-ingest-key}
+      OTEL_RESOURCE_ATTRIBUTES: service.namespace=opencok,deployment.environment.name=development
+    ports:
+      - 80:8080
+      - 9933:9933
+    entrypoint: [/bin/sh, /etc/traefik/start-dev.sh]
+    volumes:
+      - ./gateway/traefik.dev.yml:/etc/traefik/traefik.dev.yml:ro
+      - ./gateway/start-dev.sh:/etc/traefik/start-dev.sh:ro
+    depends_on: [api, server]
+
+  postgres:
+    networks: [opencok-internal-network, opencok-external-network]
+    environment:
+      POSTGRES_PASSWORD: postgres
+      PGDATA: /var/lib/postgresql/data/pgdata
+    ports:
+      - 5432:5432
+
+  postgres-setup:
+    image: opencok-postgres-setup:local
+    build:
+      context: ..
+      dockerfile: docker/postgres-setup/Dockerfile
+    networks: [opencok-internal-network]
+    restart: "no"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    depends_on: [postgres]
+    volumes:
+      - pgadmin-servers:/configuration
+
+  mongodb:
+    image: mongo:8.0.34
+    networks: [opencok-internal-network, opencok-external-network]
+    volumes:
+      - mongodb-data:/data/db
+      - mongodb-config:/data/configdb
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: mongo
+      MONGO_INITDB_ROOT_PASSWORD: mongo
+    ports:
+      - 27017:27017
+
+  redis:
+    image: redis:6.2.24-bookworm
+    networks: [opencok-internal-network]
+    command: [redis-server, /usr/local/etc/redis/redis.conf]
+    ports:
+      - 6379:6379
+    volumes:
+      - ./redis/redis.conf:/usr/local/etc/redis/redis.conf:ro
+      - redis-data:/data
+
+  redis-cache:
+    image: redis:8.10.3-trixie
+    networks: [opencok-internal-network]
+    command: [redis-server, /usr/local/etc/redis/redis-cache.conf]
+    ports:
+      - 6380:6379
+    volumes:
+      - ./redis/redis-cache.conf:/usr/local/etc/redis/redis-cache.conf:ro
+    tmpfs:
+      - /data:rw,noexec,nosuid,nodev,size=16m,mode=1777
+
+  redisinsight:
+    image: redis/redisinsight:3.8.0
+    profiles: [all, devops, redis]
+    networks: [opencok-internal-network]
+    depends_on: [redis, redis-cache]
+    environment:
+      RI_REDIS_HOST: redis
+      RI_REDIS_PORT: 6379
+      RI_REDIS_ALIAS: OpenCoK operational
+      RI_REDIS_DB: 0
+      RI_REDIS_HOST1: redis-cache
+      RI_REDIS_PORT1: 6379
+      RI_REDIS_ALIAS1: OpenCoK cache
+      RI_REDIS_DB1: 0
+    ports:
+      - 5540:5540
+    volumes:
+      - redisinsight-data:/data
+
+  zookeeper:
+    image: zookeeper:3.4.14
+    networks: [opencok-internal-network]
+    environment:
+      ZOO_INIT_LIMIT: 10
+      ZOO_SYNC_LIMIT: 5
+      ZOO_AUTOPURGE_PURGEINTERVAL: 1
+      ZOO_CFG_EXTRA: 4lw.commands.whitelist=ruok,srvr
+    ports:
+      - 2181:2181
+    volumes:
+      - zookeeper-data:/data
+      - zookeeper-datalog:/datalog
+      - zookeeper-logs:/logs
+
+  maple:
+    image: opencok-maple:v0.3.0-csp1
+    build:
+      context: ./maple
+      dockerfile: Dockerfile
+    networks: [opencok-internal-network]
+    environment:
+      MAPLE_LOCAL_INGEST_KEY: ${MAPLE_LOCAL_INGEST_KEY:-opencok-development-ingest-key}
+      MAPLE_LOCAL_ACCESS_TOKEN: ${MAPLE_LOCAL_ACCESS_TOKEN:-opencok-development-access-token}
+      MAPLE_TELEMETRY: "off"
+      MAPLE_NO_UPDATE_CHECK: 1
+    ports:
+      - 4318:4318
+    volumes:
+      - maple-data:/data
+    stop_grace_period: 45s
+
+  pgadmin:
+    image: dpage/pgadmin4:9.18
+    networks: [opencok-internal-network, opencok-external-network]
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@opencok.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+      PGADMIN_SERVER_JSON_FILE: /configuration/servers.json
+    depends_on:
+      postgres-setup:
+        condition: service_completed_successfully
+    ports:
+      - 5050:80
+    volumes:
+      - pgadmin-data:/var/lib/pgadmin
+      - pgadmin-servers:/configuration:ro
+
+  mongo-express:
+    image: mongo-express:1.0.2
+    networks: [opencok-internal-network, opencok-external-network]
+    environment:
+      ME_CONFIG_MONGODB_URL: mongodb://mongo:mongo@mongodb:27017/?authSource=admin
+      ME_CONFIG_BASICAUTH: "true"
+      ME_CONFIG_BASICAUTH_USERNAME: admin
+      ME_CONFIG_BASICAUTH_PASSWORD: admin
+    depends_on: [mongodb]
+    ports:
+      - 8081:8081
+
+  portainer:
+    image: portainer/portainer-ce:lts
+    command: [--http-enabled]
+    networks: [opencok-external-network]
+    ports:
+      - 9443:9000
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - portainer-data:/data
+
+  minio:
+    image: ghcr.io/coollabsio/minio
+    networks: [opencok-internal-network, opencok-external-network]
+    command: [server, /data, --console-address, :9001]
+    environment:
+      MINIO_ROOT_USER: opencok
+      MINIO_ROOT_PASSWORD: opencok-secret
+      MINIO_BROWSER_REDIRECT_URL: http://localhost:9001
+      MINIO_API_CORS_ALLOW_ORIGIN: "*"
+    ports:
+      - 9000:9000
+      - 9001:9001
+    volumes:
+      - minio-data:/data
+
+  minio-setup:
+    image: ghcr.io/coollabsio/minio
+    networks: [opencok-internal-network]
+    restart: "no"
+    entrypoint: [/bin/sh, /configuration/setup.sh]
+    environment:
+      MINIO_ROOT_USER: opencok
+      MINIO_ROOT_PASSWORD: opencok-secret
+    depends_on:
+      - minio
+    volumes:
+      - ./minio/setup.sh:/configuration/setup.sh:ro
+      - ./minio/cdn-policy.json:/configuration/cdn-policy.json:ro
+      - ../data/cdn/data:/source:ro
+
+  api:
+    restart: unless-stopped
+    environment:
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://maple:4318
+      MAPLE_LOCAL_INGEST_KEY: ${MAPLE_LOCAL_INGEST_KEY:-opencok-development-ingest-key}
+      NODE_ENV: development
+      DATABASE_URL: ${DATABASE_URL:-postgresql://postgres:postgres@postgres:5432/opencok_global}
+      GLOBAL_DATABASE_NAME: opencok_global
+      KINGDOM_ID: 1
+      CHAT_URL: http://chat:8083
+      S3_ENDPOINT: http://minio:9000
+      S3_PUBLIC_ENDPOINT: http://localhost:9000
+      S3_REGION: us-east-1
+      S3_BUCKET: opencok-uploads
+      S3_ACCESS_KEY_ID: opencok
+      S3_SECRET_ACCESS_KEY: opencok-secret
+      REDIS_URL: redis://redis:6379/0
+      GAME_PUBLIC_HOST: 127.0.0.1
+    depends_on:
+      postgres-setup:
+        condition: service_completed_successfully
+      minio-setup:
+        condition: service_completed_successfully
+      redis:
+        condition: service_started
+
+  server:
+    restart: unless-stopped
+    environment:
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://maple:4318
+      MAPLE_LOCAL_INGEST_KEY: ${MAPLE_LOCAL_INGEST_KEY:-opencok-development-ingest-key}
+      NODE_ENV: development
+      DATABASE_URL: ${DATABASE_URL:-postgresql://postgres:postgres@postgres:5432/opencok_global}
+      KINGDOM_ID: 1
+      KINGDOM_DATABASE_NAME: opencok_kingdom_1
+      GLOBAL_DATABASE_NAME: opencok_global
+      API_URL: http://api:8080
+      REDIS_URL: redis://redis:6379/0
+      GAME_ZOOKEEPER: zookeeper:2181
+      GAME_SECRET: ${GAME_SECRET:-opencok-development-game-secret}
+      ACTIVITY_SCHEDULER_MODE: local
+      ACTIVITY_SCHEDULER_SECRET: ${ACTIVITY_SCHEDULER_SECRET:-opencok-development-scheduler-secret}
+      MAIL_INTEGRATION_MODE: local
+      CHAT_URL: http://chat:8083
+      CHAT_SECRET: ${CHAT_SECRET:-opencok-development-chat-secret}
+    depends_on:
+      postgres-setup:
+        condition: service_completed_successfully
+      zookeeper:
+        condition: service_started
+      redis:
+        condition: service_started
+
+  chat:
+    restart: unless-stopped
+    init: true
+    stop_grace_period: 30s
+    environment:
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://maple:4318
+      MAPLE_LOCAL_INGEST_KEY: ${MAPLE_LOCAL_INGEST_KEY:-opencok-development-ingest-key}
+      NODE_ENV: development
+      DATABASE_URL: ${DATABASE_URL:-postgresql://postgres:postgres@postgres:5432/opencok_global}
+      GLOBAL_DATABASE_NAME: opencok_global
+      CHAT_KINGDOM_DATABASES: 1:opencok_kingdom_1,2:opencok_kingdom_2
+      MONGO_URI: mongodb://mongo:mongo@mongodb:27017/opencok_chat?authSource=admin
+      CHAT_SECRET: ${CHAT_SECRET:-opencok-development-chat-secret}
+    depends_on:
+      postgres-setup:
+        condition: service_completed_successfully
+      mongodb:
+        condition: service_started
+    ports:
+      - 8083:8083
+
+  scheduler:
+    profiles: [all, scheduler]
+    restart: unless-stopped
+    stop_grace_period: 45s
+    environment:
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://maple:4318
+      MAPLE_LOCAL_INGEST_KEY: ${MAPLE_LOCAL_INGEST_KEY:-opencok-development-ingest-key}
+      ACTIVITY_SCHEDULER_MODE: external
+      ACTIVITY_SCHEDULER_SECRET: ${ACTIVITY_SCHEDULER_SECRET:-opencok-development-scheduler-secret}
+      KINGDOM_ID: 1
+      KINGDOM_DATABASE_NAME: opencok_kingdom_1
+      SCHEDULER_DATABASE_URL: ${SCHEDULER_DATABASE_URL:-}
+      SCHEDULER_OWNER_URL: http://server:18090
+    depends_on:
+      postgres-setup:
+        condition: service_completed_successfully
+      server:
+        condition: service_started
+
+  mail-workers:
+    profiles: [all, mail-workers]
+    restart: unless-stopped
+    stop_grace_period: 45s
+    environment:
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://maple:4318
+      MAPLE_LOCAL_INGEST_KEY: ${MAPLE_LOCAL_INGEST_KEY:-opencok-development-ingest-key}
+      MAIL_INTEGRATION_MODE: external
+      KINGDOM_ID: 1
+      KINGDOM_DATABASE_NAME: opencok_kingdom_1
+      GLOBAL_DATABASE_NAME: opencok_global
+      MAIL_WORKER_KINGDOM_URL: ${MAIL_WORKER_KINGDOM_URL:-}
+      MAIL_WORKER_GLOBAL_URL: ${MAIL_WORKER_GLOBAL_URL:-}
+      CHAT_URL: http://chat:8083
+      CHAT_SECRET: ${CHAT_SECRET:-opencok-development-chat-secret}
+    depends_on:
+      postgres-setup:
+        condition: service_completed_successfully
+      chat:
+        condition: service_started
+
+  web:
+    image: opencok-web:local
+    build:
+      context: ..
+      dockerfile: apps/web/Dockerfile
+    networks: [opencok-internal-network, opencok-external-network]
+    environment:
+      NODE_ENV: development
+    ports:
+      - 5173:5173
+    volumes:
+      - ../apps/web/assets:/workspace/apps/web/assets:ro
