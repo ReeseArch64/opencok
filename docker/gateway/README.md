@@ -2,7 +2,7 @@
 
 Traefik routes HTTP discovery to `api:8080` and SFS/TCP to `server:9933`.
 Static configuration lives in [traefik.yml](traefik.yml); development uses
-[traefik.dev.yml](traefik.dev.yml). Routes live in [dynamic.yml](dynamic.yml).
+[traefik.dev.yml](traefik.dev.yml). Routes live in [dynamic.yml.tmpl](dynamic.yml.tmpl).
 No Docker socket or administration dashboard is exposed.
 
 | Public route                                                                                             | Methods         | Destination                           |
@@ -20,6 +20,11 @@ must serve `/opencok-cdn/cok.eleximg.com/cok/*` and
 `/opencok-cdn/asset.cok.chat/100001/*`; these prefixes remain fixed.
 Development uses `CDN_URL=http://minio:9000`; production uses the external origin.
 This setting is independent of the API upload storage configured by `S3_*`.
+
+Private avatar reads under `/opencok-uploads/` use `S3_ENDPOINT` as the internal
+storage origin and preserve the signed Host and query. Configure the API
+`S3_PUBLIC_ENDPOINT` with the client-reachable gateway origin. The avatar storage
+route is omitted when `S3_ENDPOINT` is unset; storage still validates signatures.
 
 The three chat metadata paths are forwarded to the API;
 `CHAT_URL` controls their upstream and an unset value preserves 404. The chat service

@@ -1,7 +1,8 @@
 import { expect, test } from "bun:test";
+import { gatewayYaml } from "./support/gateway";
 
 const config = Bun.YAML.parse(
-    await Bun.file(new URL("../../../docker/gateway/dynamic.yml", import.meta.url)).text(),
+    await gatewayYaml(),
 ) as {
     http: {
         routers: Record<string, { rule: string; service: string; }>;
@@ -14,6 +15,13 @@ const config = Bun.YAML.parse(
 
 const route = config.http.routers["avatar-storage"]!;
 const pattern = new RegExp(/PathRegexp\(`([^`]+)`\)/.exec(route.rule)![1]!);
+
+test("gateway omits optional avatar storage when its origin is absent", async () => {
+    const disabled = Bun.YAML.parse(await gatewayYaml(false)) as typeof config;
+    expect(disabled.http.routers["avatar-storage"]).toBeUndefined();
+    expect(disabled.http.services["avatar-storage"]).toBeUndefined();
+    expect(disabled.http.routers.health!.service).toBe("api");
+});
 
 test("gateway forwards private avatar object reads with the signed host intact", () => {
     expect(pattern.test(`/opencok-uploads/123456/${"a".repeat(32)}.jpg`)).toBe(true);

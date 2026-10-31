@@ -29,7 +29,7 @@ services:
     networks: [opencok-internal-network, opencok-external-network]
     volumes:
       - ./gateway/traefik.yml:/etc/traefik/traefik.yml:ro
-      - ./gateway/dynamic.yml:/etc/traefik/dynamic.yml:ro
+      - ./gateway/dynamic.yml.tmpl:/etc/traefik/dynamic.yml:ro
 
   postgres:
     image: postgres:17.11-bookworm

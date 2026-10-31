@@ -1,4 +1,5 @@
 import { createAvatarTickets } from "@opencok/storage/avatar-tickets";
+import { gatewayYaml } from "./support/gateway";
 import { expect, test } from "bun:test";
 import { createHash, randomBytes } from "node:crypto";
 import sharp from "sharp";
@@ -362,7 +363,7 @@ test("API media stays unavailable when its dependency is disabled", async () => 
 
 test("gateway routes exact public avatar paths to API and keeps confirmation private", async () => {
     const gateway = Bun.YAML.parse(
-        await Bun.file(new URL("../../../docker/gateway/dynamic.yml", import.meta.url)).text(),
+        await gatewayYaml(),
     ) as {
         http: {
             routers: Record<string, { rule: string; service: string; middlewares?: string[]; }>;

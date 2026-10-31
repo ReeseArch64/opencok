@@ -57,6 +57,7 @@ services:
       - /tmp:rw,noexec,nosuid,nodev,size=16m,mode=1777
     environment:
       CDN_URL: ${CDN_URL:?Defina CDN_URL no .env}
+      S3_ENDPOINT: ${S3_ENDPOINT:-}
     ports:
       - 80:8080
       - 9933:9933

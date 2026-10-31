@@ -1,4 +1,5 @@
 import { expect, test, spyOn } from "bun:test";
+import { gatewayYaml } from "./support/gateway";
 import type { IncomingMessage, ServerResponse } from "node:http";
 import { Effect } from "effect";
 import { EnvironmentSource } from "@opencok/env/effect";
@@ -403,7 +404,7 @@ test("origin and dependency configuration reach the API without starting a serve
 
 test("gateway allowlisting exposes only the three public GET metadata paths and keeps existing destinations", async () => {
     const gateway = Bun.YAML.parse(
-        await Bun.file(new URL("../../../infra/gateway/dynamic.yml", import.meta.url)).text(),
+        await gatewayYaml(),
     ) as {
         http: {
             routers: Record<string, { rule: string; service: string; entryPoints: string[]; }>;
