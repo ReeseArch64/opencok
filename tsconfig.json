@@ -1,5 +1,5 @@
 {
   "extends": "@opencok/config/tsconfig.base.json",
-  "include": ["vite.config.ts", "infra/observability/maple/mcp*.ts"],
-  "exclude": ["node_modules"]
+  "include": ["vite.config.mjs"],
+  "exclude": ["node_modules/"]
 }

@@ -6,7 +6,6 @@
     "./*": "./src/*.ts"
   },
   "scripts": {
-    "check-types": "tsc --noEmit",
     "test": "bun --no-env-file test tests"
   },
   "dependencies": {

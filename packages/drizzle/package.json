@@ -9,7 +9,6 @@
     "./*": "./src/*.ts"
   },
   "scripts": {
-    "check-types": "tsc --noEmit",
     "db:generate": "bun --no-env-file scripts/kit.ts generate",
     "db:migrate": "bun --no-env-file scripts/migrate.ts",
     "db:check": "bun --no-env-file scripts/kit.ts check",

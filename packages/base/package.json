@@ -1,9 +1,6 @@
 {
   "name": "@opencok/base",
   "private": true,
-  "scripts": {
-    "check-types": "tsc --noEmit"
-  },
   "devDependencies": {
     "@opencok/config": "workspace:*",
     "@types/bun": "catalog:",
