@@ -1,60 +1,63 @@
 # Vocabulary and Code Conventions
 
-Use consistent domain vocabulary, ordinary TypeScript naming and readable layout. C# inspires block presentation only in TypeScript files, not other languages, naming or runtime semantics. This separates readability/formatting from structural refactoring; These conventions do not authorize new formatters, mass renaming, structural migration or unrelated rewrites. Existing public names and compatibility requirements take precedence.
+Use established domain vocabulary, ordinary TypeScript names and readable layout. C# inspires TypeScript block presentation only, never naming, runtime semantics or other languages. Public names/compatibility take precedence. These conventions authorize neither new formatters, mass renaming, structural migration nor unrelated rewrites; operational limits are in [rules](.agents/RULES.md).
 
 ## Implementation vocabulary
 
-| Term                     | Responsibility                                                                                    |
-| ------------------------ | ------------------------------------------------------------------------------------------------- |
-| Application              | Deployable process/composition root in `apps/`; wires collaborators and runtime configuration.    |
-| Package                  | Reusable code in `packages/`; never imports applications.                                         |
-| Controller               | Transport-facing operations delegated to injected Services.                                       |
-| Service                  | Use case coordinating rules/persistence through contracts and constructor-injected collaborators. |
-| Contract                 | Structural port, operation input, query, selection or response; not runtime validation.           |
-| Port                     | Required capability without coupling to an infrastructure implementation.                         |
-| Adapter                  | Connects transport/infrastructure to a contract; I/O alone does not confer workflow ownership.    |
-| DTO                      | Plain create/update input class, not every boundary object.                                       |
-| Response                 | Output contract, including mobile responses; not a DTO.                                           |
-| Mapper                   | Transport mapping/wire serialization, preserving required names, types and field order.           |
-| Validation               | Runtime boundary checks, including Zod schemas; types/DTO declarations do not validate values.    |
-| Rule                     | Domain behavior/invariant, not transport parsing or serialization.                                |
-| Enum                     | Finite named alternatives, e.g. commands, protocol groups or resource types.                      |
-| Constant                 | Fixed value; tunable limits/durations remain configuration.                                       |
-| Abstract class           | Shared workflow, lifecycle or invariants with concrete domain-specific steps.                     |
-| Composition              | Wiring collaborators in applications, not hidden construction inside domain code.                 |
-| Wire contract            | Exchanged representation: names, values, numeric widths, optionality and serialization order.     |
-| Compatibility entrypoint | Existing import/call boundary delegating while callers migrate.                                   |
+| Term | Responsibility |
+| --- | --- |
+| Application | Deployable `apps/` composition root; wires collaborators/configuration. |
+| Package | Reusable `packages/` code; never imports applications. |
+| Controller | Transport operations delegated to injected Services. |
+| Service | Use case coordinating rules/persistence through contracts and constructor injection. |
+| Contract | Structural port/input/query/selection/response, without runtime validation. |
+| Port | Required capability independent of infrastructure implementation. |
+| Adapter | Connects transport/infrastructure to contracts; I/O does not confer workflow ownership. |
+| DTO | Plain create/update input class. |
+| Response | Output contract, including mobile; not a DTO. |
+| Mapper | Transport mapping/wire serialization. |
+| Validation | Runtime boundary checks, including Zod; declarations alone do not validate. |
+| Rule | Domain behavior/invariant, separate from parsing/serialization. |
+| Enum | Finite named alternatives. |
+| Constant | Fixed value; tunable limits/durations are configuration. |
+| Abstract class | Shared workflow/lifecycle/invariants with domain-specific steps. |
+| Composition | Application wiring, without hidden domain construction. |
+| Wire contract | Exchanged names/values, numeric widths, optionality and serialization order. |
+| Compatibility entrypoint | Existing import/call boundary delegating during migration. |
 
-Keep implementation files to one responsibility and one class with behavior. Do not create empty abstractions/layers to satisfy terminology; factories and compatibility entrypoints do not authorize unrelated rewrites.
+One responsibility and one behavioral class per implementation file; no empty abstractions/layers to satisfy terminology.
 
 ## Domain vocabulary
 
-- **Realm:** authoritative gameplay scope owned by a realm server, not permission for arbitrary frontends/workers to mutate state.
-- **Kingdom:** existing gameplay/persistence term, including `kingdomId`; do not mechanically replace it with realm.
-- **Account/identity:** authentication context, distinct from an individual gameplay **character/player**. Preserve domain-specific identifier meanings.
-- **Command:** named application/protocol operation; preserve wire strings regardless of internal enum casing.
+- **Realm:** authoritative gameplay scope owned by a realm server, without arbitrary frontend/worker writes.
+- **Kingdom:** existing gameplay/persistence term (`kingdomId`), not mechanically interchangeable with realm.
+- **Account/identity:** authentication context, distinct from gameplay **character/player**; preserve identifier meanings.
+- **Command:** named application/protocol operation; wire strings remain independent of enum casing.
 - **Snapshot:** point-in-time state contract, not a create/update DTO.
 
-Prefer established domain terms; do not merge distinct identifiers or invent synonyms for cosmetic uniformity.
+Do not merge identifiers or invent cosmetic synonyms.
 
-## Naming and boundaries
+## Naming and contracts
 
-- Classes, interfaces, type aliases and enums: `PascalCase`; functions, methods, parameters, locals and properties: `camelCase`. No C#-style PascalCase methods/properties or mandatory `I` interface prefix.
-- Enum members: `PascalCase`, preserving serialized values, e.g. `ResourceType.Wood` → `"wood"`. Fixed scalar constants follow `UPPER_SNAKE_CASE`; collections/schemas follow `camelCase`. `const` alone does not require uppercase.
-- Source files: lowercase, hyphen-separated domain names, preserving established role suffixes, e.g. `chat-config.mapper.ts`; not every file needs one. Preserve `Dto`, `Id`, `Uuid`, protocol keys and public exports; no acronym-wide renaming.
-- Create/update inputs: `Create<Resource>Dto` / `Update<Resource>Dto`, e.g. `CreateCharacterDto` in `create-character.dto.ts`. Response interfaces: `<Resource>Response`, e.g. `ChatConfigResponse` in `chat-config.response.ts`. Schemas: descriptive `camelCase` ending in `Schema`. Tests follow component conventions (`tests/`, `integration/`, `.test.ts`).
-- DTOs declare explicit `declare public readonly` properties, with `?` only for genuinely optional fields. No decorators, constructors, inheritance, behavior, methods, static schemas, definite-assignment or non-null assertions. Never weaken required inputs for convenience.
-- Queries, deletion selections, responses and protocol snapshots use contracts, not DTO classes. Centralized compatibility locations are `packages/contracts` (responses under `src/responses`), `packages/validations` and `packages/mappings`; domain-owned equivalents follow current contribution conventions.
-- Validate at mapping/application boundaries; preserve mobile names, signed numeric widths, optionality and wire order.
+- Classes/interfaces/type aliases/enums and enum members: `PascalCase`; functions/methods/parameters/locals/properties: `camelCase`. No mandatory `I` interface prefix or C#-style methods/properties.
+- Fixed scalar constants: `UPPER_SNAKE_CASE`; collections/schemas: `camelCase`. `const` alone does not imply uppercase. Preserve serialized enum values (`ResourceType.Wood` → `"wood"`).
+- Files: lowercase hyphen-separated domain names; preserve established role suffixes (`chat-config.mapper.ts`) without requiring one everywhere. Preserve `Dto`, `Id`, `Uuid`, protocol keys and public exports; no acronym-wide renaming.
+- Inputs: `Create<Resource>Dto` / `Update<Resource>Dto` (`create-character.dto.ts`); response interfaces: `<Resource>Response` (`chat-config.response.ts`); schemas: descriptive `camelCase` ending in `Schema`. Tests follow component conventions (`tests/`, `integration/`, `.test.ts`).
+- DTO properties: explicit `declare public readonly`; `?` only for optional fields. No decorators, constructors, inheritance, behavior/methods, static schemas, definite-assignment/non-null assertions or weakened required inputs.
+- Queries, deletion selections, responses and snapshots use contracts. Compatibility locations: `packages/contracts` (responses in `src/responses`), `packages/validations`, `packages/mappings`; domain equivalents follow contribution conventions.
+- Validate at mapping/application boundaries; preserve mobile names/types, signed numeric widths, optionality and wire field order.
 
-## Presentation and enforcement
+## Presentation and checks
 
-- Maintained TypeScript files (TS/TSX and c/m TypeScript module variants) belong exclusively to pinned dprint: four spaces, no hard tabs, LF, double quotes, semicolons, 100 columns and trailing commas only in multiline constructs. Preserve property quoting and import/export order.
-- Oxfmt exclusively owns JavaScript/JSX and c/m JavaScript module variants plus other supported formats, including Markdown/embedded code, retaining the previous two-space, same-line-brace defaults. The C#-inspired TypeScript presentation does not apply to them. Do not manually align columns or incidentally sort imports, bindings, properties or package keys.
-- In TypeScript, use Allman braces for declarations, functions, methods, accessors, constructors and control flow. Every applicable control body needs braces, including single guards and `do`; Oxlint `curly` covers gaps left by dprint. Start `else`, `catch`, `finally` and `do`'s `while` continuation on new lines.
-- In TypeScript, arrow callback braces stay inline; objects retain expression layout. Empty blocks may remain `{}` on the next line. Let the formatter wrap conditions, arguments, generics and chains; no per-file wrapping rules. Keep `return` with its expression and parentheses around arrow-object returns.
-- In TypeScript, separate imports/declarations, adjacent top-level declarations, methods, control blocks, meaningful stages and final returns with one blank line; keep related fields/locals together. No decorative blank lines, minified layout or dense ternaries/callbacks hiding stages. Focused-method extraction is a separately scoped, behavior-preserving refactor.
-- No code, documentation or suppression comments in tracked files/embedded examples. Explain intent in prose, constraints through names/types/tests; preserve required interpreter directives.
-- Lint enforces correctness with warnings as errors; semantic types require separate workspace checks. Logical-stage spacing, naming, responsibilities and compatibility require review plus relevant tests/type checks, not formatter success alone.
+- Pinned dprint exclusively owns maintained TypeScript (TS/TSX/c/m variants): four spaces, no tabs, LF, double quotes, semicolons, 100 columns, multiline-only trailing commas; preserve property quoting and import/export order.
+- Oxfmt exclusively owns JavaScript/JSX/c/m variants and other supported formats, including Markdown/embedded code: retain two-space, same-line-brace defaults. Never manually align columns or incidentally sort imports/bindings/properties/package keys.
 
-Run `bun run lint`, `bun run format:check`, relevant workspace type checks and affected tests. Limit automatic fixes to authorized paths, never repository-wide formatting for a scoped task. Formatting must preserve gameplay, protocols, persistence, costs, timers, property order and import side effects. Renaming/structural changes need their own scope and compatibility evidence; formatter success proves neither behavior preservation nor native-client compatibility.
+TypeScript layout:
+
+- Allman braces for declarations/functions/methods/accessors/constructors/control flow; brace every control body, including guards and `do` (Oxlint `curly` covers formatter gaps). Put `else`, `catch`, `finally` and `do`'s `while` on new lines.
+- Arrow callback braces stay inline; objects retain expression layout. Empty blocks may be `{}` on the next line. Formatter owns wrapping; no per-file rules. Keep `return` with its expression and parenthesize arrow-object returns.
+- One blank line between imports/declarations, top-level declarations, methods, control blocks, meaningful stages and final returns; group related fields/locals. No decorative spacing, minification or dense ternaries/callbacks hiding stages. Method extraction requires separately scoped behavior-preserving refactoring.
+
+No code/documentation/suppression comments in tracked files or embedded examples; preserve required interpreter directives. Explain intent in prose and constraints through names/types/tests.
+
+Run `bun run lint`, `bun run format:check`, relevant workspace type checks and affected tests. Warnings are errors; lint does not replace semantic type checks. Review spacing/naming/responsibilities/compatibility separately. Formatting preserves gameplay, protocols, persistence, costs, timers, property order and import side effects; success proves neither behavior preservation nor native-client compatibility. Renaming/structural changes require their own scope and compatibility evidence.

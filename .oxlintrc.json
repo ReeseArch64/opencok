@@ -14,7 +14,12 @@
   "categories": {
     "correctness": "error"
   },
-  "rules": {
-    "curly": ["error", "all"]
-  }
+  "overrides": [
+    {
+      "files": ["**/*.ts"],
+      "rules": {
+        "curly": ["error", "all"]
+      }
+    }
+  ]
 }
