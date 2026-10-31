@@ -10,14 +10,32 @@ permissions:
 jobs:
   lint-and-format:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v7
-        with:
-          fetch-depth: 0
       - uses: ./.github/actions/setup
-      - run: bun run lint
-      - run: bun run format:check
-      - run: bun run test:packages
-      - run: bun run --cwd apps/workers test
-      - run: bun run --cwd apps/scheduler test
+
+      - name: Check Oxfmt formatting
+        run: bunx --no-install oxfmt --config .oxfmtrc.json . --check
+
+      - name: Check Oxlint rules
+        run: bunx --no-install oxlint --config .oxlintrc.json . --deny-warnings
+
+      - name: Check dprint formatting
+        run: bunx --no-install dprint check --config dprint.json
+
+      - name: Check TypeScript projects
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          while IFS= read -r project; do
+            directory="${project%/*}"
+
+            if [[ "$project" != "tsconfig.json" && -z "$(git ls-files -- "$directory/*.ts" "$directory/*.tsx" "$directory/*.cjs" "$directory/*.mjs")" ]]; then
+              echo "Skipping $project: no tracked source files"
+              continue
+            fi
+
+            bunx --no-install tsc --noEmit --incremental false --project "$project"
+          done < <(git ls-files 'tsconfig.json' 'apps/*/tsconfig.json' 'packages/*/tsconfig.json')

@@ -104,4 +104,23 @@ export interface ReconnectProgressWrite
     }[];
 }
 
+export type ProductionProgressState = Pick<
+    ReconnectProgressState,
+    | "profile"
+    | "resource"
+    | "effects"
+    | "newGenerals"
+    | "armies"
+    | "generals"
+    | "buildings"
+    | "glory"
+    | "weakness"
+    | "allianceResearch"
+>;
+
+export type ProductionProgressWrite = Pick<
+    ReconnectProgressWrite,
+    "resource" | "armies" | "weakness" | "weaknessTime" | "troopChanges"
+>;
+
 export type ReconnectResearchProjection = (rows: readonly Row[], queues: readonly Row[]) => Value;

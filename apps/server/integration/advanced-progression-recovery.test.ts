@@ -15,7 +15,7 @@ import { createActivityExecutor } from "@opencok/repositories/timed-activity";
 import { createCityProductionBoundary } from "@opencok/production/repositories/city-boundary";
 import { createRealmCityProgressionStore } from "../src/composition/city-persistence.ts";
 import { readReconnectProgress } from "@opencok/repositories/reconnect-progress";
-import { persistReconnectProgress } from "@opencok/repositories/reconnect-write";
+import { persistProductionProgress } from "@opencok/repositories/reconnect-write";
 import { createRealmCityProgressionHandlers } from "../src/composition/city.ts";
 import { TimedActivityService } from "@opencok/services/timed-activity";
 import { dragonProgressionDomain } from "@opencok/services/dragon-progression";
@@ -124,7 +124,7 @@ function resumed(
                 worldPowerEffects: async () => new Map<string, string>(),
                 emperorVersion: async () => null,
             });
-            await persistReconnectProgress(tx, state, plan.write, authority, at);
+            await persistProductionProgress(tx, state, plan.write, authority, at);
             return plan.rates;
         },
     };

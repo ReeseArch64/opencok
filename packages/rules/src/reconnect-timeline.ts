@@ -1,4 +1,4 @@
-import type { ReconnectProgressState } from "@opencok/contracts/reconnect";
+import type { ProductionProgressState } from "@opencok/contracts/reconnect";
 import type { WorldPowerEffect } from "@opencok/contracts/power";
 import type { Rules } from "./game.ts";
 import { ruleTime, type RuleContext } from "./availability.ts";
@@ -7,7 +7,7 @@ import { javaDecimal } from "./java-integer.ts";
 const long = (value: unknown) => javaDecimal(String(value ?? 0), 64);
 
 export function reconnectSettlementTimes(
-    state: ReconnectProgressState,
+    state: ProductionProgressState,
     world: readonly WorldPowerEffect[],
     rules: Rules,
     context: RuleContext,

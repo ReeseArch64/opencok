@@ -2,19 +2,26 @@ import { PostgresFailureKind } from "./enums/postgres-failure-kind";
 
 export function postgresFailureKind(error: unknown): PostgresFailureKind | undefined
 {
-    if (!(error instanceof Error) || !("code" in error))
+    if (!(error instanceof Error))
     {
         return undefined;
     }
 
-    if (error.code === "57014")
+    const code = "code" in error ? error.code : undefined;
+
+    if (code === undefined && error.name === "Error" && error.message === "Query read timeout")
+    {
+        return PostgresFailureKind.DriverReadTimeout;
+    }
+
+    if (code === "57014")
     {
         return error.message === "canceling statement due to statement timeout"
             ? PostgresFailureKind.StatementTimeout
             : PostgresFailureKind.QueryCancelled;
     }
 
-    if (error.code === "55P03")
+    if (code === "55P03")
     {
         return error.message === "canceling statement due to lock timeout"
             ? PostgresFailureKind.LockTimeout

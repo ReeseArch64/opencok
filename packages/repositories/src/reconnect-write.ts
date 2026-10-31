@@ -9,7 +9,12 @@ import { user_building } from "@opencok/drizzle/schema/opencok_kingdom/user_buil
 import { user_glory_info } from "@opencok/drizzle/schema/opencok_kingdom/user_glory_info";
 import { user_weakness_building } from "@opencok/drizzle/schema/opencok_kingdom/user_weakness_building";
 import { resource_settlement } from "@opencok/drizzle/schema/opencok_kingdom/resource_settlement";
-import type { ReconnectProgressState, ReconnectProgressWrite } from "@opencok/contracts/reconnect";
+import type {
+    ReconnectProgressState,
+    ReconnectProgressWrite,
+    ProductionProgressState,
+    ProductionProgressWrite,
+} from "@opencok/contracts/reconnect";
 import { javaDecimal } from "@opencok/rules/java-integer";
 import type { DatabaseClient } from "@opencok/drizzle/contracts/database";
 import { fenceRealmTransaction, type RealmAuthority } from "./realm-authority.ts";
@@ -41,10 +46,10 @@ const updated = (rows: readonly unknown[]) => {
     }
 };
 
-export async function persistReconnectProgress(
+export async function persistProductionProgress(
     tx: Transaction,
-    state: ReconnectProgressState,
-    write: ReconnectProgressWrite,
+    state: Pick<ProductionProgressState, "profile" | "resource" | "armies" | "weakness" | "glory">,
+    write: ProductionProgressWrite,
     authority: RealmAuthority,
     now: bigint,
 ): Promise<void>
@@ -88,11 +93,6 @@ export async function persistReconnectProgress(
             write.armies.map((row) => row.armyId),
             write.weakness.map((row) => row.armyId),
             write.troopChanges.map((row) => row.armyId),
-            write.generalResets,
-            write.skillResets,
-            write.skillCooldownResets,
-            write.buildingRefreshes.map((row) => row.uuid),
-            write.mail.map((row) => row.uid),
         ]
     )
     {
@@ -311,6 +311,33 @@ export async function persistReconnectProgress(
                 });
         }
     }
+
+    authority.assertReady();
+}
+
+export async function persistReconnectProgress(
+    tx: Transaction,
+    state: ReconnectProgressState,
+    write: ReconnectProgressWrite,
+    authority: RealmAuthority,
+    now: bigint,
+): Promise<void>
+{
+    for (
+        const ids of [
+            write.generalResets,
+            write.skillResets,
+            write.skillCooldownResets,
+            write.buildingRefreshes.map((row) => row.uuid),
+            write.mail.map((row) => row.uid),
+        ]
+    )
+    {
+        unique(ids);
+    }
+
+    await persistProductionProgress(tx, state, write, authority, now);
+    const uid = String(state.profile.uid);
 
     await new ReconnectTaskRepository(tx, uid, { integer, unique, updated }).writeTasks(
         state.tasks,

@@ -6,7 +6,7 @@ import { ActivityDeadlineController } from "@opencok/queues/controllers/deadline
 import { createRealmCityProgressionHandlers } from "./composition/city";
 import {
     createRealmProductionService,
-    planRealmProductionContext,
+    createRealmProductionPreparation,
     createRealmProductionExecutor,
 } from "./composition/production.ts";
 import { nicknameChangePayment } from "@opencok/player/repositories/nickname-change";
@@ -303,7 +303,6 @@ import {
     type ActivityDomain,
 } from "@opencok/repositories/timed-activity";
 import { readReconnectProgress } from "@opencok/repositories/reconnect-progress";
-import { persistReconnectProgress } from "@opencok/repositories/reconnect-write";
 import { TimedActivityService } from "@opencok/services/timed-activity";
 import { sfs, encode, decode, str, int, fields, Type } from "@opencok/messages/sfs";
 import { createCharacterCreator } from "./character-provisioning";
@@ -757,23 +756,10 @@ export const RealmDependenciesLive = Layer.effect(
                 ),
             emperor: () => cache.emperorVersion(config.kingdomId),
         };
-        const baseProductionPreparation = {
-            async prepare(
-                tx: Parameters<typeof readReconnectProgress>[0],
-                owner: string,
-                now: bigint,
-            )
-            {
-                const state = await readReconnectProgress(tx, owner, config.kingdomId, now);
-                const planned = await planRealmProductionContext(state, rules, now, {
-                    worldPowerEffects: (id) => worldEffects(id),
-                    emperorVersion: (id) => cache.emperorVersion(id),
-                });
-                await persistReconnectProgress(tx, state, planned.write, authority, now);
-
-                return planned.rates;
-            },
-        };
+        const baseProductionPreparation = createRealmProductionPreparation(rules, authority, {
+            worldPowerEffects: (id) => worldEffects(id),
+            emperorVersion: (id) => cache.emperorVersion(id),
+        });
         const baseCityBoundary = observeAdapter(
             createCityProductionBoundary(baseProductionPreparation, (row) => {
                 const rule = rules.building(

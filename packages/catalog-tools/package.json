@@ -6,7 +6,6 @@
     "./*": "./src/*.ts"
   },
   "scripts": {
-    "check-types": "tsc --noEmit",
     "test": "bun --no-env-file test tests",
     "discover": "bun --no-env-file src/discover.ts",
     "dragon:inventory": "bun --no-env-file scripts/dragon-inventory.ts",

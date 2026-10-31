@@ -1,7 +1,10 @@
 import { expect, test } from "bun:test";
 import { drizzle, type NodePgClient } from "drizzle-orm/node-postgres";
 import * as schema from "@opencok/drizzle/schema/kingdom";
-import { readReconnectProgress } from "@opencok/repositories/reconnect-progress";
+import {
+    readProductionProgress,
+    readReconnectProgress,
+} from "@opencok/repositories/reconnect-progress";
 import { executeReconnectProgress } from "@opencok/repositories/reconnect-write";
 
 function database(overrides: Record<string, Record<string, unknown>[]> = {}, failBegin?: string)
@@ -190,4 +193,20 @@ test("invalid owners cannot reach dependent reads and missing or oversized progr
         oversized.db.transaction((tx) => readReconnectProgress(tx, "owner", 2, 100n)),
     ).rejects.toThrow();
     expect(oversized.queries.at(-1)!.text).toBe("rollback");
+});
+
+test("readProductionProgress_oversizedArmies_rejectsWithoutReadingReconnectDomains", async () => {
+    const fixture = database({
+        user_army: Array.from({ length: 32768 }, () => ({ uid: "owner", armyId: "army", free: 0 })),
+    });
+
+    await expect(fixture.db.transaction((tx) => readProductionProgress(tx, "owner", 2, 100n)))
+        .rejects.toThrow();
+
+    expect(
+        fixture.queries.some((query) =>
+            query.text.includes("from \"opencok_kingdom\".\"user_task\"")
+        ),
+    ).toBe(false);
+    expect(fixture.queries.at(-1)!.text).toBe("rollback");
 });

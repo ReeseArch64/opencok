@@ -1,6 +1,6 @@
 import {
     createRealmProductionService,
-    planRealmProductionContext,
+    createRealmProductionPreparation,
     createRealmProductionExecutor,
 } from "../../src/composition/production.ts";
 import { createTotemEffectStore } from "@opencok/repositories/totem";
@@ -20,7 +20,6 @@ import { createActivityExecutor, type ActivityDomain } from "@opencok/repositori
 import { createRealmCityProgressionStore } from "../../src/composition/city-persistence.ts";
 import { createCityProductionBoundary } from "@opencok/production/repositories/city-boundary";
 import { readReconnectProgress } from "@opencok/repositories/reconnect-progress";
-import { persistReconnectProgress } from "@opencok/repositories/reconnect-write";
 import { acquireRealmAuthority } from "@opencok/repositories/realm-authority";
 import { createRealmCityProgressionHandlers } from "../../src/composition/city.ts";
 import type { CityDomain } from "@opencok/city/contracts/domain";
@@ -157,22 +156,10 @@ export async function cityHarness(
                 }
             }
         }
-        const basePreparation = {
-            async prepare(
-                tx: Parameters<typeof readReconnectProgress>[0],
-                owner: string,
-                at: bigint,
-            )
-            {
-                const state = await readReconnectProgress(tx, owner, kingdomId, at);
-                const planned = await planRealmProductionContext(state, rules, at, {
-                    worldPowerEffects: async () => new Map<string, string>(),
-                    emperorVersion: async () => null,
-                });
-                await persistReconnectProgress(tx, state, planned.write, authority, at);
-                return planned.rates;
-            },
-        };
+        const basePreparation = createRealmProductionPreparation(rules, authority, {
+            worldPowerEffects: async () => new Map<string, string>(),
+            emperorVersion: async () => null,
+        });
         const baseBoundary = createCityProductionBoundary(basePreparation, (row) => {
             const rule = rules.building(
                 text(row, "itemId"),

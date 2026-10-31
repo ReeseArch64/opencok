@@ -1,0 +1,108 @@
+---
+import "../styles/site.css";
+import { site } from "../data/site.mjs";
+const { title = "Seu reino. Sua história.", description = site.description } =
+  Astro.props;
+const path = Astro.url.pathname;
+const links = [
+  ["/", "Início"],
+  ["/catalogo/tropas/", "Tropas"],
+  ["/catalogo/skins/", "Skins"],
+  ["/catalogo/avatares/", "Avatares"],
+  ["/catalogo/eventos/", "Eventos"],
+  ["/wiki/", "Wiki"],
+];
+---
+
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content={description} />
+    <meta name="theme-color" content="#101513" />
+    <meta property="og:title" content={`${title} — OpenCoK`} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+    <link rel="icon" href="/media/icon.png" />
+    <title>{title} — OpenCoK</title>
+  </head>
+  <body>
+    <a class="skip" href="#conteudo">
+      Pular para o conteúdo
+    </a>
+
+    <header class="header">
+      <a href="/" class="brand" aria-label="OpenCoK, início">
+        <img src="/media/icon.png" width="40" height="40" alt="" />
+        <span>
+          OPEN<span class="gold">COK</span>
+          <small>FORJE SUA HISTÓRIA</small>
+        </span>
+      </a>
+      <button
+        class="menu-toggle"
+        aria-expanded="false"
+        aria-controls="navigation"
+        aria-label="Abrir menu"
+      >
+        ☰
+      </button>
+
+      <nav id="navigation" aria-label="Navegação principal">
+        {links.map(([href, label]) => (
+          <a href={href} aria-current={path === href ? "page" : undefined}>
+            {label}
+          </a>
+        ))}
+      </nav>
+      <a class="button small header-cta" href="/jogar/">
+        Jogar agora <span>↗</span>
+      </a>
+    </header>
+
+    <main id="conteudo">
+      <slot />
+    </main>
+
+    <footer>
+      <div class="footer-top">
+        <a class="brand" href="/">
+          OPEN<span class="gold">COK</span>
+        </a>
+        <p>Grandes reinos começam com uma escolha.</p>
+        <a href="/jogar/">Comece sua história ↗</a>
+      </div>
+
+      <div class="footer-bottom">
+        <span>OpenCoK · Projeto independente de estratégia medieval.</span>
+        <div>
+          <a href="/wiki/sobre/">Sobre o projeto</a>
+          <a href="/wiki/">Central de conhecimento</a>
+          <a href="#conteudo">Voltar ao topo ↑</a>
+        </div>
+      </div>
+    </footer>
+
+    <script>
+      const toggle = document.querySelector(".menu-toggle");
+      toggle?.addEventListener("click", () => {
+        const expanded = toggle.getAttribute("aria-expanded") === "true";
+        toggle.setAttribute("aria-expanded", String(!expanded));
+        document
+          .querySelector("#navigation")
+          ?.classList.toggle("open", !expanded);
+      });
+      document.addEventListener("keydown", (event) => {
+        if (
+          event.key === "Escape" &&
+          toggle?.getAttribute("aria-expanded") === "true"
+        ) {
+          toggle.setAttribute("aria-expanded", "false");
+          document.querySelector("#navigation")?.classList.remove("open");
+          (toggle as HTMLButtonElement).focus();
+        }
+      });
+    </script>
+  </body>
+</html>

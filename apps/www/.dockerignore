@@ -1,0 +1,6 @@
+*
+!Dockerfile
+!apache/
+!apache/www.conf
+!dist/
+!dist/**

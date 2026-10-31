@@ -1,3 +1,4 @@
+import { readPlayerEffectProjection } from "./player-effect-projection";
 import { dragon_talent_skill } from "@opencok/drizzle/schema/opencok_kingdom/dragon_talent_skill";
 import { userprofile } from "@opencok/drizzle/schema/opencok_kingdom/userprofile";
 import { playerinfo } from "@opencok/drizzle/schema/opencok_kingdom/playerinfo";
@@ -233,6 +234,7 @@ export async function readPlayerEffects(
     tx: Pick<DatabaseClient<"kingdom">, "select">,
     profile: Row,
     bounded = false,
+    combined = false,
 ): Promise<PlayerEffectSnapshot>
 {
     const uid = profile.uid;
@@ -242,121 +244,121 @@ export async function readPlayerEffects(
         throw new Error("Invalid effect owner");
     }
 
-    const generals = await bound(
-        tx
-            .select({
-                generalId: user_general.generalId,
-                level: user_general.level,
-                ability: user_general.ability,
-            })
-            .from(user_general)
-            .where(eq(user_general.uid, uid))
-            .orderBy(asc(user_general.uuid)),
-        bounded,
-    );
-    const sciences = await bound(
-        tx
-            .select({ itemId: user_science.itemId, level: user_science.level })
-            .from(user_science)
-            .where(eq(user_science.uid, uid))
-            .orderBy(asc(user_science.itemId)),
-        bounded,
-    );
-    const civilizationSciences = await bound(
-        tx
-            .select({
-                baseItemID: user_civilization_science.baseItemID,
-                level: user_civilization_science.level,
-            })
-            .from(user_civilization_science)
-            .where(eq(user_civilization_science.userID, uid))
-            .orderBy(asc(user_civilization_science.baseItemID)),
-        bounded,
-    );
-    const sagaSciences = await bound(
-        tx
-            .select({ itemid: saga_tower_science.itemid, level: saga_tower_science.level })
-            .from(saga_tower_science)
-            .where(eq(saga_tower_science.uid, uid))
-            .orderBy(asc(saga_tower_science.itemid)),
-        bounded,
-    );
-    const foreignSciences = await bound(
-        tx
-            .select({ itemid: foreigen_sciences.itemid, level: foreigen_sciences.level })
-            .from(foreigen_sciences)
-            .where(eq(foreigen_sciences.uid, uid))
-            .orderBy(asc(foreigen_sciences.itemid)),
-        bounded,
-    );
-    const equipment = await bound(
-        tx
-            .select({
-                itemId: user_equip.itemId,
-                on: user_equip.on,
-                extraProperty: user_equip.extraProperty,
-                strengthLevel: user_equip.strengthLevel,
-            })
-            .from(user_equip)
-            .where(and(eq(user_equip.uid, uid), eq(user_equip.on, 1)))
-            .orderBy(asc(user_equip.uuid)),
-        bounded,
-    );
-    const heroes = await bound(
-        tx
-            .select({ heroid: t_hero.heroid, level: t_hero.level, exp: t_hero.exp })
-            .from(t_hero)
-            .where(eq(t_hero.uid, uid))
-            .orderBy(asc(t_hero.id)),
-        bounded,
-    );
-    const dragons = await bound(
-        tx
-            .select({
-                itemId: user_pet_dragon.itemId,
-                dragonState: user_pet_dragon.dragonState,
-                lv: user_pet_dragon.lv,
-                useFlag: user_pet_dragon.useFlag,
-            })
-            .from(user_pet_dragon)
-            .where(eq(user_pet_dragon.uid, uid))
-            .orderBy(asc(user_pet_dragon.uuid)),
-        bounded,
-    );
-    const dragonSkills = await bound(
-        tx
-            .select({
-                ownerId: user_pet_dragon_skill.ownerId,
-                index1: user_pet_dragon_skill.index1,
-                skillId: user_pet_dragon_skill.skillId,
-                level: user_pet_dragon_skill.level,
-                strengthenLevel: user_pet_dragon_skill.strengthenLevel,
-            })
-            .from(user_pet_dragon_skill)
-            .where(eq(user_pet_dragon_skill.uid, uid))
-            .orderBy(asc(user_pet_dragon_skill.uuid)),
-        bounded,
-    );
-    const dragonTalents = await bound(
-        tx.select().from(dragon_talent_skill).where(eq(dragon_talent_skill.uid, uid)),
-        bounded,
-    );
-    const states = await bound(
-        tx
-            .select({
-                stateId: user_state.stateId,
-                startTime: user_state.startTime,
-                endTime: user_state.endTime,
-                ranEffId: user_state.ranEffId,
-                ranEffValue: user_state.ranEffValue,
-            })
-            .from(user_state)
-            .where(eq(user_state.uid, uid))
-            .orderBy(asc(user_state.stateId)),
-        bounded,
-    );
-    const vip = (
-        await tx
+    const projection = await readPlayerEffectProjection(tx, {
+        generals: bound(
+            tx
+                .select({
+                    generalId: user_general.generalId,
+                    level: user_general.level,
+                    ability: user_general.ability,
+                })
+                .from(user_general)
+                .where(eq(user_general.uid, uid))
+                .orderBy(asc(user_general.uuid)),
+            bounded,
+        ),
+        sciences: bound(
+            tx
+                .select({ itemId: user_science.itemId, level: user_science.level })
+                .from(user_science)
+                .where(eq(user_science.uid, uid))
+                .orderBy(asc(user_science.itemId)),
+            bounded,
+        ),
+        civilizationSciences: bound(
+            tx
+                .select({
+                    baseItemID: user_civilization_science.baseItemID,
+                    level: user_civilization_science.level,
+                })
+                .from(user_civilization_science)
+                .where(eq(user_civilization_science.userID, uid))
+                .orderBy(asc(user_civilization_science.baseItemID)),
+            bounded,
+        ),
+        sagaSciences: bound(
+            tx
+                .select({ itemid: saga_tower_science.itemid, level: saga_tower_science.level })
+                .from(saga_tower_science)
+                .where(eq(saga_tower_science.uid, uid))
+                .orderBy(asc(saga_tower_science.itemid)),
+            bounded,
+        ),
+        foreignSciences: bound(
+            tx
+                .select({ itemid: foreigen_sciences.itemid, level: foreigen_sciences.level })
+                .from(foreigen_sciences)
+                .where(eq(foreigen_sciences.uid, uid))
+                .orderBy(asc(foreigen_sciences.itemid)),
+            bounded,
+        ),
+        equipment: bound(
+            tx
+                .select({
+                    itemId: user_equip.itemId,
+                    on: user_equip.on,
+                    extraProperty: user_equip.extraProperty,
+                    strengthLevel: user_equip.strengthLevel,
+                })
+                .from(user_equip)
+                .where(and(eq(user_equip.uid, uid), eq(user_equip.on, 1)))
+                .orderBy(asc(user_equip.uuid)),
+            bounded,
+        ),
+        heroes: bound(
+            tx
+                .select({ heroid: t_hero.heroid, level: t_hero.level, exp: t_hero.exp })
+                .from(t_hero)
+                .where(eq(t_hero.uid, uid))
+                .orderBy(asc(t_hero.id)),
+            bounded,
+        ),
+        dragons: bound(
+            tx
+                .select({
+                    itemId: user_pet_dragon.itemId,
+                    dragonState: user_pet_dragon.dragonState,
+                    lv: user_pet_dragon.lv,
+                    useFlag: user_pet_dragon.useFlag,
+                })
+                .from(user_pet_dragon)
+                .where(eq(user_pet_dragon.uid, uid))
+                .orderBy(asc(user_pet_dragon.uuid)),
+            bounded,
+        ),
+        dragonSkills: bound(
+            tx
+                .select({
+                    ownerId: user_pet_dragon_skill.ownerId,
+                    index1: user_pet_dragon_skill.index1,
+                    skillId: user_pet_dragon_skill.skillId,
+                    level: user_pet_dragon_skill.level,
+                    strengthenLevel: user_pet_dragon_skill.strengthenLevel,
+                })
+                .from(user_pet_dragon_skill)
+                .where(eq(user_pet_dragon_skill.uid, uid))
+                .orderBy(asc(user_pet_dragon_skill.uuid)),
+            bounded,
+        ),
+        dragonTalents: bound(
+            tx.select().from(dragon_talent_skill).where(eq(dragon_talent_skill.uid, uid)),
+            bounded,
+        ),
+        states: bound(
+            tx
+                .select({
+                    stateId: user_state.stateId,
+                    startTime: user_state.startTime,
+                    endTime: user_state.endTime,
+                    ranEffId: user_state.ranEffId,
+                    ranEffValue: user_state.ranEffValue,
+                })
+                .from(user_state)
+                .where(eq(user_state.uid, uid))
+                .orderBy(asc(user_state.stateId)),
+            bounded,
+        ),
+        vip: tx
             .select({
                 score: user_vip.score,
                 vipEndTime: user_vip.vipEndTime,
@@ -364,53 +366,116 @@ export async function readPlayerEffects(
             })
             .from(user_vip)
             .where(eq(user_vip.uid, uid))
-            .limit(1)
-    )[0];
-    const allianceSciences = typeof profile.allianceId === "string" && profile.allianceId.trim()
-        ? await bound(
+            .limit(1),
+        allianceSciences: typeof profile.allianceId === "string" && profile.allianceId.trim()
+            ? bound(
+                tx
+                    .select({
+                        scienceId: alliance_science.scienceId,
+                        level: alliance_science.level,
+                    })
+                    .from(alliance_science)
+                    .where(eq(alliance_science.allianceId, profile.allianceId))
+                    .orderBy(asc(alliance_science.scienceId)),
+                bounded,
+            )
+            : undefined,
+        prestige: bound(
             tx
-                .select({ scienceId: alliance_science.scienceId, level: alliance_science.level })
-                .from(alliance_science)
-                .where(eq(alliance_science.allianceId, profile.allianceId))
-                .orderBy(asc(alliance_science.scienceId)),
+                .select({
+                    civilizationType: user_civilization_prestige.civilizationType,
+                    prestigeValue: user_civilization_prestige.prestigeValue,
+                })
+                .from(user_civilization_prestige)
+                .where(eq(user_civilization_prestige.uid, uid))
+                .orderBy(asc(user_civilization_prestige.civilizationType)),
             bounded,
-        )
-        : [];
-    const prestige = await bound(
-        tx
-            .select({
-                civilizationType: user_civilization_prestige.civilizationType,
-                prestigeValue: user_civilization_prestige.prestigeValue,
-            })
-            .from(user_civilization_prestige)
-            .where(eq(user_civilization_prestige.uid, uid))
-            .orderBy(asc(user_civilization_prestige.civilizationType)),
-        bounded,
-    );
-    const military = (
-        await tx
+        ),
+        military: tx
             .select({ skill: user_military_rank.skill })
             .from(user_military_rank)
             .where(eq(user_military_rank.uid, uid))
-            .limit(1)
-    )[0];
-    const miracle = (
-        await tx
+            .limit(1),
+        miracle: tx
             .select({ level: user_miracle_buff_active.level })
             .from(user_miracle_buff_active)
             .where(eq(user_miracle_buff_active.uid, uid))
-            .limit(1)
-    )[0];
-    const office = (
-        await tx
+            .limit(1),
+        office: tx
             .select({
                 positionId: kingdom_position.positionId,
                 serverId: kingdom_position.serverId,
             })
             .from(kingdom_position)
             .where(eq(kingdom_position.uid, uid))
-            .limit(1)
-    )[0];
+            .limit(1),
+        territoryTrees: typeof profile.allianceId === "string" && profile.allianceId.trim()
+            ? tx
+                .select({
+                    allianceId: alliance_territory.allianceId,
+                    pointId: alliance_territory.pointId,
+                    type: alliance_territory.type,
+                    stat: alliance_territory.stat,
+                    level: alliance_territory.level,
+                    activeSkin: alliance_territory.activeSkin,
+                })
+                .from(alliance_territory)
+                .where(
+                    and(
+                        eq(alliance_territory.allianceId, profile.allianceId),
+                        eq(alliance_territory.type, 42),
+                        gt(alliance_territory.pointId, 0),
+                    ),
+                )
+                .orderBy(asc(alliance_territory.uid))
+                .limit(2)
+            : undefined,
+        luckyDay: tx
+            .select({
+                status: lucky_day.status,
+                time: lucky_day.time,
+                effectId: lucky_day.effectId,
+                lucky_id: lucky_day.lucky_id,
+            })
+            .from(lucky_day)
+            .where(eq(lucky_day.uid, uid))
+            .limit(1),
+        throneRewards: tx
+            .select({
+                version: cross_throne_reward_record.version,
+                rewardId: cross_throne_reward_record.reward_id,
+            })
+            .from(cross_throne_reward_record)
+            .where(
+                and(
+                    eq(cross_throne_reward_record.target_uid, uid),
+                    eq(cross_throne_reward_record.reward_type, 2),
+                    eq(cross_throne_reward_record.throne_type, 2),
+                ),
+            )
+            .orderBy(asc(cross_throne_reward_record.id))
+            .limit(4097),
+    }, combined);
+    const generals = projection.generals;
+    const sciences = projection.sciences;
+    const civilizationSciences = projection.civilizationSciences;
+    const sagaSciences = projection.sagaSciences;
+    const foreignSciences = projection.foreignSciences;
+    const equipment = projection.equipment;
+    const heroes = projection.heroes;
+    const dragons = projection.dragons;
+    const dragonSkills = projection.dragonSkills;
+    const dragonTalents = projection.dragonTalents;
+    const states = projection.states;
+    const vip = projection.vip[0];
+    const allianceSciences = projection.allianceSciences;
+    const prestige = projection.prestige;
+    const military = projection.military[0];
+    const miracle = projection.miracle[0];
+    const office = projection.office[0];
+    const territoryTrees = projection.territoryTrees;
+    const luckyDay = projection.luckyDay[0];
+    const throneRewards = projection.throneRewards;
     const kingdomFights = office
         ? await tx
             .select({
@@ -424,39 +489,6 @@ export async function readPlayerEffects(
             .orderBy(asc(activity.id))
             .limit(2)
         : [];
-    const territoryTrees = typeof profile.allianceId === "string" && profile.allianceId.trim()
-        ? await tx
-            .select({
-                allianceId: alliance_territory.allianceId,
-                pointId: alliance_territory.pointId,
-                type: alliance_territory.type,
-                stat: alliance_territory.stat,
-                level: alliance_territory.level,
-                activeSkin: alliance_territory.activeSkin,
-            })
-            .from(alliance_territory)
-            .where(
-                and(
-                    eq(alliance_territory.allianceId, profile.allianceId),
-                    eq(alliance_territory.type, 42),
-                    gt(alliance_territory.pointId, 0),
-                ),
-            )
-            .orderBy(asc(alliance_territory.uid))
-            .limit(2)
-        : [];
-    const luckyDay = (
-        await tx
-            .select({
-                status: lucky_day.status,
-                time: lucky_day.time,
-                effectId: lucky_day.effectId,
-                lucky_id: lucky_day.lucky_id,
-            })
-            .from(lucky_day)
-            .where(eq(lucky_day.uid, uid))
-            .limit(1)
-    )[0];
     const powerServer = luckyDay
         ? (
             await tx
@@ -466,21 +498,6 @@ export async function readPlayerEffects(
                 .limit(1)
         )[0]
         : undefined;
-    const throneRewards = await tx
-        .select({
-            version: cross_throne_reward_record.version,
-            rewardId: cross_throne_reward_record.reward_id,
-        })
-        .from(cross_throne_reward_record)
-        .where(
-            and(
-                eq(cross_throne_reward_record.target_uid, uid),
-                eq(cross_throne_reward_record.reward_type, 2),
-                eq(cross_throne_reward_record.throne_type, 2),
-            ),
-        )
-        .orderBy(asc(cross_throne_reward_record.id))
-        .limit(4097);
 
     if (
         bounded

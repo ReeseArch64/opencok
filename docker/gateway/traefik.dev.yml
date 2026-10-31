@@ -1,0 +1,60 @@
+entryPoints:
+  web:
+    address: ":8080"
+    forwardedHeaders:
+      insecure: false
+    http:
+      aliasHeadersStrategy: delete
+  game:
+    address: ":9933"
+  health:
+    address: ":8082"
+
+providers:
+  file:
+    filename: /etc/traefik/dynamic.yml
+    watch: true
+
+ping:
+  entryPoint: health
+
+api:
+  dashboard: false
+  insecure: false
+
+log:
+  level: WARN
+
+accessLog:
+  format: json
+  dualOutput: true
+  fields:
+    defaultMode: drop
+    names:
+      StartUTC: keep
+      RequestMethod: keep
+      RouterName: keep
+      OriginStatus: keep
+      DownstreamStatus: keep
+      Duration: keep
+    headers:
+      defaultMode: drop
+    queryParameters:
+      defaultMode: drop
+  otlp:
+    serviceName: gateway
+    http:
+      endpoint: http://maple:4318/v1/logs
+      headers:
+        Authorization: Bearer __MAPLE_LOCAL_INGEST_KEY__
+experimental:
+  otlpLogs: true
+metrics:
+  otlp:
+    serviceName: gateway
+    pushInterval: 1s
+    addRoutersLabels: true
+    http:
+      endpoint: http://maple:4318/v1/metrics
+      headers:
+        Authorization: Bearer __MAPLE_LOCAL_INGEST_KEY__

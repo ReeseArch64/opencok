@@ -2,7 +2,10 @@ import { expect, test } from "bun:test";
 import { drizzle, type NodePgClient } from "drizzle-orm/node-postgres";
 import * as schema from "@opencok/drizzle/schema/kingdom";
 import type { ReconnectProgressState, ReconnectProgressWrite } from "@opencok/contracts/reconnect";
-import { persistReconnectProgress } from "@opencok/repositories/reconnect-write";
+import {
+    persistProductionProgress,
+    persistReconnectProgress,
+} from "@opencok/repositories/reconnect-write";
 
 const state = {
     profile: { uid: "owner", serverId: 2 },
@@ -273,3 +276,79 @@ test("skill repair, cooldown reset and notification share one commit and roll ba
         expect(failed.queries.at(-1)!.text).toBe("rollback");
     }
 });
+
+test("persistProductionProgress_narrowState_commitsTheOriginalEconomicRecords", async () => {
+    const fixture = database();
+    const production = {
+        profile: state.profile,
+        resource: state.resource,
+        armies: state.armies,
+        weakness: state.weakness,
+        glory: state.glory,
+    };
+
+    await fixture.db.transaction((tx) =>
+        persistProductionProgress(tx, production, write(), fixture.authority, 20n)
+    );
+
+    expect(fixture.committed).toEqual([
+        "command_receipt",
+        "economy_posting",
+        "economy_posting",
+        "resource_settlement",
+        "user_resource",
+    ]);
+});
+
+test.each(
+    [
+        ["food creation", (plan: ReconnectProgressWrite) => {
+            plan.resource.food = 101n;
+        }, "Invalid reconnect resource debit"],
+        ["bound food creation", (plan: ReconnectProgressWrite) => {
+            plan.resource.foodbind = 51n;
+        }, "Invalid reconnect resource debit"],
+        ["wrong checkpoint", (plan: ReconnectProgressWrite) => {
+            plan.resource.lastUpdateTime = 10n;
+        }, "Invalid reconnect checkpoint"],
+        ["negative starvation", (plan: ReconnectProgressWrite) => {
+            plan.resource.starvingMillis = -1n;
+        }, "Invalid reconnect checkpoint"],
+        ["excess starvation", (plan: ReconnectProgressWrite) => {
+            plan.resource.starvingMillis = 11n;
+        }, "Invalid reconnect checkpoint"],
+        ["missing loss ledger", (plan: ReconnectProgressWrite) => {
+            plan.armies = [{ armyId: "knight", free: 5, defence: 5 }];
+        }, "Inconsistent reconnect troop ledger"],
+    ] as const,
+)("persistProductionProgress_%s_rejectsBeforeEconomicWrites", async (_name, change, message) => {
+    const fixture = database();
+    const plan = write();
+    change(plan);
+
+    await expect(
+        fixture.db.transaction((tx) =>
+            persistProductionProgress(tx, state, plan, fixture.authority, 20n)
+        ),
+    ).rejects.toThrow(message);
+
+    expect(fixture.committed).toEqual([]);
+    expect(fixture.queries.some((query) => query.text.startsWith("insert"))).toBe(false);
+    expect(fixture.queries.at(-1)!.text).toBe("rollback");
+});
+
+test.each(["user_resource", "disconnect"])(
+    "persistProductionProgress_%s_rollsBackTheIntervalReceipt",
+    async (failure) => {
+        const fixture = database(failure);
+
+        await expect(
+            fixture.db.transaction((tx) =>
+                persistProductionProgress(tx, state, write(), fixture.authority, 20n)
+            ),
+        ).rejects.toThrow();
+
+        expect(fixture.committed).toEqual([]);
+        expect(fixture.queries.at(-1)!.text).toBe("rollback");
+    },
+);

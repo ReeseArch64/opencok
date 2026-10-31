@@ -6,10 +6,19 @@ on:
   pull_request:
   workflow_dispatch:
 
+permissions:
+  contents: read
+
+concurrency:
+  group: commitlint-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   commitlint:
     name: Validate commit messages
+    if: github.event.deleted != true
     runs-on: ubuntu-latest
+    timeout-minutes: 5
 
     steps:
       - name: Checkout repository with full history
@@ -18,39 +27,17 @@ jobs:
           fetch-depth: 0
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
 
-      - name: Setup Bun
-        uses: oven-sh/setup-bun@v2
-        with:
-          bun-version: 1.4.2
-
-      - name: Install dependencies
-        run: bun install --frozen-lockfile --ignore-scripts
+      - uses: ./.github/actions/setup
 
       - name: Validate new commits
         env:
-          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
-          EVENT_NAME: ${{ github.event_name }}
-          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+          BASE_SHA: ${{ github.event.before || github.event.pull_request.base.sha }}
         shell: bash
         run: |
           set -euo pipefail
 
-          range_base=""
-
-          if [[ -n "${BASE_SHA:-}" ]] && git cat-file -e "${BASE_SHA}^{commit}" 2>/dev/null; then
-            if git merge-base --is-ancestor "$BASE_SHA" HEAD; then
-              range_base="$BASE_SHA"
-            elif [[ "${EVENT_NAME:-}" == "pull_request" ]]; then
-              range_base="$(git merge-base "$BASE_SHA" HEAD)"
-            fi
-          fi
-
-          if [[ -z "$range_base" ]]; then
-            range_base="$(git merge-base "refs/remotes/origin/${DEFAULT_BRANCH}" HEAD)"
-          fi
-
-          if [[ "$range_base" == "$(git rev-parse HEAD)" ]]; then
-            git show --quiet --format=%B HEAD | bunx commitlint --verbose
+          if [[ -n "${BASE_SHA:-}" && "$BASE_SHA" != "0000000000000000000000000000000000000000" ]] && git cat-file -e "${BASE_SHA}^{commit}" 2>/dev/null; then
+            bunx --no-install commitlint --from="$BASE_SHA" --to=HEAD --verbose
           else
-            bunx commitlint --from="$range_base" --to=HEAD --verbose
+            bunx --no-install commitlint --last --verbose
           fi

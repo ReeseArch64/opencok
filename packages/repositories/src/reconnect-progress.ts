@@ -20,7 +20,7 @@ import { user_weakness_building } from "@opencok/drizzle/schema/opencok_kingdom/
 import { user_wall } from "@opencok/drizzle/schema/opencok_kingdom/user_wall";
 import { user_knight_title } from "@opencok/drizzle/schema/opencok_kingdom/user_knight_title";
 import { user_item } from "@opencok/drizzle/schema/opencok_kingdom/user_item";
-import type { ReconnectProgressState } from "@opencok/contracts/reconnect";
+import type { ReconnectProgressState, ProductionProgressState } from "@opencok/contracts/reconnect";
 import { GameError } from "@opencok/errors/game";
 import { errors } from "@opencok/constants/game";
 import type { DatabaseClient } from "@opencok/drizzle/contracts/database";
@@ -30,12 +30,13 @@ import { readReconnectMarches } from "./reconnect-marches.ts";
 
 type Transaction = Parameters<Parameters<DatabaseClient<"kingdom">["transaction"]>[0]>[0];
 
-export async function readReconnectProgress(
+export async function readProductionProgress(
     tx: Transaction,
     uid: string,
     kingdomId: number,
     now: bigint,
-): Promise<ReconnectProgressState>
+    combineEffects = false,
+): Promise<ProductionProgressState>
 {
     if (!uid.trim() || uid.length > 40 || !uid.isWellFormed() || uid.includes("\0"))
     {
@@ -121,6 +122,75 @@ export async function readReconnectProgress(
         throw new GameError(errors.invalid);
     }
 
+    const effects = await readPlayerEffects(tx, profile, true, combineEffects);
+    const newGenerals = await readResourceNewGenerals(tx, uid, false);
+    const armies = await tx
+        .select()
+        .from(user_army)
+        .where(eq(user_army.uid, uid))
+        .orderBy(asc(user_army.armyId))
+        .limit(32768);
+    const generals = await tx
+        .select({
+            uuid: user_general.uuid,
+            generalId: user_general.generalId,
+            level: user_general.level,
+            status: user_general.status,
+            ability: user_general.ability,
+            abilityIndex: user_general.abilityIndex,
+        })
+        .from(user_general)
+        .where(eq(user_general.uid, uid))
+        .orderBy(asc(user_general.uuid))
+        .limit(32768);
+    const buildings = await tx
+        .select()
+        .from(user_building)
+        .where(eq(user_building.uid, uid))
+        .orderBy(asc(user_building.uuid))
+        .limit(32768);
+    const glory = (
+        await tx.select().from(user_glory_info).where(eq(user_glory_info.uid, uid)).limit(1)
+    )[0];
+    const weakness = await tx
+        .select()
+        .from(user_weakness_building)
+        .where(eq(user_weakness_building.uid, uid))
+        .orderBy(asc(user_weakness_building.armyId))
+        .limit(32768);
+
+    if ([armies, generals, buildings, weakness].some((rows) => rows.length > 32767))
+    {
+        throw new GameError(errors.unsupported, "reconnect");
+    }
+
+    return {
+        allianceResearch: profile.allianceId
+            ? await tx
+                .select()
+                .from(alliance_science_upgrade)
+                .where(eq(alliance_science_upgrade.allianceId, profile.allianceId))
+            : [],
+        profile,
+        resource,
+        effects,
+        newGenerals,
+        armies,
+        generals,
+        buildings,
+        glory,
+        weakness,
+    };
+}
+
+export async function readReconnectProgress(
+    tx: Transaction,
+    uid: string,
+    kingdomId: number,
+    now: bigint,
+): Promise<ReconnectProgressState>
+{
+    const production = await readProductionProgress(tx, uid, kingdomId, now);
     const world = (
         await tx
             .select({
@@ -152,39 +222,12 @@ export async function readReconnectProgress(
         throw new GameError(errors.invalid);
     }
 
-    const effects = await readPlayerEffects(tx, profile, true);
-    const newGenerals = await readResourceNewGenerals(tx, uid, false);
     const marches = await readReconnectMarches(tx, uid);
-    const armies = await tx
-        .select()
-        .from(user_army)
-        .where(eq(user_army.uid, uid))
-        .orderBy(asc(user_army.armyId))
-        .limit(32768);
-    const generals = await tx
-        .select({
-            uuid: user_general.uuid,
-            generalId: user_general.generalId,
-            level: user_general.level,
-            status: user_general.status,
-            ability: user_general.ability,
-            abilityIndex: user_general.abilityIndex,
-        })
-        .from(user_general)
-        .where(eq(user_general.uid, uid))
-        .orderBy(asc(user_general.uuid))
-        .limit(32768);
     const skills = await tx
         .select()
         .from(user_skill)
         .where(eq(user_skill.ownerId, uid))
         .orderBy(asc(user_skill.endTime), asc(user_skill.uuid))
-        .limit(32768);
-    const buildings = await tx
-        .select()
-        .from(user_building)
-        .where(eq(user_building.uid, uid))
-        .orderBy(asc(user_building.uuid))
         .limit(32768);
     const equipment = await tx
         .select({
@@ -221,15 +264,6 @@ export async function readReconnectProgress(
             .where(eq(civilization_castle.uid, uid))
             .limit(1)
     )[0];
-    const glory = (
-        await tx.select().from(user_glory_info).where(eq(user_glory_info.uid, uid)).limit(1)
-    )[0];
-    const weakness = await tx
-        .select()
-        .from(user_weakness_building)
-        .where(eq(user_weakness_building.uid, uid))
-        .orderBy(asc(user_weakness_building.armyId))
-        .limit(32768);
     const hospital = await tx
         .select()
         .from(user_hospital)
@@ -260,14 +294,10 @@ export async function readReconnectProgress(
 
     if (
         [
-            armies,
-            generals,
             skills,
-            buildings,
             equipment,
             queues,
             tasks,
-            weakness,
             registrations,
             walls,
             items,
@@ -278,30 +308,16 @@ export async function readReconnectProgress(
     }
 
     return {
-        allianceResearch: profile.allianceId
-            ? await tx
-                .select()
-                .from(alliance_science_upgrade)
-                .where(eq(alliance_science_upgrade.allianceId, profile.allianceId))
-            : [],
-        profile,
+        ...production,
         world,
-        newGenerals,
         marches,
-        resource,
-        effects,
-        armies,
-        generals,
         skills,
-        buildings,
         equipment,
         queues,
         tasks,
         playerInfo,
         registrationPlatform: registration?.platform ?? null,
         civilizationCastle,
-        glory,
-        weakness,
         hospital,
         walls,
         knight,
