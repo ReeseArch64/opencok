@@ -42,6 +42,7 @@ export function cosmeticStatusRule(rule: CosmeticRule): CosmeticRule
     return {
         ...rule,
         effect: visualEffects.join("|"),
+        effectAdd: "",
         effect_add: "",
         skill: "",
         random: "0",

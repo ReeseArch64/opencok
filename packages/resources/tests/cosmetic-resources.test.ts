@@ -8,7 +8,7 @@ import { join } from "node:path";
 
 test("cosmeticResourceXml_skinPreviews_removesAbilitiesAndBonusesWithoutChangingOwnershipMetadata", () => {
     const source =
-        "<database><Group id=\"status\"><ItemSpec id=\"1\" type2=\"100\" effect=\"14;1|487;500\" effectAdd=\"50;99\" skill=\"12\" time=\"3600\" subgroup=\"8\"/><ItemSpec id=\"2\" type2=\"9\" effect=\"50;25\"/></Group></database>";
+        "<database><Group id=\"status\"><ItemSpec id=\"1\" type2=\"100\" effect=\"14;1|487;500\" effectAdd=\"50;99\" effect_add=\"487;500\" skill=\"12\" time=\"3600\" subgroup=\"8\"/><ItemSpec id=\"2\" type2=\"9\" effect=\"50;25\"/></Group></database>";
 
     const output = cosmeticResourceXml(source, GameplayCatalog.Status);
 
@@ -18,6 +18,7 @@ test("cosmeticResourceXml_skinPreviews_removesAbilitiesAndBonusesWithoutChanging
             type2: "100",
             effect: "14;1",
             effectAdd: "",
+            effect_add: "",
             skill: "",
             time: "3600",
             subgroup: "8",
@@ -42,6 +43,7 @@ test("cosmeticResourceXml_civilizationFortressSkin_removesTheType114CombatPrevie
             subgroup: "519",
             isForever: "1",
             effectAdd: "",
+            effect_add: "",
             skill: "",
             random: "0",
         }]);

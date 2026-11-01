@@ -85,6 +85,7 @@ test.each([
             type2: String(type),
             effect: "487;100|14;1|50;30",
             effectAdd: "487;500",
+            effect_add: "50;99",
             skill: "12345",
             random: "1",
             subgroup: "1",
@@ -97,6 +98,7 @@ test.each([
             ...rule,
             effect: "14;1",
             effectAdd: "",
+            effect_add: "",
             skill: "",
             random: "0",
         });
@@ -106,7 +108,13 @@ test.each([
 
 test("cosmeticStatusRule_throneCounterAndOrdinaryEffects_preservesLegitimateBonuses", () => {
     const throne = { type2: "110", effect: "2189;1", overlap: "5" };
-    const ordinary = { type2: "9", effect: "50;25", random: "1" };
+    const ordinary = {
+        type2: "9",
+        effect: "50;25",
+        effectAdd: "487;500",
+        effect_add: "50;99",
+        random: "1",
+    };
     const unclassified = { type2: "202", effect: "50;25" };
 
     expect(cosmeticStatusRule(throne)).toBe(throne);
