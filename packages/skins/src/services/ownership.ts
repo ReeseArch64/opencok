@@ -1,7 +1,7 @@
 import type { CosmeticRecord as Row } from "../contracts/records";
 import type { CosmeticCatalog, CosmeticContext } from "../contracts/context";
 import type { CosmeticOwnershipRuntime } from "../contracts/runtime";
-import { CosmeticKind } from "../enums/kind";
+import { CosmeticKind, cosmeticKinds } from "../enums/kind";
 
 export class CosmeticOwnership<
     TCatalog extends CosmeticCatalog,
@@ -17,6 +17,8 @@ export class CosmeticOwnership<
         id: string,
         previous: readonly Row[],
         states: readonly Row[],
+        count = 1,
+        extendOwned = false,
     ) => {
         const { text, long, cityInteger, serverFeature } = this.runtime;
         const target = context.state.cosmeticTarget,
@@ -25,11 +27,7 @@ export class CosmeticOwnership<
         if (
             target?.uid !== uid
             || !rule?.subgroup
-            || ![
-                String(CosmeticKind.City),
-                String(CosmeticKind.Bubble),
-                String(CosmeticKind.Overlap),
-            ].includes(rule.type2 ?? "")
+            || !cosmeticKinds.includes(Number(rule.type2))
             || !serverFeature(context.rules, "avatar", {
                 kingdomId: context.rules.kingdomId,
                 version: "12.06.0",
@@ -40,7 +38,36 @@ export class CosmeticOwnership<
             return;
         }
 
-        const dirty = context.write.cosmeticTarget?.avatars ?? [];
+        const dirty = [...(context.write.cosmeticTarget?.avatars ?? [])];
+        for (const row of extendOwned ? previous : [])
+        {
+            const priorId = String(row.stateId);
+            const prior = context.rules.power.statuses?.get(priorId);
+            if (
+                row.uid !== uid || long(row, "endTime") <= context.now || !prior?.subgroup
+                || prior.overlap === "5" || !cosmeticKinds.includes(Number(prior.type2))
+            )
+            {
+                continue;
+            }
+            const saved = [...target.avatars, ...dirty].some((entry) => {
+                const entryRule = context.rules.power.statuses?.get(text(entry, "avatarId"));
+                return entryRule?.type2 === prior.type2 && entryRule?.subgroup === prior.subgroup
+                    && (long(entry, "expirationTime") === -1n
+                        || long(entry, "expirationTime") > context.now);
+            });
+            if (!saved)
+            {
+                dirty.push({
+                    uid,
+                    avatarId: priorId,
+                    expirationTime: long(row, "endTime") === 9223372036854775807n
+                        ? -1n
+                        : long(row, "endTime"),
+                    effectiveSign: 0,
+                });
+            }
+        }
         const avatars = [
             ...target.avatars.filter((row) =>
                 !dirty.some((next) => next.avatarId === row.avatarId)
@@ -63,11 +90,12 @@ export class CosmeticOwnership<
 
         if (!counter)
         {
-            const duration = BigInt(cityInteger(rule.time ?? 0)) * 1000n;
+            const duration = BigInt(cityInteger(rule.time ?? 0)) * 1000n
+                * BigInt(cityInteger(count, 1));
             const expiration =
                 rule.time === undefined || (owned && long(owned, "expirationTime") === -1n)
                     ? -1n
-                    : owned && rule.type2 !== String(CosmeticKind.City)
+                    : owned && !extendOwned && rule.type2 !== String(CosmeticKind.City)
                     ? long(owned, "expirationTime")
                     : (owned ? long(owned, "expirationTime") : context.now) + duration;
             owned = {

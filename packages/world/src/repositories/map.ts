@@ -5,7 +5,12 @@ import { worldpoint } from "@opencok/drizzle/schema/opencok_kingdom/worldpoint";
 import { user_state } from "@opencok/drizzle/schema/opencok_kingdom/user_state";
 import { and, eq, inArray } from "drizzle-orm";
 
-export async function readWorldMap(db: DatabaseClient<"kingdom">, uid: string, ids: number[])
+export async function readWorldMap(
+    db: DatabaseClient<"kingdom">,
+    uid: string,
+    ids: number[],
+    cosmeticKinds: readonly number[],
+)
 {
     return db.transaction(
         async (tx) => {
@@ -35,7 +40,7 @@ export async function readWorldMap(db: DatabaseClient<"kingdom">, uid: string, i
                     .where(
                         and(
                             inArray(user_state.uid, owners),
-                            inArray(user_state.type2, [100, 105, 200]),
+                            inArray(user_state.type2, [...cosmeticKinds]),
                         ),
                     )
                     .orderBy(user_state.uid, user_state.stateId)

@@ -1,3 +1,5 @@
+import { cosmeticOwnership, cosmeticInteractionEvent } from "./city-cosmetics";
+import { CosmeticKind } from "@opencok/skins/enums/kind";
 import { prepareLegacyGeneral } from "@opencok/hero/services/legacy-general";
 
 import { CityCommandDomain } from "./city-command-domain.ts";
@@ -51,7 +53,44 @@ export function applyProgressionStatus(context: CityProgressionContext, id: stri
         return {};
     }
 
+    const avatars = cosmeticOwnership(
+        context,
+        context.owner,
+        id,
+        context.state.effects.states,
+        plan.states,
+        count,
+        true,
+    );
+    if (avatars)
+    {
+        context.write.cosmeticTarget = {
+            uid: context.owner,
+            states: plan.states,
+            deleted: plan.deleted,
+            avatars,
+        };
+        context.write.states = [
+            ...context.state.effects.states.filter((row) =>
+                !plan.deleted.includes(num(row, "stateId"))
+                && !plan.states.some((next) => next.stateId === row.stateId)
+            ),
+            ...plan.states,
+        ];
+        context.write.cosmeticChanges = plan.states.map((row) => ({
+            uid: context.owner,
+            id: num(row, "stateId"),
+            previous: plan.deleted[0],
+        }));
+    }
     const declaration = context.rules.power.statuses?.get(String(state.stateId));
+    if (declaration?.type2 === String(CosmeticKind.Frame))
+    {
+        context.write.appearance = {
+            ...context.write.appearance,
+            picfraId: cityInteger(declaration.frameID, 1),
+        };
+    }
     const effects = declaration?.random === "1"
         ? [[num(state, "ranEffId"), num(state, "ranEffValue")]]
         : (declaration?.effect ?? "")
@@ -220,7 +259,23 @@ async function prepare(context: CityProgressionContext, command: string, params:
         return prepareLegacyGeneral(context, command, params, applyProgressionStatus);
     }
 
-    return { response: encode(body), event: null };
+    if (command === "effects.init" || command === "status.remove")
+    {
+        const deleted = context.write.deletedStates ?? [];
+        const active = context.state.effects.states.find((row) =>
+            num(row, "type2") === CosmeticKind.Frame && long(row, "endTime") > context.now
+            && !deleted.includes(num(row, "stateId"))
+        );
+        const frame = active
+            ? context.rules.power.statuses?.get(String(active.stateId))
+            : undefined;
+        const frameId = frame ? cityInteger(frame.frameID, 1) : 0;
+        if (frameId !== num(context.state.profile, "picfraId"))
+        {
+            context.write.appearance = { ...context.write.appearance, picfraId: frameId };
+        }
+    }
+    return { response: encode(body), event: cosmeticInteractionEvent(context, body) };
 }
 
 export class PlayerEffectsDomain extends CityCommandDomain

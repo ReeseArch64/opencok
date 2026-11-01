@@ -151,9 +151,12 @@ export class CitySnapshotReader
             profile,
             resource,
             cosmeticTarget: command === "trigger.activity" || command === "avatar.activate"
+                    || command === "effect.item"
                 ? (session.cosmeticTarget = await session.cosmetics.readCosmeticTarget(
                     request,
-                    command === "avatar.activate" ? owner : undefined,
+                    command === "avatar.activate" || command === "effect.item"
+                        ? owner
+                        : undefined,
                 ))
                 : undefined,
             trouble: command === "get.trouble.list" || command?.startsWith("trouble.")

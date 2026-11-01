@@ -3,6 +3,30 @@ import { text, num, long, type Row } from "@opencok/contracts/rows";
 
 export function validateCityWrite(write: CityProgressionWrite, owner: string)
 {
+    if (write.appearance)
+    {
+        for (const [key, value] of Object.entries(write.appearance))
+        {
+            if (key === "pic")
+            {
+                if (
+                    typeof value !== "string" || value.length === 0 || value.length > 40
+                    || value.includes("\0")
+                )
+                {
+                    throw new Error("Invalid profile appearance");
+                }
+            }
+            else if (
+                (key !== "picVer" && key !== "picfraId") || !Number.isInteger(value)
+                || Number(value) < 0 || Number(value) > 2147483647
+            )
+            {
+                throw new Error("Invalid profile appearance");
+            }
+        }
+    }
+
     for (
         const [rows, identity, fields] of [
             [

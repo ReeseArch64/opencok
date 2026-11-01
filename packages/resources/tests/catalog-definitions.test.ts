@@ -18,6 +18,7 @@ const appearanceAdditions: Readonly<Record<string, number>> = {
 };
 
 const maintainedAdditions: Readonly<Record<string, readonly number[]>> = {
+    [GameplayCatalog.LordImage]: [53325, 53326, 53327, 53328, 53329, 53330, 53331, 53332],
     [GameplayCatalog.GeneralAb]: [41020011, 53571201, 53571202],
     [GameplayCatalog.GeneralSkill]: [
         53571100,

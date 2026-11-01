@@ -1,3 +1,4 @@
+import { worldCosmeticKinds } from "@opencok/skins/enums/kind";
 import { test, expect } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { eq, sql } from "drizzle-orm";
@@ -60,7 +61,10 @@ async function fixture()
         timeoutMs: 5000,
     });
     const world = createRealmWorldService(
-        { getWorldByPointIds: (uid, ids) => readWorldMap(adapter.kingdom.db, uid, ids) },
+        {
+            getWorldByPointIds: (uid, ids) =>
+                readWorldMap(adapter.kingdom.db, uid, ids, worldCosmeticKinds),
+        },
         1200,
         1,
         {
@@ -222,7 +226,12 @@ test(
             });
             expect(point.sid).toBe(509878);
             expect(point.set).toBe(Date.UTC(2024, 8, 5, 13) / 1000);
-            const snapshot = await readWorldMap(h.adapter.kingdom.db, "owner", [4]);
+            const snapshot = await readWorldMap(
+                h.adapter.kingdom.db,
+                "owner",
+                [4],
+                worldCosmeticKinds,
+            );
             expect(snapshot.cosmetics.every((row) => row.uid === "other")).toBe(true);
             h.clock.now += 6000;
             expect((await h.map()).bubble).toBeUndefined();
@@ -275,6 +284,61 @@ test(
             expect(Object.keys(overlap.body)).toEqual(["overlap", "uid", "worldpointid"]);
             expect(overlap.body.uid).toEqual(sfs.string("other"));
             expect(overlap.body.worldpointid).toEqual(sfs.int(4));
+        }
+        finally
+        {
+            await h.close();
+        }
+    },
+    120000,
+);
+
+test(
+    "world map reload includes independently active wings, aura, effects, nameplate and frame",
+    async () => {
+        const h = await fixture();
+        try
+        {
+            for (
+                const [type, field] of [[104, "npavatar"], [108, "castleEffect"], [109, "wings"], [
+                    115,
+                    "avatarframe",
+                ], [116, "aura"]] as const
+            )
+            {
+                const rule = [...h.rules.power.statuses!.values()].find((entry) =>
+                    Number(entry.type2) === type
+                )!;
+                expect(rule).toBeDefined();
+                await h.db.db.insert(user_state).values({
+                    uid: "other",
+                    stateId: Number(rule.id),
+                    type2: type,
+                    startTime: BigInt(h.clock.now),
+                    endTime: BigInt(h.clock.now + 60000),
+                    count: 1,
+                });
+                expect((await h.map())[field]).toEqual({
+                    sid: Number(rule.id),
+                    set: (h.clock.now + 60000) / 1000,
+                });
+            }
+            const reloaded = await readWorldMap(
+                h.adapter.kingdom.db,
+                "owner",
+                [4],
+                worldCosmeticKinds,
+            );
+            expect(reloaded.cosmetics.map((row) => row.type2).sort()).toEqual([
+                104,
+                108,
+                109,
+                115,
+                116,
+            ]);
+            h.clock.now += 60001;
+            expect((await h.map()).wings).toBeUndefined();
+            expect((await h.map()).aura).toBeUndefined();
         }
         finally
         {
