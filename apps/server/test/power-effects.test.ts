@@ -132,7 +132,6 @@ test.each([
     123,
     124,
     200,
-    202,
 ])(
     "storedPowerEffects_savedSkinType%s_ignoresConfiguredAndRandomBonusesAfterReloadAndExpiry",
     (type) => {

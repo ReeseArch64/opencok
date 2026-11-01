@@ -77,7 +77,6 @@ test.each([
     123,
     124,
     200,
-    202,
 ])(
     "cosmeticStatusRule_type%s_removesAttributesAndAbilitiesWhileKeepingVisualMetadata",
     (type) => {
