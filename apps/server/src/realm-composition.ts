@@ -1,3 +1,5 @@
+import { ProfilePictureDomain } from "@opencok/player/services/profile-picture";
+import { worldCosmeticKinds } from "@opencok/skins/enums/kind";
 import {
     createRealmActivityDeadlineDispatcher,
     validateRealmActivitySchedulerConfig,
@@ -888,6 +890,7 @@ export const RealmDependenciesLive = Layer.effect(
                     ),
                     observeAdapter(equipmentDomains.workshop, "realm.WorkshopDomain"),
                     observeAdapter(new PlayerEffectsDomain(), "realm.PlayerEffectsDomain"),
+                    observeAdapter(new ProfilePictureDomain(), "realm.ProfilePictureDomain"),
                     observeAdapter(createRealmQuestsDomain(), "realm.QuestsDomain"),
                     observeAdapter(createRealmConstructionDomain(), "realm.ConstructionDomain"),
                     observeAdapter(createRealmResearchDomain(), "realm.ResearchDomain"),
@@ -2026,7 +2029,7 @@ export const RealmDependenciesLive = Layer.effect(
                 }
             }
 
-            for (const type of ["trigger.activity", "avatar.activate"])
+            for (const type of ["trigger.activity", "avatar.activate", "effect.item"])
             {
                 for (let index = 0; index < 64; index++)
                 {
@@ -3182,32 +3185,31 @@ export const RealmDependenciesLive = Layer.effect(
                                 economy,
                             );
                         },
-                        useEffect: async (tx, owner, itemId, count, now, economy) =>
-                            decode(
-                                Buffer.from(
-                                    (
-                                        await city.command(
-                                            tx,
-                                            owner,
-                                            itemId === "200031"
-                                                ? "prayer.item"
-                                                : rules.goods.get(itemId)?.type === "36"
-                                                ? "ordinary.box.open"
-                                                : ["37", "40"].includes(
-                                                        rules.goods.get(itemId)?.type ?? "",
-                                                    )
-                                                ? "dragon.item"
-                                                : "effect.item",
-                                            encode({
-                                                itemId: sfs.string(itemId),
-                                                count: sfs.int(count),
-                                            }),
-                                            now,
-                                            economy,
-                                        )
-                                    ).response,
-                                ),
-                            ),
+                        useEffect: async (tx, owner, itemId, count, now, economy) => {
+                            const prepared = await city.command(
+                                tx,
+                                owner,
+                                itemId === "200031"
+                                    ? "prayer.item"
+                                    : rules.goods.get(itemId)?.type === "36"
+                                    ? "ordinary.box.open"
+                                    : ["37", "40"].includes(rules.goods.get(itemId)?.type ?? "")
+                                    ? "dragon.item"
+                                    : "effect.item",
+                                encode({ itemId: sfs.string(itemId), count: sfs.int(count) }),
+                                now,
+                                economy,
+                            );
+                            if (prepared.event)
+                            {
+                                economy.event?.({
+                                    id: "cosmetic",
+                                    type: "effect.item",
+                                    payload: prepared.event,
+                                });
+                            }
+                            return decode(Buffer.from(prepared.response));
+                        },
                     }),
                     "realm.createInventoryExecutor",
                 ),
@@ -3634,7 +3636,7 @@ export const RealmDependenciesLive = Layer.effect(
                         createRealmWorldService(
                             {
                                 getWorldByPointIds: (uid, ids) =>
-                                    readWorldMap(db.kingdom.db, uid, ids),
+                                    readWorldMap(db.kingdom.db, uid, ids, worldCosmeticKinds),
                             },
                             config.mapSize,
                             config.kingdomId,

@@ -17,6 +17,7 @@ export interface CosmeticContext<TCatalog extends CosmeticCatalog>
         readonly effects: { readonly states: readonly CosmeticRecord[]; };
     };
     readonly write: {
+        appearance?: { picfraId?: number; };
         states?: readonly CosmeticRecord[];
         deletedStates?: readonly number[];
         cosmeticTarget?: CosmeticTargetWrite;

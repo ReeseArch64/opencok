@@ -75,19 +75,19 @@ export const guides = [
     name: "Sua identidade no reino",
     group: "Skins e avatares",
     image: "/media/king.jpg",
-    description: "Conheça os sete tipos de skin e escolha a aparência do seu senhor.",
+    description: "Conheça os nove tipos de skin e escolha a aparência do seu senhor.",
     sections: [
       [
-        "Sete tipos de skin",
-        "As skins se dividem em Castelo, Asa, Balão, Marcha, Efeito, Decoração e Perfil. Use os atalhos de tipo ou o filtro da galeria para explorar cada coleção. As imagens são prévias estáticas dos cosméticos.",
+        "Nove tipos de skin",
+        "As skins se dividem em Aura, Moldura de Avatar, Asas, Efeito, Placa de Identificação, Bolha, Decoração, Fila e Castelo. Use os atalhos de tipo ou o filtro da galeria para explorar cada coleção. Cada skin exibe seu nome e ID original. As imagens são prévias estáticas dos cosméticos.",
       ],
       [
         "Avatar é a aparência do senhor",
-        "O avatar define a aparência do personagem que representa você no reino. Molduras e brasões pertencem às skins de Perfil; asas, castelos e marchas têm suas próprias coleções. Os códigos originais das aparências do senhor são preservados quando não há nome de personagem confirmado.",
+        "O avatar define a aparência do personagem que representa você no reino. Moldura de Avatar e Placa de Identificação são coleções separadas; Asas, Castelo e Fila também têm suas próprias coleções. Os códigos originais das aparências do senhor são preservados quando não há nome de personagem confirmado.",
       ],
       [
-        "Balões, perfil e decoração",
-        "Balão reúne as aparências de conversa e os balões do castelo. Perfil reúne brasões e molduras. Decoração corresponde às aparências do terreno da cidade; Efeito reúne os efeitos de castelo. Essas coleções personalizam partes diferentes da experiência.",
+        "Bolha, identificação e decoração",
+        "Bolha reúne as aparências de conversa e os balões do castelo. Placa de Identificação e Moldura de Avatar personalizam a identificação do jogador. Decoração corresponde às aparências do terreno da cidade; Efeito reúne os efeitos de castelo. Essas coleções personalizam partes diferentes da experiência.",
       ],
       [
         "Disponibilidade e aquisição",

@@ -66,3 +66,20 @@ test("saved city deadlines retain exact signed-64 precision", () => {
             .toThrow();
     }
 });
+
+test("appearance writes preserve portrait and frame without changing progression fields", () => {
+    expect(() =>
+        validateCityWrite({ appearance: { pic: "g044", picVer: 1000017, picfraId: 5000 } }, "owner")
+    ).not.toThrow();
+});
+
+test.each([
+    { pic: "" },
+    { pic: "x".repeat(41) },
+    { pic: "g\0x" },
+    { picVer: -1 },
+    { picfraId: 0.5 },
+    { picfraId: 2147483648 },
+])("invalid appearance values cannot enter persistence: %j", (appearance) => {
+    expect(() => validateCityWrite({ appearance }, "owner")).toThrow("Invalid profile appearance");
+});

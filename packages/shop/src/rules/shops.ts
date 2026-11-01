@@ -1,3 +1,4 @@
+import { ShopCurrency } from "@opencok/shop/enums/currency";
 import type { ShopState } from "@opencok/shop/contracts/shops";
 import { long, num, text } from "@opencok/contracts/rows";
 import { errors, MOBILE_CLIENT_VERSION } from "@opencok/constants/game";
@@ -104,13 +105,37 @@ export function shopPrice(rule: Rule, daily: number, count: number)
     }
 
     let gold = 0;
+    let crystalGold = 0;
 
     for (const key of ["value1", "value2"])
     {
         const prices = values(rule[key]);
         const type = shopInteger(rule[`${key}_type`]);
 
-        if (type !== 0 && type !== 1)
+        const appearance = rule.sale_type === "15" && key === "value1";
+        const amount = (prices[Math.min(index, prices.length - 1)] ?? 0) * count;
+
+        if (appearance && type === ShopCurrency.CrystalGold)
+        {
+            crystalGold += amount;
+            continue;
+        }
+
+        if (appearance && type === ShopCurrency.Item)
+        {
+            if (
+                !rule.value_item || rule.value_item === "0"
+                || !shopInteger(rule.value_item_num)
+                || prices.some((price) => price !== shopInteger(rule.value_item_num))
+            )
+            {
+                throw new GameError(errors.unsupported);
+            }
+
+            continue;
+        }
+
+        if (type !== ShopCurrency.None && type !== ShopCurrency.Gold)
         {
             throw new GameError(errors.unsupported);
         }
@@ -123,12 +148,15 @@ export function shopPrice(rule: Rule, daily: number, count: number)
         gold += (prices[Math.min(index, prices.length - 1)] ?? 0) * count;
     }
 
-    if (!Number.isSafeInteger(gold) || gold > 2147483647)
+    if (
+        !Number.isSafeInteger(gold) || gold > 2147483647
+        || !Number.isSafeInteger(crystalGold) || crystalGold > 2147483647
+    )
     {
         throw new GameError(errors.invalid);
     }
 
-    return { gold, index, tiers };
+    return { gold, crystalGold, index, tiers };
 }
 
 export function shopLimit(rule: Rule, state: ShopState, count: number)
@@ -345,9 +373,9 @@ export function shopAvailable(rule: Rule, state: ShopState, rules: Rules): boole
         return false;
     }
 
-    const { gold } = shopPrice(rule, 0, 1);
+    const { gold, crystalGold } = shopPrice(rule, 0, 1);
 
-    if (!gold && (!rule.value_item || rule.value_item === "0"))
+    if (!gold && !crystalGold && (!rule.value_item || rule.value_item === "0"))
     {
         return false;
     }

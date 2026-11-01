@@ -324,6 +324,7 @@ export async function loadRules(directory?: string, kingdomId = 1)
             militaryRanks,
             servers,
             characters: await optional(GameplayCatalog.Characters),
+            lordImages: await optional(GameplayCatalog.LordImage),
         },
         { treasures, rewards, quests, positionUnlock },
         mail,

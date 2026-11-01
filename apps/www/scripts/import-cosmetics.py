@@ -18,6 +18,34 @@ def clean_name(value):
     return re.sub(r"[{}]", "", value).split("|")[0].strip()
 
 
+def merge_cosmetics(current, imported):
+    previous_by_id = {item["id"]: item for item in current}
+    previous_by_art = {
+        (item.get("cosmeticType"), item.get("artCode")): item
+        for item in current
+        if item.get("category") == "skins" and item.get("artCode") is not None
+    }
+    result = [item for item in current if item["category"] not in ["skins", "avatares"]]
+    imported_keys = set()
+    for item in imported:
+        key = (item.get("cosmeticType"), item.get("artCode"))
+        previous = previous_by_id.get(item["id"]) or previous_by_art.get(key)
+        merged = dict(item)
+        if previous:
+            merged.update(previous)
+            if previous.get("source") is None and item.get("source"):
+                merged["source"] = item["source"]
+                merged["previewStatus"] = "ready"
+        result.append(merged)
+        if item["category"] == "skins":
+            imported_keys.add(key)
+    result.extend(
+        item for item in current
+        if item.get("sourceClient") and (item.get("cosmeticType"), item.get("artCode")) not in imported_keys
+    )
+    return result
+
+
 def import_cosmetics():
     types = json.loads((APP / "src/data/cosmetic-types.json").read_text())
     groups = {
@@ -69,7 +97,7 @@ def import_cosmetics():
         if not source:
             continue
         name_key = status.get("name") or item.get("name", "")
-        name = clean_name(translations.get(name_key, "")) or f'{types[kind]} · {art}'
+        name = clean_name(translations.get(name_key, "")) or str(art)
         items.append({
             "id": f'skin-{status["id"]}',
             "name": name,
@@ -118,11 +146,7 @@ def import_cosmetics():
     path = APP / "src/data/catalog.json"
     current = json.loads(path.read_text())
     preserved = [item for item in current if item["category"] not in ["skins", "avatares"]]
-    previous = {item["id"]: item for item in current}
-    for item in items:
-        if item["id"] in previous:
-            item["status"] = previous[item["id"]]["status"]
-    result = preserved + items
+    result = merge_cosmetics(current, items)
     identifiers = [item["id"] for item in result]
     if len(set(identifiers)) != len(identifiers):
         raise ValueError("Duplicate cosmetic routes; inspect client subgroups before importing")

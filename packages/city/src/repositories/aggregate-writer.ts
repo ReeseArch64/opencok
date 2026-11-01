@@ -121,6 +121,13 @@ export class CityAggregateWriter
             }
         }
 
+        if (write.appearance)
+        {
+            await tx.update(userprofile).set(write.appearance).where(
+                eq(userprofile.uid, owner),
+            );
+        }
+
         if (write.profile)
         {
             await tx.update(userprofile).set(write.profile).where(

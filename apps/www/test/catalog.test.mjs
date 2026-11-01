@@ -1,9 +1,10 @@
 import { expect, test } from "bun:test";
-import { existsSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { catalog, categories } from "../src/lib/catalog.mjs";
 import { guides } from "../src/data/guides.mjs";
 import { site } from "../src/data/site.mjs";
+import { validateTroopArtwork } from "../src/lib/artwork.mjs";
 
 const root = fileURLToPath(new URL("../../../", import.meta.url));
 
@@ -12,8 +13,14 @@ test("catalog_allEntries_haveUniqueRoutesAndExistingLocalArt", () => {
   expect(new Set(ids).size).toBe(ids.length);
   for (const item of catalog) {
     expect(item.id).toMatch(/^[a-z0-9-]+$/);
-    expect(item.source).toStartWith("data/cdn/extracteds/");
-    expect(existsSync(`${root}/${item.source}`)).toBe(true);
+    if (item.source !== null) {
+      expect(item.source).toStartWith("data/cdn/extracteds/");
+      expect(existsSync(`${root}/${item.source}`)).toBe(true);
+    } else {
+      expect(item.category).toBe("skins");
+      expect(item.previewStatus).toBe("missing");
+      expect(item.image).toBeNull();
+    }
     expect(categories[item.category]).toBeDefined();
     expect(["soon", "available"]).toContain(item.status);
   }
@@ -24,6 +31,15 @@ test("catalog_requestedCollections_haveContent", () => {
   expect(catalog.filter((item) => item.category === "avatares").length).toBeGreaterThan(0);
   expect(catalog.filter((item) => item.category === "skins").length).toBeGreaterThan(0);
   expect(catalog.filter((item) => item.category === "eventos").length).toBeGreaterThan(0);
+});
+
+test("catalog_troops_useVisibleTransparentFullBodyArt", () => {
+  const troops = catalog.filter((item) => item.category === "tropas");
+  expect(troops).toHaveLength(46);
+  for (const item of troops) {
+    expect(item.image).toEndWith("-full.png");
+    expect(() => validateTroopArtwork(item, readFileSync(`${root}/${item.source}`))).not.toThrow();
+  }
 });
 
 test("releaseLinks_configuredWebAndPendingMobile_exposeCorrectDestinations", () => {

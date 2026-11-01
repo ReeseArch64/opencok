@@ -5,7 +5,7 @@ import type {
     CityCosmeticResponse,
     CosmeticStatusResponse,
 } from "../contracts/responses/cosmetics";
-import { CosmeticKind } from "../enums/kind";
+import { CosmeticKind, cosmeticWorldFields } from "../enums/kind";
 
 export class CosmeticPolicy<TCatalog extends CosmeticCatalog>
 {
@@ -48,14 +48,16 @@ export class CosmeticPolicy<TCatalog extends CosmeticCatalog>
                     : {}),
             };
         };
-        const skin = select(CosmeticKind.City),
-            bubble = select(CosmeticKind.Bubble),
-            overlap = select(CosmeticKind.Overlap);
-
-        return {
-            ...(skin ? { sid: skin.sid, set: skin.set } : {}),
-            ...(bubble ? { bubble } : {}),
-            ...(overlap ? { overlap } : {}),
-        };
+        const skin = select(CosmeticKind.City);
+        const result: CityCosmeticResponse = skin ? { sid: skin.sid, set: skin.set } : {};
+        for (const [type, field] of Object.entries(cosmeticWorldFields))
+        {
+            const value = select(Number(type));
+            if (value)
+            {
+                result[field] = value;
+            }
+        }
+        return result;
     };
 }

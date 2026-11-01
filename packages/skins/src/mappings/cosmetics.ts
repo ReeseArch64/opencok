@@ -1,3 +1,4 @@
+import { cosmeticWorldFields } from "../enums/kind";
 import type { CosmeticRecord as Row } from "../contracts/records";
 import type { CosmeticCatalog } from "../contracts/context";
 import type { CityCosmeticResponse } from "../contracts/responses/cosmetics";
@@ -21,7 +22,7 @@ export class CosmeticMapper
             body.set = sfs.int(value.set);
         }
 
-        for (const key of ["bubble", "overlap"] as const)
+        for (const key of Object.values(cosmeticWorldFields))
         {
             const status = value[key];
 

@@ -40,12 +40,13 @@ const catalog = (): CosmeticCatalog => ({
 function context(
     avatars: readonly CosmeticRecord[] = [],
     uid = "target",
+    rules = catalog(),
 ): CosmeticContext<CosmeticCatalog>
 {
     return {
         owner: "owner",
         now: 1000n,
-        rules: catalog(),
+        rules,
         state: {
             effects: { states: [] },
             cosmeticTarget: { uid, realm: 1, point: 7, states: [], avatars },
@@ -320,4 +321,85 @@ test("interaction participant selection keeps actor-first deduplication and igno
         .toEqual(["owner"]);
     expect(select("owner", "avatar.activate", { type: sfs.int(45), uid: sfs.string("target") }))
         .toBeUndefined();
+});
+
+test.each([
+    [104, "npavatar"],
+    [108, "castleEffect"],
+    [109, "wings"],
+    [115, "avatarframe"],
+    [116, "aura"],
+])("cosmetic type %i survives world projection under its native field", (type, field) => {
+    const c = context();
+    const value = policy.cityCosmeticProjection(
+        [{ stateId: 901, type2: type, endTime: 9000n }],
+        c.rules,
+        1000n,
+    );
+    expect(value).toEqual({ [field]: { sid: 901, set: 9 } });
+    expect(mapper.cityCosmeticFields(value)).toEqual({
+        [field]: sfs.object({ sid: sfs.int(901), set: sfs.int(9) }),
+    });
+});
+
+test("expired world cosmetics are omitted independently of a still-active castle", () => {
+    const c = context();
+    const value = policy.cityCosmeticProjection(
+        [
+            { stateId: 101, type2: 100, endTime: 9000n },
+            { stateId: 901, type2: 109, endTime: 1000n },
+        ],
+        c.rules,
+        1000n,
+    );
+    expect(value).toEqual({ sid: 101, set: 9 });
+});
+
+test.each([101, 102, 103, 104, 108, 109, 115, 116])(
+    "cosmetic type %i is stored as owned without granting foreign ownership",
+    (type) => {
+        const c = context([], "owner", {
+            ...catalog(),
+            power: {
+                statuses: new Map([...catalog().power.statuses!, ["901", {
+                    type2: String(type),
+                    subgroup: "901",
+                    overlap: "2",
+                }]]),
+            },
+        });
+        const states = [{ stateId: 901, type2: type, endTime: 9000n }];
+        expect(ownership.cosmeticOwnership(c, "owner", "901", [], states)).toBeDefined();
+        expect(ownership.cosmeticOwnership(c, "foreign", "901", [], states)).toBeUndefined();
+    },
+);
+
+test("item use retains an already active legacy skin before replacing its only status", () => {
+    const c = context([], "owner", {
+        ...catalog(),
+        power: {
+            statuses: new Map([...catalog().power.statuses!, ["901", {
+                type2: "100",
+                subgroup: "901",
+                overlap: "2",
+            }]]),
+        },
+    });
+    const recovered = ownership.cosmeticOwnership(
+        c,
+        "owner",
+        "901",
+        [
+            { uid: "owner", stateId: 101, type2: 100, endTime: 9223372036854775807n },
+            { uid: "foreign", stateId: 201, type2: 105, endTime: 9000n },
+            { uid: "owner", stateId: 301, type2: 200, endTime: 9000n, count: 5 },
+        ],
+        [{ uid: "owner", stateId: 901, type2: 100, endTime: 9223372036854775807n }],
+        1,
+        true,
+    );
+    expect(recovered).toEqual([
+        { uid: "owner", avatarId: "101", expirationTime: -1n, effectiveSign: 0 },
+        { uid: "owner", avatarId: "901", expirationTime: -1n, effectiveSign: 0 },
+    ]);
 });
