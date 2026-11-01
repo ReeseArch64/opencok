@@ -114,10 +114,10 @@
     "group": "Infantaria",
     "tier": 13,
     "status": "soon",
-    "source": "data/cdn/extracteds/tropas/images/T13/ico107010_small.png",
+    "source": "data/cdn/extracteds/tropas/images/T13/ico107010.png",
     "reference": "107010",
     "description": "Paladino integra o catálogo de infantaria no tier T13. Explore sua arte e compare as unidades desta família.",
-    "note": "Ícone pequeno do APK; arte de corpo inteiro não localizada"
+    "note": "Arte de corpo inteiro do acervo do cliente."
   },
   {
     "id": "tropa-107110",
@@ -126,10 +126,10 @@
     "group": "Cavalaria",
     "tier": 13,
     "status": "soon",
-    "source": "data/cdn/extracteds/tropas/images/T13/ico107110_small.png",
+    "source": "data/cdn/extracteds/tropas/images/T13/ico107110.png",
     "reference": "107110",
     "description": "Cavaleiro de Grifo integra o catálogo de cavalaria no tier T13. Explore sua arte e compare as unidades desta família.",
-    "note": "Ícone pequeno do APK; arte de corpo inteiro não localizada"
+    "note": "Arte de corpo inteiro do acervo do cliente."
   },
   {
     "id": "tropa-107210",
@@ -138,10 +138,10 @@
     "group": "Arqueiros",
     "tier": 13,
     "status": "soon",
-    "source": "data/cdn/extracteds/tropas/images/T13/ico107210_small.png",
+    "source": "data/cdn/extracteds/tropas/images/T13/ico107210.png",
     "reference": "107210",
     "description": "Del Fogo integra o catálogo de arqueiros no tier T13. Explore sua arte e compare as unidades desta família.",
-    "note": "Ícone pequeno do APK; arte de corpo inteiro não localizada"
+    "note": "Arte de corpo inteiro do acervo do cliente."
   },
   {
     "id": "tropa-107313",
@@ -150,10 +150,10 @@
     "group": "Cerco",
     "tier": 13,
     "status": "soon",
-    "source": "data/cdn/extracteds/tropas/images/T13/ico107313_small.png",
+    "source": "data/cdn/extracteds/tropas/images/T13/ico107313.png",
     "reference": "107313",
     "description": "Elefante de Guerra integra o catálogo de cerco no tier T13. Explore sua arte e compare as unidades desta família.",
-    "note": "Ícone pequeno do APK; arte de corpo inteiro não localizada"
+    "note": "Arte de corpo inteiro do acervo do cliente."
   },
   {
     "id": "tropa-107310",
@@ -162,10 +162,10 @@
     "group": "Cerco",
     "tier": 13,
     "status": "soon",
-    "source": "data/cdn/extracteds/tropas/images/T13/ico107310_small.png",
+    "source": "data/cdn/extracteds/tropas/images/T13/ico107310.png",
     "reference": "107310",
     "description": "Martelão do Gronde integra o catálogo de cerco no tier T13. Explore sua arte e compare as unidades desta família.",
-    "note": "Ícone pequeno do APK; arte de corpo inteiro não localizada"
+    "note": "Arte de corpo inteiro do acervo do cliente."
   },
   {
     "id": "tropa-107014",
@@ -174,10 +174,10 @@
     "group": "Infantaria",
     "tier": 14,
     "status": "soon",
-    "source": "data/cdn/extracteds/tropas/images/T14/ico107014_small.png",
+    "source": "data/cdn/extracteds/tropas/images/T14/ico107014.png",
     "reference": "107014",
     "description": "Guardiões do Firmamento integra o catálogo de infantaria no tier T14. Explore sua arte e compare as unidades desta família.",
-    "note": "Ícone pequeno do APK; arte de corpo inteiro não localizada"
+    "note": "Arte de corpo inteiro utilizada no cliente OpenCoK."
   },
   {
     "id": "tropa-107414",
@@ -189,7 +189,7 @@
     "source": "data/cdn/extracteds/tropas/images/T14/ico107414.png",
     "reference": "107414",
     "description": "Carrasco Quebrador de Juramentos integra o catálogo de infantaria no tier T14. Explore sua arte e compare as unidades desta família.",
-    "note": "Arte capturada no BosMod, com fundo preservado."
+    "note": "Arte capturada no BosMod e tratada para fundo transparente."
   },
   {
     "id": "tropa-107514",
@@ -201,7 +201,7 @@
     "source": "data/cdn/extracteds/tropas/images/T14/ico107514.png",
     "reference": "107514",
     "description": "Cavaleiro do Pesadelo integra o catálogo de cavalaria no tier T14. Explore sua arte e compare as unidades desta família.",
-    "note": "Arte capturada no BosMod, com fundo preservado."
+    "note": "Arte capturada no BosMod e tratada para fundo transparente."
   },
   {
     "id": "tropa-107114",
@@ -210,10 +210,10 @@
     "group": "Cavalaria",
     "tier": 14,
     "status": "soon",
-    "source": "data/cdn/extracteds/tropas/images/T14/ico107114_small.png",
+    "source": "data/cdn/extracteds/tropas/images/T14/ico107114.png",
     "reference": "107114",
     "description": "Guarda Brilhante integra o catálogo de cavalaria no tier T14. Explore sua arte e compare as unidades desta família.",
-    "note": "Ícone pequeno do APK; arte de corpo inteiro não localizada"
+    "note": "Arte de corpo inteiro utilizada no cliente OpenCoK."
   },
   {
     "id": "tropa-107214",
@@ -222,10 +222,10 @@
     "group": "Arqueiros",
     "tier": 14,
     "status": "soon",
-    "source": "data/cdn/extracteds/tropas/images/T14/ico107214_small.png",
+    "source": "data/cdn/extracteds/tropas/images/T14/ico107214.png",
     "reference": "107214",
     "description": "Caçador da Justiça integra o catálogo de arqueiros no tier T14. Explore sua arte e compare as unidades desta família.",
-    "note": "Ícone pequeno do APK; arte de corpo inteiro não localizada"
+    "note": "Arte de corpo inteiro utilizada no cliente OpenCoK."
   },
   {
     "id": "tropa-107614",
@@ -237,7 +237,7 @@
     "source": "data/cdn/extracteds/tropas/images/T14/ico107614.png",
     "reference": "107614",
     "description": "Caçador de Corvo Negro integra o catálogo de arqueiros no tier T14. Explore sua arte e compare as unidades desta família.",
-    "note": "Arte capturada no BosMod, com fundo preservado."
+    "note": "Arte capturada no BosMod e tratada para fundo transparente."
   },
   {
     "id": "tropa-107314",
@@ -249,7 +249,7 @@
     "source": "data/cdn/extracteds/tropas/images/T14/ico107314.png",
     "reference": "107314",
     "description": "Punidor Divino integra o catálogo de cerco no tier T14. Explore sua arte e compare as unidades desta família.",
-    "note": "Arte capturada no BosMod, com fundo preservado."
+    "note": "Arte capturada no BosMod e tratada para fundo transparente."
   },
   {
     "id": "tropa-107714",
@@ -261,7 +261,7 @@
     "source": "data/cdn/extracteds/tropas/images/T14/ico107714.png",
     "reference": "107714",
     "description": "Abissal Bruto integra o catálogo de cerco no tier T14. Explore sua arte e compare as unidades desta família.",
-    "note": "Arte capturada no BosMod, com fundo preservado."
+    "note": "Arte capturada no BosMod e tratada para fundo transparente."
   },
   {
     "id": "tropa-57580215",

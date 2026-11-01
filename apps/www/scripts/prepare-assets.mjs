@@ -1,6 +1,7 @@
 import { copyFile, mkdir, readFile, rm } from "node:fs/promises";
 import { dirname, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
+import { mediaFilename, validateTroopArtwork } from "../src/lib/artwork.mjs";
 
 const app = fileURLToPath(new URL("../", import.meta.url));
 const root = resolve(app, "../..");
@@ -19,7 +20,8 @@ for (const item of catalog) {
   ) {
     throw new Error(`Invalid catalog asset: ${item.id}`);
   }
-  await copyFile(source, resolve(output, `${item.id}.png`));
+  if (item.category === "tropas") validateTroopArtwork(item, await readFile(source));
+  await copyFile(source, resolve(output, mediaFilename(item)));
   prepared++;
 }
 

@@ -453,6 +453,11 @@ em {
   padding: 42px 24px 14px;
   transition: transform 0.4s;
 }
+.tropas .card-art img {
+  object-position: center bottom;
+  padding: 44px 20px 22px;
+  filter: drop-shadow(0 12px 10px #0005);
+}
 .catalog-card:hover img {
   transform: scale(1.04);
 }
@@ -934,6 +939,11 @@ select {
   height: 500px;
   object-fit: contain;
   padding: 50px;
+}
+.detail-art.tropas > img {
+  object-position: center;
+  padding: 40px 28px;
+  filter: drop-shadow(0 18px 16px #0005);
 }
 .detail-art.avatares > img {
   max-width: 340px;
