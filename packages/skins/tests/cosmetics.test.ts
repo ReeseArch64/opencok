@@ -9,6 +9,7 @@ import { CosmeticEventMapper } from "../src/mappings/interaction";
 import type { CosmeticRecord, CosmeticRule } from "../src/contracts/records";
 import type { CosmeticContext, CosmeticCatalog } from "../src/contracts/context";
 import { decode, encode, sfs, type Fields } from "@opencok/messages/sfs";
+import { cosmeticStatusRule, isCosmeticStatus } from "../src/rules/attributes";
 
 const readers = {
     num: (row: CosmeticRecord, key: string) => Number(row[key] ?? 0),
@@ -57,6 +58,96 @@ const ownership = new CosmeticOwnership(readers);
 const policy = new CosmeticPolicy(readers);
 const mapper = new CosmeticMapper();
 const events = new CosmeticEventMapper(readers, policy, mapper, ownership.cosmeticTargetStates);
+
+test.each([
+    100,
+    101,
+    102,
+    103,
+    104,
+    105,
+    106,
+    108,
+    109,
+    114,
+    115,
+    116,
+    117,
+    118,
+    121,
+    123,
+    124,
+    200,
+])(
+    "cosmeticStatusRule_type%s_removesAttributesAndAbilitiesWhileKeepingVisualMetadata",
+    (type) => {
+        const rule = {
+            type2: String(type),
+            effect: "487;100|14;1|50;30",
+            effectAdd: "487;500",
+            effect_add: "50;99",
+            skill: "12345",
+            random: "1",
+            subgroup: "1",
+            time: "3600",
+            frameID: "20490040",
+        };
+        const before = { ...rule };
+
+        expect(cosmeticStatusRule(rule)).toEqual({
+            ...rule,
+            effect: "14;1",
+            effectAdd: "",
+            effect_add: "",
+            skill: "",
+            random: "0",
+        });
+        expect(rule).toEqual(before);
+    },
+);
+
+test("cosmeticStatusRule_throneCounterAndOrdinaryEffects_preservesLegitimateBonuses", () => {
+    const throne = { type2: "110", effect: "2189;1", overlap: "5" };
+    const ordinary = {
+        type2: "9",
+        effect: "50;25",
+        effectAdd: "487;500",
+        effect_add: "50;99",
+        random: "1",
+    };
+    const unclassified = { type2: "202", effect: "50;25" };
+
+    expect(cosmeticStatusRule(throne)).toBe(throne);
+    expect(cosmeticStatusRule(ordinary)).toBe(ordinary);
+    expect(cosmeticStatusRule(unclassified)).toBe(unclassified);
+    expect(isCosmeticStatus(undefined)).toBe(false);
+    expect(cosmeticStatusRule({ ...throne, subgroup: "308" }).effect).toBe("");
+});
+
+test("avatarActivationResponse_savedRandomSkin_omitsBonusesAndPreservesExpiryAndSwitchContract", () => {
+    const rules = catalog();
+    const declarations = new Map(rules.power.statuses);
+    declarations.set("101", { type2: "100", random: "1", effect: "487;999" });
+    const row = {
+        stateId: 101,
+        startTime: 1000n,
+        endTime: 8000n,
+        ranEffId: 487,
+        ranEffValue: 999,
+    };
+
+    const response = decode(encode(mapper.avatarActivationResponse(
+        row,
+        { ...rules, power: { statuses: declarations } },
+        102,
+    )));
+
+    expect(response.status).toBeUndefined();
+    expect(response.statusId).toEqual(sfs.int(101));
+    expect(response.endTime).toEqual(sfs.long(8000n));
+    expect(response.oldStatus).toEqual(sfs.string("102"));
+    expect(row.ranEffValue).toBe(999);
+});
 
 test("cosmetic ownership extends pending city expiry, preserves bubble expiry and replaces expired ownership", () => {
     const c = context([{

@@ -4,6 +4,7 @@ import { alliance } from "@opencok/drizzle/schema/opencok_kingdom/alliance";
 import { user_world } from "@opencok/drizzle/schema/opencok_kingdom/user_world";
 import { worldpoint } from "@opencok/drizzle/schema/opencok_kingdom/worldpoint";
 import { sfs, type Value } from "@opencok/messages/sfs";
+import { worldCosmeticKinds } from "@opencok/skins/enums/kind";
 import { createRealmWorldService } from "../src/composition/world";
 import { readWorldMap } from "@opencok/world/repositories/map";
 import { cityHarness } from "./support/city";
@@ -48,7 +49,7 @@ async function fixture()
         castle(216, 15, "other", "blank"),
     ]);
     const world = createRealmWorldService(
-        { getWorldByPointIds: (uid, ids) => readWorldMap(h.db.db, uid, ids) },
+        { getWorldByPointIds: (uid, ids) => readWorldMap(h.db.db, uid, ids, worldCosmeticKinds) },
         20,
         1,
         {
@@ -91,7 +92,12 @@ test("initial world snapshots label allied castles from bounded alliance project
         expect(points.get(214)?.asn).toBeUndefined();
         expect(points.get(215)).toMatchObject({ ai: "guild-b", asn: "联盟" });
         expect(points.get(216)).toMatchObject({ ai: "blank", asn: "" });
-        const projection = await readWorldMap(h.db.db, "owner", [211, 212, 213, 214, 215, 216]);
+        const projection = await readWorldMap(
+            h.db.db,
+            "owner",
+            [211, 212, 213, 214, 215, 216],
+            worldCosmeticKinds,
+        );
         expect(projection.alliances?.map((row) => row.uid).sort()).toEqual([
             "blank",
             "guild-a",
@@ -147,7 +153,7 @@ test("world alliance projection rejects more than the bounded alliance set", asy
             ids.map((id, index) => castle(id, index % 20, "other", `bulk-${id}`)),
         );
 
-        await expect(readWorldMap(h.db.db, "owner", ids)).rejects.toThrow(
+        await expect(readWorldMap(h.db.db, "owner", ids, worldCosmeticKinds)).rejects.toThrow(
             "World alliance projection exceeds bound",
         );
     }

@@ -14,6 +14,7 @@ import {
 import { readFile, stat, access } from "node:fs/promises";
 import { join } from "node:path";
 import { Rules, type Rule } from "@opencok/rules/game";
+import { cosmeticStatusRule } from "@opencok/rules/city-cosmetics";
 
 export async function loadRules(directory?: string, kingdomId = 1)
 {
@@ -50,10 +51,16 @@ export async function loadRules(directory?: string, kingdomId = 1)
             : legacyCatalogRecords(source, catalogCodecs[name] ?? {}, name);
     const load = async (name: GameplayCatalog): Promise<Map<string, Rule>> => {
         const source = await read(name);
-
-        return typeof source === "string"
+        const rules = typeof source === "string"
             ? fixtures!.parseRules(source, name)
             : indexRules(records(source, name), name);
+
+        if (name === GameplayCatalog.Status)
+        {
+            return new Map([...rules].map(([id, rule]) => [id, cosmeticStatusRule(rule)]));
+        }
+
+        return rules;
     };
     const optionalRecords = async (name: GameplayCatalog) =>
         (await available(name)) ? records(await read(name), name) : [];

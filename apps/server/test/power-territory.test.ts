@@ -116,18 +116,14 @@ test("default control values include their ID and missing or blank status effect
     expect(territoryTreeEffects(profile, [tree], rules)).toEqual(new Map([[218, 7]]));
 });
 
-test("skin status IDs are deduplicated and retain Java hash traversal replacement precedence", () => {
+test("skin status IDs cannot replace level bonuses or change persisted appearances", () => {
     const rules = fixture();
     const custom = { ...tree, activeSkin: "custom", level: 2 };
-    expect(territoryTreeEffects(profile, [custom], rules).get(487)).toBe(-2);
-    rules.power.treeSkins!.get("custom")!.buff = "b;a;b";
-    expect(territoryTreeEffects(profile, [custom], rules).get(487)).toBe(-2);
-    rules.power.statuses!.set("Aa", { id: "Aa", effect: "487;9" });
-    rules.power.statuses!.set("BB", { id: "BB", effect: "487;4" });
-    rules.power.treeSkins!.get("custom")!.buff = "Aa;BB";
-    expect(territoryTreeEffects(profile, [custom], rules).get(487)).toBe(4);
-    rules.power.treeSkins!.get("custom")!.buff = "BB;Aa";
-    expect(territoryTreeEffects(profile, [custom], rules).get(487)).toBe(9);
+    const before = structuredClone(custom);
+    expect(territoryTreeEffects(profile, [custom], rules).get(487)).toBe(2147483647);
+    rules.power.treeSkins!.get("custom")!.buff = "487;999999|malformed";
+    expect(territoryTreeEffects(profile, [custom], rules).get(487)).toBe(2147483647);
+    expect(custom).toEqual(before);
 });
 
 test("each status contributes its first hash-map entry rather than its first declared effect", () => {
@@ -141,19 +137,20 @@ test("each status contributes its first hash-map entry rather than its first dec
     expect(territoryTreeEffects(profile, [tree], rules)).toEqual(new Map([[1, 1]]));
 });
 
-test("absent skins and empty buff lists yield no bonuses without requiring unrelated catalogs", () => {
+test("absent skins and empty buff lists preserve normal tree bonuses without a skin catalog", () => {
     const rules = fixture();
-    rules.configuration.payControl!.clear();
-    expect(territoryTreeEffects(profile, [{ ...tree, activeSkin: "unknown" }], rules).size).toBe(0);
+    expect(territoryTreeEffects(profile, [{ ...tree, activeSkin: "unknown" }], rules).get(487))
+        .toBe(12);
     rules.power.treeSkins!.get("custom")!.buff = ";;";
-    rules.power.statuses!.clear();
-    expect(territoryTreeEffects(profile, [{ ...tree, activeSkin: "custom" }], rules).size).toBe(0);
+    rules.power.treeSkins!.clear();
+    expect(territoryTreeEffects(profile, [{ ...tree, activeSkin: "custom" }], rules).get(487)).toBe(
+        12,
+    );
 });
 
 test("missing required catalogs and malformed active values cannot become a partial tree modifier", () => {
     for (
         const erase of [
-            (rules: Rules) => rules.items.clear(),
             (rules: Rules) => rules.configuration.payControl!.clear(),
             (rules: Rules) => rules.power.statuses!.clear(),
         ]
@@ -165,8 +162,8 @@ test("missing required catalogs and malformed active values cannot become a part
     }
     const rules = fixture();
     rules.power.treeSkins!.clear();
-    expect(() => territoryTreeEffects(profile, [{ ...tree, activeSkin: "custom" }], rules))
-        .toThrow();
+    expect(territoryTreeEffects(profile, [{ ...tree, activeSkin: "custom" }], rules).get(487))
+        .toBe(12);
     for (const effect of ["bad", "487;NaN", "487;Infinity", "487;1e999", "2147483648;1"])
     {
         rules.power.statuses!.get("a")!.effect = effect;

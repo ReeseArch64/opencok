@@ -2,6 +2,7 @@ import { expect, test } from "bun:test";
 import { GameplayCatalog } from "@opencok/enums/gameplay-catalog";
 import { catalogDefinitions, loadCatalog } from "../src/catalog-definitions.ts";
 import { loadRules } from "../src/rules.ts";
+import { isCosmeticStatus } from "@opencok/rules/city-cosmetics";
 
 test("bundled rules load for both realms and isolate mutable indexes", async () => {
     const first = await loadRules(undefined, 1);
@@ -25,6 +26,28 @@ test("bundled rules load for both realms and isolate mutable indexes", async () 
     });
     expect(second.buildings.get(key)).toEqual(original);
     expect(second.buildings.get(key)).not.toEqual(first.buildings.get(key));
+});
+
+test("loadRules_bundledSkins_disablesAttributeAndAbilityDeclarationsOnEveryRestart", async () => {
+    const first = await loadRules();
+    const restarted = await loadRules();
+    const skins = [...first.power.statuses!.values()].filter(isCosmeticStatus);
+
+    expect(skins.length).toBeGreaterThan(100);
+    expect(
+        skins.every((rule) =>
+            !rule.effect || rule.effect.split("|").every((pair) => pair.startsWith("14;"))
+        ),
+    )
+        .toBe(true);
+    expect(
+        skins.every((rule) =>
+            !rule.effectAdd && !rule.effect_add && !rule.skill && rule.random === "0"
+        ),
+    ).toBe(true);
+    expect(restarted.power.statuses).toEqual(first.power.statuses);
+    expect(first.power.statuses!.get("510152")!.effect).toBe("2189;1");
+    expect(first.power.statuses!.get("12000080")!.effect).toBe("");
 });
 
 test("changing typed item pricing reaches server rules without an XML conversion", async () => {

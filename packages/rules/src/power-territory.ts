@@ -61,38 +61,16 @@ export function territoryTreeEffects(
         return effects;
     }
 
-    const defaultSkin = rules.items.get("life_treeavatar")?.k2;
+    const level = integer(tree.level ?? 0);
+    const id = level === 1 ? "69015" : level === 2 ? "69016" : "69014";
+    const control = rules.configuration.payControl?.get(id);
 
-    if (!defaultSkin?.trim())
+    if (!control)
     {
         return invalid();
     }
 
-    const skin = text(tree, "activeSkin").trim() ? text(tree, "activeSkin") : defaultSkin;
-    let statuses: Iterable<string>;
-
-    if (skin === defaultSkin)
-    {
-        const level = integer(tree.level ?? 0);
-        const id = level === 1 ? "69015" : level === 2 ? "69016" : "69014";
-        const control = rules.configuration.payControl?.get(id);
-
-        if (!control)
-        {
-            return invalid();
-        }
-
-        statuses = hashOrder(Object.keys(control)).map((key) => control[key]!);
-    }
-    else
-    {
-        if (!rules.power.treeSkins?.size)
-        {
-            return invalid();
-        }
-
-        statuses = rules.power.treeSkins.get(skin)?.buff?.split(";").filter(Boolean) ?? [];
-    }
+    const statuses = hashOrder(Object.keys(control)).map((key) => control[key]!);
 
     const ids = hashOrder(statuses);
 

@@ -113,6 +113,63 @@ test("live statuses use configured or persisted random effects and ignore expire
     expect(state).toEqual(before);
 });
 
+test.each([
+    100,
+    101,
+    102,
+    103,
+    104,
+    105,
+    106,
+    108,
+    109,
+    114,
+    115,
+    116,
+    117,
+    118,
+    121,
+    123,
+    124,
+    200,
+])(
+    "storedPowerEffects_savedSkinType%s_ignoresConfiguredAndRandomBonusesAfterReloadAndExpiry",
+    (type) => {
+        const { state, rules } = fixture();
+        rules.items.set("effect", { id: "effect", k1: "487;3" });
+        rules.power.sciences!.set("1001", { id: "1001", para1: "487", para2: "7" });
+        rules.power.statuses!.set("1", { id: "1", type2: String(type), effect: "487;100" });
+        rules.power.statuses!.set("2", {
+            id: "2",
+            type2: String(type),
+            random: "1",
+            effect: "487;200",
+        });
+        rules.power.statuses!.set("3", { id: "3", type2: "9", effect: "487;25" });
+        state.sciences = [{ itemId: 1000, level: 1 }];
+        state.states = [
+            { stateId: 1, type2: type, endTime: BigInt(now + 100) },
+            {
+                stateId: 2,
+                type2: type,
+                endTime: BigInt(now + 100),
+                ranEffId: 487,
+                ranEffValue: 999,
+            },
+            { stateId: 3, endTime: BigInt(now + 1000) },
+        ];
+        const persisted = structuredClone(state);
+
+        expect(storedPowerEffects(state, rules, now)).toEqual({
+            initialAndScience: 10,
+            status: 25,
+        });
+        expect(storedPowerEffects(structuredClone(persisted), rules, now + 100))
+            .toEqual({ initialAndScience: 10, status: 25 });
+        expect(state).toEqual(persisted);
+    },
+);
+
 test("throne status overrides and integer overflow match the legacy status accumulator", () => {
     const { state, rules } = fixture();
     rules.power.statuses!.set("510152", { id: "510152", effect: "487;1" });
