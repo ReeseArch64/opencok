@@ -1,7 +1,7 @@
 import { compactPoint, pointSections } from "../mappings/world-map";
 import { viewport } from "../rules/viewport";
 import type { WorldMapStore, WorldMapLive, WorldPointProjections } from "../contracts/runtime";
-import { long, num } from "../contracts/rows";
+import { long, num, text } from "../contracts/rows";
 import { int, sfs, str, type Fields } from "@opencok/messages/sfs";
 import { GameError } from "@opencok/errors/game";
 import { errors } from "@opencok/constants/game";
@@ -38,7 +38,11 @@ export class WorldService
         }
 
         const ids = mode ? [1 + x + y * this.size] : viewport(x, y, this.size);
-        const { world, points, hasMarches, cosmetics } = await this.db.getWorldByPointIds(uid, ids);
+        const { world, points, hasMarches, cosmetics, alliances } = await this.db
+            .getWorldByPointIds(
+                uid,
+                ids,
+            );
 
         if (!world || num(world, "worldId") !== 0 || (hasMarches && !this.live))
         {
@@ -46,6 +50,9 @@ export class WorldService
         }
 
         const byId = new Map(points.map((row) => [num(row, "id"), row]));
+        const alliancesById = new Map(
+            (alliances ?? []).map((row) => [text(row, "uid"), row]),
+        );
         const compact = ids
             .filter((id) => byId.has(id))
             .map((id) =>
@@ -54,6 +61,7 @@ export class WorldService
                     cosmetics?.filter((row) => row.uid === byId.get(id)!.ownerId),
                     this.projections,
                     BigInt(this.live?.now?.() ?? Date.now()),
+                    alliancesById,
                 )
             );
         await this.live?.subscribe(uid, x, y);

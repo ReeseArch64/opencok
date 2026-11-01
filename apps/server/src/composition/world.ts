@@ -28,8 +28,12 @@ export function createRealmCompactPoint(rules?: Rules)
         monster: (row) => worldMapMonsterFields(row, rules),
     };
 
-    return (row: Row, cosmetics: readonly Row[] = [], now = BigInt(Date.now())) =>
-        compactPoint(row, cosmetics, projections, now);
+    return (
+        row: Row,
+        cosmetics: readonly Row[] = [],
+        now = BigInt(Date.now()),
+        alliances: ReadonlyMap<string, Row> = new Map(),
+    ) => compactPoint(row, cosmetics, projections, now, alliances);
 }
 
 export function createRealmWorldService(

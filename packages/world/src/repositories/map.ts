@@ -1,4 +1,5 @@
 import type { DatabaseClient } from "@opencok/drizzle/contracts/database";
+import { alliance } from "@opencok/drizzle/schema/opencok_kingdom/alliance";
 import { user_world } from "@opencok/drizzle/schema/opencok_kingdom/user_world";
 import { world_march } from "@opencok/drizzle/schema/opencok_kingdom/world_march";
 import { worldpoint } from "@opencok/drizzle/schema/opencok_kingdom/worldpoint";
@@ -21,6 +22,24 @@ export async function readWorldMap(db: DatabaseClient<"kingdom">, uid: string, i
                     .from(worldpoint)
                     .where(and(eq(worldpoint.worldId, 0), inArray(worldpoint.id, ids)))
                 : [];
+            const allianceIds = [
+                ...new Set(
+                    points.map((row) => row.allianceId).filter((id): id is string => Boolean(id)),
+                ),
+            ];
+            const alliances = allianceIds.length
+                ? await tx
+                    .select({ uid: alliance.uid, abbr: alliance.abbr })
+                    .from(alliance)
+                    .where(inArray(alliance.uid, allianceIds))
+                    .limit(1025)
+                : [];
+
+            if (alliances.length > 1024)
+            {
+                throw new Error("World alliance projection exceeds bound");
+            }
+
             const owners = [
                 ...new Set(
                     points.filter((row) => row.pointType === 1 && row.ownerId).map((row) =>
@@ -47,7 +66,7 @@ export async function readWorldMap(db: DatabaseClient<"kingdom">, uid: string, i
                 throw new Error("World cosmetic projection exceeds bound");
             }
 
-            return { world, hasMarches, points, cosmetics };
+            return { world, hasMarches, points, cosmetics, alliances };
         },
         { isolationLevel: "repeatable read", accessMode: "read only" },
     );
