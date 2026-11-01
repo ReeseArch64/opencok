@@ -92,6 +92,12 @@ const related = guide
           <h1>{item.name}</h1>
           <p class="lead">{item.description}</p>
           <dl>
+            {item.category === "skins" && (
+              <div>
+                <dt>ID da skin</dt>
+                <dd>{item.reference}</dd>
+              </div>
+            )}
             <div>
               <dt>Status</dt>
               <dd>{statusLabel(item.status)}</dd>

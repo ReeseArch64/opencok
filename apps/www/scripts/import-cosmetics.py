@@ -69,7 +69,7 @@ def import_cosmetics():
         if not source:
             continue
         name_key = status.get("name") or item.get("name", "")
-        name = clean_name(translations.get(name_key, "")) or f'{types[kind]} · {art}'
+        name = clean_name(translations.get(name_key, "")) or str(art)
         items.append({
             "id": f'skin-{status["id"]}',
             "name": name,

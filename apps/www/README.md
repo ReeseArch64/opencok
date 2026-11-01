@@ -44,7 +44,7 @@ O desenvolvimento monta `dist` como somente leitura para refletir novos builds. 
 - `src/data/site.mjs`: URLs de Android, iOS e navegador. Valores `null` deixam os botões desabilitados com **Em breve**. O navegador já aponta para `https://web.opencok.com`; preencha os endereços de distribuição Android e iOS quando disponíveis.
 - `src/data/guides.mjs`: guias editoriais da wiki.
 
-Após alterar conteúdo ou URLs, gere uma nova build. O catálogo contém 46 tropas, 22 aparências de senhor, 1.236 skins e 3 eventos, inicialmente em breve. Skins usam nomes em português do cliente; aparências de senhor preservam os códigos `gXXX` de `lord_image`. Imagens são prévias estáticas, sem compor animações Spine.
+Após alterar conteúdo ou URLs, gere uma nova build. O catálogo contém 46 tropas, 22 aparências de senhor, 1.236 skins e 3 eventos, inicialmente em breve. Skins exibem o nome em português disponível (ou o código original da aparência quando não há tradução) e o ID original de `status`; aparências de senhor preservam os códigos `gXXX` de `lord_image`. Imagens são prévias estáticas, sem compor animações Spine.
 
 As galerias oferecem busca sem distinção de acentos ou maiúsculas, filtros combinados, estado vazio, carregamento progressivo e URLs compartilháveis com filtros. Sem JavaScript, todas as fichas continuam acessíveis. O site não consulta o estado do servidor: a disponibilidade é editorial.
 
@@ -58,15 +58,19 @@ Avatar significa a aparência do senhor, identificada por `lord_image.id` e `lor
 
 O campo `status.type2` é interpretado por `AvatarManager` no servidor e pelas categorias `AvatarType_*` no cliente:
 
-| Tipo na wiki | Códigos  | Conteúdo                    |
-| ------------ | -------- | --------------------------- |
-| Castelo      | 100      | Aparência do castelo        |
-| Asa          | 109      | Asas                        |
-| Balão        | 103, 105 | Conversa e balão do castelo |
-| Marcha       | 101      | Aparência da marcha         |
-| Efeito       | 108      | Efeitos de castelo          |
-| Decoração    | 102      | Terreno da cidade           |
-| Perfil       | 104, 115 | Brasões e molduras          |
+| Tipo na wiki           | Códigos  | Conteúdo                    |
+| ---------------------- | -------- | --------------------------- |
+| Aura                   | 116      | Aura do castelo             |
+| Moldura de Avatar      | 115      | Moldura do avatar           |
+| Asas                   | 109      | Asas                        |
+| Efeito                 | 108      | Efeitos de castelo          |
+| Placa de Identificação | 104      | Placa do jogador            |
+| Bolha                  | 103, 105 | Conversa e balão do castelo |
+| Decoração              | 102      | Terreno da cidade           |
+| Fila                   | 101      | Aparência da marcha         |
+| Castelo                | 100      | Aparência do castelo        |
+
+Os atalhos e o filtro seguem essa ordem, inclusive para coleções sem prévias. Aura ainda não tem fichas importadas; seu atalho permanece visível com contagem zero. Cartões e fichas mostram o ID original da skin, também disponível na busca.
 
 A importação exige correspondência entre o cliente Android v12.06.0 e o catálogo de servidor da mesma versão. As imagens são selecionadas por referências exatas do cliente nos manifestos extraídos. Tipos não mapeados e imagens não encontradas não são classificados por suposição. Onze senhores presentes em `lord_image` ainda não têm imagem estática completa localizada e não entram nesta galeria.
 

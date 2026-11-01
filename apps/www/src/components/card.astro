@@ -28,6 +28,7 @@ const { item } = Astro.props;
   <div class="card-copy">
     <span class="eyebrow">{item.group}</span>
     <h3>{item.name}</h3>
+    {item.category === "skins" && <p class="skin-id">ID: {item.reference}</p>}
     <span class="card-link">
       Explorar ficha <span>↗</span>
     </span>

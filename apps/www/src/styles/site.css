@@ -500,6 +500,12 @@ em {
   min-height: 49px;
   margin-top: 9px;
 }
+.skin-id {
+  color: var(--gold);
+  font-size: 12px;
+  margin-top: 8px;
+  overflow-wrap: anywhere;
+}
 .card-link {
   display: flex;
   justify-content: space-between;

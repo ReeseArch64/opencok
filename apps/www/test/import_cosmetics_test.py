@@ -25,7 +25,7 @@ class ImportCosmeticsTests(unittest.TestCase):
         self.packages = self.root / "packages"
         for directory in [self.app / "src/data", self.client, self.server, self.packages / "art"]:
             directory.mkdir(parents=True)
-        (self.app / "src/data/cosmetic-types.json").write_text('{"100":"Castelo","109":"Asa"}')
+        (self.app / "src/data/cosmetic-types.json").write_text('{"100":"Castelo","109":"Asas"}')
         (self.app / "src/data/catalog.json").write_text(json.dumps([
             {"id": "troop", "category": "tropas", "status": "soon"},
             {"id": "skin-1", "category": "skins", "status": "available"},
@@ -77,6 +77,17 @@ class ImportCosmeticsTests(unittest.TestCase):
         skin = next(item for item in result if item["id"] == "skin-1")
         self.assertEqual(skin["status"], "available")
         self.assertEqual(skin["name"], "Fortaleza de teste")
+
+    def test_import_skin_preserves_original_id(self):
+        result = self.import_catalog()
+        skin = next(item for item in result if item["id"] == "skin-1")
+        self.assertEqual(skin["reference"], "1")
+
+    def test_import_missing_translation_uses_art_code_as_name(self):
+        (self.client / "text_pt.ini").write_text("")
+        result = self.import_catalog()
+        skin = next(item for item in result if item["id"] == "skin-1")
+        self.assertEqual(skin["name"], "castle")
 
     def test_import_server_client_type_disagreement_excludes_item(self):
         result = self.import_catalog()

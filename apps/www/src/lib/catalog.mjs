@@ -13,7 +13,7 @@ export const categories = {
     name: "Skins",
     eyebrow: "Um reino com a sua identidade",
     description:
-      "Explore skins de castelo, asa, balão, marcha, efeito, decoração e perfil. Cada detalhe do reino tem seu próprio estilo.",
+      "Explore skins de Aura, Moldura de Avatar, Asas, Efeito, Placa de Identificação, Bolha, Decoração, Fila e Castelo. Cada detalhe do reino tem seu próprio estilo.",
     symbol: "♜",
   },
   avatares: {

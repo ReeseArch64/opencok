@@ -1,11 +1,12 @@
 {
   "100": "Castelo",
-  "101": "Marcha",
+  "101": "Fila",
   "102": "Decoração",
-  "103": "Balão",
-  "104": "Perfil",
-  "105": "Balão",
+  "103": "Bolha",
+  "104": "Placa de Identificação",
+  "105": "Bolha",
   "108": "Efeito",
-  "109": "Asa",
-  "115": "Perfil"
+  "109": "Asas",
+  "115": "Moldura de Avatar",
+  "116": "Aura"
 }
