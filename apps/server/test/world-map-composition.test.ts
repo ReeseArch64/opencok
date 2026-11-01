@@ -58,6 +58,40 @@ test("viewport composition projects in viewport order with a clock per point bef
     expect(result.m).toEqual(sfs.array([]));
 });
 
+test("world snapshot resolves alliance abbreviations from the bounded map projection", async () => {
+    const service = createRealmWorldService(
+        {
+            getWorldByPointIds: async () => ({
+                world: { worldId: 0 },
+                points: [{ id: 1, pointType: 1, allianceId: "guild" }],
+                alliances: [{ uid: "guild", abbr: "ABC" }],
+                hasMarches: false,
+            }),
+        },
+        20,
+        1,
+        {
+            rules: new Rules(new Map(), new Map(), new Map()),
+            subscribe: async () => {},
+            marches: async () => [],
+        },
+    );
+
+    const result = await service.get("self", {
+        x: sfs.int(0),
+        y: sfs.int(0),
+        type: sfs.int(1),
+        timeStamp: sfs.int(7),
+    });
+    const sections = result.points!.value as Value[];
+
+    expect(JSON.parse(String(sections[0]!.value))[0]).toMatchObject({
+        i: 1,
+        ai: "guild",
+        asn: "ABC",
+    });
+});
+
 test("failed viewport subscription prevents live march reads", async () => {
     let reads = 0;
     const service = createRealmWorldService(

@@ -10,6 +10,7 @@ export function compactPoint(
     cosmetics: readonly Row[] = [],
     projections: WorldPointProjections,
     now = BigInt(Date.now()),
+    alliances: ReadonlyMap<string, Row> = new Map(),
 ): string
 {
     if (
@@ -45,9 +46,17 @@ export function compactPoint(
         out.oid = text(row, "ownerId");
     }
 
-    if (text(row, "allianceId"))
+    const allianceId = text(row, "allianceId");
+
+    if (allianceId)
     {
-        out.ai = text(row, "allianceId");
+        out.ai = allianceId;
+        const alliance = alliances.get(allianceId);
+
+        if (alliance && alliance.abbr != null)
+        {
+            out.asn = text(alliance, "abbr");
+        }
     }
 
     if (out.t === 1 && Number(out.l) > 30)

@@ -41,6 +41,7 @@ export interface WorldMapStore
         points: Row[];
         hasMarches: boolean;
         cosmetics?: readonly Row[];
+        alliances?: readonly Row[];
     }>;
 }
 
