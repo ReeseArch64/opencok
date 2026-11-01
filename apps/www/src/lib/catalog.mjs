@@ -35,7 +35,7 @@ export const categories = {
 export const catalog = records.map((item) => ({
   ...item,
   ...classifyCosmetic(item.sourceTable, item.cosmeticType),
-  image: `/media/${item.id}.png`,
+  image: item.source === null ? null : `/media/${item.id}.png`,
 }));
 
 export function statusLabel(status) {

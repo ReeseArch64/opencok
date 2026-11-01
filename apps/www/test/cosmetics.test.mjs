@@ -1,5 +1,6 @@
 import { expect, test } from "bun:test";
 import { classifyCosmetic, skinGroups } from "../src/lib/cosmetics.mjs";
+import gameSkins from "../../../packages/resources/tests/fixtures/appearance-catalog.json";
 import records from "../src/data/catalog.json";
 import { catalog as statusCatalog } from "../../../packages/resources/src/catalogs/data/status.ts";
 import { records as lordImages } from "../../../packages/resources/src/catalogs/data/lord_image.records0.ts";
@@ -52,6 +53,7 @@ test("catalog_skins_matchAuthoritativeStatusTypesAndAvailableCollections", () =>
   const statusById = new Map(statusCatalog.records.map((row) => [String(row.id), row]));
   expect([...new Set(skins.map((item) => item.group))].sort()).toEqual([
     "Asas",
+    "Aura",
     "Bolha",
     "Castelo",
     "Decoração",
@@ -62,7 +64,10 @@ test("catalog_skins_matchAuthoritativeStatusTypesAndAvailableCollections", () =>
   ]);
   for (const item of skins) {
     expect(item.sourceTable).toBe("status");
-    expect(statusById.get(item.reference)?.type2).toBe(item.cosmeticType);
+    const binding = gameSkins.find((skin) => skin.wikiId === item.id);
+    expect(binding).toBeDefined();
+    expect(binding.type).toBe(item.cosmeticType);
+    expect(statusById.get(binding.statusId)?.type2).toBe(item.cosmeticType);
     expect(classifyCosmetic(item.sourceTable, item.cosmeticType)).toEqual({
       category: item.category,
       group: item.group,

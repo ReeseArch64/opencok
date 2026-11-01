@@ -9,7 +9,9 @@ const catalog = JSON.parse(await readFile(resolve(app, "src/data/catalog.json"),
 await rm(output, { recursive: true, force: true });
 await mkdir(output, { recursive: true });
 
+let prepared = 0;
 for (const item of catalog) {
+  if (item.source === null) continue;
   const source = resolve(root, item.source);
   if (
     !source.startsWith(resolve(root, "data/cdn/extracteds") + sep) ||
@@ -18,6 +20,7 @@ for (const item of catalog) {
     throw new Error(`Invalid catalog asset: ${item.id}`);
   }
   await copyFile(source, resolve(output, `${item.id}.png`));
+  prepared++;
 }
 
 for (const [source, target] of [
@@ -31,4 +34,4 @@ for (const [source, target] of [
   await copyFile(resolve(root, source), resolve(output, target));
 }
 await copyFile(resolve(app, "public/robots.txt"), resolve(dirname(output), "robots.txt"));
-console.log(`Prepared ${catalog.length + 6} local assets for www.`);
+console.log(`Prepared ${prepared + 6} local assets for www.`);

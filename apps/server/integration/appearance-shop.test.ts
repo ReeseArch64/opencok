@@ -2,6 +2,7 @@ import { expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { eq, sql } from "drizzle-orm";
 import { userprofile } from "@opencok/drizzle/schema/opencok_kingdom/userprofile";
+import { user_building } from "@opencok/drizzle/schema/opencok_kingdom/user_building";
 import { user_item } from "@opencok/drizzle/schema/opencok_kingdom/user_item";
 import { createShopRepository } from "@opencok/shop/repositories/shops";
 import { ShopService } from "@opencok/shop/services/shops";
@@ -116,6 +117,63 @@ test(
                 }),
             ).rejects.toThrow();
             expect(await harness.snapshot()).toEqual(beforeFailure);
+        }
+        finally
+        {
+            await harness.close();
+        }
+    },
+    120000,
+);
+
+test(
+    "new appearance offers in every category deliver once and debit their configured gold price",
+    async () => {
+        const harness = await shopHarness();
+        try
+        {
+            const { loadRules } = await import("@opencok/resources/rules");
+            const { default: skins } = await import(
+                "../../../packages/resources/tests/fixtures/appearance-catalog.json"
+            );
+            const catalog = await loadRules();
+            await harness.db.db.update(userprofile).set({ gold: 1000000n }).where(
+                eq(userprofile.uid, "buyer"),
+            );
+            await harness.db.db.insert(user_building).values({
+                uuid: "catalog-castle",
+                uid: "buyer",
+                itemId: 400000,
+                pos: 0,
+                level: 1,
+            });
+            let expectedGold = 1000000n;
+            for (const type of [100, 101, 102, 103, 104, 105, 108, 109, 115, 116])
+            {
+                const skin = skins.find((entry) =>
+                    entry.enabled && entry.type === type && entry.offerId.startsWith("1715")
+                    && catalog.shops.get(entry.offerId)?.value1_type === "1"
+                )!;
+                expect(skin).toBeDefined();
+                const offer = catalog.shops.get(skin.offerId)!;
+                harness.rules.shops.set(offer.id!, offer);
+                const request = {
+                    id: sfs.string(skin.offerId),
+                    num: sfs.int(1),
+                    operationId: sfs.string(randomUUID()),
+                };
+                const bought = await harness.shops.command("buyer", "shoppingMall.buy", request);
+                expectedGold -= BigInt(offer.value1!);
+                expect(bought.body.gold).toEqual(sfs.long(expectedGold));
+                expect(fields(bought.body.goods).itemId).toEqual(sfs.string(skin.itemId));
+                expect((await harness.shops.command("buyer", "shoppingMall.buy", request)).body)
+                    .toEqual(bought.body);
+                expect(
+                    (await harness.db.db.select().from(userprofile).where(
+                        eq(userprofile.uid, "buyer"),
+                    ))[0]!.gold,
+                ).toBe(expectedGold);
+            }
         }
         finally
         {

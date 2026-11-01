@@ -1,5 +1,6 @@
 ---
 import { statusLabel } from "../lib/catalog.mjs";
+import ItemImage from "./item-image.astro";
 const { item } = Astro.props;
 ---
 
@@ -16,9 +17,8 @@ const { item } = Astro.props;
   <div class="card-art">
     <span class:list={["badge", item.status]}>{statusLabel(item.status)}</span>
     {item.tier && <span class="tier">T{item.tier}</span>}
-    <img
-      src={item.image}
-      alt={item.name}
+    <ItemImage
+      item={item}
       loading="lazy"
       width="300"
       height="280"

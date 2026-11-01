@@ -12,8 +12,14 @@ test("catalog_allEntries_haveUniqueRoutesAndExistingLocalArt", () => {
   expect(new Set(ids).size).toBe(ids.length);
   for (const item of catalog) {
     expect(item.id).toMatch(/^[a-z0-9-]+$/);
-    expect(item.source).toStartWith("data/cdn/extracteds/");
-    expect(existsSync(`${root}/${item.source}`)).toBe(true);
+    if (item.source !== null) {
+      expect(item.source).toStartWith("data/cdn/extracteds/");
+      expect(existsSync(`${root}/${item.source}`)).toBe(true);
+    } else {
+      expect(item.category).toBe("skins");
+      expect(item.previewStatus).toBe("missing");
+      expect(item.image).toBeNull();
+    }
     expect(categories[item.category]).toBeDefined();
     expect(["soon", "available"]).toContain(item.status);
   }

@@ -1,6 +1,7 @@
 ---
 import Layout from "../../layouts/layout.astro";
 import Card from "../../components/card.astro";
+import ItemImage from "../../components/item-image.astro";
 import { catalog, categories, statusLabel } from "../../lib/catalog.mjs";
 import { guides } from "../../data/guides.mjs";
 export function getStaticPaths() {
@@ -83,7 +84,7 @@ const related = guide
           <span class:list={["badge", item.status]}>
             {statusLabel(item.status)}
           </span>
-          <img src={item.image} alt={item.name} width="600" height="540" />
+          <ItemImage item={item} width="600" height="540" />
         </div>
         <div class="detail-copy">
           <p class="eyebrow">

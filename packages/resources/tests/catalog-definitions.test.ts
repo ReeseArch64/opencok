@@ -11,6 +11,12 @@ import {
 } from "../src/catalog-mechanics.ts";
 import provenance from "../src/catalogs/provenance.json";
 
+const appearanceAdditions: Readonly<Record<string, number>> = {
+    [GameplayCatalog.Goods]: 385,
+    [GameplayCatalog.Status]: 603,
+    [GameplayCatalog.ShopNew]: 1037,
+};
+
 const maintainedAdditions: Readonly<Record<string, readonly number[]>> = {
     [GameplayCatalog.GeneralAb]: [41020011, 53571201, 53571202],
     [GameplayCatalog.GeneralSkill]: [
@@ -100,7 +106,9 @@ test("all remaining catalogs expose domain definitions without XML documents", a
         if (catalog.kind === CatalogKind.Table)
         {
             const additions = maintainedAdditions[source.id] ?? [];
-            expect(catalog.records.length).toBe(source.records! + additions.length);
+            expect(catalog.records.length).toBe(
+                source.records! + additions.length + (appearanceAdditions[source.id] ?? 0),
+            );
             for (const id of additions)
             {
                 expect(catalog.records.filter((record) => "id" in record && record.id === id))
