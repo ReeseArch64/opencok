@@ -1,6 +1,7 @@
 import { expect, test } from "bun:test";
 import { cosmeticResourceXml } from "../src/cosmetic-resources";
 import { parseRecords } from "../src/xml-fixtures";
+import { GameplayCatalog } from "@opencok/enums/gameplay-catalog";
 import { mkdtemp, mkdir, writeFile, readFile, symlink, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -9,9 +10,9 @@ test("cosmeticResourceXml_skinPreviews_removesAbilitiesAndBonusesWithoutChanging
     const source =
         "<database><Group id=\"status\"><ItemSpec id=\"1\" type2=\"100\" effect=\"14;1|487;500\" effectAdd=\"50;99\" skill=\"12\" time=\"3600\" subgroup=\"8\"/><ItemSpec id=\"2\" type2=\"9\" effect=\"50;25\"/></Group></database>";
 
-    const output = cosmeticResourceXml(source, "status");
+    const output = cosmeticResourceXml(source, GameplayCatalog.Status);
 
-    expect(parseRecords(output, "status")).toEqual([
+    expect(parseRecords(output, GameplayCatalog.Status)).toEqual([
         {
             id: "1",
             type2: "100",
@@ -24,21 +25,46 @@ test("cosmeticResourceXml_skinPreviews_removesAbilitiesAndBonusesWithoutChanging
         },
         { id: "2", type2: "9", effect: "50;25" },
     ]);
-    expect(cosmeticResourceXml(output, "status")).toBe(output);
+    expect(cosmeticResourceXml(output, GameplayCatalog.Status)).toBe(output);
+});
+
+test("cosmeticResourceXml_civilizationFortressSkin_removesTheType114CombatPreview", () => {
+    const source =
+        "<database><Group><ItemSpec id=\"12000080\" type2=\"114\" effect=\"1011;300|60;20\" subgroup=\"519\" isForever=\"1\"/></Group></database>";
+
+    expect(
+        parseRecords(cosmeticResourceXml(source, GameplayCatalog.Status), GameplayCatalog.Status),
+    )
+        .toEqual([{
+            id: "12000080",
+            type2: "114",
+            effect: "",
+            subgroup: "519",
+            isForever: "1",
+            effectAdd: "",
+            skill: "",
+            random: "0",
+        }]);
 });
 
 test("cosmeticResourceXml_treeSkinPreview_removesBuffsAndPreservesUpgradeCostsAndDuration", () => {
     const source =
         "<database><Group><ItemSpec id=\"980001\" buff=\"505182;505183\" skinExp=\"100\" time=\"10\" goldSkinExp=\"2\"/></Group></database>";
 
-    expect(parseRecords(cosmeticResourceXml(source, "life_treeS"), "life_treeS")).toEqual([
+    expect(
+        parseRecords(
+            cosmeticResourceXml(source, GameplayCatalog.LifeTreeS),
+            GameplayCatalog.LifeTreeS,
+        ),
+    ).toEqual([
         { id: "980001", buff: "", skinExp: "100", time: "10", goldSkinExp: "2" },
     ]);
 });
 
 test("cosmeticResourceXml_invalidOrEntityDocument_rejectsBeforeGeneratingResources", () => {
-    expect(() => cosmeticResourceXml("<database>", "status")).toThrow();
-    expect(() => cosmeticResourceXml("<!DOCTYPE database><database/>", "status")).toThrow();
+    expect(() => cosmeticResourceXml("<database>", GameplayCatalog.Status)).toThrow();
+    expect(() => cosmeticResourceXml("<!DOCTYPE database><database/>", GameplayCatalog.Status))
+        .toThrow();
 });
 
 test("cosmeticResourcesCli_sourceAliasesAndExistingOutput_rejectsWithoutOverwritingInputs", async () => {
@@ -73,7 +99,7 @@ test("cosmeticResourcesCli_sourceAliasesAndExistingOutput_rejectsWithoutOverwrit
         expect(await run(join(directory, "alias", "derived"))).not.toBe(0);
         expect(await run(output)).toBe(0);
         const generated = await readFile(join(output, "status.xml"), "utf8");
-        expect(parseRecords(generated, "status")[0]!.effect).toBe("");
+        expect(parseRecords(generated, GameplayCatalog.Status)[0]!.effect).toBe("");
         expect(await run(output)).not.toBe(0);
         expect(await readFile(join(output, "status.xml"), "utf8")).toBe(generated);
         expect(await readFile(join(source, "status.xml"), "utf8")).toBe(original);

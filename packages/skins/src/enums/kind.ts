@@ -1,6 +1,22 @@
 export enum CosmeticKind
 {
     City = 100,
+    March = 101,
+    Ground = 102,
+    ChatBackground = 103,
+    Nameplate = 104,
     Bubble = 105,
+    Shield = 106,
+    CityEffect = 108,
+    Wings = 109,
+    Civilization = 110,
+    CivilizationFortress = 114,
+    HeadFrame = 115,
+    Aura = 116,
+    HeroMarch = 117,
+    ActivityEffect = 118,
+    TeleportEffect = 121,
+    InnerCastle = 123,
+    InnerDecoration = 124,
     Overlap = 200,
 }

@@ -58,7 +58,27 @@ const policy = new CosmeticPolicy(readers);
 const mapper = new CosmeticMapper();
 const events = new CosmeticEventMapper(readers, policy, mapper, ownership.cosmeticTargetStates);
 
-test.each([100, 101, 102, 103, 104, 105, 106, 108, 109, 115, 116, 117, 121, 123, 200, 202])(
+test.each([
+    100,
+    101,
+    102,
+    103,
+    104,
+    105,
+    106,
+    108,
+    109,
+    114,
+    115,
+    116,
+    117,
+    118,
+    121,
+    123,
+    124,
+    200,
+    202,
+])(
     "cosmeticStatusRule_type%s_removesAttributesAndAbilitiesWhileKeepingVisualMetadata",
     (type) => {
         const rule = {

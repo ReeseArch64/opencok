@@ -1,6 +1,7 @@
 import { mkdir, readFile, writeFile, realpath } from "node:fs/promises";
 import { resolve, join, relative, isAbsolute, dirname, basename, sep } from "node:path";
 import { cosmeticResourceXml } from "../src/cosmetic-resources";
+import { GameplayCatalog } from "@opencok/enums/gameplay-catalog";
 
 const [sourceDirectory, outputDirectory] = Bun.argv.slice(2);
 
@@ -21,13 +22,15 @@ if (
     throw new Error("Cosmetic resource output must be outside the read-only source directory");
 }
 
-const resources = await Promise.all(["status", "life_treeS"].map(async (table) => ({
-    table,
-    xml: cosmeticResourceXml(
-        await readFile(join(source, `${table}.xml`), "utf8"),
-        table as "status" | "life_treeS",
-    ),
-})));
+const resources = await Promise.all(
+    ([GameplayCatalog.Status, GameplayCatalog.LifeTreeS] as const).map(async (table) => ({
+        table,
+        xml: cosmeticResourceXml(
+            await readFile(join(source, `${table}.xml`), "utf8"),
+            table,
+        ),
+    })),
+);
 
 await mkdir(output, { recursive: false });
 

@@ -43,6 +43,7 @@ test("loadRules_bundledSkins_disablesAttributeAndAbilityDeclarationsOnEveryResta
     expect(skins.every((rule) => !rule.effectAdd && !rule.skill && rule.random === "0")).toBe(true);
     expect(restarted.power.statuses).toEqual(first.power.statuses);
     expect(first.power.statuses!.get("510152")!.effect).toBe("2189;1");
+    expect(first.power.statuses!.get("12000080")!.effect).toBe("");
 });
 
 test("changing typed item pricing reaches server rules without an XML conversion", async () => {

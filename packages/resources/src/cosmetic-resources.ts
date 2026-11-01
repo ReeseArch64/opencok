@@ -1,8 +1,12 @@
 import { XMLBuilder, XMLParser } from "fast-xml-parser";
+import { GameplayCatalog } from "@opencok/enums/gameplay-catalog";
 import { cosmeticStatusRule } from "@opencok/rules/city-cosmetics";
 import { parseRecords } from "./xml-fixtures";
 
-export function cosmeticResourceXml(source: string, table: "status" | "life_treeS"): string
+export function cosmeticResourceXml(
+    source: string,
+    table: GameplayCatalog.Status | GameplayCatalog.LifeTreeS,
+): string
 {
     parseRecords(source, table);
     const options = {
@@ -20,7 +24,7 @@ export function cosmeticResourceXml(source: string, table: "status" | "life_tree
             if (Object.hasOwn(node, "ItemSpec") && node[":@"])
             {
                 const attributes = node[":@"] as Record<string, string>;
-                node[":@"] = table === "status"
+                node[":@"] = table === GameplayCatalog.Status
                     ? cosmeticStatusRule(attributes)
                     : { ...attributes, buff: "" };
             }

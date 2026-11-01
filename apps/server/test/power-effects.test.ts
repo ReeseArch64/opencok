@@ -113,7 +113,27 @@ test("live statuses use configured or persisted random effects and ignore expire
     expect(state).toEqual(before);
 });
 
-test.each([100, 101, 102, 103, 104, 105, 106, 108, 109, 115, 116, 117, 121, 123, 200, 202])(
+test.each([
+    100,
+    101,
+    102,
+    103,
+    104,
+    105,
+    106,
+    108,
+    109,
+    114,
+    115,
+    116,
+    117,
+    118,
+    121,
+    123,
+    124,
+    200,
+    202,
+])(
     "storedPowerEffects_savedSkinType%s_ignoresConfiguredAndRandomBonusesAfterReloadAndExpiry",
     (type) => {
         const { state, rules } = fixture();

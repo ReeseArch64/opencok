@@ -1,29 +1,33 @@
 import type { CosmeticRule } from "../contracts/records";
+import { CosmeticKind } from "../enums/kind";
 
 const cosmeticStatusTypes = new Set([
-    "100",
-    "101",
-    "102",
-    "103",
-    "104",
-    "105",
-    "106",
-    "108",
-    "109",
-    "115",
-    "116",
-    "117",
-    "121",
-    "123",
-    "200",
-    "202",
-]);
+    CosmeticKind.City,
+    CosmeticKind.March,
+    CosmeticKind.Ground,
+    CosmeticKind.ChatBackground,
+    CosmeticKind.Nameplate,
+    CosmeticKind.Bubble,
+    CosmeticKind.Shield,
+    CosmeticKind.CityEffect,
+    CosmeticKind.Wings,
+    CosmeticKind.CivilizationFortress,
+    CosmeticKind.HeadFrame,
+    CosmeticKind.Aura,
+    CosmeticKind.HeroMarch,
+    CosmeticKind.ActivityEffect,
+    CosmeticKind.TeleportEffect,
+    CosmeticKind.InnerCastle,
+    CosmeticKind.InnerDecoration,
+    CosmeticKind.Overlap,
+    202,
+].map(String));
 
 export function isCosmeticStatus(rule: CosmeticRule | undefined): boolean
 {
     return rule !== undefined
         && (cosmeticStatusTypes.has(rule.type2 ?? "")
-            || (rule.type2 === "110" && Boolean(rule.subgroup)));
+            || (rule.type2 === String(CosmeticKind.Civilization) && Boolean(rule.subgroup)));
 }
 
 export function cosmeticStatusRule(rule: CosmeticRule): CosmeticRule
