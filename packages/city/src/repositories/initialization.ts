@@ -98,6 +98,12 @@ export class CityInitializationReader
                     await readers.readPlayerEffects(tx, profile, true),
                 );
 
+                if (command === CityInitializationCommand.Effects)
+                {
+                    state.cosmeticTarget = session.cosmeticTarget = await session.cosmetics
+                        .readCosmeticTarget(undefined, owner, { ownerWardrobe: true });
+                }
+
                 if (command === CityInitializationCommand.VipBox)
                 {
                     state.vipBox = await readers.readVipBox(tx, owner);

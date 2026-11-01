@@ -19,6 +19,7 @@ export class CosmeticRepository
     public readonly readCosmeticTarget = async (
         request?: Uint8Array,
         actor?: string,
+        options?: { ownerWardrobe: true; },
     ) => {
         const { tx } = this;
         const { playerItemGiftRecipient } = this.runtime;
@@ -30,6 +31,10 @@ export class CosmeticRepository
         }
 
         const uid = playerItemGiftRecipient(actor ?? str(params, "uid"));
+        if (options?.ownerWardrobe && uid !== this.owner)
+        {
+            throw new Error("Foreign wardrobe owner");
+        }
         const [profile] = await tx
             .select({ uid: userprofile.uid, realm: userprofile.serverId })
             .from(userprofile)
@@ -52,7 +57,7 @@ export class CosmeticRepository
             .limit(4097)
             .for("update");
 
-        if (states.length > 4096 || (world && world.worldId !== 0))
+        if (states.length > 4096 || (!options?.ownerWardrobe && world && world.worldId !== 0))
         {
             throw new Error("Invalid cosmetic target world or state bound");
         }
@@ -91,7 +96,7 @@ export class CosmeticRepository
             });
         }
 
-        if ((write.avatars?.length ?? 0) > 64)
+        if ((write.avatars?.length ?? 0) > 4096)
         {
             throw new Error("Cosmetic storage write exceeds bound");
         }

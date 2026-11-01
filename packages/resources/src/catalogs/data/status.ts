@@ -1,3 +1,6 @@
+import { permanentAppearanceStatuses } from "../permanent-appearances";
+import { catalog as goods } from "./goods";
+import { catalog as offers } from "./shop_new";
 import { records as appearanceRecords } from "./status.appearance.ts";
 import { CatalogKind } from "@opencok/enums/catalog-kind";
 import type { StatusDefinition } from "../types/status.ts";
@@ -16,20 +19,24 @@ import { records as records10 } from "./status.records10.ts";
 
 export const catalog: CatalogTable<StatusDefinition> = {
     "kind": CatalogKind.Table,
-    "records": [
-        ...appearanceRecords,
-        ...records0,
-        ...records1,
-        ...records2,
-        ...records3,
-        ...records4,
-        ...records5,
-        ...records6,
-        ...records7,
-        ...records8,
-        ...records9,
-        ...records10,
-    ],
+    "records": permanentAppearanceStatuses(
+        [
+            ...appearanceRecords,
+            ...records0,
+            ...records1,
+            ...records2,
+            ...records3,
+            ...records4,
+            ...records5,
+            ...records6,
+            ...records7,
+            ...records8,
+            ...records9,
+            ...records10,
+        ],
+        goods.records,
+        offers.records,
+    ),
     "sections": [],
     "metadata": { "KSOProductBuildVer": "2052-10.1.0.6207" },
 };
