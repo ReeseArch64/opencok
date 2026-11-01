@@ -114,6 +114,7 @@ export interface ReconnectCatalogs
 
 export interface ProfileCatalogs
 {
+    lordImages?: Map<string, Rule>;
     nicknameWords?: readonly string[];
     characters?: Map<string, Rule>;
     achievementCount?: number;

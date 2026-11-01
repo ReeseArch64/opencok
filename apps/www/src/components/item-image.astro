@@ -1,0 +1,12 @@
+---
+const { item, width, height, loading } = Astro.props;
+---
+
+{item.image ? (
+  <img src={item.image} alt={item.name} width={width} height={height} loading={loading} />
+) : (
+  <div class="preview-pending" role="img" aria-label={`${item.name}: prévia em preparação`}>
+    <span aria-hidden="true">♜</span>
+    <p>Prévia em preparação</p>
+  </div>
+)}

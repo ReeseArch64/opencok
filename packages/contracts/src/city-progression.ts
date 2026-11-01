@@ -180,6 +180,7 @@ export interface CityProgressionWrite
     hospital?: readonly Row[];
     forts?: readonly Row[];
     queues?: readonly Row[];
+    appearance?: { pic?: string; picVer?: number; picfraId?: number; };
     profile?: { level: number; exp: number; };
     statistics?: {
         power: bigint;

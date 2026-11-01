@@ -173,6 +173,7 @@ export async function executeInventoryTransaction<State extends InventoryCommand
         "dmmPaidGold",
         "dmmPaidSpecialGold",
         "crystal",
+        "crystalGold",
     ];
     const resourceKeys = [
         "wood",

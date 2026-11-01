@@ -1,6 +1,7 @@
 import { copyFile, mkdir, readFile, rm } from "node:fs/promises";
 import { dirname, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
+import { mediaFilename, validateTroopArtwork } from "../src/lib/artwork.mjs";
 
 const app = fileURLToPath(new URL("../", import.meta.url));
 const root = resolve(app, "../..");
@@ -9,7 +10,9 @@ const catalog = JSON.parse(await readFile(resolve(app, "src/data/catalog.json"),
 await rm(output, { recursive: true, force: true });
 await mkdir(output, { recursive: true });
 
+let prepared = 0;
 for (const item of catalog) {
+  if (item.source === null) continue;
   const source = resolve(root, item.source);
   if (
     !source.startsWith(resolve(root, "data/cdn/extracteds") + sep) ||
@@ -17,7 +20,9 @@ for (const item of catalog) {
   ) {
     throw new Error(`Invalid catalog asset: ${item.id}`);
   }
-  await copyFile(source, resolve(output, `${item.id}.png`));
+  if (item.category === "tropas") validateTroopArtwork(item, await readFile(source));
+  await copyFile(source, resolve(output, mediaFilename(item)));
+  prepared++;
 }
 
 for (const [source, target] of [
@@ -31,4 +36,4 @@ for (const [source, target] of [
   await copyFile(resolve(root, source), resolve(output, target));
 }
 await copyFile(resolve(app, "public/robots.txt"), resolve(dirname(output), "robots.txt"));
-console.log(`Prepared ${catalog.length + 6} local assets for www.`);
+console.log(`Prepared ${prepared + 6} local assets for www.`);

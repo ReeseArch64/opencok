@@ -10,6 +10,11 @@ export interface CityCosmeticResponse
     sid?: number;
     set?: number;
     bubble?: CosmeticStatusResponse;
+    npavatar?: CosmeticStatusResponse;
+    castleEffect?: CosmeticStatusResponse;
+    wings?: CosmeticStatusResponse;
+    avatarframe?: CosmeticStatusResponse;
+    aura?: CosmeticStatusResponse;
     overlap?: CosmeticStatusResponse;
 }
 

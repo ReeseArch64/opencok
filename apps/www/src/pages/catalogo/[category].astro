@@ -2,6 +2,7 @@
 import Layout from "../../layouts/layout.astro";
 import Card from "../../components/card.astro";
 import { catalog, categories } from "../../lib/catalog.mjs";
+import { skinGroups } from "../../lib/cosmetics.mjs";
 export function getStaticPaths() {
   return Object.entries(categories).map(([category, info]) => ({
     params: { category },
@@ -11,9 +12,12 @@ export function getStaticPaths() {
 const { category } = Astro.params;
 const { info } = Astro.props;
 const items = catalog.filter((item) => item.category === category);
+if (category === "skins") {
+  items.sort((a, b) => skinGroups.indexOf(a.group) - skinGroups.indexOf(b.group));
+}
 const groups =
   category === "skins"
-    ? ["Castelo", "Asa", "Balão", "Marcha", "Efeito", "Decoração", "Perfil"]
+    ? skinGroups
     : [...new Set(items.map((item) => item.group))];
 const tiers = [...new Set(items.map((item) => item.tier).filter(Boolean))].sort(
   (a, b) => a - b,
@@ -66,7 +70,7 @@ const tiers = [...new Set(items.map((item) => item.tier).filter(Boolean))].sort(
         <input
           name="query"
           type="search"
-          placeholder={`Buscar ${info.name.toLowerCase()}, nome ou código…`}
+          placeholder={`Buscar ${info.name.toLowerCase()}, nome ou ID…`}
           autocomplete="off"
         />
       </label>

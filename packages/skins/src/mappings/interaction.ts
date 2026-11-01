@@ -4,7 +4,7 @@ import type { CosmeticCatalog, CosmeticContext } from "../contracts/context";
 import type { CosmeticReaders } from "../contracts/runtime";
 import { CosmeticPolicy } from "../rules/projection";
 import { CosmeticMapper } from "./cosmetics";
-import { CosmeticKind } from "../enums/kind";
+import { cosmeticKinds } from "../enums/kind";
 
 export class CosmeticEventMapper<
     TCatalog extends CosmeticCatalog,
@@ -60,7 +60,7 @@ export class CosmeticEventMapper<
 
             const type = num(row, "type2");
 
-            if (![CosmeticKind.City, CosmeticKind.Bubble, CosmeticKind.Overlap].includes(type))
+            if (!cosmeticKinds.includes(type))
             {
                 throw new Error("Unsupported cosmetic status kind");
             }

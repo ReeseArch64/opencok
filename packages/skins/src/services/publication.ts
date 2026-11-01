@@ -3,7 +3,7 @@ import type { CityCosmeticResponse } from "../contracts/responses/cosmetics";
 import type { CosmeticPublicationRuntime } from "../contracts/runtime";
 import { CosmeticMapper } from "../mappings/cosmetics";
 import { CosmeticPush } from "../enums/command";
-import { CosmeticKind } from "../enums/kind";
+import { CosmeticKind, cosmeticKinds } from "../enums/kind";
 
 export class CosmeticPublication
 {
@@ -27,7 +27,7 @@ export class CosmeticPublication
             || event.statuses.value.length > 64
             || event.kinds?.type !== Type.Array
             || !Array.isArray(event.kinds.value)
-            || event.kinds.value.length > 3
+            || event.kinds.value.length > cosmeticKinds.length
             || point < 0
         )
         {
@@ -41,7 +41,7 @@ export class CosmeticPublication
                 body = fields(update.body),
                 id = int(body, "statusId");
 
-            if (![CosmeticKind.City, CosmeticKind.Bubble, CosmeticKind.Overlap].includes(kind))
+            if (!cosmeticKinds.includes(kind))
             {
                 throw new Error("Invalid cosmetic private status kind");
             }
@@ -103,6 +103,21 @@ export class CosmeticPublication
         for (const kind of event.kinds.value)
         {
             const type = int({ kind }, "kind");
+            if (!cosmeticKinds.includes(type))
+            {
+                throw new Error("Invalid cosmetic notification kind");
+            }
+            if (![CosmeticKind.City, CosmeticKind.Bubble, CosmeticKind.Overlap].includes(type))
+            {
+                for (const recipient of recipients)
+                {
+                    if (recipient)
+                    {
+                        await publish(recipient, CosmeticPush.WorldPoint, { id: sfs.int(point) });
+                    }
+                }
+                continue;
+            }
             let data: CityCosmeticResponse = {};
 
             if (type === CosmeticKind.City)

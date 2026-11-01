@@ -25,7 +25,7 @@ class ImportCosmeticsTests(unittest.TestCase):
         self.packages = self.root / "packages"
         for directory in [self.app / "src/data", self.client, self.server, self.packages / "art"]:
             directory.mkdir(parents=True)
-        (self.app / "src/data/cosmetic-types.json").write_text('{"100":"Castelo","109":"Asa"}')
+        (self.app / "src/data/cosmetic-types.json").write_text('{"100":"Castelo","109":"Asas"}')
         (self.app / "src/data/catalog.json").write_text(json.dumps([
             {"id": "troop", "category": "tropas", "status": "soon"},
             {"id": "skin-1", "category": "skins", "status": "available"},
@@ -78,6 +78,17 @@ class ImportCosmeticsTests(unittest.TestCase):
         self.assertEqual(skin["status"], "available")
         self.assertEqual(skin["name"], "Fortaleza de teste")
 
+    def test_import_skin_preserves_original_id(self):
+        result = self.import_catalog()
+        skin = next(item for item in result if item["id"] == "skin-1")
+        self.assertEqual(skin["reference"], "1")
+
+    def test_import_missing_translation_uses_art_code_as_name(self):
+        (self.client / "text_pt.ini").write_text("")
+        result = self.import_catalog()
+        skin = next(item for item in result if item["id"] == "skin-1")
+        self.assertEqual(skin["name"], "castle")
+
     def test_import_server_client_type_disagreement_excludes_item(self):
         result = self.import_catalog()
         self.assertNotIn("skin-3", [item["id"] for item in result])
@@ -108,6 +119,30 @@ class ImportCosmeticsTests(unittest.TestCase):
         second = self.import_catalog()
         self.assertEqual(second, first)
         self.assertEqual([path.read_bytes() for path in inputs], before)
+
+
+class SupplementalMergeTests(unittest.TestCase):
+    def test_unmatched_supplement_preserves_route_and_available_status(self):
+        existing = {"id": "skin-20", "category": "skins", "cosmeticType": 116, "artCode": "halo", "sourceClient": "bosmod", "status": "available"}
+        self.assertEqual(IMPORTER.merge_cosmetics([existing], []), [existing])
+
+    def test_matching_art_preserves_curated_route_name_and_publication(self):
+        existing = {"id": "skin-20", "reference": "20", "category": "skins", "cosmeticType": 116, "artCode": "halo", "sourceClient": "bosmod", "name": "Nome confirmado", "status": "available"}
+        incoming = {"id": "skin-21", "reference": "21", "category": "skins", "cosmeticType": 116, "artCode": "halo", "status": "soon"}
+        self.assertEqual(IMPORTER.merge_cosmetics([existing], [incoming]), [existing])
+
+    def test_matching_art_can_complete_missing_preview(self):
+        existing = {"id": "skin-20", "category": "skins", "cosmeticType": 116, "artCode": "halo", "sourceClient": "bosmod", "source": None, "previewStatus": "missing", "status": "available"}
+        incoming = {"id": "skin-21", "category": "skins", "cosmeticType": 116, "artCode": "halo", "source": "data/cdn/extracteds/halo.png", "status": "soon"}
+        actual = IMPORTER.merge_cosmetics([existing], [incoming])
+        self.assertEqual(actual[0]["source"], "data/cdn/extracteds/halo.png")
+        self.assertEqual(actual[0]["previewStatus"], "ready")
+        self.assertEqual(actual[0]["id"], "skin-20")
+        self.assertEqual(actual[0]["status"], "available")
+
+    def test_new_supplement_remains_unpublished(self):
+        incoming = {"id": "skin-21", "category": "skins", "cosmeticType": 116, "artCode": "halo", "status": "soon"}
+        self.assertEqual(IMPORTER.merge_cosmetics([], [incoming]), [incoming])
 
 
 if __name__ == "__main__":

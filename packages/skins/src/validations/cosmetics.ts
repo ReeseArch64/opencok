@@ -11,6 +11,11 @@ export const cityCosmeticSchema = z.strictObject({
     sid: field.int.optional(),
     set: field.int.optional(),
     bubble: status.optional(),
+    npavatar: status.optional(),
+    castleEffect: status.optional(),
+    wings: status.optional(),
+    avatarframe: status.optional(),
+    aura: status.optional(),
     overlap: status.optional(),
 }) satisfies z.ZodType<CityCosmeticResponse>;
 

@@ -415,6 +415,7 @@ export const loggedGameCommands: ReadonlySet<string> = new Set([
     "region.recall.init",
     "region.recall.open.ui",
     "region.recall.receive",
+    "pic.change",
     "report.picVer",
     "resource.client.reward.get",
     "resource.new.detail",

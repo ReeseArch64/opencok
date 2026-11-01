@@ -1,3 +1,4 @@
+import { worldCosmeticKinds } from "@opencok/skins/enums/kind";
 import { test, expect } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { eq, sql } from "drizzle-orm";
@@ -60,7 +61,10 @@ async function fixture()
         timeoutMs: 5000,
     });
     const world = createRealmWorldService(
-        { getWorldByPointIds: (uid, ids) => readWorldMap(adapter.kingdom.db, uid, ids) },
+        {
+            getWorldByPointIds: (uid, ids) =>
+                readWorldMap(adapter.kingdom.db, uid, ids, worldCosmeticKinds),
+        },
         1200,
         1,
         {
@@ -200,7 +204,7 @@ test(
     120000,
 );
 test(
-    "owned map projections retain overlap, bubble and skin fields, expiry and the target-only database selection",
+    "owned map projections retain permanent catalog skins, timed bubbles and target-only database selection",
     async () => {
         const h = await fixture();
         try
@@ -221,13 +225,22 @@ test(
                 set: Date.UTC(2024, 8, 5, 12, 0, 5) / 1000,
             });
             expect(point.sid).toBe(509878);
-            expect(point.set).toBe(Date.UTC(2024, 8, 5, 13) / 1000);
-            const snapshot = await readWorldMap(h.adapter.kingdom.db, "owner", [4]);
+            expect(point.set).toBe(2147000000);
+            expect(
+                (await h.db.db.select().from(user_state).where(eq(user_state.stateId, 509878)))[0]!
+                    .endTime,
+            ).toBe(9223372036854775807n);
+            const snapshot = await readWorldMap(
+                h.adapter.kingdom.db,
+                "owner",
+                [4],
+                worldCosmeticKinds,
+            );
             expect(snapshot.cosmetics.every((row) => row.uid === "other")).toBe(true);
             h.clock.now += 6000;
             expect((await h.map()).bubble).toBeUndefined();
             h.clock.now = Date.UTC(2024, 8, 5, 13, 0, 1);
-            expect((await h.map()).sid).toBeUndefined();
+            expect((await h.map()).sid).toBe(509878);
             expect((await h.map()).overlap.count).toBe(50);
         }
         finally
@@ -275,6 +288,61 @@ test(
             expect(Object.keys(overlap.body)).toEqual(["overlap", "uid", "worldpointid"]);
             expect(overlap.body.uid).toEqual(sfs.string("other"));
             expect(overlap.body.worldpointid).toEqual(sfs.int(4));
+        }
+        finally
+        {
+            await h.close();
+        }
+    },
+    120000,
+);
+
+test(
+    "world map reload includes independently active wings, aura, effects, nameplate and frame",
+    async () => {
+        const h = await fixture();
+        try
+        {
+            for (
+                const [type, field] of [[104, "npavatar"], [108, "castleEffect"], [109, "wings"], [
+                    115,
+                    "avatarframe",
+                ], [116, "aura"]] as const
+            )
+            {
+                const rule = [...h.rules.power.statuses!.values()].find((entry) =>
+                    Number(entry.type2) === type
+                )!;
+                expect(rule).toBeDefined();
+                await h.db.db.insert(user_state).values({
+                    uid: "other",
+                    stateId: Number(rule.id),
+                    type2: type,
+                    startTime: BigInt(h.clock.now),
+                    endTime: BigInt(h.clock.now + 60000),
+                    count: 1,
+                });
+                expect((await h.map())[field]).toEqual({
+                    sid: Number(rule.id),
+                    set: (h.clock.now + 60000) / 1000,
+                });
+            }
+            const reloaded = await readWorldMap(
+                h.adapter.kingdom.db,
+                "owner",
+                [4],
+                worldCosmeticKinds,
+            );
+            expect(reloaded.cosmetics.map((row) => row.type2).sort()).toEqual([
+                104,
+                108,
+                109,
+                115,
+                116,
+            ]);
+            h.clock.now += 60001;
+            expect((await h.map()).wings).toBeUndefined();
+            expect((await h.map()).aura).toBeUndefined();
         }
         finally
         {

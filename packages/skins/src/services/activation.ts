@@ -5,7 +5,7 @@ import type { CosmeticActivationRuntime } from "../contracts/runtime";
 import { CosmeticMapper } from "../mappings/cosmetics";
 import { CosmeticEventMapper } from "../mappings/interaction";
 import { CosmeticCommand } from "../enums/command";
-import { CosmeticKind } from "../enums/kind";
+import { CosmeticKind, cosmeticKinds } from "../enums/kind";
 
 export class AvatarActivationDomain<
     TCatalog extends CosmeticCatalog,
@@ -49,11 +49,7 @@ export class AvatarActivationDomain<
 
         if (
             !rule?.subgroup
-            || ![
-                String(CosmeticKind.City),
-                String(CosmeticKind.Bubble),
-                String(CosmeticKind.Overlap),
-            ].includes(rule.type2 ?? "")
+            || !cosmeticKinds.includes(Number(rule.type2))
             || target?.uid !== context.owner
             || target.realm !== context.rules.kingdomId
             || !serverFeature(context.rules, "avatar", {
@@ -98,6 +94,14 @@ export class AvatarActivationDomain<
         if (!state)
         {
             return { response: encode({}), event: null };
+        }
+
+        if (rule.type2 === String(CosmeticKind.Frame))
+        {
+            context.write.appearance = {
+                ...context.write.appearance,
+                picfraId: cityInteger(rule.frameID, 1),
+            };
         }
 
         if (!["3", "4"].includes(rule.overlap ?? "") && long(owned, "expirationTime") !== -1n)

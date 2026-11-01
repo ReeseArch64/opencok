@@ -1,5 +1,6 @@
 import records from "../data/catalog.json";
 import { classifyCosmetic } from "./cosmetics.mjs";
+import { mediaFilename } from "./artwork.mjs";
 
 export const categories = {
   tropas: {
@@ -13,7 +14,7 @@ export const categories = {
     name: "Skins",
     eyebrow: "Um reino com a sua identidade",
     description:
-      "Explore skins de castelo, asa, balão, marcha, efeito, decoração e perfil. Cada detalhe do reino tem seu próprio estilo.",
+      "Explore skins de Aura, Moldura de Avatar, Asas, Efeito, Placa de Identificação, Bolha, Decoração, Fila e Castelo. Cada detalhe do reino tem seu próprio estilo.",
     symbol: "♜",
   },
   avatares: {
@@ -35,7 +36,7 @@ export const categories = {
 export const catalog = records.map((item) => ({
   ...item,
   ...classifyCosmetic(item.sourceTable, item.cosmeticType),
-  image: `/media/${item.id}.png`,
+  image: item.source === null ? null : `/media/${mediaFilename(item)}`,
 }));
 
 export function statusLabel(status) {

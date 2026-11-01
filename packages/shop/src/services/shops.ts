@@ -114,7 +114,7 @@ export class ShopService
                 }
 
                 const counters = shopLimit(rule, state, count);
-                const { gold } = shopPrice(rule, counters.daily, count);
+                const { gold, crystalGold } = shopPrice(rule, counters.daily, count);
                 const original = state.inventory;
                 const costs = rule.value_item && rule.value_item !== "0"
                     ? [
@@ -125,7 +125,7 @@ export class ShopService
                     ]
                     : [];
 
-                if (!gold && !costs.length)
+                if (!gold && !crystalGold && !costs.length)
                 {
                     throw new GameError(errors.unsupported);
                 }
@@ -185,6 +185,30 @@ export class ShopService
                     throw new GameError(errors.invalid);
                 }
 
+                if (crystalGold)
+                {
+                    const before = long(original.profile, "crystalGold");
+
+                    if (before < 0n || before > 9223372036854775807n)
+                    {
+                        throw new GameError(errors.invalid);
+                    }
+
+                    if (before < BigInt(crystalGold))
+                    {
+                        throw new GameError(errors.insufficientResource);
+                    }
+
+                    profile.crystalGold = before - BigInt(crystalGold);
+                    postings.push({
+                        account: owner,
+                        asset: "profile.crystalGold",
+                        before,
+                        after: profile.crystalGold,
+                        reason: command,
+                    });
+                }
+
                 const items = plan.items;
                 const delivered = plan.items.find((item) => item.itemId === rule.item_id);
 
@@ -229,7 +253,7 @@ export class ShopService
                     body.shoppingMallItems = sfs.object({});
                 }
 
-                const pushes = [
+                const pushes: { command: string; body: Fields; }[] = [
                     {
                         command: "push.useritem",
                         body: {
@@ -241,6 +265,14 @@ export class ShopService
                         },
                     },
                 ];
+
+                if (crystalGold)
+                {
+                    pushes.push({
+                        command: "push.user.crystalGold",
+                        body: { crystalGold: sfs.long(profile.crystalGold!) },
+                    });
+                }
 
                 return {
                     inventory: {

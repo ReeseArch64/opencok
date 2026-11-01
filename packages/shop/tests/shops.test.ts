@@ -269,3 +269,176 @@ test("shop and trade grants cannot spend or revive a stack at its expiry deadlin
             .items[0]!.count,
     ).toBe(3);
 });
+
+const diamondOffer = { ...offer, sale_type: "15", value1_type: "8", value1: "20" };
+const fragmentOffer = {
+    ...offer,
+    sale_type: "15",
+    value1_type: "11",
+    value1: "1000000",
+    value_item: "200300",
+    value_item_num: "1000000",
+};
+
+test("appearance diamond pricing uses the configured batch amount", () => {
+    expect(shopPrice(diamondOffer, 0, 2)).toMatchObject({ gold: 0, crystalGold: 40 });
+    expect(shopAvailable(diamondOffer, state(), rules)).toBe(true);
+});
+
+test("appearance fragment pricing uses its existing item binding", () => {
+    expect(shopPrice(fragmentOffer, 0, 1)).toMatchObject({ gold: 0, crystalGold: 0 });
+    expect(shopAvailable(fragmentOffer, state(), rules)).toBe(true);
+});
+
+test("legacy gold pricing preserves its currency", () => {
+    expect(shopPrice(offer, 0, 1)).toMatchObject({ gold: 10, crystalGold: 0 });
+});
+
+test.each(
+    [
+        ["missing fragment binding", { ...fragmentOffer, value_item: "0" }, 1],
+        ["inconsistent fragment amount", { ...fragmentOffer, value_item_num: "1" }, 1],
+        ["zero fragment price", { ...fragmentOffer, value1: "0" }, 1],
+        ["fragment currency outside appearance", { ...fragmentOffer, sale_type: "10" }, 1],
+        ["diamond currency outside appearance", { ...diamondOffer, sale_type: "10" }, 1],
+        ["diamond batch overflow", { ...diamondOffer, value1: "2147483647" }, 2],
+    ] as const,
+)("appearance pricing rejects %s", (_, rule, count) => {
+    expect(() => shopPrice(rule, 0, count)).toThrow();
+});
+
+function appearanceService(current: ShopState, rule: Rule)
+{
+    const local = new Rules(new Map(), new Map(), new Map());
+    local.goods.set("200300", { id: "200300", type: "1", para1: "60" });
+    local.goods.set("200301", { id: "200301", type: "1", para1: "60" });
+    local.shops.set("offer", rule);
+    let planned: ShopPlan | undefined;
+    const service = new ShopService(
+        {
+            read: async (_, select) => select(current),
+            execute: async (_, __, plan) => {
+                planned = await plan(current);
+                return Buffer.from(planned.inventory.response);
+            },
+        },
+        local,
+        planRealmInventoryGrants,
+    );
+    return { service, plan: () => planned! };
+}
+
+test("appearance diamond purchases debit crystalGold and publish the native balance notification", async () => {
+    const current = state();
+    current.inventory.profile.crystalGold = 40n;
+    current.inventory.profile.crystal = 999n;
+    const local = new Rules(new Map(), new Map(), new Map());
+    local.goods.set("200300", { id: "200300", type: "1", para1: "60" });
+    local.shops.set("offer", { ...offer, sale_type: "15", value1_type: "8", value1: "20" });
+    let planned: ShopPlan | undefined;
+    const service = new ShopService(
+        {
+            read: async (_, select) => select(current),
+            execute: async (_, __, plan) => {
+                planned = await plan(current);
+                return Buffer.from(planned.inventory.response);
+            },
+        },
+        local,
+        planRealmInventoryGrants,
+    );
+    const request = { id: sfs.string("offer"), num: sfs.int(2) };
+    const result = await service.command("buyer", "shoppingMall.buy", request);
+    expect(planned!.inventory.profile).toEqual({ crystalGold: 0n });
+    expect(planned!.inventory.postings).toContainEqual({
+        account: "buyer",
+        asset: "profile.crystalGold",
+        before: 40n,
+        after: 0n,
+        reason: "shoppingMall.buy",
+    });
+    expect(result.body.gold).toEqual(sfs.long(115));
+    expect(result.pushes).toContainEqual({
+        command: "push.user.crystalGold",
+        body: { crystalGold: sfs.long(0) },
+    });
+    expect(fields(result.body.goods).count).toEqual(sfs.int(2));
+});
+
+test.each(
+    [
+        ["insufficient", 39n],
+        ["negative", -1n],
+        ["overflow", 9223372036854775808n],
+    ] as const,
+)("appearance diamond purchases reject %s balances", async (_, balance) => {
+    const current = state();
+    current.inventory.profile.crystalGold = balance;
+    current.inventory.profile.crystal = 999n;
+    const { service } = appearanceService(current, diamondOffer);
+    await expect(service.command("buyer", "shoppingMall.buy", {
+        id: sfs.string("offer"),
+        num: sfs.int(2),
+    })).rejects.toThrow();
+});
+
+test("appearance fragment purchases debit the configured item once", async () => {
+    const current = state();
+    current.inventory.items = [{
+        uuid: "fragments",
+        itemId: "200300",
+        count: 1000000,
+        value: 0,
+        vanishTime: 0n,
+    }];
+    const local = new Rules(new Map(), new Map(), new Map());
+    local.goods.set("200300", { id: "200300", type: "1", para1: "60" });
+    local.goods.set("200301", { id: "200301", type: "1", para1: "60" });
+    local.shops.set("offer", {
+        ...offer,
+        item_id: "200301",
+        sale_type: "15",
+        value1_type: "11",
+        value1: "1000000",
+        value_item: "200300",
+        value_item_num: "1000000",
+    });
+    let planned: ShopPlan | undefined;
+    const service = new ShopService(
+        {
+            read: async (_, select) => select(current),
+            execute: async (_, __, plan) => {
+                planned = await plan(current);
+                return Buffer.from(planned.inventory.response);
+            },
+        },
+        local,
+        planRealmInventoryGrants,
+    );
+    const result = await service.command("buyer", "shoppingMall.buy", {
+        id: sfs.string("offer"),
+        num: sfs.int(1),
+    });
+    expect(planned!.inventory.profile).toEqual({});
+    expect(planned!.inventory.postings.filter((entry) => entry.asset === "item.fragments"))
+        .toMatchObject([
+            { before: 1000000n, after: 0n },
+        ]);
+    expect(fields(result.body.goods).count).toEqual(sfs.int(1));
+});
+
+test("appearance fragment purchases reject insufficient fragments", async () => {
+    const current = state();
+    current.inventory.items = [{
+        uuid: "fragments",
+        itemId: "200300",
+        count: 999999,
+        value: 0,
+        vanishTime: 0n,
+    }];
+    const { service } = appearanceService(current, { ...fragmentOffer, item_id: "200301" });
+    await expect(service.command("buyer", "shoppingMall.buy", {
+        id: sfs.string("offer"),
+        num: sfs.int(1),
+    })).rejects.toThrow();
+});

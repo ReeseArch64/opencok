@@ -1,5 +1,6 @@
 import { expect, test } from "bun:test";
-import { classifyCosmetic } from "../src/lib/cosmetics.mjs";
+import { classifyCosmetic, skinGroups } from "../src/lib/cosmetics.mjs";
+import gameSkins from "../../../packages/resources/tests/fixtures/appearance-catalog.json";
 import records from "../src/data/catalog.json";
 import { catalog as statusCatalog } from "../../../packages/resources/src/catalogs/data/status.ts";
 import { records as lordImages } from "../../../packages/resources/src/catalogs/data/lord_image.records0.ts";
@@ -7,14 +8,15 @@ import { matchesItem } from "../src/lib/search.mjs";
 
 test.each([
   [100, "Castelo"],
-  [101, "Marcha"],
+  [101, "Fila"],
   [102, "Decoração"],
-  [103, "Balão"],
-  [104, "Perfil"],
-  [105, "Balão"],
+  [103, "Bolha"],
+  [104, "Placa de Identificação"],
+  [105, "Bolha"],
   [108, "Efeito"],
-  [109, "Asa"],
-  [115, "Perfil"],
+  [109, "Asas"],
+  [115, "Moldura de Avatar"],
+  [116, "Aura"],
 ])("classifyCosmetic_statusType%s_mapsToSkin%s", (type, group) => {
   expect(classifyCosmetic("status", type)).toEqual({ category: "skins", group });
 });
@@ -46,21 +48,26 @@ test("catalog_lordAppearances_matchServerIdsAndCharacterArt", () => {
   }
 });
 
-test("catalog_skins_matchAuthoritativeStatusTypesAndCoverSevenCollections", () => {
+test("catalog_skins_matchAuthoritativeStatusTypesAndAvailableCollections", () => {
   const skins = records.filter((item) => item.category === "skins");
   const statusById = new Map(statusCatalog.records.map((row) => [String(row.id), row]));
   expect([...new Set(skins.map((item) => item.group))].sort()).toEqual([
-    "Asa",
-    "Balão",
+    "Asas",
+    "Aura",
+    "Bolha",
     "Castelo",
     "Decoração",
     "Efeito",
-    "Marcha",
-    "Perfil",
+    "Fila",
+    "Moldura de Avatar",
+    "Placa de Identificação",
   ]);
   for (const item of skins) {
     expect(item.sourceTable).toBe("status");
-    expect(statusById.get(item.reference)?.type2).toBe(item.cosmeticType);
+    const binding = gameSkins.find((skin) => skin.wikiId === item.id);
+    expect(binding).toBeDefined();
+    expect(binding.type).toBe(item.cosmeticType);
+    expect(statusById.get(binding.statusId)?.type2).toBe(item.cosmeticType);
     expect(classifyCosmetic(item.sourceTable, item.cosmeticType)).toEqual({
       category: item.category,
       group: item.group,
@@ -68,8 +75,42 @@ test("catalog_skins_matchAuthoritativeStatusTypesAndCoverSevenCollections", () =
   }
 });
 
-test("matchesItem_profileSkin_doesNotMatchLordAppearanceFilter", () => {
-  const frame = { name: "Moldura de bronze", group: "Perfil", reference: "12000093" };
-  expect(matchesItem(frame, { group: "Perfil", query: "moldura" })).toBe(true);
+test("matchesItem_avatarFrame_doesNotMatchLordAppearanceFilter", () => {
+  const frame = { name: "Moldura de bronze", group: "Moldura de Avatar", reference: "12000093" };
+  expect(matchesItem(frame, { group: "Moldura de Avatar", query: "moldura" })).toBe(true);
   expect(matchesItem(frame, { group: "Aparência do senhor" })).toBe(false);
+});
+
+test("skinGroups_requestedCollections_preserveDisplayOrder", () => {
+  expect(skinGroups).toEqual([
+    "Aura",
+    "Moldura de Avatar",
+    "Asas",
+    "Efeito",
+    "Placa de Identificação",
+    "Bolha",
+    "Decoração",
+    "Fila",
+    "Castelo",
+  ]);
+});
+
+test("matchesItem_nameplate_doesNotMatchAvatarFrameFilter", () => {
+  const plate = {
+    name: "Placa do esqueleto",
+    group: "Placa de Identificação",
+    reference: "505558",
+  };
+  expect(matchesItem(plate, { group: "Moldura de Avatar" })).toBe(false);
+});
+
+test("matchesItem_skinNameAndOriginalId_findsWithinCollection", () => {
+  const plate = {
+    name: "Placa do esqueleto",
+    group: "Placa de Identificação",
+    reference: "505558",
+  };
+  expect(matchesItem(plate, { group: "Placa de Identificação", query: "esqueleto 505558" })).toBe(
+    true,
+  );
 });

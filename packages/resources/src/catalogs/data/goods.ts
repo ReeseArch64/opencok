@@ -1,3 +1,4 @@
+import { records as appearanceRecords } from "./goods.appearance.ts";
 import { CatalogKind } from "@opencok/enums/catalog-kind";
 import type { GoodsDefinition } from "../types/goods.ts";
 import type { CatalogTable } from "../../catalog-model.ts";
@@ -46,6 +47,7 @@ import { records as records40 } from "./goods.records40.ts";
 export const catalog: CatalogTable<GoodsDefinition> = {
     "kind": CatalogKind.Table,
     "records": [
+        ...appearanceRecords,
         ...records0,
         ...records1,
         ...records2,
