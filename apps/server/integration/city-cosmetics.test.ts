@@ -204,7 +204,7 @@ test(
     120000,
 );
 test(
-    "owned map projections retain overlap, bubble and skin fields, expiry and the target-only database selection",
+    "owned map projections retain permanent catalog skins, timed bubbles and target-only database selection",
     async () => {
         const h = await fixture();
         try
@@ -225,7 +225,11 @@ test(
                 set: Date.UTC(2024, 8, 5, 12, 0, 5) / 1000,
             });
             expect(point.sid).toBe(509878);
-            expect(point.set).toBe(Date.UTC(2024, 8, 5, 13) / 1000);
+            expect(point.set).toBe(2147000000);
+            expect(
+                (await h.db.db.select().from(user_state).where(eq(user_state.stateId, 509878)))[0]!
+                    .endTime,
+            ).toBe(9223372036854775807n);
             const snapshot = await readWorldMap(
                 h.adapter.kingdom.db,
                 "owner",
@@ -236,7 +240,7 @@ test(
             h.clock.now += 6000;
             expect((await h.map()).bubble).toBeUndefined();
             h.clock.now = Date.UTC(2024, 8, 5, 13, 0, 1);
-            expect((await h.map()).sid).toBeUndefined();
+            expect((await h.map()).sid).toBe(509878);
             expect((await h.map()).overlap.count).toBe(50);
         }
         finally
