@@ -186,10 +186,10 @@
     "group": "Infantaria",
     "tier": 14,
     "status": "soon",
-    "source": "data/cdn/extracteds/tropas/images/T14/ico107414_small.png",
+    "source": "data/cdn/extracteds/tropas/images/T14/ico107414.png",
     "reference": "107414",
     "description": "Carrasco Quebrador de Juramentos integra o catálogo de infantaria no tier T14. Explore sua arte e compare as unidades desta família.",
-    "note": "Ícone pequeno do APK; arte de corpo inteiro não localizada"
+    "note": "Arte capturada no BosMod, com fundo preservado."
   },
   {
     "id": "tropa-107514",
@@ -198,10 +198,10 @@
     "group": "Cavalaria",
     "tier": 14,
     "status": "soon",
-    "source": "data/cdn/extracteds/tropas/images/T14/ico107514_small.png",
+    "source": "data/cdn/extracteds/tropas/images/T14/ico107514.png",
     "reference": "107514",
     "description": "Cavaleiro do Pesadelo integra o catálogo de cavalaria no tier T14. Explore sua arte e compare as unidades desta família.",
-    "note": "Ícone pequeno do APK; arte de corpo inteiro não localizada"
+    "note": "Arte capturada no BosMod, com fundo preservado."
   },
   {
     "id": "tropa-107114",
@@ -234,10 +234,10 @@
     "group": "Arqueiros",
     "tier": 14,
     "status": "soon",
-    "source": "data/cdn/extracteds/tropas/images/T14/ico107614_small.png",
+    "source": "data/cdn/extracteds/tropas/images/T14/ico107614.png",
     "reference": "107614",
     "description": "Caçador de Corvo Negro integra o catálogo de arqueiros no tier T14. Explore sua arte e compare as unidades desta família.",
-    "note": "Ícone pequeno do APK; arte de corpo inteiro não localizada"
+    "note": "Arte capturada no BosMod, com fundo preservado."
   },
   {
     "id": "tropa-107314",
@@ -246,10 +246,10 @@
     "group": "Cerco",
     "tier": 14,
     "status": "soon",
-    "source": "data/cdn/extracteds/tropas/images/T14/ico107314_small.png",
+    "source": "data/cdn/extracteds/tropas/images/T14/ico107314.png",
     "reference": "107314",
     "description": "Punidor Divino integra o catálogo de cerco no tier T14. Explore sua arte e compare as unidades desta família.",
-    "note": "Ícone pequeno do APK; arte de corpo inteiro não localizada"
+    "note": "Arte capturada no BosMod, com fundo preservado."
   },
   {
     "id": "tropa-107714",
@@ -258,10 +258,10 @@
     "group": "Cerco",
     "tier": 14,
     "status": "soon",
-    "source": "data/cdn/extracteds/tropas/images/T14/ico107714_small.png",
+    "source": "data/cdn/extracteds/tropas/images/T14/ico107714.png",
     "reference": "107714",
     "description": "Abissal Bruto integra o catálogo de cerco no tier T14. Explore sua arte e compare as unidades desta família.",
-    "note": "Ícone pequeno do APK; arte de corpo inteiro não localizada"
+    "note": "Arte capturada no BosMod, com fundo preservado."
   },
   {
     "id": "tropa-57580215",
