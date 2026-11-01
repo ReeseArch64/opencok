@@ -20,7 +20,6 @@ const cosmeticStatusTypes = new Set([
     CosmeticKind.InnerCastle,
     CosmeticKind.InnerDecoration,
     CosmeticKind.Overlap,
-    202,
 ].map(String));
 
 export function isCosmeticStatus(rule: CosmeticRule | undefined): boolean

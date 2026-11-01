@@ -107,9 +107,11 @@ test.each([
 test("cosmeticStatusRule_throneCounterAndOrdinaryEffects_preservesLegitimateBonuses", () => {
     const throne = { type2: "110", effect: "2189;1", overlap: "5" };
     const ordinary = { type2: "9", effect: "50;25", random: "1" };
+    const unclassified = { type2: "202", effect: "50;25" };
 
     expect(cosmeticStatusRule(throne)).toBe(throne);
     expect(cosmeticStatusRule(ordinary)).toBe(ordinary);
+    expect(cosmeticStatusRule(unclassified)).toBe(unclassified);
     expect(isCosmeticStatus(undefined)).toBe(false);
     expect(cosmeticStatusRule({ ...throne, subgroup: "308" }).effect).toBe("");
 });
