@@ -4,6 +4,7 @@ import type { CityCosmeticResponse } from "../contracts/responses/cosmetics";
 import { sfs, type Fields } from "@opencok/messages/sfs";
 import { validateFields } from "@opencok/messages/validations/fields";
 import { cityCosmeticSchema, cityCosmeticUpdateSchema } from "../validations/cosmetics";
+import { cosmeticStatusRule } from "../rules/attributes";
 
 export class CosmeticMapper
 {
@@ -54,7 +55,8 @@ export class CosmeticMapper
         rules: CosmeticCatalog,
         previous?: number,
     ): Fields => {
-        const rule = rules.power.statuses?.get(String(row.stateId)),
+        const declaration = rules.power.statuses?.get(String(row.stateId)),
+            rule = declaration ? cosmeticStatusRule(declaration) : undefined,
             end = row.endTime === 9223372036854775807n
                 ? 2147000000000n
                 : BigInt(String(row.endTime)),

@@ -5,7 +5,11 @@ import { anniversaryDomain } from "@opencok/services/anniversary";
 import {
     cosmeticInteractionParticipants,
     publishCosmeticInteractionMutation,
+    createRealmAvatarActivationDomain,
 } from "../src/composition/skins";
+import { playerEffectsDomain } from "@opencok/services/player-effects";
+import { readPlayerEffects } from "@opencok/repositories/power";
+import { storedPowerEffects } from "@opencok/rules/power-effects";
 import { Database } from "@opencok/repositories/game";
 import { createRealmWorldService } from "../src/composition/world";
 import { readWorldMap } from "@opencok/world/repositories/map";
@@ -18,6 +22,95 @@ import { avatar_storage } from "@opencok/drizzle/schema/opencok_kingdom/avatar_s
 import { mutation_outbox } from "@opencok/drizzle/schema/opencok_kingdom/mutation_outbox";
 import { sfs, type Fields, type Value } from "@opencok/messages/sfs";
 import { cityHarness } from "./support/city";
+
+test(
+    "saved skin bonuses disappear through activation, service restart, reconnect and expiry",
+    async () => {
+        const domains = [createRealmAvatarActivationDomain(), playerEffectsDomain];
+        const h = await cityHarness(domains);
+        let restarted: Awaited<ReturnType<typeof cityHarness>> | undefined;
+        const expiry = BigInt(h.clock.now + 3600000);
+        const configure = (rules: typeof h.rules) => {
+            rules.features.set("avatar", {
+                id: "avatar",
+                online: "all",
+                test: "all",
+                version: "1.0.0",
+            });
+            for (const id of ["990001", "990002"])
+            {
+                rules.power.statuses!.set(id, {
+                    id,
+                    type2: "100",
+                    subgroup: id === "990001" ? "1" : "2",
+                    group: "500500",
+                    overlap: "2",
+                    time: "3600",
+                    effect: "50;999",
+                    random: "1",
+                });
+            }
+        };
+        try
+        {
+            configure(h.rules);
+            await h.db.db.insert(avatar_storage).values([
+                { uid: "owner", avatarId: "990001", expirationTime: expiry, effectiveSign: 1 },
+                { uid: "owner", avatarId: "990002", expirationTime: expiry, effectiveSign: 1 },
+            ]);
+            await h.db.db.insert(user_state).values([
+                {
+                    uid: "owner",
+                    stateId: 990001,
+                    type2: 100,
+                    endTime: expiry,
+                    ranEffId: 50,
+                    ranEffValue: 999,
+                },
+                { uid: "owner", stateId: 500080, type2: 9, endTime: expiry + 1000n },
+            ]);
+            const saved = await readPlayerEffects(h.db.db, { uid: "owner" });
+            expect(storedPowerEffects(saved, h.rules, h.clock.now, 50).status).toBe(25);
+
+            await h.command("avatar.activate", { avatarId: sfs.string("990002") });
+            const switched = await h.db.db.select().from(user_state).where(
+                eq(user_state.uid, "owner"),
+            );
+            expect(switched.find((row) => row.stateId === 990002)!.endTime).toBe(expiry);
+            expect(switched.some((row) => row.stateId === 990001)).toBe(false);
+
+            restarted = await cityHarness(domains, false, undefined, 1200, {
+                connection: h.connection,
+                seed: false,
+                now: h.clock.now,
+            });
+            configure(restarted.rules);
+            const reloaded = await readPlayerEffects(restarted.db.db, { uid: "owner" });
+            expect(storedPowerEffects(reloaded, restarted.rules, restarted.clock.now, 50).status)
+                .toBe(25);
+            await restarted.command("effects.init", {});
+            restarted.clock.now = Number(expiry);
+            await restarted.command("effects.init", {});
+            const expired = await readPlayerEffects(restarted.db.db, { uid: "owner" });
+            expect(expired.states.some((row) => row.stateId === 990002)).toBe(false);
+            expect(storedPowerEffects(expired, restarted.rules, restarted.clock.now, 50).status)
+                .toBe(25);
+            const owned = await restarted.db.db.select().from(avatar_storage)
+                .where(eq(avatar_storage.uid, "owner"));
+            expect(owned.map((row) => row.avatarId).sort()).toEqual(["990001", "990002"]);
+            expect(owned.map((row) => row.expirationTime)).toEqual([expiry, expiry]);
+            const [profile] = await restarted.db.db.select().from(userprofile)
+                .where(eq(userprofile.uid, "owner"));
+            expect(profile!.gold).toBe(100000n);
+        }
+        finally
+        {
+            await restarted?.close();
+            await h.close();
+        }
+    },
+    120000,
+);
 async function fixture()
 {
     const h = await cityHarness([anniversaryDomain], false, cosmeticInteractionParticipants);

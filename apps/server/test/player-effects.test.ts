@@ -3,10 +3,58 @@ import { loadRules } from "@opencok/resources/rules";
 import { temporaryEffect, vipMutation } from "@opencok/rules/player-effects";
 import { validateTalentTrees } from "@opencok/hero/rules/legacy-general-talents";
 import { storedPowerEffects } from "@opencok/rules/power-effects";
-import { playerEffectsDomain } from "@opencok/services/player-effects";
+import { applyProgressionStatus, playerEffectsDomain } from "@opencok/services/player-effects";
 import { cityFixture } from "./fixtures/city-progression";
-import { sfs } from "@opencok/messages/sfs";
+import { decode, sfs, type Value } from "@opencok/messages/sfs";
 const rules = await loadRules();
+
+test("applyProgressionStatus_skinItem_omitsBonusesFromTheNativeResponse", async () => {
+    const local = await loadRules();
+    local.power.statuses!.set("990001", {
+        id: "990001",
+        type2: "100",
+        subgroup: "1",
+        effect: "50;99",
+        time: "3600",
+    });
+    const { context } = cityFixture(local);
+
+    const body = applyProgressionStatus(context, "990001");
+
+    expect(body.status).toEqual(sfs.array([]));
+    expect(body.statusId).toEqual(sfs.int(990001));
+    expect(context.write.states![0]!.endTime).toBe(context.now + 3600000n);
+});
+
+test("showStatusItem_savedRandomSkin_clearsDisplayedBonusesWithoutChangingSavedState", async () => {
+    const local = await loadRules();
+    local.power.statuses!.set("990001", {
+        id: "990001",
+        type2: "100",
+        random: "1",
+        effect: "50;99",
+    });
+    const { context, state } = cityFixture(local);
+    state.effects.states = [{
+        stateId: 990001,
+        type2: 100,
+        startTime: 0n,
+        endTime: context.now + 1000n,
+        ranEffId: 50,
+        ranEffValue: 99,
+    }];
+    const persisted = structuredClone(state.effects.states);
+
+    const result = await playerEffectsDomain.prepare(context, "show.status.item", {});
+    const statuses = decode(Buffer.from(result.response)).statusItems!.value as Value[];
+
+    expect(statuses[0]!.value).toMatchObject({
+        id: sfs.int(990001),
+        ranEffId: sfs.int(-1),
+        ranEffValue: sfs.int(0),
+    });
+    expect(state.effects.states).toEqual(persisted);
+});
 test("talent points enforce tree membership, OR prerequisites, and total budget", () => {
     expect(
         validateTalentTrees([{ id: "50000", "600000": 5, "600100": 5, "601000": 1 }], rules, 11),

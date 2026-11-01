@@ -9,6 +9,7 @@ import { num, long } from "@opencok/contracts/rows";
 import { cityInteger } from "@opencok/rules/city-progression";
 import { vipMutation, temporaryEffect } from "@opencok/rules/player-effects";
 import { vipState, temporaryState } from "@opencok/mappings/player-effects";
+import { cosmeticStatusRule } from "@opencok/skins/rules/attributes";
 
 import type { CityDomain } from "./city-domain.ts";
 import type { CityProgressionContext } from "./city-progression-context.ts";
@@ -51,7 +52,8 @@ export function applyProgressionStatus(context: CityProgressionContext, id: stri
         return {};
     }
 
-    const declaration = context.rules.power.statuses?.get(String(state.stateId));
+    const rule = context.rules.power.statuses?.get(String(state.stateId));
+    const declaration = rule ? cosmeticStatusRule(rule) : undefined;
     const effects = declaration?.random === "1"
         ? [[num(state, "ranEffId"), num(state, "ranEffValue")]]
         : (declaration?.effect ?? "")
@@ -212,7 +214,7 @@ async function prepare(context: CityProgressionContext, command: string, params:
                     (row) =>
                         long(row, "startTime") <= context.now && long(row, "endTime") > context.now,
                 )
-                .map((row) => sfs.object(temporaryState(row))),
+                .map((row) => sfs.object(temporaryState(row, context.rules))),
         );
     }
     else

@@ -6,6 +6,7 @@ import type { Rules } from "./game.ts";
 
 import { effectInteger as integer } from "./power-values.ts";
 import { civilizationResearchEffect, towerResearchEffect } from "./power-research.ts";
+import { isCosmeticStatus } from "@opencok/skins/rules/attributes";
 
 function effectValues(source: string | undefined, requested: number): number[]
 {
@@ -119,7 +120,7 @@ export function storedPowerEffects(
             throw new GameError(errors.unsupported, "power_effect");
         }
 
-        if (!rule.effect?.trim())
+        if (isCosmeticStatus(rule) || !rule.effect?.trim())
         {
             continue;
         }
