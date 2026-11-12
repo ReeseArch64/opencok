@@ -11,7 +11,13 @@ These rules govern Git-tracked content and proposed additions, including changes
 
 ## Protected tracked content
 
-Read-only unless authorized: `.agents/`, `.github/`, `.husky/`, `data/`, `docker/`, `docs/`; every file directly in the repository root, including dotfiles; agent guides, tool configuration, manifests and lockfiles elsewhere in the repository. Protection does not require scanning or reading unrelated content.
+Read-only unless authorized: `.agents/`, `.github/`, `.husky/`, `data/`, `docker/`, `docs/`; every file directly in the repository root, including dotfiles; all README files; agent guides, tool configuration, manifests and lockfiles elsewhere in the repository. Protection does not require scanning or reading unrelated content.
+
+## README scope
+
+- README files are read-only by default. Create or edit them only when the user explicitly requests README changes; implementation work does not authorize documentation updates.
+- Except for the root `README.md`, keep each README limited to a title, a brief description and minimal instructions for using the package or application. Include only essential prerequisites and a small working example or command.
+- Do not append implementation details, model catalogs, architecture, test reports, progress notes, roadmaps or future work. Do not create other documentation to relocate removed README content unless explicitly requested.
 
 ## Destinations
 
