@@ -1,6 +1,7 @@
 import type { Connection } from "mongoose";
 import { resourceDepositConfigurationModel } from "../models/global/resource-deposit-configuration";
 import configurations from "./data/resource-deposit-configurations.json";
+
 export async function seedResourceConfigurations(
     connection: Connection,
 ): Promise<void>

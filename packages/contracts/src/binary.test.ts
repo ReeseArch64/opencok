@@ -1,6 +1,7 @@
 import { expect, test } from "bun:test";
 import { encodePacket, decodePacket } from "./binary";
 import fixture from "../../../gameserver/testdata/world.json";
+
 test("shared Go/Dart/TypeScript fixtures round trip byte for byte", () => {
     for (const bytes of Object.values(fixture))
     {

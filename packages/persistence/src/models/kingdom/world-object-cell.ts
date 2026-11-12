@@ -3,6 +3,7 @@ import { Check, Column, Entity, ForeignKey, Index } from "typeorm";
 import { BaseEntity } from "../../base/base-entity";
 import { World } from "./world";
 import { WorldObject } from "./world-object";
+
 @Entity({ name: "world_object_cells" })
 @ForeignKey(() => World, ["worldId"], ["id"], {
     name: "world_object_cell_world",

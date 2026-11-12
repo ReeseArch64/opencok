@@ -12,6 +12,7 @@
     "nextControlFlowPosition": "nextLine",
     "useBraces": "always",
     "arrowFunction.bracePosition": "sameLine",
+    "module.blankLinesAfterImports": 1,
     "module.sortImportDeclarations": "maintain",
     "module.sortExportDeclarations": "maintain",
     "importDeclaration.sortNamedImports": "maintain",

@@ -6,6 +6,7 @@ import { resourceDepositConfigurationModel } from "../models/global/resource-dep
 import { ResourceType } from "../enums/resource-type";
 import { WorldObjectType } from "../enums/world-object-type";
 import { ResourceDepositStatus } from "../enums/resource-deposit-status";
+
 export async function seedResourceDeposits(
     source: DataSource,
     mongo: Connection,

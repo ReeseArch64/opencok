@@ -1,4 +1,5 @@
 import type { MigrationInterface, QueryRunner } from "typeorm";
+
 export class CreateWorldOccupancyRegionsAndSpawnJobs1794438005000 implements MigrationInterface
 {
     name = "CreateWorldOccupancyRegionsAndSpawnJobs1794438005000";

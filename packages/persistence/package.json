@@ -7,6 +7,7 @@
     "./*": "./src/*.ts"
   },
   "scripts": {
+    "format": "dprint fmt --config ../../dprint.json --allow-no-files .",
     "migration:run": "bun --no-env-file --tsconfig-override tsconfig.json ./node_modules/typeorm/cli.js migration:run -d src/data-source.ts",
     "migration:revert": "bun --no-env-file --tsconfig-override tsconfig.json ./node_modules/typeorm/cli.js migration:revert -d src/data-source.ts",
     "migration:show": "bun --no-env-file --tsconfig-override tsconfig.json ./node_modules/typeorm/cli.js migration:show -d src/data-source.ts",

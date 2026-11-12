@@ -4,6 +4,7 @@ import { BaseEntity } from "../../base/base-entity";
 
 import { WorldObjectType } from "../../enums/world-object-type";
 import { World } from "./world";
+
 @Entity({ name: "world_objects" })
 @Index("world_object_id_type_unique", ["id", "objectType"], { unique: true })
 @ForeignKey(() => World, ["worldId"], ["id"], {

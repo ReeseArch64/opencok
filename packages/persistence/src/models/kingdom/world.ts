@@ -1,6 +1,7 @@
 import "reflect-metadata";
 import { Check, Column, Entity } from "typeorm";
 import { BaseEntity } from "../../base/base-entity";
+
 @Entity({ name: "worlds" })
 @Check("world_main_id", "\"id\" = 1")
 @Check(

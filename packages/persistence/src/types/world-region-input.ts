@@ -1,6 +1,7 @@
 import type { Types } from "mongoose";
 import type { WorldRegionType } from "../enums/world-region-type";
 import type { WorldRegionStatus } from "../enums/world-region-status";
+
 export type CreateWorldRegion = {
     worldPublicId: string;
     displayName: string;

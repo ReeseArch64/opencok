@@ -1,4 +1,5 @@
 import type { MigrationInterface, QueryRunner } from "typeorm";
+
 export class CreateWorldResourceDeposits1794438004000 implements MigrationInterface
 {
     name = "CreateWorldResourceDeposits1794438004000";

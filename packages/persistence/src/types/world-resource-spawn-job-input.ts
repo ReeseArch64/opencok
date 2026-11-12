@@ -1,5 +1,6 @@
 import type { Types } from "mongoose";
 import type { ResourceSpawnJobStatus } from "../enums/resource-spawn-job-status";
+
 export type CreateWorldResourceSpawnJob = {
     worldRegionId: string | Types.ObjectId;
     sourceDepositPublicId?: string | null;

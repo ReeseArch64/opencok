@@ -7,6 +7,7 @@
     "./binary": "./src/binary.ts"
   },
   "scripts": {
+    "format": "dprint fmt --config ../../dprint.json --allow-no-files .",
     "generate": "bun --no-env-file scripts/generate.ts",
     "check-generated": "bun --no-env-file scripts/generate.ts --check",
     "test": "bun --no-env-file test",

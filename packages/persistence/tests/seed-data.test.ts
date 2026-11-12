@@ -2,6 +2,7 @@ import { expect, test } from "bun:test";
 import { Mongoose } from "mongoose";
 import { worldLayoutModel } from "@opencok/persistence/models/kingdom/world-layout";
 import terrain from "../src/seeds/data/terrain-layout.json";
+
 test("initial terrain data validates and matches the current read-only Realm terrain", async () => {
     const connection = new Mongoose().createConnection().useDb("kingdom_1");
     const Layout = worldLayoutModel(connection, 1);

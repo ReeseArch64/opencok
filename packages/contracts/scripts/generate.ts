@@ -3,6 +3,7 @@ import { packets } from "../src/world";
 import { encodePacket, wireSchema, type WireSchema } from "../src/binary";
 import { resolve } from "node:path";
 import { mkdir } from "node:fs/promises";
+
 const root = resolve(import.meta.dir, "../../..");
 const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 const definitions = new Map<string, WireSchema>();

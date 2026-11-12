@@ -1,4 +1,5 @@
 import type { Types } from "mongoose";
+
 export type CreateWorldPopulationConfiguration = {
     worldRegionId: string | Types.ObjectId;
     configurationVersion: number;
