@@ -56,7 +56,6 @@ services:
       - 4318:4318
     volumes:
       - maple-data:/data
-    stop_grace_period: 45s
 
   postgres:
     environment:
@@ -101,3 +100,7 @@ services:
   redis:
     ports:
       - 6379:6379
+
+  zookeeper:
+    ports:
+      - 2181:2181

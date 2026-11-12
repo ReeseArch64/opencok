@@ -7,6 +7,7 @@ import { prepareResourceCatalog } from "../src/seeds/prepare-resource-catalog";
 import { prepareBuildingCatalog } from "../src/seeds/prepare-building-catalog";
 import { seedResourceConfigurations } from "../src/seeds/seed-resource-configurations";
 import { seedResourceDeposits } from "../src/seeds/seed-resource-deposits";
+import { prepareGameplayCatalogs } from "../src/seeds/prepare-gameplay-catalogs";
 import { persistenceOptions } from "./options";
 
 const options = persistenceOptions();
@@ -20,6 +21,7 @@ try
     await kingdom.initialize();
     await prepareResourceCatalog(mongo.useDb("global", { useCache: true }));
     await prepareBuildingCatalog(mongo.useDb("global", { useCache: true }));
+    await prepareGameplayCatalogs(mongo.useDb("global", { useCache: true }));
     await seedResourceConfigurations(mongo.useDb("global", { useCache: true }));
     await seedKingdom(global);
     await seedWorld(kingdom, mongo);

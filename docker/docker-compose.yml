@@ -5,6 +5,9 @@ volumes:
   mongodb-data: ~
   mongodb-config: ~
   redis-data: ~
+  zookeeper-data: ~
+  zookeeper-datalog: ~
+  zookeeper-logs: ~
 
 networks:
   opencok-internal-network:
@@ -60,3 +63,16 @@ services:
     command: [redis-server, "--save", "", "--appendonly", "no"]
     volumes:
       - redis-data:/data
+
+  zookeeper:
+    image: zookeeper:3.4.14
+    networks: [opencok-internal-network]
+    environment:
+      ZOO_INIT_LIMIT: 10
+      ZOO_SYNC_LIMIT: 5
+      ZOO_AUTOPURGE_PURGEINTERVAL: 1
+      ZOO_CFG_EXTRA: 4lw.commands.whitelist=ruok,srvr
+    volumes:
+      - zookeeper-data:/data
+      - zookeeper-datalog:/datalog
+      - zookeeper-logs:/logs

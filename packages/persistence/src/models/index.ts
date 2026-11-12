@@ -22,3 +22,5 @@ export { WorldMarchTroop } from "./kingdom/world-march-troop";
 export { WorldMarchCheckpoint } from "./kingdom/world-march-checkpoint";
 export { GatheringJob } from "./kingdom/gathering-job";
 export { TrainingJob } from "./kingdom/training-job";
+export { RealmAuthority } from "./kingdom/realm-authority";
+export { KingdomRuleSet } from "./kingdom/kingdom-rule-set";
