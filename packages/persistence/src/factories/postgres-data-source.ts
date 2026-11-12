@@ -18,6 +18,13 @@ import {
     CommandReceipt,
     EconomyPosting,
     MutationOutbox,
+    BuildingProduction,
+    CharacterTroops,
+    WorldMarch,
+    WorldMarchTroop,
+    WorldMarchCheckpoint,
+    GatheringJob,
+    TrainingJob,
 } from "../models";
 import { kingdomDatabase } from "./kingdom-database";
 import type { PostgresDatabase } from "../types/postgres-database";
@@ -53,6 +60,13 @@ export function createPostgresDataSource(
             CommandReceipt,
             EconomyPosting,
             MutationOutbox,
+            BuildingProduction,
+            CharacterTroops,
+            WorldMarch,
+            WorldMarchTroop,
+            WorldMarchCheckpoint,
+            GatheringJob,
+            TrainingJob,
         ];
     return new DataSource({
         type: "postgres",

@@ -45,7 +45,7 @@ test("building catalog accepts only the selected buildings with matching product
     }
     for (
         const patch of [
-            { buildingType: "barracks" },
+            { buildingType: "hospital" },
             { buildingType: BuildingType.Farm },
             {
                 buildingType: BuildingType.Sawmill,
@@ -58,7 +58,7 @@ test("building catalog accepts only the selected buildings with matching product
             { level: 1.5 },
             { constructionSeconds: -1 },
             { requiredBuildings: undefined },
-            { requiredBuildings: [{ buildingType: "barracks", level: 1 }] },
+            { requiredBuildings: [{ buildingType: "hospital", level: 1 }] },
             {
                 requiredBuildings: [
                     { buildingType: "farm", level: 1 },

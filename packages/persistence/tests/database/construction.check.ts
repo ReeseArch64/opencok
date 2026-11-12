@@ -114,7 +114,7 @@ try
         "23505",
     );
     await rejectsSql(
-        "INSERT INTO city_buildings(city_id,building_type,position) VALUES ($1,'barracks',9)",
+        "INSERT INTO city_buildings(city_id,building_type,position) VALUES ($1,'hospital',9)",
         [city.id],
         "22P02",
     );
@@ -369,7 +369,10 @@ try
         [],
         "Applied schema differs from models",
     );
-    await source.undoLastMigration({ transaction: "all" });
+    while ((await source.query("SELECT to_regclass('city_buildings') AS name"))[0].name != null)
+    {
+        await source.undoLastMigration({ transaction: "all" });
+    }
     assert.equal(
         (await source.query("SELECT to_regclass('city_buildings') AS table_name"))[0].table_name,
         null,

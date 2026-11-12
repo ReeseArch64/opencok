@@ -20,6 +20,7 @@ import { WorldObject } from "./world-object";
     "resource_deposit_state",
     "(\"deposit_status\" = 'available' AND \"remaining_quantity\" > 0 AND \"depleted_at\" IS NULL) OR (\"deposit_status\" = 'depleted' AND \"remaining_quantity\" = 0 AND \"depleted_at\" IS NOT NULL)",
 )
+@Index("resource_deposit_id_type_unique", ["id", "resourceType"], { unique: true })
 export class WorldResourceDeposit extends BaseEntity
 {
     @Column({ name: "world_object_id", type: "integer" })

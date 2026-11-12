@@ -5,4 +5,8 @@ export enum BuildingType
     Sawmill = "sawmill",
     Quarry = "quarry",
     IronMine = "iron_mine",
+    Barracks = "barracks",
+    Stable = "stable",
+    ArcheryRange = "archery_range",
+    SiegeWorkshop = "siege_workshop",
 }

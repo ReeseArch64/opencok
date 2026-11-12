@@ -17,6 +17,13 @@ import {
     CommandReceipt,
     EconomyPosting,
     MutationOutbox,
+    BuildingProduction,
+    CharacterTroops,
+    WorldMarch,
+    WorldMarchTroop,
+    WorldMarchCheckpoint,
+    GatheringJob,
+    TrainingJob,
 } from "@opencok/persistence";
 import { createPostgresDataSource } from "@opencok/persistence/factories/postgres-data-source";
 
@@ -68,6 +75,13 @@ test("SQL models distinguish lifecycle rows from retained command and economic r
                     WorldObjectCell,
                     CityBuilding,
                     ConstructionJob,
+                    BuildingProduction,
+                    CharacterTroops,
+                    WorldMarch,
+                    WorldMarchTroop,
+                    WorldMarchCheckpoint,
+                    GatheringJob,
+                    TrainingJob,
                 ].some((model) => model === metadata.target),
             ).toBe(true);
             if (typeof metadata.target !== "function")

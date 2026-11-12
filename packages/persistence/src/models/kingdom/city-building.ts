@@ -15,6 +15,7 @@ import { City } from "./city";
 @Check("city_building_position_nonnegative", "\"position\" >= 0")
 @Check("city_building_level_nonnegative", "\"level\" >= 0")
 @Check("city_building_version_nonnegative", "\"state_version\" >= 0")
+@Index("city_building_id_city_type_unique", ["id", "cityId", "buildingType"], { unique: true })
 export class CityBuilding extends BaseEntity
 {
     @Column({ name: "city_id", type: "integer", update: false })

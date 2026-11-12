@@ -1,6 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { Schema } from "mongoose";
 import { BuildingType } from "../../enums/building-type";
+import { TroopType } from "../../enums/troop-type";
 import { CharacterResource } from "../../enums/character-resource";
 import { integerValidator } from "../../validators/integer";
 
@@ -77,6 +78,19 @@ const productionSchema = new Schema(
     { _id: false, strict: "throw" },
 );
 
+const trainingSchema = new Schema(
+    {
+        troopType: {
+            type: String,
+            enum: Object.values(TroopType),
+            required: true,
+            immutable: true,
+        },
+        maxBatchSize: positiveInteger,
+    },
+    { _id: false, strict: "throw" },
+);
+
 export const buildingConfigurationSchema = new Schema({
     publicId: {
         type: Schema.Types.UUID,
@@ -103,12 +117,13 @@ export const buildingConfigurationSchema = new Schema({
         immutable: true,
         validate: {
             validator: (values: { buildingType: string; }[]) =>
-                values.length <= 5
+                values.length <= Object.values(BuildingType).length
                 && new Set(values.map(value => value.buildingType)).size === values.length,
-            message: "Informe até cinco requisitos, sem repetir tipos de construção",
+            message: "Informe requisitos sem repetir tipos de construção",
         },
     },
     production: { type: productionSchema, default: null, immutable: true },
+    training: { type: trainingSchema, default: null, immutable: true },
     createdAt: { type: Date, required: true, default: Date.now, immutable: true },
 }, {
     collection: "building_configurations",
@@ -145,9 +160,35 @@ buildingConfigurationSchema.pre("validate", function()
             this.invalidate("production", "Castelo não possui produção de recursos");
         }
     }
-    else if (this.production == null || this.production.resource !== resources[this.buildingType])
+    else if (resources[this.buildingType] != null)
     {
-        this.invalidate("production", "Produção deve corresponder ao recurso da construção");
+        if (this.production == null || this.production.resource !== resources[this.buildingType])
+        {
+            this.invalidate("production", "Produção deve corresponder ao recurso da construção");
+        }
+    }
+    else if (this.production != null)
+    {
+        this.invalidate("production", "Prédios de treinamento não produzem recursos");
+    }
+
+    const troops: Partial<Record<BuildingType, TroopType>> = {
+        [BuildingType.Barracks]: TroopType.Infantry,
+        [BuildingType.Stable]: TroopType.Cavalry,
+        [BuildingType.ArcheryRange]: TroopType.Archer,
+        [BuildingType.SiegeWorkshop]: TroopType.Siege,
+    };
+    const troopType = troops[this.buildingType];
+    if (troopType != null)
+    {
+        if (this.training == null || this.training.troopType !== troopType)
+        {
+            this.invalidate("training", "Treinamento deve corresponder ao tipo do prédio");
+        }
+    }
+    else if (this.training != null)
+    {
+        this.invalidate("training", "Construção não permite treinamento de tropas");
     }
 });
 

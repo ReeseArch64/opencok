@@ -20,6 +20,13 @@ import {
     CommandReceipt,
     EconomyPosting,
     MutationOutbox,
+    BuildingProduction,
+    CharacterTroops,
+    WorldMarch,
+    WorldMarchTroop,
+    WorldMarchCheckpoint,
+    GatheringJob,
+    TrainingJob,
 } from "@opencok/persistence";
 import { worldLayoutModel } from "@opencok/persistence/models/kingdom/world-layout";
 
@@ -67,6 +74,13 @@ test("database routing separates registry, kingdom and payment entities", () => 
         CommandReceipt,
         EconomyPosting,
         MutationOutbox,
+        BuildingProduction,
+        CharacterTroops,
+        WorldMarch,
+        WorldMarchTroop,
+        WorldMarchCheckpoint,
+        GatheringJob,
+        TrainingJob,
     ]);
     expect(createPostgresDataSource("payments").options.entities).toEqual([]);
     for (
