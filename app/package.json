@@ -21,13 +21,11 @@
     "format": "dart format .",
     "format:check": "dart format --output=none --set-exit-if-changed .",
     "check-types": "dart analyze --fatal-infos",
-    "test:unit": "flutter test lib",
-    "test:integration": "flutter test tests/integration",
-    "test:contract": "flutter test tests/contract",
-    "test:snapshot": "flutter test tests/snapshot",
-    "test:e2e": "dart run tool/run_e2e.dart",
-    "test:mutation": "dart run mutation_test tests/mutation/mutation-test.xml",
-    "test:coverage": "flutter test lib tests/contract tests/integration tests/snapshot --coverage",
-    "test:all": "bun run test:unit && bun run test:integration && bun run test:contract && bun run test:snapshot && bun run test:e2e && bun run test:coverage && bun run test:mutation"
+    "test:unit": "flutter test lib test",
+    "test:integration": "test -n \"$(find tests/integration -type f -name \"*_test.dart\" -print -quit)\" && flutter test tests/integration",
+    "test:mutation": "timeout --signal=INT --kill-after=5s 90s dart run mutation_test tests/mutation/mutation-test.xml",
+    "test:coverage": "flutter test lib test tests/integration --coverage",
+    "test:all": "bun run test:unit && bun run test:integration && bun run test:coverage && bun run test:mutation",
+    "test": "bun run test:unit && bun run test:integration"
   }
 }

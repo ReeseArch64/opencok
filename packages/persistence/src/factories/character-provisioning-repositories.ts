@@ -61,7 +61,6 @@ export function createCharacterProvisioningRepositories(manager: EntityManager)
                 });
             },
         },
-        // Call only after the authoritative Realm confirms its transaction committed.
         complete: {
             async execute(input: CompleteCharacterProvisioning): Promise<CharacterProvisioning>
             {

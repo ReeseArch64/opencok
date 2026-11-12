@@ -30,7 +30,6 @@ class TrainingUnit {
   String get portrait =>
       usesBodyPortrait ? body : '${assetPrefix}_portrait.png';
 
-  // Static presentation values until kingdom training rules are connected.
   int _strength(int base, int growth) =>
       ((base + combatTier * growth) *
               (switch (culture) {

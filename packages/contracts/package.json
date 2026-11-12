@@ -10,14 +10,28 @@
     "format": "dprint fmt --config ../../dprint.json --allow-no-files .",
     "generate": "bun --no-env-file scripts/generate.ts",
     "check-generated": "bun --no-env-file scripts/generate.ts --check",
-    "test": "bun --no-env-file test",
+    "test": "bun run test:unit && vitest run",
+    "test:unit": "bun --no-env-file test ./src",
+    "test:contract": "vitest run tests/contract",
+    "test:integration": "vitest run tests/integration",
+    "test:e2e": "vitest run tests/e2e",
+    "test:snapshot": "vitest run tests/snapshot",
+    "test:property": "vitest run tests/property",
+    "test:coverage": "bun --no-env-file test ./src --coverage --coverage-reporter=text --coverage-reporter=lcov --coverage-dir=coverage/bun && vitest run --coverage",
+    "test:mutation": "timeout --signal=INT --kill-after=5s 90s stryker run",
     "check-types": "tsc --noEmit"
   },
   "dependencies": {
     "zod": "catalog:"
   },
   "devDependencies": {
+    "@stryker-mutator/core": "10.1.1",
+    "@stryker-mutator/vitest-runner": "10.1.1",
     "@types/bun": "catalog:",
-    "typescript": "catalog:"
+    "@vitest/coverage-v8": "5.1.0",
+    "@vitest/snapshot": "5.1.0",
+    "fast-check": "4.10.2",
+    "typescript": "catalog:",
+    "vitest": "5.1.0"
   }
 }

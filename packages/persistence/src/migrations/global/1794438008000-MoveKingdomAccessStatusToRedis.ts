@@ -20,7 +20,6 @@ export class MoveKingdomAccessStatusToRedis1794438008000 implements MigrationInt
                 );
             for (const kingdom of kingdoms)
             {
-                // Uma repetição não sobrescreve um status já atualizado pelo serviço.
                 await store.set(kingdom.id, kingdom.accessStatus, undefined, true);
             }
             await queryRunner.query("ALTER TABLE \"kingdoms\" DROP COLUMN \"access_status\"");

@@ -10,7 +10,6 @@ export const provisionCharacterValidator = characterCreateValidator.pick({
 }).extend({ characterPublicId: publicIdValidator });
 export type ProvisionCharacter = z.input<typeof provisionCharacterValidator>;
 
-/** Realm-only operation. Replays never reset progression or recreate removed characters. */
 export class ProvisionCharacterRepository
 {
     constructor(private readonly manager: EntityManager)

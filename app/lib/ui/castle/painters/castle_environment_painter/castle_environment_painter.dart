@@ -70,8 +70,6 @@ class CastleEnvironmentPainter extends CustomPainter {
       return;
     }
 
-    // These transparent cutouts belong to omitted foreground scenery.
-    // Keep terrain beneath them rather than exposing the distant sky.
     for (final rect in const [
       Rect.fromLTWH(1370, 370, 360, 240),
       Rect.fromLTWH(1650, 470, 430, 240),

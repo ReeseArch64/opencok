@@ -1,14 +1,12 @@
 {
   "name": "@opencok/config",
   "private": true,
+  "type": "module",
   "files": [
     "tsconfig.base.json"
   ],
   "exports": {
     "./tsconfig.base.json": "./tsconfig.base.json"
-  },
-  "scripts": {
-    "format": "dprint fmt --config ../../dprint.json --allow-no-files ."
   },
   "devDependencies": {
     "@types/bun": "catalog:",

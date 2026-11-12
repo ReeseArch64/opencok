@@ -24,7 +24,16 @@
     "lint": "turbo lint",
     "format": "turbo format",
     "check-types": "turbo check-types",
-    "prepare": "husky"
+    "prepare": "husky",
+    "test": "turbo test",
+    "test:unit": "turbo test:unit",
+    "test:contract": "turbo test:contract",
+    "test:integration": "turbo test:integration",
+    "test:e2e": "turbo test:e2e",
+    "test:snapshot": "turbo test:snapshot",
+    "test:property": "turbo test:property",
+    "test:coverage": "turbo test:coverage",
+    "test:mutation": "timeout --signal=INT --kill-after=5s 285s bunx turbo test:mutation --ui=stream"
   },
   "devDependencies": {
     "@commitlint/cli": "^21.2.4",

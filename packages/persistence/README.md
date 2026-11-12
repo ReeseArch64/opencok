@@ -255,9 +255,10 @@ na mesma transação, conferir autorização e epoch, comparar pedidos repetidos
 retornar a resposta gravada. A persistência de produção passiva existe em `BuildingProduction`; o cálculo
 e a liquidação de recursos ainda precisam ser integrados ao gameplay.
 
-`bun run test:construction` verifica migrations, restrições, rollback transacional,
-retenção e exatidão de valores em bancos temporários PostgreSQL/MongoDB, removidos
-ao final. Aceita os mesmos argumentos de conexão de `migrate`.
+`bun run test:e2e` inclui as verificações de construção: migrations, restrições,
+rollback transacional, retenção e exatidão de valores. A suíte exige Docker e inicia
+seus próprios containers descartáveis PostgreSQL/MongoDB/Redis, removidos ao final;
+não recebe os argumentos de conexão de `migrate` nem reutiliza bancos da aplicação.
 
 ### Kingdom authority and active rules
 

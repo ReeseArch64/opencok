@@ -12,7 +12,6 @@ export const mapQuery = z.strictObject({
 });
 export const mapRegion = z.strictObject({
     requestId: uint(0xffffffff),
-    // 0 = success, 1 = invalid region/kingdom, 2 = unavailable.
     status: uint(2),
     kingdomId: uint(0xffffffff),
     name: z.string().max(64),
@@ -22,7 +21,6 @@ export const mapRegion = z.strictObject({
         .array(
             z.strictObject({
                 id: uint(0xffffffff),
-                // 1 = development castle, 2 = wood, 3 = food. Code 4 is reserved.
                 kind: uint(4),
                 x: coordinate,
                 y: coordinate,

@@ -4,8 +4,9 @@
   "type": "module",
   "scripts": {
     "dev": "bun --no-env-file src/main.ts",
-    "test": "bun --no-env-file test",
-    "check-types": "tsc --noEmit"
+    "test": "bun run test:unit",
+    "check-types": "tsc --noEmit",
+    "test:unit": "bun --no-env-file test"
   },
   "dependencies": {
     "@opencok/contracts": "workspace:*",
