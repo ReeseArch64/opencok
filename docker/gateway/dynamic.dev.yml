@@ -1,0 +1,11 @@
+http:
+  routers:
+    gameserver:
+      entryPoints: [game]
+      rule: PathPrefix(`/`)
+      service: gameserver
+  services:
+    gameserver:
+      loadBalancer:
+        servers:
+          - url: http://gameserver:9933

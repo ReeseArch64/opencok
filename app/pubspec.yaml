@@ -1,0 +1,152 @@
+name: opencok
+description: OpenCoK game client for Web, Android, iOS, macOS, Windows and Linux.
+publish_to: none
+version: 0.1.0+1
+
+environment:
+  sdk: ^3.13.5
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+  intl: any
+  flame: 1.38.2
+  jailbreak_root_detection: 1.2.3
+  web: 1.1.2
+  audioplayers: ^6.8.1
+  web_socket_channel: ^3.0.3
+  flutter_dotenv: ^6.0.1
+flutter:
+  generate: true
+  uses-material-design: true
+  assets:
+    - .env
+    - assets/castle/environment/
+    - assets/castle/buildings/
+    - assets/ui/training/
+    - assets/sounds/effects/ui_confirm.ogg
+    - assets/sounds/background/city.mp3
+    - assets/sounds/background/world.mp3
+    - assets/sounds/background/loading.mp3
+    - assets/fonts/bitmap/iskoola_pota.fnt
+    - assets/fonts/bitmap/iskoola_pota.png
+    - assets/ui/hud/badges/notification_badge.png
+    - assets/ui/hud/chat/chat_bar_background.png
+    - assets/ui/hud/chat/translate_icon.png
+    - assets/ui/hud/navigation/alliance_icon.png
+    - assets/ui/hud/navigation/city_icon.png
+    - assets/ui/hud/navigation/daily_tasks_icon.png
+    - assets/ui/hud/navigation/inventory_icon.png
+    - assets/ui/hud/navigation/mail_icon.png
+    - assets/ui/hud/navigation/navigation_bar_background.png
+    - assets/ui/hud/navigation/world_map_icon.png
+    - assets/ui/hud/profile/energy_bar_fill.png
+    - assets/ui/hud/profile/experience_bar_fill.png
+    - assets/ui/hud/profile/level_badge.png
+    - assets/ui/hud/profile/portrait_background.png
+    - assets/ui/hud/profile/portrait_frame.png
+    - assets/ui/hud/profile/avatars/
+    - assets/ui/hud/profile/progress_bar_background.png
+    - assets/ui/hud/profile/progress_panel_background.png
+    - assets/ui/hud/profile/vip_background.png
+    - assets/ui/hud/resources/food_icon.png
+    - assets/ui/hud/resources/gold_button_background.png
+    - assets/ui/hud/resources/gold_coins_icon.png
+    - assets/ui/hud/resources/iron_icon.png
+    - assets/ui/hud/resources/mithril_icon.png
+    - assets/ui/hud/resources/power_background.png
+    - assets/ui/hud/resources/resource_bar_background.png
+    - assets/ui/hud/resources/wood_icon.png
+    - assets/ui/profile/
+    - assets/ui/errors/
+    - assets/ui/login/game_logo.png
+    - assets/ui/login/loading_bar.png
+    - assets/ui/login/loading_bar_background.png
+    - assets/ui/login/loading_progress.png
+    - assets/ui/login/loading_artwork.webp
+    - assets/world_map/kingdom_layout.json
+    - assets/world_map/buildings/castle/
+    - assets/world_map/buildings/resources/
+    - assets/world_map/scenery/ground/craters.png
+    - assets/world_map/scenery/mountains/desert_rocks.png
+    - assets/world_map/scenery/mountains/forested_rocks.png
+    - assets/world_map/scenery/mountains/mountain_range.png
+    - assets/world_map/scenery/mountains/rock_peak.png
+    - assets/world_map/scenery/mountains/rock_peaks.png
+    - assets/world_map/scenery/water/swamp.png
+    - assets/world_map/scenery/water/water_ripples.png
+    - assets/world_map/terrain/coast/coast_tile_05.png
+    - assets/world_map/terrain/coast/coast_tile_06.png
+    - assets/world_map/terrain/coast/coast_tile_07.png
+    - assets/world_map/terrain/coast/coast_tile_08.png
+    - assets/world_map/terrain/coast/coast_tile_09.png
+    - assets/world_map/terrain/coast/coast_tile_11.png
+    - assets/world_map/terrain/coast/coast_tile_12.png
+    - assets/world_map/terrain/coast/coast_tile_14.png
+    - assets/world_map/terrain/coast/coast_tile_15.png
+    - assets/world_map/terrain/coast/coast_tile_16.png
+    - assets/world_map/terrain/coast/coast_tile_17.png
+    - assets/world_map/terrain/coast/coast_tile_18.png
+    - assets/world_map/terrain/coast/coast_tile_20.png
+    - assets/world_map/terrain/coast/coast_tile_21.png
+    - assets/world_map/terrain/coast/coast_tile_22.png
+    - assets/world_map/terrain/coast/coast_tile_23.png
+    - assets/world_map/terrain/grass/grass_tile_01.png
+    - assets/world_map/terrain/grass/grass_tile_02.png
+    - assets/world_map/terrain/grass/grass_tile_03.png
+    - assets/world_map/terrain/grass_dirt/grass_dirt_tile_24.png
+    - assets/world_map/terrain/grass_dirt/grass_dirt_tile_25.png
+    - assets/world_map/terrain/grass_dirt/grass_dirt_tile_26.png
+    - assets/world_map/terrain/grass_dirt/grass_dirt_tile_27.png
+    - assets/world_map/terrain/grass_dirt/grass_dirt_tile_28.png
+    - assets/world_map/terrain/grass_dirt/grass_dirt_tile_30.png
+    - assets/world_map/terrain/grass_dirt/grass_dirt_tile_31.png
+    - assets/world_map/terrain/grass_dirt/grass_dirt_tile_33.png
+    - assets/world_map/terrain/grass_dirt/grass_dirt_tile_34.png
+    - assets/world_map/terrain/grass_dirt/grass_dirt_tile_35.png
+    - assets/world_map/terrain/grass_dirt/grass_dirt_tile_36.png
+    - assets/world_map/terrain/grass_dirt/grass_dirt_tile_37.png
+    - assets/world_map/terrain/grass_dirt/grass_dirt_tile_38.png
+    - assets/world_map/terrain/grass_dirt/grass_dirt_tile_39.png
+    - assets/world_map/terrain/grass_dirt/grass_dirt_tile_40.png
+    - assets/world_map/terrain/grass_dirt/grass_dirt_tile_41.png
+    - assets/world_map/terrain/grass_dirt/grass_dirt_tile_43.png
+    - assets/world_map/terrain/hills/hill_tile_44.png
+    - assets/world_map/terrain/hills/hill_tile_45.png
+    - assets/world_map/terrain/hills/hill_tile_46.png
+    - assets/world_map/terrain/hills/hill_tile_47.png
+    - assets/world_map/terrain/hills/hill_tile_49.png
+    - assets/world_map/terrain/hills/hill_tile_50.png
+    - assets/world_map/terrain/hills/hill_tile_52.png
+    - assets/world_map/terrain/hills/hill_tile_53.png
+    - assets/world_map/terrain/hills/hill_tile_54.png
+    - assets/world_map/terrain/hills/hill_tile_55.png
+    - assets/world_map/terrain/hills/hill_tile_56.png
+    - assets/world_map/terrain/hills/hill_tile_57.png
+    - assets/world_map/terrain/hills/hill_tile_58.png
+    - assets/world_map/terrain/hills/hill_tile_59.png
+    - assets/world_map/terrain/hills/hill_tile_60.png
+    - assets/world_map/terrain/hills/hill_tile_61.png
+    - assets/world_map/terrain/mud/
+    - assets/world_map/terrain/stone/stone_center.png
+    - assets/world_map/terrain/stone/stone_corner_max_x_max_y.png
+    - assets/world_map/terrain/stone/stone_corner_max_x_min_y.png
+    - assets/world_map/terrain/stone/stone_corner_min_x_max_y.png
+    - assets/world_map/terrain/stone/stone_corner_min_x_min_y.png
+    - assets/world_map/terrain/stone/stone_edge_max_x.png
+    - assets/world_map/terrain/stone/stone_edge_max_y.png
+    - assets/world_map/terrain/stone/stone_edge_min_x.png
+    - assets/world_map/terrain/stone/stone_edge_min_y.png
+  fonts:
+    - family: Cooljazz
+      fonts:
+        - asset: assets/fonts/handwritten/cooljazz.ttf
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+  mutation_test: ^1.8.1
+  integration_test:
+    sdk: flutter

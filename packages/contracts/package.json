@@ -1,29 +1,22 @@
 {
   "name": "@opencok/contracts",
   "private": true,
-  "devDependencies": {
-    "@opencok/config": "workspace:*",
-    "@types/bun": "catalog:",
-    "typescript": "catalog:"
-  },
   "type": "module",
   "exports": {
-    "./*": "./src/*.ts"
+    ".": "./src/world.ts",
+    "./binary": "./src/binary.ts"
+  },
+  "scripts": {
+    "generate": "bun --no-env-file scripts/generate.ts",
+    "check-generated": "bun --no-env-file scripts/generate.ts --check",
+    "test": "bun --no-env-file test",
+    "check-types": "tsc --noEmit"
   },
   "dependencies": {
-    "@opencok/enums": "workspace:*",
-    "@opencok/messages": "workspace:*",
-    "@opencok/hero": "workspace:*",
-    "@opencok/economy": "workspace:*",
-    "@opencok/ledger": "workspace:*",
-    "@opencok/base": "workspace:*",
-    "@opencok/equipment": "workspace:*",
-    "@opencok/tasks": "workspace:*",
-    "@opencok/mail": "workspace:*",
-    "@opencok/skins": "workspace:*",
-    "@opencok/alliance": "workspace:*",
-    "@opencok/share": "workspace:*",
-    "@opencok/ranking": "workspace:*",
-    "@opencok/world": "workspace:*"
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@types/bun": "catalog:",
+    "typescript": "catalog:"
   }
 }

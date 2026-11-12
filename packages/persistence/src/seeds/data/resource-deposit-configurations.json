@@ -1,0 +1,482 @@
+[
+  {
+    "resourceType": "wood",
+    "resourceLevel": 1,
+    "configurationVersion": 1,
+    "initialQuantity": 35100,
+    "respawnPolicy": "after_depletion",
+    "respawnDelaySeconds": 3600
+  },
+  {
+    "resourceType": "wood",
+    "resourceLevel": 2,
+    "configurationVersion": 1,
+    "initialQuantity": 46800,
+    "respawnPolicy": "after_depletion",
+    "respawnDelaySeconds": 10800
+  },
+  {
+    "resourceType": "wood",
+    "resourceLevel": 3,
+    "configurationVersion": 1,
+    "initialQuantity": 108000,
+    "respawnPolicy": "after_depletion",
+    "respawnDelaySeconds": 18000
+  },
+  {
+    "resourceType": "wood",
+    "resourceLevel": 4,
+    "configurationVersion": 1,
+    "initialQuantity": 189000,
+    "respawnPolicy": "after_depletion",
+    "respawnDelaySeconds": 25200
+  },
+  {
+    "resourceType": "wood",
+    "resourceLevel": 5,
+    "configurationVersion": 1,
+    "initialQuantity": 297000,
+    "respawnPolicy": "after_depletion",
+    "respawnDelaySeconds": 32400
+  },
+  {
+    "resourceType": "wood",
+    "resourceLevel": 6,
+    "configurationVersion": 1,
+    "initialQuantity": 432000,
+    "respawnPolicy": "after_depletion",
+    "respawnDelaySeconds": 39600
+  },
+  {
+    "resourceType": "wood",
+    "resourceLevel": 7,
+    "configurationVersion": 1,
+    "initialQuantity": 514800,
+    "respawnPolicy": "after_depletion",
+    "respawnDelaySeconds": 46800
+  },
+  {
+    "resourceType": "wood",
+    "resourceLevel": 8,
+    "configurationVersion": 1,
+    "initialQuantity": 678600,
+    "respawnPolicy": "after_depletion",
+    "respawnDelaySeconds": 54000
+  },
+  {
+    "resourceType": "wood",
+    "resourceLevel": 9,
+    "configurationVersion": 1,
+    "initialQuantity": 678600,
+    "respawnPolicy": "after_depletion",
+    "respawnDelaySeconds": 61200
+  },
+  {
+    "resourceType": "wood",
+    "resourceLevel": 10,
+    "configurationVersion": 1,
+    "initialQuantity": 678600,
+    "respawnPolicy": "after_depletion",
+    "respawnDelaySeconds": 68400
+  },
+  {
+    "resourceType": "food",
+    "resourceLevel": 1,
+    "configurationVersion": 1,
+    "initialQuantity": 35100,
+    "respawnPolicy": "after_depletion",
+    "respawnDelaySeconds": 3600
+  },
+  {
+    "resourceType": "food",
+    "resourceLevel": 2,
+    "configurationVersion": 1,
+    "initialQuantity": 46800,
+    "respawnPolicy": "after_depletion",
+    "respawnDelaySeconds": 10800
+  },
+  {
+    "resourceType": "food",
+    "resourceLevel": 3,
+    "configurationVersion": 1,
+    "initialQuantity": 93600,
+    "respawnPolicy": "after_depletion",
+    "respawnDelaySeconds": 18000
+  },
+  {
+    "resourceType": "food",
+    "resourceLevel": 4,
+    "configurationVersion": 1,
+    "initialQuantity": 189000,
+    "respawnPolicy": "after_depletion",
+    "respawnDelaySeconds": 25200
+  },
+  {
+    "resourceType": "food",
+    "resourceLevel": 5,
+    "configurationVersion": 1,
+    "initialQuantity": 297000,
+    "respawnPolicy": "after_depletion",
+    "respawnDelaySeconds": 32400
+  },
+  {
+    "resourceType": "food",
+    "resourceLevel": 6,
+    "configurationVersion": 1,
+    "initialQuantity": 432000,
+    "respawnPolicy": "after_depletion",
+    "respawnDelaySeconds": 39600
+  },
+  {
+    "resourceType": "food",
+    "resourceLevel": 7,
+    "configurationVersion": 1,
+    "initialQuantity": 514800,
+    "respawnPolicy": "after_depletion",
+    "respawnDelaySeconds": 46800
+  },
+  {
+    "resourceType": "food",
+    "resourceLevel": 8,
+    "configurationVersion": 1,
+    "initialQuantity": 678600,
+    "respawnPolicy": "after_depletion",
+    "respawnDelaySeconds": 54000
+  },
+  {
+    "resourceType": "food",
+    "resourceLevel": 9,
+    "configurationVersion": 1,
+    "initialQuantity": 678600,
+    "respawnPolicy": "after_depletion",
+    "respawnDelaySeconds": 61200
+  },
+  {
+    "resourceType": "food",
+    "resourceLevel": 10,
+    "configurationVersion": 1,
+    "initialQuantity": 678600,
+    "respawnPolicy": "after_depletion",
+    "respawnDelaySeconds": 68400
+  },
+  {
+    "resourceType": "iron",
+    "resourceLevel": 1,
+    "configurationVersion": 1,
+    "initialQuantity": 5850,
+    "respawnPolicy": "after_depletion",
+    "respawnDelaySeconds": 3600
+  },
+  {
+    "resourceType": "iron",
+    "resourceLevel": 2,
+    "configurationVersion": 1,
+    "initialQuantity": 7800,
+    "respawnPolicy": "after_depletion",
+    "respawnDelaySeconds": 10800
+  },
+  {
+    "resourceType": "iron",
+    "resourceLevel": 3,
+    "configurationVersion": 1,
+    "initialQuantity": 18000,
+    "respawnPolicy": "after_depletion",
+    "respawnDelaySeconds": 18000
+  },
+  {
+    "resourceType": "iron",
+    "resourceLevel": 4,
+    "configurationVersion": 1,
+    "initialQuantity": 31500,
+    "respawnPolicy": "after_depletion",
+    "respawnDelaySeconds": 25200
+  },
+  {
+    "resourceType": "iron",
+    "resourceLevel": 5,
+    "configurationVersion": 1,
+    "initialQuantity": 49500,
+    "respawnPolicy": "after_depletion",
+    "respawnDelaySeconds": 32400
+  },
+  {
+    "resourceType": "iron",
+    "resourceLevel": 6,
+    "configurationVersion": 1,
+    "initialQuantity": 72000,
+    "respawnPolicy": "after_depletion",
+    "respawnDelaySeconds": 39600
+  },
+  {
+    "resourceType": "iron",
+    "resourceLevel": 7,
+    "configurationVersion": 1,
+    "initialQuantity": 99000,
+    "respawnPolicy": "after_depletion",
+    "respawnDelaySeconds": 46800
+  },
+  {
+    "resourceType": "iron",
+    "resourceLevel": 8,
+    "configurationVersion": 1,
+    "initialQuantity": 113100,
+    "respawnPolicy": "after_depletion",
+    "respawnDelaySeconds": 54000
+  },
+  {
+    "resourceType": "iron",
+    "resourceLevel": 9,
+    "configurationVersion": 1,
+    "initialQuantity": 113100,
+    "respawnPolicy": "after_depletion",
+    "respawnDelaySeconds": 61200
+  },
+  {
+    "resourceType": "iron",
+    "resourceLevel": 10,
+    "configurationVersion": 1,
+    "initialQuantity": 113100,
+    "respawnPolicy": "after_depletion",
+    "respawnDelaySeconds": 68400
+  },
+  {
+    "resourceType": "mithril",
+    "resourceLevel": 1,
+    "configurationVersion": 1,
+    "initialQuantity": 1463,
+    "respawnPolicy": "after_depletion",
+    "respawnDelaySeconds": 3600
+  },
+  {
+    "resourceType": "mithril",
+    "resourceLevel": 2,
+    "configurationVersion": 1,
+    "initialQuantity": 2250,
+    "respawnPolicy": "after_depletion",
+    "respawnDelaySeconds": 10800
+  },
+  {
+    "resourceType": "mithril",
+    "resourceLevel": 3,
+    "configurationVersion": 1,
+    "initialQuantity": 4500,
+    "respawnPolicy": "after_depletion",
+    "respawnDelaySeconds": 18000
+  },
+  {
+    "resourceType": "mithril",
+    "resourceLevel": 4,
+    "configurationVersion": 1,
+    "initialQuantity": 7875,
+    "respawnPolicy": "after_depletion",
+    "respawnDelaySeconds": 25200
+  },
+  {
+    "resourceType": "mithril",
+    "resourceLevel": 5,
+    "configurationVersion": 1,
+    "initialQuantity": 12375,
+    "respawnPolicy": "after_depletion",
+    "respawnDelaySeconds": 32400
+  },
+  {
+    "resourceType": "mithril",
+    "resourceLevel": 6,
+    "configurationVersion": 1,
+    "initialQuantity": 18000,
+    "respawnPolicy": "after_depletion",
+    "respawnDelaySeconds": 39600
+  },
+  {
+    "resourceType": "mithril",
+    "resourceLevel": 7,
+    "configurationVersion": 1,
+    "initialQuantity": 21450,
+    "respawnPolicy": "after_depletion",
+    "respawnDelaySeconds": 46800
+  },
+  {
+    "resourceType": "mithril",
+    "resourceLevel": 8,
+    "configurationVersion": 1,
+    "initialQuantity": 28275,
+    "respawnPolicy": "after_depletion",
+    "respawnDelaySeconds": 54000
+  },
+  {
+    "resourceType": "mithril",
+    "resourceLevel": 9,
+    "configurationVersion": 1,
+    "initialQuantity": 28275,
+    "respawnPolicy": "after_depletion",
+    "respawnDelaySeconds": 61200
+  },
+  {
+    "resourceType": "mithril",
+    "resourceLevel": 10,
+    "configurationVersion": 1,
+    "initialQuantity": 28275,
+    "respawnPolicy": "after_depletion",
+    "respawnDelaySeconds": 68400
+  },
+  {
+    "resourceType": "gold",
+    "resourceLevel": 1,
+    "configurationVersion": 1,
+    "initialQuantity": 10,
+    "respawnPolicy": "after_depletion",
+    "respawnDelaySeconds": 3600
+  },
+  {
+    "resourceType": "gold",
+    "resourceLevel": 2,
+    "configurationVersion": 1,
+    "initialQuantity": 20,
+    "respawnPolicy": "after_depletion",
+    "respawnDelaySeconds": 10800
+  },
+  {
+    "resourceType": "gold",
+    "resourceLevel": 3,
+    "configurationVersion": 1,
+    "initialQuantity": 34,
+    "respawnPolicy": "after_depletion",
+    "respawnDelaySeconds": 18000
+  },
+  {
+    "resourceType": "gold",
+    "resourceLevel": 4,
+    "configurationVersion": 1,
+    "initialQuantity": 52,
+    "respawnPolicy": "after_depletion",
+    "respawnDelaySeconds": 25200
+  },
+  {
+    "resourceType": "gold",
+    "resourceLevel": 5,
+    "configurationVersion": 1,
+    "initialQuantity": 74,
+    "respawnPolicy": "after_depletion",
+    "respawnDelaySeconds": 32400
+  },
+  {
+    "resourceType": "gold",
+    "resourceLevel": 6,
+    "configurationVersion": 1,
+    "initialQuantity": 100,
+    "respawnPolicy": "after_depletion",
+    "respawnDelaySeconds": 39600
+  },
+  {
+    "resourceType": "gold",
+    "resourceLevel": 7,
+    "configurationVersion": 1,
+    "initialQuantity": 130,
+    "respawnPolicy": "after_depletion",
+    "respawnDelaySeconds": 46800
+  },
+  {
+    "resourceType": "gold",
+    "resourceLevel": 8,
+    "configurationVersion": 1,
+    "initialQuantity": 164,
+    "respawnPolicy": "after_depletion",
+    "respawnDelaySeconds": 54000
+  },
+  {
+    "resourceType": "gold",
+    "resourceLevel": 9,
+    "configurationVersion": 1,
+    "initialQuantity": 202,
+    "respawnPolicy": "after_depletion",
+    "respawnDelaySeconds": 61200
+  },
+  {
+    "resourceType": "gold",
+    "resourceLevel": 10,
+    "configurationVersion": 1,
+    "initialQuantity": 244,
+    "respawnPolicy": "after_depletion",
+    "respawnDelaySeconds": 68400
+  },
+  {
+    "resourceType": "refined_iron",
+    "resourceLevel": 1,
+    "configurationVersion": 1,
+    "initialQuantity": 270000,
+    "respawnPolicy": "after_depletion",
+    "respawnDelaySeconds": 3600
+  },
+  {
+    "resourceType": "refined_iron",
+    "resourceLevel": 2,
+    "configurationVersion": 1,
+    "initialQuantity": 360000,
+    "respawnPolicy": "after_depletion",
+    "respawnDelaySeconds": 10800
+  },
+  {
+    "resourceType": "refined_iron",
+    "resourceLevel": 3,
+    "configurationVersion": 1,
+    "initialQuantity": 720000,
+    "respawnPolicy": "after_depletion",
+    "respawnDelaySeconds": 18000
+  },
+  {
+    "resourceType": "refined_iron",
+    "resourceLevel": 4,
+    "configurationVersion": 1,
+    "initialQuantity": 1260000,
+    "respawnPolicy": "after_depletion",
+    "respawnDelaySeconds": 25200
+  },
+  {
+    "resourceType": "refined_iron",
+    "resourceLevel": 5,
+    "configurationVersion": 1,
+    "initialQuantity": 1980000,
+    "respawnPolicy": "after_depletion",
+    "respawnDelaySeconds": 32400
+  },
+  {
+    "resourceType": "refined_iron",
+    "resourceLevel": 6,
+    "configurationVersion": 1,
+    "initialQuantity": 2880000,
+    "respawnPolicy": "after_depletion",
+    "respawnDelaySeconds": 39600
+  },
+  {
+    "resourceType": "refined_iron",
+    "resourceLevel": 7,
+    "configurationVersion": 1,
+    "initialQuantity": 3960000,
+    "respawnPolicy": "after_depletion",
+    "respawnDelaySeconds": 46800
+  },
+  {
+    "resourceType": "refined_iron",
+    "resourceLevel": 8,
+    "configurationVersion": 1,
+    "initialQuantity": 5220000,
+    "respawnPolicy": "after_depletion",
+    "respawnDelaySeconds": 54000
+  },
+  {
+    "resourceType": "refined_iron",
+    "resourceLevel": 9,
+    "configurationVersion": 1,
+    "initialQuantity": 6660000,
+    "respawnPolicy": "after_depletion",
+    "respawnDelaySeconds": 61200
+  },
+  {
+    "resourceType": "refined_iron",
+    "resourceLevel": 10,
+    "configurationVersion": 1,
+    "initialQuantity": 8280000,
+    "respawnPolicy": "after_depletion",
+    "respawnDelaySeconds": 68400
+  }
+]

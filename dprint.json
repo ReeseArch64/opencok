@@ -6,7 +6,7 @@
   "typescript": {
     "quoteStyle": "alwaysDouble",
     "quoteProps": "preserve",
-    "semiColons": "always",
+    "semicolons": "always",
     "trailingCommas": "onlyMultiLine",
     "bracePosition": "nextLine",
     "nextControlFlowPosition": "nextLine",
@@ -16,8 +16,8 @@
     "module.sortExportDeclarations": "maintain",
     "importDeclaration.sortNamedImports": "maintain",
     "exportDeclaration.sortNamedExports": "maintain",
-    "importDeclaration.sortTypeOnlyImports": "none",
-    "exportDeclaration.sortTypeOnlyExports": "none"
+    "importDeclaration.sortTypeOnlyImports": "inline",
+    "exportDeclaration.sortTypeOnlyExports": "inline"
   },
   "plugins": ["./node_modules/@dprint/typescript/plugin.wasm"],
   "includes": ["**/*.ts"],
@@ -26,10 +26,12 @@
     "**/dist/**",
     "**/coverage/**",
     "**/*.tsbuildinfo",
-    "data/**",
-    ".husky/_/**",
-    "packages/drizzle/migrations/**",
     "**/__snapshots__/**",
-    "packages/drizzle/tests/fixtures/**"
+    "data/**",
+    "docker/**",
+    "gameserver",
+    "app",
+    ".husky/_/**",
+    ".github/**"
   ]
 }

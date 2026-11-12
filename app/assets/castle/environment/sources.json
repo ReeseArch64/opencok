@@ -1,0 +1,205 @@
+{
+  "sourceRoot": "data/assets",
+  "assets": [
+    {
+      "asset": "wooded_cliffs_r01_c02.png",
+      "source": "sprites/Imperial/Imperial_21/new_main_city_02.png",
+      "sha256": "4756c0ff1d7700600d8f6bee3410736256cf891d421743aabe89159b180a6f0c"
+    },
+    {
+      "asset": "mountain_forest_r01_c03.png",
+      "source": "sprites/Imperial/Imperial_21/new_main_city_03.png",
+      "sha256": "c7a9e7a8a0a84c5820beac348836e1e85bbad50ac5c1ae45a44cd30ba2d0bc6c"
+    },
+    {
+      "asset": "waterfall_cliffs_r01_c04.png",
+      "source": "sprites/Imperial/Imperial_21/new_main_city_04.png",
+      "sha256": "71c6b3ba316b46893fbec5bfb551a502050552181309b94d612a8baa6c5d094b"
+    },
+    {
+      "asset": "rocky_ridge_r01_c05.png",
+      "source": "sprites/Imperial/Imperial_21/new_main_city_05.png",
+      "sha256": "c5d518311fc4547ecf221decb5e0b626edf2d7f151192f8d6a025cfba5f31821"
+    },
+    {
+      "asset": "fortress_dam_r01_c06.png",
+      "source": "sprites/Imperial/Imperial_21/new_main_city_06.png",
+      "sha256": "9190915ed328f0da2a1ba73674a73550fb4231b02adaf12876817772d6eccf7f"
+    },
+    {
+      "asset": "dragon_cave_cliffs_r01_c07.png",
+      "source": "sprites/Imperial/Imperial_21/new_main_city_07.png",
+      "sha256": "0fa115ef66589ece408caa984faf25cd79ea1634b8f48bd66326738b27311c5f"
+    },
+    {
+      "asset": "eastern_grass_plateau_r04_c07.png",
+      "source": "sprites/Imperial/Imperial_21/new_main_city_28.png",
+      "sha256": "c04ca4205564392c8e349a1ec131a0df1b2dec11fc030cd8552af3babf6fa0d3"
+    },
+    {
+      "asset": "eastern_grass_paths_r05_c07.png",
+      "source": "sprites/Imperial/Imperial_21/new_main_city_35.png",
+      "sha256": "3bf20bd0f973c159893da2a70ecb66c411b14240a82e4f40aaac46a690537148"
+    },
+    {
+      "asset": "forest_edge_r01_c01.png",
+      "source": "sprites/Imperial/Imperial_23/new_main_city_01.png",
+      "sha256": "eb095723feb7eaf77cec90d22771116183314642bdb37e072ddc4bf105c7dc8b"
+    },
+    {
+      "asset": "western_cliff_edge_r02_c01.png",
+      "source": "sprites/Imperial/Imperial_23/new_main_city_08.png",
+      "sha256": "fcc0d277687496c72746c53a393be6770786fda18b3bf292eec51a0ef096e616"
+    },
+    {
+      "asset": "upper_grass_paths_r02_c02.png",
+      "source": "sprites/Imperial/Imperial_23/new_main_city_09.png",
+      "sha256": "7534b4ce4169e73808bdc38988246b7ca77b53a0d94bde9cfbb9beed17567ec8"
+    },
+    {
+      "asset": "forest_paths_r02_c03.png",
+      "source": "sprites/Imperial/Imperial_23/new_main_city_10.png",
+      "sha256": "3bafc63822401c73f6a99a29bbd26e4917853c8488fdfbd88235fbe2e7e418e2"
+    },
+    {
+      "asset": "waterfall_terrace_r02_c04.png",
+      "source": "sprites/Imperial/Imperial_23/new_main_city_11.png",
+      "sha256": "86b7bff5479f55f07c675c8d52b09787e6ab8a16dbc1d2656e9d11dbf81eaa05"
+    },
+    {
+      "asset": "upper_courtyard_r02_c05.png",
+      "source": "sprites/Imperial/Imperial_23/new_main_city_12.png",
+      "sha256": "ccd514e693d3e03cc692a38600a4e03a15bde6e66fc630ba8e7994fb8b0fd660"
+    },
+    {
+      "asset": "harbor_walls_r02_c06.png",
+      "source": "sprites/Imperial/Imperial_23/new_main_city_13.png",
+      "sha256": "818522084d8f7476d7c1250035057294309635cd70d8f570c9c26b4d5e3686cd"
+    },
+    {
+      "asset": "dragon_cave_bank_r02_c07.png",
+      "source": "sprites/Imperial/Imperial_23/new_main_city_14.png",
+      "sha256": "de8a6d50893af1beedc5f960e05f2af19a9d4892273e12520384d1e2c585031c"
+    },
+    {
+      "asset": "western_lower_cliffs_r03_c01.png",
+      "source": "sprites/Imperial/Imperial_24/new_main_city_15.png",
+      "sha256": "c644180061273ec9555267dbc8962158469ec9708a0f5981642058f7b8d98841"
+    },
+    {
+      "asset": "western_grass_paths_r03_c02.png",
+      "source": "sprites/Imperial/Imperial_24/new_main_city_16.png",
+      "sha256": "1d4ae4eb8bd6ed53f8e0159198f023947957c9103d0faff1a117841b2c2efbc5"
+    },
+    {
+      "asset": "western_wall_stairs_r03_c03.png",
+      "source": "sprites/Imperial/Imperial_24/new_main_city_17.png",
+      "sha256": "e428614f1468e61bd143137cdd4beaf5c9f9cce1bcc1bd8973da54686ba74810"
+    },
+    {
+      "asset": "garden_terrace_r03_c04.png",
+      "source": "sprites/Imperial/Imperial_24/new_main_city_18.png",
+      "sha256": "bbf9995b54e45c8dceaa8bee90495650b73fa7014daf64260b7fbc7896d4c6b3"
+    },
+    {
+      "asset": "central_courtyard_r03_c05.png",
+      "source": "sprites/Imperial/Imperial_24/new_main_city_19.png",
+      "sha256": "3a90c9613975d4a483afaf88ca8fdd1b0ff7dee8da56338b6076d8f9ba929f39"
+    },
+    {
+      "asset": "lower_courtyard_r03_c06.png",
+      "source": "sprites/Imperial/Imperial_24/new_main_city_20.png",
+      "sha256": "080a3102f4e67b00bf1ce4886c65b325a06dde40934209147702317950ea0de2"
+    },
+    {
+      "asset": "eastern_riverbank_r03_c07.png",
+      "source": "sprites/Imperial/Imperial_24/new_main_city_21.png",
+      "sha256": "ccc59cdef4d6e758354ee202b8a37459cc68e49e05bf8cb5739d23613cc91863"
+    },
+    {
+      "asset": "autumn_forest_r04_c01.png",
+      "source": "sprites/Imperial/Imperial_25/new_main_city_22.png",
+      "sha256": "90b0de55b899ece79caccf45f4a59657665cb8c7ad5821099657d32e5c38dc3b"
+    },
+    {
+      "asset": "autumn_cliff_edge_r04_c02.png",
+      "source": "sprites/Imperial/Imperial_25/new_main_city_23.png",
+      "sha256": "484a83ccd1b56ba6eb4c3049ffcf8986cf7041d564856531367337c46f28bc16"
+    },
+    {
+      "asset": "woodland_clearing_r04_c03.png",
+      "source": "sprites/Imperial/Imperial_25/new_main_city_24.png",
+      "sha256": "13a92839497ef15adf44ec70086e8d4d4b2d186b377b7852ddedd85768316f52"
+    },
+    {
+      "asset": "courtyard_approach_r04_c04.png",
+      "source": "sprites/Imperial/Imperial_25/new_main_city_25.png",
+      "sha256": "05a2d1b0533c8b8eaf50c5ea4fdad4690bc79bb0a2834c8cb2e98b717b20dfc8"
+    },
+    {
+      "asset": "lower_terrace_wall_r04_c05.png",
+      "source": "sprites/Imperial/Imperial_25/new_main_city_26.png",
+      "sha256": "ed6dc02c1aa259dc8980e3a34e0ca2b1e4fb1761f4cf53c10612d41ca5bf3a7b"
+    },
+    {
+      "asset": "bridge_approach_r04_c06.png",
+      "source": "sprites/Imperial/Imperial_25/new_main_city_27.png",
+      "sha256": "f3a352a85ce741b949c9dcf30557f40999c1a0c87168c0b7d3fc7482dafc226f"
+    },
+    {
+      "asset": "cracked_autumn_clearing_r05_c01.png",
+      "source": "sprites/Imperial/Imperial_26/new_main_city_29.png",
+      "sha256": "84abf1656ece11cc753073f8db099a714f2bc5909c323ac7ab8ded76304a0e69"
+    },
+    {
+      "asset": "western_dirt_clearing_r05_c02.png",
+      "source": "sprites/Imperial/Imperial_26/new_main_city_30.png",
+      "sha256": "4d6ff4ba7a3b0d4330a90b59c7e20bd071cb40c4521705db4677bc4dc252a9f3"
+    },
+    {
+      "asset": "central_dirt_clearing_r05_c03.png",
+      "source": "sprites/Imperial/Imperial_26/new_main_city_31.png",
+      "sha256": "dd109ce2f3b7227f892a39ddf74d3b3e52dd02f14ed1107d52301a88ffcdbb52"
+    },
+    {
+      "asset": "southern_woodland_r05_c04.png",
+      "source": "sprites/Imperial/Imperial_26/new_main_city_32.png",
+      "sha256": "edadde4a4add56cf6a37fa99cb3830b5e1fe4c22fc21fe762c792ddcad2bb131"
+    },
+    {
+      "asset": "river_waterfall_r05_c05.png",
+      "source": "sprites/Imperial/Imperial_26/new_main_city_33.png",
+      "sha256": "ec81219ff726fe8825481ef4d8e78b47ff84767dc5b6ed4e0eb5c70863475e5a"
+    },
+    {
+      "asset": "southern_grass_paths_r05_c06.png",
+      "source": "sprites/Imperial/Imperial_26/new_main_city_34.png",
+      "sha256": "cf1e02530388c9acf03a8adcb26ab4ba19909f606b6662b2de3bd0686bd8928d"
+    },
+    {
+      "asset": "distant_mountains.png",
+      "source": "sprites/Common/Common_1000/new1_main_city_46.png",
+      "sha256": "8e564e562287b8afea1a65206736b6b2bf32a57f7ad3d18e1043fcc42c793274"
+    },
+    {
+      "asset": "river_texture.png",
+      "source": "textures/image3d/shui_alpha.png",
+      "sha256": "39da385e894a8d5e36cec26ce8d1eba5d00ee63c797c924bae6eeca0111ba86a"
+    },
+    {
+      "asset": "clouds.png",
+      "source": "sprites/Imperial/Imperial_35/up_cloud.png",
+      "sha256": "ddda42043254c7917c7bdd3d8cb0adaa42b844255b637cf2832c6433ce4556a8"
+    },
+    {
+      "asset": "river_mask.png",
+      "derivedFrom": "alpha of the 35 environment tiles listed in this manifest",
+      "derivation": "Transparent water basins selected at scene coordinates (6000,1000), (4900,2000), (4600,1450), multiplied by inverse source alpha and reduced to 1748x636."
+    },
+    {
+      "asset": "autumn_tree.png",
+      "source": "sprites/Imperial/Imperial_27/main_city_shu.png",
+      "sha256": "fe38121fe3a71f54c1c2d0e99e93ef7ff093dce61b53487f813f9a67127c46a1"
+    }
+  ]
+}

@@ -1,13 +1,40 @@
 {
-  "[typescript][typescriptreact]": {
+  "editor.formatOnSave": true,
+  "editor.formatOnPaste": true,
+  "editor.insertSpaces": true,
+  "editor.tabSize": 2,
+  "[typescript]": {
     "editor.defaultFormatter": "dprint.dprint",
-    "editor.tabSize": 4,
-    "editor.insertSpaces": true
+    "editor.tabSize": 4
   },
   "dprint.path": "./node_modules/.bin/dprint",
-  "[javascript][javascriptreact][json][jsonc][yaml][markdown][css][scss][less][html][vue][svelte][astro][toml][graphql]": {
-    "editor.defaultFormatter": "oxc.oxc-vscode",
-    "editor.tabSize": 2,
-    "editor.insertSpaces": true
-  }
+  "[javascript][typescriptreact][json][jsonc][yaml][markdown][css][scss][html][astro][toml]": {
+    "editor.defaultFormatter": "oxc.oxc-vscode"
+  },
+  "material-icon-theme.activeIconPack": "none",
+  "[go]": {
+    "editor.defaultFormatter": "golang.go",
+    "editor.tabSize": 4,
+    "editor.codeActionsOnSave": {
+      "source.organizeImports": "explicit"
+    }
+  },
+  "go.useLanguageServer": true,
+  "go.formatTool": "goimports",
+  "[python]": {
+    "editor.defaultFormatter": "charliermarsh.ruff",
+    "editor.tabSize": 4,
+    "editor.codeActionsOnSave": {
+      "source.organizeImports.ruff": "explicit"
+    }
+  },
+  "python.languageServer": "Pylance",
+  "python.analysis.typeCheckingMode": "basic",
+  "[dart]": {
+    "editor.defaultFormatter": "Dart-Code.dart-code",
+    "editor.codeActionsOnSave": {
+      "source.organizeImports": "explicit"
+    }
+  },
+  "python.terminal.useEnvFile": true
 }

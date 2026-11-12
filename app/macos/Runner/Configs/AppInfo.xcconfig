@@ -1,0 +1,5 @@
+PRODUCT_NAME = OpenCoK
+
+PRODUCT_BUNDLE_IDENTIFIER = org.opencok.opencok
+
+PRODUCT_COPYRIGHT = Copyright © 2026 org.opencok. All rights reserved.

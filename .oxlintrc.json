@@ -1,14 +1,17 @@
 {
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
   "ignorePatterns": [
     "**/node_modules/**",
     "**/dist/**",
     "**/coverage/**",
     "**/*.tsbuildinfo",
-    "data/**",
-    ".husky/_/**",
-    "packages/drizzle/migrations/**",
     "**/__snapshots__/**",
-    "packages/drizzle/tests/fixtures/**"
+    "data/**",
+    "docker/**",
+    "gameserver",
+    "app",
+    ".husky/_/**",
+    ".github/**"
   ],
   "plugins": ["typescript", "unicorn", "oxc"],
   "categories": {

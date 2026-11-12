@@ -1,1 +1,0 @@
-CREATE INDEX "nickname_change_receipt_owner_realm" ON "opencok_global"."nickname_change_receipt" USING btree ("ownerUid","kingdomId");

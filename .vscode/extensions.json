@@ -1,3 +1,20 @@
 {
-  "recommendations": ["dprint.dprint", "oxc.oxc-vscode"]
+  "recommendations": [
+    "dprint.dprint",
+    "oxc.oxc-vscode",
+    "ms-python.vscode-pylance",
+    "charliermarsh.ruff",
+    "astro-build.astro-vscode",
+    "ms-azuretools.vscode-containers",
+    "be5invis.toml",
+    "ms-azuretools.vscode-docker",
+    "ms-python.debugpy",
+    "editorconfig.editorconfig",
+    "google.arb-editor",
+    "dart-code.dart-code",
+    "dart-code.flutter",
+    "golang.go",
+    "ms-python.python",
+    "ms-python.vscode-python-envs"
+  ]
 }

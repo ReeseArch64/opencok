@@ -1,9 +1,0 @@
-{
-  "name": "@opencok/payments",
-  "private": true,
-  "devDependencies": {
-    "@opencok/config": "workspace:*",
-    "@types/bun": "catalog:",
-    "typescript": "catalog:"
-  }
-}

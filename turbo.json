@@ -1,0 +1,21 @@
+{
+  "$schema": "https://turbo.build/schema.json",
+  "ui": "tui",
+  "tasks": {
+    "lint": {
+      "cache": false
+    },
+    "format": {
+      "cache": false
+    },
+    "build": {
+      "cache": false
+    },
+    "check-types": {
+      "cache": false
+    },
+    "dev": {
+      "cache": false
+    }
+  }
+}

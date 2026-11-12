@@ -1,0 +1,25 @@
+{
+  "sourceRoot": "data/assets",
+  "assets": [
+    {
+      "asset": "barracks.png",
+      "source": "sprites/Imperial/Imperial_22/pic423000_2.png",
+      "sha256": "8631f5f3c003028175d10991f56472d76e3ced513b30eb97cb57f7c35efee50c"
+    },
+    {
+      "asset": "stable.png",
+      "source": "sprites/Imperial/Imperial_22/pic424000_2.png",
+      "sha256": "a106131c91cee4abe5df8822e4d04f7e4b036b66d8d75ff9c894884cbc53a216"
+    },
+    {
+      "asset": "archery_range.png",
+      "source": "sprites/Imperial/Imperial_22/pic425000_2.png",
+      "sha256": "491d157f529c6b4f04a8fe9c8bab8be55e7d5bb0aba876345cf917ebc55efa09"
+    },
+    {
+      "asset": "siege_workshop.png",
+      "source": "sprites/Imperial/Imperial_22/pic426000_2.png",
+      "sha256": "66bb37f0ad475533700a20ae1f2239a8504e5bf74a0bb4dc38e15756b97c19ca"
+    }
+  ]
+}

@@ -1,2 +1,0 @@
-ALTER TABLE "opencok_kingdom"."user_mixed_info" ADD COLUMN "ordinaryBoxGold" integer DEFAULT 0 NOT NULL;
-ALTER TABLE "opencok_kingdom"."user_mixed_info" ADD CONSTRAINT "user_mixed_info_box_gold_mode" CHECK ("ordinaryBoxGold" IN (0, 1));
