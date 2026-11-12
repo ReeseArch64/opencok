@@ -25,6 +25,8 @@ import {
     WorldMarchCheckpoint,
     GatheringJob,
     TrainingJob,
+    RealmAuthority,
+    KingdomRuleSet,
 } from "../models";
 import { kingdomDatabase } from "./kingdom-database";
 import type { PostgresDatabase } from "../types/postgres-database";
@@ -67,6 +69,8 @@ export function createPostgresDataSource(
             WorldMarchCheckpoint,
             GatheringJob,
             TrainingJob,
+            RealmAuthority,
+            KingdomRuleSet,
         ];
     return new DataSource({
         type: "postgres",

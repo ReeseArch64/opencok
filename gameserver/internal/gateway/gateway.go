@@ -1,4 +1,3 @@
-// Package gateway implements the anonymous OpenCoK binary connection bootstrap.
 package gateway
 
 import (
@@ -78,14 +77,13 @@ func (g *Gateway) originAllowed(r *http.Request) bool {
 	origin := r.Header.Get("Origin")
 	if origin == "" {
 		return true
-	} // Native clients do not send Origin.
+	}
 	for _, allowed := range g.cfg.Origins {
 		if origin == allowed {
 			return true
 		}
 	}
 	u, err := url.Parse(origin)
-	// Default only permits local development origins, never arbitrary sites.
 	return len(g.cfg.Origins) == 0 && err == nil && (u.Scheme == "http" || u.Scheme == "https") && (u.Hostname() == "localhost" || u.Hostname() == "127.0.0.1" || u.Hostname() == "[::1]" || u.Hostname() == "::1")
 }
 
@@ -138,7 +136,6 @@ func (g *Gateway) connect(w http.ResponseWriter, r *http.Request) {
 		g.reject(c)
 		return
 	}
-	// One writer is shared by query replies and the heartbeat goroutine.
 	var writeMu sync.Mutex
 	send := func(data []byte) error { writeMu.Lock(); defer writeMu.Unlock(); return write(c, data) }
 	welcome := make([]byte, 26)
@@ -176,7 +173,6 @@ func (g *Gateway) connect(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 	}()
-	// Queries do not refresh the heartbeat deadline. Rate limits are per socket.
 	tokens, refill := 8.0, time.Now()
 	for {
 		kind, data, err := c.ReadMessage()
@@ -233,7 +229,6 @@ func (g *Gateway) reject(c *websocket.Conn) {
 	_ = c.WriteControl(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseProtocolError, "invalid binary message"), time.Now().Add(time.Second))
 }
 
-// Close also terminates upgraded sockets, which http.Server.Shutdown does not own.
 func (g *Gateway) Close() {
 	g.mu.Lock()
 	g.closed = true

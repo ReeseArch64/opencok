@@ -37,4 +37,4 @@ Realm means gameplay authority; Kingdom is the existing gameplay/persistence ter
 - Use one blank line between imports/declarations, top-level declarations, methods, control blocks and meaningful stages; group related fields/locals. No decorative alignment or incidental sorting.
 - Oxfmt owns other supported formats, including `.tsx`, `.cjs` and `.mjs`: two spaces and same-line braces. Preserve Markdown wrapping; disable import/export and package-key sorting. Oxlint checks JS/TS correctness; mandatory `curly` applies only to `.ts`. EditorConfig follows the same indentation split.
 
-No inline, block, documentation or suppression comments in tracked code, configuration, scripts, SQL, templates or embedded examples. Preserve interpreter directives; express intent in prose and constraints through names/types.
+Do not write comments in code, including inline, block, documentation or suppression comments. This applies to tracked code, configuration, scripts, SQL, templates and embedded examples. Preserve interpreter directives; express intent in prose and constraints through names/types.

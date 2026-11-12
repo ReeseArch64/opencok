@@ -192,8 +192,9 @@ as decisões econômicas.
 
 ### Construction persistence
 
-`CityBuilding` (`city_buildings`, PostgreSQL por reino) representa somente Castelo,
-Fazenda, Serraria, Pedreira e Mina de Ferro, definidos em `BuildingType`. Cada posição
+`CityBuilding` (`city_buildings`, PostgreSQL por reino) representa Castelo, Fazenda, Serraria,
+Pedreira, Mina de Ferro, Quartel, Estábulo, Campo de Arqueiros e Oficina de Cerco,
+definidos em `BuildingType`. Cada posição
 pertence a uma cidade; posição, cidade e tipo são imutáveis nos models. Há no máximo
 um Castelo por cidade, inclusive após exclusão lógica. `level` começa em zero e
 `stateVersion` usa string decimal bigint para controle de concorrência pelo consumidor.
@@ -233,8 +234,9 @@ etapa; a adoção de Kysely descrita na arquitetura continua sendo trabalho sepa
 usa a coleção MongoDB global `building_configurations`. Cada publicação tem UUID,
 `schemaVersion = 1`, `configurationVersion`, tipo/nível, limite de instâncias, duração
 em segundos, todos os custos como strings bigint explícitas e requisitos limitados
-aos cinco tipos selecionados. Produtores exigem recurso correspondente, produção
-por hora e capacidade; Castelo exige uma instância e não aceita produção.
+aos tipos selecionados. Produtores exigem recurso correspondente, produção
+por hora e capacidade; Castelo exige uma instância e não aceita produção. Prédios
+militares exigem categoria de tropa correspondente e limite de unidades por lote.
 Versões são únicas por `(buildingType, level, configurationVersion)`. O schema
 rejeita edição/exclusão pelas operações normais do model; acesso direto à coleção
 exige as permissões do proprietário e não deve alterar publicações aceitas.
@@ -250,9 +252,105 @@ Esses models/schemas ainda não possuem handlers de construção, repositórios 
 integração ao provisionamento, ativação de configuração, Scheduler ou publicador.
 O consumidor deverá coordenar construção/fila, saldo, lançamento, recibo e outbox
 na mesma transação, conferir autorização e epoch, comparar pedidos repetidos e
-retornar a resposta gravada. Produção passiva e liquidação de recursos ficam para
-um lote posterior.
+retornar a resposta gravada. A persistência de produção passiva existe em `BuildingProduction`; o cálculo
+e a liquidação de recursos ainda precisam ser integrados ao gameplay.
 
-`bun run test:construction` verifica migrations, restrições, rollback transacional,
-retenção e exatidão de valores em bancos temporários PostgreSQL/MongoDB, removidos
-ao final. Aceita os mesmos argumentos de conexão de `migrate`.
+`bun run test:e2e` inclui as verificações de construção: migrations, restrições,
+rollback transacional, retenção e exatidão de valores. A suíte exige Docker e inicia
+seus próprios containers descartáveis PostgreSQL/MongoDB/Redis, removidos ao final;
+não recebe os argumentos de conexão de `migrate` nem reutiliza bancos da aplicação.
+
+### Kingdom authority and active rules
+
+Aplique `CreateKingdomRulesAndAuthority` em cada PostgreSQL de reino. Os models
+`RealmAuthority` e `KingdomRuleSet` estão no export principal e no data source.
+Ambos usam `id = 1`, pois o banco `kingdom_<id>` já determina o reino. Não herdam
+`BaseEntity`, não têm exclusão lógica e não podem ser apagados por `DELETE`.
+Nenhum registro é criado ou ativado automaticamente pela migration ou pelo seed.
+
+`RealmAuthority` (`realm_authority`) mantém `ownerEpoch` como string bigint,
+`instanceId` como UUID da instância e `acquiredAt` como timestamptz. Cada aquisição
+avança o epoch exatamente em um e não pode retroceder o instante de aquisição.
+A instância é identificada por execução; uma retomada, inclusive pela mesma
+instância, exige novo epoch. Este model não implementa eleição, lease ou heartbeat.
+
+O consumidor deve adquirir autoridade com compare-and-swap do epoch esperado e
+verificar a quantidade de linhas alteradas. Cada transação de gameplay precisa
+bloquear o registro de autoridade, conferir instância e epoch e manter o bloqueio
+até o commit. Só registrar `ownerEpoch` no recibo não impede uma escrita obsoleta.
+A ausência do registro não autoriza mutações de gameplay.
+
+`KingdomRuleSet` (`kingdom_rule_sets`) é a seleção ativa, com `stateVersion` bigint,
+`activatedAt`, versões dos catálogos de construções, tropas, treinamento, marchas
+e depósitos, além do UUID e versão da configuração inicial. Para cada catálogo,
+a versão seleciona somente publicações com aquela `configurationVersion`, sem
+fallback para outra versão. Publicar novos documentos não altera a seleção ativa.
+Atualizações exigem incremento de `stateVersion` em um e instante não regressivo.
+Use compare-and-swap da versão esperada na transação de ativação.
+
+Não há foreign keys entre PostgreSQL e MongoDB. Antes de ativar, o consumidor
+precisa verificar a existência e completude dos catálogos selecionados, incluindo
+as 40 combinações de categoria/tier em tropas e treinamento, os níveis de prédios
+exigidos e o UUID/versão inicial. A seleção de depósitos deve ser conciliada com
+as referências explícitas das configurações de população do mundo. Essas
+validações e a operação de ativação ainda não são implementadas neste lote.
+Operações iniciadas preservam seus UUIDs, versões, valores e prazos aceitos;
+não devem consultar a seleção atual para recalcular uma conclusão.
+
+### Initial city configuration
+
+`cityInitialConfigurationModel(connection)` usa MongoDB `global`, coleção
+`city_initial_configurations`. O schema exige `schemaVersion = 1`, versão de
+configuração, saldos explícitos para os sete recursos e construções iniciais com
+tipo, posição e nível positivo. Exige exatamente um Castelo e posições distintas;
+permite múltiplos produtores, sujeitos aos limites do catálogo de construções.
+Posição zero é válida. Posições vazias não precisam de registros de construção.
+Saldos são strings bigint não negativas, sem conversão por ponto flutuante.
+UUIDs e versões são únicos, e as publicações são imutáveis pelas operações normais
+do model, sem TTL. O acesso direto à coleção continua exigindo controle de acesso
+operacional para preservar essas garantias.
+
+`prepareGameplayCatalogs` prepara coleções e índices de tropas, treinamento,
+marchas e cidades iniciais; o script `seed` chama esse preparador. Ele não publica
+custos, prazos, recursos iniciais ou regras de progressão inventadas.
+
+O provisionamento deve validar os prédios iniciais contra a versão selecionada,
+incluindo limites, requisitos e correspondência do nível do Castelo com o objeto
+no mapa. Deve criar personagem, cidade, ocupação, saldos, construções e estados de
+produção em uma transação no reino. O recibo deve preservar a configuração inicial
+aceita. Um retry retorna o resultado existente, sem conceder os recursos novamente.
+Essa integração continua pendente; o schema sozinho não concede o pacote inicial.
+
+Para verificar o novo lote com bancos temporários, execute, a partir do pacote:
+
+```sh
+bun --no-env-file --tsconfig-override tsconfig.json tests/database/kingdom-rules.check.ts
+```
+
+Aceita os argumentos de conexão de `migrate`. Verifica epochs exatos, concorrência
+com compare-and-swap, rollback transacional, reconexão, índices dos documentos,
+rollback/reaplicação da migration e correspondência entre models e schema SQL.
+
+### Base version persistence review
+
+Construções, produção, tropas T1–T10, treinamento, marchas, coleta, recibos,
+lançamentos econômicos, outbox, autoridade e seleção de regras já têm estruturas
+de persistência. As filas existentes permitem consultar trabalho pendente após
+reinício; não é necessária uma segunda tabela genérica de filas para esse recorte.
+O provisionamento transacional no reino também dispensa uma fila adicional de
+concessões iniciais.
+
+Antes de fechar a versão base, falta resolver a correspondência de recursos:
+`ResourceType` do mapa inclui `mithril` e `refined_iron`, ausentes em
+`CharacterResource`; `stone`, `silver` e `crystals` existem nos saldos, mas não no
+catálogo do mapa. Não se deve inventar conversão entre eles. A primeira versão
+precisa restringir os depósitos aos recursos suportados ou ampliar os saldos e
+publicar regras explícitas. Isso pode ser resolvido nos enums, schemas e models
+existentes; uma tabela de conversão só é necessária se conversão fizer parte das
+regras escolhidas.
+
+Também faltam publicar os catálogos completos, definir posições e limites de
+construção permitidos, integrar provisionamento/ativação, implementar handlers
+transacionais, conferir autoridade, liquidar produção/coleta, concluir filas e
+publicar a outbox. A estrutura de tabelas não equivale à versão jogável concluída.
+Hospital, cura, pesquisa, combate, heróis e alianças ficam fora deste recorte.

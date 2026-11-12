@@ -5,10 +5,8 @@ import 'package:opencok/domain/training/training_culture/training_culture.dart';
 import 'package:opencok/domain/training/training_unit/training_unit.dart';
 
 class TrainingCatalog {
-  // Other cultures remain in the catalog for future releases.
   static const availableCultures = [TrainingCulture.simple];
 
-  // High-tier troops belong to one culture; they are not reskinned copies.
   static const specialOwners = <(String, int), TrainingCulture>{
     ('archer', 11): TrainingCulture.simple,
     ('archer', 12): TrainingCulture.japanese,

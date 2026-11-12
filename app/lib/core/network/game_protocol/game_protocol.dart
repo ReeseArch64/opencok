@@ -1,6 +1,5 @@
 import 'dart:typed_data';
 
-/// Bootstrap wire contract: gameserver/PROTOCOL.md.
 class GameProtocol {
   static const subprotocol = 'opencok.binary.v1';
   static Uint8List get hello => Uint8List.fromList([1, 1]);

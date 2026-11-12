@@ -27,6 +27,8 @@ import {
     WorldMarchCheckpoint,
     GatheringJob,
     TrainingJob,
+    RealmAuthority,
+    KingdomRuleSet,
 } from "@opencok/persistence";
 import { worldLayoutModel } from "@opencok/persistence/models/kingdom/world-layout";
 
@@ -81,6 +83,8 @@ test("database routing separates registry, kingdom and payment entities", () => 
         WorldMarchCheckpoint,
         GatheringJob,
         TrainingJob,
+        RealmAuthority,
+        KingdomRuleSet,
     ]);
     expect(createPostgresDataSource("payments").options.entities).toEqual([]);
     for (

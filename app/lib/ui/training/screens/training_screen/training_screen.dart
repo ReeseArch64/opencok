@@ -45,7 +45,6 @@ class _TrainingScreenState extends State<TrainingScreen> {
       units.length - 1,
     );
     final selected = units[selectedIndex];
-    // Decode the incoming model before fading it in, avoiding a blank frame.
     await Future.wait([
       precacheImage(AssetImage(selected.body), context),
       precacheImage(AssetImage(selected.portrait), context),

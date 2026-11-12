@@ -13,8 +13,6 @@ Future<void> main(List<String> arguments) async {
     exitCode = 1;
     return;
   }
-  // Flutter detects device tests only under integration_test/. Using drive
-  // keeps the real tests in tests/e2e/ while still running on the device.
   for (final test in tests) {
     final process = await Process.start(
       'flutter',

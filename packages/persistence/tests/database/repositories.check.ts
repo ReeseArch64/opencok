@@ -49,7 +49,6 @@ try
     await admin.initialize();
     await admin.query(`CREATE DATABASE "${database}"`);
     ownsDatabase = true;
-    // Não tocar em um banco MongoDB pré-existente, mesmo numa colisão de ID.
     const databases = await mongo.db!.admin().listDatabases({ nameOnly: true });
     assert.ok(
         !databases.databases.some(entry => entry.name === database),
@@ -183,7 +182,6 @@ try
     await regions.update.execute({ publicId: regionPublicId, patch: { displayName: "Alterada" } });
     assert.equal((await regions.findByPublicId.execute(regionPublicId))?.displayName, "Alterada");
 
-    // As duas escritas leem a mesma versão; apenas uma pode persistir.
     let reads = 0;
     let release!: () => void;
     const barrier = new Promise<void>(resolve => {

@@ -95,6 +95,13 @@ try
         amount: "23",
         remainder: "100",
     });
+    while (
+        (await source.query("SELECT name FROM typeorm_migrations ORDER BY id DESC LIMIT 1"))[0].name
+        !== "CreateTrainingPersistence1794438015000"
+    )
+    {
+        await source.undoLastMigration({ transaction: "all" });
+    }
     await source.undoLastMigration({ transaction: "all" });
     const baseTypes = await source.query("SELECT enum_range(NULL::building_type)::text AS values");
     assert.equal(baseTypes[0].values, "{castle,farm,sawmill,quarry,iron_mine}");
@@ -370,10 +377,18 @@ try
         assert.equal(next.jobStatus, TrainingJobStatus.Pending);
         checks++;
     }
+    while (
+        (await source.query("SELECT name FROM typeorm_migrations ORDER BY id DESC LIMIT 1"))[0].name
+        !== "CreateTrainingPersistence1794438015000"
+    )
+    {
+        await source.undoLastMigration({ transaction: "all" });
+    }
     await assert.rejects(
         source.undoLastMigration({ transaction: "all" }),
         /explicit handling of existing military buildings/,
     );
+    await source.runMigrations({ transaction: "all" });
     assert.equal(await manager.count(TrainingJob), 5);
     assert.deepEqual((await source.driver.createSchemaBuilder().log()).upQueries, []);
     checks += 3;

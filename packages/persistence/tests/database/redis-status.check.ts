@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { randomInt } from "node:crypto";
 import { persistenceOptions } from "../../scripts/options";
 import { createPostgresDataSource } from "../../src/factories/postgres-data-source";
+import { Kingdom } from "../../src/models/global/kingdom";
 import { connectRedis } from "../../src/redis";
 import { KingdomAccessStatus as Status } from "../../src/enums/kingdom-access-status";
 import {
@@ -20,6 +21,7 @@ admin.setOptions({ database: "postgres", entities: [], migrations: [] });
 const source = createPostgresDataSource("global", options.postgres);
 source.setOptions({
     database,
+    entities: [Kingdom],
     migrations: [CreateKingdomRegistry1794438000000, AddKingdomFullStatus1794438003000],
 });
 const redis = await connectRedis(options.redisUrl);
@@ -45,7 +47,6 @@ try
     assert.equal(await store.get(first), Status.Open);
     assert.equal(await store.get(first + 1), Status.Closed);
     assert.ok((await redis.ttl(kingdomAccessStatusKey(first))) > 0);
-    // Expiração real no Redis, sem usar relógio simulado.
     await Bun.sleep(1100);
     assert.equal(await store.get(first), Status.Closed);
     await store.set(first, Status.Full);
@@ -79,7 +80,6 @@ try
     });
     await source.initialize();
 
-    // Falhar na conexão Redis deve manter o schema e o histórico SQL.
     migrationRedisUris.set(source, "redis://127.0.0.1:1");
     await assert.rejects(source.runMigrations({ transaction: "all" }));
     assert.equal(

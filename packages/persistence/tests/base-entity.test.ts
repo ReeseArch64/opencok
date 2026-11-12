@@ -24,6 +24,8 @@ import {
     WorldMarchCheckpoint,
     GatheringJob,
     TrainingJob,
+    RealmAuthority,
+    KingdomRuleSet,
 } from "@opencok/persistence";
 import { createPostgresDataSource } from "@opencok/persistence/factories/postgres-data-source";
 
@@ -50,6 +52,15 @@ test("SQL models distinguish lifecycle rows from retained command and economic r
         ).toBe(false);
         for (const metadata of source.entityMetadatas)
         {
+            if ([RealmAuthority, KingdomRuleSet].some(model => model === metadata.target))
+            {
+                expect(metadata.deleteDateColumn).toBeUndefined();
+                expect(metadata.updateDateColumn).toBeUndefined();
+                expect(metadata.createDateColumn).toBeUndefined();
+                expect(metadata.primaryColumns[0]?.propertyName).toBe("id");
+                expect(metadata.primaryColumns[0]?.isGenerated).toBe(false);
+                continue;
+            }
             if (
                 [CommandReceipt, EconomyPosting, MutationOutbox].some(model =>
                     model === metadata.target

@@ -1,6 +1,7 @@
 {
   "$schema": "https://turbo.build/schema.json",
   "ui": "tui",
+  "concurrency": "1",
   "tasks": {
     "lint": {
       "cache": false
@@ -9,13 +10,49 @@
       "cache": false
     },
     "build": {
-      "cache": false
+      "cache": true
     },
     "check-types": {
       "cache": false
     },
     "dev": {
       "cache": false
+    },
+    "test": {
+      "cache": true
+    },
+    "test:unit": {
+      "cache": true
+    },
+    "test:contract": {
+      "cache": true
+    },
+    "test:integration": {
+      "cache": true
+    },
+    "test:e2e": {
+      "cache": true
+    },
+    "test:snapshot": {
+      "cache": true
+    },
+    "test:property": {
+      "cache": true
+    },
+    "test:coverage": {
+      "cache": true
+    },
+    "test:mutation": {
+      "cache": true,
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        "$TURBO_ROOT$/mise.toml",
+        "$TURBO_ROOT$/bunfig.toml",
+        "$TURBO_ROOT$/packages/config/tsconfig.base.json",
+        "$TURBO_ROOT$/gameserver/testdata/**"
+      ],
+      "outputs": ["coverage/mutation/**", "mutation-test-report/**"],
+      "env": ["CI", "FLUTTER_ROOT", "NODE_ENV"]
     }
   }
 }

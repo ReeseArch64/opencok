@@ -66,7 +66,6 @@ class _WorldMapViewportState extends State<WorldMapViewport> {
 
   void _scheduleQuery() {
     _queryTimer?.cancel();
-    // Debounce camera motion; changing the requested region also invalidates late replies.
     ++_generation;
     _queryTimer = Timer(
       const Duration(milliseconds: 180),
@@ -106,7 +105,6 @@ class _WorldMapViewportState extends State<WorldMapViewport> {
     try {
       final objects = <int, MapRegionObjectsItem>{};
       var chunks = 0;
-      // Split unusually wide viewports into bounded server regions.
       for (var y = minY; y <= maxY; y += 64) {
         for (var x = minX; x <= maxX; x += 64) {
           if (chunks++ > 0) {

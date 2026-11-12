@@ -1,4 +1,3 @@
-// Package realm provides bounded read-only routing to a development Realm.
 package realm
 
 import (

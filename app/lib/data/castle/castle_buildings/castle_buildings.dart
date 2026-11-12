@@ -5,7 +5,6 @@ import 'package:opencok/domain/castle/castle_building/castle_building.dart';
 class CastleBuildings {
   static const assetRoot = 'assets/castle/buildings/';
 
-  // Back to front so the foreground buildings cover those behind them.
   static const military = [
     CastleBuilding(
       'buildingSiegeWorkshop',
