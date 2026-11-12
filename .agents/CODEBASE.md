@@ -1,109 +1,47 @@
 # OpenCoK Codebase
 
-## Purpose
+OpenCoK uses a Turborepo monorepo with Bun workspaces. This is the target organization; introduce directories only when needed and inspect implementation before claiming support.
 
-This document defines the repository layout, file ownership, application boundaries and dependency conventions. It contains the context needed to apply these conventions independently.
+## Ownership
 
-OpenCoK uses a Turborepo monorepo with Bun workspaces for TypeScript applications and shared packages. TypeScript applications live in `apps/`, the Flutter game in `app/` and the Go GameServer in `gameserver/`. The structure below is the target layout; directories and configuration files are introduced when their implementation is needed.
+| Location                                            | Responsibility                                                            |
+| --------------------------------------------------- | ------------------------------------------------------------------------- |
+| `app/`                                              | Flutter + Flame game; distinct from `apps/`.                              |
+| `apps/api/`                                         | Global HTTP API.                                                          |
+| `apps/realm/`                                       | Gameplay application reused by all kingdoms.                              |
+| `apps/workers/`                                     | Background integrations and reconciliation.                               |
+| `apps/automation/`                                  | Bots and NPCs.                                                            |
+| `apps/admin/`, `apps/console/`, `apps/landing/`     | Operator, account and public React clients.                               |
+| `gameserver/`                                       | Go WSS gateway, sessions and Chat.                                        |
+| `wiki/`                                             | Markdown/MDX documentation; generator undecided.                          |
+| `packages/`                                         | Shared TypeScript contracts, UI, adapters and tooling.                    |
+| `bootstrap/`                                        | Reproducible local setup and infrastructure.                              |
+| `.agents/`                                          | Context, product, vocabulary and codebase guidance.                       |
+| `.github/`, `.devcontainer/`, `.husky/`, `.vscode/` | CI/architecture, development container, hooks and shared editor settings. |
 
-## Root layout
+## Workspaces and tools
 
-```text
-opencok/
-├── .agents/             # Context, vocabulary, product and codebase documents
-├── .devcontainer/       # Development container and its configuration
-├── .git/                # Local Git metadata; managed by Git
-├── .github/             # GitHub workflows, templates and architecture document
-├── .husky/              # Git hooks
-├── .vscode/             # Shared workspace settings, tasks and launch configurations
-├── app/                 # Flutter + Flame game for mobile and web
-├── apps/                # TypeScript applications
-│   ├── api/             # Global HTTP API
-│   ├── realm/           # Authoritative gameplay application, deployed per kingdom
-│   ├── workers/         # Global background integrations and asynchronous tasks
-│   ├── automation/      # TypeScript/Bun Bots and NPCs
-│   ├── admin/           # React operator client
-│   ├── console/         # React player account, purchases and automation client
-│   ├── landing/         # React public website
-│   └── wiki/            # Markdown/MDX documentation and generator configuration
-├── gameserver/          # Go WSS gateway, sessions and Chat
-├── bootstrap/           # Scripts and infrastructure definitions for initial setup
-├── packages/            # Shared TypeScript code and tooling packages
-├── .editorconfig        # Common editor formatting conventions
-├── .gitignore           # Ignored local, generated and sensitive files
-├── CHANGELOG.md         # Project release history
-├── LICENSE              # Project license
-├── *.md                 # Other standalone project documents
-├── mise.toml            # Language runtimes, SDKs and development tool versions
-├── package.json         # Private root workspace, common commands and tooling
-├── bun.lock             # Shared JavaScript/TypeScript dependency lockfile
-└── turbo.json           # Task graph, dependencies, inputs and cached outputs
-```
+Root `package.json` declares `apps/*`, `packages/*`, `app` and `gameserver`, repository tooling and common commands. Workspaces own their dependencies/scripts; internal TypeScript dependencies use `workspace:*` and public exports. Wiki joins when build tooling exists.
 
-`app/` always means the Flutter game; `apps/` groups TypeScript applications. Each application has its own entrypoint, configuration, build and deployment boundary. Multiple kingdoms reuse `apps/realm/`; they do not create separate source directories. Wiki remains at `wiki/` while its generator is undecided.
+Turborepo owns task dependencies, outputs and cache inputs. Include relevant source, generated contracts, manifests, environment/configuration and tool versions. Generate contracts before dependent builds/checks. Never cache persistent development tasks or migrations, provisioning and deployment.
 
-## Workspaces and task execution
+`mise.toml` owns runtime/SDK/tool versions. Bun, Dart and Go manifests/lockfiles own their respective dependencies. Small package scripts expose Flutter/Go commands to Turborepo without replacing native tooling or adding Bun to Go's runtime.
 
-The root `package.json` lists `apps/*`, `packages/*`, `app` and `gameserver` as workspaces, declares Bun as the package manager and exposes common Turborepo commands. Wiki joins the workspace when its build tooling is introduced. Internal TypeScript dependencies use `workspace:*` and public package exports. Each workspace declares its own dependencies and scripts; root dependencies are repository tooling.
+## Application boundaries
 
-Turborepo coordinates tasks such as `dev`, `build`, `lint`, `typecheck`, `test` and `generate` when applicable. `turbo.json` declares their dependency graph and outputs. Persistent development tasks and tasks that mutate external systems, such as migrations, provisioning and deployment, are not cached. Environment variables and configuration affecting outputs must participate in task inputs.
+- TypeScript backends: `src/main.ts` starts/stops the process; `composition/` wires modules; each module has a public facade plus `application/`, `domain/` and `infrastructure/`. Domain code excludes transport, persistence implementations and startup. Application-owned migrations and integration/recovery tests stay with the application; unit tests may be colocated.
+- React: feature-grouped `src/` with client-owned routing/composition. Shared UI may live in packages; backend dependencies cannot enter browser bundles. Routing/rendering choices remain open.
+- Go: `cmd/gameserver/main.go`, private modules under `internal/`, generated bindings under `internal/contracts/generated/`, colocated `*_test.go` tests.
+- Flutter: `lib/`, `test/`, platform projects, `lib/generated/` bindings and small bundled `assets/`. Separate confirmed state from presentation; downloaded assets/caches are untracked runtime data.
 
-`app/pubspec.yaml` remains the authority for Flutter dependencies, with `app/pubspec.lock` committed for reproducibility. A small `app/package.json` exposes Flutter commands to the workspace task graph; it does not replace Dart tooling. Contract generation declares its source dependencies and runs before dependent client checks/builds. Flutter source, manifests and relevant tool versions participate in cache inputs.
+Each application owns its entrypoint, configuration, build and deployment. Modules expose explicit interfaces; shared packages never own application migrations or expose private tables.
 
-`gameserver/go.mod` and `gameserver/go.sum` own Go dependencies. A small `gameserver/package.json` exposes Go build, test and development commands to Turborepo without introducing a Bun runtime dependency for the service. Go source, module files, generated contracts and the Go toolchain version participate in task inputs. Go is also versioned through `mise.toml`.
+## Shared code and repository support
 
-`mise.toml` defines the language/tool versions used locally, in the DevContainer and in CI. Dependency manifests and lockfiles define library versions. Avoid competing tool-version files; tool upgrades update the shared definition and relevant validation together.
+Each `packages/` child is a lowercase kebab-case `@opencok/` workspace with its own manifest, exports and source. Dependencies are explicit and acyclic; packages never import applications. Keep gameplay implementations with their backend owner.
 
-## Application layout
+`packages/contracts/` owns Zod wire schemas, inferred types and export/generation tooling. Generate Dart/Go bindings reproducibly into their consuming applications; never hand-edit generated output or duplicate wire definitions. Each owner declares output policy; CI checks freshness.
 
-TypeScript backend applications follow this baseline, adding directories only when needed:
+Bootstrap covers prerequisites, dependencies, services, migrations, initial configuration and startup with documented inputs/order and safe reruns. Destructive reset is explicit; production automation has a separate scope. DevContainer reuses bootstrap, CI reuses local checks and hooks call repository commands.
 
-```text
-apps/realm/
-├── src/
-│   ├── main.ts          # Process startup and shutdown
-│   ├── composition/     # Explicit dependency wiring and module composition
-│   └── modules/
-│       └── city/
-│           ├── facade.ts
-│           ├── application/    # Commands, queries and repository interfaces
-│           ├── domain/         # Entities, value objects and gameplay rules
-│           └── infrastructure/ # Repository implementations and external adapters
-├── migrations/         # Migrations owned by this application
-├── tests/              # Integration and application-level recovery scenarios
-├── package.json
-└── tsconfig.json
-```
-
-Modules communicate through explicit public interfaces. Domain code does not import transport, persistence implementations or process startup. Unit tests may sit beside the code they exercise; integration tests remain with their owning application. A shared package does not take ownership of application migrations or expose another application's private tables.
-
-React clients keep source under `src/`, grouped by feature, with routing and application composition owned by that client. Shared React components may live in `packages/`; backend-only dependencies must not enter browser bundles. Router packages and rendering conventions remain undecided; each client owns its routing configuration and rendering entrypoints.
-
-The Go GameServer uses `gameserver/cmd/gameserver/main.go` as its entrypoint and `gameserver/internal/` for private session, routing, Chat and transport modules. Generated Go contract bindings live under `gameserver/internal/contracts/generated/`; tests use Go's colocated `*_test.go` convention. Go modules communicate through explicit interfaces and do not import TypeScript implementations.
-
-The Flutter game keeps Dart source under `app/lib/`, tests under `app/test/` and platform projects under `app/android/`, `app/ios/` and `app/web/`. Feature code separates confirmed game state from Flutter/Flame presentation. Generated contract bindings live under `app/lib/generated/`. Small bundled assets live under `app/assets/`; downloaded content and local caches are runtime data outside version control.
-
-Wiki source belongs to `wiki/`; its build tooling is introduced after the generator is selected. The repository layout does not select a Wiki generator.
-
-## Shared packages
-
-Each direct child of `packages/` is a named TypeScript workspace with its own `package.json`, public exports and `src/`. Use lowercase kebab-case directory names and the `@opencok/` package scope. Create packages for concrete shared responsibilities rather than collecting unrelated code in a general utilities package.
-
-- `packages/contracts/` owns Zod wire schemas, inferred TypeScript types, message definitions and contract-export tooling. Dart and Go bindings are generated from these definitions; Go bindings belong to `gameserver/`, not the shared TypeScript packages directory.
-- Additional packages may hold shared React UI, infrastructure adapters or TypeScript/lint configuration when consumers need them.
-- Applications may depend on packages; packages never import executable applications. Package dependencies are explicit and acyclic.
-- Gameplay implementations stay with their owning backend modules. Sharing contracts with clients or automation does not share gameplay authority.
-
-Generated bindings and exported schemas have a reproducible generation command. Do not edit generated files manually or maintain a second handwritten copy of a contract. Generated output policy is declared by its owning workspace, and CI checks that consumers use current contracts.
-
-## Bootstrap and repository support
-
-`bootstrap/` contains the scripts and infrastructure definitions needed to bring a clean checkout to a running local game: prerequisite checks, dependency setup, local services, migrations, initial configuration and startup orchestration. Use named scripts and a concise README describing execution order and required inputs. Scripts must support safe reruns; destructive reset is a separate explicit operation. Production deployment automation is added here in a clearly separate scope when its mechanism is chosen.
-
-`.devcontainer/` defines the containerized development environment and invokes shared setup rather than duplicating bootstrap logic. `.github/workflows/` runs the same workspace checks used locally. `.husky/` contains lightweight hooks calling repository commands. `.vscode/` contains portable shared settings without machine-specific paths or credentials.
-
-Keep secrets, local environment files, database volumes, downloaded assets, `node_modules/`, `.turbo/`, `.dart_tool/` and build outputs out of version control. Commit safe configuration examples and the appropriate dependency lockfiles. `.git/` is generated by Git and is never a source directory to maintain manually.
-
-Root documentation is organized by scope: product requirements, technical orientation, repository conventions and release history. Each document must explain its scope independently, without requiring another root document to supply essential context. Module documentation stays near its implementation.
-
-Workspace/task integration follows the Turborepo documentation for [repository structure](https://turborepo.dev/docs/crafting-your-repository/structuring-a-repository) and [multiple languages](https://turborepo.dev/docs/guides/multi-language).
+Exclude secrets, local environments, volumes, downloaded assets, dependency/cache directories and build outputs from Git. Commit safe examples and dependency lockfiles. Keep documentation self-contained by scope and module documentation near implementation; avoid machine-specific editor paths or credentials.

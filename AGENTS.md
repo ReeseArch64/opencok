@@ -4,8 +4,7 @@ OpenCoK is a self-hosted game platform. Use this index to load only the guidance
 
 ## Task references
 
-| Source                                  | Scope                                                          |
-| --------------------------------------- | -------------------------------------------------------------- |
-| [CONTEXT](.agents/CONTEXT.md)           | Technical requirements, priorities and acceptance criteria.    |
-| [ARCHITECTURE](.github/ARCHITECTURE.md) | Components, dependencies, state ownership and migration gates. |
-| [GLOSSARY](.agents/GLOSSARY.md)         | Vocabulary, names, contracts and code presentation.            |
+| Source                          | Scope                                                       |
+| ------------------------------- | ----------------------------------------------------------- |
+| [CONTEXT](.agents/CONTEXT.md)   | Technical requirements, priorities and acceptance criteria. |
+| [GLOSSARY](.agents/GLOSSARY.md) | Vocabulary, names, contracts and code presentation.         |
