@@ -1,0 +1,178 @@
+repository:
+  name: opencok
+  description: A Clash of Kings private server project for self-hosted gameplay, server customization, and local development.
+  homepage: https://opencok.com
+  topics: clash-of-kings, cok, private-server, self-hosted
+  private: false
+  has_issues: true
+  has_projects: true
+  has_wiki: true
+  has_downloads: true
+  default_branch: develop
+  allow_squash_merge: true
+  allow_merge_commit: true
+  allow_rebase_merge: false
+  allow_auto_merge: true
+  delete_branch_on_merge: true
+  squash_merge_commit_title: PR_TITLE
+  squash_merge_commit_message: PR_BODY
+  web_commit_signoff_required: true
+  enable_automated_security_fixes: true
+  enable_vulnerability_alerts: true
+
+labels:
+  - name: documentation
+    color: "#0075CA"
+    description: Changes guides, examples, or project documentation.
+
+  - name: release/v9.27.0
+    color: "#0E8A16"
+    description: Release version v9.27.0
+
+  - name: release/v5.36.0
+    color: "#0E8A16"
+    description: Release version v5.36.0
+
+  - name: release/v6.12.20
+    color: "#0E8A16"
+    description: Release version v6.12.20
+
+  - name: release/v12.06.0
+    color: "#0E8A16"
+    description: Release version v12.06.0
+
+  - name: infrastructure
+    color: "#D93F0B"
+    description: Changes related to infrastructure, CI/CD, and DevOps.
+
+  - name: bug
+    color: "#D73A4A"
+    description: Changes related to bug fixes.
+
+  - name: enhancement
+    color: "#A2EEEF"
+    description: Changes related to new features or enhancements.
+
+  - name: question
+    color: "#D876E3"
+    description: Changes related to questions or inquiries.
+
+  - name: discussion
+    color: "#BFDADC"
+    description: Changes related to discussions or community conversations.
+
+  - name: help wanted
+    color: "#D876E3"
+    description: Changes related to help wanted or assistance needed.
+
+  - name: accessibility
+    color: "#FFD700"
+    description: Changes related to accessibility improvements.
+
+  - name: security
+    color: "#B60205"
+    description: Changes related to security improvements and vulnerability fixes.
+
+  - name: performance
+    color: "#FF4500"
+    description: Changes related to performance improvements and optimizations.
+
+  - name: duplicate
+    color: "#CCCCCC"
+    description: Changes related to duplicate issues or pull requests.
+
+  - name: wontfix
+    color: "#E6E6E6"
+    description: Changes related to issues or pull requests that will not be fixed.
+
+  - name: wontdo
+    color: "#E6E6E6"
+    description: Changes related to issues or pull requests that are decided not to be done.
+
+  - name: invalid
+    color: "#E6E6E6"
+    description: Changes related to issues or pull requests that are deemed invalid.
+
+  - name: blocked
+    color: "#E6E6E6"
+    description: Changes related to issues or pull requests that are blocked.
+
+  - name: wontmerge
+    color: "#E6E6E6"
+    description: Changes related to pull requests that will not be merged.
+
+  - name: needs review
+    color: "#E6E6E6"
+    description: Changes related to pull requests that need further review.
+
+  - name: blocked review
+    color: "#E6E6E6"
+    description: Changes related to pull requests that are blocked from being reviewed.
+
+  - name: good first issue
+    color: "#7057FF"
+    description: Changes related to issues that are suitable for newcomers or first-time contributors.
+
+  - name: hotfix
+    color: "#FF0000"
+    description: Changes related to urgent fixes that need to be applied immediately.
+
+  - name: dependencies
+    color: "#0366D6"
+    description: Updates to project dependencies and third-party libraries.
+
+  - name: refactoring
+    color: "#A2EEEF"
+    description: Code restructuring without changing existing behavior.
+
+  - name: testing
+    color: "#1D76DB"
+    description: Changes to automated tests, fixtures, and test coverage.
+
+  - name: ci/cd
+    color: "#D93F0B"
+    description: Changes to build, continuous integration, and deployment workflows.
+
+  - name: maintenance
+    color: "#FEF2C0"
+    description: Routine upkeep, cleanup, and repository housekeeping.
+
+  - name: regression
+    color: "#B60205"
+    description: Previously working functionality that is now broken.
+
+  - name: compatibility
+    color: "#5319E7"
+    description: Compatibility across client versions, platforms, and environments.
+
+  - name: database
+    color: "#006B75"
+    description: Changes to database schemas, queries, migrations, and seed data.
+
+  - name: server
+    color: "#0052CC"
+    description: Changes to game servers and backend services.
+
+  - name: client
+    color: "#C5DEF5"
+    description: Changes to game clients and client-side integrations.
+
+  - name: networking
+    color: "#006B75"
+    description: Changes to protocols, connectivity, routing, and server discovery.
+
+  - name: investigation
+    color: "#D4C5F9"
+    description: Diagnosis of private server behavior and client compatibility issues.
+
+  - name: needs triage
+    color: "#FBCA04"
+    description: Issues awaiting initial assessment and classification.
+
+  - name: needs reproduction
+    color: "#FBCA04"
+    description: Issues requiring reproducible steps or a minimal test case.
+
+  - name: needs information
+    color: "#FBCA04"
+    description: Issues requiring additional details before work can proceed.

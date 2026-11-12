@@ -8,3 +8,4 @@ OpenCoK is a self-hosted game platform. Use this index to load only the guidance
 | ------------------------------- | ----------------------------------------------------------- |
 | [CONTEXT](.agents/CONTEXT.md)   | Technical requirements, priorities and acceptance criteria. |
 | [GLOSSARY](.agents/GLOSSARY.md) | Vocabulary, names, contracts and code presentation.         |
+| [RULES](.agents/RULES.md)       | Repository rules, protection, destinations and delivery.    |
