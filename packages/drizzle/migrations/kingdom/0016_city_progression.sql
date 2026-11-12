@@ -1,1 +1,0 @@
-ALTER TABLE "opencok_kingdom"."timed_activity" ADD COLUMN "data" jsonb;

@@ -7,6 +7,9 @@
   "exports": {
     "./tsconfig.base.json": "./tsconfig.base.json"
   },
+  "scripts": {
+    "format": "dprint fmt --config ../../dprint.json --allow-no-files ."
+  },
   "devDependencies": {
     "@types/bun": "catalog:",
     "typescript": "catalog:"

@@ -1,0 +1,18 @@
+enum HudAction {
+  profile,
+  experience,
+  energy,
+  vip,
+  wood,
+  food,
+  iron,
+  mithril,
+  power,
+  gold,
+  map,
+  daily,
+  items,
+  mail,
+  alliance,
+  chat,
+}

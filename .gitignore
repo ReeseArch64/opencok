@@ -1,13 +1,87 @@
+# IDEs and editors
+.vscode/
+.zed/
+.cursor/
+.kiro/
+.idea/
+.devin/
+
+# IA Agents
+.claude/
+.pi/
+.gemini/
+.codex/
+.openclaude/
+
+GEMINI.md
+CLAUDE.md
+
+opencode.json
+
+# Android
+android/.gradle/
+android/.kotlin/
+android/local.properties
+android/key.properties
+android/app/debug/
+android/app/profile/
+android/app/release/
+
+# MacOS
+.DS_Store
+
+macos/Pods/
+macos/.symlinks/
+macos/Flutter/ephemeral/
+macos/Flutter/Flutter.podspec
+
+# IOS
+ios/Pods/
+ios/.symlinks/
+ios/Flutter/ephemeral/
+ios/Flutter/Generated.xcconfig
+ios/Flutter/flutter_export_environment.sh
+ios/Flutter/Flutter.podspec
+
+# Linux & Windows
+linux/flutter/ephemeral/
+windows/flutter/ephemeral/
+
+# Dart
+.dart_tool/
+
+# Flutter
+.flutter-plugins-dependencies
+
+# Build
+build/
+
+# Others
+*.iml
+
+# TypeScript
 dist/
 *.tsbuildinfo
 
+# Node.js
 node_modules/
 
+# Environment variables
 .env
 .env.*
 !.env.example
 
+# Distribution and local credentials
+*.jks
+*.keystore
+
+# Data files
 data/*
 !data/.gitkeep
 
-.pi/
+# Test reports
+coverage/
+mutation-test-report/
+
+# Turborepo
+.turbo/

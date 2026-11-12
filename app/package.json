@@ -1,0 +1,33 @@
+{
+  "name": "@opencok/app",
+  "private": true,
+  "scripts": {
+    "dev:android": "dart run tool/flutter_tasks.dart dev android",
+    "dev:ios": "dart run tool/flutter_tasks.dart dev ios",
+    "dev:linux": "flutter run -d linux --dart-define-from-file=.env",
+    "dev:macos": "flutter run -d macos --dart-define-from-file=.env",
+    "dev:windows": "flutter run -d windows --dart-define-from-file=.env",
+    "dev:web": "flutter run -d web-server --web-hostname 0.0.0.0 --dart-define-from-file=.env",
+    "build": "bun run build:all",
+    "build:android": "flutter build apk --dart-define-from-file=.env",
+    "build:ios": "flutter build ios --dart-define-from-file=.env",
+    "build:linux": "flutter build linux --dart-define-from-file=.env",
+    "build:macos": "flutter build macos --dart-define-from-file=.env",
+    "build:windows": "flutter build windows --dart-define-from-file=.env",
+    "build:web": "flutter build web --dart-define-from-file=.env",
+    "build:all": "dart run tool/flutter_tasks.dart build-all",
+    "lint": "flutter analyze --fatal-infos --fatal-warnings",
+    "lint:fix": "dart fix --apply lib && dart fix --apply tests && dart fix --apply tool",
+    "format": "dart format .",
+    "format:check": "dart format --output=none --set-exit-if-changed .",
+    "check-types": "dart analyze --fatal-infos",
+    "test:unit": "flutter test lib",
+    "test:integration": "flutter test tests/integration",
+    "test:contract": "flutter test tests/contract",
+    "test:snapshot": "flutter test tests/snapshot",
+    "test:e2e": "dart run tool/run_e2e.dart",
+    "test:mutation": "dart run mutation_test tests/mutation/mutation-test.xml",
+    "test:coverage": "flutter test lib tests/contract tests/integration tests/snapshot --coverage",
+    "test:all": "bun run test:unit && bun run test:integration && bun run test:contract && bun run test:snapshot && bun run test:e2e && bun run test:coverage && bun run test:mutation"
+  }
+}

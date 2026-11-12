@@ -1,1 +1,0 @@
-ALTER TABLE "opencok_kingdom"."mutation_outbox" ADD COLUMN "traceparent" varchar(55);

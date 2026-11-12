@@ -1,3 +1,12 @@
 {
-  "extends": "@opencok/config/tsconfig.base.json"
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "Preserve",
+    "moduleResolution": "bundler",
+    "strict": true,
+    "noEmit": true,
+    "types": ["bun"],
+    "skipLibCheck": true
+  },
+  "include": ["src", "scripts"]
 }

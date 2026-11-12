@@ -1,0 +1,314 @@
+{
+  "@@locale": "pt",
+  "close": "Fechar",
+  "retry": "Tente novamente",
+  "ok": "OK",
+  "daily": "Diariamente",
+  "items": "Itens",
+  "mail": "Correio",
+  "alliance": "Aliança",
+  "chat": "Conversa",
+  "city": "Cidade",
+  "map": "Mapa",
+  "profile": "Perfil",
+  "experienceShort": "XP",
+  "experience": "Experiência",
+  "energy": "Energia",
+  "vip": "VIP",
+  "wood": "Madeira",
+  "food": "Comida",
+  "iron": "Ferro",
+  "mithril": "Mithril",
+  "power": "Poder",
+  "gold": "Ouro",
+  "backToGame": "Voltar ao jogo",
+  "rename": "Alterar nome",
+  "ranking": "Classificação",
+  "achievements": "Conquistas",
+  "information": "Informações",
+  "reset": "Redefinir",
+  "skills": "Talentos",
+  "settings": "Configurações",
+  "castleInterior": "Interior do castelo",
+  "castleLoadError": "Não foi possível carregar o interior do castelo.",
+  "mapLoadError": "Não foi possível carregar o mapa.",
+  "closeSelection": "Fechar seleção",
+  "trainTroops": "Treinar tropas",
+  "backToCastle": "Voltar ao castelo",
+  "unitInformation": "Informações da unidade",
+  "combatRelation": "Relação de combate das unidades",
+  "combatRelationButton": "Relação de combate\ndas unidades",
+  "combatRelationDescription": "As vantagens de combate dependem das regras do reino.",
+  "attack": "Ataque",
+  "defense": "Defesa",
+  "health": "HP",
+  "trainNow": "Treine Agora!",
+  "train": "Treinar",
+  "trainingUnavailable": "Treinamento indisponível",
+  "trainingUnavailableDescription": "O reino ainda não está conectado. Nenhuma unidade foi treinada e nenhum recurso foi gasto.",
+  "decreaseQuantity": "Diminuir quantidade",
+  "increaseQuantity": "Aumentar quantidade",
+  "trainingBonusHint": "Use itens de bônus para aumentar o valor do treino!",
+  "trainingBonus": "Bônus de treinamento",
+  "trainingBonusDescription": "Os itens de bônus estarão disponíveis quando o inventário estiver conectado.",
+  "securityCompromised": "O jogo não pode ser aberto em dispositivos com root ou jailbreak.",
+  "securityPrivileged": "Abra o jogo com uma conta comum, sem privilégios de root ou administrador.",
+  "securityDeveloperMode": "Desative as opções do desenvolvedor para abrir o jogo.",
+  "securityDebugger": "Desconecte o depurador para abrir o jogo.",
+  "securityMobileBrowser": "O jogo não está disponível pelo navegador em dispositivos móveis. Use o aplicativo.",
+  "securityVerificationFailed": "Não foi possível verificar a segurança do dispositivo. Tente novamente.",
+  "verifyAgain": "Verificar novamente",
+  "castleInstructions": "Interior do castelo. Arraste para explorar, amplie com dois dedos e toque em uma construção para selecionar.",
+  "visualPreview": "{label} · prévia visual",
+  "@visualPreview": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "comingSoon": "{label} · em breve",
+  "@comingSoon": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "addResource": "Adicionar {label}",
+  "@addResource": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "resourceValue": "{label}: {value}",
+  "@resourceValue": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      },
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "profileLevel": "Perfil, nível {level}",
+  "@profileLevel": {
+    "placeholders": {
+      "level": {
+        "type": "int"
+      }
+    }
+  },
+  "emptyEquipmentSlot": "Espaço de equipamento vazio {slot}",
+  "@emptyEquipmentSlot": {
+    "placeholders": {
+      "slot": {
+        "type": "int"
+      }
+    }
+  },
+  "unitLevel": "{name}, nível {level}",
+  "@unitLevel": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "level": {
+        "type": "int"
+      }
+    }
+  },
+  "unitDetails": "{name} · nível {level}\nAtaque: {attack}\nDefesa: {defense}\nHP: {hp}",
+  "@unitDetails": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "level": {
+        "type": "int"
+      },
+      "attack": {
+        "type": "int"
+      },
+      "defense": {
+        "type": "int"
+      },
+      "hp": {
+        "type": "int"
+      }
+    }
+  },
+  "ownedUnits": "Possui: {count}",
+  "@ownedUnits": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "unitCount": "{count, plural, one{1 unidade} other{{count} unidades}}",
+  "@unitCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "trainingCapacity": "Capacidade de treinamento: {capacity}",
+  "@trainingCapacity": {
+    "placeholders": {
+      "capacity": {
+        "type": "int"
+      }
+    }
+  },
+  "versionInfo": "Cliente: v{client}\nServidor: v{server}",
+  "@versionInfo": {
+    "placeholders": {
+      "client": {
+        "type": "String"
+      },
+      "server": {
+        "type": "String"
+      }
+    }
+  },
+  "trainingHeading": "{culture} · {building}",
+  "@trainingHeading": {
+    "placeholders": {
+      "culture": {
+        "type": "String"
+      },
+      "building": {
+        "type": "String"
+      }
+    }
+  },
+  "unitStandardInfantry1": "Milícia",
+  "unitStandardInfantry2": "Infantaria",
+  "unitStandardInfantry3": "Lanceiro",
+  "unitStandardInfantry4": "Infantaria IV",
+  "unitStandardInfantry5": "Infantaria V",
+  "unitStandardInfantry6": "Infantaria VI",
+  "unitStandardInfantry7": "Infantaria VII",
+  "unitStandardInfantry8": "Infantaria VIII",
+  "unitStandardInfantry9": "Infantaria IX",
+  "unitStandardInfantry10": "Infantaria X",
+  "unitStandardCavalry1": "Cavaleiro",
+  "unitStandardCavalry2": "Cavalaria leve",
+  "unitStandardCavalry3": "Cavalaria pesada",
+  "unitStandardCavalry4": "Cavalaria IV",
+  "unitStandardCavalry5": "Cavalaria V",
+  "unitStandardCavalry6": "Cavalaria VI",
+  "unitStandardCavalry7": "Cavalaria VII",
+  "unitStandardCavalry8": "Cavalaria VIII",
+  "unitStandardCavalry9": "Cavalaria IX",
+  "unitStandardCavalry10": "Cavalaria X",
+  "unitStandardArcher1": "Arqueiro",
+  "unitStandardArcher2": "Besteiro",
+  "unitStandardArcher3": "Arqueiro longo",
+  "unitStandardArcher4": "Arqueiro IV",
+  "unitStandardArcher5": "Arqueiro V",
+  "unitStandardArcher6": "Arqueiro VI",
+  "unitStandardArcher7": "Arqueiro VII",
+  "unitStandardArcher8": "Arqueiro VIII",
+  "unitStandardArcher9": "Arqueiro IX",
+  "unitStandardArcher10": "Arqueiro X",
+  "unitStandardSiege1": "Aríete",
+  "unitStandardSiege2": "Catapulta",
+  "unitStandardSiege3": "Torre de cerco",
+  "unitStandardSiege4": "Cerco IV",
+  "unitStandardSiege5": "Cerco V",
+  "unitStandardSiege6": "Cerco VI",
+  "unitStandardSiege7": "Cerco VII",
+  "unitStandardSiege8": "Cerco VIII",
+  "unitStandardSiege9": "Cerco IX",
+  "unitStandardSiege10": "Cerco X",
+  "unitSlaughterCavalry": "Cavalaria de Abate",
+  "unitRangerKnight": "Cavaleiro Guarda",
+  "unitEliteInfantry1": "Guardiões do Firmamento",
+  "unitEliteInfantry2": "Carrasco Quebrador de Juramentos",
+  "unitEliteInfantry3": "Guarda Perfuragelo",
+  "unitEliteInfantry4": "Defensor da Couraça de Gelo",
+  "unitEliteInfantry5": "Porta-Escudo de Aço Gélido",
+  "unitEliteInfantry6": "Lanceiro de Aço Gélido",
+  "unitEliteInfantry7": "Guardião de Gélido",
+  "unitEliteInfantry8": "Sentinela Asa Gélida",
+  "unitEliteCavalry1": "Cavaleiro do Pesadelo",
+  "unitEliteCavalry2": "Guarda Brilhante",
+  "unitEliteCavalry3": "Cavaleiro Espectral Lobo de Gelo",
+  "unitEliteCavalry4": "Cavaleiro Quebra-Alces",
+  "unitEliteCavalry5": "Touro de Guerra Estampedeiro",
+  "unitEliteCavalry6": "Yeti Lançador",
+  "unitEliteCavalry7": "Vanguarda Grifo",
+  "unitEliteCavalry8": "Cavaleiro Dentes-de-Sabre",
+  "unitEliteArcher1": "Caçador da Justiça",
+  "unitEliteArcher2": "Caçador de Corvo Negro",
+  "unitEliteArcher3": "Atirador Blackraven",
+  "unitEliteArcher4": "Arqueiro Morto-Vivo Enxertado",
+  "unitEliteArcher5": "Arqueiro Morto-vivo Olho do Vazio",
+  "unitEliteArcher6": "Atirador de Elite Corvoréu",
+  "unitEliteArcher7": "Arqueiro Morto-Vivo Frenético",
+  "unitEliteArcher8": "Ceifador de Setas Bloodraven",
+  "unitEliteSiege1": "Punidor Divino",
+  "unitEliteSiege2": "Abissal Bruto",
+  "unitEliteSiege3": "Esmagador Chifre de Ferro",
+  "unitEliteSiege4": "Golem Arcano",
+  "unitEliteSiege5": "Titã do Fluxo do Vazio",
+  "unitEliteSiege6": "Aniquilador Golpe-Partido",
+  "unitEliteSiege7": "Arquimago Abandonado",
+  "unitEliteSiege8": "Devastador Costas de Canhão",
+  "unitHighArcher11": "Besteiro Furioso",
+  "unitHighArcher12": "Arqueiro Shura",
+  "unitHighCavalry12": "Cavaleiro Pégasos",
+  "unitHighSiege11": "Artilharia Destemida",
+  "unitHighSiege12": "Asas de Fênix",
+  "unitHighInfantry11": "Lanceiro Voulge",
+  "unitHighInfantry12": "Guerreiro Selvagem",
+  "buildingSiegeWorkshop": "Fábrica de Armas de Cerco",
+  "buildingStable": "Estábulo",
+  "buildingArcheryRange": "Campo de Alcance",
+  "buildingBarracks": "Quartel",
+  "cultureSimple": "Simples",
+  "cultureSimpleTitle": "Unidades básicas",
+  "cultureViking": "Vikings",
+  "cultureVikingTitle": "Unidades vikings",
+  "cultureJapanese": "Japonesas",
+  "cultureJapaneseTitle": "Unidades japonesas",
+  "cultureChinese": "Chinesas",
+  "cultureChineseTitle": "Unidades chinesas",
+  "culturePersian": "Persas",
+  "culturePersianTitle": "Unidades persas",
+  "cultureElite": "Especiais",
+  "cultureEliteTitle": "Tropas especiais",
+  "errorMessage": "{error, select, unexpected{Ocorreu um erro inesperado. Feche esta mensagem e tente novamente.} music{Não foi possível reproduzir a música do jogo.} other{Ocorreu um erro inesperado. Feche esta mensagem e tente novamente.}}",
+  "@errorMessage": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "unitVikingInfantry": "Guerreiro Viking",
+  "unitVikingCavalry": "Cavaleiro Viking",
+  "unitVikingArcher": "Arqueiro Viking",
+  "unitVikingSiege": "Cerco Viking",
+  "unitJapaneseInfantry": "Samurai",
+  "unitJapaneseCavalry": "Cavaleiro Japonês",
+  "unitJapaneseArcher": "Arqueiro Japonês",
+  "unitJapaneseSiege": "Cerco Japonês",
+  "unitChineseInfantry": "Guerreiro Chinês",
+  "unitChineseCavalry": "Cavaleiro Chinês",
+  "unitChineseArcher": "Arqueiro Chinês",
+  "unitChineseSiege": "Cerco Chinês",
+  "unitPersianInfantry": "Guerreiro Persa",
+  "unitPersianCavalry": "Cavaleiro Persa",
+  "unitPersianArcher": "Arqueiro Persa",
+  "unitPersianSiege": "Cerco Persa",
+  "loading": "Carregando",
+  "connectingToServer": "Conectando ao servidor…",
+  "reconnectingToServer": "Conexão perdida. Reconectando…"
+}

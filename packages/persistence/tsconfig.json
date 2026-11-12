@@ -1,0 +1,9 @@
+{
+  "extends": "@opencok/config/tsconfig.base.json",
+  "include": ["src/**/*.ts", "tests/**/*.ts", "scripts/**/*.ts"],
+  "exclude": ["node_modules/", "dist/"],
+  "compilerOptions": {
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true
+  }
+}

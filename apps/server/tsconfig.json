@@ -1,4 +1,0 @@
-{
-  "extends": "@opencok/config/tsconfig.base.json",
-  "include": ["src", "test", "integration", "scripts"]
-}

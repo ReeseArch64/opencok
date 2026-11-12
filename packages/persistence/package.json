@@ -1,0 +1,39 @@
+{
+  "name": "@opencok/persistence",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/models/index.ts",
+    "./*": "./src/*.ts"
+  },
+  "scripts": {
+    "format": "dprint fmt --config ../../dprint.json --allow-no-files .",
+    "migration:run": "bun --no-env-file --tsconfig-override tsconfig.json ./node_modules/typeorm/cli.js migration:run -d src/data-source.ts",
+    "migration:revert": "bun --no-env-file --tsconfig-override tsconfig.json ./node_modules/typeorm/cli.js migration:revert -d src/data-source.ts",
+    "migration:show": "bun --no-env-file --tsconfig-override tsconfig.json ./node_modules/typeorm/cli.js migration:show -d src/data-source.ts",
+    "check-types": "tsc --noEmit",
+    "test": "bun test --no-env-file --tsconfig-override tsconfig.json tests",
+    "migrate": "bun --no-env-file --tsconfig-override tsconfig.json scripts/migrate.ts",
+    "seed": "bun --no-env-file --tsconfig-override tsconfig.json scripts/seed.ts",
+    "test:database": "bun --no-env-file --tsconfig-override tsconfig.json tests/database/world-structure.check.ts",
+    "test:redis": "bun --no-env-file --tsconfig-override tsconfig.json tests/database/redis-status.check.ts",
+    "test:repositories": "bun --no-env-file --tsconfig-override tsconfig.json tests/database/repositories.check.ts",
+    "test:construction": "bun --no-env-file --tsconfig-override tsconfig.json tests/database/construction.check.ts"
+  },
+  "devDependencies": {
+    "@opencok/config": "workspace:",
+    "@types/bun": "catalog:",
+    "@types/mongodb": "^4.0.6",
+    "@types/mongoose": "^5.11.96",
+    "@types/pg": "^8.23.1",
+    "@types/reflect-metadata": "^0.0.5",
+    "typescript": "catalog:"
+  },
+  "dependencies": {
+    "mongoose": "^9.12.1",
+    "pg": "^8.23.1",
+    "reflect-metadata": "^0.2.2",
+    "typeorm": "^1.1.2",
+    "zod": "catalog:"
+  }
+}

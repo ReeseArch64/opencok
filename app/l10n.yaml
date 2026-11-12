@@ -1,0 +1,14 @@
+# Traduções: lib/l10n/app_pt.arb é o catálogo base e o idioma de fallback.
+# Para um idioma novo, copie esse arquivo para app_<idioma>.arb (ex.: app_en.arb),
+# ajuste @@locale e traduza os valores, preservando chaves e placeholders.
+# Execute `flutter gen-l10n` após editar os catálogos. Não edite os .dart gerados.
+# Widgets usam context.l10n (localization_context.dart).
+# Nomes de tropas/construções usam nameKey + gameName (game_names.dart).
+# Para um novo nome, adicione a mensagem no ARB e seu caso em game_names.dart.
+# GameApp(locale: Locale('en')) permite definir o idioma explicitamente;
+# sem locale, o Flutter usa o idioma do dispositivo e depois o fallback pt.
+arb-dir: lib/l10n
+template-arb-file: app_pt.arb
+output-localization-file: app_localizations.dart
+output-class: AppLocalizations
+preferred-supported-locales: [pt]

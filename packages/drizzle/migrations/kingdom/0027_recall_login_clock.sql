@@ -1,1 +1,0 @@
-ALTER TABLE "opencok_kingdom"."user_recall_task_notes" ADD COLUMN "lastLoginTime" bigint DEFAULT 0 NOT NULL;

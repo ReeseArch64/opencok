@@ -1,0 +1,39 @@
+name: opencok
+
+volumes:
+  postgres-data: ~
+  mongodb-data: ~
+  mongodb-config: ~
+  redis-data: ~
+
+networks:
+  opencok-internal-network:
+    name: opencok-internal-network
+    internal: true
+    driver: bridge
+
+  opencok-external-network:
+    internal: false
+    name: opencok-external-network
+    driver: bridge
+
+services:
+  postgres:
+    image: postgres:17.11-bookworm
+    networks: [opencok-internal-network]
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+
+  mongodb:
+    image: mongo:8.0.34
+    networks: [opencok-internal-network, opencok-external-network]
+    volumes:
+      - mongodb-data:/data/db
+      - mongodb-config:/data/configdb
+
+  redis:
+    image: redis:8.10.3-trixie
+    networks: [opencok-internal-network]
+    command: [redis-server, "--save", "", "--appendonly", "no"]
+    volumes:
+      - redis-data:/data

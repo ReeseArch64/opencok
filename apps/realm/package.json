@@ -1,0 +1,18 @@
+{
+  "name": "@opencok/realm",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "bun --no-env-file src/main.ts",
+    "test": "bun --no-env-file test",
+    "check-types": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@opencok/contracts": "workspace:*",
+    "effect": "catalog:"
+  },
+  "devDependencies": {
+    "@types/bun": "catalog:",
+    "typescript": "catalog:"
+  }
+}

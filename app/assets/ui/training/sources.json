@@ -1,0 +1,2093 @@
+{
+  "sourceRoot": "data/assets",
+  "assets": [
+    {
+      "asset": "archer_tier_01_body.png",
+      "source": "sprites/Common/Common_202/ico107200.png",
+      "sha256": "aabd9f09b5fd570749783cda8d9df8ee2734a10331270c44383341274612bf6f"
+    },
+    {
+      "asset": "archer_tier_01_portrait.png",
+      "source": "sprites/Common/Common_204/ico107200_small.png",
+      "sha256": "a4f51ec09bfbecc63ab0515d077641bc7673bb3bd379b579d5ceb5a483042a16"
+    },
+    {
+      "asset": "archer_tier_02_body.png",
+      "source": "sprites/Common/Common_202/ico107201.png",
+      "sha256": "3b020741d4f01dc7edc2f2a3a78351e74b9c1dc76e5908fa295f92bb8884fe0b"
+    },
+    {
+      "asset": "archer_tier_02_portrait.png",
+      "source": "sprites/Common/Common_204/ico107201_small.png",
+      "sha256": "c06b0a707e3bf9c3f255dd5fbfa2819a9c6232fa0015ff1f4a87160a8a9b46fc"
+    },
+    {
+      "asset": "archer_tier_03_body.png",
+      "source": "sprites/Common/Common_202/ico107202.png",
+      "sha256": "4ec0c93ace70dbc8c86cfa0c73e00c863cf9d94e53f08f20e37e9eec84dff377"
+    },
+    {
+      "asset": "archer_tier_03_portrait.png",
+      "source": "sprites/Common/Common_204/ico107202_small.png",
+      "sha256": "b4db4720767099177aea4834d5583b2458c3ce4a30efb6c48ed64a3db31fde5a"
+    },
+    {
+      "asset": "archer_tier_04_body.png",
+      "source": "sprites/Common/Common_202/ico107203.png",
+      "sha256": "2b6e12bcfead26dc5f26e928318f41b3f7ea72a20c114099e3646ab40dace104"
+    },
+    {
+      "asset": "archer_tier_04_portrait.png",
+      "source": "sprites/Common/Common_204/ico107203_small.png",
+      "sha256": "d5f9fd270c7f914ce8335bdac0637cf0acbf419b6df049913001eb8c6c87b04f"
+    },
+    {
+      "asset": "archer_tier_05_body.png",
+      "source": "sprites/Common/Common_202/ico107204.png",
+      "sha256": "082e4e63320c2786b09c3e2e8961bfd22983311927d4ad97fd6994076d19fa69"
+    },
+    {
+      "asset": "archer_tier_05_portrait.png",
+      "source": "sprites/Common/Common_204/ico107204_small.png",
+      "sha256": "e0dd2d5c705e1d78de938c7c696544dc574b80a19d7949bd5e0c00480943a646"
+    },
+    {
+      "asset": "archer_tier_06_body.png",
+      "source": "sprites/Common/Common_202/ico107205.png",
+      "sha256": "09a88ceb27b997eb06493f7ffb42f5c116f0205521cc2a20eaed29fc830bc1f5"
+    },
+    {
+      "asset": "archer_tier_06_portrait.png",
+      "source": "sprites/Common/Common_204/ico107205_small.png",
+      "sha256": "5ac044005462ac7a5cf10e1ddf9dead7e5d648213dbfe94cf3e804b0bd59943b"
+    },
+    {
+      "asset": "archer_tier_07_body.png",
+      "source": "sprites/Common/Common_202/ico107206.png",
+      "sha256": "0f091d395755a81b2fcefd5dc30cdc4b0b3304c53c5cbb8e03aa35ff85738900"
+    },
+    {
+      "asset": "archer_tier_07_portrait.png",
+      "source": "sprites/Common/Common_204/ico107206_small.png",
+      "sha256": "111a3fffc259df660400e583e26d97e4ecfdaf7b63a1a2346ffec299cac28962"
+    },
+    {
+      "asset": "archer_tier_08_body.png",
+      "source": "sprites/Common/Common_202/ico107207.png",
+      "sha256": "7a384d596964380265d863c0e5cae820ca675c04b991fcefe2200e422b1cb609"
+    },
+    {
+      "asset": "archer_tier_08_portrait.png",
+      "source": "sprites/Common/Common_204/ico107207_small.png",
+      "sha256": "f14c3acac5287e1b8b6b0d72a773589703ebb7fbca72118efd258276b817152a"
+    },
+    {
+      "asset": "archer_tier_09_body.png",
+      "source": "sprites/Common/Common_202/ico107208.png",
+      "sha256": "97f74a597be325f2f9ea00ccd1ab647b2980abe37ec8e7d67cb75c4697f6f80c"
+    },
+    {
+      "asset": "archer_tier_09_portrait.png",
+      "source": "sprites/Common/Common_204/ico107208_small.png",
+      "sha256": "a4a39d6ad640c7751968b3411d6f92824ee4451afc880f3a5f0d1a08d8bddfad"
+    },
+    {
+      "asset": "archer_tier_10_body.png",
+      "source": "sprites/Common/Common_202/ico107209.png",
+      "sha256": "1c820212994e7480c5f72771221753c62bd926a8299542df35978611e3893e1c"
+    },
+    {
+      "asset": "archer_tier_10_portrait.png",
+      "source": "sprites/Common/Common_204/ico107209_small.png",
+      "sha256": "ae75bd2f9df6475c449bc7811a6b6c30532b6cb1ca83437fe53fab4fc636aac6"
+    },
+    {
+      "asset": "archer_tier_11_body.png",
+      "source": "sprites/Common/Common_202/ico107211.png",
+      "sha256": "43d06241a78fbdb8a82c59960952cc68c15020aa0289b4bd0c652ad4419dc368"
+    },
+    {
+      "asset": "archer_tier_11_portrait.png",
+      "source": "sprites/Common/Common_204/ico107211_small.png",
+      "sha256": "ae29bbff2ef6ec5fb97247f51a9d4e62fadfbbadfb07eee2b591e9b477219614"
+    },
+    {
+      "asset": "archer_type_icon.png",
+      "source": "sprites/Common/Common_6/Icon_army_type5.png",
+      "sha256": "a056caaf94ba1dbf073b53c7a271449544c5d51d4683c9b5dbaa5ba1e85e09a4"
+    },
+    {
+      "asset": "attack_bar.png",
+      "source": "sprites/Common/Common_3/c3_red.png",
+      "sha256": "fb0f24439062559342dbea125d00b4314c7bfc894ac8089fe462907eab12c593"
+    },
+    {
+      "asset": "back_button.png",
+      "source": "sprites/Common/Common_1/but_back.png",
+      "sha256": "55f6b4744c64237649c4d6d0a43082444c2d579dea1b48e0a1c905be33cbf5ca"
+    },
+    {
+      "asset": "bonus_button_background.png",
+      "source": "sprites/Common/Common_520/prestige_plus_bg.png",
+      "sha256": "9d86428cbb60a6a48f97096c80653ad59a7c125c2e72370e0c7c68c73a036073"
+    },
+    {
+      "asset": "cavalry_tier_01_body.png",
+      "source": "sprites/Common/Common_200/ico107100.png",
+      "sha256": "006c23c68b732ab2821f87cb7fddb1d636021041dbabcd5ca659ba934fe5fec2"
+    },
+    {
+      "asset": "cavalry_tier_01_portrait.png",
+      "source": "sprites/Common/Common_204/ico107100_small.png",
+      "sha256": "5fc8c25ca52d9428bce995a5a60afa490d8e6ccbddb82e8f695e4df555d34536"
+    },
+    {
+      "asset": "cavalry_tier_02_body.png",
+      "source": "sprites/Common/Common_200/ico107101.png",
+      "sha256": "9e79ea9af379709e2ee51e98dee4f2b4be98553d69513e3784a6c70f2d55d115"
+    },
+    {
+      "asset": "cavalry_tier_02_portrait.png",
+      "source": "sprites/Common/Common_204/ico107101_small.png",
+      "sha256": "9c745d5560b4b0be370f64e61d48eef2c6a911adb1f835036b4566626505d315"
+    },
+    {
+      "asset": "cavalry_tier_03_body.png",
+      "source": "sprites/Common/Common_200/ico107102.png",
+      "sha256": "7668d02c1ed096983e8846b5eba7c153f926799dbade1497ff2b78aa3c946349"
+    },
+    {
+      "asset": "cavalry_tier_03_portrait.png",
+      "source": "sprites/Common/Common_204/ico107102_small.png",
+      "sha256": "dced67a2eb2f959a055b7c8f1c17ff3187505c8407791cba640ef74a3707100e"
+    },
+    {
+      "asset": "cavalry_tier_04_body.png",
+      "source": "sprites/Common/Common_200/ico107103.png",
+      "sha256": "da88dbb0c158b9f56e938e2a381f8606ed08914ce51e902bdd09f4113bd738b8"
+    },
+    {
+      "asset": "cavalry_tier_04_portrait.png",
+      "source": "sprites/Common/Common_204/ico107103_small.png",
+      "sha256": "c7447222ae41be8ff6dc7a911643a00766e221d961a365ec85476a5355db1e48"
+    },
+    {
+      "asset": "cavalry_tier_05_body.png",
+      "source": "sprites/Common/Common_200/ico107104.png",
+      "sha256": "f7b2ea4b5721c96c35b8605d15da8c40c49af1a625ab9abb40f392a072e6161c"
+    },
+    {
+      "asset": "cavalry_tier_05_portrait.png",
+      "source": "sprites/Common/Common_204/ico107104_small.png",
+      "sha256": "96aaed02312f11f133b973eafe5b8f5f285e0037cc48755a5e103c8c0230bb98"
+    },
+    {
+      "asset": "cavalry_tier_06_body.png",
+      "source": "sprites/Common/Common_200/ico107105.png",
+      "sha256": "a99dedc3232568da4df0da3e66f1b44b967d2e1aedceccf3bf7ef578b6b23759"
+    },
+    {
+      "asset": "cavalry_tier_06_portrait.png",
+      "source": "sprites/Common/Common_204/ico107105_small.png",
+      "sha256": "e5dc8b38430f4589328bfbdb71eb42be1e6df58daa4dcc61e709f8a3a6e78752"
+    },
+    {
+      "asset": "cavalry_tier_07_body.png",
+      "source": "sprites/Common/Common_200/ico107106.png",
+      "sha256": "042726b78fe46f6bb11fb4485a247e298fd0592c25b9d0f7c3c0bae2fef7b63d"
+    },
+    {
+      "asset": "cavalry_tier_07_portrait.png",
+      "source": "sprites/Common/Common_204/ico107106_small.png",
+      "sha256": "3ea5f5c1c4286803ac20021710304e4c1826387121349b1d9bec9ec7ef1b44a6"
+    },
+    {
+      "asset": "cavalry_tier_08_body.png",
+      "source": "sprites/Common/Common_200/ico107107.png",
+      "sha256": "549033e5f5aa08d6a111813b03390d056b287012f513df12603bd2ee1df6ddbf"
+    },
+    {
+      "asset": "cavalry_tier_08_portrait.png",
+      "source": "sprites/Common/Common_204/ico107107_small.png",
+      "sha256": "4724c8e30efef298f177f4db70d514d425f741610171b03311500bd9191ce906"
+    },
+    {
+      "asset": "cavalry_tier_09_body.png",
+      "source": "sprites/Common/Common_200/ico107108.png",
+      "sha256": "31ede11d0ac9ee136244b1446eb75eda3ad17c607a932b2ef0af58143d2993c3"
+    },
+    {
+      "asset": "cavalry_tier_09_portrait.png",
+      "source": "sprites/Common/Common_204/ico107108_small.png",
+      "sha256": "562f88c9771d8a5bc6711a4ff443e954c286f122a4f062110e59c2e7ee577cea"
+    },
+    {
+      "asset": "cavalry_tier_10_body.png",
+      "source": "sprites/Common/Common_200/ico107109.png",
+      "sha256": "8e6e6242129966b086b44a0f6fac78fa219306119d0ba203f6686ee521158c4b"
+    },
+    {
+      "asset": "cavalry_tier_10_portrait.png",
+      "source": "sprites/Common/Common_204/ico107109_small.png",
+      "sha256": "48e09a049616e9def7942d1e1b953300b486c6a480cb97474399cf41c3a22cc4"
+    },
+    {
+      "asset": "cavalry_type_icon.png",
+      "source": "sprites/Common/Common_6/Icon_army_type3.png",
+      "sha256": "995d8c67d379152ee5a07a284c1e5fed318325afbb229e80f3538c7508d5d18d"
+    },
+    {
+      "asset": "decrease_button.png",
+      "source": "sprites/Common/Common_1/jianhao.png",
+      "sha256": "2107d408724685c40829203f25146c6b5211388ef52f090b6d42558eb070d3bb"
+    },
+    {
+      "asset": "defense_bar.png",
+      "source": "sprites/Common/Common_3/c3_blue.png",
+      "sha256": "057f6f48827e8b36edac72a71af656bb6ef6ed00e0340eaaf46bf0206c76e389"
+    },
+    {
+      "asset": "food_cost_icon.png",
+      "source": "sprites/Common/Common_1/ui_food.png",
+      "sha256": "2fc4fccf06b4500bcbc453e3a5ff30f614b9cb513a296b18e6e53a3b64040bf1"
+    },
+    {
+      "asset": "gold_cost_icon.png",
+      "source": "sprites/Common/Common_1/ui_gold.png",
+      "sha256": "b0fb3264deb474fcd606a2753325f1b8511b76fab477aaef4cbaf1cd43b6e523"
+    },
+    {
+      "asset": "health_bar.png",
+      "source": "sprites/Common/Common_3/c3_green.png",
+      "sha256": "dbecf524ff264f565c31a1f928ad27a358188c1a99d5582c794791839ef2f7b8"
+    },
+    {
+      "asset": "help_button.png",
+      "source": "sprites/Common/Common_1/btn_help02.png",
+      "sha256": "0b977d743e63b840e5c029e1633db46c21f89aafbba60d6ed005decb13faaf05"
+    },
+    {
+      "asset": "increase_button.png",
+      "source": "sprites/Common/Common_1/jiahao.png",
+      "sha256": "145e0eec9247bbbbdabe48ba73ae8c90e9835320a284fce96a1d3a61c7a1e6d2"
+    },
+    {
+      "asset": "infantry_tier_01_body.png",
+      "source": "sprites/Common/Common_200/ico107000.png",
+      "sha256": "65250c725b1d2238901be05e5a069f55af6529f6c345e4ef42c8cff8cf55c29e"
+    },
+    {
+      "asset": "infantry_tier_01_portrait.png",
+      "source": "sprites/Common/Common_204/ico107000_small.png",
+      "sha256": "353adf6567194b645bdd556bf4fa4831d608f1799514c238bbf4bedc8e152e97"
+    },
+    {
+      "asset": "infantry_tier_02_body.png",
+      "source": "sprites/Common/Common_200/ico107001.png",
+      "sha256": "510c4f8886cddc7ff4c0202a2da96f39f46d301cef070b8a36122a9dc76dc69e"
+    },
+    {
+      "asset": "infantry_tier_02_portrait.png",
+      "source": "sprites/Common/Common_204/ico107001_small.png",
+      "sha256": "7a4f0b1ba0667a79bd284c64f0fdb85bca735add503b631f56065068cd5a9fa9"
+    },
+    {
+      "asset": "infantry_tier_03_body.png",
+      "source": "sprites/Common/Common_200/ico107002.png",
+      "sha256": "adb3fe595ca7ad1af76cf78660208ec7c2d158b4ece652b4e3fcbfc29be730b1"
+    },
+    {
+      "asset": "infantry_tier_03_portrait.png",
+      "source": "sprites/Common/Common_204/ico107002_small.png",
+      "sha256": "35c4144a4ce09a7ae6396908e15cf1b9993b329f100b6b0bbf2cabdfbaaaa182"
+    },
+    {
+      "asset": "infantry_tier_04_body.png",
+      "source": "sprites/Common/Common_200/ico107003.png",
+      "sha256": "6cbd1d0fe5f722045c06b909ccd4f8f5d6e32739cb983dc908bc96a14e8591fc"
+    },
+    {
+      "asset": "infantry_tier_04_portrait.png",
+      "source": "sprites/Common/Common_204/ico107003_small.png",
+      "sha256": "90068fd7dd41925fb84eb9977aaf1da3e0848e25d4b4181736f6d756a6bba00c"
+    },
+    {
+      "asset": "infantry_tier_05_body.png",
+      "source": "sprites/Common/Common_200/ico107004.png",
+      "sha256": "fc436e448e46039781afc744bb263326f350164d75345dcb6dc16da17bc12272"
+    },
+    {
+      "asset": "infantry_tier_05_portrait.png",
+      "source": "sprites/Common/Common_204/ico107004_small.png",
+      "sha256": "7369d9bd8f82cd00e0fa189f7ff1b1e73bb3940595828e60b75cce4b86b223eb"
+    },
+    {
+      "asset": "infantry_tier_06_body.png",
+      "source": "sprites/Common/Common_200/ico107005.png",
+      "sha256": "c2f572ea764b60b5abe675e1ccf178e496098fd1b74e1990c0abd7ac8b1d1b7b"
+    },
+    {
+      "asset": "infantry_tier_06_portrait.png",
+      "source": "sprites/Common/Common_204/ico107005_small.png",
+      "sha256": "ff61723d8ff65cd662b2ea6a19f4ed2057125c43fcb7143fd7d04424bba562d2"
+    },
+    {
+      "asset": "infantry_tier_07_body.png",
+      "source": "sprites/Common/Common_200/ico107006.png",
+      "sha256": "0e40da5de904f62eb4e7c0a0b5b259fc10d453ee2f83810d0a693bef5525539b"
+    },
+    {
+      "asset": "infantry_tier_07_portrait.png",
+      "source": "sprites/Common/Common_204/ico107006_small.png",
+      "sha256": "76900db74c1eb65ee6369c1981c616352f80fdcb0ede1060001ed697bf30212b"
+    },
+    {
+      "asset": "infantry_tier_08_body.png",
+      "source": "sprites/Common/Common_200/ico107007.png",
+      "sha256": "6bcc21baaed124ef04d4ccec356bc448d28305b00875f2dec9bf0203e405b185"
+    },
+    {
+      "asset": "infantry_tier_08_portrait.png",
+      "source": "sprites/Common/Common_204/ico107007_small.png",
+      "sha256": "fd767756d07cf53644be1379c7bb1e705f39dd79d1697f99452cf8182c7a1b0c"
+    },
+    {
+      "asset": "infantry_tier_09_body.png",
+      "source": "sprites/Common/Common_200/ico107008.png",
+      "sha256": "11ebfffb439d564880627e5830cc15f2206a2fe4e797b361d525519601f6a0e5"
+    },
+    {
+      "asset": "infantry_tier_09_portrait.png",
+      "source": "sprites/Common/Common_204/ico107008_small.png",
+      "sha256": "afe4d86a67062f34dd3f8318cb080f949411f8a4d192be1fd6faaf89156dc3eb"
+    },
+    {
+      "asset": "infantry_tier_10_body.png",
+      "source": "sprites/Common/Common_200/ico107009.png",
+      "sha256": "e829b40c9339358846510410000cc16868ae16ff90756df817e84ad178e0d617"
+    },
+    {
+      "asset": "infantry_tier_10_portrait.png",
+      "source": "sprites/Common/Common_204/ico107009_small.png",
+      "sha256": "2a1bcce768e7ecfac7759a74c79b906d66906a5fb9c3ed1213b18d9d414261bc"
+    },
+    {
+      "asset": "infantry_type_icon.png",
+      "source": "sprites/Common/Common_6/Icon_army_type1.png",
+      "sha256": "0484405b4744ed2f62d9adb84fafbd5e1b9ff9e931326b19475b51dab8543399"
+    },
+    {
+      "asset": "info_button.png",
+      "source": "sprites/Common/Common_1/btn_Lord_information.png",
+      "sha256": "901d152244eb482e856efbf353e38abd995f296cec9d590992cfbd7a9ed278a6"
+    },
+    {
+      "asset": "instant_train_button.png",
+      "source": "sprites/Common/Common_666/Common666_butten_lv_zhong.png",
+      "sha256": "5fe7bf66f808edfa0a85bc8ac47b29907601df595b6ba6ee7878efba5b56dd72"
+    },
+    {
+      "asset": "iron_cost_icon.png",
+      "source": "sprites/Common/Common_1/ui_iron.png",
+      "sha256": "3c20f29998e2fb5f9c89e6fa15c96def9dbb2047694fb087bf38c7bd6ceb4fac"
+    },
+    {
+      "asset": "mithril_cost_icon.png",
+      "source": "sprites/Common/Common_1/ui_silver.png",
+      "sha256": "f12cb03386b1e9a4c8e03d9cd8ec8a81080ded3896dd021629ef8dd918a6533e"
+    },
+    {
+      "asset": "panel_border.png",
+      "source": "sprites/Common/Common_1/frame_02png.png",
+      "sha256": "748f7b633a71f3dfea702c5e505ed50248f54b1897bbdd3da6c41bd6c28353c9"
+    },
+    {
+      "asset": "panel_frame.png",
+      "source": "sprites/Common/Common_1/frame_04.png",
+      "sha256": "06d059dd327698a132740ba487394d21917a6dca7e043c458ddeb108a3b08575"
+    },
+    {
+      "asset": "panel_heading.png",
+      "source": "sprites/Common/Common_4/mid_title_bg.png",
+      "sha256": "959f5ae71ba88719ada5b200d2e16681e2ae0568557f60c079d901130f56317d"
+    },
+    {
+      "asset": "quantity_slider_fill.png",
+      "source": "sprites/Common/Common_4/pro_soldier_jindutiao2.png",
+      "sha256": "fc1484c2fa1d89389854a1e63fce16466febbd45f46b988e827c82773a0bc926"
+    },
+    {
+      "asset": "quantity_slider_thumb.png",
+      "source": "sprites/Common/Common_1/huadongtiao1.png",
+      "sha256": "4225b5bbe0b67ee4dc0985c679483ecc27cfba9f7d5b2a992a3736e621dec3db"
+    },
+    {
+      "asset": "quantity_slider_track.png",
+      "source": "sprites/Common/Common_520/prestige_jindutiao_bg2.png",
+      "sha256": "d7355cd72f7448a5e6a4f47862051fb6766784bb9fc43c428b5e6b57de8fa3b9"
+    },
+    {
+      "asset": "selected_unit_glow.png",
+      "source": "sprites/Common/Common_4/trainGetFocusOnBG.png",
+      "sha256": "52360b1d340413f9f43778aed46f3c06ec2bd95f0ce81952c0c6a323a9d06bc4"
+    },
+    {
+      "asset": "siege_tier_01_body.png",
+      "source": "sprites/Common/Common_202/ico107300.png",
+      "sha256": "7973e4c3160f41bbfcb34d6fd2c1fade77716c80d8bcc77a4e40c09fc9eb2fee"
+    },
+    {
+      "asset": "siege_tier_01_portrait.png",
+      "source": "sprites/Common/Common_204/ico107300_small.png",
+      "sha256": "87f969414652fce9ac26faa2641c746c543d6ca8714ff989709c8a4e6244a6e4"
+    },
+    {
+      "asset": "siege_tier_02_body.png",
+      "source": "sprites/Common/Common_202/ico107301.png",
+      "sha256": "6b2c8f7f510c97c145195126d5061827ae10bab8574fd0401474e308a4d182f6"
+    },
+    {
+      "asset": "siege_tier_02_portrait.png",
+      "source": "sprites/Common/Common_204/ico107301_small.png",
+      "sha256": "865a20dc3d5e2d8d8a46fa179dc7486bcbe2a49e24d1bced82ce96945b688431"
+    },
+    {
+      "asset": "siege_tier_03_body.png",
+      "source": "sprites/Common/Common_202/ico107302.png",
+      "sha256": "c4508c0092f59aa480fe2d7cac1f9401ef9582f46926411d84b26ece5319fbd4"
+    },
+    {
+      "asset": "siege_tier_03_portrait.png",
+      "source": "sprites/Common/Common_204/ico107302_small.png",
+      "sha256": "229e8ac3f8c7123ab9260b64fe9250d0da936f4b155feef786b0daf8c51ff3e3"
+    },
+    {
+      "asset": "siege_tier_04_body.png",
+      "source": "sprites/Common/Common_202/ico107303.png",
+      "sha256": "aabc3b8a6047d321917edeb596a479c4aa02c48efbfece8b6b340fb9eb69575c"
+    },
+    {
+      "asset": "siege_tier_04_portrait.png",
+      "source": "sprites/Common/Common_204/ico107303_small.png",
+      "sha256": "ab38dc6b4537e0ba078004708e1370430ea84adb367bdabe9be777b1caef410b"
+    },
+    {
+      "asset": "siege_tier_05_body.png",
+      "source": "sprites/Common/Common_202/ico107304.png",
+      "sha256": "e48e6ef47d2b5fe315af53e1afafeac2cfe0584b183bca49dd3b54fe582056f4"
+    },
+    {
+      "asset": "siege_tier_05_portrait.png",
+      "source": "sprites/Common/Common_204/ico107304_small.png",
+      "sha256": "3e013a11086ea9314601b927a7d07b770ac823bba37235b025f2d2dda31c8828"
+    },
+    {
+      "asset": "siege_tier_06_body.png",
+      "source": "sprites/Common/Common_202/ico107305.png",
+      "sha256": "6dfecb778834f369e497539e44d1ba1bc2c99f22d59d191403d2bbf9b4cf09a9"
+    },
+    {
+      "asset": "siege_tier_06_portrait.png",
+      "source": "sprites/Common/Common_204/ico107305_small.png",
+      "sha256": "4213828ad2f0ff48c73898df3e44fbfe6bd041ad551630178e1bd7f7b9e66c66"
+    },
+    {
+      "asset": "siege_tier_07_body.png",
+      "source": "sprites/Common/Common_202/ico107306.png",
+      "sha256": "9ac98fc68130a0721fafdd6cdbdb069f8e9c6e82125242346020373a66cbf0e7"
+    },
+    {
+      "asset": "siege_tier_07_portrait.png",
+      "source": "sprites/Common/Common_204/ico107306_small.png",
+      "sha256": "1349693524cf73bf37b5b09813acf79fbf5d7146c70b067adfab52338a9ce5a5"
+    },
+    {
+      "asset": "siege_tier_08_body.png",
+      "source": "sprites/Common/Common_202/ico107307.png",
+      "sha256": "605ebae573122956e996b4bd9d61af5441af900f8f677fa11536c51c43c732be"
+    },
+    {
+      "asset": "siege_tier_08_portrait.png",
+      "source": "sprites/Common/Common_204/ico107307_small.png",
+      "sha256": "b865bad0ed3f9ec34b6f17fad9b64317ebb2eb7fcbe98306b60352df24a269d7"
+    },
+    {
+      "asset": "siege_tier_09_body.png",
+      "source": "sprites/Common/Common_202/ico107308.png",
+      "sha256": "7a090ae6c4e4aabb328e11d61d766dc242c4c4c7ce51b437ab63e61c752a7b05"
+    },
+    {
+      "asset": "siege_tier_09_portrait.png",
+      "source": "sprites/Common/Common_204/ico107308_small.png",
+      "sha256": "865436df86fa23d6b842851e8110ac959bf140d9b1ee66ff40b769a1a552288e"
+    },
+    {
+      "asset": "siege_tier_10_body.png",
+      "source": "sprites/Common/Common_202/ico107309.png",
+      "sha256": "d32041f9f8ce1ca4e484ab5f830a4c90cde9f3b2fcaed322ad18c02a2985d124"
+    },
+    {
+      "asset": "siege_tier_10_portrait.png",
+      "source": "sprites/Common/Common_204/ico107309_small.png",
+      "sha256": "14350d7a969b33a82fed8a0e78fa2f616001c46370fef90b736f7799fd3b2551"
+    },
+    {
+      "asset": "siege_type_icon.png",
+      "source": "sprites/Common/Common_6/Icon_army_type7.png",
+      "sha256": "0a81b2057b70eea2c585a8a0ee4dbc6ed7d52e3b3d52aff8ab73aeee677e6bb1"
+    },
+    {
+      "asset": "train_button.png",
+      "source": "sprites/Common/Common_666/Common666_butten_cheng_zhong.png",
+      "sha256": "73b160b0d92035b4542c560e81bd491922aeb0fdea06db44593d1ad0b356f476"
+    },
+    {
+      "asset": "training_panel_frame.png",
+      "source": "sprites/Common/Common_666/Common666_frame_02png.png",
+      "sha256": "971bbaba74a2c06341e89f6eacd6a422dab6ba0d99898cea56884431bcb046db"
+    },
+    {
+      "asset": "training_time_icon.png",
+      "source": "sprites/Common/Common_1/icon_time.png",
+      "sha256": "0273b037e3a2ce915b41e7c57b26628b992baf6f3a8cea11cbcd122f3f8026a6"
+    },
+    {
+      "asset": "unit_card_background.png",
+      "source": "sprites/Common/Common_3/PRO_diban03.png",
+      "sha256": "5c8ab741ff77f91c8cd384f4c307f86b883126e12fc6373d17573fae76996be8"
+    },
+    {
+      "asset": "unit_carousel_divider.png",
+      "source": "sprites/Common/Common_4/arc_bg_circle.png",
+      "sha256": "af6b69753f3ae9d85f60414b63c77bb70fc9609eacb12e2593a1d87edb752d67"
+    },
+    {
+      "asset": "unit_level_01.png",
+      "source": "sprites/Common/Common_3/Roman_1.png",
+      "sha256": "8c1551ccb3a14bff418d158af6ecb865d28b506a82848196bb7701c204cb5d30"
+    },
+    {
+      "asset": "unit_level_02.png",
+      "source": "sprites/Common/Common_3/Roman_2.png",
+      "sha256": "fcbd5b48fea3289f1f48465bb94520f83c16ac97f1b0024516413abf1c24132c"
+    },
+    {
+      "asset": "unit_level_03.png",
+      "source": "sprites/Common/Common_3/Roman_3.png",
+      "sha256": "3576b5f7d00105aa548dbdb6196d573e26efb635acc688dc160de0b78aaeb76b"
+    },
+    {
+      "asset": "unit_level_04.png",
+      "source": "sprites/Common/Common_3/Roman_4.png",
+      "sha256": "1e7e15ff5d7e1d030f034e9651e59860772da1cb02c1d9ab0cbac39a3cce8012"
+    },
+    {
+      "asset": "unit_level_05.png",
+      "source": "sprites/Common/Common_3/Roman_5.png",
+      "sha256": "353bd77669c5388e432cc617f4861e245b5d960f565cc0636235d4ba47b0b623"
+    },
+    {
+      "asset": "unit_level_06.png",
+      "source": "sprites/Common/Common_3/Roman_6.png",
+      "sha256": "14c6c1e0850bf9d0025ffeef89fc9d9cca69b7f7d05e96bb564efaf122f5e602"
+    },
+    {
+      "asset": "unit_level_07.png",
+      "source": "sprites/Common/Common_3/Roman_7.png",
+      "sha256": "43fec5150ba6781a90c956eb1997cca22b171bb1abcc8abb6f1f9897be7f9c32"
+    },
+    {
+      "asset": "unit_level_08.png",
+      "source": "sprites/Common/Common_3/Roman_8.png",
+      "sha256": "4919117c768b7a01a88246a09705797b9beb0132c62afe9a5649c1949de0389d"
+    },
+    {
+      "asset": "unit_level_09.png",
+      "source": "sprites/Common/Common_3/Roman_9.png",
+      "sha256": "f0b8a575bbe9710d60283a6439348d992a8f3f7b3ce42bdf35a65d31aa060dd1"
+    },
+    {
+      "asset": "unit_level_10.png",
+      "source": "sprites/Common/Common_3/Roman_10.png",
+      "sha256": "19ec2867567b93fd1a219901d8debcea6bd2d8441b18f3ae7b524f66779be74d"
+    },
+    {
+      "asset": "unit_level_11.png",
+      "source": "sprites/Common/Common_3/Roman_11.png",
+      "sha256": "4e11ce84cc50944ef29274a84481999675f6c711c4fa497ce4aa4e23af0a5922"
+    },
+    {
+      "asset": "unit_level_12.png",
+      "source": "sprites/Common/Common_3/Roman_12.png",
+      "sha256": "b3d5a8a8fa8eb7465170bcb046567d76e9ce9ccab8f39b05b61696c1cfcd547a"
+    },
+    {
+      "asset": "unit_portrait_frame.png",
+      "source": "sprites/Common/Common_666/bingzhong_touxiang_kuang.png",
+      "sha256": "75d356fa797b779c7df52ffe316dfa04f7600ea26c1985da75856089bf6dd45d"
+    },
+    {
+      "asset": "unit_rank_badge.png",
+      "source": "sprites/Common/Common_510/soldier_star.png",
+      "sha256": "1e3069102d52eb086b8e05759ac2350919a3d89b927d299b1bbd107fdd6681e4"
+    },
+    {
+      "asset": "unit_selection_pointer.png",
+      "source": "sprites/Common/Common_3/PRO_diban02.png",
+      "sha256": "bb822292f11fa625050ab6a675afa2769e44be91b58eaff19297022adc1d2c43"
+    },
+    {
+      "asset": "wood_cost_icon.png",
+      "source": "sprites/Common/Common_1/ui_wood.png",
+      "sha256": "157908370a907e4e69553ce36a8f429ad2e5201942779fb7feda3bcbb66e700e"
+    },
+    {
+      "asset": "training_panel_heading.png",
+      "source": "sprites/Common/Common_666/Common666_Tips_BGtitle.png",
+      "sha256": "908deec35ee598ccea7fb7b215b713b1e78536bfe51e2238d65f8b4cdfa7f080"
+    },
+    {
+      "asset": "combat_relation_button.png",
+      "source": "sprites/Common/Common_1/btn_dark_blue_grey.png",
+      "sha256": "8cae9852451144293d8b176edb7a2872fc2f6cc1ac767dbdc45b65c739640627"
+    },
+    {
+      "asset": "viking_infantry_tier_01_body.png",
+      "source": "sprites/face_race_1/Common/Common_200/ico107000.png",
+      "sha256": "92b41519d052406fd4ec41de1f52f55815607bd3740d173ce507baed5e275bf1"
+    },
+    {
+      "asset": "viking_infantry_tier_02_body.png",
+      "source": "sprites/face_race_1/Common/Common_200/ico107001.png",
+      "sha256": "a3770128582618c458e9ca146d2e390b6d0195cff47bd1e027618b1de81d4a72"
+    },
+    {
+      "asset": "viking_infantry_tier_03_body.png",
+      "source": "sprites/face_race_1/Common/Common_200/ico107002.png",
+      "sha256": "d6f8de0d0054a77dba209e33132f3e5d6b7839d9a1c460a4a3fc001d2e10463e"
+    },
+    {
+      "asset": "viking_infantry_tier_04_body.png",
+      "source": "sprites/face_race_1/Common/Common_200/ico107003.png",
+      "sha256": "e56894f32fc6cccd4b251c35794c017ad58bfb83c8b9522feefc1c640a9630c7"
+    },
+    {
+      "asset": "viking_infantry_tier_05_body.png",
+      "source": "sprites/face_race_1/Common/Common_200/ico107004.png",
+      "sha256": "d8548747a047d59ee247879b0a6db2843cdf14d78e04fe9ac147266e7c50bf62"
+    },
+    {
+      "asset": "viking_infantry_tier_06_body.png",
+      "source": "sprites/face_race_1/Common/Common_200/ico107005.png",
+      "sha256": "404600b68be1c0dda974034dbc25a64a9ae5ef5c114bcaf7dd132fec185ffa63"
+    },
+    {
+      "asset": "viking_infantry_tier_07_body.png",
+      "source": "sprites/face_race_1/Common/Common_200/ico107006.png",
+      "sha256": "4b8079cb90743e52c38ef63d6f6fc1ead72a66113f14984a6673e349c6480739"
+    },
+    {
+      "asset": "viking_infantry_tier_08_body.png",
+      "source": "sprites/face_race_1/Common/Common_200/ico107007.png",
+      "sha256": "24b1fb5797500c6a10fe05a2ab434033d3302542a839186a0130b18e5a2078eb"
+    },
+    {
+      "asset": "viking_infantry_tier_09_body.png",
+      "source": "sprites/face_race_1/Common/Common_200/ico107008.png",
+      "sha256": "0190ae31001ee3f91e53f504e58928cbe80d21524c204f37308367f781854d47"
+    },
+    {
+      "asset": "viking_infantry_tier_10_body.png",
+      "source": "sprites/face_race_1/Common/Common_200/ico107009.png",
+      "sha256": "d0a88f87d0b07f9df54ef9d1c25be7661e1676a14bc7b6a1d936b703802a6c69"
+    },
+    {
+      "asset": "viking_infantry_tier_12_body.png",
+      "source": "sprites/face_race_1/Common/Common_200/ico107012.png",
+      "sha256": "373b1bbb6864db8e765dbfe3aa48b76a94ad3123b79bb04c3fa7122209dcfd12"
+    },
+    {
+      "asset": "viking_cavalry_tier_01_body.png",
+      "source": "sprites/face_race_1/Common/Common_200/ico107100.png",
+      "sha256": "42ebffe8314056c0367d80570591b3d564acf02f586a82164ed3a30cbc1e93ce"
+    },
+    {
+      "asset": "viking_cavalry_tier_02_body.png",
+      "source": "sprites/face_race_1/Common/Common_200/ico107101.png",
+      "sha256": "fbb7a6cc8d0b0d4997d6f60f921e5d4a0a3092fbe51f3c5ed2608327b1c05d1a"
+    },
+    {
+      "asset": "viking_cavalry_tier_03_body.png",
+      "source": "sprites/face_race_1/Common/Common_200/ico107102.png",
+      "sha256": "28a65a17995dd0539bd1be54813671323cdb9e73f50dfd19f5d076bc992174bc"
+    },
+    {
+      "asset": "viking_cavalry_tier_04_body.png",
+      "source": "sprites/face_race_1/Common/Common_200/ico107103.png",
+      "sha256": "d2f93a570a2dee9e0c44bc090e5295c639fe4e580fd130c3706d9e511de58617"
+    },
+    {
+      "asset": "viking_cavalry_tier_05_body.png",
+      "source": "sprites/face_race_1/Common/Common_200/ico107104.png",
+      "sha256": "b4d8b3427aa624d07aad699473643d92562d4b566144795915f0857a0b2005d8"
+    },
+    {
+      "asset": "viking_cavalry_tier_06_body.png",
+      "source": "sprites/face_race_1/Common/Common_200/ico107105.png",
+      "sha256": "85efa91ebc52ec4eefb033d2a17fa0ef9671dad25e383555b479c092a5ba8fd0"
+    },
+    {
+      "asset": "viking_cavalry_tier_07_body.png",
+      "source": "sprites/face_race_1/Common/Common_200/ico107106.png",
+      "sha256": "43aa76e4de609d3201e58102ac4ec136d8bfc21c05a97bf2fe999ac1fe58fcb1"
+    },
+    {
+      "asset": "viking_cavalry_tier_08_body.png",
+      "source": "sprites/face_race_1/Common/Common_200/ico107107.png",
+      "sha256": "150a3df4382a94a6bbd546b7a7098fb436001f4f764500f07ab3b08aee328504"
+    },
+    {
+      "asset": "viking_cavalry_tier_09_body.png",
+      "source": "sprites/face_race_1/Common/Common_200/ico107108.png",
+      "sha256": "c75f92b0bb9702fa262677ee9ccc4a6159cf0588e32dcdea2779b2fbbbf0481b"
+    },
+    {
+      "asset": "viking_cavalry_tier_10_body.png",
+      "source": "sprites/face_race_1/Common/Common_200/ico107109.png",
+      "sha256": "7af67200375dcc4b7d14d7f9889f7f189d32bfed32f8ce3080ec9f79b55f212a"
+    },
+    {
+      "asset": "viking_cavalry_tier_12_body.png",
+      "source": "sprites/face_race_1/Common/Common_200/ico107111.png",
+      "sha256": "fad337be9f57d1ae1d8d6a2409ff909707877b1d84559d97a45738a3914bcabc"
+    },
+    {
+      "asset": "viking_archer_tier_01_body.png",
+      "source": "sprites/face_race_1/Common/Common_202/ico107200.png",
+      "sha256": "34c45ca8a837783e4fab130e5452030ee6dc38456e541d73816a1b78d5c49103"
+    },
+    {
+      "asset": "viking_archer_tier_02_body.png",
+      "source": "sprites/face_race_1/Common/Common_202/ico107201.png",
+      "sha256": "12ecf744442176d8337687cda177d86d3d1dc7891359d54f1863a825e22d3288"
+    },
+    {
+      "asset": "viking_archer_tier_03_body.png",
+      "source": "sprites/face_race_1/Common/Common_202/ico107202.png",
+      "sha256": "550f9b3deaf4cb6a89ffc9365d59b8e6f2ee13a7cb4c73500770f103e8974ae6"
+    },
+    {
+      "asset": "viking_archer_tier_04_body.png",
+      "source": "sprites/face_race_1/Common/Common_202/ico107203.png",
+      "sha256": "cf8cae92097ac395be392fdf8a67dd6631738756c0ab1c576d6dc40c989662ff"
+    },
+    {
+      "asset": "viking_archer_tier_05_body.png",
+      "source": "sprites/face_race_1/Common/Common_202/ico107204.png",
+      "sha256": "30e9e6c51366e5518c4c6deec19f1830c8377db85b22d07166d6c96c54a23875"
+    },
+    {
+      "asset": "viking_archer_tier_06_body.png",
+      "source": "sprites/face_race_1/Common/Common_202/ico107205.png",
+      "sha256": "c4b61a138511bf30c65e3bf2a5b61fa0cdef6c54dea2e13cc2f9478911d56a52"
+    },
+    {
+      "asset": "viking_archer_tier_07_body.png",
+      "source": "sprites/face_race_1/Common/Common_202/ico107206.png",
+      "sha256": "f31ef1dee7448f7df57d6f2591555454f41f387e7c544091e809c3dd7b523170"
+    },
+    {
+      "asset": "viking_archer_tier_08_body.png",
+      "source": "sprites/face_race_1/Common/Common_202/ico107207.png",
+      "sha256": "92242713242c338200deec0a19eae74c02578d6a39cdb689ddb2857dd3bbd09d"
+    },
+    {
+      "asset": "viking_archer_tier_09_body.png",
+      "source": "sprites/face_race_1/Common/Common_202/ico107208.png",
+      "sha256": "2e7f1be7d3af40a1542157b4c3cc243c6873775eea70318853290fdebda9e6ec"
+    },
+    {
+      "asset": "viking_archer_tier_10_body.png",
+      "source": "sprites/face_race_1/Common/Common_202/ico107209.png",
+      "sha256": "7e7a404caba8dd2e2a31cfbe81d7a798e54c98d427b1960616fa5d6d195badef"
+    },
+    {
+      "asset": "viking_siege_tier_01_body.png",
+      "source": "sprites/face_race_1/Common/Common_202/ico107300.png",
+      "sha256": "7ff63e04513ada28043ce42a44ecca03d56cda6296e2d20a990381d9e43df2be"
+    },
+    {
+      "asset": "viking_siege_tier_02_body.png",
+      "source": "sprites/face_race_1/Common/Common_202/ico107301.png",
+      "sha256": "1be7d4e906864e9f0f7d9e55067b40388a8228b031305abe9349f739f00fd294"
+    },
+    {
+      "asset": "viking_siege_tier_03_body.png",
+      "source": "sprites/face_race_1/Common/Common_202/ico107302.png",
+      "sha256": "b01b7aea21c8611de30efbe247b823d679a45e943a4be23cc7c3dd59e3b6b078"
+    },
+    {
+      "asset": "viking_siege_tier_04_body.png",
+      "source": "sprites/face_race_1/Common/Common_202/ico107303.png",
+      "sha256": "029b04cedea2e25d5d5572e536b8d72c3644f085dab46ec290858af39b3c3e9b"
+    },
+    {
+      "asset": "viking_siege_tier_05_body.png",
+      "source": "sprites/face_race_1/Common/Common_202/ico107304.png",
+      "sha256": "b0409f2a44f1157258a684b557f13ffef75cb575425cd3442f766eaf022f561b"
+    },
+    {
+      "asset": "viking_siege_tier_06_body.png",
+      "source": "sprites/face_race_1/Common/Common_202/ico107305.png",
+      "sha256": "e279789aa43c851fd58ac923595ce1ec93bc46819c78c8ab7e46275a4efecdb1"
+    },
+    {
+      "asset": "viking_siege_tier_07_body.png",
+      "source": "sprites/face_race_1/Common/Common_202/ico107306.png",
+      "sha256": "9a40f3ac9ba82aac1a686c49772c95cee797f4e7f807a7d70f1cadc80844f42d"
+    },
+    {
+      "asset": "viking_siege_tier_08_body.png",
+      "source": "sprites/face_race_1/Common/Common_202/ico107307.png",
+      "sha256": "b8d351e82a75ddde5c4ed08c1b16f1d501c243d1fde3bd726e28475ed1968413"
+    },
+    {
+      "asset": "viking_siege_tier_09_body.png",
+      "source": "sprites/face_race_1/Common/Common_202/ico107308.png",
+      "sha256": "d669646c82a904213e251add934413dfd784ca0a7f1e7b07b43b8c54e2269dee"
+    },
+    {
+      "asset": "viking_siege_tier_10_body.png",
+      "source": "sprites/face_race_1/Common/Common_202/ico107309.png",
+      "sha256": "2e9fd8d2390944ba3c5aae9475243162e7893e2ebab3f97da2c7de441ecd0583"
+    },
+    {
+      "asset": "japanese_infantry_tier_01_body.png",
+      "source": "sprites/face_race_2/Common/Common_200/ico107000.png",
+      "sha256": "a14b7b1f100956b3bd3f299e8c34a52d3783ef986107c4be7a9c7fcc8291e959"
+    },
+    {
+      "asset": "japanese_infantry_tier_02_body.png",
+      "source": "sprites/face_race_2/Common/Common_200/ico107001.png",
+      "sha256": "056fbda670692816513e19584137dca7ef593d9623dde0bd87c1c84793a8f5fb"
+    },
+    {
+      "asset": "japanese_infantry_tier_03_body.png",
+      "source": "sprites/face_race_2/Common/Common_200/ico107002.png",
+      "sha256": "340a38edcf4c9fe63322ef89eff0eee99e068199e3926720df1ee4baf3102d4f"
+    },
+    {
+      "asset": "japanese_infantry_tier_04_body.png",
+      "source": "sprites/face_race_2/Common/Common_200/ico107003.png",
+      "sha256": "f081a370aef2ef56f40d16d8925b32ab59259bc3ef62933417082610815f374c"
+    },
+    {
+      "asset": "japanese_infantry_tier_05_body.png",
+      "source": "sprites/face_race_2/Common/Common_200/ico107004.png",
+      "sha256": "b1ec7c2934923ed24f059929ee60e3c53ecda275777611aeb7a49859cc519540"
+    },
+    {
+      "asset": "japanese_infantry_tier_06_body.png",
+      "source": "sprites/face_race_2/Common/Common_200/ico107005.png",
+      "sha256": "2f60c3dcfd708d025c9fbb1d63d06b720fea15fc4d410672b4bd6777f25ab936"
+    },
+    {
+      "asset": "japanese_infantry_tier_07_body.png",
+      "source": "sprites/face_race_2/Common/Common_200/ico107006.png",
+      "sha256": "fd3979850c58b4d24d7143ea9824b685fcfc1c5439275e0b1f181fc1c4b78c70"
+    },
+    {
+      "asset": "japanese_infantry_tier_08_body.png",
+      "source": "sprites/face_race_2/Common/Common_200/ico107007.png",
+      "sha256": "443d85e73450a456f23a11aaac90acde3814efe80d2e526077a3a18d82fca4df"
+    },
+    {
+      "asset": "japanese_infantry_tier_09_body.png",
+      "source": "sprites/face_race_2/Common/Common_200/ico107008.png",
+      "sha256": "b927bd9eccbbcf0dcdb57ee3da9c5ecd977758b17e0daa86aeabe2a97080a00f"
+    },
+    {
+      "asset": "japanese_infantry_tier_10_body.png",
+      "source": "sprites/face_race_2/Common/Common_200/ico107009.png",
+      "sha256": "aa50b686eff8d89092491d1df94134e1fecaab17c7fae3135cd2e59b909c7427"
+    },
+    {
+      "asset": "japanese_infantry_tier_11_body.png",
+      "source": "sprites/face_race_2/Common/Common_200/ico107011.png",
+      "sha256": "62016926cad9548963ac13311cd5a0af7b348a73ecc86324aa34f8f23f6edfe0"
+    },
+    {
+      "asset": "japanese_cavalry_tier_01_body.png",
+      "source": "sprites/face_race_2/Common/Common_200/ico107100.png",
+      "sha256": "6ca11863c08f529495fd90c5f9ee7a8ea7fd65785d3f18ebb2c0b254758c4db5"
+    },
+    {
+      "asset": "japanese_cavalry_tier_02_body.png",
+      "source": "sprites/face_race_2/Common/Common_200/ico107101.png",
+      "sha256": "6ad983bfcb67aca264184b509cf3bb4a72e6d9205e0fc07e5337ce0792a95ff8"
+    },
+    {
+      "asset": "japanese_cavalry_tier_03_body.png",
+      "source": "sprites/face_race_2/Common/Common_200/ico107102.png",
+      "sha256": "f179f969e80fa69c275d7316e7692c590a43dd8253a3994be0940eebfe2127e4"
+    },
+    {
+      "asset": "japanese_cavalry_tier_04_body.png",
+      "source": "sprites/face_race_2/Common/Common_200/ico107103.png",
+      "sha256": "6393e14786995652260e6235772a1178fe502578b47388ac136805fc27b047f6"
+    },
+    {
+      "asset": "japanese_cavalry_tier_05_body.png",
+      "source": "sprites/face_race_2/Common/Common_200/ico107104.png",
+      "sha256": "ecfe98bd3becad75e6971744e8d43b738f2d13b1ab7f9282a0056c18ab6581cc"
+    },
+    {
+      "asset": "japanese_cavalry_tier_06_body.png",
+      "source": "sprites/face_race_2/Common/Common_200/ico107105.png",
+      "sha256": "6866587a512af5fa67a97c7979019acbe2d4c3bd506b903c5c5da68baa105d09"
+    },
+    {
+      "asset": "japanese_cavalry_tier_07_body.png",
+      "source": "sprites/face_race_2/Common/Common_200/ico107106.png",
+      "sha256": "93651011d62a6f56ea48c3b33c58e4fd12547b77ee965cf1289fb85e453810cc"
+    },
+    {
+      "asset": "japanese_cavalry_tier_08_body.png",
+      "source": "sprites/face_race_2/Common/Common_200/ico107107.png",
+      "sha256": "8784bc4ed0cd200e45bd4b5159aead019b126622077157133288a5776a568fe6"
+    },
+    {
+      "asset": "japanese_cavalry_tier_09_body.png",
+      "source": "sprites/face_race_2/Common/Common_200/ico107108.png",
+      "sha256": "0a96e7fab06a4d53d667f1aef26f208af311a1a787ffcb5aad4b3c31245cdeb8"
+    },
+    {
+      "asset": "japanese_cavalry_tier_10_body.png",
+      "source": "sprites/face_race_2/Common/Common_200/ico107109.png",
+      "sha256": "1a12ba5a110f2efa1667128ca40d03a5950554098554dd6a2dbd75102cbd4c49"
+    },
+    {
+      "asset": "japanese_archer_tier_01_body.png",
+      "source": "sprites/face_race_2/Common/Common_202/ico107200.png",
+      "sha256": "178bc4caf1f29344c55074c3d22d4364d544a09fd81e0b8ba95c11e2a706f458"
+    },
+    {
+      "asset": "japanese_archer_tier_02_body.png",
+      "source": "sprites/face_race_2/Common/Common_202/ico107201.png",
+      "sha256": "13dc1d366893c3f49b1ac77603edd921822cc757d6f1b08255b69658d43ef84e"
+    },
+    {
+      "asset": "japanese_archer_tier_03_body.png",
+      "source": "sprites/face_race_2/Common/Common_202/ico107202.png",
+      "sha256": "4646c100418688515d845d54e33f3d26cd056b380b9e7fe5022a9c903b39bff3"
+    },
+    {
+      "asset": "japanese_archer_tier_04_body.png",
+      "source": "sprites/face_race_2/Common/Common_202/ico107203.png",
+      "sha256": "5beba404533d5298dc85631e4efdf88945b81913f78c8d775bf037e86cbbf5ee"
+    },
+    {
+      "asset": "japanese_archer_tier_05_body.png",
+      "source": "sprites/face_race_2/Common/Common_202/ico107204.png",
+      "sha256": "6083d5b5add659bce10df622aa3f3eac73b2b65e037c1f4fd72907cf3696dc34"
+    },
+    {
+      "asset": "japanese_archer_tier_06_body.png",
+      "source": "sprites/face_race_2/Common/Common_202/ico107205.png",
+      "sha256": "3bdfb1f236240814db4addf8fa82ce0d2240d8cc4875983cdcd57e9371e88b65"
+    },
+    {
+      "asset": "japanese_archer_tier_07_body.png",
+      "source": "sprites/face_race_2/Common/Common_202/ico107206.png",
+      "sha256": "bf078712cbf40b4683540fd5b6bff2164dacbb3f94f849d7f703775acae70727"
+    },
+    {
+      "asset": "japanese_archer_tier_08_body.png",
+      "source": "sprites/face_race_2/Common/Common_202/ico107207.png",
+      "sha256": "5db51458a17f605fde28c98865deb057cad84c69084691c7079b9b7ec1f70920"
+    },
+    {
+      "asset": "japanese_archer_tier_09_body.png",
+      "source": "sprites/face_race_2/Common/Common_202/ico107208.png",
+      "sha256": "c450463ff01cf549848ec6dd0f2c036b4084cf23ac688712bfd6a691004ce721"
+    },
+    {
+      "asset": "japanese_archer_tier_10_body.png",
+      "source": "sprites/face_race_2/Common/Common_202/ico107209.png",
+      "sha256": "3b6735dafba370093038dad9ddee6a5ce52e4a7e263d7f9ee32a476965938ccf"
+    },
+    {
+      "asset": "japanese_archer_tier_12_body.png",
+      "source": "sprites/face_race_2/Common/Common_202/ico107212.png",
+      "sha256": "9f9da26b3f1c49e76f9a38b15bf02cad3683bd6ee4c288afe00446c82914b3b6"
+    },
+    {
+      "asset": "japanese_siege_tier_01_body.png",
+      "source": "sprites/face_race_2/Common/Common_202/ico107300.png",
+      "sha256": "e8bda21922a8837a47e3108bca4d0fa18848e15cae537914726ad77736df1358"
+    },
+    {
+      "asset": "japanese_siege_tier_02_body.png",
+      "source": "sprites/face_race_2/Common/Common_202/ico107301.png",
+      "sha256": "8de56d29f9bc0a321d9e2397d9a72c920bd9c7b52ae1938ee33039365f96a20b"
+    },
+    {
+      "asset": "japanese_siege_tier_03_body.png",
+      "source": "sprites/face_race_2/Common/Common_202/ico107302.png",
+      "sha256": "36d688aad490c3ef17f07a49db67cf9a726791eb81eb768afc3f7ddd9a49a4fa"
+    },
+    {
+      "asset": "japanese_siege_tier_04_body.png",
+      "source": "sprites/face_race_2/Common/Common_202/ico107303.png",
+      "sha256": "5ef63b346c16844ad105b090680c230a83b5c2386758033e18902d965140b25b"
+    },
+    {
+      "asset": "japanese_siege_tier_05_body.png",
+      "source": "sprites/face_race_2/Common/Common_202/ico107304.png",
+      "sha256": "b3e8b071ffec34f0337cfde8fb2d40e4d29f9ecf56d634fceca74472114b9d72"
+    },
+    {
+      "asset": "japanese_siege_tier_06_body.png",
+      "source": "sprites/face_race_2/Common/Common_202/ico107305.png",
+      "sha256": "877d5899ad70ddc59084ffc1845d146936eb9ab0fb899dc95796d905967e71ee"
+    },
+    {
+      "asset": "japanese_siege_tier_07_body.png",
+      "source": "sprites/face_race_2/Common/Common_202/ico107306.png",
+      "sha256": "b130b8179d8e0f591e8cd2fa7e494a321cc4a38e022cd93eb8c881a31e3c2590"
+    },
+    {
+      "asset": "japanese_siege_tier_08_body.png",
+      "source": "sprites/face_race_2/Common/Common_202/ico107307.png",
+      "sha256": "4c17e0355c2bc9842c83b45026ce7b3ec799b01540855771db604dda7f0b728b"
+    },
+    {
+      "asset": "japanese_siege_tier_09_body.png",
+      "source": "sprites/face_race_2/Common/Common_202/ico107308.png",
+      "sha256": "f20c04ab1db9452240591c3dc1767e3b6d5494c4f8c8a51f8fde99302ed8a340"
+    },
+    {
+      "asset": "japanese_siege_tier_10_body.png",
+      "source": "sprites/face_race_2/Common/Common_202/ico107309.png",
+      "sha256": "ed8c7d595273edbd5fc38f20ce38699c0ab9ab3345d26f9177655c55734b8ec2"
+    },
+    {
+      "asset": "japanese_siege_tier_12_body.png",
+      "source": "sprites/face_race_2/Common/Common_202/ico107312.png",
+      "sha256": "51dd7d682decdfe74b8be13cfbdca25a08c660de69b862cb20c25d85b7130c98"
+    },
+    {
+      "asset": "chinese_infantry_tier_01_body.png",
+      "source": "sprites/face_race_3/Common/Common_200/ico107000.png",
+      "sha256": "18b2576d798ea626434df0d2c2ca0cec5f7a1ddc1833a0b9da151799e612fda4"
+    },
+    {
+      "asset": "chinese_infantry_tier_02_body.png",
+      "source": "sprites/face_race_3/Common/Common_200/ico107001.png",
+      "sha256": "18b2576d798ea626434df0d2c2ca0cec5f7a1ddc1833a0b9da151799e612fda4"
+    },
+    {
+      "asset": "chinese_infantry_tier_03_body.png",
+      "source": "sprites/face_race_3/Common/Common_200/ico107002.png",
+      "sha256": "03b1d87ca6b4913c3eea5706546d60fa935254a3f2850ab2f66098850cc94ba7"
+    },
+    {
+      "asset": "chinese_infantry_tier_04_body.png",
+      "source": "sprites/face_race_3/Common/Common_200/ico107003.png",
+      "sha256": "18b2576d798ea626434df0d2c2ca0cec5f7a1ddc1833a0b9da151799e612fda4"
+    },
+    {
+      "asset": "chinese_infantry_tier_05_body.png",
+      "source": "sprites/face_race_3/Common/Common_200/ico107004.png",
+      "sha256": "03b1d87ca6b4913c3eea5706546d60fa935254a3f2850ab2f66098850cc94ba7"
+    },
+    {
+      "asset": "chinese_infantry_tier_06_body.png",
+      "source": "sprites/face_race_3/Common/Common_200/ico107005.png",
+      "sha256": "18b2576d798ea626434df0d2c2ca0cec5f7a1ddc1833a0b9da151799e612fda4"
+    },
+    {
+      "asset": "chinese_infantry_tier_07_body.png",
+      "source": "sprites/face_race_3/Common/Common_200/ico107006.png",
+      "sha256": "18b2576d798ea626434df0d2c2ca0cec5f7a1ddc1833a0b9da151799e612fda4"
+    },
+    {
+      "asset": "chinese_infantry_tier_08_body.png",
+      "source": "sprites/face_race_3/Common/Common_200/ico107007.png",
+      "sha256": "03b1d87ca6b4913c3eea5706546d60fa935254a3f2850ab2f66098850cc94ba7"
+    },
+    {
+      "asset": "chinese_infantry_tier_09_body.png",
+      "source": "sprites/face_race_3/Common/Common_200/ico107008.png",
+      "sha256": "03b1d87ca6b4913c3eea5706546d60fa935254a3f2850ab2f66098850cc94ba7"
+    },
+    {
+      "asset": "chinese_infantry_tier_10_body.png",
+      "source": "sprites/face_race_3/Common/Common_200/ico107009.png",
+      "sha256": "18b2576d798ea626434df0d2c2ca0cec5f7a1ddc1833a0b9da151799e612fda4"
+    },
+    {
+      "asset": "chinese_cavalry_tier_01_body.png",
+      "source": "sprites/face_race_3/Common/Common_200/ico107100.png",
+      "sha256": "2e65d6af78e4e424b8d6deeb2b6de17893b5e6b52e8a28cfe002ca4296f418ea"
+    },
+    {
+      "asset": "chinese_cavalry_tier_02_body.png",
+      "source": "sprites/face_race_3/Common/Common_200/ico107101.png",
+      "sha256": "2e65d6af78e4e424b8d6deeb2b6de17893b5e6b52e8a28cfe002ca4296f418ea"
+    },
+    {
+      "asset": "chinese_cavalry_tier_03_body.png",
+      "source": "sprites/face_race_3/Common/Common_200/ico107102.png",
+      "sha256": "2e65d6af78e4e424b8d6deeb2b6de17893b5e6b52e8a28cfe002ca4296f418ea"
+    },
+    {
+      "asset": "chinese_cavalry_tier_04_body.png",
+      "source": "sprites/face_race_3/Common/Common_200/ico107103.png",
+      "sha256": "ee408bff07544dffba44f39bf38546af6f892ebeb28857f698e2c6b5f1f6fc54"
+    },
+    {
+      "asset": "chinese_cavalry_tier_05_body.png",
+      "source": "sprites/face_race_3/Common/Common_200/ico107104.png",
+      "sha256": "ee408bff07544dffba44f39bf38546af6f892ebeb28857f698e2c6b5f1f6fc54"
+    },
+    {
+      "asset": "chinese_cavalry_tier_06_body.png",
+      "source": "sprites/face_race_3/Common/Common_200/ico107105.png",
+      "sha256": "2e65d6af78e4e424b8d6deeb2b6de17893b5e6b52e8a28cfe002ca4296f418ea"
+    },
+    {
+      "asset": "chinese_cavalry_tier_07_body.png",
+      "source": "sprites/face_race_3/Common/Common_200/ico107106.png",
+      "sha256": "ee408bff07544dffba44f39bf38546af6f892ebeb28857f698e2c6b5f1f6fc54"
+    },
+    {
+      "asset": "chinese_cavalry_tier_08_body.png",
+      "source": "sprites/face_race_3/Common/Common_200/ico107107.png",
+      "sha256": "2e65d6af78e4e424b8d6deeb2b6de17893b5e6b52e8a28cfe002ca4296f418ea"
+    },
+    {
+      "asset": "chinese_cavalry_tier_09_body.png",
+      "source": "sprites/face_race_3/Common/Common_200/ico107108.png",
+      "sha256": "ee408bff07544dffba44f39bf38546af6f892ebeb28857f698e2c6b5f1f6fc54"
+    },
+    {
+      "asset": "chinese_cavalry_tier_10_body.png",
+      "source": "sprites/face_race_3/Common/Common_200/ico107109.png",
+      "sha256": "2e65d6af78e4e424b8d6deeb2b6de17893b5e6b52e8a28cfe002ca4296f418ea"
+    },
+    {
+      "asset": "chinese_archer_tier_01_body.png",
+      "source": "sprites/face_race_3/Common/Common_202/ico107200.png",
+      "sha256": "b057c92985c76d329e097b3290397e27cbf6502119119ea8421e39f20e73930c"
+    },
+    {
+      "asset": "chinese_archer_tier_02_body.png",
+      "source": "sprites/face_race_3/Common/Common_202/ico107201.png",
+      "sha256": "b057c92985c76d329e097b3290397e27cbf6502119119ea8421e39f20e73930c"
+    },
+    {
+      "asset": "chinese_archer_tier_03_body.png",
+      "source": "sprites/face_race_3/Common/Common_202/ico107202.png",
+      "sha256": "eec5d6f20440ec7ce5d1ad1b7c9ea78ffb6694c05ec11aafa6e13b645f43325d"
+    },
+    {
+      "asset": "chinese_archer_tier_04_body.png",
+      "source": "sprites/face_race_3/Common/Common_202/ico107203.png",
+      "sha256": "eec5d6f20440ec7ce5d1ad1b7c9ea78ffb6694c05ec11aafa6e13b645f43325d"
+    },
+    {
+      "asset": "chinese_archer_tier_05_body.png",
+      "source": "sprites/face_race_3/Common/Common_202/ico107204.png",
+      "sha256": "b057c92985c76d329e097b3290397e27cbf6502119119ea8421e39f20e73930c"
+    },
+    {
+      "asset": "chinese_archer_tier_06_body.png",
+      "source": "sprites/face_race_3/Common/Common_202/ico107205.png",
+      "sha256": "b057c92985c76d329e097b3290397e27cbf6502119119ea8421e39f20e73930c"
+    },
+    {
+      "asset": "chinese_archer_tier_07_body.png",
+      "source": "sprites/face_race_3/Common/Common_202/ico107206.png",
+      "sha256": "eec5d6f20440ec7ce5d1ad1b7c9ea78ffb6694c05ec11aafa6e13b645f43325d"
+    },
+    {
+      "asset": "chinese_archer_tier_08_body.png",
+      "source": "sprites/face_race_3/Common/Common_202/ico107207.png",
+      "sha256": "b057c92985c76d329e097b3290397e27cbf6502119119ea8421e39f20e73930c"
+    },
+    {
+      "asset": "chinese_archer_tier_09_body.png",
+      "source": "sprites/face_race_3/Common/Common_202/ico107208.png",
+      "sha256": "eec5d6f20440ec7ce5d1ad1b7c9ea78ffb6694c05ec11aafa6e13b645f43325d"
+    },
+    {
+      "asset": "chinese_archer_tier_10_body.png",
+      "source": "sprites/face_race_3/Common/Common_202/ico107209.png",
+      "sha256": "b057c92985c76d329e097b3290397e27cbf6502119119ea8421e39f20e73930c"
+    },
+    {
+      "asset": "chinese_siege_tier_01_body.png",
+      "source": "sprites/face_race_3/Common/Common_202/ico107300.png",
+      "sha256": "b4f026b66533634ee6cd57b9921fef8b6677c44c3c1524df92e6cd788f662ac2"
+    },
+    {
+      "asset": "chinese_siege_tier_02_body.png",
+      "source": "sprites/face_race_3/Common/Common_202/ico107301.png",
+      "sha256": "bbe392d1ed28cab9a3ba7a00be19b66f0926b9f0d9984f5540a8efeb08dc5703"
+    },
+    {
+      "asset": "chinese_siege_tier_03_body.png",
+      "source": "sprites/face_race_3/Common/Common_202/ico107302.png",
+      "sha256": "3ea3a7147118a853eb218d75696ea26eeb94c58a635d09a693e86768508c9a55"
+    },
+    {
+      "asset": "chinese_siege_tier_04_body.png",
+      "source": "sprites/face_race_3/Common/Common_202/ico107303.png",
+      "sha256": "32098078e08008d68aade9c0ba42c806e86d1e3e0f44f8b462fa28acb67ebb0b"
+    },
+    {
+      "asset": "chinese_siege_tier_05_body.png",
+      "source": "sprites/face_race_3/Common/Common_202/ico107304.png",
+      "sha256": "7cbb803169d95ed253b3c79813831527b377039682cf8896cd1f529504aa9892"
+    },
+    {
+      "asset": "chinese_siege_tier_06_body.png",
+      "source": "sprites/face_race_3/Common/Common_202/ico107305.png",
+      "sha256": "df4d7b73fdc6a2a3c65a9f86bfd428da7bbbd3f2002ee0525662622c16cfdbb2"
+    },
+    {
+      "asset": "chinese_siege_tier_07_body.png",
+      "source": "sprites/face_race_3/Common/Common_202/ico107306.png",
+      "sha256": "6f88a679e4b808201a9c6f40cca3e282ef3f3e6563512ce19fe65a6985b37c03"
+    },
+    {
+      "asset": "chinese_siege_tier_08_body.png",
+      "source": "sprites/face_race_3/Common/Common_202/ico107307.png",
+      "sha256": "ebc5ecb3d5a72838e61b2cf1c51a71f2bca3a4e99177737bfdb4635ddc707555"
+    },
+    {
+      "asset": "chinese_siege_tier_09_body.png",
+      "source": "sprites/face_race_3/Common/Common_202/ico107308.png",
+      "sha256": "b229b3437384bb5fd0d9a4a6188051b52b64aedc45bb97dcaf70ec95079507fc"
+    },
+    {
+      "asset": "chinese_siege_tier_10_body.png",
+      "source": "sprites/face_race_3/Common/Common_202/ico107309.png",
+      "sha256": "35ce0928479a44755646e51763617ae008ab8e4831528362a4904bd0e3f5c1be"
+    },
+    {
+      "asset": "chinese_siege_tier_11_body.png",
+      "source": "sprites/face_race_3/Common/Common_202/ico107311.png",
+      "sha256": "61158b2ec64cf7e2b57f6993dc0fb4b4e6f5a99658f8de9763e71200518cd336"
+    },
+    {
+      "asset": "persian_infantry_tier_01_body.png",
+      "source": "sprites/face_race_4/Common/Common_200/ico107000.png",
+      "sha256": "74a8343b7913fd07e564896a0189e7c218cd65865916b1a44bc9951226ce9ba2"
+    },
+    {
+      "asset": "persian_infantry_tier_01_portrait.png",
+      "source": "sprites/face_race_4/Common/Common_2040/ico107000_small_4.png",
+      "sha256": "50b7e9d7b852d7f168a7af3fa2bd5a6988c84e5aa3798d617595d1ab5e61d6cc"
+    },
+    {
+      "asset": "persian_infantry_tier_02_body.png",
+      "source": "sprites/face_race_4/Common/Common_200/ico107001.png",
+      "sha256": "4bbdfffc9e44191bfa546bfc9a87b467d0521d7213ac6cbf7385a299d27027e5"
+    },
+    {
+      "asset": "persian_infantry_tier_02_portrait.png",
+      "source": "sprites/face_race_4/Common/Common_2040/ico107001_small_4.png",
+      "sha256": "3a9d24b1b1910f5981884e9ec609062534b09d403194411bf9cae3b0e8c2515e"
+    },
+    {
+      "asset": "persian_infantry_tier_03_body.png",
+      "source": "sprites/face_race_4/Common/Common_200/ico107002.png",
+      "sha256": "8404893016cf673b241ba3134cd36c6fff53466164a6f978d1f4916cbc8bbe3c"
+    },
+    {
+      "asset": "persian_infantry_tier_03_portrait.png",
+      "source": "sprites/face_race_4/Common/Common_2040/ico107002_small_4.png",
+      "sha256": "9af176b0f659b6234f7606bfbfabc7a5e3533d2c9f9bd37b4483db42607bbea1"
+    },
+    {
+      "asset": "persian_infantry_tier_04_body.png",
+      "source": "sprites/face_race_4/Common/Common_200/ico107003.png",
+      "sha256": "89e18aa1c56cf6ecf86c2e713ef728cc634632be50a6a716d5a5023caf49e065"
+    },
+    {
+      "asset": "persian_infantry_tier_04_portrait.png",
+      "source": "sprites/face_race_4/Common/Common_2040/ico107003_small_4.png",
+      "sha256": "095c2ef3ddc6cb204397d37dcdc279de25e3ce026b7eedb7a369635ff65fe307"
+    },
+    {
+      "asset": "persian_infantry_tier_05_body.png",
+      "source": "sprites/face_race_4/Common/Common_200/ico107004.png",
+      "sha256": "19ca72d0939282ab01ed8fbcb179db7984bd813f1a5bffeaaeabd0561d9f8495"
+    },
+    {
+      "asset": "persian_infantry_tier_05_portrait.png",
+      "source": "sprites/face_race_4/Common/Common_2040/ico107004_small_4.png",
+      "sha256": "7975e6f083de5004cd17fa014f8bf2add251f1ab7b3df4f706464beae7a260f7"
+    },
+    {
+      "asset": "persian_infantry_tier_06_body.png",
+      "source": "sprites/face_race_4/Common/Common_200/ico107005.png",
+      "sha256": "fe8904b135a2b3cbf8fe1fe808df5b09da79d94c8ee2e5cb6c4b7210de2eaf85"
+    },
+    {
+      "asset": "persian_infantry_tier_06_portrait.png",
+      "source": "sprites/face_race_4/Common/Common_2040/ico107005_small_4.png",
+      "sha256": "3de14f52106f8dcd4ba98622dfc79be58c16d844ae5c2f91fd5704e11f57c955"
+    },
+    {
+      "asset": "persian_infantry_tier_07_body.png",
+      "source": "sprites/face_race_4/Common/Common_200/ico107006.png",
+      "sha256": "5f93fc887b071820693cee86dbddadbdf0d9ab4c708b79e20eca9becf3a7fe35"
+    },
+    {
+      "asset": "persian_infantry_tier_07_portrait.png",
+      "source": "sprites/face_race_4/Common/Common_2040/ico107006_small_4.png",
+      "sha256": "8684eb8b7853a40686ebbdcbd45828bcdc0e677c9170b076bd9a766c7baad228"
+    },
+    {
+      "asset": "persian_infantry_tier_08_body.png",
+      "source": "sprites/face_race_4/Common/Common_200/ico107007.png",
+      "sha256": "5522069cbbe6aae5f617c830fa11741c823eaec07559e11ed68a236ef3c9a918"
+    },
+    {
+      "asset": "persian_infantry_tier_08_portrait.png",
+      "source": "sprites/face_race_4/Common/Common_2040/ico107007_small_4.png",
+      "sha256": "aa99b735541f5c841a78a4479bd10f95daeacac096bf6cf811dd09570296105d"
+    },
+    {
+      "asset": "persian_infantry_tier_09_body.png",
+      "source": "sprites/face_race_4/Common/Common_200/ico107008.png",
+      "sha256": "a49ec279871691ccb8eca9e41797ca9f031f3360008f91e0f8dfc619c3898802"
+    },
+    {
+      "asset": "persian_infantry_tier_09_portrait.png",
+      "source": "sprites/face_race_4/Common/Common_2040/ico107008_small_4.png",
+      "sha256": "fd262b1d4bb4ea2d1ec2c7bae7b8d894cef5f284c460b914e5695c8bee495230"
+    },
+    {
+      "asset": "persian_infantry_tier_10_body.png",
+      "source": "sprites/face_race_4/Common/Common_200/ico107009.png",
+      "sha256": "7820905013011c07a7a775631585a8df064a90da57d594680aac5d41f5672f52"
+    },
+    {
+      "asset": "persian_infantry_tier_10_portrait.png",
+      "source": "sprites/face_race_4/Common/Common_2040/ico107009_small_4.png",
+      "sha256": "c1ad2ded55db269f0c36864573f145e55c38d462b2f21a5cfb672c08d9ed4008"
+    },
+    {
+      "asset": "persian_cavalry_tier_01_body.png",
+      "source": "sprites/face_race_4/Common/Common_200/ico107100.png",
+      "sha256": "4d3be80bb33aef91d88c574d736794b1440ec6da6221f63bc266a75e417a2176"
+    },
+    {
+      "asset": "persian_cavalry_tier_01_portrait.png",
+      "source": "sprites/face_race_4/Common/Common_2040/ico107100_small_4.png",
+      "sha256": "80075014e693d8adad871d57a55482262f8ce742a218335a8fe64d374078dea8"
+    },
+    {
+      "asset": "persian_cavalry_tier_02_body.png",
+      "source": "sprites/face_race_4/Common/Common_200/ico107101.png",
+      "sha256": "1718ddcee45d371d9cc759802d3b3000d66f7f30a85bb74d6c7ea88c310048af"
+    },
+    {
+      "asset": "persian_cavalry_tier_02_portrait.png",
+      "source": "sprites/face_race_4/Common/Common_2040/ico107101_small_4.png",
+      "sha256": "54bc7526976e43f1b5800055161700113740533c4bbacad3a75b31de1ccbbfd4"
+    },
+    {
+      "asset": "persian_cavalry_tier_03_body.png",
+      "source": "sprites/face_race_4/Common/Common_200/ico107102.png",
+      "sha256": "10da829db7abc76a6eec663b488a83d2747dfba22daf45c076210b86eda003ac"
+    },
+    {
+      "asset": "persian_cavalry_tier_03_portrait.png",
+      "source": "sprites/face_race_4/Common/Common_2040/ico107102_small_4.png",
+      "sha256": "6688fac15e30871105509900d83e44bd29729613e4eba38fd3d1ae58ea59b0ae"
+    },
+    {
+      "asset": "persian_cavalry_tier_04_body.png",
+      "source": "sprites/face_race_4/Common/Common_200/ico107103.png",
+      "sha256": "f5264d072679648963276a2b1e366a93500e584f94930cd1a3833e2dec260a33"
+    },
+    {
+      "asset": "persian_cavalry_tier_04_portrait.png",
+      "source": "sprites/face_race_4/Common/Common_2040/ico107103_small_4.png",
+      "sha256": "0949044fde47ccabbcad061283e6e2fb1cc39f20cb9afd8121c165b049a759a3"
+    },
+    {
+      "asset": "persian_cavalry_tier_05_body.png",
+      "source": "sprites/face_race_4/Common/Common_200/ico107104.png",
+      "sha256": "1282b05d63a6ddbf609fc664503235fe94dfa19d317905c5308525996656526e"
+    },
+    {
+      "asset": "persian_cavalry_tier_05_portrait.png",
+      "source": "sprites/face_race_4/Common/Common_2040/ico107104_small_4.png",
+      "sha256": "16e90d1ef785b92bee2dd8c8de5e00cd28483140a21a2f246589f96f83e699c7"
+    },
+    {
+      "asset": "persian_cavalry_tier_06_body.png",
+      "source": "sprites/face_race_4/Common/Common_200/ico107105.png",
+      "sha256": "2cdde45dcea81749529f2c443cbfcf584c1de1f5c970ae5e0a825322607e4c1c"
+    },
+    {
+      "asset": "persian_cavalry_tier_06_portrait.png",
+      "source": "sprites/face_race_4/Common/Common_2040/ico107105_small_4.png",
+      "sha256": "ae463eb630848214cbe8b137535875ca5f1ed5d63d74009dc079b85c7b2f400a"
+    },
+    {
+      "asset": "persian_cavalry_tier_07_body.png",
+      "source": "sprites/face_race_4/Common/Common_200/ico107106.png",
+      "sha256": "ae3bdf1857af4a5bb9519c068d3019614485635c7151087ae01cdf316af21acc"
+    },
+    {
+      "asset": "persian_cavalry_tier_07_portrait.png",
+      "source": "sprites/face_race_4/Common/Common_2040/ico107106_small_4.png",
+      "sha256": "18f2a7f2368ef28de2b409e7913316732be3269b7f32b0388541d8b41c51e623"
+    },
+    {
+      "asset": "persian_cavalry_tier_08_body.png",
+      "source": "sprites/face_race_4/Common/Common_200/ico107107.png",
+      "sha256": "d833982aefa3ed3547545f4199309c17db8f81e6b05af151fd5f1a64a0e817ac"
+    },
+    {
+      "asset": "persian_cavalry_tier_08_portrait.png",
+      "source": "sprites/face_race_4/Common/Common_2040/ico107107_small_4.png",
+      "sha256": "831c6025f7ce4f054b0716146d48f50eb9f88bf2fb4656e2a6fad9e86868540c"
+    },
+    {
+      "asset": "persian_cavalry_tier_09_body.png",
+      "source": "sprites/face_race_4/Common/Common_200/ico107108.png",
+      "sha256": "455e27c8f562ece91ef69f45b3d57d017b4b76a866fbc9fff53af3a2ea7e455d"
+    },
+    {
+      "asset": "persian_cavalry_tier_09_portrait.png",
+      "source": "sprites/face_race_4/Common/Common_2040/ico107108_small_4.png",
+      "sha256": "bce55ed37330aaee671a1ee6f8449d21b44b1847b7121d7a331384ed2caef808"
+    },
+    {
+      "asset": "persian_cavalry_tier_10_body.png",
+      "source": "sprites/face_race_4/Common/Common_200/ico107109.png",
+      "sha256": "0b3f100f1ce2c6a4d9750da393a5b51246dd61aef1dde8eb6f736b8d939274c9"
+    },
+    {
+      "asset": "persian_cavalry_tier_10_portrait.png",
+      "source": "sprites/face_race_4/Common/Common_2040/ico107109_small_4.png",
+      "sha256": "5419ac63e3de44f31569a00b808f110595624a404392d067aa4df500f6870816"
+    },
+    {
+      "asset": "persian_archer_tier_01_body.png",
+      "source": "sprites/face_race_4/Common/Common_202/ico107200.png",
+      "sha256": "66bc3591f869cde641a1539a970c760300a782e28dc26eb18520c804b1ff83ee"
+    },
+    {
+      "asset": "persian_archer_tier_01_portrait.png",
+      "source": "sprites/face_race_4/Common/Common_2040/ico107200_small_4.png",
+      "sha256": "0a187878d4d78c2173be8df9f6fe1db315d63214b52c4218beef1f790d21d945"
+    },
+    {
+      "asset": "persian_archer_tier_02_body.png",
+      "source": "sprites/face_race_4/Common/Common_202/ico107201.png",
+      "sha256": "0d21410ea26f7fdd2dcd8e4e6b4a4b949938dcd996fe8c2cb1d0ff2a30c76d8f"
+    },
+    {
+      "asset": "persian_archer_tier_02_portrait.png",
+      "source": "sprites/face_race_4/Common/Common_2040/ico107201_small_4.png",
+      "sha256": "da340a3e5f628da9b4a6d57ffde3865e7e2372a71ba9e55d9cd9138d23c4c411"
+    },
+    {
+      "asset": "persian_archer_tier_03_body.png",
+      "source": "sprites/face_race_4/Common/Common_202/ico107202.png",
+      "sha256": "f51b11c2eeda7872d4e8a98fb8e417bec40a1894a2c36ec87afd6129c60e4884"
+    },
+    {
+      "asset": "persian_archer_tier_03_portrait.png",
+      "source": "sprites/face_race_4/Common/Common_2040/ico107202_small_4.png",
+      "sha256": "9ba1826eea1b6792a8b96f48e12e3be29b4337bbe76668e8680c17cea81180e0"
+    },
+    {
+      "asset": "persian_archer_tier_04_body.png",
+      "source": "sprites/face_race_4/Common/Common_202/ico107203.png",
+      "sha256": "f338ee27d0db374ee1801caec9d8d1753960311ee6058780fb65a66030101cd0"
+    },
+    {
+      "asset": "persian_archer_tier_04_portrait.png",
+      "source": "sprites/face_race_4/Common/Common_2040/ico107203_small_4.png",
+      "sha256": "5d82002f73b83f49eb752d4371cb03220f4e222904162bf618793ca32595d58d"
+    },
+    {
+      "asset": "persian_archer_tier_05_body.png",
+      "source": "sprites/face_race_4/Common/Common_202/ico107204.png",
+      "sha256": "8dd8e1f20ffe1019fb7b3244f0ef88f0417a7ce4ce68b87557cdf612eb09788a"
+    },
+    {
+      "asset": "persian_archer_tier_05_portrait.png",
+      "source": "sprites/face_race_4/Common/Common_2040/ico107204_small_4.png",
+      "sha256": "7a80a2c1efd06a1ed90218d04b6c01441689c3b9f9991420debad5a0f622d06f"
+    },
+    {
+      "asset": "persian_archer_tier_06_body.png",
+      "source": "sprites/face_race_4/Common/Common_202/ico107205.png",
+      "sha256": "800f3658ca37fced43f39029907498386b7570d91fb43ad07bae422c03b6964a"
+    },
+    {
+      "asset": "persian_archer_tier_06_portrait.png",
+      "source": "sprites/face_race_4/Common/Common_2040/ico107205_small_4.png",
+      "sha256": "7fb9fe21fd24a078ff5d187ccfffb62a823f07b72951f0abfd28eac62d4901bc"
+    },
+    {
+      "asset": "persian_archer_tier_07_body.png",
+      "source": "sprites/face_race_4/Common/Common_202/ico107206.png",
+      "sha256": "eada3f4d2fcc24e84e5f9c7fe7d63ba61f67850e2c4aafc09a7e8fc8110a3aaf"
+    },
+    {
+      "asset": "persian_archer_tier_07_portrait.png",
+      "source": "sprites/face_race_4/Common/Common_2040/ico107206_small_4.png",
+      "sha256": "44abf1a007d0f2a51b4b479ca07f2ad272a39c6ccad7dedf29392dc98e00c48b"
+    },
+    {
+      "asset": "persian_archer_tier_08_body.png",
+      "source": "sprites/face_race_4/Common/Common_202/ico107207.png",
+      "sha256": "d0d4a73222e17a0edc514342d3f4f581079ea22283de602e6487d99b64001710"
+    },
+    {
+      "asset": "persian_archer_tier_08_portrait.png",
+      "source": "sprites/face_race_4/Common/Common_2040/ico107207_small_4.png",
+      "sha256": "39ce5ea18f1b99823336f6920860547f5d722b6fae0fe019f554dd815e6c0bfe"
+    },
+    {
+      "asset": "persian_archer_tier_09_body.png",
+      "source": "sprites/face_race_4/Common/Common_202/ico107208.png",
+      "sha256": "3df55744721915ad5cc6fa9fe5d08fd6f5f4b1aae17d98ec5d3276f576f6b10c"
+    },
+    {
+      "asset": "persian_archer_tier_09_portrait.png",
+      "source": "sprites/face_race_4/Common/Common_2040/ico107208_small_4.png",
+      "sha256": "ad46b2477a0e691b8f831b025809775946f354faa713ce24dbe54a8aa3d964ee"
+    },
+    {
+      "asset": "persian_archer_tier_10_body.png",
+      "source": "sprites/face_race_4/Common/Common_202/ico107209.png",
+      "sha256": "0d97294943c3c4053560c5ab8ab5ae5f93f139c685a77bb29ebf80673a3437dd"
+    },
+    {
+      "asset": "persian_archer_tier_10_portrait.png",
+      "source": "sprites/face_race_4/Common/Common_2040/ico107209_small_4.png",
+      "sha256": "34fb3fa1e633dd57d71b6e676df708c744dd3a52adb42c67b5499e074a8d4829"
+    },
+    {
+      "asset": "persian_siege_tier_01_body.png",
+      "source": "sprites/face_race_4/Common/Common_202/ico107300.png",
+      "sha256": "921cb0fabd26b01831e1568cd843c7fea5556ca615417a31aa2e4a15b166f8da"
+    },
+    {
+      "asset": "persian_siege_tier_01_portrait.png",
+      "source": "sprites/face_race_4/Common/Common_2040/ico107300_small_4.png",
+      "sha256": "4c5b1eaf566a3041f183f99a0a20d975c73294f1263c72c99457204764a2b39a"
+    },
+    {
+      "asset": "persian_siege_tier_02_body.png",
+      "source": "sprites/face_race_4/Common/Common_202/ico107301.png",
+      "sha256": "e544f2ea540fead198c47750c09d98fc4974a6bd42e7b532cfc21f2b3adef148"
+    },
+    {
+      "asset": "persian_siege_tier_02_portrait.png",
+      "source": "sprites/face_race_4/Common/Common_2040/ico107301_small_4.png",
+      "sha256": "cf59fb0059efacb091f88b5d75bc6b0b8af1277cda4813ed75e3d4fbe6fb614e"
+    },
+    {
+      "asset": "persian_siege_tier_03_body.png",
+      "source": "sprites/face_race_4/Common/Common_202/ico107302.png",
+      "sha256": "ac8874844b2af7686cc8de734a2d7b1a0d95b84286d133bc4070dfc1f0cf3c1c"
+    },
+    {
+      "asset": "persian_siege_tier_03_portrait.png",
+      "source": "sprites/face_race_4/Common/Common_2040/ico107302_small_4.png",
+      "sha256": "8a158ef6f965081f8705764a851ead59f326f8b8af4a7c8680f46a95847ecaf7"
+    },
+    {
+      "asset": "persian_siege_tier_04_body.png",
+      "source": "sprites/face_race_4/Common/Common_202/ico107303.png",
+      "sha256": "00eb17b34227cf5c87ab587359fb36281c6151e1edeb0e1e76bb10a5f75b33d1"
+    },
+    {
+      "asset": "persian_siege_tier_04_portrait.png",
+      "source": "sprites/face_race_4/Common/Common_2040/ico107303_small_4.png",
+      "sha256": "ba103a4cc910f6d50f5b4f8a4cdaa8d1dffdec54d2ea2157d92b59ef9fb02c18"
+    },
+    {
+      "asset": "persian_siege_tier_05_body.png",
+      "source": "sprites/face_race_4/Common/Common_202/ico107304.png",
+      "sha256": "a1d953080aa0d3fdc6b6ac88e79da3ef69a7025383cfc8724e7f5bba95f42aeb"
+    },
+    {
+      "asset": "persian_siege_tier_05_portrait.png",
+      "source": "sprites/face_race_4/Common/Common_2040/ico107304_small_4.png",
+      "sha256": "b790141292b13977f9b1cbea72fed8c809241e9eb3da92a42ebabce00abccf9d"
+    },
+    {
+      "asset": "persian_siege_tier_06_body.png",
+      "source": "sprites/face_race_4/Common/Common_202/ico107305.png",
+      "sha256": "3c0bb42e70110551df8fa7536660319937668f2910941bc2c47b0774929ccdae"
+    },
+    {
+      "asset": "persian_siege_tier_06_portrait.png",
+      "source": "sprites/face_race_4/Common/Common_2040/ico107305_small_4.png",
+      "sha256": "e3bf67a0adef90fb1981eccde94816d646418b79907374463c7e8ff0ab6a0548"
+    },
+    {
+      "asset": "persian_siege_tier_07_body.png",
+      "source": "sprites/face_race_4/Common/Common_202/ico107306.png",
+      "sha256": "1b95c3c93f8a037d5411cbd9b5516951398d3ccc7640b18f4835ca29a9ee0223"
+    },
+    {
+      "asset": "persian_siege_tier_07_portrait.png",
+      "source": "sprites/face_race_4/Common/Common_2040/ico107306_small_4.png",
+      "sha256": "651f8926df4783f7b168b8e4e99f55ee9005912330469a89a253506552c9e484"
+    },
+    {
+      "asset": "persian_siege_tier_08_body.png",
+      "source": "sprites/face_race_4/Common/Common_202/ico107307.png",
+      "sha256": "56daf15763450ba9097dc79714fcb680f4c583b8c0b8f7dffc2d0f3b59f4eaf2"
+    },
+    {
+      "asset": "persian_siege_tier_08_portrait.png",
+      "source": "sprites/face_race_4/Common/Common_2040/ico107307_small_4.png",
+      "sha256": "1c2c5bc8060b22c22fcb1c1d059b011d8d59166c26839bef3693d04b46ec5896"
+    },
+    {
+      "asset": "persian_siege_tier_09_body.png",
+      "source": "sprites/face_race_4/Common/Common_202/ico107308.png",
+      "sha256": "6743f9781371690b82056a60be30c5131326cbd28b929ff68019a8baf7989885"
+    },
+    {
+      "asset": "persian_siege_tier_09_portrait.png",
+      "source": "sprites/face_race_4/Common/Common_2040/ico107308_small_4.png",
+      "sha256": "f921d09daaaf08679ebf157386f51760962ac6c43a774ae75c1fdefb61cf033d"
+    },
+    {
+      "asset": "persian_siege_tier_10_body.png",
+      "source": "sprites/face_race_4/Common/Common_202/ico107309.png",
+      "sha256": "12e0b46b1a4677d108f2dd7a831884f6a7846bc4e75972992f9194c9d7252c31"
+    },
+    {
+      "asset": "persian_siege_tier_10_portrait.png",
+      "source": "sprites/face_race_4/Common/Common_2040/ico107309_small_4.png",
+      "sha256": "a12d3541dcac55eba0c41d35aa9bd68c926e544413a809b791e3adbcdac89306"
+    },
+    {
+      "asset": "simple_cavalry_tier_11_slaughter_cavalry_body.png",
+      "sourceRoot": "/mnt/storage/1/opencok/opencok/data/cdn/extracteds/tropas",
+      "source": "images/T11/ico107410.png",
+      "sha256": "ae06da6f8bb594cde2a6aa00d5268eca8a7745fd237e6317299f104fca6902fd"
+    },
+    {
+      "asset": "simple_cavalry_tier_11_slaughter_cavalry_portrait.png",
+      "sourceRoot": "/mnt/storage/1/opencok/opencok/data/cdn/extracteds/tropas",
+      "source": "images/T11/ico107410_small.png",
+      "sha256": "671ea5038ae2c35aea5d814c6ad6ec573dd1b5f3d554a7e92e33ce8220d9bd56"
+    },
+    {
+      "asset": "simple_cavalry_tier_11_ranger_knight_body.png",
+      "sourceRoot": "/mnt/storage/1/opencok/opencok/data/cdn/extracteds/tropas",
+      "source": "images/T11/ico107412.png",
+      "sha256": "f94a34757a0fa60a59ccdd80bd0545258ebf7d33f65082eca36bf1b0ccff9dd3"
+    },
+    {
+      "asset": "simple_cavalry_tier_11_ranger_knight_portrait.png",
+      "sourceRoot": "/mnt/storage/1/opencok/opencok/data/cdn/extracteds/tropas",
+      "source": "images/T11/ico107412_small.png",
+      "sha256": "940d0bf6368b61be32a80df82c91b53d7c8356314d1426cf77122e459721eab3"
+    },
+    {
+      "asset": "special_infantry_level_01_guardians_of_firmament_body.png",
+      "sourceRoot": "/mnt/storage/1/opencok/opencok/data/cdn/extracteds/tropas",
+      "source": "images/T14/ico107014.png",
+      "sha256": "7af160a06ffe964d177b555ae4522f1889d2f06fd0cebaec355a8ec42b6b4bde"
+    },
+    {
+      "asset": "special_infantry_level_01_guardians_of_firmament_portrait.png",
+      "sourceRoot": "/mnt/storage/1/opencok/opencok/data/cdn/extracteds/tropas",
+      "source": "images/T14/ico107014_small.png",
+      "sha256": "c057bff438ecc8864e54dc684cbb334ec9b8e28b4c12be2ec6ea8e5514baa98e"
+    },
+    {
+      "asset": "special_infantry_level_02_oathbreaker_executioner_body.png",
+      "sourceRoot": "/mnt/storage/1/opencok/opencok/data/cdn/extracteds/tropas",
+      "source": "images/T14/ico107414.png",
+      "sha256": "9eca5e2ac838fbade91ab131238d040236dda80655c18976dfa688fa3a5d9d2e"
+    },
+    {
+      "asset": "special_infantry_level_02_oathbreaker_executioner_portrait.png",
+      "sourceRoot": "/mnt/storage/1/opencok/opencok/data/cdn/extracteds/tropas",
+      "source": "images/T14/ico107414_small.png",
+      "sha256": "a0d3368e72da30e8db007f1873e333a68013acdb1ff6d7cf27daadda765de3d4"
+    },
+    {
+      "asset": "special_cavalry_level_01_nightmare_knight_body.png",
+      "sourceRoot": "/mnt/storage/1/opencok/opencok/data/cdn/extracteds/tropas",
+      "source": "images/T14/ico107514.png",
+      "sha256": "c434a25f0221e6c57927c7b68a8269a3ca61aeec0b2890f1869a39dbb47cca9c"
+    },
+    {
+      "asset": "special_cavalry_level_01_nightmare_knight_portrait.png",
+      "sourceRoot": "/mnt/storage/1/opencok/opencok/data/cdn/extracteds/tropas",
+      "source": "images/T14/ico107514_small.png",
+      "sha256": "94bf0652bc8fa5bf1659ce5bb661711b71384cf1b6a228bc8ff3770d3eb50e9f"
+    },
+    {
+      "asset": "special_cavalry_level_02_brightness_ranger_body.png",
+      "sourceRoot": "/mnt/storage/1/opencok/opencok/data/cdn/extracteds/tropas",
+      "source": "images/T14/ico107114.png",
+      "sha256": "f55574b0398b389b4a0efc6068418719d2041651885f799b3d23498718c9d5f4"
+    },
+    {
+      "asset": "special_cavalry_level_02_brightness_ranger_portrait.png",
+      "sourceRoot": "/mnt/storage/1/opencok/opencok/data/cdn/extracteds/tropas",
+      "source": "images/T14/ico107114_small.png",
+      "sha256": "08d258d00363a72155289f1149495418c5af7113479dc0a498c15d3d13545453"
+    },
+    {
+      "asset": "special_archer_level_01_justice_hunter_body.png",
+      "sourceRoot": "/mnt/storage/1/opencok/opencok/data/cdn/extracteds/tropas",
+      "source": "images/T14/ico107214.png",
+      "sha256": "8fe3d86c9574a52f63cfb90271ff5bc7760d3eee9e947ecddcef73084dbdade2"
+    },
+    {
+      "asset": "special_archer_level_01_justice_hunter_portrait.png",
+      "sourceRoot": "/mnt/storage/1/opencok/opencok/data/cdn/extracteds/tropas",
+      "source": "images/T14/ico107214_small.png",
+      "sha256": "c9148d51beb2f4755157be307171a45f71bd1f01c555b00fcb13b369a3341847"
+    },
+    {
+      "asset": "special_archer_level_02_black_crow_hunter_body.png",
+      "sourceRoot": "/mnt/storage/1/opencok/opencok/data/cdn/extracteds/tropas",
+      "source": "images/T14/ico107614.png",
+      "sha256": "eefd55da25cd3327e237efa48d194a76cfbb7e8a5769abc55a0a0ce826395ead"
+    },
+    {
+      "asset": "special_archer_level_02_black_crow_hunter_portrait.png",
+      "sourceRoot": "/mnt/storage/1/opencok/opencok/data/cdn/extracteds/tropas",
+      "source": "images/T14/ico107614_small.png",
+      "sha256": "e147b607ec0776528dbd4a65b36e3704f27dde1d2198b0b0f21977e73757673a"
+    },
+    {
+      "asset": "special_siege_level_01_divine_punisher_body.png",
+      "sourceRoot": "/mnt/storage/1/opencok/opencok/data/cdn/extracteds/tropas",
+      "source": "images/T14/ico107314.png",
+      "sha256": "270e4597b3fce09831baa1c24ced78266f76209bacac66b9c5fe0ed53a503f77"
+    },
+    {
+      "asset": "special_siege_level_01_divine_punisher_portrait.png",
+      "sourceRoot": "/mnt/storage/1/opencok/opencok/data/cdn/extracteds/tropas",
+      "source": "images/T14/ico107314_small.png",
+      "sha256": "1efacde763acd67c42c60b9ff9244344688c433b5182c5e5b818bd87281e6408"
+    },
+    {
+      "asset": "special_siege_level_02_abyssal_brute_body.png",
+      "sourceRoot": "/mnt/storage/1/opencok/opencok/data/cdn/extracteds/tropas",
+      "source": "images/T14/ico107714.png",
+      "sha256": "e660f27aaff4a3d3de4783a6996a3d17b2bffd6e20ffc3aee061c8c204fd3490"
+    },
+    {
+      "asset": "special_siege_level_02_abyssal_brute_portrait.png",
+      "sourceRoot": "/mnt/storage/1/opencok/opencok/data/cdn/extracteds/tropas",
+      "source": "images/T14/ico107714_small.png",
+      "sha256": "6ad1c64c695c71458efe5d692165c527c19fcd23811e4f86e22e0c6aa54c3209"
+    },
+    {
+      "asset": "special_infantry_level_03_frostpiercer_guard_body.png",
+      "sourceRoot": "/mnt/storage/1/opencok/opencok/data/cdn/extracteds/tropas",
+      "source": "images/T15/ico57580215.png",
+      "sha256": "d436df996f170c6d847e353ee5b51fda5d5e461ab21418212e96861db76ad013"
+    },
+    {
+      "asset": "special_infantry_level_03_frostpiercer_guard_portrait.png",
+      "sourceRoot": "/mnt/storage/1/opencok/opencok/data/cdn/extracteds/tropas",
+      "source": "images/T15/ico57580215_head.png",
+      "sha256": "0dd2c2fbdf828db045599793bdde3ad929aa33cd521f6bc8cefac3f2eb0db070"
+    },
+    {
+      "asset": "special_cavalry_level_03_frostwolf_wraith_rider_body.png",
+      "sourceRoot": "/mnt/storage/1/opencok/opencok/data/cdn/extracteds/tropas",
+      "source": "images/T15/ico57580315.png",
+      "sha256": "6cb5ccd9045ae46b928e04c1c6c98937d7934c6b895e40dfbf28106d4e139b0f"
+    },
+    {
+      "asset": "special_cavalry_level_03_frostwolf_wraith_rider_portrait.png",
+      "sourceRoot": "/mnt/storage/1/opencok/opencok/data/cdn/extracteds/tropas",
+      "source": "images/T15/ico57580315_head.png",
+      "sha256": "81efb7b632d906b93b891e93243193f4fac13c85f08142e66a0370b15af37336"
+    },
+    {
+      "asset": "special_archer_level_03_blackraven_marksman_body.png",
+      "sourceRoot": "/mnt/storage/1/opencok/opencok/data/cdn/extracteds/tropas",
+      "source": "images/T15/ico57580515.png",
+      "sha256": "0b2dc47a70c3f200819292c55cfae23641bb206d5f2125becec1bae9fb7c159f"
+    },
+    {
+      "asset": "special_archer_level_03_blackraven_marksman_portrait.png",
+      "sourceRoot": "/mnt/storage/1/opencok/opencok/data/cdn/extracteds/tropas",
+      "source": "images/T15/ico57580515_head.png",
+      "sha256": "f1eccd6349e28ccc60f20d930ae74e3122c564ac0a19b65115b79d26dc0caad7"
+    },
+    {
+      "asset": "special_siege_level_03_ironhorn_crusher_body.png",
+      "sourceRoot": "/mnt/storage/1/opencok/opencok/data/cdn/extracteds/tropas",
+      "source": "images/T15/ico57580715.png",
+      "sha256": "a9ba16a0a47f48f2fc543134f93fa22f9a4d7306ebbea695017f1656e469a14d"
+    },
+    {
+      "asset": "special_siege_level_03_ironhorn_crusher_portrait.png",
+      "sourceRoot": "/mnt/storage/1/opencok/opencok/data/cdn/extracteds/tropas",
+      "source": "images/T15/ico57580715_head.png",
+      "sha256": "98fba3e76191cd70c00295536648bcfb6919906f3c4a3eb4b68a771cf1ebed0d"
+    },
+    {
+      "asset": "special_infantry_level_04_frostplate_defender_body.png",
+      "sourceRoot": "/mnt/storage/1/opencok/opencok/data/cdn/extracteds/tropas",
+      "source": "images/T16/ico57580116.png",
+      "sha256": "dbcc9105d267db20ecd4ab88381b785bb050834aecbe7ef045b9fd3ab9e90d91"
+    },
+    {
+      "asset": "special_infantry_level_04_frostplate_defender_portrait.png",
+      "sourceRoot": "/mnt/storage/1/opencok/opencok/data/cdn/extracteds/tropas",
+      "source": "images/T16/ico57580116_head.png",
+      "sha256": "2f805f92db8c4c673f39189444a86b5b9e5e1c8456b83fced7c92721117d475e"
+    },
+    {
+      "asset": "special_cavalry_level_04_elkbreaker_cavalier_body.png",
+      "sourceRoot": "/mnt/storage/1/opencok/opencok/data/cdn/extracteds/tropas",
+      "source": "images/T16/ico57580416.png",
+      "sha256": "aa6025b204e45b26fe475af0fc43c1dcf949123701684018c27d1fc91c39c912"
+    },
+    {
+      "asset": "special_cavalry_level_04_elkbreaker_cavalier_portrait.png",
+      "sourceRoot": "/mnt/storage/1/opencok/opencok/data/cdn/extracteds/tropas",
+      "source": "images/T16/ico57580416_head.png",
+      "sha256": "78e0254d3330b27d3cefd02cad82fcbd6b35375de8f79dcb392a60e981e7d7ef"
+    },
+    {
+      "asset": "special_archer_level_04_grafted_undead_archer_body.png",
+      "sourceRoot": "/mnt/storage/1/opencok/opencok/data/cdn/extracteds/tropas",
+      "source": "images/T16/ico57580616.png",
+      "sha256": "9378aad8c04578b5c0cf4853d1a59567094b71b74091ab2f46815131f02911ff"
+    },
+    {
+      "asset": "special_archer_level_04_grafted_undead_archer_portrait.png",
+      "sourceRoot": "/mnt/storage/1/opencok/opencok/data/cdn/extracteds/tropas",
+      "source": "images/T16/ico57580616_head.png",
+      "sha256": "dd67ade127dd34102d5669494b63a692e164e12f076f642b984bcf363cd2888e"
+    },
+    {
+      "asset": "special_siege_level_04_arcane_golem_body.png",
+      "sourceRoot": "/mnt/storage/1/opencok/opencok/data/cdn/extracteds/tropas",
+      "source": "images/T16/ico57580816.png",
+      "sha256": "3797b5a8b4b79488cb10f61879bf805fc68a6e9a23a890b4c59944768ed480be"
+    },
+    {
+      "asset": "special_siege_level_04_arcane_golem_portrait.png",
+      "sourceRoot": "/mnt/storage/1/opencok/opencok/data/cdn/extracteds/tropas",
+      "source": "images/T16/ico57580816_head.png",
+      "sha256": "31477986d676232ead43408a2ff27e2c8192de7b0d496d46947bb82d9b35cb48"
+    },
+    {
+      "asset": "special_infantry_level_05_froststeel_shieldbearer_body.png",
+      "sourceRoot": "/mnt/storage/1/opencok/opencok/data/cdn/extracteds/tropas",
+      "source": "images/T17/ico57580117.png",
+      "sha256": "0105fb78fe29adc71b95c6640bf1003925a1c22737d4821c4bbebf836e3a8ab6"
+    },
+    {
+      "asset": "special_infantry_level_05_froststeel_shieldbearer_portrait.png",
+      "sourceRoot": "/mnt/storage/1/opencok/opencok/data/cdn/extracteds/tropas",
+      "source": "images/T17/ico57580117_head.png",
+      "sha256": "758c12a8c4c3971b359e11bac5d9f5a21afff6ca2dfba2088fce4a592614efe4"
+    },
+    {
+      "asset": "special_infantry_level_06_froststeel_lancer_body.png",
+      "sourceRoot": "/mnt/storage/1/opencok/opencok/data/cdn/extracteds/tropas",
+      "source": "images/T17/ico57580217.png",
+      "sha256": "be9208421c9d4a5627563d26aff11b9c10675abe1eb98bfb650b45577b3c53c3"
+    },
+    {
+      "asset": "special_infantry_level_06_froststeel_lancer_portrait.png",
+      "sourceRoot": "/mnt/storage/1/opencok/opencok/data/cdn/extracteds/tropas",
+      "source": "images/T17/ico57580217_head.png",
+      "sha256": "58e46d6314b338d4a404b180ce503fa6af38d4be3b55177f62b12019766b8a91"
+    },
+    {
+      "asset": "special_cavalry_level_05_warbull_stampeder_body.png",
+      "sourceRoot": "/mnt/storage/1/opencok/opencok/data/cdn/extracteds/tropas",
+      "source": "images/T17/ico57580317.png",
+      "sha256": "7cca98cb42df51222c6866a9ec8e510b3d39ac34373d1abb9e039ddd51013fe0"
+    },
+    {
+      "asset": "special_cavalry_level_05_warbull_stampeder_portrait.png",
+      "sourceRoot": "/mnt/storage/1/opencok/opencok/data/cdn/extracteds/tropas",
+      "source": "images/T17/ico57580317_head.png",
+      "sha256": "426cfab165994e8db337add20345106c3b78e7f296474fc69d7ab880c9bb48cb"
+    },
+    {
+      "asset": "special_cavalry_level_06_yeti_flayer_body.png",
+      "sourceRoot": "/mnt/storage/1/opencok/opencok/data/cdn/extracteds/tropas",
+      "source": "images/T17/ico57580417.png",
+      "sha256": "56c57588d534718583b751ccd0ffe2767139d2de2fbcecbd01c776830350d505"
+    },
+    {
+      "asset": "special_cavalry_level_06_yeti_flayer_portrait.png",
+      "sourceRoot": "/mnt/storage/1/opencok/opencok/data/cdn/extracteds/tropas",
+      "source": "images/T17/ico57580417_head.png",
+      "sha256": "2412d9834cfc7c8de90fc3cc3ca5e2348348a9217f452913e3f7cf50af80b75d"
+    },
+    {
+      "asset": "special_archer_level_05_voideye_undead_archer_body.png",
+      "sourceRoot": "/mnt/storage/1/opencok/opencok/data/cdn/extracteds/tropas",
+      "source": "images/T17/ico57580517.png",
+      "sha256": "ff980e881a96c0ac2fd8b35df0efbb8845ed9bb920aea8bd60f05fe5babd38f8"
+    },
+    {
+      "asset": "special_archer_level_05_voideye_undead_archer_portrait.png",
+      "sourceRoot": "/mnt/storage/1/opencok/opencok/data/cdn/extracteds/tropas",
+      "source": "images/T17/ico57580517_head.png",
+      "sha256": "93895a93aea760ee08091baf3874a55bee355db816cdebc85c861b239d871d16"
+    },
+    {
+      "asset": "special_archer_level_06_duskraven_sharpshooter_body.png",
+      "sourceRoot": "/mnt/storage/1/opencok/opencok/data/cdn/extracteds/tropas",
+      "source": "images/T17/ico57580617.png",
+      "sha256": "93006d906d5338ae636b05b6fdd2c24d37d0b5b180ec4073a5db7add35387c14"
+    },
+    {
+      "asset": "special_archer_level_06_duskraven_sharpshooter_portrait.png",
+      "sourceRoot": "/mnt/storage/1/opencok/opencok/data/cdn/extracteds/tropas",
+      "source": "images/T17/ico57580617_head.png",
+      "sha256": "41a89c8a8d154d75f7a7eeccd3db93bc99a6b8a89ed2c289dfd6e02f10955ed4"
+    },
+    {
+      "asset": "special_siege_level_05_voidflux_titan_body.png",
+      "sourceRoot": "/mnt/storage/1/opencok/opencok/data/cdn/extracteds/tropas",
+      "source": "images/T17/ico57580717.png",
+      "sha256": "d57c756110460fc29ed79a7f786c8cdf668489ea9705ffd6ebf6b49135838685"
+    },
+    {
+      "asset": "special_siege_level_05_voidflux_titan_portrait.png",
+      "sourceRoot": "/mnt/storage/1/opencok/opencok/data/cdn/extracteds/tropas",
+      "source": "images/T17/ico57580717_head.png",
+      "sha256": "a068097f5dcc6e4102f41331e5baade6a8829529f1b2b6f5abf71d4b70c0506f"
+    },
+    {
+      "asset": "special_siege_level_06_sunderstrike_vanquisher_body.png",
+      "sourceRoot": "/mnt/storage/1/opencok/opencok/data/cdn/extracteds/tropas",
+      "source": "images/T17/ico57580817.png",
+      "sha256": "6c7084841a9afe7560cb8cbcb2e6d5bd768fa575e65de5cdb145d7b4a899c8fd"
+    },
+    {
+      "asset": "special_siege_level_06_sunderstrike_vanquisher_portrait.png",
+      "sourceRoot": "/mnt/storage/1/opencok/opencok/data/cdn/extracteds/tropas",
+      "source": "images/T17/ico57580817_head.png",
+      "sha256": "0a0979c3466e1a4ee426c4d67de7dc3bd1128dd6f5f8da14f724dfdbf4d559e4"
+    },
+    {
+      "asset": "special_infantry_level_07_frostborne_guardian_body.png",
+      "sourceRoot": "/mnt/storage/1/opencok/opencok/data/cdn/extracteds/tropas",
+      "source": "images/T18/ico57580118.png",
+      "sha256": "d8f4a39ead99948a8222676b46965dca0dadf3bcd081dd5cf01995da2ea77891"
+    },
+    {
+      "asset": "special_infantry_level_07_frostborne_guardian_portrait.png",
+      "sourceRoot": "/mnt/storage/1/opencok/opencok/data/cdn/extracteds/tropas",
+      "source": "images/T18/ico57580118_head.png",
+      "sha256": "d10f4c5e98f2a5d52bb708dbe24052adbc9266458705dd4c5b10223569c170ab"
+    },
+    {
+      "asset": "special_infantry_level_08_frostwing_sentinel_body.png",
+      "sourceRoot": "/mnt/storage/1/opencok/opencok/data/cdn/extracteds/tropas",
+      "source": "images/T18/ico57580218.png",
+      "sha256": "2aa85d519d1f898c9fdc538573b750a88c5849f90342e9a6622c775aa83fb7a2"
+    },
+    {
+      "asset": "special_infantry_level_08_frostwing_sentinel_portrait.png",
+      "sourceRoot": "/mnt/storage/1/opencok/opencok/data/cdn/extracteds/tropas",
+      "source": "images/T18/ico57580218_head.png",
+      "sha256": "315e0508caabb7e051eb2f2766afdffe9fefab45acebee16f4b0548d07e8132d"
+    },
+    {
+      "asset": "special_cavalry_level_07_griffin_vanguard_body.png",
+      "sourceRoot": "/mnt/storage/1/opencok/opencok/data/cdn/extracteds/tropas",
+      "source": "images/T18/ico57580318.png",
+      "sha256": "bc36bb17d97eae92286d8965c4936cb31b27af9acf5dea693e71bca97b951817"
+    },
+    {
+      "asset": "special_cavalry_level_07_griffin_vanguard_portrait.png",
+      "sourceRoot": "/mnt/storage/1/opencok/opencok/data/cdn/extracteds/tropas",
+      "source": "images/T18/ico57580318_head.png",
+      "sha256": "312d532ea305e9e0020c7bf5d48c790d72a9591bc8336d697fb1cce0b075a7c5"
+    },
+    {
+      "asset": "special_cavalry_level_08_sabertooth_cavalier_body.png",
+      "sourceRoot": "/mnt/storage/1/opencok/opencok/data/cdn/extracteds/tropas",
+      "source": "images/T18/ico57580418.png",
+      "sha256": "2b5698afd160e5b04808baf65ddb6e10e648ffa127f6b6a8b3992bdb8e7e1006"
+    },
+    {
+      "asset": "special_cavalry_level_08_sabertooth_cavalier_portrait.png",
+      "sourceRoot": "/mnt/storage/1/opencok/opencok/data/cdn/extracteds/tropas",
+      "source": "images/T18/ico57580418_head.png",
+      "sha256": "70012327e376bed0be5c1ecab2361bcb8d957507574847094ae4286989bdf660"
+    },
+    {
+      "asset": "special_archer_level_07_frenzied_undead_archer_body.png",
+      "sourceRoot": "/mnt/storage/1/opencok/opencok/data/cdn/extracteds/tropas",
+      "source": "images/T18/ico57580518.png",
+      "sha256": "67f5107f47d4a45af93566eac140e4161cb31015f79241edf85b93902d8b175c"
+    },
+    {
+      "asset": "special_archer_level_07_frenzied_undead_archer_portrait.png",
+      "sourceRoot": "/mnt/storage/1/opencok/opencok/data/cdn/extracteds/tropas",
+      "source": "images/T18/ico57580518_head.png",
+      "sha256": "9687f6fa25e9d6d2694ad27b076ae4448afb7cfb44bb2daaf827c9d4178630b1"
+    },
+    {
+      "asset": "special_archer_level_08_bloodraven_bolt_reaper_body.png",
+      "sourceRoot": "/mnt/storage/1/opencok/opencok/data/cdn/extracteds/tropas",
+      "source": "images/T18/ico57580618.png",
+      "sha256": "47a55bb84842c786467c40f0b5ed3bd710ad401cd2c254cdb26eda68711266c4"
+    },
+    {
+      "asset": "special_archer_level_08_bloodraven_bolt_reaper_portrait.png",
+      "sourceRoot": "/mnt/storage/1/opencok/opencok/data/cdn/extracteds/tropas",
+      "source": "images/T18/ico57580618_head.png",
+      "sha256": "c46eaf36d0e0472a6834edcd5a82274fd6c637d52494f3aa98beb38240ddd5ed"
+    },
+    {
+      "asset": "special_siege_level_07_forsaken_archon_body.png",
+      "sourceRoot": "/mnt/storage/1/opencok/opencok/data/cdn/extracteds/tropas",
+      "source": "images/T18/ico57580718.png",
+      "sha256": "86cb3e183d010b1c3c1316bed6a147d64cf517ce9d9f8f7b3de77ac3f5e7cfde"
+    },
+    {
+      "asset": "special_siege_level_07_forsaken_archon_portrait.png",
+      "sourceRoot": "/mnt/storage/1/opencok/opencok/data/cdn/extracteds/tropas",
+      "source": "images/T18/ico57580718_head.png",
+      "sha256": "5d5657f9a3a5acf23f4b295ee6a9d561d8f6320d4a3eb04ea068a0b7d38c46cc"
+    },
+    {
+      "asset": "special_siege_level_08_cannonback_ravager_body.png",
+      "sourceRoot": "/mnt/storage/1/opencok/opencok/data/cdn/extracteds/tropas",
+      "source": "images/T18/ico57580818.png",
+      "sha256": "ad1ff8af0b2a4b8ffa4b4752971688ffaef7835d798c72d39b9216b54f4cc244"
+    },
+    {
+      "asset": "special_siege_level_08_cannonback_ravager_portrait.png",
+      "sourceRoot": "/mnt/storage/1/opencok/opencok/data/cdn/extracteds/tropas",
+      "source": "images/T18/ico57580818_head.png",
+      "sha256": "74ee9a27b30900a5b0884e863743f775252e893c286e618d9e467a333b0b19b1"
+    }
+  ]
+}

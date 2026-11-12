@@ -1,1 +1,0 @@
-CREATE INDEX "receive_item_owner" ON "opencok_kingdom"."receive_item" USING btree ("uid","id");

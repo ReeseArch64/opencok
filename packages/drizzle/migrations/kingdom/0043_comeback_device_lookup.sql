@@ -1,1 +1,0 @@
-CREATE INDEX "user_comeback_record_device_backtime" ON "opencok_kingdom"."user_comeback_record" USING btree ("deviceId","backTime");
