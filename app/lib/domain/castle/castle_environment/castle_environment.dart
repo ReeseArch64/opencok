@@ -6,7 +6,6 @@ class CastleEnvironment {
   final Map<String, ui.Image> images;
   static const assetRoot = 'assets/castle/environment/';
   static const size = ui.Size(6989, 2544);
-  // The western expansion is reserved for future releases.
   static const playableBounds = ui.Rect.fromLTRB(3400, 0, 6989, 2544);
   static const focus = ui.Offset(4450, 1250);
 

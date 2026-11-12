@@ -3,7 +3,6 @@ import 'package:opencok/domain/world_map/map_tile/map_tile.dart';
 import 'package:opencok/domain/world_map/world_map_scene/world_map_scene.dart';
 import 'package:opencok/generated/world.dart';
 
-/// Server objects carry logical cells; sprite anchors remain a client concern.
 List<MapTile> worldObjectTiles(
   WorldMapScene scene,
   Iterable<MapRegionObjectsItem> objects,

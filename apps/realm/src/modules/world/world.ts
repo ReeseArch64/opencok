@@ -1,7 +1,6 @@
 import type { MapQuery, MapRegion } from "@opencok/contracts";
 import terrain from "./terrain.json";
 
-/** Read-only development kingdom. No character ownership or durable placement yet. */
 export class World
 {
     readonly id = 1;
@@ -27,8 +26,6 @@ export class World
         {
             return true;
         }
-        // The client repeats this numeric 57x57 terrain template around (600,600).
-        // Mud remains terrain; the central reserve, water, hills and scenery block.
         if (x >= 574 && x <= 626 && y >= 574 && y <= 626)
         {
             return false;

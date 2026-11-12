@@ -3,8 +3,6 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:opencok/domain/castle/castle_environment/castle_environment.dart';
 
-/// The scenery remains cached in separate repaint boundaries. Only these
-/// transparent layers advance with time; animation never rebuilds the HUD.
 class CastleWaterPainter extends CustomPainter {
   CastleWaterPainter(this.environment, this.clock, this.camera, this.viewport)
     : super(repaint: Listenable.merge([clock, camera]));

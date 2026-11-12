@@ -3,7 +3,6 @@ import { decodePacket, encodePacket } from "@opencok/contracts/binary";
 import { mapQuery } from "@opencok/contracts";
 import { World } from "./modules/world/world";
 
-// One immutable world snapshot per Realm process; interactive queries have no writes.
 export function handler(world = new World())
 {
     return async (request: Request): Promise<Response> => {
@@ -16,7 +15,6 @@ export function handler(world = new World())
         {
             return new Response("Not found", { status: 404 });
         }
-        // The only accepted request is a fixed 26-byte binary query.
         try
         {
             const reader = request.body?.getReader();

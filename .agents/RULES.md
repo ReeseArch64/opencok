@@ -23,6 +23,12 @@ Read-only unless authorized: `.agents/`, `.github/`, `.husky/`, `data/`, `docker
 ## Tools and configuration
 
 - Reuse adopted formats/tools/dependencies; installations and technology changes require authorization. Prefer temporary commands over persistent helpers; images, binaries and exports need an explicit purpose.
+- Never edit `package.json` or `bun.lock` directly, manually or through scripts. Use only the Bun CLI to modify these files and manage dependencies, including additions, removals and updates.
+- Never edit `pubspec.yaml` or `pubspec.lock` directly, manually or through scripts. Use only `flutter pub` to modify these files and manage Flutter dependencies.
+- Never edit `go.mod` or `go.sum` directly, manually or through scripts. Use only `go get` and `go mod` to modify these files and manage Go dependencies.
+- Do not run lint, formatting or test commands, directly or through scripts or task runners. Leave these checks to Git hooks; do not invoke hooks manually to trigger them.
+- Create or expand tests only when explicitly requested or justified by a concrete behavioral change or regression. Use the smallest sufficient coverage; documentation, formatting and simple configuration changes do not require new tests by default.
+- Do not duplicate checks already provided by compilers, linters or Git hooks, or mirror implementation values as test expectations. Do not add runners, suite categories, fixtures or abstractions merely to complete a testing structure.
 - Restrict automatic fixes to authorized paths. Never weaken rules, exclusions, assertions or failure handling to pass checks.
 - Changes to tracked environment bindings, templates or runtime configuration require an explicit request. Prefer nonsecret constants/defaults for stable settings; request missing deployment-specific values instead of inventing them.
 

@@ -4,8 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:opencok/domain/castle/castle_building/castle_building.dart';
 import 'package:opencok/domain/castle/castle_environment/castle_environment.dart';
 
-/// The scenery remains cached in separate repaint boundaries. Only these
-/// transparent layers advance with time; animation never rebuilds the HUD.
 class CastleAmbiencePainter extends CustomPainter {
   CastleAmbiencePainter(
     this.environment,
@@ -41,7 +39,6 @@ class CastleAmbiencePainter extends CustomPainter {
   }
 
   void _waterfall(Canvas canvas, double time) {
-    // Follow the exposed water to the right of the turret, never its masonry.
     canvas.save();
     canvas.clipPath(
       Path()
@@ -66,7 +63,6 @@ class CastleAmbiencePainter extends CustomPainter {
       );
     }
     canvas.restore();
-    // Soft spray rises from the foot of the cascade.
     for (var i = 0; i < 12; i++) {
       final age = (time / 4 + i / 12) % 1;
       canvas.drawCircle(
@@ -139,7 +135,6 @@ class CastleAmbiencePainter extends CustomPainter {
       Rect.fromLTWH(offset - 180, 0, size.width + 360, 420),
       Paint()..filterQuality = FilterQuality.low,
     );
-    // Very light haze crosses the courtyard independently of the camera.
     for (var i = 0; i < 3; i++) {
       final x = 3400 + ((time * 18 + i * 820) % 2460);
       final rect = Rect.fromCenter(
@@ -189,7 +184,6 @@ class CastleAmbiencePainter extends CustomPainter {
         ..style = PaintingStyle.stroke
         ..strokeWidth = 2.5,
     );
-    // Tint only opaque building pixels, retaining the original silhouette.
     final image = environment.images[building.asset]!;
     canvas.drawImageRect(
       image,

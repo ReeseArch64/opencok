@@ -20,7 +20,6 @@ class MetadataSource extends DataSource
     }
 }
 
-// Simulates an insert losing a uniqueness race and then reading the committed row.
 function replayManager(record: object)
 {
     let saves = 0;

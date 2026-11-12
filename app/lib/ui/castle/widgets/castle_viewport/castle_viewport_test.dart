@@ -1,6 +1,3 @@
-// Unit tests live beside their source; flutter_test stays a dev dependency.
-// ignore_for_file: depend_on_referenced_packages
-
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';

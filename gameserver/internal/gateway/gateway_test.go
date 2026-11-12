@@ -66,7 +66,7 @@ func TestHeartbeatPresenceAndDisconnect(t *testing.T) {
 		t.Fatal("unadmitted connection counted online")
 	}
 	welcome(t, c)
-	for i := 0; i < 8; i++ { // Survive longer than the timeout with valid pongs.
+	for i := 0; i < 8; i++ {
 		kind, b, err := c.ReadMessage()
 		if err != nil || kind != websocket.BinaryMessage || string(b) != string([]byte{1, 3}) {
 			t.Fatalf("ping: %x %v", b, err)

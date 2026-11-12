@@ -3,8 +3,6 @@ import 'package:opencok/domain/castle/castle_building/castle_building.dart';
 import 'package:opencok/l10n/game_names.dart';
 import 'package:opencok/l10n/localization_context.dart';
 
-/// The scenery remains cached in separate repaint boundaries. Only these
-/// transparent layers advance with time; animation never rebuilds the HUD.
 class CastleBuildingMenu extends StatelessWidget {
   const CastleBuildingMenu({
     super.key,

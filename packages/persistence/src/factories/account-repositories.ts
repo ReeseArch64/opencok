@@ -3,7 +3,6 @@ import { Account } from "../models/global/account";
 import { accountCreateValidator } from "../validators/account";
 import type { CreateAccount } from "../types/account";
 
-/** Internal API: firebaseUid must come from verification against the configured Firebase project. */
 export function createAccountRepositories(manager: EntityManager)
 {
     if (manager.connection.options.database !== "global")

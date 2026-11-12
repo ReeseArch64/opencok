@@ -41,7 +41,6 @@ export class MongoEntityStore<T, C, P> implements EntityStore<HydratedDocument<T
     async update(publicId: string, patch: P): Promise<HydratedDocument<T> | null>
     {
         const values = validateMongoInput(patch, this.model as unknown as Model<unknown>, true);
-        // Documento completo: os hooks validam invariantes que cruzam vários campos.
         const document = await this.findByPublicId(publicId);
         if (!document)
         {

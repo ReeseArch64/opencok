@@ -1,0 +1,7 @@
+bunx turbo test:unit
+bunx turbo test:contract
+bunx turbo test:snapshot
+bunx turbo test:property
+bunx turbo test:integration
+bunx turbo test:e2e
+bunx turbo test:coverage
