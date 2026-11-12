@@ -1,0 +1,19 @@
+Dockerfile linguist-detectable=false
+Dockerfile.* linguist-detectable=false
+
+*.Dockerfile linguist-detectable=false
+*.md linguist-detectable=false
+*.markdown linguist-detectable=false
+
+CMakeLists.txt linguist-detectable=false
+
+*.cmake linguist-detectable=false
+*.h linguist-detectable=false
+*.c linguist-detectable=false
+*.m linguist-detectable=false
+*.mm linguist-detectable=false
+*.arb linguist-detectable=false
+*.js linguist-detectable=false
+*.mjs linguist-detectable=false
+*.cjs linguist-detectable=false
+*.swift linguist-detectable=false
