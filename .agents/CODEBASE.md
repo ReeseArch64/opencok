@@ -10,6 +10,7 @@ OpenCoK uses a Turborepo monorepo with Bun workspaces for TypeScript application
 
 ```text
 opencok/
+├── .agents/             # Context, vocabulary, product and codebase documents
 ├── .devcontainer/       # Development container and its configuration
 ├── .git/                # Local Git metadata; managed by Git
 ├── .github/             # GitHub workflows, templates and architecture document
@@ -31,7 +32,6 @@ opencok/
 ├── .editorconfig        # Common editor formatting conventions
 ├── .gitignore           # Ignored local, generated and sensitive files
 ├── CHANGELOG.md         # Project release history
-├── CODEBASE.md          # Repository structure and file ownership
 ├── LICENSE              # Project license
 ├── *.md                 # Other standalone project documents
 ├── mise.toml            # Language runtimes, SDKs and development tool versions
